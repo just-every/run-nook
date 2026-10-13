@@ -41,7 +41,7 @@ export async function previewImport(c: Context, input: any) {
         await ownerBatch(c, [c.sql('UPDATE nook_import_reviews SET fingerprint=? WHERE id=? AND fingerprint IS NULL', plan.fingerprint, id)]);
     return { ...preview, review: id, fingerprint: plan.fingerprint, kitCounts: plan.counts, needsOmissionReview: false };
 }
-async function reviewed(c: Context, id: string, requirePlan = true) { await owner(c); const row = await c.one('SELECT * FROM nook_import_reviews WHERE id=? AND owner=? AND state<>?', [id, c.uid, 'discarded']); if (!row || requirePlan && !row.fingerprint)
+async function reviewed(c: Context, id: string, requirePlan = true) { await owner(c); const row = await c.one('SELECT * FROM nook_import_reviews WHERE id=? AND owner=?', [id, c.uid]); if (row?.state === 'discarded') fail(409, 'This reviewed import was cancelled and its source upload withdrawn'); if (!row || requirePlan && !row.fingerprint)
     fail(404, 'Reviewed import unavailable'); return reconcileReviewed(c, row); }
 // Nook's statements after the kit returns: the completion batch (6) or the
 // reversal's owner batch (7). Undo's object cleanup takes only what is left.
@@ -53,6 +53,7 @@ export async function applyReviewed(c: Context, id: string, fingerprint: string)
     c = budgeted(c);
     const review = await reviewed(c, id);
     assertSlackCaptureAdmitted(JSON.parse(review.summary_json));
+    if (review.erased) fail(409, 'This import was erased; resume its remaining entries using the current job');
     if (fingerprint !== review.fingerprint)
         fail(409, 'Reviewed plan changed');
     if (review.state === 'undone')
