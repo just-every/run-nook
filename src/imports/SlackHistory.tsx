@@ -9,6 +9,6 @@ export function SlackHistory({ history }: { history?: SlackPresentation }) {
     if (!history) return null;
     return <>{history.edited && <span className="edited">edited in Slack</span>}
         {history.missingFiles.map(f => <div className="file-row" key={f.sourceId}><span>file not supplied: {f.name}</span></div>)}
-        {history.reactions.length > 0 && <div className="team-reactions" aria-label="Imported Slack reactions · read only">{history.reactions.map((r, i) => <span key={i} title={r.people.join(', ')}>{r.name} {r.count}</span>)}</div>}
+        {history.reactions.length > 0 && <div className="team-reactions" aria-label="Imported Slack reactions · read only">{history.reactions.map((r, i) => <span key={i} title={r.people.join(', ')}>{r.name} <span>{r.count}</span></span>)}</div>}
     </>;
 }

@@ -83,7 +83,10 @@
 .nook-app .reaction-chips details p { margin: var(--s1) 0 0; }
 .nook-app .reaction-chips details p button { margin-left: var(--s2); color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; }
 .nook-app .message small[role=status] { color: var(--ink-soft); font-size: var(--fs-meta); }
-.nook-app .team-reactions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: var(--s1); color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .team-reactions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+/* Imported Slack reactions are the same chips as above, read only: no hover wash, no focus stop. */
+.nook-app .team-reactions > span { display: inline-flex; min-height: 26px; align-items: center; gap: 4px; padding: 0 9px; border-radius: var(--r-pill); background: rgb(42 29 33 / .05); color: var(--ink); font-size: var(--fs-ui); }
+.nook-app .team-reactions > span > span { font-size: var(--fs-meta); font-weight: 600; }
 
 /* The composer: one quiet line that grows, with paperclip and @ beside Send */
 .nook-app .composer { display: grid; flex: none; grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "routing routing routing routing" "staged staged staged staged" "text attach options send" "notes notes notes notes"; align-items: center; width: min(var(--column), calc(100% - 48px)); margin: var(--s2) auto 0; padding: 6px 6px 6px 14px; border: 1px solid var(--line); border-radius: var(--r-surface); background: var(--surface-raised); }
