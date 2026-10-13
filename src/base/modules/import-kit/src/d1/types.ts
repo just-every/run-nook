@@ -52,6 +52,18 @@ export interface D1TargetAdapter extends Partial<D1PreservedUndoAdapter> {
   write(row: TargetRow): D1Sql[];
   remove(destination: string, kind: string, id: string): D1Sql[];
   list(db: D1Database, destination: string): Promise<TargetRow[]>;
+  /** Optional field-redaction scope, so its cost follows the affected rows, not
+   * the destination: `rows` are exactly the destination's rows whose native
+   * value holds one of `fields` (exact path and value). `holding` gives nonempty
+   * predicates that exactly the given rows hold one; `matches`, set predicates
+   * that each given row matches its snapshot; `write` rewrites existing rows. */
+  redaction?(db: D1Database, destination: string, fields: readonly D1FieldRedaction[]): Promise<D1RedactionScope>;
+}
+export interface D1RedactionScope {
+  rows: TargetRow[];
+  holding(rows: TargetRow[]): D1Sql[];
+  matches(rows: TargetRow[]): D1Sql[];
+  write(rows: TargetRow[]): D1Sql[];
 }
 /** Product recognition of an erased person's data outside the erased target's own
  * sources: another record's mapped values, a rejected row, or an original's bytes.

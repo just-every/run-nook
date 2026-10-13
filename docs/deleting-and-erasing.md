@@ -16,7 +16,7 @@ Empty message and file positions keep surviving threads navigable. Separate hist
 
 A Slack source author is a separate imported identity. Owners with current access to every affected imported channel can erase that author under **Team → Imported authors**, including after the original importer leaves. Selected source copies and files are erased; retained original ZIPs for that import are withdrawn because they can contain the erased content. Other authors' visible imported history remains.
 
-Erasing an imported author, or a member linked to one, also removes their Slack user ID from other people's imported reactions. Those reactions keep their other people and their counts. This removal happens in one step, which covers about 100 reactions on other people's messages. If the person reacted to more messages than that, the erasure still completes, but those reactions keep the Slack ID.
+Erasing an imported author, or a member linked to one, also removes their Slack user ID from other people's imported reactions. Those reactions keep their other people and their counts. Nook reads and rewrites only the messages whose reactions name the person, in one step. In testing, that step removed the ID from reactions on 5,000 messages, and from one reaction among 5,000 other imported messages, each time using under 300 of the 1,000 database statements one request may run. The step grows by about one statement for every 85 affected messages, so it reaches that limit only at tens of thousands of affected messages. If a person reacted to more messages than one step can rewrite, the erasure still completes, and its receipt says how many imported messages keep their Slack ID in reactions.
 
 ## Completion and interrupted files
 

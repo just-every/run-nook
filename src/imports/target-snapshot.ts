@@ -2,6 +2,15 @@ import { missingFileRefs } from './slack-records.mjs';
 import { retainedChannelHistory } from './channel-guard.ts';
 import type { D1Database, D1Sql, TargetRow } from './kit.ts';
 export const sql = (sql: string, ...params: any[]): D1Sql => ({ sql, params });
+export const fileColumns = 'f.message,f.id,f.source_id,a.name,a.mime,a.size,a.sha256,f.position,a.object_key,a.state,a.author,a.expires,a.created,a.intent,a.message AS attachment_message,a.conversation AS attachment_conversation,a.position AS attachment_position,f.attachment';
+/** A message target's value from its record (with its import owner) and files. */
+export function messageValue(r: any, files: any[]): any {
+    const value: any = { id: r.id, job: r.job, owner: r.owner, conversation: r.conversation, key: r.key, sourceActor: r.source_actor, sourceTimestamp: r.source_timestamp, sourceRecord: JSON.parse(r.source_record), body: r.body, parent: r.parent, sequence: r.sequence, files: files.map(f => ({ id: f.id, sourceId: f.source_id, name: f.name, mime: f.mime, size: f.size, sha256: f.sha256, position: f.position, objectKey: f.object_key, state: f.state, author: f.author, expires: f.expires, created: f.created, intent: f.intent })) };
+    const missing = missingFileRefs(value.sourceRecord, value.files);
+    if (missing.length)
+        value.missingFiles = missing;
+    return value;
+}
 export async function readTarget(db: D1Database, destination: string, kind: string, id: string): Promise<TargetRow | undefined> {
     const rev = await db.prepare('SELECT revision FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?').bind(destination, kind, id).first<{
         revision: string;
@@ -34,10 +43,7 @@ export async function readTarget(db: D1Database, destination: string, kind: stri
         const r = await db.prepare('SELECT r.*,j.owner FROM nook_import_records r JOIN nook_imports j ON j.id=r.job WHERE r.id=?').bind(id).first<any>();
         if (!r)
             throw new Error('IMPORT_NATIVE_MISSING');
-        const files = (await db.prepare('SELECT f.id,f.source_id,a.name,a.mime,a.size,a.sha256,f.position,a.object_key,a.state,a.author,a.expires,a.created,a.intent,a.message AS attachment_message,a.conversation AS attachment_conversation,a.position AS attachment_position,f.attachment FROM nook_import_files f JOIN nook_attachments a ON a.id=f.attachment WHERE f.message=? ORDER BY f.position').bind(id).all<any>()).results;
-        value = { id: r.id, job: r.job, owner: r.owner, conversation: r.conversation, key: r.key, sourceActor: r.source_actor, sourceTimestamp: r.source_timestamp, sourceRecord: JSON.parse(r.source_record), body: r.body, parent: r.parent, sequence: r.sequence, files: files.map(f => ({ id: f.id, sourceId: f.source_id, name: f.name, mime: f.mime, size: f.size, sha256: f.sha256, position: f.position, objectKey: f.object_key, state: f.state, author: f.author, expires: f.expires, created: f.created, intent: f.intent })) };
-        const missing = missingFileRefs(value.sourceRecord, value.files);
-        if (missing.length) value.missingFiles = missing;
+        value = messageValue(r, (await db.prepare(`SELECT ${fileColumns} FROM nook_import_files f JOIN nook_attachments a ON a.id=f.attachment WHERE f.message=? ORDER BY f.position`).bind(id).all<any>()).results);
     }
     else
         throw new Error('IMPORT_TARGET_KIND');

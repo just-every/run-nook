@@ -1,5 +1,7 @@
 import {retireD1ImportCustody,D1RequestLimitError,type D1RelatedErasure,type D1ImportContext} from '../../imports/kit'
 import {importTargets} from '../../imports/target'
+import {holding} from '../../imports/target-redaction'
+import {sql} from './statements'
 import {MAPPING_VERSION} from '../../imports/ids.mjs'
 import {importDigest} from '../../family/team-chat/import-capture.mjs'
 import {authority,authFence,type Context} from '../../platform/storage/context'
@@ -25,11 +27,13 @@ export async function eraseImportedTarget(c:Context,work:any,kind:'actor'|'messa
   const ctx:D1ImportContext={destination:job.owner,namespace:job.namespace,mappingVersion:MAPPING_VERSION,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence} AND (${scope.condition})`,params:[...c.credentials,...scope.params]})}}
   try{await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint())}
   catch(error){
-   // Base redacts shared fields in one atomic request, about 100 peer messages.
-   // Refused before any write, the person's erasure still completes; those
-   // reactions keep the Slack ID (docs/deleting-and-erasing.md).
+   // Field redaction reads and writes only the affected rows, in one atomic
+   // request. Refused for size before any write, the person's erasure still
+   // completes, and its receipt counts the imported messages that keep their
+   // Slack ID (docs/deleting-and-erasing.md).
    if(!(error instanceof D1RequestLimitError)||!related?.fields)throw error
-   await retireD1ImportCustody({target:{kind,id:target},values,related:{...related,fields:undefined}},statements,ctx,await f.checkpoint())
+   const held=holding(related.fields)
+   await retireD1ImportCustody({target:{kind,id:target},values,related:{...related,fields:undefined}},[...statements,sql(`UPDATE nook_erasure_receipts SET counts=json_set(counts,'$.reactionsKept',(SELECT COUNT(*) FROM nook_import_effect_revisions e WHERE e.destination=? AND (${held.sql}))) WHERE id=?`,job.owner,...held.params!,work.operation)],ctx,await f.checkpoint())
   }
   return
  }

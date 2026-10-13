@@ -119,7 +119,32 @@ test('the source-author door composes real import-kit custody, keeps unrelated t
   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,1);
  }finally{f.close()}
  await sharedUploadErasure();
+ await largeImportReactionErasure();
 });
+
+// A realistic import: one peer reaction names the author among 400 unrelated
+// messages. The erasure rewrites only that message, and no copy of the id stays.
+async function largeImportReactionErasure(){
+ const {slackServiceFixture}=await import('./slack-import/sqlite-service.mjs'),{zipFixture}=await import('./slack-import/fixture.mjs');
+ const f=await slackServiceFixture();f.db.exec('PRAGMA foreign_keys=ON');try{
+  const unrelated=Array.from({length:400},(_,i)=>({type:'message',user:'U2',text:'Unrelated '+i,ts:`${1700000010+i}.000001`,...(i%2?{}:{reactions:[{name:'tada',count:1,users:['U2']}]})}));
+  const zip=zipFixture([['users.json',[{id:'U1',name:'One'},{id:'U2',name:'Two'}]],['channels.json',[{id:'C1',name:'general'}]],
+   ['general/2024-01-01.json',[{type:'message',user:'U1',text:'By the erased author',ts:'1700000000.000001'},{type:'message',user:'U2',text:'Peer reacted',ts:'1700000001.000001',reactions:[{name:'+1',count:2,users:['U1','U2']},{name:'eyes',count:1,users:['U2']}]},...unrelated]]]);
+  const upload=await f.custody.localUpload(f.c,new Request('https://fixture.test/upload',{method:'POST',body:zip}));
+  const review={namespace:'large-reaction-erasure',channels:[{sourceId:'C1',name:'Imported',members:[f.owner.operatorId]}],actors:{U1:null,U2:null},acceptedOmissions:[]};
+  let plan=await f.service.previewImport(f.c,{upload,review});
+  if(plan.needsOmissionReview){review.acceptedOmissions=[plan.omissionDigest];plan=await f.service.previewImport(f.c,{upload,review})}
+  await f.finish(plan);
+  const others=()=>f.db.prepare("SELECT id,body,source_record FROM nook_import_records WHERE body LIKE 'Unrelated %' ORDER BY id").all(),before=others();
+  const c=new Context({...f.c.env,CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}},f.owner),target=f.db.prepare("SELECT job||':'||source_id AS id FROM nook_import_actors WHERE source_id='U1'").get().id;
+  const receipt=await finishDoor(standard,c,await door(standard,c,'',{kind:'imported-author',target,confirmation:'ERASE'}));
+  assert.equal(receipt.counts.reactionsKept,undefined);
+  assert.deepEqual(JSON.parse(f.db.prepare("SELECT source_record FROM nook_import_records WHERE body='Peer reacted'").get().source_record).reactions,[{name:'+1',count:2,users:['U2']},{name:'eyes',count:1,users:['U2']}]);
+  assert.equal(before.length,400);assert.deepEqual(others(),before);
+  // Only the import review keeps its reviewed actor choice; reactions, plan custody and provenance do not.
+  assert.deepEqual(scanSql(f,/"U1"/).filter(table=>table!=='nook_import_reviews'),[]);
+ }finally{f.close()}
+}
 
 async function sharedUploadErasure(){
  const {slackServiceFixture}=await import('./slack-import/sqlite-service.mjs'),{zipFixture}=await import('./slack-import/fixture.mjs');

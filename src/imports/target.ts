@@ -1,10 +1,11 @@
 import type { D1TargetAdapter, TargetRow } from './kit.ts';
 import { readTarget, targetMatches, targetMatchParts, sql } from './target-snapshot.ts';
+import { redactionScope } from './target-redaction.ts';
 import { assertSlackEffect } from './policy.mjs';
 import { importedAttachment, retainedChannelHistory } from './channel-guard.ts';
 export function importTargets(): D1TargetAdapter {
     return {
-        read: readTarget, matches: targetMatches, matchesParts: targetMatchParts,
+        read: readTarget, matches: targetMatches, matchesParts: targetMatchParts, redaction: redactionScope,
         async list(db, destination) { const rows = (await db.prepare('SELECT kind,id FROM nook_import_effect_revisions WHERE destination=? ORDER BY kind,id').bind(destination).all<{
             kind: string;
             id: string;

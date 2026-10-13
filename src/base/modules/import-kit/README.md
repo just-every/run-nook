@@ -294,6 +294,10 @@ Other native edits still produce the existing undo conflict. The adapter's
 `list` must enumerate its complete imported native set and supply exact full-set
 guards (`matchesMany` or `matchesCount` with individual snapshot predicates).
 The kit writes sanitized native values through that adapter in the same batch.
+An adapter with `redaction(db, destination, fields)` instead reads, fences and
+rewrites only the rows holding a selected value, proving with holding-set
+predicates that no other row holds one before or after, so the cost follows the
+affected rows rather than the destination.
 Caller statements must not separately change those retained peer targets; such
 changes fail their snapshot guards. The product handles personal data outside
 the adapter's set and outside the selected fields.

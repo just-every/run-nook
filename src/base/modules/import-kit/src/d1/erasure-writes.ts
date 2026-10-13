@@ -2,6 +2,15 @@ import type { D1Sql } from './types.ts';
 import { retainedTemplate as sql, retainedSql } from './retained-values.ts';
 import { jsonChunks } from './sets.ts';
 import { changed, updateRows, deleteRows } from './expected-state.ts';
+/** Rewrite retained provenance or history bodies one packed chunk per statement,
+ * so a job-wide change (a withdrawn artifact's name) does not cost one per row. */
+export function recordWrites(table: string, rows: { id: string; body: string }[]): D1Sql[] {
+  return jsonChunks(rows, 500000).map(chunk => {
+    const selected = new Map<string, string>(JSON.parse(chunk).map((row: { id: string; body: string }) => [row.id, row.body]));
+    return changed(retainedSql([`UPDATE ${table} SET record_json=(SELECT json_extract(value,'$.body') FROM json_each(`, `) WHERE json_extract(value,'$.id')=${table}.id) WHERE id IN (SELECT json_extract(value,'$.id') FROM json_each(`, '))'], [chunk, chunk], [0, 1]),
+      updateRows(table, item => selected.has(item.id), item => ({ ...item, record_json: selected.get(item.id)! })));
+  });
+}
 export interface ErasedDecision { job_id: string; ordinal: number; identity: string; source_hash: string; effects_hash: string }
 export interface ErasedJob { id: string; body: string; fingerprint: string; erasedRecords: number; policyHash: string | null }
 /** Set writes keep repeated imports from spending one D1 statement per copy.

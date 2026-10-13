@@ -571,7 +571,7 @@
       "executable": false
     },
     "base-copies.json": {
-      "sha256": "34da73e66087cd936dfb1a0649a2f083fb96c09fd09b61e93a565a23fe1e16d4",
+      "sha256": "a20d20db380a7070ee36b24a831dc56aea7bdd6b8ad551aaabbdae8f77394cfb",
       "executable": false
     },
     "BASE-LICENSE": {
@@ -611,7 +611,7 @@
       "executable": false
     },
     "docs/deleting-and-erasing.md": {
-      "sha256": "0b14b00c50a73c362062768c0c0cd7aaf94bff8af0419403ef449143079c2980",
+      "sha256": "69ad51d1ff13583a3af7259e27fbcdfb47ebe4b4c0480e43cf45180225cd5191",
       "executable": false
     },
     "docs/install.md": {
@@ -1407,7 +1407,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/README.md": {
-      "sha256": "135e842e338cd40001f149dd30e46fab1e6c05aaa91a542ed163c7bffcc14f19",
+      "sha256": "b3714a47ba03a4df02e24166b764db3f683b08be35e7b1b1a5185a8b86b471b1",
       "executable": false
     },
     "src/base/modules/import-kit/schema/importer-verification-receipt.schema.json": {
@@ -1447,7 +1447,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/erased-custody.ts": {
-      "sha256": "3b32fc2de77dc7ada815466f31645bc1322d8ef7a70bf357ddef3dc39455e51d",
+      "sha256": "64792af544f4f618a5aaed4c5fefcd29db137a47f9aff53d2c70635aa24ab5cc",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/erased-plan.ts": {
@@ -1507,7 +1507,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/erasure-writes.ts": {
-      "sha256": "0782c50143ab1e4feae218ce2baac4db425ad2b53699ad9d63e392ac82ac07a9",
+      "sha256": "67de4b96cc828def4f0e09f2f495e7bbabfe35dea6ccafd0d2421617fd79b5f4",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/erasure.ts": {
@@ -1659,7 +1659,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/redacted-custody.ts": {
-      "sha256": "e6dd3619ace00c17bf2febc45a26cdf15da134cfb2a858d8580fb33bc1c5e0b8",
+      "sha256": "581a1af69915a114d0069046284c39ce7aeb3c4efb1c9c624f84c9d1176d821c",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/retained-values.ts": {
@@ -1819,7 +1819,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/types.ts": {
-      "sha256": "d1598f0154c98fcc027e30ea569dc376c77524e9116c0f620758a475ed8ada0f",
+      "sha256": "b6fce04a3bc3a27f70062bf43c701a4f3cc8683c988b31b785bacd03a0a7c8a8",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/undo-observations.ts": {
@@ -3378,12 +3378,16 @@
       "sha256": "f806829c46bb322841e20f939ecca2e7bf82e20ca84a81ac31fe778368724a7c",
       "executable": false
     },
+    "src/imports/target-redaction.ts": {
+      "sha256": "8767be63237bfb09bffbd74ef042196ea6289e2c574598669121728b8fd706fb",
+      "executable": false
+    },
     "src/imports/target-snapshot.ts": {
-      "sha256": "84b98be4f900e107e90a3fe7f9570fa0d4b0bd2b893caacad3ce41e0c01f7cf2",
+      "sha256": "023e1a81230e092501991d4f9b7c3da5b39187356f12b07c6858ea60d7b07daa",
       "executable": false
     },
     "src/imports/target.ts": {
-      "sha256": "3388383518e6c7d1c53c6b30ccd40f4e539a168593f71b867d1fe4922f0e3ec4",
+      "sha256": "46c272027313186b0df916450ffe0af6b683d5c4e8ba899dd0dda95276ee5ad5",
       "executable": false
     },
     "src/imports/timestamps.d.mts": {
@@ -3647,7 +3651,7 @@
       "executable": false
     },
     "src/team/erasure/ErasureDialog.tsx": {
-      "sha256": "ab1d3a9eab36bcadff693c0d1710ccd80b6d7e7ba0618b0b8507fab94c5ce4b9",
+      "sha256": "b3b425f2294ccbba5916018b67b2780c1e06680a6e3cd436777c74fd517cdfdc",
       "executable": false
     },
     "src/team/erasure/expired-files.mjs": {
@@ -3663,7 +3667,7 @@
       "executable": false
     },
     "src/team/erasure/import-commit.ts": {
-      "sha256": "1e0338148bea39c0ba1511bd371bc8d72541bb47a0df37eb59f5632927fd354c",
+      "sha256": "6e8526b0f49af81d80dfd42c880efae0affe1df0266591822c853e0e6999d7b8",
       "executable": false
     },
     "src/team/erasure/import-preview.ts": {
@@ -3847,7 +3851,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "7675a13da4abdf8b7487739bd13d516712ab3c0094b1fbbb01c2a67a111c0548",
+      "sha256": "2c7502cbbc5931ad608a46380d51327d86675910ea2adf6128c82c69a4a2e986",
       "executable": false
     },
     "tests/fake-cloudflare.mjs": {
