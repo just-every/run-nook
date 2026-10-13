@@ -1,0 +1,16 @@
+import {useEffect,useState} from 'react'
+import {api} from './api'
+import type {Conversation,Message,Page,Person} from './types'
+import {conversationName} from './Navigation'
+type Result=Pick<Message,'id'|'conversation'|'body'|'parent'|'authorName'>&{displayBody?:string}
+// The query's matches become <mark> text nodes; the message text is never parsed as markup.
+function highlight(text:string,query:string) {
+ const term=query.trim();if(!term)return text
+ return text.split(new RegExp('('+term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi')).map((part,index)=>index%2?<mark key={index}>{part}</mark>:part)
+}
+export function SearchView({query,revision,privateSignal,conversations,user,onQuery,onOpen,onError}:{conversations:Conversation[];user:Person;query:string;revision:number;privateSignal:AbortSignal;onQuery:(q:string)=>void;onOpen:(conversation:string,focus:string,thread:string|null)=>void;onError:(e:unknown)=>void}) {
+ const [input,setInput]=useState(query),[results,setResults]=useState<Result[]>([]),[loading,setLoading]=useState(false),[completedQuery,setCompletedQuery]=useState('')
+ useEffect(()=>{setInput(query)},[query])
+ useEffect(()=>{let cancelled=false;const current=()=>!cancelled&&!privateSignal.aborted;if(!current())return;setResults([]);setCompletedQuery('');if(!query.trim()){setLoading(false);setCompletedQuery('');return}setLoading(true);const search=async()=>{const items:Result[]=[];let after='';for(;;){const page=await api<Page<Result>>('search?q='+encodeURIComponent(query)+'&after='+encodeURIComponent(after));if(!current())return [];items.push(...page.items);if(!page.hasMore)return items;if(page.cursor===after)throw Error('Search could not continue. Please try again.');after=page.cursor}};void search().then(items=>{if(current()){setResults(items);setCompletedQuery(query)}}).catch(error=>{if(current())onError(error)}).finally(()=>{if(current())setLoading(false)});return ()=>{cancelled=true}},[query,revision,onError,privateSignal])
+ return <section className="page-content"><div className="page-column"><form className="search-form" onSubmit={e=>{e.preventDefault();onQuery(input)}}><label className="field"><span className="sr-only">Search conversations</span><input type="search" required minLength={3} maxLength={128} value={input} placeholder="Search messages" onChange={e=>setInput(e.target.value)} autoFocus/></label><button className="soft-button">Search</button></form><p className="sr-only" role="status" aria-live="polite">{query?(loading?'Searching…':completedQuery===query?`${results.length} ${results.length===1?'matching message':'matching messages'}.`:''):''}</p>{loading?<p className="muted">Searching…</p>:results.map(m=>{const where=conversations.find(c=>c.id===m.conversation);return <article className="search-result reveal-host" key={m.id}><p className="search-meta">{where?(where.kind==='dm'?'':'# ')+conversationName(where,user)+' · ':''}{m.authorName}</p><p className="search-snippet">{highlight(m.displayBody??m.body,query)}</p><button className="soft-button reveal" onClick={()=>onOpen(m.conversation,m.id,m.parent)}>Open in conversation</button></article>})}{query&&!loading&&completedQuery===query&&!results.length&&<p className="empty-state">No matching messages in your conversations.</p>}</div></section>
+}

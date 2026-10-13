@@ -1,0 +1,65 @@
+/* Buttons, menus, fields, dialogs and the notice toast shared by every app screen.
+   Four button looks: .send (ink pill, the one primary), the accent pill for Accept and Report done
+   (.card-actions .send, in outcomes.css), ghost (.soft-button, .text-button, .icon-button) and .danger-button. */
+
+.nook-app .send { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; padding: 0 16px; border-radius: var(--r-pill); background: var(--ink); color: var(--brand-paper); font-size: var(--fs-ui); font-weight: 600; line-height: 1.4; }
+.nook-app .send:disabled { opacity: .5; }
+.nook-app :is(.soft-button, .text-button) { display: inline-flex; min-height: 32px; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; border-radius: var(--r-control); background: transparent; color: var(--ink-soft); font-size: var(--fs-ui); font-weight: 500; text-decoration: none; }
+.nook-app :is(.soft-button, .text-button):hover { background: var(--wash); color: var(--ink); }
+.nook-app :is(.soft-button, .text-button) svg { width: 16px; height: 16px; flex: none; }
+.nook-app .icon-button { display: inline-flex; width: 32px; height: 32px; flex: none; align-items: center; justify-content: center; padding: 0; border-radius: var(--r-control); background: transparent; color: var(--ink-soft); }
+.nook-app .icon-button:hover { background: var(--wash); color: var(--ink); }
+.nook-app .icon-button svg { width: 18px; height: 18px; }
+.nook-app .danger-button { min-height: 36px; padding: 0 16px; border-radius: var(--r-pill); background: var(--brand-berry); color: #fff; font-size: var(--fs-ui); font-weight: 600; }
+@media (hover: none) {
+  .nook-app .send { min-height: 40px; }
+  .nook-app :is(.soft-button, .text-button) { min-height: 40px; }
+  .nook-app .icon-button { width: 40px; height: 40px; }
+}
+
+/* Menus: a <details> whose summary is the trigger (see useDismiss) and a popover that floats under it. */
+.nook-app .menu { position: relative; }
+.nook-app .menu > summary { list-style: none; cursor: pointer; }
+.nook-app .menu > summary::-webkit-details-marker { display: none; }
+.nook-app .popover { position: absolute; top: calc(100% + 4px); left: 0; z-index: 20; min-width: 184px; padding: 4px; border-radius: 12px; background: var(--surface-raised); box-shadow: var(--shadow-pop); transition: opacity var(--dur) var(--ease); }
+@starting-style { .nook-app .popover { opacity: 0; } }
+.nook-app .popover.end { right: 0; left: auto; }
+.nook-app .popover.up { top: auto; bottom: calc(100% + 4px); }
+.nook-app .popover.strip { display: flex; min-width: 0; gap: 2px; }
+.nook-app .popover > button { display: flex; width: 100%; min-height: 32px; align-items: center; padding: 0 10px; border-radius: 8px; color: var(--ink); font-size: var(--fs-ui); font-weight: 500; text-align: left; }
+.nook-app .popover > button:hover { background: var(--wash); }
+.nook-app .popover.strip > button { width: 32px; justify-content: center; padding: 0; font-size: 16px; }
+@media (hover: none) {
+  .nook-app .popover > button { min-height: 40px; }
+  .nook-app .popover.strip > button { width: 40px; }
+}
+
+/* Fields */
+.nook-app .field { display: flex; flex-direction: column; gap: 6px; margin: var(--s3) 0; font-size: var(--fs-ui); font-weight: 500; }
+.nook-app .field :is(input, textarea, select) { width: 100%; min-width: 0; padding: 9px 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background: var(--surface-raised); color: var(--ink); font: inherit; font-weight: 400; }
+.nook-app :is(.field, .search-form, .team-invite) :is(input, textarea, select):focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.nook-app .field textarea { min-height: 95px; resize: vertical; }
+.nook-app .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+@media (max-width: 520px) { .nook-app .field-row { grid-template-columns: 1fr; } }
+.nook-app input[type=search]::-webkit-search-cancel-button { filter: grayscale(1) brightness(.45); }
+.nook-app .check { display: flex; align-items: center; gap: 9px; margin: 10px 0; font-size: var(--fs-ui); }
+.nook-app :is(.check, .team-check) input { accent-color: var(--ink); }
+.nook-app fieldset { max-height: 250px; overflow: auto; border: 1px solid var(--line); border-radius: var(--r-surface); }
+.nook-app legend { padding: 0 6px; font-weight: 600; }
+
+/* Dialogs: a raised sheet that fades in; a bottom sheet on phones (phone.css) */
+.nook-app dialog { width: calc(100% - 32px); max-width: 480px; max-height: 90dvh; padding: var(--s5); border: 0; border-radius: var(--r-dialog); background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-pop); }
+.nook-app dialog[open] { opacity: 1; transform: none; transition: opacity 160ms var(--ease), transform 160ms var(--ease); }
+@starting-style { .nook-app dialog[open] { opacity: 0; transform: scale(.98); } }
+@media (prefers-reduced-motion: reduce) { .nook-app dialog[open] { transition: none; } }
+.nook-app dialog::backdrop { background: rgb(42 29 33 / .30); }
+.nook-app .dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s4); }
+.nook-app .dialog-heading h2 { margin: 0; font: 650 20px/1.2 var(--brand-font-display); font-variation-settings: 'opsz' 36; letter-spacing: -.02em; }
+
+.nook-app .warning { padding: 8px 12px; border-left: 3px solid var(--brand-rose); color: var(--ink); font-size: var(--fs-ui); }
+
+/* Notices are a raised card centred just under the header. They take their own row (the page moves down
+   while one shows) so a notice never sits over a control the person needs, e.g. the Search button. */
+.nook-app .notice-error { position: relative; z-index: 30; display: flex; flex: none; align-self: center; width: max-content; max-width: min(560px, calc(100% - 32px)); align-items: center; gap: var(--s3); margin: 12px 0 4px; padding: 6px 6px 6px 16px; border-left: 3px solid var(--accent); border-radius: var(--r-surface); background: var(--surface-raised); box-shadow: var(--shadow-pop); font-size: var(--fs-ui); transition: opacity var(--dur) var(--ease); }
+.nook-app .notice-error > span { min-width: 0; }
+@starting-style { .nook-app .notice-error { opacity: 0; } }

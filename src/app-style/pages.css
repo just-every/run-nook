@@ -1,0 +1,40 @@
+/* The other screens: Channels, Search, You, Team, plus empty states. Attention has its own file. */
+
+/* Channels: the rail already lists your conversations, so wide screens show only the directory; phones and guests keep the flat list. */
+.nook-app .channels-page .conversation-group h2 { margin: 0; }
+.nook-app .channels-page .group-heading { padding: var(--s3) 4px 4px; }
+.nook-app .channels-page .conversation-link { min-height: 52px; margin: 0; padding: 0 4px; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+.nook-app .channels-page .conversation-link:hover { background: var(--wash); }
+@media (min-width: 851px) { .nook-app .channels-page.has-directory .conversation-group { display: none; } }
+
+/* Search: a quiet underlined field, then results as plain rows */
+.nook-app .search-form { display: flex; align-items: center; gap: var(--s3); margin: 0 0 var(--s4); }
+.nook-app .search-form .field { flex: 1; margin: 0; }
+.nook-app .search-form .field input { height: 44px; padding: 0 2px; border: 0; border-bottom: 1px solid var(--line-field); border-radius: 0; background: transparent; font-size: 17px; }
+.nook-app .search-form .field input:focus-visible { border-bottom-color: var(--ink); box-shadow: 0 1px 0 0 var(--ink); }
+.nook-app .search-form .field input::placeholder { color: var(--ink-soft); opacity: 1; }
+.nook-app .search-result { padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.nook-app .search-meta { margin: 0 0 2px; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .search-snippet { margin: 0 0 4px; font-size: var(--fs-body); line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap; }
+.nook-app .search-snippet mark { padding: 0 1px; border-radius: 3px; background: var(--wash-select); color: inherit; }
+.nook-app .search-result .soft-button { margin-left: -10px; }
+
+/* Empty and missing states: centred, with the mark */
+.nook-app .empty-state { display: flex; max-width: 420px; flex-direction: column; align-items: center; gap: var(--s2); margin: auto; padding: var(--s7) var(--s4); color: var(--ink-soft); font-size: var(--fs-body); text-align: center; }
+.nook-app .empty-state > svg { width: 40px; height: 44px; margin-bottom: var(--s2); }
+.nook-app .empty-state > :is(p, h2, h3) { margin: 0; }
+.nook-app .empty-state :is(h2, h3) { color: var(--ink); font: 650 20px/1.3 var(--brand-font-display); font-variation-settings: 'opsz' 36; letter-spacing: -.02em; }
+.nook-app .empty-state button { margin-top: var(--s2); }
+
+/* You: a head, then rows separated by hairlines */
+.nook-app .profile-page .page-column { max-width: 560px; }
+.nook-app .profile-head { display: flex; align-items: center; gap: var(--s4); padding: var(--s2) 0 var(--s5); }
+.nook-app .profile-head h2 { margin: 0; font-size: var(--fs-title); }
+.nook-app .profile-head p { margin: 0; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .profile-row { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: var(--s4); border-top: 1px solid var(--line); }
+.nook-app .profile-row .soft-button { margin-left: -10px; }
+.nook-app .profile-link { display: flex; width: 100%; min-height: 56px; padding: 0; align-items: center; justify-content: space-between; gap: var(--s3); color: var(--ink); font-size: var(--fs-body); font-weight: 500; text-align: left; text-decoration: none; }
+.nook-app .profile-link svg { width: 18px; height: 18px; flex: none; color: var(--ink-faint); }
+.nook-app .profile-link:hover svg { color: var(--ink); }
+.nook-app .team-page .page-column { max-width: 760px; }
+.nook-app .muted { color: var(--ink-soft); font-size: var(--fs-ui); line-height: 1.65; }

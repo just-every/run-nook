@@ -1,0 +1,87 @@
+/* The app in Nook's brand: paper, a quiet rail, rose-wash selection and the accent only for the one chosen
+   action, counts and focus. Tokens live in tokens.css. This file: the page, the rail, the header and the
+   grid that holds each screen. */
+
+.nook-app {
+  color: var(--ink);
+  font-family: var(--brand-font-text);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.nook-app * { box-sizing: border-box; }
+body:has(.nook-app) { margin: 0; overflow: hidden; background: var(--brand-paper); }
+.nook-app button, .nook-app input, .nook-app textarea, .nook-app select { font: inherit; }
+.nook-app button { cursor: pointer; border: 0; background: transparent; color: inherit; }
+.nook-app button:disabled { opacity: .5; cursor: default; }
+.nook-app :is(button, a, summary, input, textarea, select):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nook-app a { color: var(--ink); text-decoration: underline; text-decoration-color: currentColor; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.nook-app :is(h1, h2, h3, p) { margin-top: 0; }
+.nook-app :is(p, h2, h3, label, legend) { text-wrap: pretty; }
+.nook-app h2 { font: 600 var(--fs-body)/1.35 var(--brand-font-text); }
+.nook-app h3 { font-size: var(--fs-body); font-weight: 600; }
+
+.nook-app .app { height: 100dvh; display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); overflow: hidden; background: var(--surface-page); }
+
+/* The rail: separated from the page by tone alone */
+
+.nook-app .sidebar { display: flex; flex-direction: column; min-height: 0; background: var(--surface-rail); }
+.nook-app .workspace-brand { display: block; padding: 20px 22px 14px; color: var(--ink); text-decoration: none; }
+.nook-app .nook-wordmark { display: flex; align-items: center; gap: 8px; font: 680 24px/1.1 var(--brand-font-display); font-variation-settings: 'opsz' 48; letter-spacing: -.035em; }
+.nook-app .nook-wordmark svg { width: 22px; height: 24px; flex: none; }
+.nook-app .workspace-nav { padding: 0 12px; }
+.nook-app .workspace-nav button { display: flex; width: 100%; min-height: 36px; align-items: center; gap: 10px; margin: 1px 0; padding: 0 10px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
+.nook-app :is(.workspace-nav button, .conversation-link, .profile):hover { background: var(--wash); }
+.nook-app :is(.workspace-nav button, .conversation-link, .profile).selected { background: var(--wash-select); font-weight: 500; }
+.nook-app .workspace-nav .count { margin-left: auto; }
+.nook-app .sidebar-conversations { flex: 1; min-height: 0; overflow: auto; padding: 14px 12px; scrollbar-width: thin; }
+.nook-app .conversation-group + .conversation-group { margin-top: 16px; }
+.nook-app .group-heading { display: flex; min-height: 28px; align-items: center; justify-content: space-between; padding: 0 0 0 10px; }
+.nook-app .group-heading .icon-button { width: 28px; height: 28px; }
+.nook-app .conversation-group h2 { margin: 0; color: var(--ink-soft); font: 500 var(--fs-meta)/1.4 var(--brand-font-text); }
+.nook-app .conversation-link { display: flex; width: 100%; min-height: 36px; align-items: center; gap: 10px; margin: 1px 0; padding: 0 10px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
+.nook-app .conversation-link > span:not(.avatar):not(.channel-prefix):not(.count) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nook-app .conversation-link.unread > span:not(.avatar):not(.channel-prefix):not(.count) { font-weight: 600; }
+.nook-app .channel-prefix { width: 17px; flex: none; color: var(--ink-faint); font-size: 17px; font-weight: 500; line-height: 1; text-align: center; }
+.nook-app .conversation-link.selected .channel-prefix { color: var(--brand-rose); }
+.nook-app .count { min-width: 18px; height: 18px; margin-left: auto; padding: 0 6px; border-radius: var(--r-pill); background: var(--accent); color: var(--accent-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center; }
+.nook-app .conversation-link .count { background: var(--wash-select); color: var(--ink); }
+.nook-app .conversation-link.selected .count { background: var(--surface-raised); }
+.nook-app .profile { display: flex; width: calc(100% - 24px); min-height: 44px; align-items: center; gap: 10px; margin: 8px 12px 12px; padding: 0 10px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
+.nook-app .profile > span:not(.sr-only) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nook-app .avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 12px; font-weight: 500; letter-spacing: .01em; }
+.nook-app .avatar.small { width: 24px; height: 24px; font-size: 11px; }
+
+/* The header and the grid under it */
+
+.nook-app .workspace { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; outline: none; }
+.nook-app .header { display: flex; height: var(--header-h); min-height: var(--header-h); align-items: center; justify-content: space-between; gap: var(--s3); padding: 0 var(--s5); border-bottom: 1px solid var(--line); }
+.nook-app .heading { display: flex; min-width: 0; align-items: center; gap: var(--s2); }
+.nook-app .heading h1 { margin: 0; overflow: hidden; font: 650 var(--fs-display)/1.2 var(--brand-font-display); font-variation-settings: 'opsz' 36; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
+.nook-app .title-prefix { margin-right: 6px; color: var(--ink-faint); }
+.nook-app .title-tag { flex: none; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .header-actions { display: flex; flex: none; align-items: center; gap: var(--s2); }
+.nook-app .decisions-toggle { gap: 0; }
+.nook-app .decisions-toggle[aria-expanded=true] { background: var(--wash); color: var(--ink); }
+.nook-app .header-count { margin-left: 6px; color: var(--ink-soft); font-size: 12px; font-weight: 600; }
+.nook-app .needs-you-dot { width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: var(--accent); }
+.nook-app .header-members { display: flex; min-height: 32px; align-items: center; padding: 0 8px 0 14px; border-radius: var(--r-pill); }
+.nook-app .header-members:hover { background: var(--wash); }
+.nook-app .header-members .avatar { margin-left: -2px; box-shadow: 0 0 0 2px var(--surface-page); }
+.nook-app .members-more { margin-left: 6px; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .body-grid { display: grid; flex: 1; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-width: 0; min-height: 0; }
+.nook-app .body-grid:is(.has-thread, .showing-outcomes) { grid-template-columns: minmax(0, 1fr) var(--panel-w); }
+/* Decisions & requests and threads are companions: closed until asked for. */
+.nook-app .body-grid:not(.has-thread):not(.showing-outcomes) > .decisions { display: none; }
+.nook-app .page-content { flex: 1; max-width: 100%; min-height: 0; overflow: auto; padding: var(--s5); }
+.nook-app .page-column { width: 100%; max-width: var(--column); margin-inline: auto; }
+.nook-app .skip-link { position: fixed; top: 8px; left: 15px; z-index: 200; width: 1px; height: 1px; overflow: hidden; padding: 0; border-radius: var(--r-pill); background: var(--ink); color: var(--brand-paper); clip-path: inset(50%); }
+.nook-app .skip-link:focus { width: auto; height: auto; padding: 12px 16px; clip-path: none; }
+.nook-app .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.nook-app .mobile-tabs { display: none; }
+.nook-app .icon-button.mobile-back { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nook-app * { scroll-behavior: auto !important; }
+}

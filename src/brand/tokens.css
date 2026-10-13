@@ -1,0 +1,22 @@
+/* Nook brand tokens, defined once and used by the homepage, the docs, sign-in
+   and the app. The fonts they name are declared in public/fonts/fonts.css, which
+   every Nook document links (src/base/font-head.ts). */
+:root {
+  --brand-font-display: 'Nook Display', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --brand-font-text: 'Nook Text', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+
+  --brand-paper: #faf5ef;
+  --brand-card: #fffdfa;
+  --brand-ink: #2a1d21;
+  --brand-ink-soft: #66565a;
+  --brand-line: #2a1d21;
+  --brand-hairline: #eadfd7;
+  --brand-rose: #f2b0a5;
+  --brand-rose-wash: #fbe1da;
+  --brand-berry: #c24e5b;
+
+  --brand-radius-card: 18px;
+  --brand-radius-pill: 999px;
+  --brand-shadow-card: 0 1px 0 rgb(42 29 33 / 0.04), 0 18px 40px -22px rgb(42 29 33 / 0.28);
+  --brand-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

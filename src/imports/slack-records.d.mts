@@ -1,0 +1,10 @@
+export const systemSubtypes: Set<string>;
+export const contentSubtypes: Set<string>;
+export function isAutomation(actor: any): boolean;
+export function actorLabel(actor: any): string;
+export function sourceActorId(message: any): string;
+export function sourceFileRefs(source: any): any[];
+export function missingFileRefs(source: any, supplied: any[]): { sourceId: string; name: string; size: number | null }[];
+export function referencedActors(message: any): string[];
+export function validateMessageMetadata(message: any): void;
+export function messageAuthorLabel(actor: any, source: any): string;

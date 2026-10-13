@@ -1,0 +1,12 @@
+data/
+exports/
+node_modules
+/design/
+.tools/
+dist/
+.wrangler/
+.tanstack/
+.seed/
+.env*
+.dev.vars*
+evidence/

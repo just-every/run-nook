@@ -1,0 +1,254 @@
+/* Section drawings: one arch (the nook) per drawing, the real UI on a cream card
+   sitting low inside it. Colour lives only here, as in the hero. The shared
+   pieces (avatars, thread rows, chips, step numbers) are defined
+   once below, under "Shared pieces". */
+
+.nook-home .nook-drawing { margin: 0; text-align: left; }
+
+.nook-home .nook-arch {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 112px 44px 34px;
+  border-radius: 999px 999px 14px 14px;
+  background: radial-gradient(120% 90% at 50% 70%, #fbe5dd 0%, #f9d9ce 78%, #f8d4c8 100%);
+}
+
+.nook-home .nook-card {
+  width: 100%;
+  border: 1.5px solid #f2c6ba;
+  border-radius: 16px;
+  background: var(--brand-card);
+  box-shadow: 0 1px 0 rgb(194 78 91 / 0.05), 0 14px 26px -20px rgb(120 50 50 / 0.35);
+  color: var(--brand-ink);
+}
+
+.nook-home .nook-card :where(p) { margin: 0; }
+
+/* Shared pieces: avatars, thread rows, chips, step numbers */
+
+.nook-home .mark-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.nook-home .avatar-rose { background: var(--brand-rose); color: var(--brand-ink); }
+.nook-home .avatar-wash { background: var(--brand-rose-wash); color: var(--brand-ink); box-shadow: inset 0 0 0 1.5px #f0bdb0; }
+
+.nook-home .thread-bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 18px;
+  border-bottom: 1px solid #f1e3dc;
+}
+
+.nook-home .thread-dots { display: inline-flex; gap: 6px; }
+.nook-home .thread-dots i { width: 10px; height: 10px; border-radius: 50%; background: #f0c3b8; }
+.nook-home .thread-dots i:first-child { background: var(--brand-berry); }
+.nook-home .thread-channel { font-size: 16px; font-weight: 600; }
+.nook-home .thread-channel span { margin-right: 2px; color: var(--brand-berry); }
+
+.nook-home .thread-message {
+  display: flex;
+  gap: 12px;
+  padding: 16px 18px 0;
+}
+
+.nook-home .thread-author { font-size: 16px; font-weight: 700; line-height: 1.3; }
+.nook-home .thread-body { margin-top: 2px; font-size: 16px; line-height: 1.4; text-wrap: pretty; }
+
+.nook-home .thread-actions {
+  display: flex;
+  gap: 14px;
+  padding: 14px 18px 18px 70px;
+}
+
+.nook-home .mark-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1.5px solid #efc9be;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.nook-home .mark-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--brand-rose-wash);
+  box-shadow: inset 0 0 0 1.5px #f0bdb0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* Licence: the LICENSE file shared in a channel */
+
+.nook-home .licence-card { max-width: 500px; overflow: hidden; }
+.nook-home .licence-card .file-row { max-width: 320px; }
+.nook-home .licence-card .thread-message { padding-bottom: 20px; }
+.nook-home .licence-card .mini-reactions { margin-top: 12px; }
+
+/* Product parts: four small cards, each in a shorter arch. */
+
+.nook-home .product-parts .nook-arch { padding: 76px 18px 20px; }
+.nook-home .product-card { min-height: 224px; padding: 16px 18px 18px; font-size: 15px; }
+
+.nook-home .sidebar-heading { color: var(--brand-ink-soft); font-size: 15px; font-weight: 600; }
+.nook-home .sidebar-heading + .sidebar-row { margin-top: 8px; }
+.nook-home .sidebar-row + .sidebar-heading { margin-top: 14px; }
+
+.nook-home .sidebar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  margin: 0 -8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.nook-home .sidebar-row.is-selected { background: var(--brand-rose-wash); font-weight: 600; }
+.nook-home .sidebar-hash { width: 14px; color: var(--brand-berry); font-weight: 600; text-align: center; }
+
+.nook-home .sidebar-count {
+  margin-left: auto;
+  min-width: 26px;
+  padding: 2px 8px;
+  border-radius: var(--brand-radius-pill);
+  background: var(--brand-berry);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.nook-home .sidebar-row .mark-avatar { width: 30px; height: 30px; font-size: 15px; }
+
+.nook-home .mini-message { display: flex; gap: 10px; }
+.nook-home .mini-message .mark-avatar { width: 34px; height: 34px; font-size: 15px; }
+.nook-home .mini-author { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.nook-home .mini-body { margin-top: 1px; font-size: 15px; line-height: 1.4; }
+
+.nook-home .mini-reactions { display: flex; gap: 6px; margin-top: 8px; }
+
+.nook-home .mini-reactions span {
+  padding: 2px 9px;
+  border: 1.5px solid #f2d3c9;
+  border-radius: var(--brand-radius-pill);
+  background: #fff;
+  font-size: 15px;
+}
+
+.nook-home .mini-reply { margin: 14px 0 0 15px; padding-left: 16px; border-left: 2px solid #f2c6ba; }
+
+.nook-home .file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid #f2d3c9;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.nook-home .file-row strong,
+.nook-home .file-row small { display: block; font-size: 15px; }
+.nook-home .file-row strong { font-weight: 600; }
+.nook-home .file-row small { margin-top: 1px; color: var(--brand-ink-soft); }
+
+.nook-home .file-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 46px;
+  border-radius: 6px 14px 6px 6px;
+  background: var(--brand-berry);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.nook-home .search-label { color: var(--brand-ink-soft); font-size: 15px; font-weight: 600; }
+
+.nook-home .search-field {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--brand-ink);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 16px;
+}
+
+.nook-home .search-result { margin-top: 14px; }
+.nook-home .search-result .mark-chip { min-height: 30px; margin-top: 10px; font-size: 15px; }
+
+/* Move in */
+
+.nook-home .movein-card { max-width: 500px; }
+.nook-home .movein-card .thread-message + .thread-message { padding-top: 18px; }
+.nook-home .movein-card .thread-author { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+
+.nook-home .imported-tag {
+  padding: 1px 9px;
+  border-radius: var(--brand-radius-pill);
+  background: #f6ece7;
+  color: var(--brand-ink-soft);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* The drawings rise in once, the first time they scroll into view (useRevealOnce).
+   Until the page is marked ready, every drawing is simply in place. */
+
+.nook-home.reveal-ready .home-section .nook-drawing:not(.is-seen) { opacity: 0; transform: translateY(28px); }
+.nook-home.reveal-ready .home-section .nook-drawing { transition: opacity 700ms var(--brand-ease), transform 700ms var(--brand-ease); }
+
+@media (max-width: 1180px) {
+  .nook-home .nook-arch { padding: 88px 28px 26px; }
+}
+
+@media (max-width: 560px) {
+  .nook-home .nook-arch { padding: 56px 12px 12px; border-radius: 50% 50% 12px 12px / 118px 118px 12px 12px; }
+  .nook-home .product-parts .nook-arch { padding: 56px 14px 14px; }
+  .nook-home .product-card { min-height: 0; }
+}
+
+@media (max-width: 1360px) {
+  .nook-home .thread-actions { gap: 10px; padding-left: 70px; }
+}
+
+@media (max-width: 560px) {
+  .nook-home .thread-bar { padding: 11px 14px; }
+  .nook-home .thread-message { gap: 10px; padding: 14px 14px 0; }
+  .nook-home .thread-actions { flex-wrap: wrap; padding: 12px 14px 16px 64px; }
+  .nook-home .mark-chip { font-size: 14px; padding: 0 11px; }
+}
+
+@media print {
+  .nook-home .home-section .nook-drawing { opacity: 1 !important; transform: none !important; }
+}

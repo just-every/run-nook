@@ -1,0 +1,11 @@
+/* Hidden-until-intent. A revealed control is always in the DOM and the accessibility tree and keeps its hit area:
+   it is never display:none or visibility:hidden. It shows on hover of its host, on keyboard focus inside the
+   host, while a menu inside the host is open, and always on touch screens (except the message tray, which a tap opens). */
+.nook-app .reveal { opacity: 0; transition: opacity var(--dur) var(--ease); }
+.nook-app :is(.reveal-host:hover, .reveal-host:focus-within, .reveal-host[data-open], .reveal-host:has(details[open])) .reveal { opacity: 1; }
+@media (hover: none) {
+  /* Phones: per-row actions just show ... */
+  .nook-app .reveal:not(.reveal-tap) { opacity: 1; }
+  /* ... except the message tray, which opens on tap (the tap focuses the message). Closed = not hit-testable. */
+  .nook-app .reveal-host:not(:focus-within):not([data-open]):not(:has(details[open])) .reveal-tap { pointer-events: none; }
+}

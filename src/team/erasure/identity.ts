@@ -1,0 +1,28 @@
+import {detachAssignee} from './audit'
+import {graph} from './graph'
+import type {Context} from '../../platform/storage/context'
+import {fenceService,type Sql} from './portability'
+import {sql,fencedRows,audit} from './statements'
+export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceService>>,target:string){
+ const affected=await c.rows('SELECT id AS conversation FROM nook_conversations c WHERE EXISTS(SELECT 1 FROM nook_members WHERE conversation=c.id AND user=?) OR EXISTS(SELECT 1 FROM nook_dm_roster WHERE conversation=c.id AND user=?) OR owner=? OR EXISTS(SELECT 1 FROM nook_erased_messages WHERE conversation=c.id AND author=?) OR EXISTS(SELECT 1 FROM nook_erased_attachments WHERE conversation=c.id AND author=?) OR EXISTS(SELECT 1 FROM nook_outcomes WHERE conversation=c.id AND assignee=?)',[target,target,target,target,target,target])
+ const historical=affected.length>0||!!await c.one("SELECT 1 FROM nook_imports WHERE owner=? UNION ALL SELECT 1 FROM nook_import_uploads WHERE owner=? UNION ALL SELECT 1 FROM nook_messages WHERE deleted=0 AND EXISTS(SELECT 1 FROM json_each(nook_messages.payload,'$.mentions') WHERE value=?) LIMIT 1",[target,target,target])
+ const person=await c.one('SELECT email,display_name FROM oa_operators WHERE id=?',[target]),result:Sql[]=[...audit('SELECT value FROM json_each(?)',[JSON.stringify(affected.map(r=>r.conversation))]),...await detachAssignee(c,f,target),...await fencedRows(c,f,'nook_attention',['id'],'EXISTS(SELECT 1 FROM nook_events e WHERE e.conversation=nook_attention.conversation AND e.seq=nook_attention.event_seq AND e.actor=?)',[target])]
+ result.push(sql("DELETE FROM oa_dev_credentials WHERE (credential='oa_sessions' AND id IN (SELECT id FROM oa_sessions WHERE operator_id=?)) OR (credential='oa_tokens' AND id IN (SELECT id FROM oa_tokens WHERE operator_id=? OR issuer_id=?))",target,target,target),sql('UPDATE oa_sessions SET source_token_id=NULL WHERE operator_id<>? AND source_token_id IN (SELECT id FROM oa_tokens WHERE issuer_id=?)',target,target))
+ const edges:[string,string[],string,any[]][]=graph.member.edges.filter(edge=>'phase' in edge&&edge.phase==='identity').map(edge=>{
+ const e=edge as any;return [e.table,[...e.key],e.where??Object.keys(e.on).map(key=>key+'=?').join(' AND '),(e.params??Object.keys(e.on)).map(()=>target)]
+ })
+ for(const [table,keys,where,params] of edges)result.push(...await fencedRows(c,f,table,keys,where,params),sql(`DELETE FROM ${table} WHERE ${where}`,...params))
+ result.push(sql("UPDATE nook_invite_plans SET state='cancelled' WHERE email=? OR issuer=?",person.email,target),sql('DELETE FROM nook_invite_plans WHERE email=? OR issuer=?',person.email,target),
+  sql('DELETE FROM nook_members WHERE user=?',target),sql('DELETE FROM nook_guest_grants WHERE user=?',target),sql('DELETE FROM nook_creator_revocations WHERE user=?',target),sql('DELETE FROM nook_access WHERE user=?',target),
+  sql('DELETE FROM nook_attention WHERE EXISTS(SELECT 1 FROM nook_events e WHERE e.conversation=nook_attention.conversation AND e.seq=nook_attention.event_seq AND e.actor=?)',target),
+  sql("UPDATE nook_conversations SET name='Direct conversation' WHERE kind='dm' AND (owner=? OR id IN (SELECT conversation FROM nook_dm_roster WHERE user=?))",target,target),
+  sql("UPDATE nook_events SET kind='erasure',actor=NULL,object=lower(hex(randomblob(16))) WHERE actor=? OR object=?",target,target),
+  sql('UPDATE oa_domain_rules SET created_by=NULL WHERE created_by=?',target),sql('UPDATE oa_first_run SET completed_by=NULL WHERE completed_by=?',target),
+  sql('DELETE FROM rer_mail_development_outbox WHERE instr(lower(message),lower(?))>0 OR instr(message,?)>0 OR instr(message,?)>0',person.email,person.display_name,target),
+  ...(historical?[sql('INSERT INTO nook_erased_actors VALUES(?)',target)]:[]),...await f.row('nook_actors',{id:target}),...await f.row('oa_operators',{id:target}),
+  sql('UPDATE oa_bootstrap SET claim_id=lower(hex(randomblob(16))) WHERE claim_id=?',target),sql('DELETE FROM nook_actors WHERE id=?',target),sql('DELETE FROM oa_operators WHERE id=?',target))
+ // Owner claim proof keeps its authority nonce, never the erased person's values.
+ const tables=await c.rows("SELECT name FROM sqlite_master WHERE type='table'")
+ if(tables.some(t=>t.name==='oc_owner_claims'))result.unshift(sql("UPDATE oc_owner_claims SET email='',operator_id=lower(hex(randomblob(16))),session_id='' WHERE operator_id=?",target))
+ return result
+}

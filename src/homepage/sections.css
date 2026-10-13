@@ -1,0 +1,125 @@
+/* Sections below the hero: a calm column of split and centred sections on paper,
+   then the footer (the closing call to action lives in closing.css). Chrome stays ink on paper. */
+
+.nook-home .home-section {
+  max-width: var(--page-w);
+  margin: 0 auto;
+  padding: var(--section-pad) 72px;
+}
+
+.nook-home .home-section h2 {
+  margin: 0;
+  font: 680 52px/1.04 var(--brand-font-display);
+  font-variation-settings: 'opsz' 96;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.nook-home .section-body {
+  max-width: 30em;
+  margin: 22px 0 0;
+  color: var(--brand-ink-soft);
+  font-size: 19px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* Split: copy and one drawing side by side, alternating sides down the page. */
+
+.nook-home .home-section.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 80px;
+}
+
+.nook-home .section-copy { max-width: 580px; }
+
+.nook-home .section-actions { margin-top: 36px; }
+
+/* Free */
+
+
+
+
+/* Product: four small arches in a row, a title and one line under each. */
+
+.nook-home .home-section.centred { text-align: center; }
+
+.nook-home .product-parts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  margin: 64px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nook-home .product-parts h3 .mark-num { width: 32px; height: 32px; font: 700 15px/1 var(--brand-font-text); }
+
+.nook-home .product-parts h3 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 26px 0 0;
+  font: 650 23px/1.2 var(--brand-font-display);
+  font-variation-settings: 'opsz' 32;
+  letter-spacing: -0.015em;
+}
+
+.nook-home .product-parts h3 + p {
+  margin: 8px 0 0;
+  color: var(--brand-ink-soft);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+/* Move in */
+
+.nook-home .movein-steps {
+  display: grid;
+  gap: 18px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nook-home .movein-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  color: var(--brand-ink-soft);
+  font-size: 18px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.nook-home .movein-steps .mark-num { flex: none; width: 34px; height: 34px; margin-top: -3px; font-size: 16px; color: var(--brand-ink); }
+.nook-home .movein-steps strong { color: var(--brand-ink); font-weight: 600; }
+.nook-home .movein-steps + .home-link { margin-top: 30px; }
+
+@media (max-width: 1180px) {
+  .nook-home .home-section { padding-left: 32px; padding-right: 32px; }
+  .nook-home .home-section.split { gap: 56px; }
+}
+
+@media (max-width: 1240px) {
+  .nook-home .product-parts { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 760px; margin-left: auto; margin-right: auto; row-gap: 56px; }
+}
+
+@media (max-width: 900px) {
+  .nook-home .home-section.split .nook-drawing { width: 100%; max-width: 580px; }
+  .nook-home .home-section { padding: 88px 24px; }
+  .nook-home .home-section.split { grid-template-columns: minmax(0, 1fr); gap: 48px; }
+  .nook-home .home-section h2 { font-size: 42px; }
+}
+
+@media (max-width: 560px) {
+  .nook-home .home-section { padding: 72px 16px; }
+  .nook-home .home-section h2 { font-size: 34px; line-height: 1.06; }
+  .nook-home .section-body { margin-top: 16px; font-size: 18px; }
+    .nook-home .product-parts { grid-template-columns: minmax(0, 1fr); row-gap: 52px; margin-top: 44px; }
+  .nook-home .product-parts h3 { margin-top: 20px; font-size: 21px; }
+  .nook-home .movein-steps li { font-size: 17px; }
+}

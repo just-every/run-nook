@@ -1,0 +1,27 @@
+/* Attention: a flat list of what needs you. Each item is a context line, the thing itself, and its actions;
+   Accept and Report done are always shown, the rest appear on hover or focus (and always on touch). */
+
+.nook-app .attention-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s1) var(--s3); margin: 0 0 var(--s2); }
+.nook-app .attention-tools .muted { margin: 0; font-size: var(--fs-meta); }
+.nook-app .attention-page > .page-column > .muted { margin: 0 0 var(--s2); font-size: var(--fs-meta); }
+
+.nook-app .attention-card { padding: var(--s4) 0; border-bottom: 1px solid var(--line); }
+.nook-app .attention-card:last-child { border-bottom: 0; }
+.nook-app .attention-context { margin: 0 0 var(--s1); color: var(--ink-soft); font-size: var(--fs-meta); }
+
+/* An outcome inside an item has no frame of its own */
+.nook-app .attention-card .outcome-card { margin: 0; padding: 0; border: 0; border-radius: 0; }
+.nook-app .attention-card .outcome-card:focus { background: transparent; }
+.nook-app .attention-card .outcome-card h3 { display: block; overflow: visible; font-size: 16px; line-height: 1.45; }
+/* Discuss is part of the answer here, so it stays visible; More and the triage actions wait for intent. */
+.nook-app .attention-card .card-actions > .soft-button.reveal { opacity: 1; }
+
+.nook-app .attention-card .message-body { margin: 0; font-size: var(--fs-body); line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap; }
+.nook-app .urgent-reason { margin: var(--s2) 0 0; padding: 2px 0 2px 12px; border-left: 3px solid var(--brand-rose); color: var(--ink); font-size: var(--fs-ui); }
+
+.nook-app .triage-actions { display: flex; flex-wrap: wrap; gap: var(--s1); }
+
+/* On a phone, Accept or Report done leaves no room for the triage actions beside it: they take the next line, flush with the text. */
+@media (max-width: 520px) {
+  .nook-app .attention-card .card-actions:has(.send) > .triage-actions { flex-basis: 100%; margin-left: -10px; }
+}

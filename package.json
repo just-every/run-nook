@@ -1,0 +1,73 @@
+{
+  "name": "@team-chat/team-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/just-every/run-nook.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": "22.20.0"
+  },
+  "scripts": {
+    "setup": "node scripts/rer.mjs setup",
+    "dev": "node scripts/rer.mjs dev",
+    "preview": "node scripts/rer.mjs preview",
+    "build": "node scripts/rer.mjs build",
+    "verify": "node scripts/rer.mjs verify",
+    "reset": "node scripts/rer.mjs reset",
+    "deploy": "node scripts/rer.mjs deploy",
+    "export": "node scripts/rer.mjs export",
+    "import": "node scripts/rer.mjs import",
+    "release": "node scripts/rer.mjs release",
+    "outbox": "node scripts/rer.mjs outbox",
+    "doctor": "node scripts/rer.mjs doctor",
+    "describe": "node scripts/rer.mjs describe",
+    "check": "node scripts/rer.mjs check",
+    "deps": "node scripts/rer.mjs install",
+    "rer": "node scripts/rer.mjs",
+    "onboard": "node scripts/install.mjs",
+    "build:app": "vite build",
+    "verify:app": "pnpm verify:core && pnpm test:pilot",
+    "verify:core": "pnpm test:base && pnpm test && pnpm run build:app && pnpm typecheck && pnpm test:runtime && pnpm test:readme && pnpm test:notify",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --test-concurrency=2 tests/*.test.mjs",
+    "test:runtime": "node tests/runtime.mjs",
+    "test:homepage": "node tests/homepage.mjs",
+    "test:readme": "node tests/readme-journey.mjs",
+    "test:pilot": "node tests/pilot-journey.mjs",
+    "test:base": "node scripts/edition-authoring/cli.mjs check && node scripts/edition-authoring/cli.mjs verify-base --offline && node scripts/rer.mjs check --profile first-party",
+    "test:notify": "node tests/notify-journey.mjs"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "1.170.33",
+    "@tanstack/react-start": "1.168.50",
+    "hono": "4.13.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.54.5",
+    "@cloudflare/workers-types": "5.20260908.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.0.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "highlight.js": "10.7.3",
+    "react-markdown": "6.0.3",
+    "remark-gfm": "1.0.0",
+    "typescript": "5.9.3",
+    "vite": "8.2.2",
+    "wrangler": "4.142.0"
+  },
+  "packageManager": "pnpm@10.12.4",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd",
+      "@parcel/watcher"
+    ]
+  }
+}

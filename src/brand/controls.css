@@ -1,0 +1,55 @@
+/* Checkboxes and file pickers wherever Nook draws its own forms (the app and the Slack
+   import page), in the accent from the installer's brand colour (berry by default). */
+
+:is(.nook-app, .imports-page) input[type=checkbox] {
+  display: inline-grid;
+  flex: none;
+  place-content: center;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid var(--brand-accent, var(--brand-berry));
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+:is(.nook-app, .imports-page) input[type=checkbox]::after {
+  content: '';
+  width: 5px;
+  height: 10px;
+  margin-top: -2px;
+  border: solid var(--brand-accent-text, #fff);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+}
+:is(.nook-app, .imports-page) input[type=checkbox]:checked { background: var(--brand-accent, var(--brand-berry)); }
+:is(.nook-app, .imports-page) input[type=checkbox]:checked::after { opacity: 1; }
+:is(.nook-app, .imports-page) input[type=checkbox]:focus-visible { outline: 3px solid var(--brand-accent, var(--brand-berry)); outline-offset: 2px; }
+:is(.nook-app, .imports-page) input[type=checkbox]:disabled { border-color: var(--brand-ink-soft); opacity: 0.55; cursor: not-allowed; }
+@media (forced-colors: active) {
+  :is(.nook-app, .imports-page) input[type=checkbox] { appearance: auto; -webkit-appearance: auto; }
+  :is(.nook-app, .imports-page) input[type=checkbox]::after { display: none; }
+}
+
+:is(.nook-app, .imports-page) input[type=file] { min-height: 0; padding: 6px 10px; }
+:is(.nook-app, .imports-page) input[type=file]::file-selector-button {
+  margin-right: 14px;
+  padding: 6px 16px;
+  border: 1.5px solid var(--brand-ink);
+  border-radius: var(--brand-radius-pill);
+  background: transparent;
+  color: var(--brand-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+:is(.nook-app, .imports-page) input[type=file]::file-selector-button:hover { background: var(--brand-rose-wash); }
+:is(.nook-app, .imports-page) input[type=file]:disabled::file-selector-button { opacity: 0.55; cursor: not-allowed; }

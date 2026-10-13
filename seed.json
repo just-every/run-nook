@@ -1,0 +1,121 @@
+{
+  "id": "team-workspace",
+  "name": "Nook",
+  "version": "0.1.0",
+  "maturity": "local-native-worker-d1-feasibility",
+  "category": "chat",
+  "spine": {
+    "id": "team-communication",
+    "record": "Conversation with explicit versioned outcomes"
+  },
+  "replaces": [
+    {
+      "name": "Slack",
+      "edition": null
+    },
+    {
+      "name": "Microsoft Teams",
+      "edition": null
+    }
+  ],
+  "description": "Loopback native sessions, D1 chat/outcomes/replay/private media and calm attention in React/Start, with local guided migrations and validated offline recovery.",
+  "capabilities": [
+    {
+      "id": "http-dispatch",
+      "clauses": [
+        "HTTP-001"
+      ]
+    },
+    {
+      "id": "native-access",
+      "clauses": [
+        "BASE-ACCESS-002"
+      ]
+    },
+    {
+      "id": "conversation-policy",
+      "clauses": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C7",
+        "C10",
+        "C11",
+        "C6",
+        "C9",
+        "C12",
+        "C13"
+      ]
+    },
+    {
+      "id": "public-docs",
+      "clauses": [
+        "DOCS-001"
+      ]
+    }
+  ],
+  "nonGoals": [
+    "Hosted or pilot release claim from local evidence",
+    "Provider effects or resource provisioning in this incubation"
+  ],
+  "externals": [
+    {
+      "id": "cloudflare",
+      "required": true,
+      "why": "Local Worker/D1 emulator for feasibility; remote hosting is not configured",
+      "data": [
+        "Synthetic local HTTP requests and D1 workspace document"
+      ],
+      "adapters": []
+    }
+  ],
+  "env": [],
+  "deploy": {
+    "healthPath": "/health",
+    "publicPaths": [
+      "/",
+      "/docs",
+      "/docs/",
+      "/signin",
+      "/health",
+      "/api/register",
+      "/api/login",
+      "/assets/"
+    ],
+    "notes": "Deployment refuses. Native private /api paths, /app document family and generated loadWorkspace independently check current sessions. Current conversation ACL is checked for every product projection."
+  },
+  "extensionPoints": {
+    "contributions": [],
+    "policies": [],
+    "events": [],
+    "slots": [],
+    "adapters": []
+  },
+  "limits": {
+    "status": "unmeasured",
+    "workspaceDocumentBytes": 16777216,
+    "casAttempts": 24,
+    "fileBytes": 1048576,
+    "attachmentsPerMessage": 5,
+    "stagedPerUploader": 50,
+    "rawWorkspaceMediaBytes": 16777216,
+    "nativeSchemaVersion": 4,
+    "nativeArchiveVersion": 4,
+    "supportedRootArchiveVersions": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "maximumRootLedger": 6
+  },
+  "accessibility": {
+    "level": "WCAG 2.2 AA",
+    "status": "target; unaudited"
+  },
+  "operatingCost": {
+    "status": "unmeasured"
+  }
+}

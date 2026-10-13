@@ -1,0 +1,58 @@
+name: Verify
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    name: verify (${{ matrix.stage }})
+    runs-on: ubuntu-latest
+    # `rer verify` runs these same stages in order. CI splits them across
+    # runners: each pilot width applies the full realistic import (~29 minutes
+    # on this runner) before census, undo and, at 1440, the restore round trip.
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - stage: core
+            # rer verify ends with Base's hosted-output check on the same build.
+            command: pnpm verify:core && node scripts/base-cli/cli/hosted-output.mjs . owner-deployment.json
+          - stage: pilot 1440
+            command: pnpm test:pilot --width 1440
+          - stage: pilot 390
+            command: pnpm test:pilot --width 390
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prepare hosted runner disk capacity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          echo 'Disk capacity before removing unused preinstalled toolchains'
+          df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
+          # runner-images installs these Android, .NET and Haskell toolchains.
+          # This Node/Playwright verification job does not use them.
+          sudo rm -rf --one-file-system -- /usr/local/lib/android/sdk /usr/share/dotnet /usr/local/.ghcup
+          echo 'Disk capacity after removing unused preinstalled toolchains'
+          df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps --only-shell chromium
+      - name: Prepare canonical temporary directory
+        run: |
+          mkdir -p ../scratch/tmp
+          echo "TMPDIR=$(realpath ../scratch/tmp)" >> "$GITHUB_ENV"
+      - run: ${{ matrix.command }}
+        env:
+          CI: 'true'
+          WRANGLER_SEND_METRICS: 'false'

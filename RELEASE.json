@@ -1,0 +1,95 @@
+{
+  "version": "0.1.0",
+  "date": "2026-10-13",
+  "publicReleaseNotes": "Nook 0.1.0: the first public release of the self-hosted team workspace (private channels, direct messages, threads, versioned decisions, commitments and calm attention) on one Cloudflare Worker.",
+  "contractChanges": {},
+  "extensionPointChanges": [],
+  "migrations": [
+    {
+      "id": "0001_workspace.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0002_attachments.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0003_attention.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0004_immutable_imports.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0005_operator_auth.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0006_mail.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0007_portability.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0008_first_run.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0010_normalized_storage.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0011_team_surfaces.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0012_owner_claim.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0013_claim_storage_fence.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0014_slack_import.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0015_dev_sessions.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0016_domain_rules_step_up.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0017_erasure.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0018_erasure_policy.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0019_email_notifications.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0020_import_reversal_fence.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0021_import_retirement.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    },
+    {
+      "id": "0022_provider_control.sql",
+      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+    }
+  ],
+  "breaking": false,
+  "agentUpdateInstructions": "First public release; there is no earlier public version to update from. Installations made from earlier private source keep their state: back up with rer export, keep every applied migration byte, and apply only new migrations in filename order as OPERATIONS.md describes. Never reset populated state to update."
+}

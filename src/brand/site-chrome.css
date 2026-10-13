@@ -1,0 +1,126 @@
+/* The site header and footer shared by the homepage and the docs (BRAND.md:
+   lift SiteHeader and NookMark rather than rebuilding them per page). */
+
+.nook-site { --site-header-h: 74px; } /* the desktop header: 26px above its 48px brand row */
+
+.nook-site a { color: inherit; text-decoration: none; }
+
+/* Header */
+
+.nook-site .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--page-w, 1440px);
+  margin: 0 auto;
+  padding: 26px 72px 0;
+}
+
+.nook-site .site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+}
+
+.nook-site .site-brand-mark { width: 36px; height: 40px; flex: none; }
+
+.nook-site .site-brand-word {
+  font: 680 40px/1 var(--brand-font-display);
+  font-variation-settings: 'opsz' 48;
+  letter-spacing: -0.035em;
+  transform: translateY(-2px);
+}
+
+.nook-site .site-nav {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.nook-site .site-nav a:not(.site-signin) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.nook-site .site-nav a[aria-current='page'] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--brand-berry); }
+.nook-site .site-nav a:not(.site-signin):hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--brand-berry); }
+
+.nook-site .site-signin {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: var(--brand-radius-pill);
+  background: var(--brand-ink);
+  color: var(--brand-paper);
+  font-weight: 600;
+  transition: transform 160ms var(--brand-ease), box-shadow 160ms var(--brand-ease);
+}
+
+.nook-site .site-signin:hover { transform: translateY(-1px); box-shadow: 0 8px 18px -10px rgb(42 29 33 / 0.6); }
+
+/* Footer */
+
+.nook-site .site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  max-width: var(--page-w, 1440px);
+  margin: 0 auto;
+  padding: 36px 72px 48px;
+  border-top: 1px solid var(--brand-hairline);
+}
+
+.nook-site .site-footer-brand { display: flex; align-items: center; gap: 22px; }
+.nook-site .site-footer-brand p { margin: 0; color: var(--brand-ink-soft); font-size: 15px; }
+.nook-site .footer-brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+.nook-site .site-footer .site-brand-mark { width: 27px; height: 30px; }
+.nook-site .site-footer .site-brand-word { font-size: 30px; }
+
+.nook-site .site-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 30px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.nook-site .site-footer-nav a { display: inline-flex; align-items: center; min-height: 44px; }
+.nook-site .site-footer-nav a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--brand-berry); }
+
+.nook-site .footer-licence { color: var(--brand-ink-soft); font-size: 15px; }
+
+@media (max-width: 1180px) {
+  .nook-site .site-header { padding-left: 32px; padding-right: 32px; }
+  .nook-site .site-footer { padding-left: 32px; padding-right: 32px; }
+}
+
+@media (max-width: 900px) {
+  .nook-site .site-header { padding: 20px 24px 0; }
+  .nook-site .site-nav { gap: 22px; font-size: 16px; }
+  .nook-site .site-footer { flex-direction: column; align-items: flex-start; padding: 32px 24px 40px; }
+}
+
+@media (max-width: 560px) {
+  .nook-site .site-header { padding: 14px 16px 0; }
+  .nook-site .site-brand { gap: 8px; }
+  .nook-site .site-brand-mark { width: 28px; height: 31px; }
+  .nook-site .site-brand-word { font-size: 31px; }
+  .nook-site .site-nav { gap: 14px; font-size: 15px; }
+  .nook-site .site-signin { min-height: 44px; padding: 0 18px; }
+  .nook-site .site-footer { padding: 28px 16px 36px; }
+  .nook-site .site-footer-brand { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .nook-site .site-footer-nav { gap: 4px 22px; }
+}
+
+@media (max-width: 360px) {
+  .nook-site .site-brand-word { font-size: 26px; }
+  .nook-site .site-nav { gap: 10px; }
+  .nook-site .site-signin { padding: 0 14px; }
+}

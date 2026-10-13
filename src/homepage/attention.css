@@ -1,0 +1,171 @@
+/* Attention: "Only what needs you." The copy on the left, a quiet hourglass on the
+   right (drawings/QuietHourglass.tsx) with the real What needs you list set over it.
+   The figure is a size container: the card and its text scale with the art, and no
+   card text drops below 15px. Below 1180px the copy stacks over the figure. */
+
+.nook-home .home-section.attention {
+  --art-w: clamp(560px, 52.4vw, 760px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nook-home .attention .section-copy,
+.nook-home .attention-figure { grid-area: 1 / 1; }
+
+.nook-home .attention .section-copy { position: relative; z-index: 1; max-width: none; align-self: start; }
+
+.nook-home .home-section.attention h2 {
+  font-size: clamp(40px, 6.1vw, 88px);
+  font-weight: 700;
+  font-variation-settings: 'opsz' 72;
+  line-height: 1.02;
+  letter-spacing: -0.026em;
+  text-wrap: nowrap;
+}
+
+.nook-home .attention .section-body {
+  max-width: 21.4em;
+  margin-top: 0.8em;
+  font-size: clamp(20px, 2.02vw, 29px);
+  line-height: 1.42;
+}
+
+.nook-home .attention-figure {
+  --card-ink: var(--brand-ink);
+  position: relative;
+  container-type: inline-size;
+  justify-self: end;
+  align-self: start;
+  width: var(--art-w);
+  margin-top: calc(var(--art-w) * 0.07);
+  aspect-ratio: 803 / 455;
+}
+
+.nook-home .attention-art { position: absolute; left: 0; top: 15.5%; width: 77.2%; }
+.nook-home .attention-art svg { display: block; width: 100%; height: auto; }
+
+.nook-home .attention-card {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 55.6cqw;
+  padding: 2.9cqw 3.4cqw 3.1cqw;
+  border-radius: 2.6cqw;
+  background: var(--brand-card);
+  box-shadow: 0 0.2cqw 0.5cqw rgb(120 50 50 / 0.07), 0 2.2cqw 4.4cqw -1.6cqw rgb(120 50 50 / 0.26);
+  color: var(--brand-ink);
+}
+
+.nook-home .attention-card :where(p) { margin: 0; }
+
+.nook-home .attention-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6cqw 2cqw;
+  padding: 0 0 3.2cqw;
+}
+
+.nook-home .attention-title {
+  font: 650 max(19px, 2.95cqw)/1.2 var(--brand-font-display);
+  font-variation-settings: 'opsz' 28;
+  letter-spacing: -0.012em;
+}
+
+.nook-home .attention-chip,
+.nook-home .attention-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 4.5cqw;
+  padding: 0 2.3cqw;
+  border-radius: var(--brand-radius-pill);
+  background: var(--brand-rose-wash);
+  font-size: max(15px, 1.95cqw);
+  font-weight: 560;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.nook-home .attention-chip { min-height: max(34px, 5.1cqw); }
+.nook-home .attention-status { min-height: max(30px, 4cqw); margin-top: 1.5cqw; justify-self: start; }
+
+.nook-home .attention-row {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  column-gap: 2.4cqw;
+  align-items: start;
+  padding: 3.1cqw 0 0;
+  border-top: 1px solid #f0e4dd;
+}
+
+.nook-home .attention-row + .attention-row { margin-top: 3cqw; }
+.nook-home .attention-head + .attention-row { padding-top: 0; border-top: 0; }
+
+.nook-home .attention-glyph {
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max(36px, 5.5cqw);
+  height: max(36px, 5.5cqw);
+  border-radius: 1.7cqw;
+  font: 500 max(18px, 2.7cqw)/1 var(--brand-font-text);
+}
+
+.nook-home .attention-glyph.is-rose { background: var(--brand-rose-wash); box-shadow: inset 0 0 0 1px #f4cdc3; }
+.nook-home .attention-glyph.is-sage { background: #d5ddc6; box-shadow: inset 0 0 0 1px #c3cdb1; }
+
+.nook-home .attention-name { grid-column: 2; font-size: max(16px, 2.3cqw); font-weight: 650; line-height: 1.25; }
+.nook-home .attention-reason { grid-column: 2; margin-top: 0.3cqw; color: var(--brand-ink-soft); font-size: max(15px, 1.95cqw); line-height: 1.3; }
+.nook-home .attention-text { grid-column: 2; margin-top: 1.7cqw; font-size: max(16px, 2.3cqw); line-height: 1.3; }
+.nook-home .attention-row > .attention-status { grid-column: 2; }
+
+.nook-home .attention-accept {
+  grid-column: 3;
+  grid-row: 3 / span 2;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: max(36px, 5.4cqw);
+  padding: 0 max(16px, 2.6cqw);
+  border-radius: var(--brand-radius-pill);
+  background: var(--brand-berry);
+  color: #fff;
+  font-size: max(15px, 2cqw);
+  font-weight: 560;
+  line-height: 1;
+}
+
+/* Rises in once with the other drawings (useRevealOnce); in place without JavaScript. */
+
+@media (max-width: 1180px) {
+  .nook-home .home-section.attention { --art-w: min(100%, 760px); padding-bottom: max(112px, var(--section-pad)); }
+  .nook-home .attention .section-copy,
+  .nook-home .attention-figure { grid-area: auto; }
+  .nook-home .home-section.attention { grid-template-rows: auto auto; row-gap: 40px; }
+  .nook-home .attention-figure { justify-self: center; margin-top: 0; width: var(--art-w); }
+  .nook-home .home-section.attention h2 { font-size: clamp(34px, 6.1vw, 64px); text-wrap: balance; }
+  .nook-home .attention .section-body { font-size: 22px; max-width: 26em; }
+}
+
+@media (max-width: 640px) {
+  .nook-home .home-section.attention { padding-top: 64px; padding-bottom: 72px; row-gap: 24px; }
+  .nook-home .attention .section-body { font-size: 18px; }
+  .nook-home .attention-figure { aspect-ratio: auto; }
+  .nook-home .attention-art {
+    position: relative;
+    top: auto;
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 78%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 78%, transparent);
+  }
+  .nook-home .attention-art svg { width: 128%; max-width: none; margin-left: -4%; }
+  .nook-home .attention-head { flex-wrap: wrap; }
+  .nook-home .attention-card { position: relative; width: auto; margin: 0; padding: 5cqw 5.4cqw 5.4cqw; border-radius: 4.4cqw; }
+}
+
+@media (max-width: 480px) {
+  .nook-home .attention-row { grid-template-columns: max-content minmax(0, 1fr); column-gap: 3cqw; }
+  .nook-home .attention-accept { grid-column: 2; grid-row: auto; justify-self: start; margin-top: 2.6cqw; }
+}

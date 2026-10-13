@@ -1,0 +1,31 @@
+/* Nook's declared theme: the installer, /setup, sign-in and the confirmation page
+   read these --rer-* tokens (src/brand/tokens.css values). The app serves the fonts and the mark. */
+@font-face {
+  font-family: 'Nook Display';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/brand/fonts/BricolageGrotesque-opsz-wght.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nook Text';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/brand/fonts/InstrumentSans-wght.woff2') format('woff2');
+}
+:root {
+  --rer-font-body: 'Nook Text', 'Avenir Next', 'Segoe UI', sans-serif;
+  --rer-font-heading: 'Nook Display', 'Avenir Next', 'Segoe UI', sans-serif;
+  --rer-page: #faf5ef;
+  --rer-surface: #fffdfa;
+  --rer-text: #2a1d21;
+  --rer-muted: #66565a;
+  --rer-border: #9b8a8d;
+  --rer-focus: #c24e5b;
+  --rer-accent: #2a1d21;
+  --rer-accent-text: #fffdfa;
+  --rer-link: #2a1d21;
+  --rer-radius: 24px;
+  --rer-logo: url('/brand/mark.svg');
+}

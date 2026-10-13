@@ -1,0 +1,50 @@
+/* The app's calm system: surfaces, lines, ink, type, space, shape, motion and layout, defined once.
+   Scoped to .nook-app so the homepage and docs (which share brand/tokens.css) are untouched. */
+.nook-app {
+  /* surfaces: three tones */
+  --surface-page: var(--brand-paper);
+  --surface-rail: #f6eee7;
+  --surface-raised: var(--brand-card);
+  --wash: rgb(42 29 33 / .045);
+  --wash-select: var(--brand-rose-wash);
+  /* lines */
+  --line: rgb(42 29 33 / .10);
+  --line-field: #b3a19a;
+  /* ink */
+  --ink: var(--brand-ink);
+  --ink-soft: var(--brand-ink-soft);
+  --ink-faint: #9a8a86;
+  --accent: var(--brand-accent);
+  --accent-text: var(--brand-accent-text);
+  /* type */
+  --fs-meta: 12.5px;
+  --fs-ui: 14px;
+  --fs-body: 15px;
+  --fs-title: 18px;
+  --fs-display: 22px;
+  /* space (4px base) */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  /* shape */
+  --r-control: 10px;
+  --r-surface: 14px;
+  --r-dialog: 18px;
+  --r-pill: 999px;
+  --shadow-pop: 0 12px 32px -16px rgb(42 29 33 / .28), 0 0 0 1px var(--line);
+  /* motion */
+  --dur: 140ms;
+  --ease: var(--brand-ease);
+  /* layout */
+  --rail-w: 248px;
+  --panel-w: 380px;
+  --column: 720px;
+  --header-h: 56px;
+}
+@media (max-width: 1200px) and (min-width: 851px) { .nook-app { --rail-w: 220px; --panel-w: 340px; } }
+@media (max-width: 850px) { .nook-app { --header-h: 52px; } }
+@media (prefers-reduced-motion: reduce) { .nook-app { --dur: 0ms; } }

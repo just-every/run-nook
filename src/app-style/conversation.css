@@ -1,0 +1,154 @@
+/* A conversation: one centred reading column of messages, a quiet composer, and the companion panel
+   (decisions & requests, or a thread) that opens beside it. Controls appear on intent (reveal.css). */
+
+.nook-app .chat { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0 0 var(--s4); }
+.nook-app .log-frame { position: relative; display: flex; flex: 1; min-height: 0; }
+.nook-app .message-log { position: relative; flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overflow-anchor: none; overscroll-behavior: contain; padding: 20px max(24px, calc((100% - var(--column)) / 2)) 16px; scrollbar-width: thin; }
+.nook-app .message-log.thread-log { padding-inline: 0; }
+.nook-app .history-controls { display: flex; justify-content: center; margin: 0 0 var(--s1); }
+.nook-app .history-controls:empty { display: none; }
+.nook-app .history-controls .text-button { font-size: 13px; }
+.nook-app .jump-latest { position: absolute; bottom: var(--s3); left: 50%; z-index: 5; transform: translateX(-50%); background: var(--surface-raised); box-shadow: var(--shadow-pop); }
+.nook-app .jump-latest:hover { background: var(--surface-raised); }
+/* Room under the last row so the floating button never covers text. */
+.nook-app .log-frame:has(> .jump-latest) > .message-log { padding-bottom: 56px; }
+.nook-app .message-log .empty-state { min-height: 100%; justify-content: center; }
+
+/* Message rows: a wash on hover, a rose wash when selected */
+.nook-app .message { position: relative; display: flex; gap: var(--s3); margin: 14px -8px 0; padding: 6px 8px; border-radius: var(--r-control); outline: none; scroll-margin-top: var(--s4); }
+.nook-app .history-controls + .message-group > .message, .nook-app .history-controls + .message, .nook-app .new-divider + .message, .nook-app .message.continued { margin-top: 0; }
+@media (hover: hover) { .nook-app .message:hover { background: var(--wash); } }
+.nook-app .message:focus { background: var(--wash-select); }
+.nook-app .message > .avatar { margin-top: 2px; }
+.nook-app .avatar-gutter { width: 32px; flex: none; }
+.nook-app .message-content { flex: 1; min-width: 0; }
+.nook-app .message-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s2); line-height: 1.4; }
+.nook-app .message-meta strong { font-size: 14.5px; font-weight: 600; }
+.nook-app :is(.message-meta time, .edited) { color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 400; }
+.nook-app .message-body { margin: 0; font-size: var(--fs-body); line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nook-app .message.deleted .message-body { color: var(--ink-soft); font-style: italic; }
+.nook-app .message .reply-button { margin-left: -10px; }
+/* A continued row has no avatar or name; its time waits in the gutter. */
+.nook-app .message.continued { padding-block: 2px; }
+.nook-app .message.continued .message-meta time { position: absolute; top: 9px; left: 0; width: 45px; font-size: 11.5px; line-height: 1.4; text-align: right; }
+
+/* The tray: the verbs of one message, on a small raised bar at its top right */
+.nook-app .message-tools { position: absolute; top: -14px; right: var(--s2); z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface-raised); box-shadow: var(--shadow-pop); }
+.nook-app .message-tools > .icon-button, .nook-app .message-tools .menu > summary { width: 30px; height: 30px; font-size: 16px; line-height: 1; }
+.nook-app .message-tools:has(details[open]) { z-index: 6; }
+.nook-app .message-tools .popover .erase-item { color: var(--brand-berry); }
+.nook-app .message-tools .popover.strip { right: 0; }
+/* The More menu opens along the tray, in its own band, so while it is open (also after an edit dialog hands focus back
+   to Edit) it never covers the message below or that message's tray. */
+.nook-app .message-tools .popover.inline { top: -3px; right: calc(100% + 2px); left: auto; display: flex; min-width: 0; gap: 2px; padding: 3px; }
+.nook-app .message-tools .popover.inline > button { width: auto; min-height: 30px; white-space: nowrap; }
+/* With room beside the tray (not on a phone) the open strip joins the tray instead of floating over it: the tray grows to
+   the left, More stays where it was pressed and every other button keeps its place in the row. */
+@media (min-width: 851px) {
+  .nook-app .message-tools .message-more[open] { display: flex; flex-direction: row-reverse; align-items: center; gap: 2px; }
+  .nook-app .message-tools .popover.inline { position: static; padding: 0; background: none; box-shadow: none; }
+}
+
+/* Stitch lines: a decision or request saved from a message, quietly under it */
+.nook-app .outcome-lines { display: flex; flex-direction: column; align-items: flex-start; margin-top: var(--s1); }
+.nook-app .outcome-line { display: flex; max-width: 100%; min-height: 24px; align-items: center; gap: var(--s2); padding: 2px 10px; border-left: 3px solid var(--brand-rose); color: var(--ink); font-size: 13px; text-align: left; }
+.nook-app .outcome-line:hover .outcome-text { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.nook-app .outcome-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nook-app .outcome-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--brand-rose); }
+.nook-app .outcome-line[data-state=proposed] .outcome-dot { background: transparent; box-shadow: inset 0 0 0 1.5px var(--brand-rose); }
+.nook-app .outcome-line[data-state=reported-complete] .outcome-dot { background: var(--ink); }
+.nook-app .outcome-line[data-state=cancelled] .outcome-dot { background: var(--ink-faint); }
+.nook-app .outcome-lines > .text-button { min-height: 24px; margin-left: 3px; padding: 0 10px; font-size: 13px; }
+
+/* New messages: a label and one rose rule */
+.nook-app .new-divider { display: flex; align-items: center; gap: var(--s3); margin: var(--s2) 0; color: var(--ink); font-size: var(--fs-meta); font-weight: 600; }
+.nook-app .new-divider::after { content: ''; flex: 1; height: 1px; background: var(--brand-rose); }
+
+/* Files */
+.nook-app .file-row { display: flex; max-width: 480px; align-items: center; gap: var(--s3); margin: 6px 0 0; padding: var(--s2) var(--s3); border-radius: var(--r-control); background: var(--wash); }
+.nook-app .file-row a { flex: 1; min-width: 0; color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
+.nook-app .file-row strong { font-size: var(--fs-ui); font-weight: 500; }
+.nook-app .file-row small { display: block; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .file-row .text-button { flex-shrink: 0; }
+
+/* Reactions: count chips only; the imported group is quiet meta */
+.nook-app .reaction-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.nook-app .reaction-chips > button { display: inline-flex; min-height: 26px; align-items: center; gap: 4px; padding: 0 9px; border-radius: var(--r-pill); background: rgb(42 29 33 / .05); color: var(--ink); font-size: var(--fs-ui); }
+.nook-app .reaction-chips > button:hover { background: rgb(42 29 33 / .09); }
+.nook-app .reaction-chips > button[aria-pressed=true] { background: var(--wash-select); box-shadow: inset 0 0 0 1px var(--brand-rose); }
+.nook-app .reaction-chips > button span { font-size: var(--fs-meta); font-weight: 600; }
+.nook-app .reaction-chips details { color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .reaction-chips details[open] { flex-basis: 100%; }
+.nook-app .reaction-chips summary { cursor: pointer; padding: 0 var(--s1); }
+.nook-app .reaction-chips details p { margin: var(--s1) 0 0; }
+.nook-app .reaction-chips details p button { margin-left: var(--s2); color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; }
+.nook-app .message small[role=status] { color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .team-reactions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: var(--s1); color: var(--ink-soft); font-size: var(--fs-meta); }
+
+/* The composer: one quiet line that grows, with paperclip and @ beside Send */
+.nook-app .composer { display: grid; flex: none; grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "routing routing routing routing" "staged staged staged staged" "text attach options send" "notes notes notes notes"; align-items: center; width: min(var(--column), calc(100% - 48px)); margin: var(--s2) auto 0; padding: 6px 6px 6px 14px; border: 1px solid var(--line); border-radius: var(--r-surface); background: var(--surface-raised); }
+.nook-app .composer:focus-within { border-color: rgb(42 29 33 / .45); }
+.nook-app .composer[data-urgent] { border-left: 3px solid var(--brand-rose); }
+.nook-app .composer textarea { grid-area: text; display: block; width: 100%; min-height: 36px; max-height: 40vh; padding: 7px 4px; border: 0; background: transparent; color: var(--ink); field-sizing: content; font-size: var(--fs-body); line-height: 22px; resize: none; }
+.nook-app .composer textarea:focus-visible { outline: none; }
+.nook-app .composer textarea::placeholder { color: var(--ink-soft); }
+.nook-app .composer .attach-button { grid-area: attach; position: relative; }
+.nook-app .composer .attach-button.disabled { opacity: .5; cursor: default; }
+.nook-app .attach-button input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.nook-app .attach-button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nook-app .composer-options { grid-area: options; }
+.nook-app .composer-options[open] > summary { background: var(--wash); color: var(--ink); }
+.nook-app .composer .send { grid-area: send; min-height: 32px; margin-left: var(--s1); }
+.nook-app .composer .send:disabled { background: transparent; color: var(--ink-soft); opacity: 1; }
+.nook-app .composer-routing { grid-area: routing; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); padding: 6px 8px 10px 0; }
+.nook-app .composer-routing .field { min-width: 0; margin: 0; gap: var(--s1); font-size: var(--fs-meta); }
+.nook-app .composer-routing .field:last-child { grid-column: 1 / -1; }
+.nook-app .staged-files { grid-area: staged; display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 8px 6px 0; }
+.nook-app .staged-files > span { display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 10px; border: 1px solid var(--line); border-radius: var(--s2); font-size: 13px; overflow-wrap: anywhere; }
+.nook-app .staged-files .icon-button { width: 24px; height: 24px; }
+.nook-app .staged-files .icon-button svg { width: 14px; height: 14px; }
+.nook-app .composer-notes { grid-area: notes; padding: 2px 8px 4px 0; }
+.nook-app .composer-hint { color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .draft-note { margin: var(--s1) 0; padding-left: 10px; border-left: 2px solid var(--line-field); color: var(--ink); font-size: 13px; }
+.nook-app .draft-note .text-button { min-height: 28px; font-size: 13px; }
+
+/* The panel: decisions & requests, or a thread, opening beside the conversation */
+.nook-app .decisions { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0 20px var(--s4); border-left: 1px solid var(--line); background: var(--surface-page); }
+.nook-app .panel-bar { display: flex; flex: none; flex-wrap: wrap; min-height: 52px; align-items: center; gap: var(--s1) var(--s2); }
+.nook-app .panel-bar h2 { flex: 1 1 auto; margin: 0; font-size: var(--fs-body); font-weight: 600; }
+.nook-app .panel-actions { display: flex; flex-basis: 100%; gap: var(--s1); margin-left: -10px; }
+.nook-app .panel-close { margin-right: -6px; }
+.nook-app .panel-close .icon-chevron, .nook-app .panel-close .icon-close { display: inline-flex; }
+.nook-app .panel-close .icon-chevron { display: none; }
+.nook-app .thread-bar .icon-button { margin-left: -8px; }
+.nook-app .panel-scroll { flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; }
+.nook-app .panel-group { margin: var(--s4) 0 var(--s1); color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 500; }
+.nook-app .panel-closed { margin-top: var(--s4); }
+.nook-app .panel-closed > summary { cursor: pointer; padding: var(--s1) 0; color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 500; }
+.nook-app .thread-sep { margin: var(--s2) 0; border: 0; border-top: 1px solid var(--line); }
+.nook-app .decisions .composer { width: 100%; margin: var(--s2) 0 0; }
+.nook-app .decisions .jump-latest { bottom: var(--s2); }
+
+@media (max-width: 850px) {
+  .nook-app .chat { padding-bottom: var(--s2); }
+  .nook-app .message-log { padding: var(--s4) var(--s4) var(--s3); }
+  .nook-app .message-log.thread-log { padding-inline: 0; }
+  .nook-app .message > .avatar, .nook-app .avatar-gutter { width: 30px; height: 30px; }
+  .nook-app .composer { width: calc(100% - 32px); }
+  .nook-app .composer textarea { font-size: 16px; }
+  .nook-app .decisions { padding: 0 var(--s4) var(--s3); border-left: 0; }
+  .nook-app .decisions .composer { width: 100%; }
+  .nook-app .panel-close .icon-close { display: none; }
+  .nook-app .panel-close .icon-chevron { display: inline-flex; }
+  .nook-app .panel-close { order: -1; margin: 0 0 0 -8px; }
+  /* The reaction strip anchors to the tray, not to its own button, so it never runs off the left edge. */
+  .nook-app .message-tools .react-menu { position: static; }
+  .nook-app .message-tools .popover.strip { left: auto; right: 0; }
+}
+@media (hover: none) {
+  /* A continued row's time is part of what a tap reveals. */
+  .nook-app .message.continued .message-meta time { opacity: 0; }
+  .nook-app .message.continued:focus-within .message-meta time { opacity: 1; }
+  .nook-app .message-tools > .icon-button, .nook-app .message-tools .menu > summary { width: 40px; height: 40px; }
+  .nook-app .message-tools .popover.inline > button { min-height: 40px; }
+}

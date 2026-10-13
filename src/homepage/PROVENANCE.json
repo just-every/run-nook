@@ -1,0 +1,16 @@
+{
+  "design": {
+    "selectedReference": "Hero: 12ui draft, concept b-centered-strip candidate B (11 Oct 2026), three rose arches with one moment of the conversation in each (brand-nook-s1/pick.png). Sections below the hero: 12ui branch execute --scope page from the built hero, option B of five (11 Oct 2026, brand-nook-s2/12ui/run-b/branch/screens/a.png and b.png). Both are kept outside the repository with the brand evidence.",
+    "implementation": "Hand-built React and CSS from the selected images, with the page copy and drawing strings from the stage 2 copy document rather than the images' placeholder text. No generated raster assets are shipped."
+  },
+  "assets": [
+    {
+      "path": "public/brand/fonts/BricolageGrotesque-opsz-wght.woff2",
+      "origin": "Bricolage Grotesque (latin, opsz and wght axes) from @fontsource-variable/bricolage-grotesque 5.3.0, unchanged. Copyright 2022 The Bricolage Grotesque Project Authors, SIL Open Font License 1.1 (public/brand/fonts/OFL-BricolageGrotesque.txt)."
+    },
+    {
+      "path": "public/brand/fonts/InstrumentSans-wght.woff2",
+      "origin": "Instrument Sans (latin, wght axis) from @fontsource-variable/instrument-sans 5.3.0, unchanged. Copyright 2022 The Instrument Sans Project Authors, SIL Open Font License 1.1 (public/brand/fonts/OFL-InstrumentSans.txt)."
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+/* Sign-in and page-not-found (brand-nook-s3 sign-in pick A): paper, the brand at the
+   top left, one cream card sitting in a rose-wash arch. */
+
+body:has(.nook-frame) { margin: 0; background: var(--brand-paper); }
+.nook-frame {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 26px 72px 64px;
+  background: var(--brand-paper);
+  color: var(--brand-ink);
+  font-family: var(--brand-font-text);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.nook-frame *, .nook-frame *::before, .nook-frame *::after { box-sizing: border-box; }
+.nook-frame :focus-visible { outline: 3px solid var(--brand-accent); outline-offset: 3px; border-radius: 6px; }
+.nook-frame .frame-card:focus { outline: none; }
+
+.frame-skip { position: absolute; z-index: 10; top: 10px; left: 10px; padding: 12px 16px; border-radius: var(--brand-radius-pill); background: var(--brand-ink); color: var(--brand-paper); font-weight: 600; transform: translateY(-160%); }
+.frame-skip:focus { transform: none; }
+
+.frame-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; color: inherit; text-decoration: none; }
+.frame-mark { width: 36px; height: 40px; flex: none; }
+.frame-brand span { font: 680 40px/1 var(--brand-font-display); font-variation-settings: 'opsz' 48; letter-spacing: -0.035em; transform: translateY(-2px); }
+
+/* The nook: a tall arch whose top shows above the card. */
+.frame-nook {
+  position: relative;
+  width: min(100%, 520px);
+  margin: 40px auto 0;
+  padding-top: 112px;
+}
+.frame-nook::before {
+  content: '';
+  position: absolute;
+  inset: 0 -40px auto -40px;
+  /* Tall enough that the top stays a full half-circle on a short card; the card hides the rest. */
+  height: min(max(70%, 340px), calc(100% - 24px));
+  border-radius: 999px 999px 14px 14px;
+  background: var(--brand-rose-wash);
+}
+
+.frame-card {
+  position: relative;
+  padding: 40px 36px 36px;
+  border: 1.5px solid #f2c6ba;
+  border-radius: var(--brand-radius-card);
+  background: var(--brand-card);
+  box-shadow: var(--brand-shadow-card);
+  text-align: center;
+}
+.frame-card h1 { margin: 0; font: 680 40px/1.06 var(--brand-font-display); font-variation-settings: 'opsz' 96; letter-spacing: -0.028em; text-wrap: balance; }
+.frame-card > p { margin: 12px 0 0; color: var(--brand-ink-soft); text-wrap: pretty; }
+.frame-card .frame-lead { font-size: 18px; }
+.frame-card form { display: grid; gap: 18px; margin: 30px 0 0; text-align: left; }
+.frame-card label { display: grid; gap: 8px; color: var(--brand-ink); font-size: 15px; font-weight: 600; }
+.frame-card input {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 16px;
+  border: 1.5px solid #d9c9c2;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--brand-ink);
+  font: inherit;
+  font-size: 17px;
+}
+.frame-card input:focus-visible { border-color: var(--brand-ink); outline: 3px solid var(--brand-accent); outline-offset: 2px; }
+.frame-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--brand-radius-pill);
+  background: var(--brand-ink);
+  color: var(--brand-paper);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 12px 24px -16px rgb(42 29 33 / 0.7);
+  transition: transform 160ms var(--brand-ease), box-shadow 160ms var(--brand-ease);
+}
+.frame-primary:hover { transform: translateY(-1px); box-shadow: 0 16px 28px -16px rgb(42 29 33 / 0.75); }
+.frame-primary:disabled { opacity: 0.6; cursor: wait; transform: none; }
+.frame-card .frame-small { margin-top: 22px; font-size: 15px; }
+.frame-card .frame-notice { margin-top: 20px; padding: 12px 16px; border-radius: 14px; background: var(--brand-rose-wash); color: var(--brand-ink); font-size: 15px; text-align: left; }
+.frame-card .frame-notice[role="alert"] { border-left: 3px solid var(--brand-berry); }
+.frame-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--brand-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--brand-berry);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+.frame-card .frame-small .frame-link { display: inline; min-height: 0; }
+.frame-card nav { margin-top: 10px; }
+.frame-card .frame-actions { display: grid; gap: 10px; margin-top: 28px; }
+
+@media (max-width: 900px) {
+  .nook-frame { padding: 20px 24px 56px; }
+}
+@media (max-width: 560px) {
+  .nook-frame { padding: 14px 16px 48px; }
+  .frame-mark { width: 28px; height: 31px; }
+  .frame-brand { gap: 8px; }
+  .frame-brand span { font-size: 31px; }
+  .frame-nook { margin-top: 24px; padding-top: 72px; }
+  .frame-nook::before { inset: 0 -8px auto -8px; height: min(max(70%, 200px), calc(100% - 24px)); border-radius: 50% 50% 12px 12px / 140px 140px 12px 12px; }
+  .frame-card { padding: 30px 20px 26px; }
+  .frame-card h1 { font-size: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .frame-primary { transition: none; }
+}

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "projectId": "just-every/nook",
+  "name": "Nook",
+  "sourceRepository": "https://github.com/just-every/run-nook",
+  "license": "MIT",
+  "deployment": {
+    "target": "cloudflare-workers",
+    "artifactFile": "nook-worker-artifact.json"
+  },
+  "operations": {
+    "setup": "node scripts/rer.mjs install --non-interactive",
+    "build": "node scripts/rer.mjs build --non-interactive",
+    "verify": "node scripts/rer.mjs verify --non-interactive",
+    "artifact": "node scripts/build-delivery-artifact.mjs",
+    "recovery": "Keep the repository and installation private. Stop Nook; retain source, private settings and all additive migrations. Use rer export to a private archive, rer import into empty inactive local state, and the documented offline identity mapping before normal sign-in. Compare re-exported records and media. Local proof is not hosted deployment acceptance; see OPERATIONS.md."
+  },
+  "verification": {
+    "sensitivePaths": [
+      "src/base/**",
+      "src/platform/**",
+      "src/server.ts",
+      "scripts/**",
+      "migrations/**",
+      "rer-setup.json",
+      "owner-deployment.json",
+      "src/team/**",
+      "src/editor/**",
+      "src/routes/**",
+      "src/router.tsx"
+    ],
+    "migrationDirectories": [
+      "migrations"
+    ],
+    "guidanceFiles": [
+      "AGENTS.md",
+      "OPERATIONS.md",
+      "CONTRACT.md"
+    ],
+    "testPatterns": [
+      "tests/**"
+    ]
+  },
+  "setup": {
+    "path": "rer-setup.json",
+    "sha256": "4a1fbc8628fdfa4c8d2bfd71248810e7df5bc770cc5e7854c0f3e232f550b8bc"
+  }
+}

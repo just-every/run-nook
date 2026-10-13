@@ -1,0 +1,75 @@
+/* Closing call to action: a wide street banner, then the headline and the two
+   actions left-aligned with the banner's edge. On phones the banner becomes a
+   taller crop of the street, centred on the middle houses. */
+
+.nook-home .home-section.closing {
+  padding-top: var(--section-pad);
+  padding-bottom: calc(var(--section-pad) * 0.8);
+}
+
+.nook-home .closing-street {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1368 / 416;
+  border-radius: 16px 16px 34px 34px;
+}
+
+.nook-home .closing-street > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.nook-home .home-section.closing h2 {
+  margin: 40px 0 0;
+  font-size: clamp(44px, 5.35vw, 78px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.004em;
+}
+
+.nook-home .closing .home-actions {
+  justify-content: flex-start;
+  gap: 42px;
+  margin: 26px 0 0;
+}
+
+.nook-home .closing .home-pill {
+  min-height: 64px;
+  padding: 0 88px;
+  font-size: 22px;
+  box-shadow: none;
+}
+
+.nook-home .closing .home-link {
+  font-size: 22px;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 10px;
+}
+
+.nook-home .closing .home-free {
+  margin: 22px 0 0;
+  font-size: 20px;
+}
+
+@media (max-width: 900px) {
+  .nook-home .home-section.closing { padding-top: 72px; padding-bottom: 72px; }
+  .nook-home .home-section.closing h2 { margin-top: 32px; }
+  .nook-home .closing .home-pill { min-height: 58px; padding: 0 56px; font-size: 20px; }
+  .nook-home .closing .home-link { font-size: 20px; }
+  .nook-home .closing .home-free { font-size: 18px; }
+}
+
+/* Phones: a 4:3 window onto the street; the art slices to its middle houses. */
+@media (max-width: 700px) {
+  .nook-home .closing-street { aspect-ratio: 4 / 3; border-radius: 14px 14px 22px 22px; }
+}
+
+@media (max-width: 560px) {
+  .nook-home .home-section.closing { padding-top: 48px; padding-bottom: 72px; }
+  .nook-home .home-section.closing h2 { margin-top: 26px; font-size: 38px; }
+  .nook-home .closing .home-actions { align-items: flex-start; gap: 18px; margin-top: 22px; }
+  .nook-home .closing .home-pill { width: 100%; justify-content: center; }
+  .nook-home .closing .home-free { margin-top: 18px; font-size: 17px; }
+}

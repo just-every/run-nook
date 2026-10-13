@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "team-chat-team-workspace",
+  "main": "src/server.ts",
+  "compatibility_date": "2026-09-08",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "team-chat-local-feasibility",
+      "database_id": "00000000-0000-0000-0000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "nook-private-local"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CHAT_HUB",
+        "class_name": "ChatHub"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "nook-chat-hub-v1",
+      "new_sqlite_classes": [
+        "ChatHub"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+/* The dialogs' insides: lean sheets with quiet fields, a quoted source line and rows that show their verbs on intent.
+   The shell (surface, shadow, radius, bottom sheet on phones) is in controls.css and phone.css. */
+
+.nook-app dialog:is([data-kind=details], [data-kind=new-message]) { max-width: 440px; }
+.nook-app dialog .dialog-heading .icon-button { margin-right: -8px; }
+.nook-app dialog .dialog-lead { margin: 0 0 var(--s3); font-size: var(--fs-ui); }
+.nook-app dialog .dialog-note { margin: var(--s3) 0 0; color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
+.nook-app dialog .dialog-section { margin: 0 0 var(--s2); font-size: var(--fs-body); font-weight: 600; }
+
+/* The message a request or decision is about, or the one about to be deleted */
+.nook-app dialog .dialog-quote { display: -webkit-box; margin: 0 0 var(--s3); padding: 2px 0 2px var(--s3); overflow: hidden; border-left: 2px solid var(--line-field); color: var(--ink-soft); font-size: var(--fs-ui); line-height: 1.5; overflow-wrap: anywhere; white-space: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.nook-app dialog .dialog-lead + .dialog-quote { -webkit-line-clamp: 4; }
+
+.nook-app dialog .field textarea { min-height: 72px; }
+.nook-app dialog .field-row { margin: var(--s3) 0; }
+.nook-app dialog .field-row .field { margin: 0; }
+.nook-app dialog form > .send, .nook-app dialog > .danger-button { display: flex; align-items: center; justify-content: center; margin: var(--s4) 0 0 auto; }
+
+/* New message: a plain list of people */
+.nook-app dialog .people-picker { display: flex; max-height: min(320px, 50dvh); flex-direction: column; margin: 0 -8px; overflow: auto; }
+.nook-app dialog .people-picker button { display: flex; width: 100%; min-height: 44px; flex: none; align-items: center; gap: var(--s3); padding: 0 8px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
+.nook-app dialog .people-picker button:hover:not(:disabled) { background: var(--wash); }
+
+/* Create a channel: the teammates are an unboxed, scrolling, two-column list */
+.nook-app dialog fieldset { min-width: 0; max-height: 220px; margin: var(--s3) 0; padding: 0; border: 0; }
+.nook-app dialog legend { margin-bottom: var(--s1); padding: 0; color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 500; }
+.nook-app dialog .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); column-gap: var(--s3); }
+.nook-app dialog .check-grid .check { margin: 0; padding: 6px 0; overflow-wrap: anywhere; }
+
+/* Conversation details: members, with Remove / Add on row intent */
+.nook-app dialog .dialog-members { display: flex; flex-direction: column; margin: 0 -8px; }
+.nook-app dialog .member-row { display: flex; min-height: 44px; align-items: center; gap: 10px; padding: 0 8px; border-radius: var(--r-control); }
+.nook-app dialog .member-row:hover { background: var(--wash); }
+.nook-app dialog .member-name { flex: 0 1 auto; min-width: 0; overflow: hidden; font-size: var(--fs-body); text-overflow: ellipsis; white-space: nowrap; }
+.nook-app dialog .member-tag { flex: none; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app dialog .member-row .text-button { flex: none; margin-left: auto; }
+
+@media (max-width: 850px) {
+  .nook-app dialog form > .send, .nook-app dialog > .danger-button { width: 100%; }
+}

@@ -1,0 +1,355 @@
+{
+  "version": 2,
+  "project": "nook",
+  "seedContract": {
+    "version": 1,
+    "profile": "first-party",
+    "adapter": "scripts/installer/local.mjs"
+  },
+  "runtime": {
+    "requirements": [
+      {
+        "name": "node",
+        "version": "22.20.0"
+      },
+      {
+        "name": "pnpm",
+        "version": "10.12.4"
+      }
+    ]
+  },
+  "requiredEnvironment": [
+    "CLOUDFLARE_ACCOUNT_ID",
+    "CLOUDFLARE_API_TOKEN",
+    "SESSION_SECRET",
+    "SETUP_TOKEN",
+    "OWNER_EMAIL",
+    "MAIL_FROM",
+    "SENDGRID_API_KEY"
+  ],
+  "environmentSources": {
+    "OWNER_EMAIL": "Explicit first owner in rer-setup.json or --owner-email; preserved on rerun. See OPERATIONS.md",
+    "SESSION_SECRET": "Generated private .dev.vars setting. See OPERATIONS.md",
+    "SETUP_TOKEN": "Generated private .dev.vars bootstrap setting. See OPERATIONS.md",
+    "MAIL_PROVIDER": "Development outbox selection in rer-setup.json. See OPERATIONS.md",
+    "MAIL_FROM": "Local sender in rer-setup.json. See OPERATIONS.md",
+    "SENDGRID_API_KEY": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
+    "RESEND_API_KEY": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
+    "CLOUDFLARE_EMAIL_API_TOKEN": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
+    "CLOUDFLARE_EMAIL_ACCOUNT_ID": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
+    "CLOUDFLARE_ACCOUNT_ID": "Owner's Cloudflare account id, supplied in the shell only for owner-account deploy. See OPERATIONS.md",
+    "CLOUDFLARE_API_TOKEN": "Owner's scoped Cloudflare API token, supplied in the shell only for owner-account deploy. See OPERATIONS.md"
+  },
+  "commands": {
+    "install": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "install"
+      ],
+      "effects": "Install the frozen dependency graph.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "setup": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "setup"
+      ],
+      "effects": "Generate private settings, build, apply additive local migrations, bootstrap one explicit owner and request an ordinary outbox sign-in; stop temporary descendants.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "dev": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "dev"
+      ],
+      "effects": "Serve Vite HMR on explicit loopback through the shared managed lifecycle; health and outbox gate readiness.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "preview": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "preview"
+      ],
+      "effects": "Serve fixed production output on explicit loopback through the shared managed lifecycle.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "build": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "build"
+      ],
+      "effects": "Build production assets with private settings removed during bundling.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "verify": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "verify"
+      ],
+      "effects": "Run product checks, the complete recursive onboarding suite, build, types, runtime and browser journeys and the README journey.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "reset": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "reset"
+      ],
+      "effects": "Require confirmation and inactive installation; remove only shared local state/settings/installer inventory.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "deploy": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "deploy"
+      ],
+      "effects": "Build and package the Worker and every migration, then deploy to the owner's Cloudflare account through Base deploy-kit owner mode and check health. Dry run makes no provider request.",
+      "inputs": [
+        "owner-deployment.json",
+        "package.json",
+        "rer-setup.json",
+        "scripts/deployment/command.mjs",
+        "scripts/installer/local.mjs",
+        "scripts/rer.mjs"
+      ],
+      "requiredEnvironment": [
+        "CLOUDFLARE_ACCOUNT_ID",
+        "CLOUDFLARE_API_TOKEN",
+        "OWNER_EMAIL",
+        "MAIL_FROM",
+        "SENDGRID_API_KEY"
+      ]
+    },
+    "export": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "export"
+      ],
+      "effects": "Export complete private product data through Base portability with credentials excluded; requires a new private archive path.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "import": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "import"
+      ],
+      "effects": "Confirm and restore a verified Base archive into empty, inactive local state, then recover explicitly mapped identities offline.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "outbox": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "outbox"
+      ],
+      "effects": "Open the configured-loopback development outbox; no external message delivery.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "doctor": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "doctor"
+      ],
+      "effects": "Inspect declared local inputs, settings presence and pinned tooling without exposing secrets.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "describe": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "describe"
+      ],
+      "effects": "Describe shared command capabilities.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "check": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "check"
+      ],
+      "effects": "Check the first-party command contract, aliases, pins and operations descriptor without credentials.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "release": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "release"
+      ],
+      "effects": "Run Base release checks, including the publication scan; never pushes, tags or deploys.",
+      "inputs": [
+        "package.json",
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "artifact": {
+      "argv": [
+        "node",
+        "scripts/build-delivery-artifact.mjs"
+      ],
+      "effects": "Produce the schema-2 Worker artifact for the pinned trusted-build workflow from committed source; no deployment.",
+      "inputs": [
+        "scripts/build-delivery-artifact.mjs",
+        "scripts/delivery/base/packaging.json",
+        "rer-project.json",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "artifact-local": {
+      "argv": [
+        "node",
+        "scripts/delivery/build-local.mjs"
+      ],
+      "effects": "Build the exact clean committed source and write local schema-2 artifact bytes to a new directory; no deployment.",
+      "inputs": [
+        "scripts/delivery/build-local.mjs",
+        "scripts/delivery/base/packaging.json",
+        "rer-project.json",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    },
+    "project-descriptor": {
+      "argv": [
+        "node",
+        "scripts/delivery/project.mjs"
+      ],
+      "effects": "Regenerate the canonical descriptor from edition policy and the exact setup manifest digest.",
+      "inputs": [
+        "scripts/delivery/project.mjs",
+        "scripts/delivery/base/packaging.json",
+        "rer-setup.json"
+      ],
+      "requiredEnvironment": []
+    }
+  },
+  "loops": [
+    {
+      "id": "production-sendgrid",
+      "type": "mail",
+      "provider": "sendgrid",
+      "required": false,
+      "enabled": false
+    },
+    {
+      "id": "production-resend",
+      "type": "mail",
+      "provider": "resend",
+      "required": false,
+      "enabled": false
+    },
+    {
+      "id": "production-cloudflare",
+      "type": "mail",
+      "provider": "cloudflare",
+      "required": false,
+      "enabled": false
+    }
+  ],
+  "documentation": {
+    "document": "OPERATIONS.md"
+  },
+  "acceptance": {
+    "document": "ACCEPTANCE.md"
+  },
+  "configuration": {
+    "module": "scripts/operations-config.mjs"
+  },
+  "health": {
+    "path": "/health",
+    "meaning": "D1 operator-auth and development outbox schema are readable; product admission additionally requires normalized storage and active Team access."
+  }
+}

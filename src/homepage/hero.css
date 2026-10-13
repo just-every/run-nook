@@ -1,0 +1,100 @@
+/* Hero: the copy on the left, the illustrated alcove on the right (hero-alcove.css).
+   Sizes follow the approved 1536px design through --u, one design pixel at the current
+   size: the width of the shared page box (--page-w) over 1536, or what leaves --hero-gap
+   above and below the 791-design-pixel alcove under the header, whichever is smaller,
+   and never under --u-floor, where the cards' 15px text would no longer fit the art.
+   On desktop the hero is at least the first screen under the header, its group centred
+   in that screen, and its tail brings the next section's content one section gap below
+   the group. Below 1240px the alcove would shrink under its text, so the copy stacks
+   above it at fixed sizes. */
+
+.nook-home .hero {
+  --hero-gap: clamp(24px, 6svh, 96px);
+  --u-floor: 0.68px;
+  --u: max(var(--u-floor), min(calc(min(100vw, var(--page-w)) / 1536), calc((100svh - var(--site-header-h) - 2 * var(--hero-gap)) / 791)));
+  --hero-tail: max(0px, calc(var(--section-pad) - (100svh - var(--site-header-h) - 791 * var(--u)) / 2));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(694 * var(--u));
+  align-content: center;
+  align-items: center;
+  min-height: calc(100svh - var(--site-header-h) + var(--hero-tail));
+  max-width: var(--page-w);
+  margin: 0 auto;
+  padding: 0 72px var(--hero-tail);
+}
+
+.nook-home .hero-copy {
+  padding: 0 0 calc(12 * var(--u)) min(calc(52 * var(--u)), 56px);
+  text-align: left;
+}
+
+.nook-home .hero h1 {
+  max-width: 7.6em;
+  margin: 0;
+  font: 740 max(40px, calc(91.5 * var(--u)))/1.03 var(--brand-font-display);
+  font-variation-settings: 'opsz' 96;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.nook-home .hero-sub {
+  max-width: 20.6em;
+  margin: calc(14 * var(--u)) 0 0 calc(6 * var(--u));
+  color: color-mix(in srgb, var(--brand-ink) 84%, var(--brand-paper));
+  font-size: max(18px, calc(28 * var(--u)));
+  line-height: 1.3;
+}
+
+.nook-home .hero-actions {
+  display: flex;
+  align-items: center;
+  gap: calc(38 * var(--u));
+  margin: calc(40 * var(--u)) 0 0 calc(6 * var(--u));
+}
+
+.nook-home .hero .hero-primary {
+  min-height: max(56px, calc(70 * var(--u)));
+  padding: 0 calc(56 * var(--u));
+  font-size: max(18px, calc(26 * var(--u)));
+}
+
+.nook-home .hero .hero-secondary { font-size: max(18px, calc(22.5 * var(--u))); font-weight: 650; }
+
+.nook-home .hero-free {
+  margin: calc(33 * var(--u)) 0 0 calc(14 * var(--u));
+  color: var(--brand-ink);
+  font-size: max(15px, calc(18 * var(--u)));
+}
+
+.nook-home .hero .hero-free .hero-free-part { white-space: nowrap; }
+
+.nook-home .hero .hero-free strong { font-weight: 600; }
+
+.nook-home .hero .hero-alcove { justify-self: end; width: calc(694 * var(--u)); margin-right: calc(-13 * var(--u)); }
+
+@media (max-width: 1240px) {
+  .nook-home .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 0;
+    padding: 40px 24px 48px;
+  }
+  .nook-home .hero-copy { padding: 0; text-align: center; }
+  .nook-home .hero h1 { max-width: 10.5em; margin: 0 auto; font-size: 56px; line-height: 1.02; }
+  .nook-home .hero-sub { margin: 22px auto 0; color: var(--brand-ink-soft); font-size: 20px; text-wrap: balance; }
+  .nook-home .hero-actions { justify-content: center; gap: 36px; margin: 30px 0 0; }
+  .nook-home .hero .hero-primary { min-height: 58px; padding: 0 34px; font-size: 18px; }
+  .nook-home .hero .hero-secondary { font-size: 18px; }
+  .nook-home .hero-free { margin: 26px 0 0; color: var(--brand-ink-soft); font-size: 15px; }
+  .nook-home .hero .hero-alcove { width: 100%; max-width: 694px; margin: 44px auto 0; }
+}
+
+@media (max-width: 560px) {
+  .nook-home .hero { padding: 36px 16px 40px; }
+  .nook-home .hero h1 { font-size: 44px; line-height: 1.04; }
+  .nook-home .hero-sub { margin-top: 18px; font-size: 18px; }
+  .nook-home .hero-actions { flex-direction: column; gap: 14px; margin-top: 28px; }
+  .nook-home .hero-free { margin-top: 20px; }
+  .nook-home .hero .hero-alcove { margin-top: 36px; }
+}

@@ -1,0 +1,155 @@
+/* Hero alcove: the illustrated nook (drawings/NookAlcove.tsx) with two live Nook
+   cards set over it. Everything is sized in cqw of the alcove, so the cards scale
+   with the art; text never drops below --alcove-min-text. The cards sit in one
+   column, so they cannot overlap whatever the text needs. */
+
+.nook-home .hero-alcove {
+  --alcove-min-text: 15px;
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 694 / 791;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--brand-ink);
+}
+
+.nook-home .hero-alcove .nook-alcove-art { display: block; width: 100%; height: 100%; }
+
+.nook-home .alcove-cards {
+  position: absolute;
+  top: 31.1%;
+  left: min(17.15%, calc(70% - max(51%, 330px)));
+  display: flex;
+  flex-direction: column;
+  gap: 2.45cqw;
+  width: max(51%, 330px);
+}
+
+.nook-home .alcove-card {
+  border-radius: 2.1cqw;
+  background: var(--brand-card);
+  box-shadow: 0 0.2cqw 0.6cqw rgb(120 50 50 / 0.1), 0 2cqw 3.6cqw -1.6cqw rgb(120 50 50 / 0.34);
+}
+
+.nook-home .alcove-card :where(p) { margin: 0; }
+
+/* Thread card */
+
+.nook-home .alcove-thread { padding: 2.16cqw 2.3cqw 2.4cqw; }
+
+.nook-home .alcove-bar { display: flex; align-items: center; gap: 2.74cqw; }
+.nook-home .alcove-dots { display: inline-flex; gap: 0.86cqw; }
+.nook-home .alcove-dots i { width: 1.44cqw; height: 1.44cqw; border-radius: 50%; background: var(--brand-berry); }
+
+.nook-home .alcove-channel { font-size: max(var(--alcove-min-text), 2.31cqw); font-weight: 650; line-height: 1.2; }
+.nook-home .alcove-channel span { margin-right: 0.3cqw; color: var(--brand-berry); }
+
+.nook-home .alcove-message { display: flex; gap: 1.73cqw; margin-top: 3.2cqw; }
+
+.nook-home .alcove-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 5.62cqw;
+  height: 5.62cqw;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d85c65, var(--brand-berry));
+  font-size: max(13px, 2.16cqw);
+  font-weight: 600;
+}
+
+.nook-home .alcove-message-text { flex: 1; min-width: 0; }
+.nook-home .alcove-author { font-size: max(var(--alcove-min-text), 2.31cqw); font-weight: 700; line-height: 1.2; }
+.nook-home .alcove-body { margin-top: 0.58cqw; font-size: max(var(--alcove-min-text), 2.25cqw); line-height: 1.38; text-wrap: pretty; }
+
+.nook-home .alcove-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1cqw; margin-top: 1.9cqw; }
+
+.nook-home .alcove-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: max(6px, 1.1cqw) max(8px, 1.15cqw);
+  border: 1px solid #df9299;
+  border-radius: var(--brand-radius-pill);
+  font-size: max(var(--alcove-min-text), 2.02cqw);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.nook-home .alcove-chip.is-chosen { border-color: transparent; background: linear-gradient(130deg, #cf4b5b, var(--brand-berry)); color: #fff; font-weight: 600; }
+
+/* Request card */
+
+.nook-home .alcove-request { padding: 2.74cqw 3.31cqw 2.9cqw; }
+
+.nook-home .alcove-status span {
+  display: inline-block;
+  padding: 0.85cqw 1.7cqw;
+  border: 1px solid var(--brand-berry);
+  border-radius: var(--brand-radius-pill);
+  font-size: max(var(--alcove-min-text), 2.02cqw);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.nook-home .alcove-title {
+  max-width: 30cqw;
+  margin-top: 2.02cqw;
+  font: 650 max(var(--alcove-min-text), 2.88cqw)/1.2 var(--brand-font-display);
+  font-variation-settings: 'opsz' 24;
+  letter-spacing: -0.012em;
+}
+
+.nook-home .alcove-person { margin-top: 3.2cqw; font-size: max(var(--alcove-min-text), 2.31cqw); font-weight: 700; }
+
+/* Motion: the cards settle in once. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .nook-home .alcove-card { animation: alcove-rise 700ms var(--brand-ease) backwards; }
+  .nook-home .alcove-thread { animation-delay: 160ms; }
+  .nook-home .alcove-request { animation-delay: 340ms; }
+}
+
+@keyframes alcove-rise { from { opacity: 0; transform: translateY(16px); } }
+
+@media (max-width: 768px) {
+  .nook-home .hero-alcove { --alcove-min-text: 13px; }
+}
+
+/* Narrow screens: the cards widen to fill the alcove, the buttons-like chips sit
+   under the whole message, and paddings stop scaling so text keeps room. */
+
+@media (max-width: 560px) {
+  .nook-home .alcove-cards { top: 20%; left: 11%; gap: 8px; width: 78%; }
+  .nook-home .alcove-card { border-radius: 12px; }
+  .nook-home .alcove-thread { padding: 11px 12px 12px; }
+  .nook-home .alcove-bar { gap: 12px; }
+  .nook-home .alcove-dots { gap: 5px; }
+  .nook-home .alcove-dots i { width: 7px; height: 7px; }
+  .nook-home .alcove-message { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; margin-top: 9px; }
+  .nook-home .alcove-message-text { display: contents; }
+  .nook-home .alcove-avatar { grid-row: 1 / span 2; width: 30px; height: 30px; min-width: 0; min-height: 0; }
+  .nook-home .alcove-body { margin-top: 1px; line-height: 1.3; }
+  .nook-home .alcove-actions { grid-column: 1 / -1; gap: 6px; margin-top: 8px; }
+  .nook-home .alcove-chip { padding: 5px 9px; }
+  .nook-home .alcove-request { padding: 11px 12px 12px; }
+  .nook-home .alcove-status span { padding: 3px 9px; }
+  .nook-home .alcove-title { max-width: none; margin-top: 7px; }
+  .nook-home .alcove-person { margin-top: 7px; }
+}
+
+/* The cards cover the art here, so only a fragment of the pinned note's words would
+   peek out under them: the paper stays, the words go. */
+
+@media (max-width: 560px) {
+  .nook-home .alcove-note-words { display: none; }
+}
+
+@media (max-width: 360px) {
+  .nook-home .alcove-cards { left: 8%; width: 84%; }
+  .nook-home .alcove-chip { padding: 5px 7px; }
+}

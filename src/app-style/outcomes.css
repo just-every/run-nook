@@ -1,0 +1,30 @@
+/* A decision or request: a status line, a sentence, one meta line, and only the actions that are yours.
+   Discuss and More appear on hover or focus (reveal.css); Accept and Report done are always there.
+   The panel and thread frames that hold these rows live in conversation.css. */
+
+.nook-app .outcome-card { margin: 0 -8px; padding: 12px 8px; border-bottom: 1px solid var(--line); }
+.nook-app .outcome-card.compact { padding-block: 8px; }
+.nook-app .outcome-card:focus { border-radius: var(--r-control); background: var(--wash-select); outline: none; }
+.nook-app .outcome-card h3 { display: -webkit-box; margin: 4px 0 2px; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: var(--fs-body); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.nook-app .outcome-card.compact h3 { font-size: var(--fs-ui); }
+.nook-app .outcome-card > p:last-child { margin-bottom: 0; }
+.nook-app .outcome-meta { margin: 0; color: var(--ink-soft); font-size: 13px; }
+
+/* Status: a quiet line with a dot (hollow while awaiting agreement, solid once agreed or decided) */
+.nook-app .status { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 500; line-height: 1.4; }
+.nook-app .status::before { content: ''; width: 7px; height: 7px; flex: none; border-radius: 50%; }
+.nook-app .status-proposed::before { box-shadow: inset 0 0 0 1.5px var(--brand-rose); }
+.nook-app :is(.status-accepted, .status-recorded)::before { background: var(--brand-rose); }
+.nook-app .status-reported-complete::before { background: var(--ink); }
+.nook-app .status-cancelled { text-decoration: line-through; text-decoration-thickness: 1px; }
+.nook-app .status-cancelled::before { background: var(--ink-faint); }
+
+.nook-app .source-warning { margin: 6px 0 0; padding: 2px 0 2px 10px; border-left: 2px solid var(--line-field); color: var(--ink); font-size: 13px; }
+
+.nook-app .card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); margin-top: var(--s1); }
+.nook-app .card-actions > .soft-button:first-child { margin-left: -10px; }
+.nook-app .card-actions .send { min-height: 32px; padding: 0 14px; background: var(--accent); color: var(--accent-text); font-size: var(--fs-ui); font-weight: 600; }
+.nook-app .card-more { margin-left: auto; }
+@media (hover: none) {
+  .nook-app .card-actions .send { min-height: 40px; }
+}
