@@ -10,9 +10,13 @@ export async function installation(edge,{bootstrap=true}={}){
  const port=await new Promise((resolve,reject)=>{const server=createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port))})});
  const origin='http://127.0.0.1:'+port,secret=crypto.randomUUID()+crypto.randomUUID(),token=crypto.randomUUID()+crypto.randomUUID();
  const modules=[{type:'ESModule',path:resolve('dist/server/index.js')},...(await readdir('dist/server/assets')).filter(name=>name.endsWith('.js')).map(name=>({type:'ESModule',path:resolve('dist/server/assets',name)}))];
- const mf=new Miniflare(convertV4MiniflareOptions({port,host:'127.0.0.1',name:'nook-push-test',routes:['*/*'],modules,modulesRoot:resolve('dist/server'),compatibilityDate:'2026-09-08',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CHAT_HUB:{className:'ChatHub',useSQLite:true}},bindings:{AUTH_ORIGIN:origin,AUTH_LOCAL:'true',OWNER_EMAIL:'owner@example.test',SESSION_SECRET:secret,SETUP_TOKEN:token,MAIL_PROVIDER:'development',MAIL_FROM:'nook@example.test'},outboundService:edge,log:new Log(LogLevel.ERROR)}));
+ const options={port,host:'127.0.0.1',name:'nook-push-test',routes:['*/*'],modules,modulesRoot:resolve('dist/server'),compatibilityDate:'2026-09-08',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CHAT_HUB:{className:'ChatHub',useSQLite:true}},bindings:{AUTH_ORIGIN:origin,AUTH_LOCAL:'true',OWNER_EMAIL:'owner@example.test',SESSION_SECRET:secret,SETUP_TOKEN:token,MAIL_PROVIDER:'development',MAIL_FROM:'nook@example.test'},outboundService:edge,log:new Log(LogLevel.ERROR)};
+ const mf=new Miniflare(convertV4MiniflareOptions(options));
  try{
- const db=await mf.getD1Database('DB');
+ let database=await mf.getD1Database('DB');
+ // Runtime reload invalidates Miniflare binding proxies. Keep calls delegated
+ // to the current real D1 binding across the configuration-rotation proof.
+ const db={prepare:query=>database.prepare(query),batch:statements=>database.batch(statements),exec:query=>database.exec(query)};
  // Miniflare's SQL exec splits multiline triggers incorrectly; use Wrangler's
  // public migration reader to preserve complete SQLite statements.
  const {unstable_splitSqlQuery}=require('wrangler');
@@ -22,8 +26,11 @@ export async function installation(edge,{bootstrap=true}={}){
  if(!bootstrap)return {mf,db,raw,call,origin,close:()=>mf.dispose()};
  const initial=await raw('/auth/bootstrap','POST',{token,displayName:'Owner'});assert.equal(initial.status,303);const ownerCookie=initial.headers.get('set-cookie').split(';')[0];
  const owner=await call('/api/me','GET',undefined,ownerCookie);
- const invite=async(name,conversation)=>{const email=name+'@example.test';await call('/api/team/invitations','POST',{email,role:'member',mode:'member',scopes:[conversation]},ownerCookie);await call('/auth/invite','POST',{email,displayName:name,role:'member'},ownerCookie,202);const row=await db.prepare('SELECT message FROM rer_mail_development_outbox ORDER BY sequence DESC LIMIT 1').first(),mail=JSON.parse(row.message),link=new URL(mail.text.trim().split('\n').at(-1));const accepted=await raw('/auth/confirm','POST',{token:link.searchParams.get('token')});assert.equal(accepted.status,303);const cookie=accepted.headers.get('set-cookie').split(';')[0];return {cookie,user:await call('/api/me','GET',undefined,cookie)}};
- return {mf,db,raw,call,owner,ownerCookie,invite,origin,close:()=>mf.dispose()};
+ const confirmLatest=async()=>{const row=await db.prepare('SELECT message FROM rer_mail_development_outbox ORDER BY sequence DESC LIMIT 1').first(),mail=JSON.parse(row.message),link=new URL(mail.text.trim().split('\n').at(-1));const accepted=await raw('/auth/confirm','POST',{token:link.searchParams.get('token')});assert.equal(accepted.status,303);const cookie=accepted.headers.get('set-cookie').split(';')[0];return {cookie,user:await call('/api/me','GET',undefined,cookie)}};
+ const signIn=async email=>{await call('/auth/magic-link','POST',{email,returnTo:'/app'},'',202);return confirmLatest()};
+ const withRotatedSecret=async work=>{await mf.setOptions(convertV4MiniflareOptions({...options,bindings:{...options.bindings,SESSION_SECRET:crypto.randomUUID()+crypto.randomUUID()}}));database=await mf.getD1Database('DB');try{return await work()}finally{await mf.setOptions(convertV4MiniflareOptions(options));database=await mf.getD1Database('DB')}};
+ const invite=async(name,conversation)=>{const email=name+'@example.test';await call('/api/team/invitations','POST',{email,role:'member',mode:'member',scopes:[conversation]},ownerCookie);await call('/auth/invite','POST',{email,displayName:name,role:'member'},ownerCookie,202);return confirmLatest()};
+ return {mf,db,raw,call,owner,ownerCookie,invite,signIn,withRotatedSecret,origin,close:()=>mf.dispose()};
  }catch(error){await mf.dispose();throw error}
 }
 export async function until(check,label,timeout=25_000){const end=Date.now()+timeout;while(Date.now()<end){const value=await check();if(value)return value;await new Promise(resolve=>setTimeout(resolve,100))}throw Error('Timed out: '+label)}

@@ -8,7 +8,7 @@ export async function presence(c){
  const message=await send(conversation,{mentions:[member.user.id]}),count=received.length;
  // No API traffic, heartbeat, clock rewrite or app helper occurs between send
  // and receipt. Only the real ChatHub alarm can release this visible presence.
- await pause(44_000);assert.equal(received.length,count,'fresh presence holds all forty-four seconds');
+ await pause(Math.max(0,start+44_000-Date.now()));assert.equal(received.length,count,'fresh presence holds all forty-four seconds');
  await until(()=>received.length>count,'alarm releases actual 45-second presence',15_000);
  const alert=received.at(-1);assert.equal(new URL(alert.value.url).searchParams.get('focus'),message.id);assert.ok(alert.at-start>=45_000);await delivered(message);await read(conversation);
  const hiddenRoom=await room('Hidden releases presence');await call('/api/devices/presence','POST',{id:device.id,page,visible:true},member.cookie);const hidden=await send(hiddenRoom,{mentions:[member.user.id]});

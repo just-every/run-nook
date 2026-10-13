@@ -5,6 +5,7 @@ import {routing} from './routing.mjs';
 import {presence} from './presence.mjs';
 import {failures} from './failures.mjs';
 import {erasure} from './erasure.mjs';
+import {setupFailure} from './setup-failure.mjs';
 import {archive} from './archive.mjs';
 
 export async function contractJourney(t){
@@ -13,9 +14,11 @@ export async function contractJourney(t){
   try{
    const target=recipients.get(request.url);assert.ok(target,'only registered synthetic vendors receive packets');
    const value=await packet(request,target,publicKey),entry={value,endpoint:request.url,at:Date.now()};received.push(entry);
-   if(target.behavior==='uncertain')throw Error('synthetic disconnect after packet accepted');
-   return new Response(null,{status:target.behavior==='rate-limited'&&received.filter(r=>r.endpoint===request.url).length===1?429:target.behavior==='expired'?410:target.behavior==='refused'?400:201});
-  }catch(error){if(error.message!=='synthetic disconnect after packet accepted')edgeError=error;throw error}
+   // Miniflare turns a thrown edge callback into HTTP 500. Withhold the
+   // reply after acceptance instead, so the real fetch timeout is uncertain.
+   if(target.behavior==='uncertain')await new Promise(resolve=>setTimeout(resolve,21_000));
+   return new Response(null,{status:target.behavior==='rate-limited'&&received.filter(r=>r.endpoint===request.url).length===1?429:target.behavior==='server-failure'&&received.filter(r=>r.endpoint===request.url).length===1?503:target.behavior==='expired'?410:target.behavior==='refused'?400:201});
+  }catch(error){edgeError=error;throw error}
  });
  try{
   const {call,db,ownerCookie}=app;
@@ -35,6 +38,7 @@ export async function contractJourney(t){
   await routing(context);
   await presence(context);
   await failures(context);
+  await setupFailure(context);
   await erasure(context);
   await archive(context);
   if(edgeError)throw edgeError;
