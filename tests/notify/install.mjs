@@ -44,7 +44,14 @@ export async function notifyInstallation(root){
   const folder=join(directory,'.wrangler/state/v3/d1/miniflare-D1DatabaseObject'),database=join(folder,(await readdir(folder)).find(name=>name.endsWith('.sqlite')&&name!=='metadata.sqlite'));
   // Writes go through Wrangler's local D1 door, as the runtime suite's do.
   const sql=async statement=>{await execute(process.execPath,['node_modules/wrangler/bin/wrangler.js','d1','execute','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc','--command',statement],{cwd:directory,env,timeout:120_000});};
-  const read=(statement,...values)=>{const db=new DatabaseSync(database,{readOnly:true});try{return db.prepare(statement).all(...values);}finally{db.close();}};
+  const read=(statement,...values)=>{
+   const db=new DatabaseSync(database,{readOnly:true});
+   try{
+    // Workerd can briefly hold D1's write lock; persistent contention still fails.
+    db.exec('PRAGMA busy_timeout=5000');
+    return db.prepare(statement).all(...values);
+   }finally{db.close();}
+  };
   const outbox=()=>read('SELECT message FROM rer_mail_development_outbox ORDER BY sequence').map(row=>JSON.parse(row.message));
   return {origin,key,directory,sql,read,outbox,start,stop,close:async()=>{await stop();await rm(directory,{recursive:true,force:true});}};
  }catch(error){

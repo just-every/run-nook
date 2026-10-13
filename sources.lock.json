@@ -3891,7 +3891,7 @@
       "executable": false
     },
     "tests/notify/install.mjs": {
-      "sha256": "0ab01889111f9f2595f1554d44254e456d088eaa833274c8dc3e86c3b3da904f",
+      "sha256": "0125a57dc3687d42dbd776a5a769151d9b3e5dfc6824e405cd6b8a21fa3dcd96",
       "executable": false
     },
     "tests/notify/people.mjs": {
