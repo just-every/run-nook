@@ -4,15 +4,13 @@ Run these commands from a Nook checkout with Node 22.20.0 and pnpm 10.12.4.
 
 ## Start locally
 
-Install the pinned project dependencies, set up the first owner, then start Nook:
+Install the pinned project dependencies, set up the first owner, then start Nook. Replace `EMAIL` and `NAME` with your email address and display name:
 
 ```sh
 rer install
-rer setup
+rer setup --owner-email EMAIL --owner-name 'NAME'
 rer dev
 ```
-
-Run setup in a terminal and enter your own email address when prompted. To set your display name too, add `--owner-name` followed by your own name in quotes to `rer setup`.
 
 Setup creates private local settings, builds the Worker, applies the local D1 migrations, claims the first owner and stops the app. Start `rer dev` and open the printed `RER_OPEN` link on this computer; it exchanges this checkout's local key for the owner's development session. On a fresh installation, that visit opens `/setup` to confirm the account before Nook opens the workspace. Keep the `RER_OPEN` link private.
 
