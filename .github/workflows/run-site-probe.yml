@@ -1,0 +1,123 @@
+# Temporary GET-only preflight; remove when landing the run-site deploy workflow.
+name: Run site credential probe
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/run-site-probe.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: run-site-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: run-site
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.20.0'
+      - name: Read Cloudflare preflight state
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const account = process.env.CLOUDFLARE_ACCOUNT_ID;
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const domain = 'run-nook.com';
+          const script = 'nook-production--site';
+          const report = (label, ok, status = null, errorCodes = []) => {
+            console.log(JSON.stringify({ label, status, ok, errorCodes }));
+          };
+          const check = (condition, label) => {
+            report(label, Boolean(condition));
+            if (!condition) throw new Error('Preflight refused');
+          };
+          async function get(path, label) {
+            let response;
+            let body;
+            try {
+              response = await fetch(`https://api.cloudflare.com/client/v4${path}`, {
+                method: 'GET',
+                headers: { Authorization: `Bearer ${token}` },
+                redirect: 'error',
+                signal: AbortSignal.timeout(20000),
+              });
+              body = await response.json();
+            } catch {
+              // Never print request errors, bodies, headers, URLs or credentials.
+              report(`${label}: request or response unavailable`, false, response?.status ?? null);
+              return { status: response?.status ?? null, ok: false, errorCodes: [] };
+            }
+            const errorCodes = Array.isArray(body?.errors)
+              ? body.errors.map(error => error?.code).filter(Number.isSafeInteger)
+              : [];
+            const ok = response.status === 200 && body?.success === true;
+            report(label, ok, response.status, errorCodes);
+            return { status: response.status, ok, body, errorCodes };
+          }
+          const onlyError = (reply, code) => reply.body?.success === false
+            && Array.isArray(reply.body.errors) && reply.body.errors.length > 0
+            && reply.body.errors.every(error => error?.code === code);
+          try {
+            check(typeof account === 'string' && /^[a-f0-9]{32}$/.test(account),
+              'Account variable present and valid');
+            check(typeof token === 'string' && token.length > 0, 'Token secret present');
+            const verified = await get(`/accounts/${account}/tokens/verify`, 'Token verification');
+            check(verified.ok && verified.body.result?.status === 'active', 'Token active');
+            const zones = await get(`/zones?name=${domain}&account.id=${account}&per_page=50`,
+              'Intended zone lookup');
+            check(zones.ok && Array.isArray(zones.body.result) && zones.body.result.length === 1
+              && (zones.body.result_info?.total_count ?? 1) === 1
+              && (zones.body.result_info?.total_pages ?? 1) <= 1, 'Unique intended zone');
+            const zone = zones.body.result[0];
+            check(zone?.name === domain && zone.status === 'active' && zone.account?.id === account
+              && typeof zone.id === 'string' && /^[a-f0-9]{32}$/.test(zone.id),
+              'Zone active and configured account matches');
+            const [domains, worker, https, redirect] = await Promise.all([
+              get(`/accounts/${account}/workers/domains?zone_id=${zone.id}`, 'Worker domains'),
+              get(`/accounts/${account}/workers/scripts/${script}/settings`, 'First-deploy Worker lookup'),
+              get(`/zones/${zone.id}/settings/always_use_https`, 'Always Use HTTPS lookup'),
+              get(`/zones/${zone.id}/rulesets/phases/http_request_dynamic_redirect/entrypoint`,
+                'Legacy PLAN redirect entrypoint lookup'),
+            ]);
+            // rer 0.2.0 performs www redirects inside its Worker and makes no ruleset calls.
+            // This old PLAN capability is informational, including 403; it is no deploy gate.
+            const redirectLabel = redirect.ok ? 'readable'
+              : redirect.status === 403 ? 'forbidden; unused permission'
+              : redirect.status === 404 && onlyError(redirect, 10003) ? 'entrypoint absent'
+              : 'access not established';
+            report(`Legacy PLAN redirect: ${redirectLabel}; informational only`, redirect.ok
+              || (redirect.status === 404 && onlyError(redirect, 10003)),
+              redirect.status, redirect.errorCodes);
+            const httpsValue = https.ok && https.body.result?.id === 'always_use_https'
+              ? https.body.result.value : undefined;
+            report(httpsValue === 'on' ? 'Always Use HTTPS on; live HTTP proof still required'
+              : httpsValue === 'off' ? 'Always Use HTTPS confirmed off'
+              : 'Always Use HTTPS not established; live HTTP proof required', httpsValue === 'on',
+              https.status, https.errorCodes);
+            check(httpsValue !== 'off', 'Always Use HTTPS not confirmed off');
+            check(domains.ok && Array.isArray(domains.body.result)
+              && (domains.body.result_info?.total_pages ?? 1) <= 1
+              && (domains.body.result_info?.total_count ?? domains.body.result.length)
+                === domains.body.result.length
+              && domains.body.result.every(entry => entry && typeof entry.hostname === 'string'
+                && typeof entry.service === 'string'), 'Complete Worker domain list');
+            const intended = domains.body.result.filter(entry =>
+              [domain, `www.${domain}`].includes(entry.hostname.toLowerCase().replace(/\.$/, '')));
+            check(intended.every(entry => entry.service === script), 'No competing apex or www Worker domain');
+            // 404 alone can hide authentication/routing failures: require Worker-not-found code.
+            check(worker.status === 404 && onlyError(worker, 10007),
+              'First-deploy Worker absent with provider Worker-not-found code');
+            report('GET-only preflight passed; write permissions and live redirects remain unproven', true);
+          } catch {
+            // Even an unexpected exception must never serialize provider or credential data.
+            report('GET-only preflight failed', false);
+            process.exitCode = 1;
+          }
+          NODE
