@@ -7,10 +7,12 @@ import {assertSlackEffect} from './policy.mjs';
 const check=(value,code)=>{if(!value)throw Error(code)};
 const ordered=rows=>[...rows].sort((a,b)=>canonicalJson(a).localeCompare(canonicalJson(b)));
 /** Validate the kit's explicit, fingerprinted erasure state; ordinary review
- * admission remains unchanged. Surviving effects still require exact provenance. */
+ * admission remains unchanged. Surviving effects still require exact provenance.
+ * A field redaction alone (an erased person's id removed from reactions) marks
+ * the plan erased without tombstoning any entry, so none need be erased. */
 export async function validateErasedReviewedPlan(read,review,job,plan){
  check(plan.erasure?.reviewedFingerprint===review.fingerprint&&plan.erasure.originalPolicy==='withdraw-all-job-artifacts','invalid_slack_erasure_review');
- check(plan.entries.length===job.total&&plan.entries.some(e=>e.erased)&&plan.source.records.length===plan.entries.length,'invalid_slack_erasure_entries');
+ check(plan.entries.length===job.total&&plan.source.records.length===plan.entries.length,'invalid_slack_erasure_entries');
  const originals=originalStorage(plan,job.id,3),same=(a,b)=>canonicalJson(ordered(a))===canonicalJson(ordered(b));
  check(same(originals.rows,(await read('ik_originals')).filter(r=>r.job_id===job.id))&&same(originals.chunks,(await read('ik_d1_original_chunks')).filter(r=>r.job_id===job.id)),'slack_original_custody_changed');
  check(plan.source.artifacts.every(a=>a.original?.status==='unavailable'&&a.original.reason==='unavailable-after-erasure'&&!a.original.base64),'slack_erased_original_retained');
