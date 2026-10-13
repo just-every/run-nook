@@ -88,7 +88,18 @@ export async function editorProof(root,platformRoot,evidence) {
   // The installed homepage is now a plain Lobby. Keep the real platform compiler
   // and source-write authority proof without mounting a replacement editor UI.
   const heading=await page.locator('h1').innerText();
-  const snapshot={revision:1,edits:[{id:'local-heading',revision:1,parentOrigin:native.origin,path:'/',target:{selector:'h1',tag:'h1',role:'heading',beforeText:heading},change:{text:'Published local source proof'}}]};
+  const target=await page.locator('h1').evaluate((element,beforeText)=>{
+   // Match the platform widget's structural selection of the rendered element.
+   const parts=[];let cursor=element;
+   while(cursor&&parts.length<6){
+    const tag=cursor.tagName.toLowerCase();if(!/^[a-z][a-z0-9-]{0,39}$/.test(tag))break;
+    const index=cursor.parentElement?Array.from(cursor.parentElement.children).indexOf(cursor)+1:1;
+    parts.unshift(`${tag}:nth-child(${index})`);cursor=cursor.parentElement;
+   }
+   return {selector:parts.join(' > ').slice(0,500),tag:element.tagName.toLowerCase(),role:element.getAttribute('role')||'',beforeText};
+  },heading);
+  assert.equal(await page.locator('h1').evaluate((element,selector)=>document.querySelector(selector)===element,target.selector),true,'structural selector resolves to the rendered heading');
+  const snapshot={revision:1,edits:[{id:'local-heading',revision:1,parentOrigin:native.origin,path:'/',target,change:{text:'Published local source proof'}}]};
   assert.equal((await context.request.post(edge.origin+'/edits',{headers:{Origin:edge.origin},data:snapshot})).status(),200);
   assert.equal(edge.state.saved,1);
   const persisted=JSON.parse(await readFile(resolve(root,'src/editor/visual-edits.json'),'utf8'));assert.equal(persisted.edits[0].change.text,'Published local source proof');

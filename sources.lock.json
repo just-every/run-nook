@@ -3847,7 +3847,7 @@
       "executable": false
     },
     "tests/part6/editor.mjs": {
-      "sha256": "bc04e2e37c4c1bf020ef05ed2c847572b511c7ed3e58ddd925d537504b7b14dc",
+      "sha256": "9589d40e244c73ec87315812d6c86866123ddf022927a80e6d94d876c8cd4ab6",
       "executable": false
     },
     "tests/part6/management-authority.mjs": {
