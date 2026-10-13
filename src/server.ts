@@ -102,8 +102,9 @@ export default {
    try { await new Repository(env).session(request.headers) } catch(error) { if(error instanceof Fault && error.status === 401) return new Response(null,{status:307,headers:{Location:'/signin','Cache-Control':'no-store'}}); throw error }
   }
   const response = await dispatch(request,() => api.fetch(request,env,execution),() => start.fetch(request))
-  const headers = new Headers(response.headers); headers.set('Cache-Control','no-store, no-transform'); headers.set('X-Content-Type-Options','nosniff')
+  const isDocument = response.headers.get('content-type')?.includes('text/html')
+  const headers = new Headers(response.headers); headers.set('Cache-Control',isDocument?'no-store, no-transform':'no-store'); headers.set('X-Content-Type-Options','nosniff')
   const document=new Response(response.body,{status:response.status,statusText:response.statusText,headers})
-  return response.headers.get('content-type')?.includes('text/html')?await editorDocument(document,env,request):document
+  return isDocument?await editorDocument(document,env,request):document
  },
 } satisfies ExportedHandler<Bindings>
