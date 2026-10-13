@@ -40,7 +40,7 @@ try{
    assert.doesNotMatch(output,/RER_SIGN_IN /,'dev identity prints no outbox sign-in line')
    const open=/RER_OPEN (http:\/\/\S+)/.exec(output)?.[1]
    assert.ok(open,'dev prints the link that signs the browser in')
-   browser=await chromium.launch()
+   browser=await chromium.launch({channel:'chromium'})
    await firstRun(ready,open)
    continue
   }

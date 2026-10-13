@@ -6,7 +6,9 @@ export const keyHeaders={'x-rer-dev-key':devKey}
 const withKey=options=>({...options,extraHTTPHeaders:{...options?.extraHTTPHeaders,...keyHeaders}})
 export function keyed(chromium){
  return {launch:async options=>{
-  const browser=await chromium.launch(options),newContext=browser.newContext.bind(browser),newPage=browser.newPage.bind(browser)
+  // Full Chromium exercises the app's service-worker badging APIs; headless
+  // shell advertises those APIs but crashes when the worker clears a badge.
+  const browser=await chromium.launch({channel:'chromium',...options}),newContext=browser.newContext.bind(browser),newPage=browser.newPage.bind(browser)
   browser.newContext=settings=>newContext(withKey(settings));browser.newPage=settings=>newPage(withKey(settings))
   return browser
  }}

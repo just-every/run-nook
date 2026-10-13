@@ -616,7 +616,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "3f1c68a7edbeb70851f6b2141e88fef2e903fa6b84aba441d0df6213cf27e8e4",
+      "sha256": "55f66b9c245b349a3029450132cb8d9d1caa3712b99b1cc12d14979731488f51",
       "executable": false
     },
     ".gitignore": {
@@ -5800,7 +5800,7 @@
       "executable": false
     },
     "tests/dev-key.mjs": {
-      "sha256": "1d70f54cf3e814d66839a7522abcdfb28a1bd2251ebd417cf13f588d01cfde60",
+      "sha256": "cdcd76f0b64b5d9f0aaf31963eaf5912d80720c31ca97acbcac45763cd80d479",
       "executable": false
     },
     "tests/dev-sessions-upgrade.test.mjs": {
@@ -5828,7 +5828,7 @@
       "executable": false
     },
     "tests/homepage.mjs": {
-      "sha256": "58512b58caeb8c4123ca210e6756d61faab1e844782ed72e3194e09d4a64d248",
+      "sha256": "72537d1e423d87fa8f66cdc16aebfac97847022d99e451e6c9b9057368824dda",
       "executable": false
     },
     "tests/import-fixture.mjs": {
@@ -5868,7 +5868,7 @@
       "executable": false
     },
     "tests/notify-journey.mjs": {
-      "sha256": "de8e7fc93811f925e246b909d288d540ab1cd35264a99fcb822d64dd80eeb370",
+      "sha256": "33494417ccac39030fba5f8d8863b401a0be92a90ed7da9ad623abd92414389e",
       "executable": false
     },
     "tests/notify.test.mjs": {
@@ -5956,7 +5956,7 @@
       "executable": false
     },
     "tests/pilot-journey.mjs": {
-      "sha256": "523ad4554560f7ae2b9a045603106127988fbbb6cf2816bcd8aee1a1f1dfa226",
+      "sha256": "16451c190712314228696b223405b5fc28c1e78496ce78a2218049bd1503f9a9",
       "executable": false
     },
     "tests/pilot/browser.mjs": {
@@ -5992,7 +5992,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "ef2ce9fc704bb1c1a942b1cf88426be2e21493490496df4be6844db425989142",
+      "sha256": "bb63a84b541d8507189c693e46db1a364876192ec487276081ee758728d32686",
       "executable": false
     },
     "tests/recovery-support.mjs": {

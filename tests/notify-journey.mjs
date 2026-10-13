@@ -33,7 +33,7 @@ try{
  assert.deepEqual(await rowan.get('/api/notify').then(s=>[s.mentions,s.urgent,s.urgentQuiet,s.address]),[false,false,false,rowan.email]);
  await expectNone(rowan.email,before,'nothing is emailed before a member turns email on');
 
- browser=await chromium.launch();
+ browser=await chromium.launch({channel:'chromium'});
  step('settings block, keyboard opt-in and owner line');
  await settingsBrowser({browser,origin:installation.origin,rowan,sam,evidence,axeSource,phase:'settings'});
  assert.equal((await rowan.get('/api/notify')).mentions,true,'the keyboard opt-in reached the server');

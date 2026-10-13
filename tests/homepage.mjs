@@ -6,7 +6,7 @@ import {chromium} from '@playwright/test'
 const origin = new URL(process.env.TEAM_CHAT_HOMEPAGE_ORIGIN || 'http://127.0.0.1:15970')
 const evidence = resolve(process.env.TEAM_CHAT_HOMEPAGE_EVIDENCE_DIR || '/tmp/team-chat-homepage-evidence')
 const {sourceRepository} = JSON.parse(await readFile(new URL('../rer-project.json', import.meta.url), 'utf8'))
-const browser = await chromium.launch({headless: true})
+const browser = await chromium.launch({headless: true,channel:'chromium'})
 const contexts = []
 const requestLog = []
 const pageErrors = []
