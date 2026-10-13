@@ -51,6 +51,6 @@ logical erasure does not promise physical removal from every backup.
 Pilot/adoption gates require production identity, hosted operations, invitations,
 real-device notification evidence, accessibility, realistic corpus/concurrency/reconnect
 measurements, signed scoped integration proof, operator upgrade/break/restore exercises
-and real-team workflow outcomes. Local code/tests do not waive them. Offline use,
-real-team adoption and measured interruption outcomes remain unproven. There is no
-replacement or parity claim.
+and real-team workflow outcomes. Local code/tests do not waive them. Offline use is
+unsupported; real-team adoption and measured interruption outcomes remain
+unproven. There is no replacement or parity claim.

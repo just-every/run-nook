@@ -2,14 +2,17 @@
 
 ## Unreleased
 
-Web Push is a separate opt-in channel alongside email, and Nook includes an
-installable PWA. The service worker displays visible alerts and caches no
-requests or private content. Local packet checks do not prove delivery to a
-real browser or device.
+Web Push is a separate opt-in channel alongside email. It sends encrypted alert
+payloads directly through the browser vendor's push service. **You** includes
+PWA install controls and browser-menu instructions. The service worker displays
+visible alerts and caches no requests or private content. Local packet checks
+do not prove delivery to a real browser or device.
 
-Member erasure clears that member's notification preferences, push devices and
-queued email/Web Push items; message and outcome erasure clears their queued
-items too. Portable row fences and erasure journals protect restore paths when
+Team and message actions offer native member and message erasure with a preview,
+typed confirmation and a receipt. Erasure removes the selected live content,
+including from other open tabs. Member erasure also clears notification
+preferences, push devices and queued email/Web Push items; message and outcome
+erasure clears their queued items too. Portable row fences and erasure journals protect restore paths when
 the latest journal is available. Imported-author erasure removes the selected
 source copies and files, then withdraws the ZIP copy Nook retained for that
 import. After erasure completes, that retained archive cannot be opened or

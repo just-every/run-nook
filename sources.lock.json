@@ -571,7 +571,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "30a9fb0ff6cdbc7e0b67b8c3a15c3e9dea4e39837f26451f143eb11f0ac26ed6",
+      "sha256": "5ee43d6f046f45f0dd62161a6836c3ac3c51c63a4e1dfb6bd1a5124194b410fb",
       "executable": false
     },
     "CLAUDE.md": {
@@ -615,7 +615,7 @@
       "executable": false
     },
     "docs/overview.md": {
-      "sha256": "9ef21530fc487c33bd78ad70c009b9dd59429931b382ce677af8dffceb67b506",
+      "sha256": "13c4c64417d2039063b80457a67d2ce588eaf0cbae513df27c355cb7916007d2",
       "executable": false
     },
     "docs/privacy.md": {
@@ -3775,11 +3775,11 @@
       "executable": false
     },
     "TARGET.md": {
-      "sha256": "a064fc7abbd0d75ac88f0a222311532fb2f96e2da00f8b69eddae38eca0c4c5f",
+      "sha256": "d56aff0145ad2d93cacd721ff3b63d259243d24829174b5e396da5a80cba7e62",
       "executable": false
     },
     "tests/accessibility.mjs": {
-      "sha256": "194efd8e89481a4809d3eba175ae8c3edb75b98fd4f0200ddbae7b3f82e2e1e1",
+      "sha256": "abb32a68f4b2ba1cbedb012fb392a4b46d61743039315e6d4b6d0877f441aaac",
       "executable": false
     },
     "tests/attention.mjs": {
