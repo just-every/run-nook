@@ -1,95 +1,60 @@
 {
-  "version": "0.1.0",
-  "date": "2026-10-13",
-  "publicReleaseNotes": "Nook 0.1.0: the first public release of the self-hosted team workspace (private channels, direct messages, threads, versioned decisions, commitments and calm attention) on one Cloudflare Worker.",
-  "contractChanges": {},
+  "version": "0.2.0",
+  "previousVersion": "0.1.0",
+  "date": "2026-10-14",
+  "publicReleaseNotes": "Nook 0.2.0 adds Web Push and an installable Nook app, finishes erasure across Slack import custody and imported reactions, exports a hosted workspace, and moves to the published rer 0.2.1 command line.\n\nWeb Push is a separate opt-in channel beside email. In You, each person can install Nook as an app and turn on push for that device, choosing mentions and commitments, urgent requests (and whether they come through quiet time), direct messages and followed-thread replies. Every push starts off. Alerts are encrypted to the browser vendor's push service and carry no message text, file names, urgent reasons or commitment wording; tapping one opens the conversation after a fresh sign-in check. Reading or marking an item done cancels its pending push, and failed deliveries show to the recipient, the sender and the owner for seven days. Migration 0023 adds the push tables and changes no email choices. Delivery was proven against local push endpoints, not on a real phone or desktop browser.\n\nErasing a person now also covers imports that were still being applied and removes their Slack ID from every other person's imported reactions, keeping the other reactors and counts. If the redaction is too large for one request the erasure still completes, and its receipt says how many imported messages keep the ID. An import whose only change from an erasure was a removed reaction can still be undone, and the latest archive holding it still restores.\n\nrer export --target remote exports a hosted Nook through the owner's session, and the update guide describes moving a deployed workspace to newer public source. Browser checks now include automated accessibility checks at desktop and phone widths, and the composer's routing control and the erasure dialogs pass them. The CONTRACT.md clauses now carry published IDs: NOOK-001 to NOOK-015 are the clauses earlier documents called C1 to C15.\n\nHosted operation on a real Cloudflare account, live email and push delivery to real devices, and virus scanning are not claimed.",
+  "contractChanges": {
+    "NOOK-013": {
+      "change": "changed",
+      "summary": "Quiet time defers routine items; external delivery follows NOOK-014 email and NOOK-015 Web Push.",
+      "was": "External delivery of attention items is email under C14 only, with no paging guarantee.",
+      "now": "External delivery follows C14 (NOOK-014) email and C15 (NOOK-015) Web Push, with no paging guarantee.",
+      "migrationIds": [
+        "0023_web_push.sql"
+      ]
+    },
+    "NOOK-014": {
+      "change": "changed",
+      "summary": "Email notifications keep their rules; Web Push is now a separate channel under NOOK-015.",
+      "was": "Urgent stays an in-app request; there is no web push, SMS or native push.",
+      "now": "Urgent stays an in-app request; Web Push follows C15 (NOOK-015); there is no SMS or native push.",
+      "migrationIds": [
+        "0023_web_push.sql"
+      ]
+    },
+    "NOOK-015": {
+      "change": "added",
+      "summary": "Opt-in Web Push per device for mentions and commitments, urgent requests, direct messages and followed-thread replies under the email channel's identity, access, quiet-time, retry and visible-failure rules, with encrypted payloads that carry no message content and an installable app whose service worker caches nothing.",
+      "migrationIds": [
+        "0023_web_push.sql"
+      ]
+    }
+  },
+  "proseChanges": [
+    {
+      "document": "README.md",
+      "change": "changed",
+      "date": "2026-10-14",
+      "summary": "Describe Web Push and the installable app, the exported state that excludes push data, and point hosted updates at the update guide.",
+      "was": "Notifications are in-app and email only; the README ends the production path at claiming the owner with the setup token.",
+      "now": "Web Push and installation controls are in You and start off; archives exclude push subscriptions, keys, presence and pending deliveries; docs/updating.md describes hosted export and updating to newer public source."
+    },
+    {
+      "document": "AGENTS.md",
+      "change": "changed",
+      "date": "2026-10-13",
+      "summary": "The rer CLI and installer come from the pinned @runeditrun/rer package instead of vendored Base copies.",
+      "was": "The CLI, installer, operator-auth, mail, portability and deploy tooling are byte-exact copies of Base under scripts/base-cli and scripts/base-onboarding, refreshed from a Base checkout.",
+      "now": "The CLI, installer and command tooling come from the exact @runeditrun/rer devDependency; runtime copies of operator-auth, mail and portability are recorded in base-copies.json and refreshed from a reviewed Base commit."
+    }
+  ],
   "extensionPointChanges": [],
   "migrations": [
     {
-      "id": "0001_workspace.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0002_attachments.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0003_attention.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0004_immutable_imports.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0005_operator_auth.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0006_mail.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0007_portability.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0008_first_run.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0010_normalized_storage.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0011_team_surfaces.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0012_owner_claim.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0013_claim_storage_fence.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0014_slack_import.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0015_dev_sessions.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0016_domain_rules_step_up.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0017_erasure.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0018_erasure_policy.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0019_email_notifications.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0020_import_reversal_fence.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0021_import_retirement.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
-    },
-    {
-      "id": "0022_provider_control.sql",
-      "buyerSteps": "Part of the initial schema. A new installation applies every migration in filename order through rer setup or rer deploy; keep every applied migration byte unchanged."
+      "id": "0023_web_push.sql",
+      "buyerSteps": "Add Web Push devices, the instance push key, presence and the push delivery queue. Every person's push choices start off and existing email choices and queued email are unchanged, so nothing is sent until someone turns push on. rer setup applies it locally and rer deploy applies it to D1; no other step is needed."
     }
   ],
   "breaking": false,
-  "agentUpdateInstructions": "First public release; there is no earlier public version to update from. Installations made from earlier private source keep their state: back up with rer export, keep every applied migration byte, and apply only new migrations in filename order as OPERATIONS.md describes. Never reset populated state to update."
+  "agentUpdateInstructions": "Updating from 0.1.0: export first (rer export locally, or rer export --target remote for a hosted Nook), fast-forward to the 0.2.0 source, run pnpm install, then rer setup for a local installation (it keeps the owner, data and private settings and applies 0023) or rer deploy for a hosted one with the same account and environment. Keep every applied migration byte unchanged; 0023 is the only new migration and it is additive. Never reset populated state to update. Push stays off for everyone until each person turns it on in You; HTTPS is required outside loopback. The clause IDs C1 to C15 in older notes and documents are NOOK-001 to NOOK-015 in CONTRACT.md, with unchanged meaning except NOOK-013, NOOK-014 and the new NOOK-015."
 }

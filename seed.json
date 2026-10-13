@@ -1,7 +1,7 @@
 {
   "id": "team-workspace",
   "name": "Nook",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "maturity": "local-native-worker-d1-feasibility",
   "category": "chat",
   "spine": {
@@ -35,18 +35,18 @@
     {
       "id": "conversation-policy",
       "clauses": [
-        "C1",
-        "C2",
-        "C3",
-        "C4",
-        "C5",
-        "C7",
-        "C10",
-        "C11",
-        "C6",
-        "C9",
-        "C12",
-        "C13"
+        "NOOK-001",
+        "NOOK-002",
+        "NOOK-003",
+        "NOOK-004",
+        "NOOK-005",
+        "NOOK-007",
+        "NOOK-010",
+        "NOOK-011",
+        "NOOK-006",
+        "NOOK-009",
+        "NOOK-012",
+        "NOOK-013"
       ]
     },
     {

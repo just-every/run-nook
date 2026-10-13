@@ -1,6 +1,10 @@
 # Nook changes
 
-## Unreleased
+## 0.2.0 (14 October 2026)
+
+Changes since 0.1.0. Migration 0023 is the only new migration; update by
+exporting first, fast-forwarding the source, `pnpm install`, then `rer setup`
+locally or `rer deploy` for a hosted Nook ([Updating and deploying](docs/updating.md)).
 
 Web Push is a separate opt-in channel alongside email. It sends encrypted alert
 payloads directly through the browser vendor's push service. **You** includes
@@ -17,6 +21,30 @@ the latest journal is available. Imported-author erasure removes the selected
 source copies and files, then withdraws the ZIP copy Nook retained for that
 import. After erasure completes, that retained archive cannot be opened or
 re-imported. These controls do not erase external archives or physical remnants.
+
+Erasing a person now also reaches imports that were still being applied, and
+removes the person's Slack ID from every other person's imported reactions while
+the other reactors and the counts stay. If that redaction is too large for one
+request, the erasure still completes and its receipt says how many imported
+messages keep the ID. An import whose only change from an erasure was a removed
+reaction can still be undone, and the latest archive holding it still restores.
+Imported Slack reactions show as the app's reaction chips.
+
+`rer export --target remote` exports a hosted Nook through the owner's session,
+and [Updating and deploying](docs/updating.md) covers claiming the production
+owner and moving a deployed workspace to newer public source. A tapped
+notification opens its conversation even after a hard reload.
+
+Nook runs the published `@runeditrun/rer` 0.2.1 command line and installer
+instead of vendored Base copies, and the installed home page is Base's shared
+Lobby in Nook's colours. Browser checks run automated accessibility checks at
+desktop and phone widths, including the erasure dialogs; the composer's routing
+control and the erasure menu text now pass them.
+
+CONTRACT.md clauses carry published IDs: NOOK-001 to NOOK-015 are the clauses
+earlier documents call C1 to C15, with DOCS-001 and ERASURE-001 unchanged.
+
+Everything below shipped in 0.1.0 or earlier.
 
 ## New brand and homepage hero
 
