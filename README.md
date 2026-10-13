@@ -10,6 +10,25 @@
 
 <p align="center"><a href="https://run-nook.com">run-nook.com</a> · <a href="https://justevery.com">Part of Just Every</a> · <a href="LICENSE">MIT licensed</a></p>
 
+<p align="center">
+  <a href="https://justevery.com/#vol-nook"><img src=".github/assets/media/preview.gif" width="800" alt="Nook: Priya asks Sam to book the room inside the thread, and Sam accepts the request from his Attention page"></a>
+</p>
+<p align="center"><a href="https://justevery.com/#vol-nook"><b>Watch the full demo</b></a> · 46 seconds</p>
+
+<p align="center">
+  <img src=".github/assets/media/flow.webp" width="800" alt="A request moving from Awaiting agreement to Accepted, then a decision recorded in the channel">
+</p>
+
+<p align="center">
+  <img src=".github/assets/media/screen-1.webp" width="800" alt="The #launch channel in Nook: a request for Sam Rivera marked Accepted under Priya's question, and Marco's message recorded as a decision with reactions"><br>
+  <sub>Requests and decisions live in the thread, where everyone can see them.</sub>
+</p>
+
+<p align="center">
+  <img src=".github/assets/media/screen-2.webp" width="800" alt="Sam's Attention page during quiet time: three saved for later, and Priya's urgent request coming through"><br>
+  <sub>Quiet time saves the rest for later; an urgent request still reaches you.</sub>
+</p>
+
 # Nook
 
 Nook is a team workspace with private channels, fixed-participant DMs, threads,
