@@ -6,7 +6,7 @@ import { encodePlan } from '../base/modules/import-kit/src/d1/plans.ts';
 import { validateSlackRecoveryGraph } from './archive-recovery.mjs';
 import { validateSlackProvenance } from './archive-provenance.mjs';
 const check = (ok, code) => { if (!ok) throw Error(code); };
-function decode(job, chunks) {
+export function decodeSlackPlan(job, chunks) {
     const header = JSON.parse(job.plan_json), parts = chunks.filter(c => c.job_id === job.id).sort((a, b) => a.ordinal - b.ordinal);
     let plan = header;
     if (header.d1Plan === 1) {
@@ -35,7 +35,7 @@ export async function slackArchivePlans(read, reviews) {
             continue;
         }
         const job = jobs.get(review.kit_job);
-        check(job,'invalid_slack_job_binding');const plan = decode(job,data.ik_d1_plan_chunks);
+        check(job,'invalid_slack_job_binding');const plan = decodeSlackPlan(job,data.ik_d1_plan_chunks);
         check(job && job.mapping_version === MAPPING_VERSION && job.destination === review.owner && job.principal_id === review.owner && job.operation_key === review.id && job.namespace === review.namespace && (plan.erasure?.reviewedFingerprint??job.fingerprint) === review.fingerprint && ['completed', 'undone', 'rolled_back'].includes(job.state), 'invalid_slack_job_binding');
         check(review.state === (job.state === 'completed' ? 'completed' : 'undone'), 'invalid_slack_review_state');
         const summary = JSON.parse(review.summary_json);

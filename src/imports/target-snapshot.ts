@@ -1,4 +1,5 @@
 import { missingFileRefs } from './slack-records.mjs';
+import { retainedChannelHistory } from './channel-guard.ts';
 import type { D1Database, D1Sql, TargetRow } from './kit.ts';
 export const sql = (sql: string, ...params: any[]): D1Sql => ({ sql, params });
 export async function readTarget(db: D1Database, destination: string, kind: string, id: string): Promise<TargetRow | undefined> {
@@ -9,16 +10,18 @@ export async function readTarget(db: D1Database, destination: string, kind: stri
         return undefined;
     let value: any;
     if (kind === 'channel') {
-        const row = await db.prepare('SELECT c.*,i.job,i.source_id,i.source_record FROM nook_conversations c JOIN nook_import_channels i ON i.conversation=c.id WHERE c.id=?').bind(id).first<any>();
+        const row = await db.prepare(`SELECT c.*,i.job,i.source_id,i.source_record,CASE WHEN ${retainedChannelHistory('c.id')} THEN 0 ELSE (SELECT COUNT(*) FROM nook_events e WHERE e.conversation=c.id AND e.kind='erasure' AND e.actor IS NULL) END AS erasure_events FROM nook_conversations c JOIN nook_import_channels i ON i.conversation=c.id WHERE c.id=?`).bind(id).first<any>();
         if (!row)
             throw new Error('IMPORT_NATIVE_MISSING');
-        const members = (await db.prepare('SELECT user FROM nook_members WHERE conversation=? ORDER BY user').bind(id).all<{
+        const members = (await db.prepare(`SELECT user FROM nook_members WHERE conversation=? UNION SELECT a.value AS user FROM nook_imports j JOIN nook_import_reviews r ON r.id=j.intent,json_each(r.channels_json) ch,json_each(json_extract(ch.value,'$.members')) a JOIN nook_erased_actors e ON e.id=a.value WHERE j.id=? AND json_extract(ch.value,'$.sourceId')=? ORDER BY user`).bind(id,row.job,row.source_id).all<{
             user: string;
         }>()).results.map(x => x.user);
-        const guestMembers = (await db.prepare('SELECT user FROM nook_guest_grants WHERE conversation=? ORDER BY user').bind(id).all<{
+        const guestMembers = (await db.prepare(`SELECT user FROM nook_guest_grants WHERE conversation=? UNION SELECT a.value AS user FROM nook_imports j JOIN nook_import_reviews r ON r.id=j.intent,json_each(r.summary_json,'$.channels') ch,json_each(json_extract(ch.value,'$.guestMembers')) a JOIN nook_erased_actors e ON e.id=a.value WHERE j.id=? AND json_extract(ch.value,'$.sourceId')=? ORDER BY user`).bind(id,row.job,row.source_id).all<{
             user: string;
         }>()).results.map(x => x.user);
-        value = { id: row.id, job: row.job, owner: row.owner, name: row.name, sourceId: row.source_id, sourceRecord: JSON.parse(row.source_record), members, guestMembers, seq: row.seq, version: row.version, messageCount: row.message_count, kind: row.kind };
+        // Import-only erasure notifications do not change the owned state.
+        // Native structural history still matters after its content is erased.
+        value = { id: row.id, job: row.job, owner: row.owner, name: row.name, sourceId: row.source_id, sourceRecord: JSON.parse(row.source_record), members, guestMembers, seq: row.seq - row.erasure_events, version: row.version, messageCount: row.message_count, kind: row.kind };
     }
     else if (kind === 'actor') {
         const row = await db.prepare('SELECT * FROM nook_import_actors WHERE job=? AND source_id=?').bind(...id.split(':')).first<any>();
@@ -48,7 +51,7 @@ export function targetMatchParts(row: TargetRow | null, destination: string, kin
         if (!v)
             parts.push(sql('NOT EXISTS(SELECT 1 FROM nook_conversations WHERE id=?) AND NOT EXISTS(SELECT 1 FROM nook_import_channels WHERE conversation=?)', id, id));
         else {
-            parts.push(sql('EXISTS(SELECT 1 FROM nook_conversations c JOIN nook_import_channels i ON i.conversation=c.id WHERE c.id=? AND c.name=? AND c.kind=? AND c.owner=? AND c.seq=? AND c.version=? AND c.message_count=? AND i.job=? AND i.source_id=? AND i.source_record=?)', id, v.name, v.kind, v.owner, v.seq, v.version, v.messageCount, v.job, v.sourceId, JSON.stringify(v.sourceRecord)), sql('(SELECT COUNT(*) FROM nook_members WHERE conversation=?)=? AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user NOT IN (SELECT value FROM json_each(?)))', id, v.members.length, id, JSON.stringify(v.members)), sql('(SELECT COUNT(*) FROM nook_guest_grants WHERE conversation=?)=? AND NOT EXISTS(SELECT 1 FROM nook_guest_grants WHERE conversation=? AND user NOT IN (SELECT value FROM json_each(?)))', id, v.guestMembers.length, id, JSON.stringify(v.guestMembers)));
+            parts.push(sql(`EXISTS(SELECT 1 FROM nook_conversations c JOIN nook_import_channels i ON i.conversation=c.id WHERE c.id=? AND c.name=? AND c.kind=? AND c.owner=? AND c.seq-(SELECT COUNT(*) FROM nook_events e WHERE e.conversation=c.id AND e.kind='erasure' AND e.actor IS NULL)=? AND c.version=? AND c.message_count=? AND i.job=? AND i.source_id=? AND i.source_record=? AND NOT (${retainedChannelHistory('c.id')}))`, id, v.name, v.kind, v.owner, v.seq, v.version, v.messageCount, v.job, v.sourceId, JSON.stringify(v.sourceRecord)), sql('(SELECT COUNT(*) FROM nook_members WHERE conversation=?)=(SELECT COUNT(*) FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)) AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user NOT IN (SELECT value FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)))', id, JSON.stringify(v.members), id, JSON.stringify(v.members)), sql('(SELECT COUNT(*) FROM nook_guest_grants WHERE conversation=?)=(SELECT COUNT(*) FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)) AND NOT EXISTS(SELECT 1 FROM nook_guest_grants WHERE conversation=? AND user NOT IN (SELECT value FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)))', id, JSON.stringify(v.guestMembers), id, JSON.stringify(v.guestMembers)));
         }
     }
     else if (kind === 'actor')

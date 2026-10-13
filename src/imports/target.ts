@@ -1,6 +1,7 @@
 import type { D1TargetAdapter, TargetRow } from './kit.ts';
 import { readTarget, targetMatches, targetMatchParts, sql } from './target-snapshot.ts';
 import { assertSlackEffect } from './policy.mjs';
+import { importedAttachment, retainedChannelHistory } from './channel-guard.ts';
 export function importTargets(): D1TargetAdapter {
     return {
         read: readTarget, matches: targetMatches, matchesParts: targetMatchParts,
@@ -17,7 +18,7 @@ export function importTargets(): D1TargetAdapter {
             assertSlackEffect(row.targetKind, row.value);
             const v = row.value as any, result = [];
             if (row.targetKind === 'channel')
-                result.push(sql('INSERT INTO nook_conversations(id,name,kind,owner,seq,version,message_count) VALUES(?,?,?,?,?,?,?)', v.id, v.name, v.kind, v.owner, v.seq, v.version, v.messageCount), sql('INSERT INTO nook_guest_grants(user,conversation) SELECT value,? FROM json_each(?)', v.id, JSON.stringify(v.guestMembers)), sql('INSERT INTO nook_members(conversation,user) SELECT ?,value FROM json_each(?)', v.id, JSON.stringify(v.members)), sql('INSERT INTO nook_import_channels(job,source_id,conversation,source_record) VALUES(?,?,?,?)', v.job, v.sourceId, v.id, JSON.stringify(v.sourceRecord)));
+                result.push(sql('INSERT INTO nook_conversations(id,name,kind,owner,seq,version,message_count) VALUES(?,?,?,?,?,?,?)', v.id, v.name, v.kind, v.owner, v.seq, v.version, v.messageCount), sql('INSERT INTO nook_guest_grants(user,conversation) SELECT value,? FROM json_each(?) WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors WHERE id=value)', v.id, JSON.stringify(v.guestMembers)), sql('INSERT INTO nook_members(conversation,user) SELECT ?,value FROM json_each(?) WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors WHERE id=value)', v.id, JSON.stringify(v.members)), sql('INSERT INTO nook_import_channels(job,source_id,conversation,source_record) VALUES(?,?,?,?)', v.job, v.sourceId, v.id, JSON.stringify(v.sourceRecord)));
             else if (row.targetKind === 'actor')
                 result.push(sql('INSERT INTO nook_import_actors(job,source_id,association,source_record) VALUES(?,?,?,?)', v.job, v.sourceId, v.association, JSON.stringify(v.sourceRecord)));
             else if (row.targetKind === 'message') {
@@ -37,7 +38,7 @@ export function importTargets(): D1TargetAdapter {
             else if (kind === 'actor')
                 result.push(sql("DELETE FROM nook_import_actors WHERE job=? AND source_id=?", ...id.split(':')));
             else if (kind === 'channel')
-                result.push(sql('INSERT INTO nook_guard(id,ok) SELECT ?,CASE WHEN NOT EXISTS(SELECT 1 FROM nook_messages WHERE conversation=?) AND NOT EXISTS(SELECT 1 FROM nook_import_records WHERE conversation=?) AND NOT EXISTS(SELECT 1 FROM nook_outcomes WHERE conversation=?) AND NOT EXISTS(SELECT 1 FROM nook_attachments WHERE conversation=?) AND NOT EXISTS(SELECT 1 FROM nook_events WHERE conversation=?) THEN 1 ELSE 0 END', 'undo:' + id, id, id, id, id, id), sql('DELETE FROM nook_reads WHERE conversation=?', id), sql('DELETE FROM nook_preferences WHERE conversation=?', id), sql('DELETE FROM nook_members WHERE conversation=?', id), sql('DELETE FROM nook_guest_grants WHERE conversation=?', id), sql('DELETE FROM nook_import_channels WHERE conversation=?', id), sql('DELETE FROM nook_conversations WHERE id=?', id), sql('DELETE FROM nook_guard WHERE id=?', 'undo:' + id));
+                result.push(sql(`INSERT INTO nook_guard(id,ok) SELECT ?,CASE WHEN NOT EXISTS(SELECT 1 FROM nook_import_records WHERE conversation=?) AND NOT EXISTS(SELECT 1 FROM nook_attachments WHERE conversation=?) AND NOT EXISTS(SELECT 1 FROM nook_conversations c WHERE c.id=? AND (${retainedChannelHistory('c.id')})) AND NOT EXISTS(SELECT 1 FROM nook_events WHERE conversation=? AND (kind<>'erasure' OR actor IS NOT NULL)) THEN 1 ELSE 0 END`, 'undo:' + id, id, id, id, id), sql("DELETE FROM nook_events WHERE conversation=? AND kind='erasure' AND actor IS NULL", id), sql(`DELETE FROM nook_erased_attachments WHERE conversation=? AND (${importedAttachment('nook_erased_attachments')})`, id), sql('DELETE FROM nook_erased_import_messages WHERE conversation=? AND NOT EXISTS(SELECT 1 FROM nook_retained_import_bodies b WHERE b.id=nook_erased_import_messages.id)', id), sql('DELETE FROM nook_reads WHERE conversation=?', id), sql('DELETE FROM nook_preferences WHERE conversation=?', id), sql('DELETE FROM nook_members WHERE conversation=?', id), sql('DELETE FROM nook_guest_grants WHERE conversation=?', id), sql('DELETE FROM nook_import_channels WHERE conversation=?', id), sql('DELETE FROM nook_conversations WHERE id=?', id), sql('DELETE FROM nook_guard WHERE id=?', 'undo:' + id));
             else
                 throw new Error('IMPORT_TARGET_KIND');
             result.push(sql('DELETE FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?', destination, kind, id));
