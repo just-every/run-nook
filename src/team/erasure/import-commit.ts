@@ -1,4 +1,4 @@
-import {retireD1ImportCustody,type D1ImportContext} from '../../imports/kit'
+import {retireD1ImportCustody,type D1RelatedErasure,type D1ImportContext} from '../../imports/kit'
 import {importTargets} from '../../imports/target'
 import {MAPPING_VERSION} from '../../imports/ids.mjs'
 import {importDigest} from '../../family/team-chat/import-capture.mjs'
@@ -16,14 +16,14 @@ export async function personValues(c:Context,work:any,actor:any){
 }
 /** Nook review/custody bindings, never an ID prefix, select the import protocol.
  * The kit also proves no import header still equals one of `values`. */
-export async function eraseImportedTarget(c:Context,work:any,kind:'actor'|'message',target:string,job:any,statements:Sql[],values:string[],f:Awaited<ReturnType<typeof fenceService>>){
+export async function eraseImportedTarget(c:Context,work:any,kind:'actor'|'message',target:string,job:any,statements:Sql[],values:string[],f:Awaited<ReturnType<typeof fenceService>>,related?:D1RelatedErasure){
  const scope=await authorizeWork(c,work)
- const review=await c.one('SELECT r.kit_job,k.destination,k.namespace FROM nook_import_reviews r JOIN ik_jobs k ON k.id=r.kit_job WHERE r.domain_job=?',[job.id])
+ const review=await c.one('SELECT r.kit_job,k.destination,k.namespace FROM nook_import_reviews r JOIN ik_jobs k ON k.operation_key=r.id AND k.principal_id=r.owner AND k.destination=r.owner WHERE r.domain_job=?',[job.id])
  if(review){
   if(review.destination!==job.owner||review.namespace!==job.namespace)throw Error('Import custody binding changed')
   // Native rows, the portability fence, the redaction checkpoint and import custody commit in one batch.
   const ctx:D1ImportContext={destination:job.owner,namespace:job.namespace,mappingVersion:MAPPING_VERSION,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence} AND (${scope.condition})`,params:[...c.credentials,...scope.params]})}}
-  await retireD1ImportCustody({target:{kind,id:target},values},statements,ctx,await f.checkpoint());return
+  await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint());return
  }
  // The original capture importer predates import-kit. Its immutable digest is
  // the authoritative format discriminator, and absence is guarded at commit.

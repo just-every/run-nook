@@ -8,7 +8,7 @@ export async function authorize(c:Context,kind:string,target:string,author=false
  await c.check();target=text(target,128)
  if(kind==='imported-author'){
   if(!await c.one(`SELECT 1 WHERE ${manager} AND EXISTS(SELECT 1 FROM oa_operators WHERE id=? AND role='owner')`,[c.uid,c.uid,c.uid]))fail(403,'Only an owner can erase imported authors')
-  const row=await c.one("SELECT a.*,j.owner FROM nook_import_actors a JOIN nook_imports j ON j.id=a.job WHERE a.job||':'||a.source_id=?",[target]);if(!row)fail(404,'Imported author unavailable')
+  const row=await c.one("SELECT a.*,j.owner FROM nook_import_actors a JOIN nook_imports j ON j.id=a.job WHERE a.job||':'||a.source_id=?",[target])??await c.one("SELECT r.domain_job AS job,json_extract(a.value,'$.sourceId') AS source_id,json_extract(a.value,'$.association') AS association,'{}' AS source_record,r.owner FROM nook_import_reviews r,json_each(r.summary_json,'$.actors') a WHERE r.domain_job||':'||json_extract(a.value,'$.sourceId')=? AND r.owner=? AND r.state='reviewed' AND NOT EXISTS(SELECT 1 FROM ik_jobs k WHERE k.operation_key=r.id AND k.principal_id=r.owner)",[target,c.uid]);if(!row)fail(404,'Imported author unavailable')
   if(!await c.one(`SELECT 1 WHERE ${importAccess}`,[target,c.uid]))fail(403,'Imported channel access denied')
   return {row:{...row,author:row.owner},conversation:undefined,condition:`${manager} AND EXISTS(SELECT 1 FROM oa_operators WHERE id=? AND role='owner') AND ${importAccess}`,params:[c.uid,c.uid,c.uid,target,c.uid]}
  }

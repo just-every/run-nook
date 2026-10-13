@@ -3162,8 +3162,12 @@
       "sha256": "116fb9a2f260296f128ef02be6c979f75dce37f34a72451d19771c560bb55311",
       "executable": false
     },
+    "src/imports/archive-plan.d.mts": {
+      "sha256": "747f9fe8824c17a278771078aa04d2c18351ce65a64cbcbe11d926c87e9c72a4",
+      "executable": false
+    },
     "src/imports/archive-plan.mjs": {
-      "sha256": "675251654071be39c9f3af7aa1f6c3d3d7efc3cda194854d40d77b08e0e51dcc",
+      "sha256": "6d92236d63a25a5bf8bd425597ae30d08b1933b8d16a47281c6b51e3394593de",
       "executable": false
     },
     "src/imports/archive-provenance.mjs": {
@@ -3179,7 +3183,11 @@
       "executable": false
     },
     "src/imports/authorization.ts": {
-      "sha256": "d2d70fed7cc7e772d4e1183dca52fd4dd4909927435ffc9a01fbf9675b80116b",
+      "sha256": "067715242342b122617a127bfdd62f92815433da109e0b88d53b4acb5101bf06",
+      "executable": false
+    },
+    "src/imports/channel-guard.ts": {
+      "sha256": "36c60f35f252a515759e6c325bcf3baf8471ab5ad5a144df8c2a38ba291ee9ef",
       "executable": false
     },
     "src/imports/custody.ts": {
@@ -3219,7 +3227,7 @@
       "executable": false
     },
     "src/imports/list.ts": {
-      "sha256": "c10e5f6aac2291c00bcde9d2da235e77e970e9e06c24fba032a0174b854aa0f4",
+      "sha256": "d6d4b9edf7262df0a0a879433f375a09eedb4a5513b8e422637425fc913e98a3",
       "executable": false
     },
     "src/imports/load.ts": {
@@ -3255,7 +3263,7 @@
       "executable": false
     },
     "src/imports/reconcile.ts": {
-      "sha256": "a5779fde0d6e32b5f8d64784af5dcead94c1dfd65fcbee6d989f431a3cee1cd6",
+      "sha256": "7937871ceb5b5c29fefce3aa13ddf3366cfce4cc5a464662fd665981e2fa8a54",
       "executable": false
     },
     "src/imports/request-budget.ts": {
@@ -3287,7 +3295,7 @@
       "executable": false
     },
     "src/imports/service.ts": {
-      "sha256": "f64ffb542647a1e3568eed83b96c9e451be8ac51891f8c4102a14023acce737e",
+      "sha256": "83d5132c1089420a6968fa48d45a03cd52829b03f24538d1d9ed5d8d4f092df3",
       "executable": false
     },
     "src/imports/slack-files.mjs": {
@@ -3327,15 +3335,15 @@
       "executable": false
     },
     "src/imports/status.ts": {
-      "sha256": "83e605ca6b412be870de8a983bf6784fbb9ec62d25fe27aa976f795e0fa02fd8",
+      "sha256": "f806829c46bb322841e20f939ecca2e7bf82e20ca84a81ac31fe778368724a7c",
       "executable": false
     },
     "src/imports/target-snapshot.ts": {
-      "sha256": "6c89dc9f9df2e42bfbb201904df75156cf390f56f7b207d63c9e682c70772d75",
+      "sha256": "a933d5f23a7b6666fc6f23d1467c9126f625414672fa83072ab018e0f6a237ce",
       "executable": false
     },
     "src/imports/target.ts": {
-      "sha256": "7e17373f406f25812351acd030e26cb35203538e19aacf07a6c39b9aa6e41d33",
+      "sha256": "f88ab964679b5c823d8c68fd0b7f3bbed8e2dfa3e9ec65c538e6e4d5bd54fc7a",
       "executable": false
     },
     "src/imports/timestamps.d.mts": {
@@ -3535,7 +3543,7 @@
       "executable": false
     },
     "src/team/erasure/authorization.ts": {
-      "sha256": "6e4888fe7bd952adf0235bf0e689f09c796edcaa9e52b8c605d0031725548f76",
+      "sha256": "95fa03aea04fc63816bde73da0f11a29c4224f5354be98c34260e4ccf778f1c0",
       "executable": false
     },
     "src/team/erasure/blobs.ts": {
@@ -3551,7 +3559,7 @@
       "executable": false
     },
     "src/team/erasure/ErasureDialog.tsx": {
-      "sha256": "4710cf4bb1675c138ccb32c1f7e6f060a18ed7c35419ab5df3253865487278d9",
+      "sha256": "ab1d3a9eab36bcadff693c0d1710ccd80b6d7e7ba0618b0b8507fab94c5ce4b9",
       "executable": false
     },
     "src/team/erasure/expired-files.mjs": {
@@ -3563,11 +3571,19 @@
       "executable": false
     },
     "src/team/erasure/identity.ts": {
-      "sha256": "92a4a0c74958b538d363a91e899256f01977154edc9833c10cbcf8768a8177e7",
+      "sha256": "b188faacf5b656a88fc5e48a0d11e5e33cb9e79d76b509fdef80095580c53455",
       "executable": false
     },
     "src/team/erasure/import-commit.ts": {
-      "sha256": "a72f641bea4052703e1102f1dec042692db93e988c8b07f593efaffd12bc7ce0",
+      "sha256": "d342be96c1e8701365a824f4b9d3204e42ce6106f47cde1b4e703c6d874764ac",
+      "executable": false
+    },
+    "src/team/erasure/import-preview.ts": {
+      "sha256": "eba4c8af795c44da97a879b655213ca4b45be9386d849ba0fb01798940b803a2",
+      "executable": false
+    },
+    "src/team/erasure/import-selection.ts": {
+      "sha256": "d9126a72b9e9d165b257ec602711ab452a400712ee218d68350c2aee8cb36798",
       "executable": false
     },
     "src/team/erasure/imported-directory.ts": {
@@ -3575,7 +3591,7 @@
       "executable": false
     },
     "src/team/erasure/imported.ts": {
-      "sha256": "ebe09c1a136a60fa481580863f2cc68a2b92fde6308f8c6403bbb91fc615666f",
+      "sha256": "d8731ef1936e91200ea1112b1b3c51a2111118e39d412a122abb7bdc6abaf135",
       "executable": false
     },
     "src/team/erasure/ImportedAuthors.tsx": {
@@ -3735,7 +3751,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "a6ac658b28c7b9fad2356d1732c43a843b91d75e9c4ffc4a2b2e3c603903ef27",
+      "sha256": "123fd55d91c3865abd9718290e0e1f9bb8ab1d2c0c3c69d11c9d7cb31ee08192",
       "executable": false
     },
     "tests/fake-cloudflare.mjs": {

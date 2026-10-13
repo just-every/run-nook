@@ -116,7 +116,75 @@ test('the source-author door composes real import-kit custody, keeps unrelated t
   await assert.rejects(f.service.applyReviewed(f.c,plan.review,plan.fingerprint));
   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,1);
  }finally{f.close()}
+ await sharedUploadErasure();
 });
+
+async function sharedUploadErasure(){
+ const {slackServiceFixture}=await import('./slack-import/sqlite-service.mjs'),{zipFixture}=await import('./slack-import/fixture.mjs');
+ const f=await slackServiceFixture();f.db.exec('PRAGMA foreign_keys=ON');try{
+  const selected='SOURCECANARYBYTES',survivor='Unrelated imported file',protectedBytes='Protected sibling file';
+  const zip=zipFixture([
+   ['users.json',[{id:'U1',name:'SOURCECANARYNAME',profile:{email:'sourcecanary@example.test'}},{id:'U2',name:'Other author'}]],
+   ['channels.json',[{id:'C1',name:'general'},{id:'C2',name:'other'}]],
+   ['general/2024-01-01.json',[{type:'message',user:'U1',text:'SOURCECANARYBODY',ts:'1700000000.000001',files:[{id:'F1',name:'SOURCECANARYFILE.txt',mimetype:'text/plain',size:selected.length}]},{type:'message',user:'U2',text:'Unrelated imported reply',ts:'1700000000.000002',thread_ts:'1700000000.000001',files:[{id:'F2',name:'survivor.txt',mimetype:'text/plain',size:survivor.length}]}]],
+   ['other/2024-01-01.json',[{type:'message',user:'U2',text:'Protected sibling history',ts:'1700000000.000003',files:[{id:'F3',name:'protected.txt',mimetype:'text/plain',size:protectedBytes.length}]}]],
+   ['files/F1/SOURCECANARYFILE.txt',selected],['files/F2/survivor.txt',survivor],['files/F3/protected.txt',protectedBytes]
+  ]);
+  const upload=await f.custody.localUpload(f.c,new Request('https://fixture.test/upload',{method:'POST',body:zip}));
+  async function approve(namespace,sourceId='C1'){
+   const review={namespace,channels:[{sourceId,name:namespace,members:[f.owner.operatorId]}],actors:{U1:null,U2:null},acceptedOmissions:[]};
+   const omitted=await f.service.previewImport(f.c,{upload,review});review.acceptedOmissions=[omitted.omissionDigest];
+   return f.service.previewImport(f.c,{upload,review});
+  }
+  const primary=await approve('shared-primary'),staged=await approve('shared-staged'),unused=await approve('shared-preview'),lost=await approve('shared-lost-ack','C2'),applied=await approve('shared-applied','C2');
+  async function interruptApply(plan,marker){
+   const original=f.adapter.batch;let fired=false;
+   f.adapter.batch=async statements=>{if(!fired&&statements.some(s=>s.sql?.includes(marker))){fired=true;throw Error('fixture interrupted shared upload')}return original(statements)};
+   try{await assert.rejects(f.service.applyReviewed(f.c,plan.review,plan.fingerprint),/fixture interrupted shared upload/)}finally{f.adapter.batch=original}
+   assert.equal(fired,true);
+  }
+  await interruptApply(staged,'INSERT INTO ik_jobs');
+  await interruptApply(lost,'UPDATE nook_import_reviews SET kit_job');
+  await f.finish(applied);await f.finish(primary);
+  const reviewRow=plan=>f.db.prepare('SELECT * FROM nook_import_reviews WHERE id=?').get(plan.review),stagedRow=reviewRow(staged),primaryRow=reviewRow(primary);
+  const stagedKeys=f.db.prepare('SELECT object_key FROM nook_import_objects WHERE instr(object_key,?)>0').all('/files/'+stagedRow.domain_job+'/'+staged.review+'/').map(r=>r.object_key);
+  assert.equal(stagedKeys.length,2);assert.equal(f.db.prepare('SELECT count(*) AS n FROM ik_jobs WHERE operation_key=?').get(staged.review).n,0);assert.equal(f.db.prepare('SELECT state FROM nook_imports WHERE id=?').get(stagedRow.domain_job).state,'staging');
+  const protectedRows=[lost,applied].map(plan=>({review:reviewRow(plan),job:f.db.prepare('SELECT * FROM ik_jobs WHERE operation_key=?').get(plan.review)}));
+  const protectedFiles=f.db.prepare('SELECT * FROM nook_import_objects WHERE upload=? AND object_key NOT IN (SELECT object_key FROM nook_import_objects WHERE instr(object_key,?)>0 OR instr(object_key,?)>0)').all(upload,'/files/'+stagedRow.domain_job+'/', '/files/'+primaryRow.domain_job+'/');
+  assert.equal(protectedFiles.length,2);assert.equal(protectedRows[0].review.kit_job,null);assert.ok(protectedRows[0].job);
+  const survivorKey=f.db.prepare("SELECT a.object_key FROM nook_attachments a JOIN nook_import_records r ON r.id=a.message WHERE r.job=? AND r.source_actor='U2'").get(primaryRow.domain_job).object_key;
+  const remove=f.bucket.delete.bind(f.bucket);let interrupted=true;f.bucket.delete=async key=>{if(interrupted&&stagedKeys.includes(key))throw Error('interrupted sibling R2 delete');return remove(key)};
+  const c=new Context(f.c.env,f.owner),target=primaryRow.domain_job+':U1';
+  let receipt=await door(standard,c,'',{kind:'imported-author',target,confirmation:'ERASE'});
+  for(let n=0;n<6;n++)receipt=await door(standard,c,'/'+receipt.id+'/resume',{});
+  assert.equal(receipt.state,'pending','staged sibling bytes keep the erasure pending');
+  assert.equal(reviewRow(staged).state,'discarded');assert.equal(reviewRow(unused).state,'discarded');assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_imports WHERE id=?').get(stagedRow.domain_job).n,0);
+  for(const key of stagedKeys){assert.equal(f.db.prepare('SELECT state FROM nook_import_objects WHERE object_key=?').get(key).state,'deleted');assert.ok(f.db.prepare('SELECT 1 FROM nook_erasure_blobs WHERE operation=? AND object_key=?').get(receipt.id,key));assert.ok(await f.bucket.head(key))}
+  for(const before of protectedRows){assert.deepEqual(f.db.prepare('SELECT * FROM ik_jobs WHERE id=?').get(before.job.id),before.job);assert.deepEqual(f.db.prepare('SELECT * FROM nook_import_reviews WHERE id=?').get(before.review.id),before.review);assert.ok(f.db.prepare('SELECT 1 FROM nook_imports WHERE id=?').get(before.review.domain_job))}
+  for(const object of protectedFiles){assert.deepEqual(f.db.prepare('SELECT * FROM nook_import_objects WHERE object_key=?').get(object.object_key),object);assert.equal(Buffer.from(await(await f.bucket.get(object.object_key)).arrayBuffer()).toString(),protectedBytes)}
+  assert.equal(Buffer.from(await(await f.bucket.get(survivorKey)).arrayBuffer()).toString(),survivor);
+  interrupted=false;await finishDoor(standard,c,receipt);
+  for(const key of stagedKeys)assert.equal(await f.bucket.head(key),null);
+  assert.deepEqual(scanSql(f,/SOURCECANARY/i),[]);for(const object of (await f.bucket.list()).objects)assert.doesNotMatch(Buffer.from(await(await f.bucket.get(object.key)).arrayBuffer()).toString(),/SOURCECANARY/i);
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_erasure_blobs WHERE operation=?').get(receipt.id).n,0);
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records WHERE job=?').get(primaryRow.domain_job).n,1);
+  assert.equal(f.db.prepare('SELECT body FROM nook_import_records WHERE job=?').get(reviewRow(applied).domain_job).body,'Protected sibling history');
+  assert.ok((await f.service.importStatus(f.c,lost.review)).job);
+  for(const plan of [staged,unused])await assert.rejects(f.service.applyReviewed(f.c,plan.review,plan.fingerprint));
+  const visible=await f.list.listImports(f.c);
+  for(const plan of [lost,applied]){const status=visible.jobs.find(job=>job.review===plan.review);assert.equal(status.forwardAuthority,true);assert.equal(status.reversalSafe,true)}
+  let continued=await f.service.resumeReviewed(f.c,lost.review);for(let n=0;continued.job.state!=='completed'&&n<10;n++)continued=await f.service.resumeReviewed(f.c,lost.review);
+  assert.equal(continued.job.state,'completed');assert.equal(continued.job.fingerprint,protectedRows[0].job.fingerprint);
+  assert.equal(f.db.prepare('SELECT body FROM nook_import_records WHERE job=?').get(reviewRow(lost).domain_job).body,'Protected sibling history');
+  assert.equal((await f.service.importStatus(f.c,applied.review)).reversalSafe,true);
+  assert.equal((await f.service.undoReviewed(f.c,applied.review)).job.state,'undone');
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_channels WHERE job=?').get(reviewRow(applied).domain_job).n,0);
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records WHERE job=?').get(reviewRow(applied).domain_job).n,0);
+  const lostFile=protectedFiles.find(object=>object.object_key.includes('/files/'+reviewRow(lost).domain_job+'/'));
+  assert.equal(Buffer.from(await(await f.bucket.get(lostFile.object_key)).arrayBuffer()).toString(),protectedBytes);
+  for(const plan of [staged,unused]){await assert.rejects(f.service.resumeReviewed(f.c,plan.review));await assert.rejects(f.service.undoReviewed(f.c,plan.review))}
+ }finally{f.close()}
+}
 
 function scanSql(f,pattern){
  const hits=[];function has(value){if(value instanceof Uint8Array)return pattern.test(Buffer.from(value).toString('utf8'));if(typeof value==='string'){if(pattern.test(value))return true;try{const parsed=JSON.parse(value);if(parsed!==value&&has(parsed))return true}catch{}if(value.length>=8&&/^[A-Za-z0-9+/]+={0,2}$/.test(value)&&pattern.test(Buffer.from(value,'base64').toString('utf8')))return true;return false}return value&&typeof value==='object'&&Object.values(value).some(has)}
@@ -217,4 +285,107 @@ test('member receipt inherits already pending author deletion and expired-file o
   assert.equal(memberReceipt.state,'pending','member completion cannot precede previously queued authored blob absence');assert.equal(f.objects.size,3);assert.equal(f.db.prepare('SELECT count(*) AS n FROM oa_operators WHERE id=?').get(member.operatorId).n,0);assert.equal(f.db.prepare('SELECT count(*) AS n FROM oa_operators WHERE id=?').get(other.operatorId).n,1);
   f.interrupt(false);await finishDoor(standard,owner,memberReceipt);assert.equal(f.objects.size,0);assert.equal((await receipt(owner,prior.receipt.id)).state,'complete');assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_erasure_work').get().n,0);assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_erasure_blobs').get().n,0);
  }finally{f.close()}
+});
+
+async function partialImportFixture({associated=false,total=300}={}){
+ const {slackServiceFixture}=await import('./slack-import/sqlite-service.mjs'),{zipFixture}=await import('./slack-import/fixture.mjs');
+ const f=await slackServiceFixture();f.db.exec('PRAGMA foreign_keys=ON');
+ const accepted=await f.accept(await f.invite('partialperson@example.test')),member=await f.auth.getSession(f.request('/auth/session',null,accepted.headers.get('set-cookie').split(';')[0]));
+ const bytes='UNAPPLIEDFILEBYTES',messages=Array.from({length:total},(_,i)=>({type:'message',user:i%2?'U2':'U1',text:i%2?'Other author <@U1> '+i:'UNAPPLIEDBODY '+i,ts:`1700000000.${String(i+1).padStart(6,'0')}`,...(i===total-2?{files:[{id:'F1',name:'UNAPPLIEDFILE.txt',mimetype:'text/plain',size:bytes.length}]}:{})}));
+ const zip=zipFixture([['users.json',[{id:'U1',name:'Identical display name',profile:{email:'partialcanary@example.test'}},{id:'U2',name:'Identical display name',profile:{email:'survivor@example.test'}}]],['channels.json',[{id:'C1',name:'general'}]],['general/2024-01-01.json',messages],['files/F1/UNAPPLIEDFILE.txt',bytes]]);
+ const upload=await f.custody.localUpload(f.c,new Request('https://fixture.test/upload',{method:'POST',body:zip})),plan=await f.service.previewImport(f.c,{upload,review:{namespace:'partial-erasure',channels:[{sourceId:'C1',name:'Partial history',members:associated?[f.owner.operatorId,member.operatorId]:[f.owner.operatorId]}],actors:{U1:associated?member.operatorId:null,U2:null},acceptedOmissions:[]}});
+ const c=new Context(f.c.env,f.owner);
+ return {...f,member,plan,upload,doorContext:c};
+}
+
+async function assertNoImportPerson(f){
+ assert.deepEqual(scanSql(f,/UNAPPLIEDBODY|UNAPPLIEDFILE|partialcanary/i),[]);
+ for(const object of (await f.bucket.list()).objects)assert.doesNotMatch(Buffer.from(await(await f.bucket.get(object.key)).arrayBuffer()).toString(),/UNAPPLIEDBODY|UNAPPLIEDFILE|partialcanary/i);
+}
+
+test('partial source erasure tombstones every planned own entry, drains staged files, resumes peers and permits guarded undo',async()=>{
+ for(const associated of [false,true]){
+ const f=await partialImportFixture({associated});try{
+  const first=await f.service.applyReviewed(f.c,f.plan.review,f.plan.fingerprint);assert.ok(first.job.checkpoint>3&&first.job.checkpoint<first.job.total);
+  const target=f.db.prepare("SELECT job||':'||source_id AS id FROM nook_import_actors WHERE source_id='U1'").get().id;
+  const remove=f.bucket.delete.bind(f.bucket);let interrupted=true;f.bucket.delete=async key=>{if(interrupted)throw Error('interrupted R2 delete');return remove(key)};
+  let receipt=await door(associated?retaining:standard,f.doorContext,'',{kind:associated?'member':'imported-author',target:associated?f.member.operatorId:target,confirmation:'ERASE'});
+  for(let n=0;n<45;n++)receipt=await door(standard,f.doorContext,'/'+receipt.id+'/resume',{});
+  assert.equal(receipt.state,'pending');assert.ok((await f.bucket.list()).objects.length>0);
+  interrupted=false;await finishDoor(standard,f.doorContext,receipt);await assertNoImportPerson(f);assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_retained_import_bodies').get().n,0);
+  assert.equal(f.db.prepare('SELECT sum(records_erased) AS n FROM ik_d1_erasure_journal').get().n,151);
+  assert.equal((await f.service.importStatus(f.c,f.plan.review)).job.checkpoint,first.job.checkpoint);
+  assert.ok((await f.list.listImports(f.c)).jobs[0].job);
+  await assert.rejects(f.service.applyReviewed(f.c,f.plan.review,f.plan.fingerprint));
+  let continued=await f.service.resumeReviewed(f.c,f.plan.review);for(let n=0;continued.job.state!=='completed'&&n<20;n++)continued=await f.service.resumeReviewed(f.c,f.plan.review);
+  assert.equal(continued.job.state,'completed');assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,150);
+  assert.equal(f.db.prepare("SELECT count(*) AS n FROM nook_import_actors WHERE source_id='U2' AND json_extract(source_record,'$.name')='Identical display name'").get().n,1);await assertNoImportPerson(f);
+  assert.ok(f.db.prepare('SELECT body FROM nook_import_records').all().every(r=>r.body.includes('<@U1>')),'another author’s mention text remains');
+  let reversed=await f.service.undoReviewed(f.c,f.plan.review);for(let n=0;!['undone','rolled_back'].includes(reversed.job.state)&&n<20;n++)reversed=await f.service.undoReviewed(f.c,f.plan.review);
+  assert.equal(reversed.job.state,'undone');assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,0);assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_channels').get().n,0);
+ }finally{f.close()}
+ }
+});
+
+test('associated preview, staged-before-create and lost-create-ack custody cannot survive member erasure',async()=>{
+ for(const phase of ['preview','preview-author','staged','lost-ack','reversed']){
+  const f=await partialImportFixture({associated:true,total:20});try{
+   if(phase==='reversed'){await f.finish(f.plan);assert.equal((await f.service.undoReviewed(f.c,f.plan.review)).job.state,'undone')}
+   if(!phase.startsWith('preview')&&phase!=='reversed'){
+    const original=f.adapter.batch;let fired=false;
+    f.adapter.batch=async statements=>{const marker=phase==='staged'?'INSERT INTO ik_jobs':'UPDATE nook_import_reviews SET kit_job';if(!fired&&statements.some(s=>s.sql?.includes(marker))){fired=true;throw Error('fixture interrupted '+phase)}return original(statements)};
+    // D1 statements expose their text in the fixture, just as the network edge
+    // exposes a failed batch acknowledgement. Application code is unchanged.
+    try{await f.service.applyReviewed(f.c,f.plan.review,f.plan.fingerprint)}catch(error){assert.match(error.message,/fixture interrupted/)}
+    f.adapter.batch=original;assert.equal(fired,true);
+   }
+   const target=phase==='preview-author'?{kind:'imported-author',target:f.db.prepare('SELECT domain_job FROM nook_import_reviews WHERE id=?').get(f.plan.review).domain_job+':U1'}:{kind:'member',target:f.member.operatorId};
+   await finishDoor(retaining,f.doorContext,await door(retaining,f.doorContext,'',{...target,confirmation:'ERASE'}));
+   await assertNoImportPerson(f);assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_retained_import_bodies').get().n,0);
+   await assert.rejects(f.service.applyReviewed(f.c,f.plan.review,f.plan.fingerprint));
+   if(phase==='lost-ack'){
+    assert.ok((await f.service.importStatus(f.c,f.plan.review)).job);
+    let current=await f.service.resumeReviewed(f.c,f.plan.review);for(let n=0;current.job.state!=='completed'&&n<10;n++)current=await f.service.resumeReviewed(f.c,f.plan.review);
+    assert.equal(current.job.state,'completed');assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,10);
+    assert.equal((await f.service.undoReviewed(f.c,f.plan.review)).job.state,'undone');
+   }
+   else if(phase==='reversed')assert.equal((await f.service.importStatus(f.c,f.plan.review)).job.state,'undone');
+   else assert.equal(f.db.prepare('SELECT state FROM nook_import_reviews WHERE id=?').get(f.plan.review).state,'discarded');
+  }finally{f.close()}
+ }
+});
+
+
+test('erasure continuation still refuses reversal after native work or an unrelated audience change',async()=>{
+ for(const change of ['native','audience']){
+  const f=await partialImportFixture({total:20});try{
+   await f.finish(f.plan);const target=f.db.prepare("SELECT job||':'||source_id AS id FROM nook_import_actors WHERE source_id='U1'").get().id;
+   await finishDoor(standard,f.doorContext,await door(standard,f.doorContext,'',{kind:'imported-author',target,confirmation:'ERASE'}));
+   const conversation=f.db.prepare('SELECT conversation FROM nook_import_channels').get().conversation;
+   if(change==='native')await standard.send(f.doorContext,conversation,{body:'Surviving native work',intent:'native-after-erasure'});
+   else await (await import('../src/platform/storage/commands.ts')).write(f.c,'members',conversation,{user:f.member.operatorId});
+   assert.equal((await f.service.importStatus(f.c,f.plan.review)).reversalSafe,false);
+   await assert.rejects(f.service.undoReviewed(f.c,f.plan.review),/IMPORT_ATOMIC_GUARD/);
+   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,10);
+   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_channels').get().n,1);
+  }finally{f.close()}
+ }
+ for(const native of ['decision','message','retained-message','attachment']){
+  const f=await partialImportFixture({associated:true,total:20});try{
+   await f.finish(f.plan);
+   const conversation=f.db.prepare('SELECT conversation FROM nook_import_channels').get().conversation,c=new Context(f.c.env,f.member);
+   const authored=native==='decision'?await standard.createOutcome(c,conversation,{kind:'decision',body:'Native decision before member erasure'}):native==='attachment'?await standard.upload(c,conversation,{name:'native.txt',mime:'text/plain',bytes:new TextEncoder().encode('Native staged file'),intent:'native-file'}):await standard.send(c,conversation,{body:'Native message before member erasure',intent:'native-before-erasure'});
+   const module=native==='retained-message'?retaining:standard;
+   await finishDoor(module,f.doorContext,await door(module,f.doorContext,'',{kind:'member',target:f.member.operatorId,confirmation:'ERASE'}));
+   const table=native==='decision'?'nook_erased_outcomes':native==='attachment'?'nook_erased_attachments':'nook_erased_messages';
+   const before=f.db.prepare('SELECT * FROM '+table+' WHERE id=?').get(authored.id);assert.equal(before.conversation,conversation);
+   if(native==='retained-message')assert.equal(f.db.prepare('SELECT body FROM nook_retained_message_bodies WHERE id=?').get(authored.id).body,'Native message before member erasure');
+   assert.equal((await f.service.importStatus(f.c,f.plan.review)).reversalSafe,false,native+' remains native work after erasure');
+   await assert.rejects(f.service.undoReviewed(f.c,f.plan.review),/IMPORT_ATOMIC_GUARD/);
+   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,10);
+   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_channels').get().n,1);
+   assert.deepEqual(f.db.prepare('SELECT * FROM '+table+' WHERE id=?').get(authored.id),before);
+   assert.ok(f.db.prepare('SELECT 1 FROM nook_conversations WHERE id=?').get(conversation));
+  }finally{f.close()}
+ }
 });

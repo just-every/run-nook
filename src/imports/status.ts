@@ -9,5 +9,5 @@ async function allowed(c: Context, review: any, action: 'apply' | 'undo') {
  * whether forward work and guarded reversal are allowed right now. */
 export async function statusView(c: Context, review: any, job: any, uploadReady: boolean) {
     const forwardAuthority = !!review.fingerprint && await allowed(c, review, 'apply');
-    return { review: review.id, upload: review.upload, state: review.fingerprint ? review.state : 'draft', fingerprint: review.fingerprint, job, forwardAuthority, reversalSafe: await allowed(c, review, 'undo'), canReviewAgain: review.state === 'undone' && uploadReady && !forwardAuthority, summary: JSON.parse(review.summary_json) };
+    return { review: review.id, upload: review.upload, state: review.fingerprint ? review.state : 'draft', fingerprint: review.currentFingerprint ?? review.fingerprint, job, forwardAuthority, reversalSafe: await allowed(c, review, 'undo'), canReviewAgain: review.state === 'undone' && uploadReady && !forwardAuthority, summary: JSON.parse(review.summary_json) };
 }
