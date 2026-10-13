@@ -24,7 +24,14 @@ while the README and pilot journeys use the ordinary rer development workflow:
   "email not delivered" to the sender and the owner before it succeeds once,
   a queued retry surviving a Worker restart, the no-session "turn these off"
   link, and no message text or file name in any email;
-- immutable imported history and recovery from every earlier archive format;
+- immutable imported history; the supported Base portability v1 recovery is the
+  explicit backup-only `rer import --legacy-v1 --input FILE --yes
+  --acknowledge-unverified-metadata --output FILE` path. It checks the v1
+  checksums, records that the archive's metadata is unverified, restores into an
+  empty installation, and writes a fresh v2 archive. The legacy single-workspace
+  document conversion and root SQLite/native archive procedures are separate
+  offline recovery paths in `OPERATIONS.md`; this is not recovery from every
+  earlier format;
 - the rer command contract: setup, first-run `/setup`, outbox sign-in, preview,
   doctor, reset, export/import round trip, the guided installer, owner-account
   deploy against a fake Cloudflare account, and a fresh-clone README journey;
@@ -50,11 +57,11 @@ The pilot uses a realistic synthetic fixture shaped from Slack’s documentation
 
 Private inline image evidence is split between `tests/team-image.test.mjs`, which accepts genuine PNG bytes and rejects active content, truncation and corruption, and `tests/team-browser.mjs`, which loads a private image preview through the actual Worker at both widths. `ImagePreview.tsx` fetches the ACL-checked PNG/JPEG endpoint and renders a revocable blob URL; downloads remain forced attachments. These checks do not establish virus scanning.
 
-The separate docs site suite and local browser pass checked manifest coverage
-and rejection of broken pages, anchors and raw HTML. All ten public guide routes
-returned one H1; the sidebar, table of contents and pager worked, 1440/900/390
-layouts had no horizontal overflow, and axe found zero serious or critical
-issues on the docs home and the long mobile guide with its menu open.
+The separate docs site suite checks manifest coverage and rejects broken pages,
+anchors and raw HTML. `docs/site.json` currently publishes 11 public guide
+routes. An earlier local browser pass exercised the sidebar, table of contents
+and pager at 1440/900/390; its axe check covered the docs home and the long
+mobile guide with its menu open.
 
 `node tests/part6.mjs --platform-root PATH` needs a checkout of the platform
 repository, so it runs outside verify. It proves the schema-2 artifact, the
@@ -63,23 +70,33 @@ authority and compiled-source persistence against the emitted Worker. The old
 installed-homepage editor, draft and visible-publication checks were retired
 when installed `/` became the session-independent Lobby.
 
-A bounded local accessibility pass checked sign-in, setup, channel, thread,
-Attention, search, Team, the import wizard, docs and native/member/imported
-message/imported-author erasure dialogs at 1440 and 390: axe serious and critical
-issues were zero across 34 surfaces. Keyboard checks covered natural focus order,
-visible focus, dialog Tab containment, Escape and focus return, mobile docs menu,
-icon-button names, and live new-message/search notices; reduced-motion checks
-covered sign-in, channel, imports and docs at both widths. All 11 public docs
-pages returned 200 with one H1. This is no full accessibility audit or WCAG claim.
-Hosted operation on a real Cloudflare account and live mail delivery, capacity
-beyond local measurement, native mobile push and integrations remain unproven.
-External notifications: email is proven against the development outbox; no
-live mail, no native push, no paging. C15 Web Push has the bounded checks below; real-device OS delivery remains pending. Local synthetic verification is not a production,
-parity or adoption claim.
+The core runtime browser journey uses the repository-pinned axe-core package to
+check the conversation with channel/thread routing closed and open, plus the
+native message and member erasure dialogs, at 1440 and 390. It fails on serious or
+critical axe findings. This bounded check does not cover imported-author
+erasure and is not a full accessibility audit or WCAG claim. Hosted operation
+on a real Cloudflare account, live mail-provider delivery, capacity beyond local
+measurement, integrations and real-team adoption remain unproven. Email has a
+local development-outbox journey; C15 Web Push has the bounded local checks
+below. Neither establishes delivery to a real inbox, browser or device. The
+installable PWA is shipped, but offline operation is not supported: its service
+worker caches no requests or private content. There is no native iOS/Android
+push transport or paging guarantee. Local synthetic verification is not a
+production, parity or adoption claim.
 
 
 ## C15 Web Push evidence boundary
 
 `pnpm test:push` runs the emitted Worker, real local D1 and the real ChatHub alarm. One core public-route flow signs in, registers an owned subscription, opts in, sends a message, and independently verifies VAPID and decrypts the actual outbound RFC 8291 packet at the sole fake network edge. A new conversation then proves read-before-delivery cancellation without relying on folding. Focused public security coverage rejects missing sessions, cross-origin mutations, another account's subscription ownership, non-vendor endpoints, invalid keys and unsupported transports, and checks that responses expose no endpoint/auth/private key.
 
-These are local synthetic checks, not browser-vendor or OS receipt evidence. Safari on iPhone/iPad and macOS, Chromium install/subscription delivery, browser subscription disappearance, real lock-screen appearance, mobile keyboard/a11y and installed PWA layout remain evidence to collect on real devices. No native iOS/Android transport exists. WebKit forbids silent Web Push, so immediate sleeping-device clear/badge-only behavior is explicitly blocked; foreground read synchronization and badges accompanying visible alerts are the supported web behavior.
+These are local synthetic checks, not browser-vendor or OS receipt evidence.
+Nook ships an installable PWA manifest and service worker, but this does not
+prove installation or Web Push delivery on a particular browser or device.
+Safari on iPhone/iPad and macOS, Chromium browser and installed-app delivery,
+subscription disappearance, real lock-screen appearance, mobile keyboard/a11y
+and installed PWA layout remain evidence to collect on real devices. The service
+worker caches no requests or private content, so offline operation is not
+provided. No native iOS/Android transport exists. WebKit forbids silent Web
+Push, so immediate sleeping-device clear/badge-only behavior is explicitly
+blocked; foreground read synchronization and badges accompanying visible
+alerts are the supported web behavior.

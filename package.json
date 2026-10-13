@@ -57,6 +57,7 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@vitejs/plugin-react": "6.1.1",
+    "axe-core": "4.14.0",
     "highlight.js": "10.7.3",
     "react-markdown": "6.0.3",
     "remark-gfm": "1.0.0",
@@ -70,6 +71,11 @@
       "esbuild",
       "workerd",
       "@parcel/watcher"
-    ]
+    ],
+    "overrides": {
+      "sharp@<0.35.5": "0.35.5",
+      "source-map-js@<1.2.2": "1.2.2",
+      "undici@>=7.0.0 <7.29.1": "7.29.1"
+    }
   }
 }

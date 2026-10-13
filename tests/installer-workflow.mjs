@@ -6,15 +6,12 @@ import {tmpdir} from 'node:os'
 import {resolve,dirname} from 'node:path'
 import {pathToFileURL} from 'node:url'
 import {DatabaseSync} from 'node:sqlite'
-import {createServer} from 'node:net'
+import {released} from './worker-ports.mjs'
 import {approveInstaller,launchInstaller} from './installer-approval.mjs'
 import {devKey} from './dev-key.mjs'
 // A setup rerun issues a fresh sign-in link (oa_tokens, outbox) by design; product
 // rows, people, sessions and the owner claim must not change.
 function workspaceSnapshot(path){const db=new DatabaseSync(path,{readOnly:true});try{const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE 'nook_%' OR name IN ('oa_operators','oa_sessions','oa_bootstrap')) AND name NOT LIKE 'nook_search%' ORDER BY name").all().map(row=>row.name);return JSON.stringify(names.map(name=>[name,db.prepare('SELECT * FROM '+name).all().map(row=>JSON.stringify(row)).sort()]))}finally{db.close()}}
-// Closing the installer stops the app it started, which can hold its port and
-// inspector port a moment longer; restart only once both are free again.
-async function released(port){for(let i=0;i<240;i++){const free=await Promise.all([port,port+1].map(p=>new Promise(ok=>{const server=createServer();server.once('error',()=>ok(false));server.listen(p,'127.0.0.1',()=>server.close(()=>ok(true)))})));if(free.every(Boolean))return;await new Promise(ok=>setTimeout(ok,125))}throw Error(`The installer's app still holds port ${port} or ${port+1}`)}
 export async function runInstallerWorkflow(h){
  const {root,states,port,check,evidence,databasePath,stop}=h
  // The guided installer runs in a fresh clone, never over this checkout's own state;

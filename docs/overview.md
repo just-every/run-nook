@@ -14,7 +14,7 @@ Nook keeps conversation history, decisions and commitments in the workspace. Dec
 
 ## What Nook does not provide
 
-Nook has no AI feature. Sign-in, invitation and opted-in notification email uses the mail provider configured by the workspace owner. Optional Web Push sends encrypted alerts directly through your browser’s push service. Nook does not claim that a local installation is ready for hosted production use.
+Nook has no AI feature. Sign-in, invitation and opted-in notification email uses the mail provider configured by the workspace owner. Optional Web Push sends encrypted alerts directly through your browser’s push service. Nook can be installed as a progressive web app, but its service worker caches no requests or private data, so it requires a network connection. Nook does not claim that a local installation is ready for hosted production use.
 
 ## What has not been proven
 

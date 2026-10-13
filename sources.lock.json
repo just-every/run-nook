@@ -555,7 +555,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "2876c4aa4beffc1f74f8b5b3ba236f694d1abcd1954b075322f047b6c2825811",
+      "sha256": "475626581f7cd9ca574a09d65f83e2c1c27524164ac8c462cf53db313fb48152",
       "executable": false
     },
     "AGENTS.md": {
@@ -571,7 +571,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "fe13938a2a9ac0df2781e1d757f1c65e1495fd16610960f92dd6c5143ca08d6e",
+      "sha256": "30a9fb0ff6cdbc7e0b67b8c3a15c3e9dea4e39837f26451f143eb11f0ac26ed6",
       "executable": false
     },
     "CLAUDE.md": {
@@ -615,7 +615,7 @@
       "executable": false
     },
     "docs/overview.md": {
-      "sha256": "61da9699ce77b10eb8d96d2db580a0160bb6f5a7e1e850c530dc01444ddabd00",
+      "sha256": "9ef21530fc487c33bd78ad70c009b9dd59429931b382ce677af8dffceb67b506",
       "executable": false
     },
     "docs/privacy.md": {
@@ -751,11 +751,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "eed69438468c8385792236cdc1c445025f902fa359392fbc54201d5414dbd3db",
+      "sha256": "7f696a300e56e30df4cab3a1ddb21b7a649eea52f365af4ccdd30876c86cef83",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "3a995dcac5693c8067bf8eed5ba79f09f4570a7679dce68dc6a318641e610d18",
+      "sha256": "edd8f08a4f27f2866ce54faa9afa64227016c450cb821cee4ea67d5bed119567",
       "executable": false
     },
     "public/brand/band.svg": {
@@ -2799,7 +2799,7 @@
       "executable": false
     },
     "src/chat/Composer.tsx": {
-      "sha256": "be604b2f2782a724ab8223959c2ed6a4e5616376692df48c1eab056b72248039",
+      "sha256": "8c721115b714a9ea21c4fc4aa45cd3f774b617d75d5381e7744d5f3c6acd7537",
       "executable": false
     },
     "src/chat/ConversationView.tsx": {
@@ -3775,7 +3775,11 @@
       "executable": false
     },
     "TARGET.md": {
-      "sha256": "220796e9010472c033ef57d7a262466960d0520058da3bcc763ab744971c4617",
+      "sha256": "a064fc7abbd0d75ac88f0a222311532fb2f96e2da00f8b69eddae38eca0c4c5f",
+      "executable": false
+    },
+    "tests/accessibility.mjs": {
+      "sha256": "194efd8e89481a4809d3eba175ae8c3edb75b98fd4f0200ddbae7b3f82e2e1e1",
       "executable": false
     },
     "tests/attention.mjs": {
@@ -3791,7 +3795,7 @@
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "afbed7e2a39a4a031e4561e0864e2508e1e40ea74d22737b024a2a3796306d93",
+      "sha256": "e07032e619c46bcf3381e02734f8f4369d5ac0314c14843b979ff851daa9678c",
       "executable": false
     },
     "tests/cloudflare-account.mjs": {
@@ -3810,8 +3814,12 @@
       "sha256": "68ff63fa2f7c56f7442b58403fdc37296dbcdd0bea4858e0ae8419f16798527a",
       "executable": false
     },
+    "tests/erasure-browser-support.mjs": {
+      "sha256": "2078c96e8dedd7a16c340362ec857beea23e899919fdea8b1ce87ed9a1228bf7",
+      "executable": false
+    },
     "tests/erasure-browser.mjs": {
-      "sha256": "007d207cef3e9bb04b29f4219ec8f0e2e4edd19e6228caf10a87e217006e57a3",
+      "sha256": "a7e28968989657d57d077b3713cce8c6b32c5503801a66d92141b352b8915ada",
       "executable": false
     },
     "tests/erasure.test.mjs": {
@@ -3855,7 +3863,7 @@
       "executable": false
     },
     "tests/installer-workflow.mjs": {
-      "sha256": "422c25c45cba47638733f29552070f80c4ab3adc0ef73ba24e4a077ff1582e74",
+      "sha256": "7fe0ecbbf19e5b6a29a2134d843dbec3b37435f6166d6fb5741b44563064ba44",
       "executable": false
     },
     "tests/keyboard.mjs": {
@@ -3871,7 +3879,7 @@
       "executable": false
     },
     "tests/notify-journey.mjs": {
-      "sha256": "33494417ccac39030fba5f8d8863b401a0be92a90ed7da9ad623abd92414389e",
+      "sha256": "d65b3cf86a502fba1267959e974894a3e0c526259789d553fe5bffc9f94eaa22",
       "executable": false
     },
     "tests/notify.test.mjs": {
@@ -4015,7 +4023,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "44e32a200846641d7b867a7e229eec3ed195783866de117ad11ff1ea8749ca97",
+      "sha256": "45242fd47d5b4d48b9cace892d052f92a86ece761641368c27fdc9e031d8cd32",
       "executable": false
     },
     "tests/slack-files.test.mjs": {
@@ -4120,6 +4128,10 @@
     },
     "tests/worker-environment.mjs": {
       "sha256": "e16f59206ad0a4b764be9fa147965f8a96e43c67023654b74052f5c7d0345de9",
+      "executable": false
+    },
+    "tests/worker-ports.mjs": {
+      "sha256": "0f2ddc8ce1b1624fa01c679e5bd8af285ba39a9fd04b0373e3f6c8d4fbe781f1",
       "executable": false
     },
     "tsconfig.json": {

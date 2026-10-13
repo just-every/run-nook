@@ -5,6 +5,7 @@ import {mkdir,writeFile,readFile} from 'node:fs/promises'
 import {resolve} from 'node:path'
 import {browserSignIn} from './auth-support.mjs'
 import {hostileMessage,assertPlainMessage} from './browser-markup.mjs'
+import {auditComposerRouting} from './accessibility.mjs'
 // A destination may carry its unread count in its accessible name, as in "Attention 2".
 const nav=(page,name)=>page.getByRole('navigation',{name:'Workspace',exact:true}).getByRole('button',{name:new RegExp('^'+name+'( \\d+)?$')})
 async function json(page,origin,path,data,method=data?'POST':'GET'){
@@ -40,6 +41,7 @@ export async function runBrowser(origin,destination){
     for(const [i,body] of ['The onboarding review is ready. Please check the last two screens.','I checked the welcome step. The wording is clearer now.','The help link is now visible on smaller screens.','We can keep the first release focused on the onboarding flow.','The support handover is ready for a final review.','Let’s agree who will send the launch notes.'].entries())messages.push(await json(i%2?bob:alice,origin,`conversations/${channel.id}/messages`,{body,intent:crypto.randomUUID()}))
     await alice.reload();await alice.getByText(messages[5].body,{exact:true}).waitFor()
     await shot(alice,'channel')
+    await auditComposerRouting(alice,alice.locator('.chat .composer'),destination,`${label}-channel`)
     const geometry=await alice.evaluate(()=>({title:document.querySelector('.heading h1').getBoundingClientRect().toJSON(),messages:[...document.querySelectorAll('.chat .message')].map(e=>e.getBoundingClientRect().toJSON()),composer:document.querySelector('.chat .composer').getBoundingClientRect().toJSON(),width:innerWidth,scrollWidth:document.documentElement.scrollWidth}))
     assert.ok(geometry.scrollWidth<=geometry.width,'conversation fits viewport')
     await writeFile(resolve(destination,`${label}-geometry.json`),JSON.stringify(geometry,null,2))
@@ -88,6 +90,7 @@ export async function runBrowser(origin,destination){
     await shot(bob,'accepted');await bob.reload();await bob.getByText('Accepted',{exact:true}).waitFor()
     await proposalCard.getByRole('button',{name:'Discuss',exact:true}).click()
     await bob.getByRole('heading',{name:'Thread',exact:true}).waitFor()
+    await auditComposerRouting(bob,bob.locator('.decisions .composer'),destination,`${label}-thread`)
     await expect(bob.locator('.thread-log').getByText(messages[5].body,{exact:true})).toBeInViewport()
     if(label==='mobile')assert.equal(await bob.locator('textarea:visible').count(),1,'phone thread has one composer')
     await bob.getByLabel('Reply in thread',{exact:true}).fill('I can send them after the review.')

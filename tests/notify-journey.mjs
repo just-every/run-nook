@@ -1,16 +1,17 @@
 import assert from 'node:assert/strict';
-import {readFile,mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {chromium} from '@playwright/test';
 import {notifyInstallation} from './notify/install.mjs';
 import {people} from './notify/people.mjs';
 import {settingsBrowser} from './notify/browser.mjs';
+import {axeSource} from './accessibility.mjs';
 // C14 through public doors: two people's sessions, the real run loop (ChatHub
 // alarm) and rer's development outbox as the only mail edge. Optional
-// --evidence DIR keeps the screenshots; --axe FILE also runs axe's published source.
+// --evidence DIR keeps the screenshots; pinned axe checks always run.
 const root=resolve(import.meta.dirname,'..'),flag=name=>{const i=process.argv.indexOf(name);return i>0?process.argv[i+1]:undefined;};
-const evidence=flag('--evidence')??await mkdtemp(join(tmpdir(),'nook-notify-shots-')),axeSource=flag('--axe')?await readFile(flag('--axe'),'utf8'):null;
+const evidence=flag('--evidence')??await mkdtemp(join(tmpdir(),'nook-notify-shots-'));
 const CANARY='NOTIFY-CANARY-7f3a91',FILE_CANARY='notify-canary-7f3a91.txt',QUIET=9_000;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const installation=await notifyInstallation(root);let browser;

@@ -1,5 +1,20 @@
 # Nook changes
 
+## Unreleased
+
+Web Push is a separate opt-in channel alongside email, and Nook includes an
+installable PWA. The service worker displays visible alerts and caches no
+requests or private content. Local packet checks do not prove delivery to a
+real browser or device.
+
+Member erasure clears that member's notification preferences, push devices and
+queued email/Web Push items; message and outcome erasure clears their queued
+items too. Portable row fences and erasure journals protect restore paths when
+the latest journal is available. Imported-author erasure removes the selected
+source copies and files, then withdraws the ZIP copy Nook retained for that
+import. After erasure completes, that retained archive cannot be opened or
+re-imported. These controls do not erase external archives or physical remnants.
+
 ## New brand and homepage hero
 
 Nook has a new look built from scratch: the lowercase `nook` wordmark with a rose

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { request as httpRequest } from 'node:http'
-import { createServer } from 'node:net'
+import {freePort,released} from './worker-ports.mjs'
 import { mkdtemp,readFile,readdir,writeFile,mkdir,rm,realpath,access } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { resolve, dirname } from 'node:path'
@@ -31,11 +31,13 @@ const evidence = {clause:'BASE-ACCESS-002',runtime:'emitted Worker with local D1
 const command = args => new Promise((ok,bad) => { const p=spawn(process.execPath,[...cli,...args],{cwd:root,env,stdio:['ignore','pipe','pipe']}); let out=''; p.stdout.on('data',c=>out+=c); p.stderr.on('data',c=>out+=c); p.on('error',bad); p.on('exit',code=>code===0?ok(out):bad(new Error(out))) })
 const sql = async statement => JSON.parse(await command(['d1','execute','DB','--local','--persist-to',state,'--config','dist/server/wrangler.json','--command',statement,'--json']))[0].results
 const facts = async () => (await sql("SELECT (SELECT count(*) FROM nook_events) AS events,(SELECT count(*) FROM nook_messages) AS messages,(SELECT count(*) FROM nook_attachments) AS attachments"))[0]
-async function portInRange() { for(let port=15800;port<=15838;port++) { const sockets=[createServer(),createServer()];try { for(let i=0;i<2;i++)await new Promise((ok,bad)=>{sockets[i].once('error',bad);sockets[i].listen(port+i,'127.0.0.1',ok)}); return port } catch {} finally {await Promise.all(sockets.filter(s=>s.listening).map(s=>new Promise(ok=>s.close(ok))))} } throw new Error('No free HTTP/inspector pair in assigned ports15800–15839') }
 async function start(port,{envFile}={}) {
+ await released(port)
  origin=`http://127.0.0.1:${port}`; output=''
  await writeFile(resolve(state,'runtime.vars'),`AUTH_ORIGIN=${origin}\nRER_DEV_ORIGIN=${origin}\nAUTH_LOCAL=true\nOWNER_EMAIL=nativeowner@example.test\nSESSION_SECRET=${sessionSecret}\nSETUP_TOKEN=${setupToken}\nMAIL_PROVIDER=development\nMAIL_FROM=auth@localhost.test\nRER_DEV_KEY=${devKey}\n`,{mode:0o600})
- worker=spawn(process.execPath,[...cli,'dev','--env-file',envFile??resolve(state,'runtime.vars'),'--local','--config',lossConfig?.path??'dist/server/wrangler.json','--persist-to',state,'--ip','127.0.0.1','--port',String(port),'--inspector-port',String(port+1),'--show-interactive-dev-session=false'],{cwd:root,env:workerEnvironment(env),stdio:['ignore','pipe','pipe']})
+ // Inspector sockets need no stable origin. Let workerd allocate one atomically
+ // on every start rather than assuming the app's neighbouring port is free.
+ worker=spawn(process.execPath,[...cli,'dev','--env-file',envFile??resolve(state,'runtime.vars'),'--local','--config',lossConfig?.path??'dist/server/wrangler.json','--persist-to',state,'--ip','127.0.0.1','--port',String(port),'--inspector-port','0','--show-interactive-dev-session=false'],{cwd:root,env:workerEnvironment(env),stdio:['ignore','pipe','pipe']})
  worker.stdout.on('data',c=>output+=c);worker.stderr.on('data',c=>output+=c)
  for(let i=0;i<160;i++) { if(worker.exitCode !== null) throw new Error(output); try { if((await fetch(origin+'/health')).ok) return } catch {} await new Promise(ok=>setTimeout(ok,125)) } throw new Error(output)
 }
@@ -69,7 +71,7 @@ async function databasePath(dir) {let found;async function visit(path){for(const
 async function check(name,fn) { try { await fn() } catch (error) { console.error('DIAG wrangler output tail:\n'+output.slice(-12000)); throw error } checks++; evidence.checks.push({name,status:'passed'}); console.log(`PASS ${name}`) }
 try {
  await command(['d1','migrations','apply','DB','--local','--persist-to',state,'--config','dist/server/wrangler.json'])
- lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root);const port=await portInRange(); await start(port)
+ lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root);const port=await freePort(); await start(port)
  const beforeDenied=(await sql('SELECT count(*) AS n FROM workspace'))[0].n
  await request('/api/me',{status:401})
  assert.equal((await sql('SELECT count(*) AS n FROM workspace'))[0].n,beforeDenied,'denied empty-workspace read does not initialize state')
@@ -107,6 +109,7 @@ try {
  await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{const checks=await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>restart({transferFaults:null}),sql});evidence.slackImports=checks})
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
   await check('React/Start desktop and mobile native journey',async()=>{await(await import('./browser.mjs')).runBrowser(origin,resolve(root,'evidence/nook-1'))})
+  await check('owner/admin erasure, modal keyboard containment and accessibility at desktop/mobile widths',async()=>{await(await import('./erasure-browser-support.mjs')).runErasureJourney({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1/erasure')})})
   await check('keyboard focus, routing drafts and visible read frontier',async()=>{await(await import('./keyboard.mjs')).runKeyboard(origin,resolve(root,'evidence/nook-1'))})
   await check('team day-one desktop/mobile journey and native notification API',async()=>{await(await import('./team-browser.mjs')).runTeamBrowserSuite({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1')})})
   await check('Slack wizard and imported history desktop/mobile',async()=>{await(await import('./slack-import-browser.mjs')).runSlackBrowser(origin)})
