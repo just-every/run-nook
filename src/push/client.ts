@@ -2,7 +2,7 @@ import {useCallback,useEffect,useRef,useState} from 'react'
 import type {TeamRequest} from '../team/types'
 import {clearPushNotices} from './notices'
 export type Choices={mentions:boolean;urgent:boolean;urgentQuiet:boolean;direct:boolean;threads:boolean}
-export type PushSettings=Choices&{problems:{error:string;state:string}[];notDelivered:{recipient:string;error:string}[];workspace:{count:number}|null}
+export type PushSettings=Choices&{problems:{error:string;state:string}[];notDelivered:{recipient:string;error:string}[];workspace:{count:number;error:string|null;state:string|null}|null}
 const decode=(value:string)=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))
 const STORE='nook.push.device'
 const supported=()=>typeof window!=='undefined'&&'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window

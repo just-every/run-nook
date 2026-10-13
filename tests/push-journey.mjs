@@ -53,3 +53,7 @@ test('push security: authentication, current device ownership, endpoint allowlis
   await call('/api/logout','POST',{},member.cookie);await call('/api/devices','GET',undefined,member.cookie,401);assert.equal((await app.db.prepare('SELECT count(*) AS n FROM nook_push_devices').first()).n,0);
  }finally{await app.close()}
 });
+
+// One responsibility-split public journey extends the original two checks.
+import {contractJourney} from './push/journey.mjs';
+test('C15 public contract: routing, device fanout, real presence, visible failures, erasure and portable recovery',{timeout:300_000},contractJourney);

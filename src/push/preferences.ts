@@ -6,7 +6,7 @@ export async function pushSettings(c:Context){
  const since=Date.now()-7*86400_000
  const problems=await c.rows("SELECT error,state,updated FROM nook_notify_queue WHERE channel='push' AND user=? AND state IN ('retrying','failed') AND updated>? ORDER BY updated DESC LIMIT 5",[c.uid,since])
  const caused=await c.rows("SELECT q.error,q.state,q.updated,o.display_name AS recipient FROM nook_notify_queue q JOIN oa_operators o ON o.id=q.user WHERE q.channel='push' AND q.actor=? AND q.state IN ('retrying','failed') AND q.updated>? ORDER BY q.updated DESC LIMIT 5",[c.uid,since])
- const workspace=c.session.operator.role==='owner'?await c.one("SELECT count(*) AS count FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>?",[since]):null
+ const workspace=c.session.operator.role==='owner'?await c.one("SELECT count(*) AS count,(SELECT error FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>? ORDER BY updated DESC LIMIT 1) AS error,(SELECT state FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>? ORDER BY updated DESC LIMIT 1) AS state FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>?",[since,since,since]):null
  return {...Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,!!p?.[v]])),problems,notDelivered:caused,workspace}
 }
 export function pushPreferenceStatements(c:Context,input:unknown){

@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {until} from './fixture.mjs';
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+export async function routing(c){
+ const {call,db,member,sender,device,room,send,rows,delivered,received,read,sync,register}=c;
+ const dm=await room('Private DM','dm'),direct=await send(dm);const [notice]=await delivered(direct);
+ assert.match(notice.value.body,/sender.*a direct conversation/);assert.equal(new URL(notice.value.url).searchParams.get('conversation'),dm.id);assert.equal((await sync()).badge,1);await read(dm);assert.equal((await sync()).badge,0);
+ const thread=await room('Followed thread'),root=await send(thread);
+ await call(`/api/conversations/${thread.id}/preferences`,'PATCH',{followed:true},member.cookie);
+ const unfollowed=await send(thread,{parent:root.id});assert.deepEqual(await rows(unfollowed),[],'conversation follow alone never pushes');
+ await call(`/api/messages/${root.id}/follow`,'POST',{follow:true},member.cookie);
+ const reply=await send(thread,{parent:root.id});const [replyNotice]=await delivered(reply);
+ assert.equal(new URL(replyNotice.value.url).searchParams.get('focus'),reply.id);
+ assert.equal((await call('/api/messages/'+reply.id,'GET',undefined,member.cookie)).parent,root.id,'link resolves the exact reply and its thread under ACL');await read(thread);
+ const burst=await room('Burst'),before=received.length,items=[];
+ for(let i=0;i<3;i++)items.push(await send(burst,{mentions:[member.user.id]}));
+ await delivered(items[0]);for(const message of items)await until(async()=>(await rows(message)).every(r=>['sent','folded'].includes(r.state)),'burst folded');
+ const packets=received.slice(before);assert.equal(packets.length,1);assert.match(packets[0].value.body,/\(\+2 more\)$/);assert.equal(packets[0].value.ids.length,1);
+ const claims=(await Promise.all(items.map(rows))).flat();assert.equal(new Set(claims.map(r=>r.email)).size,1);assert.equal(claims[0].email,packets[0].value.ids[0]);for(const item of items)assert.ok(!JSON.stringify(packets[0].value).includes(item.body));
+ assert.equal((await sync()).badge,3);await call('/api/attention/'+claims[0].attention,'POST',{action:'done'},member.cookie);assert.equal((await sync()).badge,2);assert.ok((await sync()).active.includes(packets[0].value.ids[0]),'folded notice remains while another event is active');await read(burst);assert.ok(!(await sync()).active.includes(packets[0].value.ids[0]));
+ const quiet=await room('Quiet hold'),deadline=Date.now()+11_000;
+ await call('/api/settings','PATCH',{dndUntil:deadline},member.cookie);const held=await send(quiet,{mentions:[member.user.id]});await pause(6000);assert.equal(received.filter(r=>new URL(r.value.url).searchParams.get('focus')===held.id).length,0);await delivered(held);assert.ok(received.find(r=>new URL(r.value.url).searchParams.get('focus')===held.id).at>=deadline);await read(quiet);
+ await call('/api/settings','PATCH',{dndUntil:Date.now()+60_000},member.cookie);await call('/api/notify','PATCH',{push:{urgentQuiet:true}},member.cookie);
+ const urgentRoom=await room('Urgent through quiet'),urgent=await send(urgentRoom,{mentions:[member.user.id],urgent:true,urgentReason:'PRIVATE-URGENT-REASON'});const [urgentNotice]=await delivered(urgent);assert.match(urgentNotice.value.body,/Urgent request/);assert.ok(!JSON.stringify(urgentNotice.value).includes('PRIVATE-URGENT-REASON'));await read(urgentRoom);await call('/api/settings','PATCH',{dndUntil:null},member.cookie);
+ const extra=[];for(let i=0;i<9;i++)extra.push(await register(member,'device-'+i));
+ await call('/api/devices','POST',{transport:'webpush',subscription:(await import('./packet.mjs')).subscriber('eleventh').subscription},member.cookie,409);
+ await call('/api/devices','DELETE',{id:extra[0].id},member.cookie);const replacement=await register(member,'replacement');extra[0]=replacement;assert.equal((await call('/api/devices','GET',undefined,member.cookie)).devices.length,10);
+ const many=await room('Ten devices'),manyMessage=await send(many,{mentions:[member.user.id]});const alerts=await delivered(manyMessage,10);assert.equal(alerts.length,10);assert.equal(new Set(alerts.map(r=>r.endpoint)).size,10);assert.equal((await sync()).badge,1,'ten device queue rows count as one attention');assert.ok(alerts.every(r=>r.value.badge===1));
+ const attention=(await rows(manyMessage))[0].attention;await call('/api/attention/'+attention,'POST',{action:'done'},member.cookie);assert.equal((await sync()).badge,0);for(const alert of alerts)assert.ok(!(await sync()).active.includes(alert.value.ids[0]));
+ for(const d of extra)await call('/api/devices','DELETE',{id:d.id},member.cookie);
+ assert.equal((await call('/api/devices','GET',undefined,member.cookie)).devices[0].id,device.id);
+ c.t.diagnostic('Routing: DM, followed reply, conversation-follow exclusion, actual five-second burst, quiet deadline and urgent override, ten-device rejection/replacement, deduplicated badge and read/done sync passed.');
+}
