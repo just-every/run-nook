@@ -1026,10 +1026,6 @@
       "sha256": "9b9098e7c0afa4af109efc1a1f24b5fd07cf4e71fc5ff206029b1b55273a4c8a",
       "executable": false
     },
-    "scripts/local/legacy-recovery.mjs": {
-      "sha256": "192131ccfd97b166a0899b1ee8e6658743dcb88c37f42355f18a8007fe78380b",
-      "executable": false
-    },
     "scripts/local/portability.mjs": {
       "sha256": "c61cbc6939dc3dafb0d45c166f57fbbc1e78bfe2e23d50c0cd7eda484c422672",
       "executable": false
@@ -1039,7 +1035,7 @@
       "executable": false
     },
     "scripts/local/transfer.mjs": {
-      "sha256": "2890f38077041e3187a5f9f59fc9887cda26cc437e94a8c90a22df64852d512a",
+      "sha256": "33377b1418ef68c5879b2a6b8a8ebe9e7c576206f1374893fd2197af5555087a",
       "executable": false
     },
     "scripts/notify-test-mail.mjs": {
@@ -3567,7 +3563,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "042a984d02cca4a1d7835de6afa17a8073e80798073a7e8e57903cc20beed761",
+      "sha256": "1766a560848ab8584d7d7c6df00f72dde93c4838be0e33c7123b017bec91e215",
       "executable": false
     },
     "src/SignInScreen.tsx": {
@@ -4075,7 +4071,7 @@
       "executable": false
     },
     "tests/storage-flows.mjs": {
-      "sha256": "5e05f92abfb59d59e495e5964e3b206f0aa5bcea91ba50b2c25240bbe975c54f",
+      "sha256": "534892ffb5ee90f75d99c3b173d2586fa1a5a5a72d8fc7abb6b9006b034f9588",
       "executable": false
     },
     "tests/storage-guards.mjs": {
