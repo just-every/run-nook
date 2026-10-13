@@ -1,3 +1,4 @@
+import {installDependencies} from '../install-dependencies.mjs';
 import assert from 'node:assert/strict';
 import {execFile,execFileSync,spawn} from 'node:child_process';
 import {copyFile,mkdir,mkdtemp,readFile,readdir,rm} from 'node:fs/promises';
@@ -17,7 +18,7 @@ export async function notifyInstallation(root){
  const {RER_LOCAL_OPERATION:ignored,...env}={...process.env,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'};
  let dev;
  const run=async(verb,...args)=>{
-  try{return (await execute(process.execPath,['scripts/rer.mjs',verb,...args],{cwd:directory,env,timeout:20*60_000,maxBuffer:8*1024*1024})).stdout;}
+  try{return (await execute(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs',verb,...args],{cwd:directory,env,timeout:20*60_000,maxBuffer:8*1024*1024})).stdout;}
   catch(error){throw Error(`rer ${verb} failed (exit ${error.code ?? 'unknown'}); CLI output withheld because it can contain sign-in credentials.`);}
  };
  const stop=async()=>{
@@ -27,7 +28,7 @@ export async function notifyInstallation(root){
  };
  let origin;
  const start=async()=>{
-  dev=spawn(process.execPath,['scripts/rer.mjs','dev','--login'],{cwd:directory,env,stdio:['ignore','pipe','pipe'],detached:true});
+  dev=spawn(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs','dev','--foreground','--login'],{cwd:directory,env,stdio:['ignore','pipe','pipe'],detached:true});
   let output='';dev.stdout.on('data',chunk=>{output+=chunk;});dev.stderr.on('data',chunk=>{output+=chunk;});
   await new Promise((resolve,reject)=>{const deadline=Date.now()+10*60_000;const timer=setInterval(()=>{if(output.includes(`RER_READY ${origin}`)){clearInterval(timer);resolve();}else if(dev.exitCode!==null||Date.now()>deadline){clearInterval(timer);reject(Error('dev did not become ready; credential-bearing output withheld'));}},200);});
  };
@@ -35,7 +36,7 @@ export async function notifyInstallation(root){
   execFileSync('git',['clone','--quiet','--no-hardlinks',root,directory],{stdio:'pipe'});
   const files=execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean);
   for(const file of files){await mkdir(dirname(join(directory,file)),{recursive:true});await copyFile(join(root,file),join(directory,file)).catch(error=>{if(error.code!=='ENOENT')throw error;});}
-  await run('install');
+  await installDependencies(directory,env);
   const port=await freePort();origin=`http://127.0.0.1:${port}`;
   assert.ok((await run('setup','--owner-email','sam@example.test','--owner-name','Sam','--port',String(port))).includes('RER_SETUP_READY'));
   await start();

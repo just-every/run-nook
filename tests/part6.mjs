@@ -1,7 +1,7 @@
 import {parseArgs} from 'node:util';
 import {execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
-import {mkdtemp,symlink,rm,realpath} from 'node:fs/promises';
+import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
 import {run} from './part6/native.mjs';
@@ -18,7 +18,6 @@ try {
  execFileSync('git',['clone','--quiet','--shared','--no-checkout',source,root]);
  execFileSync('git',['checkout','--quiet','--detach',revision],{cwd:root});
  await sourceProof(root,resolve(values['platform-root']),revision);
- await symlink(await realpath(resolve(source,'node_modules')),resolve(root,'node_modules'),'dir');
  console.log(`Part 6 exact source ${revision}; temporary source edits and all runtime resources are owned by this command.`);
  const built=await run(root,['scripts/delivery/build-local.mjs']);
  const receipt=built.split('\n').map(line=>{try{return JSON.parse(line)}catch{return null}}).find(value=>value?.scope==='local-source-and-bytes-only');

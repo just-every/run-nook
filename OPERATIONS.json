@@ -43,14 +43,12 @@
   "commands": {
     "install": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "install"
       ],
       "effects": "Install the frozen dependency graph.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -58,14 +56,12 @@
     },
     "setup": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "setup"
       ],
       "effects": "Generate private settings, build, apply additive local migrations, bootstrap one explicit owner and request an ordinary outbox sign-in; stop temporary descendants.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -73,14 +69,12 @@
     },
     "dev": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "dev"
       ],
       "effects": "Serve Vite HMR on explicit loopback through the shared managed lifecycle; health and outbox gate readiness.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -88,14 +82,12 @@
     },
     "preview": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "preview"
       ],
       "effects": "Serve fixed production output on explicit loopback through the shared managed lifecycle.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -103,14 +95,12 @@
     },
     "build": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "build"
       ],
       "effects": "Build production assets with private settings removed during bundling.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -118,14 +108,12 @@
     },
     "verify": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "verify"
       ],
       "effects": "Run product checks, the complete recursive onboarding suite, build, types, runtime and browser journeys and the README journey.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -133,14 +121,12 @@
     },
     "reset": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "reset"
       ],
       "effects": "Require confirmation and inactive installation; remove only shared local state/settings/installer inventory.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -148,8 +134,7 @@
     },
     "deploy": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "deploy"
       ],
       "effects": "Build and package the Worker and every migration, then deploy to the owner's Cloudflare account through Base deploy-kit owner mode and check health. Dry run makes no provider request.",
@@ -158,8 +143,7 @@
         "package.json",
         "rer-setup.json",
         "scripts/deployment/command.mjs",
-        "scripts/installer/local.mjs",
-        "scripts/rer.mjs"
+        "scripts/installer/local.mjs"
       ],
       "requiredEnvironment": [
         "CLOUDFLARE_ACCOUNT_ID",
@@ -171,14 +155,12 @@
     },
     "export": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "export"
       ],
       "effects": "Export complete private product data through Base portability with credentials excluded; requires a new private archive path.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -186,14 +168,12 @@
     },
     "import": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "import"
       ],
       "effects": "Confirm and restore a verified Base archive into empty, inactive local state, then recover explicitly mapped identities offline.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -201,14 +181,12 @@
     },
     "outbox": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "outbox"
       ],
       "effects": "Open the configured-loopback development outbox; no external message delivery.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -216,14 +194,12 @@
     },
     "doctor": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "doctor"
       ],
       "effects": "Inspect declared local inputs, settings presence and pinned tooling without exposing secrets.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -231,14 +207,12 @@
     },
     "describe": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "describe"
       ],
       "effects": "Describe shared command capabilities.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -246,14 +220,12 @@
     },
     "check": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "check"
       ],
       "effects": "Check the first-party command contract, aliases, pins and operations descriptor without credentials.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],
@@ -261,14 +233,12 @@
     },
     "release": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "release"
       ],
       "effects": "Run Base release checks, including the publication scan; never pushes, tags or deploys.",
       "inputs": [
         "package.json",
-        "scripts/rer.mjs",
         "scripts/installer/local.mjs",
         "rer-setup.json"
       ],

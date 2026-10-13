@@ -12,7 +12,7 @@ const root=process.cwd(),git=(...args)=>execFileSync('git',args,{cwd:root,encodi
 if(git('status','--porcelain','--untracked-files=all'))throw Error('Commit source changes before binding a local artifact to an exact source revision.');
 const revision=git('rev-parse','HEAD'),tree=git('rev-parse','HEAD^{tree}');
 await new Promise((ok,bad)=>{
- const child=spawn(process.execPath,['scripts/rer.mjs','build','--non-interactive'],{cwd:root,stdio:'inherit'});
+ const child=spawn(process.execPath,['node_modules/@runeditrun/rer/bin/rer.mjs','build','--non-interactive'],{cwd:root,stdio:'inherit'});
  child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Nook build failed; no artifact produced.')));
 });
 if(git('rev-parse','HEAD')!==revision||git('status','--porcelain','--untracked-files=all'))throw Error('Source changed during build.');

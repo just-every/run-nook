@@ -58,8 +58,10 @@ issues on the docs home and the long mobile guide with its menu open.
 
 `node tests/part6.mjs --platform-root PATH` needs a checkout of the platform
 repository, so it runs outside verify. It proves the schema-2 artifact, the
-signed owner claim and the homepage editor at 1440 and 390 against the emitted
-Worker.
+signed owner claim, owner/anonymous Lobby equality at 1440 and 390, editor
+authority and compiled-source persistence against the emitted Worker. The old
+installed-homepage editor, draft and visible-publication checks were retired
+when installed `/` became the session-independent Lobby.
 
 A bounded local accessibility pass checked sign-in, setup, channel, thread,
 Attention, search, Team, the import wizard, docs and native/member/imported

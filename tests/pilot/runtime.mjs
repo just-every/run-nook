@@ -1,3 +1,4 @@
+import {installDependencies} from '../install-dependencies.mjs';
 import assert from 'node:assert/strict';
 import {execFile,execFileSync,spawn} from 'node:child_process';
 import {copyFile,mkdir,mkdtemp,readFile,rm} from 'node:fs/promises';
@@ -17,7 +18,7 @@ export async function pilotInstallation(root){
  const {RER_LOCAL_OPERATION:ignored,...env}={...process.env,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'};
  let dev;
  const run=async(verb,...args)=>{
-  try{return (await execute(process.execPath,['scripts/rer.mjs',verb,...args],{cwd:directory,env,timeout:20*60_000,maxBuffer:8*1024*1024})).stdout;}
+  try{return (await execute(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs',verb,...args],{cwd:directory,env,timeout:20*60_000,maxBuffer:8*1024*1024})).stdout;}
   catch(error){throw Error(`Pilot rer ${verb} failed (exit ${error.code ?? 'unknown'}); CLI output withheld because it can contain sign-in credentials.`);}
  };
  const stop=async()=>{
@@ -29,10 +30,10 @@ export async function pilotInstallation(root){
   execFileSync('git',['clone','--quiet','--no-hardlinks',root,directory],{stdio:'pipe'});
   const files=execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean);
   for(const file of files){await mkdir(dirname(join(directory,file)),{recursive:true});await copyFile(join(root,file),join(directory,file));}
-  console.log('PILOT installing isolated working-tree copy');await run('install');
+  console.log('PILOT installing isolated working-tree copy');await installDependencies(directory,env);
   const port=await freePort(),origin=`http://127.0.0.1:${port}`;
   console.log('PILOT running real rer setup');const setupOutput=await run('setup','--owner-email','pilot-owner@example.test','--owner-name','Pilot owner','--port',String(port));assert.ok(setupOutput.includes('RER_SETUP_READY'),'rer setup reported ready');
-  dev=spawn(process.execPath,['scripts/rer.mjs','dev','--login'],{cwd:directory,env,stdio:['ignore','pipe','pipe'],detached:true});
+  dev=spawn(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs','dev','--foreground','--login'],{cwd:directory,env,stdio:['ignore','pipe','pipe'],detached:true});
   let output='';dev.stdout.on('data',chunk=>{output+=chunk;});dev.stderr.on('data',chunk=>{output+=chunk;});
   await new Promise((resolve,reject)=>{const deadline=Date.now()+10*60_000;const timer=setInterval(()=>{if(output.includes(`RER_READY ${origin}`)&&/RER_OPEN (http:\/\/\S+)/.test(output)){clearInterval(timer);resolve();}else if(dev.exitCode!==null||Date.now()>deadline){clearInterval(timer);reject(Error('Pilot dev did not become ready; credential-bearing output withheld'));}},200);});
   const outbox=/RER_OPEN (http:\/\/\S+)/.exec(output)?.[1];

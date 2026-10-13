@@ -109,13 +109,13 @@ single workspace document is an explicit, resumable offline conversion in
 [OPERATIONS.md](OPERATIONS.md).
 
 Product rules live in `src/family/team-chat`, sign-in and D1 access in
-`src/platform`, and routing in `src/server.ts`. The rer CLI, installer,
-operator-auth, mail, portability and deploy tooling are byte-exact copies of
-Base, recorded in `base-copies.json` and checked by
+`src/platform`, and routing in `src/server.ts`. The rer CLI, installer and command tooling come from the pinned
+`@runeditrun/rer` package. Runtime copies of operator-auth, mail and portability
+are recorded in `base-copies.json` and checked by
 `node scripts/edition-authoring/cli.mjs verify-base`. Imported history from
 other tools keeps its provenance without creating unread, attention or accepted
 work; see [IMPORT-APPLY.md](IMPORT-APPLY.md). Managed RER installations add a signed owner claim, the
-homepage editor and a pinned trusted-build workflow; see
+owner-scoped editor authority API and a pinned trusted-build workflow; see
 [OPERATIONS.md](OPERATIONS.md). [CONTRACT.md](CONTRACT.md) states
 the product guarantees and [ACCEPTANCE.md](ACCEPTANCE.md) what has been proven.
 

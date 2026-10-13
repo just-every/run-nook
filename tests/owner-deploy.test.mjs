@@ -18,7 +18,7 @@ test('rer deploy builds the committed source, applies every migration to a new D
  await symlink(join(root,'node_modules'),join(clone,'node_modules'),'dir')
  const report=join(clone,'.rer-test-provider.json')
  const deploy=(env)=>{
-  const result=spawnSync(process.execPath,['--import',pathToFileURL(join(root,'tests/fake-cloudflare.mjs')).href,'scripts/rer.mjs','deploy','--json','--non-interactive'],{cwd:clone,encoding:'utf8',timeout:15*60_000,env:{...cloneEnvironment,NOOK_FAKE_CLOUDFLARE_REPORT:report,...env}})
+  const result=spawnSync(process.execPath,['--import',pathToFileURL(join(root,'tests/fake-cloudflare.mjs')).href,'node_modules/@runeditrun/rer/bin/rer.mjs','deploy','--json','--non-interactive'],{cwd:clone,encoding:'utf8',timeout:15*60_000,env:{...cloneEnvironment,NOOK_FAKE_CLOUDFLARE_REPORT:report,...env}})
   const events=result.stdout.trim().split('\n').filter(Boolean).map(line=>JSON.parse(line))
   return {status:result.status,result:events.find(event=>event.event==='result'),error:events.find(event=>event.event==='error'),output:result.stdout+result.stderr,provider:JSON.parse(readFileSync(report,'utf8'))}
  }

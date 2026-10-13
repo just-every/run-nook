@@ -1,11 +1,11 @@
 import {randomBytes} from 'node:crypto';
 import {cp,mkdir,mkdtemp,readFile,rename,rm} from 'node:fs/promises';
 import {join} from 'node:path';
-import {ownerPlan,ownerWorkerName} from '../base-cli/modules/deploy-kit/owner.mjs';
-import {packageBuild} from '../base-cli/modules/deploy-kit/prepare.mjs';
-import {main} from '../base-cli/modules/deploy-kit/owner-cli.mjs';
-import {privateDirectory,readPrivateFile,writePrivateFile} from '../base-onboarding/private-files.mjs';
-import {invalid,missing} from '../base-cli/cli/errors.mjs';
+import {ownerPlan,ownerWorkerName} from '@runeditrun/rer/modules/deploy-kit/owner';
+import {packageBuild} from '@runeditrun/rer/modules/deploy-kit/prepare';
+import {main} from '@runeditrun/rer/modules/deploy-kit/owner-cli';
+import {privateDirectory,readPrivateFile,writePrivateFile} from '@runeditrun/rer/private-files';
+import {invalid,missing} from '@runeditrun/rer/errors';
 
 export const ownerProduct='.rer/deploy/product';
 export const secretsFile='.rer/deploy/production-secrets.json';

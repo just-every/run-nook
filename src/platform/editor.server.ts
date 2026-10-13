@@ -50,7 +50,7 @@ export async function editorDocument(response:Response,env:EditorBindings,reques
  const directives=(policy??"object-src 'none'; base-uri 'self'; frame-ancestors 'none'").split(';').map(v=>v.trim()).filter(Boolean)
  const retained=directives.filter(v=>!/^frame-src(?:\s|$)/i.test(v))
  next.set('Content-Security-Policy',[...retained,`frame-src ${frames}`].join('; '))
- next.set('Cache-Control','no-store, private');next.append('Vary','Cookie')
+ next.set('Cache-Control','no-store, private, no-transform');next.append('Vary','Cookie')
  const document=new Response(response.body,{status:response.status,statusText:response.statusText,headers:next})
  if(!request.headers.has('cookie')||!await authority(env,request).catch(()=>null))return document
  return new HTMLRewriter().on('head',{element(head){head.append('<meta name="nook-editor-owner" content="">',{html:true})}}).transform(document)

@@ -12,8 +12,11 @@ import {teamRoute} from './team/routes.server'
 import {context} from './platform/storage/context'
 import {readUpload} from './platform/storage/files'
 export {ChatHub} from './platform/storage/live'
-import {authRoute,outboxRoute,operatorAuth,acceptsRequest} from './platform/operator-auth.server'
-import {firstRunResponse} from './platform/first-run/setup'
+import {authRoute,outboxRoute,operatorAuth,acceptsRequest,authBindings} from './platform/operator-auth.server'
+import {firstRunResponse} from './base/setup'
+import {lobbyResponse} from './base/lobby'
+import {setupStateResponse} from './base/setup-state'
+import {identity} from './identity'
 import {notifySettings,updateNotifySettings} from './notify/preferences'
 import {unsubscribeRoute} from './notify/unsubscribe'
 import {theme} from './theme'
@@ -74,6 +77,11 @@ export default {
   // Built files first: a hosted deploy runs this Worker before its assets.
   const asset = await staticAssetResponse(request,env)
   if(asset) return asset
+  const publicEnv = authBindings(env)
+  const state = await setupStateResponse(request,publicEnv)
+  if(state) return state
+  const lobby = await lobbyResponse(request,publicEnv,identity)
+  if(lobby) return lobby
   const url = new URL(request.url)
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
   if(url.pathname==='/notify/off') return unsubscribeRoute(env,request)
@@ -94,7 +102,7 @@ export default {
    try { await new Repository(env).session(request.headers) } catch(error) { if(error instanceof Fault && error.status === 401) return new Response(null,{status:307,headers:{Location:'/signin','Cache-Control':'no-store'}}); throw error }
   }
   const response = await dispatch(request,() => api.fetch(request,env,execution),() => start.fetch(request))
-  const headers = new Headers(response.headers); headers.set('Cache-Control','no-store'); headers.set('X-Content-Type-Options','nosniff')
+  const headers = new Headers(response.headers); headers.set('Cache-Control','no-store, no-transform'); headers.set('X-Content-Type-Options','nosniff')
   const document=new Response(response.body,{status:response.status,statusText:response.statusText,headers})
   return response.headers.get('content-type')?.includes('text/html')?await editorDocument(document,env,request):document
  },

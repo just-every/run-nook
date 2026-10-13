@@ -1,3 +1,4 @@
+import {installDependencies} from './install-dependencies.mjs'
 import assert from 'node:assert/strict'
 import {execFileSync,spawn} from 'node:child_process'
 import {mkdtemp,readFile,mkdir,rm,rename,appendFile,writeFile} from 'node:fs/promises'
@@ -17,7 +18,7 @@ async function released(port){for(let i=0;i<240;i++){const free=await Promise.al
 export async function runInstallerWorkflow(h){
  const {root,states,port,check,evidence,databasePath,stop}=h
  // The guided installer runs in a fresh clone, never over this checkout's own state;
- // it installs that clone's dependencies itself.
+ // install its locked package tools before opening the guided installer.
  const {RER_LOCAL_OPERATION:_,...baseEnv}=h.env,env={...baseEnv,RER_SERVER_JOURNEY:'1'}
  let app
  let state=h.getState(),origin=h.getOrigin(),guidedPort
@@ -32,6 +33,7 @@ export async function runInstallerWorkflow(h){
   await stop();state=localState;states.push(state)
   let installer
   try {
+   await installDependencies(app,env)
    installer=await launchInstaller(app,['--port',String(port),'--no-prefill'],env)
    const original=JSON.parse(branding);const input={WORKSPACE_NAME:original.name,PRIMARY_COLOR:original.primaryColor,OWNER_EMAIL:'nativeowner@example.test',displayName:'NativeOwner',MAIL_PROVIDER:'development',MAIL_FROM:'auth@localhost.test',IDENTITY_PROVIDER:''}
    const held=await mkdtemp(resolve(tmpdir(),'nook-build-repair-'));states.push(held);const entry=resolve(app,'src/server.ts'),preserved=resolve(held,'server.ts');
@@ -41,7 +43,7 @@ export async function runInstallerWorkflow(h){
    origin=await approveInstaller(installer,input);guidedPort=Number(new URL(origin).port)
    // Setup satisfies every local input; owner-account deploy inputs come only from the shell.
    const deployInputs={CLOUDFLARE_ACCOUNT_ID:'a'.repeat(32),CLOUDFLARE_API_TOKEN:'test-only-token',SESSION_SECRET:'test-only-production-session-secret',SETUP_TOKEN:'test-only-production-setup-token',OWNER_EMAIL:'nativeowner@example.test',MAIL_FROM:'auth@example.test',SENDGRID_API_KEY:'test-only-sendgrid-key'}
-   const diagnostic=await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/rer.mjs','doctor','--json'],{cwd:app,env:{...env,...deployInputs},stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',()=>{});child.once('error',bad);child.once('close',code=>code===0?ok(text):bad(Error('Installed public diagnostics failed: '+text))) });const diagnosticResult=diagnostic.trim().split('\n').map(line=>JSON.parse(line)).find(event=>event.event==='result');assert.equal(diagnosticResult.diagnostics.ok,true);assert.deepEqual(diagnosticResult.diagnostics.missingInputs,[]);
+   const diagnostic=await new Promise((ok,bad)=>{const child=spawn(process.execPath,['node_modules/@runeditrun/rer/bin/rer.mjs','doctor','--json'],{cwd:app,env:{...env,...deployInputs},stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',()=>{});child.once('error',bad);child.once('close',code=>code===0?ok(text):bad(Error('Installed public diagnostics failed: '+text))) });const diagnosticResult=diagnostic.trim().split('\n').map(line=>JSON.parse(line)).find(event=>event.event==='result');assert.equal(diagnosticResult.diagnostics.ok,true);assert.deepEqual(diagnosticResult.diagnostics.missingInputs,[]);
    const proof=await runWorkflow(origin);const initial=await verifyWorkflow(origin,proof)
    const guide={failureThenResume:true,oneApprovalPerAttempt:true,providers:false,phase:(await installer.state()).phase,branding:input,appPort:Number(new URL(origin).port)}
    await installer.close();installer=undefined

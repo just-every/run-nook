@@ -4,11 +4,11 @@ import {constants} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import {Readable} from 'node:stream';
 import {getPlatformProxy,unstable_splitSqlQuery} from 'wrangler';
-import {createPortability,readArchive,PortabilityError} from '../base-cli/modules/portability/index.mjs';
-import {readLegacyArchive} from '../base-cli/modules/portability/format.mjs';
-import {migrationReplay} from '../base-cli/modules/portability/migration-history.mjs';
+import {createPortability,readArchive,PortabilityError} from '@runeditrun/rer/modules/portability';
+import {readLegacyArchive} from '@runeditrun/rer/modules/portability/format';
+import {migrationReplay} from '@runeditrun/rer/modules/portability/migration-history';
 import {legacyRecovery} from './legacy-recovery.mjs';
-import {absent,privateFile,promote} from '../base-cli/modules/portability/cli-options.mjs';
+import {absent,privateFile,promote} from '@runeditrun/rer/modules/portability/cli-options';
 import {rebuildSearch} from '../../src/platform/storage/portability.mjs';
 import {productPolicy} from '../../src/platform/portability-policy.mjs';
 async function* records(path,reader=readArchive){const file=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);try{yield* reader(Readable.toWeb(file.createReadStream({autoClose:false})))}finally{await file.close()}}

@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { assertBuildStateSafe, persistencePath } from './scripts/persistence.mjs'
 import { docsSite } from './src/docs/build/plugin.ts'
-import { archiveOutputGuard } from './scripts/base-onboarding/archive-output.mjs'
+import { archiveOutputGuard } from '@runeditrun/rer/archive-output'
 
 // Only `vite dev` loads the local-only entry and the checkout's dev key; a build keeps src/server.ts
 // and never sees either (rer build checks its output).

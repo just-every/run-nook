@@ -1,5 +1,5 @@
 import {lstat} from 'node:fs/promises';
-import {RerError,refuse} from '../base-cli/cli/errors.mjs';
+import {RerError,refuse} from '@runeditrun/rer/errors';
 async function transfer(context,direction){
  // The shared command boundary validates an unserved exports/ or external archive path.
  const {root,path,store,signal,operationToken,legacyRecovery,journal}=context;
