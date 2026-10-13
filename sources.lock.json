@@ -3184,7 +3184,7 @@
       "executable": false
     },
     "src/app-style/conversation.css": {
-      "sha256": "bb0e6d2c2fc64fe7584ccf854cf096223b98c25193bc54b2d58de3d4f5dfa10b",
+      "sha256": "e8781418f0b1c3e018cbed875a7274445e22d6217a4af805951ae90c53cc8171",
       "executable": false
     },
     "src/app-style/dialogs.css": {
@@ -5312,7 +5312,7 @@
       "executable": false
     },
     "src/imports/SlackHistory.tsx": {
-      "sha256": "2edeec6de559e2c532415c1c8816d984fdc897c8406b18ce5504fff27c83b1aa",
+      "sha256": "38586020c36c8577490b5395d58f8b9d67a8343f042c716fc042f30bd5791b5c",
       "executable": false
     },
     "src/imports/source.ts": {
