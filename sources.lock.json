@@ -3947,7 +3947,7 @@
       "executable": false
     },
     "tests/operator-recovery.test.mjs": {
-      "sha256": "d6f77e282eb88ee6ed7c472b4f399e96a05808199a5297cd8931e463c637d464",
+      "sha256": "dc45d3db59a9df84ba5ba8ce3419887e0618d2d0a54d082a50b572303af5076f",
       "executable": false
     },
     "tests/operator-security.mjs": {
