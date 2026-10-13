@@ -6,19 +6,27 @@ export type PushSettings=Choices&{problems:{error:string;state:string}[];notDeli
 const decode=(value:string)=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))
 const STORE='nook.push.device'
 const supported=()=>typeof window!=='undefined'&&'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window
-export function usePush(user:string,request:TeamRequest,refresh:number|string){
+export function usePush(user:string,request:TeamRequest,refresh:number|string,privateSignal:AbortSignal){
  const [settings,setSettings]=useState<PushSettings|null>(null),[permission,setPermission]=useState<NotificationPermission|'unsupported'>('unsupported'),[enabled,setEnabled]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false)
  const [install,setInstall]=useState<any>(null),[standalone,setStandalone]=useState(false)
  useEffect(()=>{const show=(event:Event)=>{event.preventDefault();setInstall(event)};const installed=()=>{setStandalone(true);setInstall(null)};setStandalone(matchMedia('(display-mode: standalone)').matches);window.addEventListener('beforeinstallprompt',show);window.addEventListener('appinstalled',installed);return()=>{window.removeEventListener('beforeinstallprompt',show);window.removeEventListener('appinstalled',installed)}},[])
  const device=useRef<string|null>(null),registration=useRef<ServiceWorkerRegistration|null>(null),current=useRef(user);current.current=user
  const page=useRef(crypto.randomUUID()),inflight=useRef<Promise<void>|null>(null)
+ // Delivery status belongs to the account, even without browser push support.
+ const settingsVersion=useRef(0)
+ const loadSettings=useCallback(async()=>{
+  if(privateSignal.aborted)return
+  const version=++settingsVersion.current,value=await request<{push:PushSettings}>('/api/notify')
+  if(!privateSignal.aborted&&current.current===user&&version===settingsVersion.current)setSettings(value.push)
+ },[request,user,privateSignal])
  const post=useCallback((path:string,value:unknown,method='POST')=>request(path,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(value)}),[request])
  const sync=useCallback(async()=>{
-  if(document.visibilityState!=='visible')return
+  if(privateSignal.aborted||document.visibilityState!=='visible')return
   const value=await request<{active:string[];badge:number}>('/api/devices/sync')
   const reg=registration.current??await navigator.serviceWorker.getRegistration('/')
+  if(privateSignal.aborted||current.current!==user)return
   reg?.active?.postMessage({type:'nook-sync',user,...value})
- },[request,user])
+ },[request,user,privateSignal])
  const reconcile=useCallback(async()=>{
   if(!supported())return
   if(inflight.current)return inflight.current
@@ -49,29 +57,37 @@ export function usePush(user:string,request:TeamRequest,refresh:number|string){
  },[user,request,post,sync])
  useEffect(()=>{
   let gone=false
+  setSettings(null);setError('');setBusy(false)
   if(!supported()){setPermission('unsupported');return}
-  const load=async()=>{try{const value=await request<{push:PushSettings}>('/api/notify');if(!gone)setSettings(value.push);await reconcile()}catch(e){if(!gone)setError(e instanceof Error?e.message:'Push unavailable')}}
-  void load()
+  void reconcile().catch(e=>{if(!gone&&!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')})
   return()=>{gone=true;device.current=null}
- },[user,request,reconcile])
+ },[user,request,reconcile,privateSignal])
  useEffect(()=>{
-  if(!supported())return
   let gone=false
   const heartbeat=async()=>{try{
-   if(device.current)await post('/api/devices/presence',{id:device.current,page:page.current,visible:document.visibilityState==='visible'})
-   if(document.visibilityState==='visible'){await sync();if(!gone)setPermission(Notification.permission)}
-  }catch(e){if(!gone)setError(e instanceof Error?e.message:'Push unavailable')}}
+   if(privateSignal.aborted)return
+   if(supported()&&device.current)await post('/api/devices/presence',{id:device.current,page:page.current,visible:document.visibilityState==='visible'})
+   if(document.visibilityState==='visible'){
+    await Promise.all([loadSettings(),...(supported()?[sync()]:[])])
+    if(!gone&&!privateSignal.aborted&&supported())setPermission(Notification.permission)
+   }
+  }catch(e){if(!gone&&!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')}}
   const visible=()=>{void heartbeat();if(document.visibilityState==='visible')void reconcile().catch(e=>setError(e.message))}
-  const changed=(event:MessageEvent)=>{if(event.data?.type==='nook-resubscribe')void reconcile().catch(e=>setError(e.message))};navigator.serviceWorker.addEventListener('message',changed);document.addEventListener('visibilitychange',visible);const timer=setInterval(()=>{void heartbeat()},15_000);void heartbeat()
-  return()=>{gone=true;clearInterval(timer);document.removeEventListener('visibilitychange',visible);navigator.serviceWorker.removeEventListener('message',changed);if(device.current)void post('/api/devices/presence',{id:device.current,page:page.current,visible:false}).catch(()=>{})}
- },[post,sync,reconcile])
- useEffect(()=>{if(supported())void sync().catch(()=>{})},[refresh,sync])
- const change=useCallback(async(value:Partial<Choices>)=>{setBusy(true);setError('');try{const next=await post('/api/notify',{push:value},'PATCH');setSettings(next.push)}catch(e){setError(e instanceof Error?e.message:'Push unavailable')}finally{setBusy(false)}},[post])
+  const changed=(event:MessageEvent)=>{if(event.data?.type==='nook-resubscribe')void reconcile().catch(e=>setError(e.message))};if(supported())navigator.serviceWorker.addEventListener('message',changed);document.addEventListener('visibilitychange',visible);const timer=setInterval(()=>{void heartbeat()},15_000)
+  return()=>{gone=true;clearInterval(timer);document.removeEventListener('visibilitychange',visible);if(supported())navigator.serviceWorker.removeEventListener('message',changed);if(device.current)void post('/api/devices/presence',{id:device.current,page:page.current,visible:false}).catch(()=>{})}
+ },[post,sync,reconcile,loadSettings,privateSignal])
+ useEffect(()=>{
+  let gone=false
+  void loadSettings().catch(e=>{if(!gone&&!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')})
+  if(supported())void sync().catch(()=>{})
+  return()=>{gone=true}
+ },[refresh,sync,loadSettings,privateSignal])
+ const change=useCallback(async(value:Partial<Choices>)=>{setBusy(true);setError('');try{const next=await post('/api/notify',{push:value},'PATCH');if(!privateSignal.aborted&&current.current===user){settingsVersion.current++;setSettings(next.push)}}catch(e){if(!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')}finally{if(!privateSignal.aborted)setBusy(false)}},[post,user,privateSignal])
  const enable=useCallback(async()=>{
   if(!supported())return
   setBusy(true);setError('')
-  try{const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;setPermission(permission);if(permission!=='granted')return;localStorage.setItem('nook.push.'+user,'on');await reconcile();if(!settings?.mentions&&!settings?.urgent&&!settings?.direct&&!settings?.threads){const next=await post('/api/notify',{push:{mentions:true}},'PATCH');setSettings(next.push)}}catch(e){setError(e instanceof Error?e.message:'Push unavailable; try enabling again')}finally{setBusy(false)}
- },[user,reconcile,post,settings])
+  try{const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;setPermission(permission);if(permission!=='granted')return;localStorage.setItem('nook.push.'+user,'on');await reconcile();if(!settings?.mentions&&!settings?.urgent&&!settings?.direct&&!settings?.threads){const next=await post('/api/notify',{push:{mentions:true}},'PATCH');if(!privateSignal.aborted&&current.current===user){settingsVersion.current++;setSettings(next.push)}}}catch(e){if(!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable; try enabling again')}finally{if(!privateSignal.aborted)setBusy(false)}
+ },[user,reconcile,post,settings,privateSignal])
  const disable=useCallback(async()=>{
   setBusy(true);setError('')
   try{await clearPushNotices();localStorage.removeItem('nook.push.'+user);let stored;try{stored=JSON.parse(localStorage.getItem(STORE)??'null')}catch{}

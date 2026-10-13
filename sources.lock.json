@@ -2879,7 +2879,7 @@
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "0210feff36218de7fa5054488c2162d5671e619b0cc028e1a3743d0b3e1d348c",
+      "sha256": "2cf6a28c598999717e026f876d9d28d7f5903ec2e0c02ca5e94757002f336d1f",
       "executable": false
     },
     "src/client.tsx": {
@@ -3491,7 +3491,7 @@
       "executable": false
     },
     "src/push/client.ts": {
-      "sha256": "593c579a41411d8a180004cddc4fe5cf11256ee701ea2a81371c080d28dbb3ba",
+      "sha256": "d3ca78b73b00ef5be16fb9e22ceaae52c4df46b594d41b8a6a33a2caac3b9c4b",
       "executable": false
     },
     "src/push/crypto.ts": {
