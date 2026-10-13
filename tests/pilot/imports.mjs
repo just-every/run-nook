@@ -4,6 +4,7 @@ import {expect} from '@playwright/test';
 import {realisticFixture,realisticUsers} from '../slack-import/realistic-fixture.mjs';
 import {verifyCorpus} from './census.mjs';
 import {pilotPhase,trackImport} from './progress.mjs';
+import {completeImportCleanup} from './cleanup.mjs';
 
 // The full 3,547-entry plan applies in durable batches that fill each request's
 // statement budget (about 80 entries): under three minutes locally. The budget
@@ -117,6 +118,7 @@ export async function exerciseUndo({owner,ownerContext,origin,stamp,name,importe
  pilotPhase('undo-files-start',{width,files:files.length});
  for(let offset=0;offset<files.length;offset+=2)await Promise.all(files.slice(offset,offset+2).map(async file=>assert.equal((await ownerContext.request.get(`${origin}/api/attachments/${file.id}/download`)).status(),404,'undo withdraws every supplied private file')));
  pilotPhase('undo-files-complete',{width,files:files.length});
+ await completeImportCleanup({context:ownerContext,origin,files:files.length,width});
  pilotPhase('guarded-undo-start',{width});
  await owner.goto(`${origin}/app?conversation=${imported.shared.id}`);const live=`Live work after import ${stamp}`;await owner.getByLabel('Message '+imported.shared.name,{exact:true}).fill(live);await owner.getByRole('button',{name:'Send',exact:true}).click();await owner.getByText(live,{exact:true}).waitFor();
  await owner.goto(origin+'/imports');const job=owner.locator('.import-job').filter({has:owner.getByRole('heading',{name:new RegExp('^general '+stamp+',')})});

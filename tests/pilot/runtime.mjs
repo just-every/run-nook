@@ -19,7 +19,10 @@ export async function pilotInstallation(root){
  let dev;
  const run=async(verb,...args)=>{
   try{return (await execute(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs',verb,...args],{cwd:directory,env,timeout:20*60_000,maxBuffer:8*1024*1024})).stdout;}
-  catch(error){throw Error(`Pilot rer ${verb} failed (exit ${error.code ?? 'unknown'}); CLI output withheld because it can contain sign-in credentials.`);}
+  catch(error){
+   const pending=String(error.stdout??'').includes('(reconcile_pending_object_work_before_export)')||String(error.stderr??'').includes('(reconcile_pending_object_work_before_export)');
+   throw Error(`Pilot rer ${verb} failed (exit ${error.code ?? 'unknown'}${pending?'; reconcile_pending_object_work_before_export':''}); CLI output withheld because it can contain sign-in credentials.`);
+  }
  };
  const stop=async()=>{
   if(!dev||dev.exitCode!==null||dev.signalCode!==null)return;
