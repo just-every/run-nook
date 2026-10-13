@@ -13,6 +13,10 @@ pin them). Install the `rer` command once: `npx -y @runeditrun/rer cli install`
 `git clone https://github.com/just-every/run-nook.git` and `cd run-nook`; every
 command below runs from that checkout.
 
+The commands use an example local identity. Replace `you@example.com` and
+`Your name` with your own email address and name, and use the same email address
+in the outbox command below.
+
 ```sh
 pnpm install --frozen-lockfile          # or: rer install
 rer setup --owner-email you@example.com --owner-name 'Your name'

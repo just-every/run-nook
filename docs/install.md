@@ -8,9 +8,11 @@ Install the pinned project dependencies, set up the first owner, then start Nook
 
 ```sh
 rer install
-rer setup --owner-email you@example.com --owner-name 'Your name'
+rer setup
 rer dev
 ```
+
+Run setup in a terminal and enter your own email address when prompted. To set your display name too, add `--owner-name` followed by your own name in quotes to `rer setup`.
 
 Setup creates private local settings, builds the Worker, applies the local D1 migrations, claims the first owner and stops the app. Start `rer dev` and open the printed `RER_OPEN` link on this computer; it exchanges this checkout's local key for the owner's development session. On a fresh installation, that visit opens `/setup` to confirm the account before Nook opens the workspace. Keep the `RER_OPEN` link private.
 
