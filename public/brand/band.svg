@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="rose" x2="0" y2="1"><stop stop-color="#fbe1da"/><stop offset="1" stop-color="#f2b0a5"/></linearGradient>
+    <linearGradient id="berry" x2="0" y2="1"><stop stop-color="#c24e5b"/><stop offset="1" stop-color="#8b3f4b"/></linearGradient>
+  </defs>
+  <path d="M0 104C220 35 363 165 602 179S1046 14 1250 64s160 64 190 56v180H0Z" fill="url(#rose)"/>
+  <path d="M0 142C217 84 377 204 605 209S1039 68 1253 106s155 63 187 51v143H0Z" fill="#fffdfa" opacity=".7"/>
+  <path d="M0 181C209 110 401 233 619 237S1037 122 1242 146s150 62 198 45v109H0Z" fill="url(#berry)"/>
+  <path d="M0 251C210 176 397 294 622 275S1045 188 1249 219s159 54 191 45v36H0Z" fill="#2a1d21"/>
+  <path d="M0 153C216 94 381 216 610 217S1035 87 1250 119s156 64 190 52" fill="none" stroke="#c24e5b" stroke-width="2" opacity=".5"/>
+</svg>

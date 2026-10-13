@@ -18,7 +18,7 @@ jobs:
         include:
           - stage: core
             # rer verify ends with Base's hosted-output check on the same build.
-            command: pnpm verify:core && node scripts/base-cli/cli/hosted-output.mjs . owner-deployment.json
+            command: pnpm verify:core && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" .
           - stage: pilot 1440
             command: pnpm test:pilot --width 1440
           - stage: pilot 390

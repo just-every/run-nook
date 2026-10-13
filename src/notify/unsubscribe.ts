@@ -1,5 +1,5 @@
-import {fontHead} from '../platform/first-run/font-head'
-import {themeFrame} from '../platform/first-run/theme-frame'
+import {fontHead} from '../base/font-head'
+import {themeFrame} from '../base/theme-frame'
 import {theme} from '../theme'
 import {tokenHash} from './run'
 // The "turn these off" link in every notification email works without a

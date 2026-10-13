@@ -21,8 +21,8 @@ for(const verb of ['setup','dev','outbox','verify','export','reset','import','de
 const freePort=()=>new Promise((ok,bad)=>{const server=createServer();server.once('error',bad);server.listen(0,'127.0.0.1',()=>{const {port}=server.address();server.close(()=>ok(port))})})
 const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),bin=await mkdtemp(join(tmpdir(),'nook-readme-bin-'))
 // README says `rer VERB`. The global rer runs the checkout's own pinned
-// dispatcher, so the journey's `rer` does exactly that.
-await writeFile(join(bin,'rer'),'#!/bin/sh\nexec node scripts/rer.mjs "$@"\n',{mode:0o755})
+// launcher, including the foreground override, so the journey does exactly that.
+await writeFile(join(bin,'rer'),'#!/bin/sh\nexec node node_modules/@runeditrun/rer/global/rer.mjs "$@"\n',{mode:0o755})
 // The clone is a different checkout: it takes its own local operation, not verify's.
 const {RER_LOCAL_OPERATION:_,...env}={...process.env,PATH:bin+':'+process.env.PATH,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'}
 const run=line=>execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})
@@ -32,7 +32,7 @@ try{
  for(const line of lines){
   if(line==='rer verify'||(/^CLOUDFLARE_ACCOUNT_ID=/.test(line)))continue
   if(line==='rer dev'){
-   dev=spawn('bash',['-c',line],{cwd:clone,env,stdio:['ignore','pipe','pipe'],detached:true});let output=''
+   dev=spawn('bash',['-c',line+' --foreground'],{cwd:clone,env,stdio:['ignore','pipe','pipe'],detached:true});let output=''
    dev.stdout.on('data',chunk=>output+=chunk);dev.stderr.on('data',chunk=>output+=chunk)
    const ready=await new Promise((ok,bad)=>{const timer=setInterval(()=>{const url=/RER_READY (http:\/\/\S+)/.exec(output)?.[1];if(url){clearInterval(timer);ok(url)}else if(dev.exitCode!=null){clearInterval(timer);bad(Error('dev exited: '+output))}},250);setTimeout(()=>{clearInterval(timer);bad(Error('dev never became ready: '+output))},10*60_000)})
    assert.equal(ready,`http://127.0.0.1:${port}`,'dev reuses the port setup saved')
@@ -59,7 +59,7 @@ try{
  console.log('README-JOURNEY passed: fresh clone, setup, dev opened signed in, personas, key-gated outbox email link, /setup at 1440 and 390, stop, export, reset, import and deploy dry run.')
 }finally{
  await browser?.close()
- if(dev&&dev.exitCode==null&&!dev.signalCode){try{execFileSync('node',['scripts/rer.mjs','dev','--stop'],{cwd:clone,env,stdio:'ignore'})}catch{process.kill(-dev.pid,'SIGTERM')}}
+ if(dev&&dev.exitCode==null&&!dev.signalCode){try{execFileSync('node',['node_modules/@runeditrun/rer/bin/rer.mjs','dev','--stop'],{cwd:clone,env,stdio:'ignore'})}catch{process.kill(-dev.pid,'SIGTERM')}}
  await rm(clone,{recursive:true,force:true});await rm(bin,{recursive:true,force:true})
 }
 

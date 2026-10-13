@@ -14,9 +14,6 @@
       "source": {
         "kind": "local",
         "paths": [
-          "src/base/dispatch.ts",
-          "src/base/rejected-response.ts",
-          "src/base/font-response.ts",
           "scripts/operations.mjs",
           "scripts/project-operations.mjs",
           "BASE-LICENSE"
@@ -26,27 +23,12 @@
           "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
           "path": ".",
           "paths": [
-            "foundation/runtime/dispatch.ts",
-            "foundation/runtime/rejected-response.ts",
-            "foundation/runtime/font-response.ts",
             "operations/operations.mjs",
             "operations/project-operations.mjs",
             "LICENSE"
           ]
         },
         "mappings": [
-          {
-            "path": "src/base/dispatch.ts",
-            "originPath": "foundation/runtime/dispatch.ts"
-          },
-          {
-            "path": "src/base/rejected-response.ts",
-            "originPath": "foundation/runtime/rejected-response.ts"
-          },
-          {
-            "path": "src/base/font-response.ts",
-            "originPath": "foundation/runtime/font-response.ts"
-          },
           {
             "path": "scripts/operations.mjs",
             "originPath": "operations/operations.mjs"
@@ -63,25 +45,97 @@
       }
     },
     {
-      "id": "runeditrun/onboarding",
+      "id": "runeditrun/runtime",
       "role": "module",
       "source": {
         "kind": "local",
         "paths": [
-          "scripts/base-onboarding"
+          "src/base/deployment-health.ts",
+          "src/base/dispatch.ts",
+          "src/base/font-response.ts",
+          "src/base/hydration",
+          "src/base/identity.ts",
+          "src/base/lobby.ts",
+          "src/base/page-style.ts",
+          "src/base/rejected-response.ts",
+          "src/base/run-site.ts",
+          "src/base/setup-state.ts",
+          "src/base/setup.ts",
+          "src/base/static-assets.ts",
+          "src/base/theme-frame.ts"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "7477a4586c536a9b05301e51ef85a4441a065d34",
+          "revision": "8981bc2c4d9e61feca5787c83b4ed44056659dd9",
           "path": ".",
           "paths": [
-            "onboarding"
+            "foundation/runtime/deployment-health.ts",
+            "foundation/runtime/dispatch.ts",
+            "foundation/runtime/font-response.ts",
+            "foundation/runtime/hydration",
+            "foundation/runtime/identity.ts",
+            "foundation/runtime/lobby.ts",
+            "foundation/runtime/page-style.ts",
+            "foundation/runtime/rejected-response.ts",
+            "foundation/runtime/run-site.ts",
+            "foundation/runtime/setup-state.ts",
+            "foundation/runtime/setup.ts",
+            "foundation/runtime/static-assets.ts",
+            "foundation/runtime/theme-frame.ts"
           ]
         },
         "mappings": [
           {
-            "path": "scripts/base-onboarding",
-            "originPath": "onboarding"
+            "path": "src/base/deployment-health.ts",
+            "originPath": "foundation/runtime/deployment-health.ts"
+          },
+          {
+            "path": "src/base/dispatch.ts",
+            "originPath": "foundation/runtime/dispatch.ts"
+          },
+          {
+            "path": "src/base/font-response.ts",
+            "originPath": "foundation/runtime/font-response.ts"
+          },
+          {
+            "path": "src/base/hydration",
+            "originPath": "foundation/runtime/hydration"
+          },
+          {
+            "path": "src/base/identity.ts",
+            "originPath": "foundation/runtime/identity.ts"
+          },
+          {
+            "path": "src/base/lobby.ts",
+            "originPath": "foundation/runtime/lobby.ts"
+          },
+          {
+            "path": "src/base/page-style.ts",
+            "originPath": "foundation/runtime/page-style.ts"
+          },
+          {
+            "path": "src/base/rejected-response.ts",
+            "originPath": "foundation/runtime/rejected-response.ts"
+          },
+          {
+            "path": "src/base/run-site.ts",
+            "originPath": "foundation/runtime/run-site.ts"
+          },
+          {
+            "path": "src/base/setup-state.ts",
+            "originPath": "foundation/runtime/setup-state.ts"
+          },
+          {
+            "path": "src/base/setup.ts",
+            "originPath": "foundation/runtime/setup.ts"
+          },
+          {
+            "path": "src/base/static-assets.ts",
+            "originPath": "foundation/runtime/static-assets.ts"
+          },
+          {
+            "path": "src/base/theme-frame.ts",
+            "originPath": "foundation/runtime/theme-frame.ts"
           }
         ]
       }
@@ -202,138 +256,6 @@
           {
             "path": "src/base/modules/import-kit",
             "originPath": "modules/import-kit"
-          }
-        ]
-      }
-    },
-    {
-      "id": "runeditrun/cli",
-      "role": "module",
-      "source": {
-        "kind": "local",
-        "paths": [
-          "scripts/base-cli/bin/rer.mjs",
-          "scripts/base-cli/cli",
-          "scripts/base-cli/modules/job-queue",
-          "scripts/base-cli/modules/release",
-          "scripts/base-cli/modules/deploy-kit",
-          "scripts/base-cli/modules/container",
-          "scripts/base-cli/modules/integrations/core",
-          "scripts/base-cli/modules/mail",
-          "scripts/base-cli/modules/ai",
-          "scripts/base-cli/modules/portability",
-          "scripts/base-cli/modules/dependencies",
-          "scripts/base-cli/modules/operator-auth",
-          "scripts/base-cli/modules/owner-claim",
-          "scripts/base-cli/operations",
-          "scripts/base-cli/scripts/publish-check",
-          "scripts/base-cli/scripts/publish-check.mjs",
-          "scripts/base-cli/composition/git-source.mjs",
-          "scripts/base-cli/edition-authoring/manifest.mjs",
-          "scripts/base-cli/edition-authoring/files.mjs"
-        ],
-        "origin": {
-          "repository": "https://github.com/runeditrun/base.git",
-          "revision": "7477a4586c536a9b05301e51ef85a4441a065d34",
-          "path": ".",
-          "paths": [
-            "bin/rer.mjs",
-            "cli",
-            "modules/job-queue",
-            "modules/release",
-            "modules/deploy-kit",
-            "modules/container",
-            "modules/integrations/core",
-            "modules/mail",
-            "modules/ai",
-            "modules/portability",
-            "modules/dependencies",
-            "modules/operator-auth",
-            "modules/owner-claim",
-            "operations",
-            "scripts/publish-check",
-            "scripts/publish-check.mjs",
-            "composition/git-source.mjs",
-            "edition-authoring/manifest.mjs",
-            "edition-authoring/files.mjs"
-          ]
-        },
-        "mappings": [
-          {
-            "path": "scripts/base-cli/bin/rer.mjs",
-            "originPath": "bin/rer.mjs"
-          },
-          {
-            "path": "scripts/base-cli/cli",
-            "originPath": "cli"
-          },
-          {
-            "path": "scripts/base-cli/modules/job-queue",
-            "originPath": "modules/job-queue"
-          },
-          {
-            "path": "scripts/base-cli/modules/release",
-            "originPath": "modules/release"
-          },
-          {
-            "path": "scripts/base-cli/modules/deploy-kit",
-            "originPath": "modules/deploy-kit"
-          },
-          {
-            "path": "scripts/base-cli/modules/container",
-            "originPath": "modules/container"
-          },
-          {
-            "path": "scripts/base-cli/modules/integrations/core",
-            "originPath": "modules/integrations/core"
-          },
-          {
-            "path": "scripts/base-cli/modules/mail",
-            "originPath": "modules/mail"
-          },
-          {
-            "path": "scripts/base-cli/modules/ai",
-            "originPath": "modules/ai"
-          },
-          {
-            "path": "scripts/base-cli/modules/portability",
-            "originPath": "modules/portability"
-          },
-          {
-            "path": "scripts/base-cli/modules/dependencies",
-            "originPath": "modules/dependencies"
-          },
-          {
-            "path": "scripts/base-cli/modules/operator-auth",
-            "originPath": "modules/operator-auth"
-          },
-          {
-            "path": "scripts/base-cli/modules/owner-claim",
-            "originPath": "modules/owner-claim"
-          },
-          {
-            "path": "scripts/base-cli/operations",
-            "originPath": "operations"
-          },
-          {
-            "path": "scripts/base-cli/scripts/publish-check",
-            "originPath": "scripts/publish-check"
-          },
-          {
-            "path": "scripts/base-cli/scripts/publish-check.mjs",
-            "originPath": "scripts/publish-check.mjs"
-          },
-          {
-            "path": "scripts/base-cli/composition/git-source.mjs",
-            "originPath": "composition/git-source.mjs"
-          },
-          {
-            "path": "scripts/base-cli/edition-authoring/manifest.mjs",
-            "originPath": "edition-authoring/manifest.mjs"
-          },
-          {
-            "path": "scripts/base-cli/edition-authoring/files.mjs",
-            "originPath": "edition-authoring/files.mjs"
           }
         ]
       }
@@ -560,7 +482,12 @@
           "scripts/delivery/base/packaging.json",
           "scripts/delivery/base/setup-manifest.mjs",
           "rer-project.json",
-          "scripts/delivery/build-local.mjs"
+          "scripts/delivery/build-local.mjs",
+          "src/identity.ts",
+          "src/site",
+          "src/client.tsx",
+          "vite.site.config.ts",
+          "deploy-site.json"
         ]
       }
     }

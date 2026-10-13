@@ -1,3 +1,4 @@
+import {installDependencies} from '../install-dependencies.mjs';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFile,mkdtemp,rm,access} from 'node:fs/promises';
@@ -9,12 +10,13 @@ import {embeddingAuthority} from './management-authority.mjs';
 
 export async function sourceProof(root,platformRoot,revision) {
  await assert.rejects(access(resolve(root,'node_modules')),{code:'ENOENT'});
+ await installDependencies(root);
  const operations=JSON.parse(await readFile(resolve(root,'OPERATIONS.json'),'utf8'));
  const env={PATH:process.env.PATH,...Object.fromEntries(operations.requiredEnvironment.map(name=>[name,'synthetic-local-input']))};
  // First-party projects check through their rer command; operations.mjs hands over to it.
- const checked=JSON.parse(execFileSync(process.execPath,['scripts/rer.mjs','check','--json'],{cwd:root,env,encoding:'utf8'}).trim().split('\n').at(-1));
+ const checked=JSON.parse(execFileSync(process.execPath,['node_modules/@runeditrun/rer/bin/rer.mjs','check','--json'],{cwd:root,env,encoding:'utf8'}).trim().split('\n').at(-1));
  assert.equal(checked.event,'result');assert.equal(checked.ok,true);
- console.log('PASS dependency-fresh Nook operations check with named synthetic local inputs; no provider verification');
+ console.log('PASS fresh Nook locked dependency install and operations check with named synthetic local inputs; no provider verification');
  const platform=await mkdtemp(resolve(tmpdir(),'nook-part6-platform-'));
  const platformRevision=execFileSync('git',['rev-parse','HEAD'],{cwd:platformRoot,encoding:'utf8'}).trim();
  let loader;

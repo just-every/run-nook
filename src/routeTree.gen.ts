@@ -9,18 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as ImportsRouteImport } from './routes/imports'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as DocsSlugRouteImport } from './routes/docs.$slug'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -48,7 +42,6 @@ const DocsSlugRoute = DocsSlugRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/imports': typeof ImportsRoute
   '/signin': typeof SigninRoute
@@ -56,7 +49,6 @@ export interface FileRoutesByFullPath {
   '/docs/': typeof DocsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/imports': typeof ImportsRoute
   '/signin': typeof SigninRoute
@@ -65,7 +57,6 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/imports': typeof ImportsRoute
   '/signin': typeof SigninRoute
@@ -74,21 +65,13 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs/'
+  fullPaths: '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs'
-  id:
-    | '__root__'
-    | '/'
-    | '/app'
-    | '/imports'
-    | '/signin'
-    | '/docs/$slug'
-    | '/docs/'
+  to: '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs'
+  id: '__root__' | '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
   ImportsRoute: typeof ImportsRoute
   SigninRoute: typeof SigninRoute
@@ -98,13 +81,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -144,7 +120,6 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AppRoute: AppRoute,
   ImportsRoute: ImportsRoute,
   SigninRoute: SigninRoute,

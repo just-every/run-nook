@@ -2,8 +2,11 @@ import assert from 'node:assert/strict'
 import {mkdir, readFile, writeFile} from 'node:fs/promises'
 import {resolve} from 'node:path'
 import {chromium} from '@playwright/test'
+import {sitePreview} from '@runeditrun/rer/internal/cli/site-preview.mjs'
 
-const origin = new URL(process.env.TEAM_CHAT_HOMEPAGE_ORIGIN || 'http://127.0.0.1:15970')
+const instance = new URL(process.env.TEAM_CHAT_HOMEPAGE_ORIGIN || 'http://127.0.0.1:15970')
+const site = await sitePreview(resolve('dist/site'), {ports: Array.from({length: 30}, (_, i) => 18720 + i)})
+const origin = new URL(site.url)
 const evidence = resolve(process.env.TEAM_CHAT_HOMEPAGE_EVIDENCE_DIR || '/tmp/team-chat-homepage-evidence')
 const {sourceRepository} = JSON.parse(await readFile(new URL('../rer-project.json', import.meta.url), 'utf8'))
 const browser = await chromium.launch({headless: true,channel:'chromium'})
@@ -35,7 +38,7 @@ function layout(page) {
     return {
       width: innerWidth,
       scrollWidth: document.documentElement.scrollWidth,
-      h1: box('h1'), primary: box('.hero-primary'), secondary: box('.hero-secondary'), signIn: box('.site-signin'), brand: box('.site-brand'),
+      h1: box('h1'), primary: box('.hero-primary'), secondary: box('.hero-secondary'), brand: box('.site-brand'),
       alcove, cards,
       drawingFont: Math.min(...[...document.querySelectorAll(':is(.hero-alcove, .nook-drawing) :is(p, span, strong, small)')].filter(node => node.textContent.trim() && !node.closest('[aria-hidden="true"]')).map(node => Number.parseFloat(getComputedStyle(node).fontSize))),
     }
@@ -62,8 +65,8 @@ try {
   const nav = desktop.getByRole('navigation', {name: 'Primary navigation'})
   assert.equal(await desktop.locator('.site-brand').getAttribute('href'), '/')
   assert.equal(await desktop.getByRole('link', {name: 'Nook', exact: true}).count(), 1, 'the brand home link is named for the product')
-  assert.deepEqual(await nav.locator('a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['/docs', sourceRepository, '/signin'])
-  assert.equal(await desktop.locator('.hero-primary').getAttribute('href'), sourceRepository)
+  assert.deepEqual(await nav.locator('a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['/docs', sourceRepository])
+  assert.equal(await desktop.locator('.hero-primary').getAttribute('href'), '/run')
   assert.equal(await desktop.locator('.hero-secondary').getAttribute('href'), '/docs')
   assert.equal(await desktop.locator('a[href="#"], a[href=""]').count(), 0, 'no placeholder links')
   assert.equal(await desktop.locator(':is(.hero-alcove, .nook-drawing) :is(button, input, a)').count(), 0, 'the drawings contain no false controls')
@@ -107,13 +110,13 @@ try {
     const page = await open(viewport)
     const narrow = await layout(page)
     assert.ok(narrow.scrollWidth <= narrow.width, `${viewport.width}px has no horizontal overflow`)
-    assert.ok(narrow.signIn.right <= narrow.width && narrow.brand.left >= 0, `${viewport.width}px header stays on screen`)
+    assert.ok(narrow.brand.left >= 0, `${viewport.width}px header stays on screen`)
     assert.ok(narrow.alcove.left >= 0 && narrow.alcove.right <= narrow.width, `${viewport.width}px alcove stays on screen`)
     assert.ok(cardsFitAlcove(narrow), `${viewport.width}px cards sit inside the alcove, aligned and apart`)
     assert.ok(narrow.drawingFont >= 13, `${viewport.width}px drawing strings stay readable`)
     if (viewport.width === 390) {
       assert.ok(narrow.secondary.bottom < 844, 'both actions are above the 390 fold')
-      for (const selector of ['.site-brand', '.site-nav a[href="/docs"]', '.site-signin', '.hero-primary', '.hero-secondary']) {
+      for (const selector of ['.site-brand', '.site-nav a[href="/docs"]', '.hero-primary', '.hero-secondary']) {
         const bounds = await page.locator(selector).boundingBox()
         assert.ok(bounds && bounds.height >= 44, `${selector} is a 44px tap target`)
       }
@@ -146,7 +149,12 @@ try {
   assert.ok(await noJs.locator('.hero-sub').isVisible(), 'SSR hero is readable without JavaScript')
   assert.equal(await noJs.locator('.hero-alcove .alcove-card').count(), 2, 'SSR drawing is present without JavaScript')
   assert.equal(await noJs.locator('.home-section .nook-drawing').evaluateAll(nodes => nodes.length >= 4 && nodes.every(node => getComputedStyle(node).opacity === '1')), true, 'every section drawing is in place without JavaScript')
-  await noJs.locator('.site-signin').click()
+  assert.equal(await noJs.locator('a[href="/signin"]').count(), 0, 'the run site omits instance-only links')
+  await noJs.goto(new URL('/docs', origin).href)
+  await noJs.locator('.docs-menu summary').click()
+  await noJs.locator('.docs-menu-list a[href="/docs/install"]').click()
+  assert.equal(new URL(noJs.url()).pathname, '/docs/install', 'static mobile navigation works without JavaScript')
+  await noJs.goto(new URL('/signin', instance).href)
   assert.equal(new URL(noJs.url()).pathname, '/signin', 'Sign in reaches the existing route without JavaScript')
   assert.equal(await noJs.getByRole('navigation', {name: 'Public documentation'}).getByRole('link', {name: 'Read the Nook guides'}).getAttribute('href'), '/docs')
   const emailInput = noJs.getByLabel(/email/i)
@@ -163,7 +171,7 @@ try {
   assert.equal(await noJs.getByRole('heading', {level: 1}).count(), 1, 'sign-in opens the public docs without JavaScript')
 
   const docs = await open({width: 390, height: 844})
-  await docs.goto(new URL('/docs', origin).href, {waitUntil: 'networkidle'})
+  await docs.goto(new URL('/docs', instance).href, {waitUntil: 'networkidle'})
   const docsMenu = docs.locator('.docs-menu details')
   const docsMenuSummary = docsMenu.locator('summary')
   assert.equal(await docsMenuSummary.isVisible(), true, 'the narrow docs view exposes a section menu')
@@ -181,4 +189,5 @@ try {
 } finally {
   for (const context of contexts) await context.close()
   await browser.close()
+  await site.close()
 }

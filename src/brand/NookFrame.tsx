@@ -1,3 +1,5 @@
+import { Children } from 'react'
+import { HydrationUnit } from '../base/hydration/unit'
 import type {ReactNode} from 'react'
 import {NookMark} from './NookMark'
 import {accentStyle} from './accent'
@@ -11,7 +13,7 @@ export function NookFrame({id, label, children}: {id: string; label: string; chi
     <a className="frame-skip" href={'#' + id} onClick={event => {event.preventDefault(); document.getElementById(id)?.focus()}}>{label}</a>
     <a className="frame-brand" href="/" aria-label="Nook home"><NookMark className="frame-mark"/><span aria-hidden="true">nook</span></a>
     <div className="frame-nook">
-      <main id={id} tabIndex={-1} className="frame-card">{children}</main>
+      <main id={id} tabIndex={-1} className="frame-card">{Children.map(children, child => <HydrationUnit>{child}</HydrationUnit>)}</main>
     </div>
   </div>
 }

@@ -2,7 +2,7 @@
 // used only by the owner-account deploy test.
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
-import { hash } from '../scripts/base-cli/modules/deploy-kit/validation.mjs';
+import { hash } from '@runeditrun/rer/internal/modules/deploy-kit/validation.mjs';
 export function providerFixture() {
   const accountId = 'a'.repeat(32); const token = 'test-only-provider-token';
   const state = {calls:[],writes:[],databases:[],buckets:[],queues:[],namespaces:[],settings:null,version:null,deployments:[],secrets:[],subdomain:false,schedules:[],objects:new Map(),failSql:null,healthOverride:null};

@@ -1,10 +1,10 @@
 import {writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
-import {operatorInstaller,developmentTarget,previewTarget} from '../base-onboarding/operator-installer.mjs';
-import {commandAdapter as createCommandAdapter} from '../base-cli/cli/adapter.mjs';
+import {operatorInstaller,developmentTarget,previewTarget} from '@runeditrun/rer/operator-installer';
+import {commandAdapter as createCommandAdapter} from '@runeditrun/rer/adapter';
 import {deployment} from '../deployment/command.mjs';
-import {readSettings} from '../base-onboarding/adapter-settings.mjs';
-import {refuse} from '../base-cli/cli/errors.mjs';
+import {readSettings} from '@runeditrun/rer/adapter-settings';
+import {refuse} from '@runeditrun/rer/errors';
 import {assertBuildStateSafe} from '../persistence.mjs';
 import {features} from './ui/seed.mjs';
 import {localPrerequisites,existingIdentity} from '../local/prerequisites.mjs';
@@ -28,9 +28,11 @@ export const commandAdapter=createCommandAdapter(lifecycle,{
  product:'Nook',browserModule:'scripts/installer/ui/seed.mjs',setup:{manifestFile:'rer-setup.json'},
  input:{names:{email:'OWNER_EMAIL',name:'displayName'}},
  dev:developmentTarget,preview:previewTarget,verify:['pnpm',['run','verify:app']],
- deploy:deployment(lifecycle),portability,
+ deploy:Object.assign(deployment(lifecycle),{declaration:'owner-deployment.json'}),portability,
  // rer verify's hosted-output check reads the declaration Nook's own deploy uses.
  deployDeclaration:'owner-deployment.json',
+ site:{entry:'src/site/pages.tsx',output:'dist/site',declaration:'deploy-site.json',config:'vite.site.config.ts'},
+ publicPages:['/','/signin','/docs','/docs/install'],
  // Local dev identity: the local-only Worker entry, the build output rer build scans for the dev layer,
  // and the kept end-to-end email-link test.
  devIdentity:{entry:'src/server.dev.ts',output:['dist'],emailLinkTest:'tests/readme-journey.mjs'},

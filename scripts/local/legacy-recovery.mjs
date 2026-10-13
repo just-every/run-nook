@@ -1,11 +1,11 @@
 import {lstat} from 'node:fs/promises';
-import {policy} from '../base-cli/modules/portability/catalogue.mjs';
-import {createPortability} from '../base-cli/modules/portability/index.mjs';
-import {createImport,uploadPart,finalizeImport,abortImport} from '../base-cli/modules/portability/import.mjs';
-import {readLegacyArchive,ArchiveVerifier} from '../base-cli/modules/portability/format.mjs';
-import {fileRecords,exportArchive} from '../base-cli/modules/portability/files.mjs';
-import {ensureLegacyAudit,legacyEmptyTables,requireLegacyEmpty} from '../base-cli/modules/portability/legacy-safety.mjs';
-import {PortabilityError} from '../base-cli/modules/portability/storage.mjs';
+import {policy} from '@runeditrun/rer/modules/portability/catalogue';
+import {createPortability} from '@runeditrun/rer/modules/portability';
+import {createImport,uploadPart,finalizeImport,abortImport} from '@runeditrun/rer/modules/portability/import';
+import {readLegacyArchive,ArchiveVerifier} from '@runeditrun/rer/modules/portability/format';
+import {fileRecords,exportArchive} from '@runeditrun/rer/modules/portability/files';
+import {ensureLegacyAudit,legacyEmptyTables,requireLegacyEmpty} from '@runeditrun/rer/modules/portability/legacy-safety';
+import {PortabilityError} from '@runeditrun/rer/modules/portability/storage';
 // Base's backup-only v1 recovery (modules/portability/legacy-files.mjs), with
 // one difference: which tables a new Nook installation leaves non-empty. Base
 // requires every table to be empty, but a fresh Nook has rows that are not data:

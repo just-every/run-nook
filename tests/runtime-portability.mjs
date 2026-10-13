@@ -4,7 +4,7 @@ import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {transfer} from '../scripts/local/transfer.mjs';
-import {makePart,ArchiveVerifier,ContentVerifier,readArchive} from '../scripts/base-cli/modules/portability/format.mjs';
+import {makePart,ArchiveVerifier,ContentVerifier,readArchive} from '@runeditrun/rer/modules/portability/format';
 import {recoverNormalizedFixture,normalizedFixtureOwner} from './recovery-support.mjs';
 import {signIn} from './auth-support.mjs';
 import {source} from './import-fixture.mjs';

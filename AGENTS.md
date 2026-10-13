@@ -28,16 +28,16 @@ accepted only by its assignee; imported history never creates unread, attention
 or accepted work.
 
 Keep product policy in `src/family/team-chat`, sign-in and D1 access in
-`src/platform` and routing in `src/server.ts`. Files under `scripts/base-cli`,
-`scripts/base-onboarding`, `scripts/edition-authoring`, `src/base` and the other
+`src/platform` and routing in `src/server.ts`. Files under `scripts/edition-authoring`, `src/base` and the other
 paths in `base-copies.json` are byte-exact Base copies: change them only by
 refreshing from Base, never by local edits. Migrations are additive; never edit
 one that has shipped. After an intentional source change run
-`node scripts/edition-authoring/cli.mjs lock`. To move to a newer Base, export the CLI from a
-Base checkout (`node <base>/scripts/export-cli.mjs .`), run
-`node <base>/edition-authoring/cli.mjs refresh-base <commit> --base <base>`, then `verify-base` and `lock`.
+`node scripts/edition-authoring/cli.mjs lock`. The CLI and installer come from the exact `@runeditrun/rer` devDependency.
+To update them, pin a published package version and refresh the lockfile. Refresh
+individual runtime copies from the reviewed Base commit, record them with
+`record-base`, then run `verify-base` and `lock`.
 Copy no Base tests. `migrations/0005_operator_auth.sql` is an applied migration kept as shipped (it is not a Base copy):
-Base's later operator-auth schema changes arrive as new numbered migrations, like `0015_dev_sessions.sql`. Nook's look on the installer, `/setup` and the sign-in confirmation page is `public/rer-theme.css` (tokens and Inter only; `src/theme.ts` and the installer descriptor point at it). Nook owns its fonts and favicon: `public/fonts/fonts.css`, `public/favicon.svg` and `src/base/font-head.ts`
+Base's later operator-auth schema changes arrive as new numbered migrations, like `0015_dev_sessions.sql`. Nook's look on the installer, `/setup` and the sign-in confirmation page is `public/rer-theme.css` (tokens and Nook Display/Nook Text fonts; `src/theme.ts` and the installer descriptor point at it). Nook owns its fonts and favicon: `public/fonts/fonts.css`, `public/favicon.svg` and `src/base/font-head.ts`
 (not a Base copy) link the fonts and the icon once from the root head, the native sign-in documents and the
 first-run page; Base's Outfit default does not apply. Base copies import the names `fontHead` and `fontLinks`
 from that file, so they keep their names although the list carries the icon link too.

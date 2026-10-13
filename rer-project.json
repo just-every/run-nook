@@ -9,9 +9,9 @@
     "artifactFile": "nook-worker-artifact.json"
   },
   "operations": {
-    "setup": "node scripts/rer.mjs install --non-interactive",
-    "build": "node scripts/rer.mjs build --non-interactive",
-    "verify": "node scripts/rer.mjs verify --non-interactive",
+    "setup": "pnpm install --frozen-lockfile && pnpm exec rer install --non-interactive",
+    "build": "pnpm exec rer build --non-interactive",
+    "verify": "pnpm exec rer verify --non-interactive",
     "artifact": "node scripts/build-delivery-artifact.mjs",
     "recovery": "Keep the repository and installation private. Stop Nook; retain source, private settings and all additive migrations. Use rer export to a private archive, rer import into empty inactive local state, and the documented offline identity mapping before normal sign-in. Compare re-exported records and media. Local proof is not hosted deployment acceptance; see OPERATIONS.md."
   },
