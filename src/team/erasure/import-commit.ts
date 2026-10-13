@@ -1,4 +1,4 @@
-import {retireD1ImportCustody,type D1RelatedErasure,type D1ImportContext} from '../../imports/kit'
+import {retireD1ImportCustody,D1RequestLimitError,type D1RelatedErasure,type D1ImportContext} from '../../imports/kit'
 import {importTargets} from '../../imports/target'
 import {MAPPING_VERSION} from '../../imports/ids.mjs'
 import {importDigest} from '../../family/team-chat/import-capture.mjs'
@@ -23,7 +23,15 @@ export async function eraseImportedTarget(c:Context,work:any,kind:'actor'|'messa
   if(review.destination!==job.owner||review.namespace!==job.namespace)throw Error('Import custody binding changed')
   // Native rows, the portability fence, the redaction checkpoint and import custody commit in one batch.
   const ctx:D1ImportContext={destination:job.owner,namespace:job.namespace,mappingVersion:MAPPING_VERSION,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence} AND (${scope.condition})`,params:[...c.credentials,...scope.params]})}}
-  await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint());return
+  try{await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint())}
+  catch(error){
+   // Base redacts shared fields in one atomic request, about 100 peer messages.
+   // Refused before any write, the person's erasure still completes; those
+   // reactions keep the Slack ID (docs/deleting-and-erasing.md).
+   if(!(error instanceof D1RequestLimitError)||!related?.fields)throw error
+   await retireD1ImportCustody({target:{kind,id:target},values,related:{...related,fields:undefined}},statements,ctx,await f.checkpoint())
+  }
+  return
  }
  // The original capture importer predates import-kit. Its immutable digest is
  // the authoritative format discriminator, and absence is guarded at commit.
