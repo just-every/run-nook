@@ -14,8 +14,10 @@ self.addEventListener('push',event=>event.waitUntil((async()=>{
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{
  const url=safeURL(event.notification.data?.url),windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
  const existing=windows.find(client=>new URL(client.url).origin===self.location.origin&&new URL(client.url).pathname==='/app');
- // Navigating uses the ordinary authenticated /app loader and current ACL.
- if(existing){await existing.navigate(url);await existing.focus()}else await self.clients.openWindow(url);
+ // Restore foreground while the clicked client is still live. Navigation can
+ // replace its WindowClient; never focus the pre-navigation object afterward.
+ // The ordinary authenticated /app loader still enforces current ACL.
+ if(existing){const focused=await existing.focus();await focused.navigate(url)}else await self.clients.openWindow(url);
 })())});
 self.addEventListener('message',event=>event.waitUntil((async()=>{
  const source=event.source;if(!source?.id)return;const client=await self.clients.get(source.id);if(!client)return;

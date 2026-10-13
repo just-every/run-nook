@@ -7,7 +7,7 @@ export function PushControl({push}:{push:ReturnType<typeof usePush>}){
  {settings&&<>{choice('mentions','Mentions and commitments')}{choice('urgent','Urgent requests')}{choice('urgentQuiet','Let urgent requests through quiet time')}{choice('direct','Direct messages')}{choice('threads','Replies to threads I follow')}</>}
  {error&&<p role="alert">{error}</p>}{settings?.problems.length? <p role="status">Push not delivered: {settings.problems[0].error}{settings.problems[0].state==='retrying'?' (retrying)':''}. If this device is no longer subscribed, enable it again.</p>:null}
  {!!settings?.notDelivered.length&&<p>Push not delivered to {settings.notDelivered[0].recipient}: {settings.notDelivered[0].error}.</p>}
- {!!settings?.workspace?.count&&<p>Workspace: {settings.workspace.count} push deliveries need attention.</p>}
+ {!!settings?.workspace?.count&&<p>Workspace: {settings.workspace.count} push deliveries need attention; latest: {settings.workspace.error}{settings.workspace.state==='retrying'?' (retrying)':''}.</p>}
  {!standalone&&(install?<button className="soft-button" onClick={installApp}>Install Nook</button>:<p>Install Nook from your browser menu. On iPhone or iPad, use Share → Add to Home Screen.</p>)}
  </section>
 }
