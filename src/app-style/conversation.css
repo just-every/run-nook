@@ -36,7 +36,8 @@
 .nook-app .message-tools { position: absolute; top: -14px; right: var(--s2); z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface-raised); box-shadow: var(--shadow-pop); }
 .nook-app .message-tools > .icon-button, .nook-app .message-tools .menu > summary { width: 30px; height: 30px; font-size: 16px; line-height: 1; }
 .nook-app .message-tools:has(details[open]) { z-index: 6; }
-.nook-app .message-tools .popover .erase-item { color: var(--brand-berry); }
+/* Darker berry keeps the destructive label readable on the tray's hover wash. */
+.nook-app .message-tools .popover .erase-item { color: #b04451; }
 .nook-app .message-tools .popover.strip { right: 0; }
 /* The More menu opens along the tray, in its own band, so while it is open (also after an edit dialog hands focus back
    to Edit) it never covers the message below or that message's tray. */
