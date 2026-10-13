@@ -2,6 +2,7 @@ import {useCallback,useEffect,useRef,useState} from 'react'
 import {api,ApiError,projection,attentionPages,windowKey} from './api'
 import {useAttentionWake} from './useAttentionWake'
 import {usePrivateScope} from './usePrivateScope'
+import {clearPushNotices} from '../push/notices'
 import type {Attention,Conversation,InitialWorkspace,LocationState,Person,Projection} from './types'
 const emptyAttention:Attention={items:[],deferredCount:0,observedAt:0,dndUntil:null,nextWakeAt:null}
 export function useWorkspace(initial:InitialWorkspace,route:LocationState) {
@@ -26,7 +27,7 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState) {
  },[])
  const onError=useCallback((e:unknown)=>{
   if(privateSignal.aborted)return
-  if(e instanceof ApiError && e.status===401){if(leaving.current)return;leaving.current=true;clearPrivate();setConversations([]);setUsers([]);sessionStorage.clear();window.location.replace('/signin');return}
+  if(e instanceof ApiError && e.status===401){if(leaving.current)return;leaving.current=true;clearPrivate();setConversations([]);setUsers([]);sessionStorage.clear();void clearPushNotices().finally(()=>window.location.replace('/signin'));return}
   if(e instanceof ApiError && e.status===403)clearPrivate()
   setError(e instanceof Error?e.message:'Something went wrong. Please try again.')
  },[clearPrivate,privateSignal])

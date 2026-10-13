@@ -1,0 +1,16 @@
+import type {Context} from '../platform/storage/context'
+import {fail} from '../family/team-chat/domain'
+const fields={mentions:'push_mentions',urgent:'push_urgent',urgentQuiet:'push_urgent_quiet',direct:'push_direct',threads:'push_threads'} as const
+export async function pushSettings(c:Context){
+ const p=await c.one('SELECT push_mentions,push_urgent,push_urgent_quiet,push_direct,push_threads FROM nook_notify_preferences WHERE user=?',[c.uid])
+ const since=Date.now()-7*86400_000
+ const problems=await c.rows("SELECT error,state,updated FROM nook_notify_queue WHERE channel='push' AND user=? AND state IN ('retrying','failed') AND updated>? ORDER BY updated DESC LIMIT 5",[c.uid,since])
+ const caused=await c.rows("SELECT q.error,q.state,q.updated,o.display_name AS recipient FROM nook_notify_queue q JOIN oa_operators o ON o.id=q.user WHERE q.channel='push' AND q.actor=? AND q.state IN ('retrying','failed') AND q.updated>? ORDER BY q.updated DESC LIMIT 5",[c.uid,since])
+ const workspace=c.session.operator.role==='owner'?await c.one("SELECT count(*) AS count FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>?",[since]):null
+ return {...Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,!!p?.[v]])),problems,notDelivered:caused,workspace}
+}
+export function pushPreferenceStatements(c:Context,input:unknown){
+ if(!input||typeof input!=='object'||Array.isArray(input)||!Object.keys(input).length||Object.entries(input).some(([k,v])=>!Object.hasOwn(fields,k)||typeof v!=='boolean'))fail(400,'Only boolean push mentions, urgent, urgentQuiet, direct and threads choices are supported')
+ const entries=Object.entries(input as Record<string,boolean>)
+ return [c.sql('INSERT OR IGNORE INTO nook_notify_preferences(user,updated) VALUES(?,?)',c.uid,Date.now()),c.sql(`UPDATE nook_notify_preferences SET ${entries.map(([k])=>fields[k as keyof typeof fields]+'=?').join(',')},updated=? WHERE user=?`,...entries.map(([,v])=>+v),Date.now(),c.uid)]
+}

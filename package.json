@@ -30,7 +30,7 @@
     "onboard": "node scripts/install.mjs",
     "build:app": "vite build",
     "verify:app": "pnpm verify:core && pnpm test:pilot",
-    "verify:core": "pnpm test:base && pnpm test && pnpm run build:app && pnpm typecheck && pnpm test:runtime && pnpm test:readme && pnpm test:notify",
+    "verify:core": "pnpm test:base && pnpm test && pnpm run build:app && pnpm typecheck && pnpm test:runtime && pnpm test:readme && pnpm test:notify && pnpm test:push",
     "typecheck": "tsc --noEmit",
     "test": "node --test --test-concurrency=2 tests/*.test.mjs",
     "test:runtime": "node tests/runtime.mjs",
@@ -38,7 +38,8 @@
     "test:readme": "node tests/readme-journey.mjs",
     "test:pilot": "node tests/pilot-journey.mjs",
     "test:base": "node scripts/edition-authoring/cli.mjs check && node scripts/edition-authoring/cli.mjs verify-base --offline && node scripts/rer.mjs check --profile first-party",
-    "test:notify": "node tests/notify-journey.mjs"
+    "test:notify": "node tests/notify-journey.mjs",
+    "test:push": "node --test --test-concurrency=1 tests/push-journey.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.33",

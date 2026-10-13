@@ -1,3 +1,5 @@
+import {devices,register,remove,presence,revokeSession} from './push/devices'
+import {pushSnapshot} from './push/run'
 import start from '@tanstack/react-start/server-entry'
 import { Hono } from 'hono'
 import { dispatch } from './base/dispatch'
@@ -39,6 +41,14 @@ api.all('/api/*', async c => {
  const p = url.pathname.split('/').filter(Boolean), action = p[1], id = p[2] ?? '', sub = p[3]
  // Authentication precedes route matching, including unknown protected paths.
  const session=await context(c.env,req.headers),team=await teamRoute(session,req,input);if(team)return team
+ if(action==='devices'){
+  if(req.method!=='GET'&&req.headers.get('origin')!==url.origin)fail(403,'Origin denied')
+  if(p.length===2&&req.method==='GET')return c.json(await devices(session))
+  if(p.length===2&&req.method==='POST')return c.json(await register(session,input))
+  if(p.length===2&&req.method==='DELETE')return c.json(await remove(session,input))
+  if(p.length===3&&id==='presence'&&req.method==='POST')return c.json(await presence(session,input))
+  if(p.length===3&&id==='sync'&&req.method==='GET'){const snapshot=await pushSnapshot(session.env,session.uid);await session.check();return c.json(snapshot)}
+ }
  if(action==='notify'&&p.length===2&&req.method==='GET')return c.json(await notifySettings(session))
  if(action==='notify'&&p.length===2&&req.method==='PATCH')return c.json(await updateNotifySettings(session,input))
  if(action==='imports'&&p.length===3&&['preview','apply'].includes(id)&&req.method==='POST')return c.json(await repository.imports(req.headers,id,'',input))
@@ -54,7 +64,7 @@ api.all('/api/*', async c => {
  if(action==='messages'&&id&&p.length===4&&sub==='follow'&&req.method==='POST')return c.json(await repository.write(req.headers,'follow',id,input))
  if(action==='conversations'&&id&&p.length===4&&sub==='preferences'&&req.method==='PATCH')return c.json(await repository.write(req.headers,'preferences',id,input))
  if(action==='attachments'&&id&&p.length===3&&(req.method==='DELETE'||(req.method==='PATCH'&&(input as Record<string,any>).delete===true)))return c.json(await repository.deleteAttachment(req.headers,id))
- if(action === 'logout' && p.length === 2 && req.method === 'POST') { const result=await operatorAuth(c.env).signOut(req);c.header('Set-Cookie',result.cookie);out={ok:true} }
+ if(action === 'logout' && p.length === 2 && req.method === 'POST') { await revokeSession(session);const result=await operatorAuth(c.env).signOut(req);c.header('Set-Cookie',result.cookie);out={ok:true} }
  else if(['me','users','search','settings','attention'].includes(action) && p.length === 2 && req.method === 'GET') out = await repository.read(req.headers,action,'',{q:url.searchParams.get('q'),after:url.searchParams.get('after')??''})
  else if(action === 'conversations' && p.length === 2) {
   if(req.method === 'GET') out = await repository.read(req.headers,action)

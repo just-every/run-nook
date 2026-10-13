@@ -34,7 +34,7 @@ while the README and pilot journeys use the ordinary rer development workflow:
   clears unread, Attention Accept and Discuss, threads and URL state;
 - day-one team surfaces at 1440 and 390: invitation through the outbox, guest
   scope, deactivation, channel browse and join, reactions, inline image preview,
-  tab-title count and browser notifications;
+  tab-title count and retirement of duplicate open-tab OS notifications;
 - Slack export import on synthetic fixtures: review, resumable apply,
   imported history and search, guarded undo, and the wizard at 1440 and 390;
 - `tests/pilot-journey.mjs`: a fresh local rer install/setup, two ordinary
@@ -72,5 +72,12 @@ pages returned 200 with one H1. This is no full accessibility audit or WCAG clai
 Hosted operation on a real Cloudflare account and live mail delivery, capacity
 beyond local measurement, native mobile push and integrations remain unproven.
 External notifications: email is proven against the development outbox; no
-live mail, no push, no paging. Local synthetic verification is not a production,
+live mail, no native push, no paging. C15 Web Push has the bounded checks below; real-device OS delivery remains pending. Local synthetic verification is not a production,
 parity or adoption claim.
+
+
+## C15 Web Push evidence boundary
+
+`pnpm test:push` runs the emitted Worker, real local D1 and the real ChatHub alarm. One core public-route flow signs in, registers an owned subscription, opts in, sends a message, and independently verifies VAPID and decrypts the actual outbound RFC 8291 packet at the sole fake network edge. A new conversation then proves read-before-delivery cancellation without relying on folding. Focused public security coverage rejects missing sessions, cross-origin mutations, another account's subscription ownership, non-vendor endpoints, invalid keys and unsupported transports, and checks that responses expose no endpoint/auth/private key.
+
+These are local synthetic checks, not browser-vendor or OS receipt evidence. Safari on iPhone/iPad and macOS, Chromium install/subscription delivery, browser subscription disappearance, real lock-screen appearance, mobile keyboard/a11y and installed PWA layout remain evidence to collect on real devices. No native iOS/Android transport exists. WebKit forbids silent Web Push, so immediate sleeping-device clear/badge-only behavior is explicitly blocked; foreground read synchronization and badges accompanying visible alerts are the supported web behavior.

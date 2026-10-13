@@ -1,4 +1,4 @@
-import {allowedGrant,productAccess} from '../team/access'
+import {recipientCancellation,attentionCancellation} from './policy'
 // @ts-ignore Product configuration uses the portable Base JavaScript API.
 import {authBindings} from '../platform/operator-auth-runtime.mjs'
 import branding from '../branding.json'
@@ -10,22 +10,18 @@ const hex=(bytes:ArrayBuffer)=>[...new Uint8Array(bytes)].map(b=>b.toString(16).
 export const tokenHash=async(token:string)=>hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token)))
 // Everything that decides whether an item may still be emailed is checked here,
 // when the email is built, not only when the event was recorded.
-const cancelReason=`CASE
- WHEN NOT EXISTS(SELECT 1 FROM oa_operators o WHERE o.id=q.user AND o.status='active') OR NOT ${productAccess('q.user')} THEN 'recipient-inactive'
- WHEN NOT EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=q.conversation AND m.user=q.user AND ${allowedGrant('m.user','m.conversation')}) THEN 'no-access'
- WHEN q.message IS NOT NULL AND NOT EXISTS(SELECT 1 FROM nook_messages s WHERE s.id=q.message AND s.deleted=0) OR q.outcome IS NOT NULL AND (NOT EXISTS(SELECT 1 FROM nook_outcomes s WHERE s.id=q.outcome) OR EXISTS(SELECT 1 FROM nook_erased_outcomes e WHERE e.id=q.outcome)) OR NOT EXISTS(SELECT 1 FROM nook_attention a WHERE a.id=q.dedupe) THEN 'source-deleted'
- WHEN NOT EXISTS(SELECT 1 FROM nook_notify_preferences p WHERE p.user=q.user AND CASE WHEN q.reason='urgent-request' THEN p.urgent ELSE p.mentions END=1) THEN 'turned-off'
- WHEN EXISTS(SELECT 1 FROM nook_attention a WHERE a.id=q.dedupe AND a.state='done') OR q.message IS NOT NULL AND EXISTS(SELECT 1 FROM nook_attention a JOIN nook_reads r ON r.conversation=a.conversation AND r.user=a.user WHERE a.id=q.dedupe AND r.seq>=a.event_seq) THEN 'seen'
-END`
+const cancelReason=`CASE ${recipientCancellation}
+ ${attentionCancellation('q.dedupe','(SELECT event_seq FROM nook_attention WHERE id=q.dedupe)')}
+ WHEN NOT EXISTS(SELECT 1 FROM nook_notify_preferences p WHERE p.user=q.user AND CASE WHEN q.reason='urgent-request' THEN p.urgent ELSE p.mentions END=1) THEN 'turned-off' END`
 /** One pass of the delivery run loop. Returns when it next needs to run, or null. */
 export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=20):Promise<number|null>{
  const db:D1Database=env.DB,sql=(text:string,...values:unknown[])=>db.prepare(text).bind(...values)
  // A send that never recorded its outcome (the Worker stopped mid-send) may have
  // gone out. It is shown as not confirmed and never sent again.
- await db.batch([sql("UPDATE nook_notify_queue SET state='failed',error='uncertain',updated=? WHERE state='sending' AND due<=?",now,now),sql("DELETE FROM nook_notify_queue WHERE state IN ('sent','folded','cancelled','failed') AND updated<?",now-KEEP_MS)])
- const groups=(await sql("SELECT DISTINCT user,conversation FROM nook_notify_queue WHERE state IN ('pending','retrying') AND due<=? ORDER BY due LIMIT ?",now,limit).all<{user:string;conversation:string}>()).results
+ await db.batch([sql("UPDATE nook_notify_queue SET state='failed',error='uncertain',updated=? WHERE channel='email' AND state='sending' AND due<=?",now,now),sql("DELETE FROM nook_notify_queue WHERE channel='email' AND state IN ('sent','folded','cancelled','failed') AND updated<?",now-KEEP_MS)])
+ const groups=(await sql("SELECT DISTINCT user,conversation FROM nook_notify_queue WHERE channel='email' AND state IN ('pending','retrying') AND due<=? ORDER BY due LIMIT ?",now,limit).all<{user:string;conversation:string}>()).results
  for(const group of groups){
-  const rows=(await sql(`SELECT q.*,${cancelReason} AS cancel FROM nook_notify_queue q WHERE q.user=? AND q.conversation=? AND q.state IN ('pending','retrying') ORDER BY q.created,q.id`,group.user,group.conversation).all<Row>()).results
+  const rows=(await sql(`SELECT q.*,${cancelReason} AS cancel FROM nook_notify_queue q WHERE q.channel='email' AND q.user=? AND q.conversation=? AND q.state IN ('pending','retrying') ORDER BY q.created,q.id`,group.user,group.conversation).all<Row>()).results
   const cancelled=rows.filter(r=>r.cancel)
   if(cancelled.length)await db.batch(cancelled.map(r=>sql("UPDATE nook_notify_queue SET state='cancelled',error=?,updated=? WHERE id=? AND state IN ('pending','retrying')",r.cancel,now,r.id)))
   const live=rows.filter(r=>!r.cancel);if(!live.length)continue
@@ -37,7 +33,7 @@ export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=
   const waiting=live.filter(r=>!ready.includes(r))
   if(quiet!==null&&waiting.length)await db.batch(waiting.map(r=>sql('UPDATE nook_notify_queue SET due=?,updated=? WHERE id=?',quiet,now,r.id)))
   if(!ready.length||!ready.some(r=>r.due<=now))continue
-  const last=await sql("SELECT max(updated) AS at FROM nook_notify_queue WHERE user=? AND conversation=? AND state='sent'",group.user,group.conversation).first<{at:number|null}>()
+  const last=await sql("SELECT max(updated) AS at FROM nook_notify_queue WHERE channel='email' AND user=? AND conversation=? AND state='sent'",group.user,group.conversation).first<{at:number|null}>()
   const held=foldedUntil(last?.at??null,now)
   if(held!==null){await db.batch(ready.map(r=>sql('UPDATE nook_notify_queue SET due=?,updated=? WHERE id=?',held,now,r.id)));continue}
   const lead=ready[0],token=hex(crypto.getRandomValues(new Uint8Array(32)).buffer),hash=await tokenHash(token)
@@ -48,6 +44,6 @@ export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=
   if(result.ok){await db.batch([sql("UPDATE nook_notify_queue SET state='sent',error=NULL,updated=? WHERE id=?",now,lead.id),...ready.slice(1).map(r=>sql("UPDATE nook_notify_queue SET state='folded',error=NULL,updated=? WHERE id=?",now,r.id))]);continue}
   await db.batch(ready.map(r=>{const next=afterFailure(r.attempts+1,result.retryable,now);return sql('UPDATE nook_notify_queue SET state=?,due=?,error=?,email=NULL,updated=? WHERE id=?',next.state,next.due,result.error,now,r.id)}))
  }
- const next=await sql("SELECT min(due) AS due FROM nook_notify_queue WHERE state IN ('pending','retrying','sending')").first<{due:number|null}>()
+ const next=await sql("SELECT min(due) AS due FROM nook_notify_queue WHERE channel='email' AND state IN ('pending','retrying','sending')").first<{due:number|null}>()
  return next?.due??null
 }

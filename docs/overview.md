@@ -14,8 +14,8 @@ Nook keeps conversation history, decisions and commitments in the workspace. Dec
 
 ## What Nook does not provide
 
-Nook has no AI feature or external notification integration. Sign-in and invitation email uses the mail provider configured by the workspace owner. Nook does not claim that a local installation is ready for hosted production use.
+Nook has no AI feature. Sign-in, invitation and opted-in notification email uses the mail provider configured by the workspace owner. Optional Web Push sends encrypted alerts directly through your browser’s push service. Nook does not claim that a local installation is ready for hosted production use.
 
 ## What has not been proven
 
-Hosted operation on a real Cloudflare account and live mail delivery, capacity beyond the recorded local measurement, native mobile push or any notification other than email (email is proven only against the local development outbox), integrations, and a full accessibility audit have not been proven. Local synthetic verification is not a production, parity or adoption claim.
+Hosted operation on a real Cloudflare account and live mail delivery, capacity beyond the recorded local measurement, native mobile push and real-device Web Push receipt (email is proven against the local development outbox; Web Push has a local encrypted network-edge proof), integrations, and a full accessibility audit have not been proven. Local synthetic verification is not a production, parity or adoption claim.

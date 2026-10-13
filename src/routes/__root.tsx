@@ -7,7 +7,7 @@ import {NotFound} from '../NotFound'
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 
 export const Route = createRootRoute({
-  head: () => ({ meta: [{ title: branding.name }, { charSet: 'utf-8' }, { name: 'viewport', content: 'width=device-width, initial-scale=1' }], links: [...fontLinks] }),
+  head: () => ({ meta: [{ title: branding.name }, { charSet: 'utf-8' }, { name: 'viewport', content: 'width=device-width, initial-scale=1' }], links: [...fontLinks,{rel:'manifest',href:'/manifest.webmanifest'},{rel:'apple-touch-icon',href:'/icons/nook-192.png'}] }),
   notFoundComponent: NotFound,
   errorComponent: ErrorPage,
   component: () => <html lang="en"><head><HeadContent /></head><body><Outlet /><NavigationLifecycle /><Scripts /></body></html>,

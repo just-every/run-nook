@@ -1,3 +1,4 @@
+import {drainPush} from '../../push/run'
 import {continueErasures} from '../../team/erasure/continuation'
 import {drainBlobs} from '../../team/erasure/blobs'
 import {allowedGrant} from '../../team/access'
@@ -51,8 +52,9 @@ export class ChatHub extends DurableObject<StorageBindings>{
   // armed until they are sent, cancelled or given up. The queue lives in D1, so a
   // restarted Worker resumes it.
   let next:number|null=null;try{next=await drainNotifications(this.env,mailSend(this.env))}catch(error){console.error('Notification delivery pass failed',error instanceof Error?error.message:'');next=Date.now()+60_000}
+  let pushNext:number|null=null;try{pushNext=await drainPush(this.env)}catch{console.error('Push delivery pass failed');pushNext=Date.now()+60_000}
   const live=this.ctx.getWebSockets().length||(await this.env.DB.prepare('SELECT object_key FROM nook_object_deletes UNION ALL SELECT operation FROM nook_erasure_work LIMIT 1').first())?Date.now()+5000:null
-  const at=[live,next].filter((value):value is number=>value!==null);if(at.length)await this.ctx.storage.setAlarm(Math.max(Math.min(...at),Date.now()+1000))
+  const at=[live,next,pushNext].filter((value):value is number=>value!==null);if(at.length)await this.ctx.storage.setAlarm(Math.max(Math.min(...at),Date.now()+1000))
  }
  async webSocketMessage(socket:WebSocket){await this.deliver(socket,true)}
  // The configured compatibility date lets the runtime complete the close handshake.

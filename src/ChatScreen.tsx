@@ -1,9 +1,11 @@
 import {TeamBindings,useTeamRequest} from './team/TeamBindings'
 import {TeamPanel} from './team/TeamPanel'
 import {ChannelBrowser} from './team/ChannelBrowser'
-import {NotificationControl} from './team/NotificationControl'
+import {PushControl} from './team/PushControl'
+import {usePush} from './push/client'
+import {clearPushNotices} from './push/notices'
 import {EmailControl} from './team/EmailControl'
-import {useOpenTabNotifications} from './team/useOpenTabNotifications'
+import {useTitleBadge} from './team/useTitleBadge'
 import {ApiError} from './chat/api'
 import './team/team.css'
 import {useCallback,useEffect,useState} from 'react'
@@ -58,8 +60,8 @@ function Workspace({initial}:{initial:InitialWorkspace}) {
   }catch(e){w.onError(e)}
  }
  const request=useTeamRequest(w.accessEpoch,w.onError),onDenied=useCallback(()=>w.onError(new ApiError(403,'Conversation access changed')),[w.onError])
- const notifyOpen=useCallback((id:string)=>{void open(id)},[navigate])
- const notifications=useOpenTabNotifications({userId:w.user.id,items:w.attention.items,activeCount:w.attention.items.length,observedAt:w.attention.observedAt,loaded:w.attentionLoaded,connected:w.connected,accessEpoch:w.accessEpoch,activeConversation:route.view==='chat'?route.conversation:null,openConversation:notifyOpen,title:`${title} · Nook`})
+ const push=usePush(w.user.id,request,w.attention.observedAt)
+ useTitleBadge(w.user.id,w.attention.items.length,w.attentionLoaded&&w.connected,`${title} · Nook`)
  const canCreate=w.user.mode==='member',canManage=canCreate&&['owner','admin'].includes(w.user.role??'')
  const discuss=(o:Outcome)=>{if(o.source)void open(o.conversation,o.source);else navigate({view:'chat',conversation:o.conversation,thread:null,focus:o.id,panel:'outcomes',before:null,threadBefore:null})}
  const action=(o:Outcome,action:string)=>w.mutate(`outcomes/${o.id}`,{version:o.version,action},'PATCH')
@@ -81,7 +83,7 @@ function Workspace({initial}:{initial:InitialWorkspace}) {
     {route.view==='channels'&&<section className={'page-content channels-page'+(canCreate?' has-directory':'')}><div className="page-column"><ConversationList conversations={w.conversations} user={w.user} current={null} onSelect={select}/>{!w.conversations.length&&<div className="empty-state"><NookMark/><h3>A little room for your team</h3><p>{canCreate?'Create a channel or message a teammate to get started.':'Your invited channels will appear here.'}</p></div>}{canCreate&&<ChannelBrowser key={w.accessEpoch} request={request} onJoined={id=>{void w.refresh().then(()=>open(id))}}/>}</div></section>}
     {route.view==='attention'&&<AttentionView attention={w.attention} user={w.user} conversations={w.conversations} onOpen={(id,focus,thread)=>void open(id,focus,thread)} onAction={action} onDiscuss={discuss} onRevise={outcome=>{navigate({conversation:outcome.conversation});setDialog({kind:'revise',outcome})}} mutate={w.mutate}/>}
     {route.view==='search'&&<SearchView key={w.accessEpoch} privateSignal={w.privateSignal} conversations={w.conversations} user={w.user} query={route.q} revision={w.revision} onQuery={q=>navigate({q})} onOpen={(id,focus,thread)=>void open(id,focus,thread)} onError={w.onError}/>}
-    {route.view==='you'&&<section className="page-content profile-page"><div className="page-column"><div className="profile-head"><Avatar person={w.user} size={48}/><div><h2>{w.user.name}</h2><p>{caption}</p></div></div><NotificationControl {...notifications}/><EmailControl key={w.accessEpoch} request={request}/>{canManage&&<div className="profile-row"><button className="profile-link" onClick={()=>nav('team')}>Team<IconForward/></button></div>}{w.user.role==='owner'&&<div className="profile-row"><a className="profile-link" href="/imports">Import Slack history<IconForward/></a></div>}<div className="profile-row"><button className="soft-button" onClick={()=>{void w.mutate('logout',{}).then(()=>{w.clearPrivate();sessionStorage.clear();location.assign('/signin')}).catch(()=>{})}}>Sign out</button></div></div></section>}
+    {route.view==='you'&&<section className="page-content profile-page"><div className="page-column"><div className="profile-head"><Avatar person={w.user} size={48}/><div><h2>{w.user.name}</h2><p>{caption}</p></div></div><PushControl push={push}/><EmailControl key={w.accessEpoch} request={request}/>{canManage&&<div className="profile-row"><button className="profile-link" onClick={()=>nav('team')}>Team<IconForward/></button></div>}{w.user.role==='owner'&&<div className="profile-row"><a className="profile-link" href="/imports">Import Slack history<IconForward/></a></div>}<div className="profile-row"><button className="soft-button" onClick={()=>{void (async()=>{await clearPushNotices();if(push.enabled)await push.disable().catch(()=>{});return w.mutate('logout',{})})().then(()=>{w.clearPrivate();sessionStorage.clear();location.assign('/signin')}).catch(()=>{})}}>Sign out</button></div></div></section>}
     {route.view==='team'&&(canManage?<section className="page-content team-page"><div className="page-column">{teamPanel}</div></section>:<div className="empty-state"><p>Only owners and admins manage the team.</p><button className="soft-button" onClick={()=>nav('you')}>Back to You</button></div>)}
    </main><MobileTabs view={route.view} attentionCount={w.attention.items.length} onNavigate={nav}/>
   </div>

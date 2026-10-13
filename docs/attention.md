@@ -12,7 +12,7 @@ An urgent request goes to explicitly selected conversation members and needs a r
 
 Attention is a flat list of what needs you, each item with the conversation and the reason it reached you. Hover over an item (they are always shown on a phone) and choose **Dismiss** to clear it from your open list, or **Remind me in an hour** to snooze it for one hour. **Quiet for one hour** at the top of the page starts quiet time; **End quiet time** stops it. Nook records these states as done and snoozed. These actions change attention only; dismissing an item does not accept or complete a commitment.
 
-Mentions and urgent requests can trigger a browser notification while Nook is open and you have opted in.
+In **You**, enable push on this device to receive alerts while away. Choose mentions and commitments, urgent requests, direct messages and replies to threads you follow separately. Email has its own controls. Push permission is requested only when you press Enable.
 
 ## Email when you are away
 
@@ -27,4 +27,10 @@ Email goes to the address you sign in with. It says who did what and where, with
 
 If an email cannot be sent, your settings say **Email not delivered** with the reason, and so do the settings of the person whose message it was and the workspace owner's. Nook tries again for a few hours first. A mail service accepting an email does not prove it reached the inbox.
 
-An urgent request is a request inside Nook, not a page. Nook has no web push, text messages or native mobile push.
+An urgent request is a request inside Nook, not a page. Web Push follows your choices and quiet time; text messages and native mobile push are unavailable.
+
+## Install and keep notifications current
+
+Use **You → Install Nook** when your browser offers it, or install from the browser menu. On iPhone or iPad, use Share → Add to Home Screen, open Nook from there, then enable push. Notifications require a compatible browser and permission. Reopen Nook to reconcile a subscription removed by the browser; a visible error gives you a way to enable again without repeated permission prompts.
+
+Push waits while a Nook page is visibly active and has a fresh heartbeat. Hidden or suspended pages do not suppress delivery indefinitely. Opening Nook synchronizes read notifications and badges. Sleeping devices may keep old notifications until opened; no silent background clear is sent.

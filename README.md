@@ -72,7 +72,7 @@ rer import --input exports/nook.rer --yes
 
 The archive holds every conversation, message, decision, commitment, file and
 attention choice with integrity checks. It leaves out sessions, sign-in links,
-outbox mail and generated settings. After import, recover the archived people
+outbox mail, push subscriptions/keys/presence, pending deliveries and generated settings. After import, recover the archived people
 before setup with the offline mapping in [OPERATIONS.md](OPERATIONS.md).
 `reset` lists what it will remove and refuses without `--yes`; it keeps source,
 dependencies, `exports/` and deploy receipts.
@@ -131,3 +131,5 @@ corpus of one million messages, then measures sends from 20 concurrent senders,
 search, history, replay, edits, deletions and fanout. If seeding pauses (exit 2),
 run the same command again to resume. The report is a measurement, not a
 capacity promise.
+
+Web Push and installation controls are in **You**. Push starts off, uses a separate channel from email, and sends visible encrypted alerts through the browser vendor. See [Attention](docs/attention.md), [Privacy](docs/privacy.md), and the operator guide below. Real-device receipt and sleeping-device background clearing remain separate evidence limits.
