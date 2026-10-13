@@ -1,6 +1,8 @@
 import {lstat} from 'node:fs/promises';
 import {RerError,refuse} from '@runeditrun/rer/errors';
+import {remoteExport} from './remote-export.mjs';
 async function transfer(context,direction){
+ if(context.target==='remote'){if(direction==='export')return remoteExport(context);throw refuse('A hosted Nook cannot be restored remotely. Restore an archive into a fresh local checkout with rer import --input FILE --yes (docs/backups.md).')}
  // The shared command boundary validates an unserved exports/ or external archive path.
  const {root,path,store,signal,operationToken,legacyRecovery,journal}=context;
  if(direction==='export'&&await lstat(path).catch(error=>{if(error.code!=='ENOENT')throw error}))throw refuse('Export requires a new archive path.');
@@ -14,4 +16,5 @@ async function transfer(context,direction){
  delete result.ok;return {target:'local',...result};
 }
 // legacyRecovery: Base's backup-only v1 recovery (rer import --legacy-v1) runs through this adapter.
-export const portability={legacyRecovery:true,export:context=>transfer(context,'export'),import:context=>transfer(context,'import')};
+// remote: rer export --target remote reads a hosted Nook through /api/portability.
+export const portability={legacyRecovery:true,remote:true,export:context=>transfer(context,'export'),import:context=>transfer(context,'import')};

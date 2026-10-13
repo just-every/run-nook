@@ -12,7 +12,9 @@ self.addEventListener('push',event=>event.waitUntil((async()=>{
  await badge(value.badge);
 })()));
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{
- const url=safeURL(event.notification.data?.url),windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+ // Only a window this worker controls can navigate: a hard-reloaded /app is
+ // uncontrolled, so the conversation opens in a new window instead.
+ const url=safeURL(event.notification.data?.url),windows=await self.clients.matchAll({type:'window'});
  const existing=windows.find(client=>new URL(client.url).origin===self.location.origin&&new URL(client.url).pathname==='/app');
  // Restore foreground while the clicked client is still live. Navigation can
  // replace its WindowClient; never focus the pre-navigation object afterward.

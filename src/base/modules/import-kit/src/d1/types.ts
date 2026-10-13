@@ -61,6 +61,15 @@ export interface D1RelatedErasure {
   source?(record: import('../types.ts').SourceRecord): boolean;
   /** True when this retained original's exact bytes hold the erased person's data. */
   original?(bytes: Uint8Array, original: { name: string; sha256: string }): boolean;
+  /** Remove exact string values at named paths in retained source payloads,
+   * effect/native values and reversal before-images. `*` visits array items.
+   * Matching array items are removed; matching object properties are deleted.
+   * Peer records and explicit aggregate counts remain. */
+  fields?: readonly D1FieldRedaction[];
+}
+export interface D1FieldRedaction {
+  path: readonly (string | number)[];
+  value: string;
 }
 export interface D1ImportContext extends Pick<ImportContext, 'destination' | 'namespace' | 'mappingVersion' | 'reviewedFingerprint' | 'operationKey' | 'batchSize' | 'maxBatches'> {
   /** Selected at creation. Omission on later calls uses the durable policy;

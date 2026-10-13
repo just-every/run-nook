@@ -10,6 +10,7 @@ import { Repository, type Bindings } from './platform/repository.server'
 import {ownerClaim} from './platform/owner-claim.server'
 import {editorRoute,editorDocument} from './platform/editor.server'
 import {slackImportRoute} from './imports/routes'
+import {portabilityRoute} from './platform/portability.server'
 import {teamRoute} from './team/routes.server'
 import {context} from './platform/storage/context'
 import {readUpload} from './platform/storage/files'
@@ -98,6 +99,7 @@ export default {
   if(url.pathname==='/auth/owner-claim') return await ownerClaim(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/api/editor/config'||url.pathname==='/api/editor/session') return editorRoute(env,request)
   if(url.pathname==='/api/slack-imports'||url.pathname.startsWith('/api/slack-imports/'))return (await slackImportRoute(request,env))!
+  if(url.pathname==='/api/portability'||url.pathname.startsWith('/api/portability/'))return portabilityRoute(env,request)
   if(url.pathname==='/api/live'){if(request.headers.get('origin')!==url.origin)return new Response('Origin denied',{status:403});try{return await new Repository(env).live(request)}catch(error){return Response.json({error:error instanceof Error?error.message:'Live unavailable'},{status:error instanceof Fault?error.status:500})}}
   if(url.pathname==='/auth/bootstrap' && (await env.DB.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>())?.authority!=='normalized')return Response.json({error:'offline_storage_conversion_required'},{status:503,headers:{'Cache-Control':'no-store'}})
   if(url.pathname==='/auth/bootstrap' && !await env.DB.prepare('SELECT singleton FROM oa_bootstrap WHERE singleton=1').first() && await env.DB.prepare('SELECT id FROM nook_actors LIMIT 1').first())return Response.json({error:'identity_recovery_required'},{status:409,headers:{'Cache-Control':'no-store'}})

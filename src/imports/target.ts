@@ -22,13 +22,16 @@ export function importTargets(): D1TargetAdapter {
             else if (row.targetKind === 'actor')
                 result.push(sql('INSERT INTO nook_import_actors(job,source_id,association,source_record) VALUES(?,?,?,?)', v.job, v.sourceId, v.association, JSON.stringify(v.sourceRecord)));
             else if (row.targetKind === 'message') {
-                result.push(sql('INSERT INTO nook_import_records(id,job,key,conversation,source_actor,source_timestamp,source_record,body,body_lower,parent,sequence) VALUES(?,?,?,?,?,?,?,?,?,?,?)', v.id, v.job, v.key, v.conversation, v.sourceActor, v.sourceTimestamp, JSON.stringify(v.sourceRecord), v.body, v.body.toLowerCase(), v.parent, v.sequence), sql("INSERT INTO nook_search(message,conversation,source,scope,body_lower) VALUES(?,?,'imported',?,?)", v.id, v.conversation, '|' + v.conversation + '|', v.body.toLowerCase()));
+                // Apply fences absence first. Erasure's field redaction rewrites a
+                // peer's existing record with sanitized values: the immutable row is
+                // replaced in the kit's fenced batch, and its files stay as they are.
+                result.push(sql('DELETE FROM nook_import_records WHERE id=?', v.id), sql('INSERT INTO nook_import_records(id,job,key,conversation,source_actor,source_timestamp,source_record,body,body_lower,parent,sequence) VALUES(?,?,?,?,?,?,?,?,?,?,?)', v.id, v.job, v.key, v.conversation, v.sourceActor, v.sourceTimestamp, JSON.stringify(v.sourceRecord), v.body, v.body.toLowerCase(), v.parent, v.sequence), sql("DELETE FROM nook_search WHERE message=? AND source='imported'", v.id), sql("INSERT INTO nook_search(message,conversation,source,scope,body_lower) VALUES(?,?,'imported',?,?)", v.id, v.conversation, '|' + v.conversation + '|', v.body.toLowerCase()));
                 for (const f of v.files)
-                    result.push(sql("INSERT INTO nook_attachments(id,conversation,author,message,name,mime,size,sha256,expires,state,created,object_key,intent,position) SELECT ?,?,?, ?,?,?,?,?,0,'attached',?,?,?,? WHERE EXISTS(SELECT 1 FROM nook_import_objects WHERE object_key=? AND sha256=? AND size=? AND mime=? AND state='ready')", f.id, v.conversation, f.author, v.id, f.name, f.mime, f.size, f.sha256, f.created, f.objectKey, f.intent, f.position, f.objectKey, f.sha256, f.size, f.mime), sql('INSERT INTO nook_import_files(id,job,message,source_id,attachment,position) VALUES(?,?,?,?,?,?)', f.id, v.job, v.id, f.sourceId, f.id, f.position));
+                    result.push(sql("INSERT INTO nook_attachments(id,conversation,author,message,name,mime,size,sha256,expires,state,created,object_key,intent,position) SELECT ?,?,?, ?,?,?,?,?,0,'attached',?,?,?,? WHERE EXISTS(SELECT 1 FROM nook_import_objects WHERE object_key=? AND sha256=? AND size=? AND mime=? AND state='ready') AND NOT EXISTS(SELECT 1 FROM nook_attachments WHERE id=?)", f.id, v.conversation, f.author, v.id, f.name, f.mime, f.size, f.sha256, f.created, f.objectKey, f.intent, f.position, f.objectKey, f.sha256, f.size, f.mime, f.id), sql('INSERT INTO nook_import_files(id,job,message,source_id,attachment,position) SELECT ?,?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM nook_import_files WHERE id=?)', f.id, v.job, v.id, f.sourceId, f.id, f.position, f.id));
             }
             else
                 throw new Error('IMPORT_TARGET_KIND');
-            result.push(sql('INSERT INTO nook_import_effect_revisions(destination,kind,id,revision) VALUES(?,?,?,?)', row.destination, row.targetKind, row.targetId, row.revision));
+            result.push(sql('INSERT INTO nook_import_effect_revisions(destination,kind,id,revision) VALUES(?,?,?,?) ON CONFLICT(destination,kind,id) DO UPDATE SET revision=excluded.revision', row.destination, row.targetKind, row.targetId, row.revision));
             return result;
         },
         remove(destination, kind, id) {

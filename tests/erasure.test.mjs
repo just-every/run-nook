@@ -95,7 +95,7 @@ test('the source-author door composes real import-kit custody, keeps unrelated t
   const bytes='SOURCECANARYBYTES',zip=zipFixture([
    ['users.json',[{id:'U1',name:'SOURCECANARYNAME',profile:{email:'sourcecanary@example.test'}},{id:'U2',name:'Other author'}]],
    ['channels.json',[{id:'C1',name:'general'}]],
-   ['general/2024-01-01.json',[{type:'message',user:'U1',text:'SOURCECANARYBODY',ts:'1700000000.000001',files:[{id:'F1',name:'SOURCECANARYFILE.txt',mimetype:'text/plain',size:bytes.length}]},{type:'message',user:'U2',text:'Unrelated imported reply',ts:'1700000000.000002',thread_ts:'1700000000.000001'}]],
+   ['general/2024-01-01.json',[{type:'message',user:'U1',text:'SOURCECANARYBODY',ts:'1700000000.000001',files:[{id:'F1',name:'SOURCECANARYFILE.txt',mimetype:'text/plain',size:bytes.length}]},{type:'message',user:'U2',text:'Unrelated imported reply',ts:'1700000000.000002',thread_ts:'1700000000.000001',reactions:[{name:'+1',count:2,users:['U1','U2']}]}]],
    ['files/F1/SOURCECANARYFILE.txt',bytes]
   ]);
   const upload=await f.custody.localUpload(f.c,new Request('https://fixture.test/upload',{method:'POST',body:zip}));
@@ -108,6 +108,8 @@ test('the source-author door composes real import-kit custody, keeps unrelated t
   assert.equal(scanSql(f,/SOURCECANARY/i).length,0);const [job,source_id]=target.split(':');await assertFenced(f,[['nook_import_actors',{job,source_id}]]);
   for(const object of (await f.bucket.list()).objects)assert.doesNotMatch(Buffer.from(await(await f.bucket.get(object.key)).arrayBuffer()).toString(),/SOURCECANARY/i);
   assert.equal(f.db.prepare('SELECT body FROM nook_import_records').get().body,'Unrelated imported reply');
+  // The erased author's Slack id leaves another author's reaction; the peer and the count stay.
+  assert.deepEqual(JSON.parse(f.db.prepare('SELECT source_record FROM nook_import_records').get().source_record).reactions,[{name:'+1',count:2,users:['U2']}]);
   // Import custody keeps tombstones, journals the erasure without its values,
   // and its redaction checkpoint refuses the whole older archive.
   const journal=f.db.prepare('SELECT * FROM ik_d1_erasure_journal').all();assert.ok(journal.length>0&&journal.some(row=>row.records_erased>0));assert.doesNotMatch(JSON.stringify(journal),/SOURCECANARY/i);

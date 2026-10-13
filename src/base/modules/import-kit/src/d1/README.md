@@ -30,6 +30,13 @@ a cached boolean or constant SQL permission defeats this contract. The engine
 evaluates the expression at both ends of every atomic mutation batch. A false
 predicate raises `IMPORT_ATOMIC_GUARD` and rolls back every native and kit write.
 Read operations also require current authority. Jobs remain bound to their actor.
+The plan and its fingerprint carry that `principalId`, so a job can never be rebound
+to another one, and an archive carries the jobs but not the operators who created
+them: after an export, reset, import and setup the owner is a new operator row. A
+product that wants restored jobs to stay usable passes a principal that survives a
+restore, such as the operator's role (`'role:' + role`), and lets `predicate` check
+that the acting operator is still active in that role. A product that passes the
+operator's row id keeps its jobs bound to that operator for good.
 
 `readD1ImportJob`, `readD1ImportOriginals`, `readD1PersistedImport` and
 `readD1ImportUndoReport` execute SELECT-only SQL, including their initial authority
@@ -420,7 +427,11 @@ is the product's restore checkpoint for rewritten rows: portability's
 `redactionStatements()`, as `D1Sql`. The batch carries it whenever it has a
 `target` or retires anything, so `rer import --journal LATER_ARCHIVE` refuses any
 older archive whole; it is required then (`IMPORT_RETIREMENT_CHECKPOINT_REQUIRED`).
-A batch without it must leave every custody row unchanged, or it aborts.
+A batch without it (nothing matched, so nothing is fenced) must also carry no
+`nativeStatements`: `IMPORT_RETIREMENT_NATIVE_REQUIRES_CHECKPOINT` refuses before any
+write, because SQL the kit cannot fence could rewrite a row it does not count, such as
+another import's job. With the checkpoint, and nothing else to do, it must leave every
+row of the retired scope unchanged, or it aborts.
 
 The journal (`ik_d1_erasure_journal`) and `ik_d1_retirements` are append-only:
 database triggers refuse updates, deletes and any insert over an existing key,

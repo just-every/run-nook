@@ -24,8 +24,9 @@ export async function importedStep(c:Context,work:any,f:Awaited<ReturnType<typeo
   if(work.kind==='imported-message')statements.push(sql("UPDATE nook_erasure_work SET phase='blobs' WHERE operation=?",work.operation))
   await eraseImportedTarget(c,work,'message',record.id,job,statements,await personValues(c,work,actor),f)
  }else{
+  // Their Slack id also leaves other people's imported reactions; peers and counts stay.
   statements.push(sql('INSERT INTO nook_guard VALUES(?,CASE WHEN NOT EXISTS(SELECT 1 FROM nook_import_records WHERE job=? AND source_actor=?) THEN 1 ELSE 0 END)','erase-actor:'+actor.job+':'+actor.source_id,actor.job,actor.source_id),sql('DELETE FROM nook_guard WHERE id=?','erase-actor:'+actor.job+':'+actor.source_id),...await f.row('nook_import_actors',{job:actor.job,source_id:actor.source_id}),sql('DELETE FROM nook_import_actors WHERE job=? AND source_id=?',actor.job,actor.source_id),sql("UPDATE nook_erasure_work SET phase='blobs' WHERE kind='imported-author' AND target=?",actor.job+':'+actor.source_id),sql('DELETE FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?',job.owner,'actor',actor.job+':'+actor.source_id))
-  await eraseImportedTarget(c,work,'actor',actor.job+':'+actor.source_id,job,statements,await personValues(c,work,actor),f,{source:r=>r.kind==='message'&&(r.payload as any).job===actor.job&&(r.payload as any).sourceActor===actor.source_id})
+  await eraseImportedTarget(c,work,'actor',actor.job+':'+actor.source_id,job,statements,await personValues(c,work,actor),f,{source:r=>r.kind==='message'&&(r.payload as any).job===actor.job&&(r.payload as any).sourceActor===actor.source_id,fields:[{path:['sourceRecord','reactions','*','users','*'],value:actor.source_id}]})
  }
  return true
 }
