@@ -1006,10 +1006,6 @@
       "sha256": "9b9098e7c0afa4af109efc1a1f24b5fd07cf4e71fc5ff206029b1b55273a4c8a",
       "executable": false
     },
-    "scripts/local/legacy-recovery.mjs": {
-      "sha256": "d9995478683b031b2f6fec309531de177fd3f037bc44c37195d3713e8aa7569d",
-      "executable": false
-    },
     "scripts/local/portability.mjs": {
       "sha256": "c61cbc6939dc3dafb0d45c166f57fbbc1e78bfe2e23d50c0cd7eda484c422672",
       "executable": false
@@ -1019,7 +1015,7 @@
       "executable": false
     },
     "scripts/local/transfer.mjs": {
-      "sha256": "2890f38077041e3187a5f9f59fc9887cda26cc437e94a8c90a22df64852d512a",
+      "sha256": "33377b1418ef68c5879b2a6b8a8ebe9e7c576206f1374893fd2197af5555087a",
       "executable": false
     },
     "scripts/notify-test-mail.mjs": {
@@ -3503,7 +3499,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "af2ba6d063842713b90ebe18c767cf76ca13114ed178537c7564817abb0d30ad",
+      "sha256": "24a22f71664a34bca1af75ae1c06732991415668c1a22ed0de52a45195c3354a",
       "executable": false
     },
     "src/SignInScreen.tsx": {
