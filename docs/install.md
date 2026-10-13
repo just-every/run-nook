@@ -4,11 +4,11 @@ Run these commands from a Nook checkout with Node 22.20.0 and pnpm 10.12.4.
 
 ## Start locally
 
-Install the pinned project dependencies, set up the first owner, then start Nook:
+Install the pinned project dependencies, set up the first owner, then start Nook. Replace `EMAIL` and `NAME` with your email address and display name:
 
 ```sh
 rer install
-rer setup --owner-email you@example.com --owner-name 'Your name'
+rer setup --owner-email EMAIL --owner-name 'NAME'
 rer dev
 ```
 
