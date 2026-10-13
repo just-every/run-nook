@@ -3815,7 +3815,7 @@
       "executable": false
     },
     "tests/erasure-browser-support.mjs": {
-      "sha256": "2078c96e8dedd7a16c340362ec857beea23e899919fdea8b1ce87ed9a1228bf7",
+      "sha256": "d5aec52e5e5f78846bd3b0f39e90e2fece109d654098defb4ee14efe51529678",
       "executable": false
     },
     "tests/erasure-browser.mjs": {

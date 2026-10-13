@@ -27,7 +27,7 @@ export async function runErasureJourney({origin,ownerCookie,destination}){
    for(const person of [member,admin,viewer])await request(ownerCookie,`/api/conversations/${channel.id}/members`,{user:person.user.id})
    const messageBody=`Channel erasure ${tag} ${label}`
    await request(member.cookie,`/api/conversations/${channel.id}/messages`,{body:messageBody,intent:crypto.randomUUID()})
-   const dm=await request(member.cookie,'/api/conversations',{kind:'dm',participants:[viewer.user.id]})
+   const dm=await request(member.cookie,'/api/conversations',{name:viewer.user.name,kind:'dm',participants:[viewer.user.id]})
    const dmBody=`Private erasure ${tag} ${label}`,dmFile=`private-${tag}-${label}.txt`
    const uploaded=await fetch(origin+`/api/conversations/${dm.id}/attachments`,{method:'POST',headers:{cookie:member.cookie,Origin:origin,'Content-Type':'text/plain','X-Filename':encodeURIComponent(dmFile),'X-Upload-Intent':crypto.randomUUID()},body:'Private erasure fixture bytes'})
    assert.equal(uploaded.status,200);const file=await uploaded.json()
