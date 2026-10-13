@@ -45,8 +45,10 @@ answers with the deploy identity (`deployment.sourceSha`, `fingerprint`,
 deploy's assets before any route (Base's `staticAssetResponse`), so they load
 behind `run_worker_first`; `rer verify` serves the build that way and fails on
 any built file that does not answer 200. Only the
-account credentials and those secrets reach the controller. Claim the production
-owner at `/auth/bootstrap` with that setup token. Production auth requires the
+account credentials and those secrets reach the controller. `rer deploy` does
+not claim the production owner: POST that setup token to `/auth/bootstrap`
+with the command in docs/updating.md (303 creates the owner; the owner then
+signs in by email). Production auth requires the
 exact HTTPS origin, `AUTH_LOCAL=false`, SendGrid mail and Cloudflare's
 `CF-Connecting-IP`; the development outbox does not exist there.
 
@@ -98,6 +100,14 @@ the bootstrap claim, outbox mail and generated settings. Import needs an empty,
 stopped destination and `--yes`. `reset --yes` removes exactly the inventory it
 lists: local D1 state, `.rer/local`, `.seed/installer` and the generated
 `.dev.vars` files.
+
+`rer export --target remote --origin ORIGIN --session-file FILE` exports a
+deployed Nook: `scripts/local/remote-export.mjs` drives Base's reviewed
+portability door, which the Worker mounts at `/api/portability`
+(`src/platform/portability.server.ts`) for exports by an active owner's current
+session only; import routes are never authorized there. It writes the same
+verified archive and erasure journal as a local export and removes the hosted
+export job. Remote import is refused; restore into a new local checkout.
 
 Archives are portability version 2: the closing `archiveHash` binds the whole
 manifest and every ordered part, and import verifies it before restoring.

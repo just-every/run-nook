@@ -15,6 +15,25 @@ An archive contains conversations, messages, decisions, commitments, files and a
 
 Each archive binds its whole manifest and every part, and import checks that binding before restoring anything. Archives made by earlier Nook versions lack it and a normal import refuses them; upgrade the original installation and export a new archive. If that installation is gone, a new checkout that has not run setup can recover one with `rer import --legacy-v1 --input exports/backup-v1.rer --yes --acknowledge-unverified-metadata --output exports/recovered-v2.rer`. It checks every checksum the old archive carries, restores it, and writes a new archive to keep instead. The old archive's own details (where and when it was made, and its record of erasures) cannot be verified.
 
+## Export a hosted Nook
+
+A Nook deployed with `rer deploy` exports from your checkout through its owner-only export door. The archive and its journal are the same as a local export's, including file bytes.
+
+1. Sign in to `https://YOUR-NOOK` as an owner. In the browser's developer tools (Application or Storage, then Cookies), copy the value of the `__Host-operator_session` cookie.
+2. Save it in a private file. Run this, paste `__Host-operator_session=VALUE` on one line, press Enter, then Ctrl-D:
+
+   ```sh
+   mkdir -p exports && (umask 077 && cat > exports/owner.session)
+   ```
+
+3. Export:
+
+   ```sh
+   rer export --target remote --origin https://YOUR-NOOK --session-file exports/owner.session --output exports/nook-hosted.rer
+   ```
+
+The file is a working owner sign-in, so delete it when you are done, or sign out in the browser to end that session. Only an active owner's session can export, and the export waits for pending uploads, deletions and imports to finish (it answers `reconcile_pending_object_work_before_export` until they have). A hosted Nook cannot be restored remotely: restore the archive into a new local checkout that has not run setup, with `rer import --input exports/nook-hosted.rer --yes`.
+
 Slack imports travel in the genuine archive with their immutable source history, supplied file bytes, provenance, destination membership and guarded import job. The automated pilot stops the local app, exports, resets it to an empty stopped installation, imports the archive and reexports it; it checks that the restored content hash matches the original. The journey uses synthetic Slack-shaped data and makes no claim about a real export, provider account or source parity.
 
 ## Keep earlier archives private

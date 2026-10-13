@@ -599,7 +599,7 @@
       "executable": false
     },
     "docs/backups.md": {
-      "sha256": "39a4f902499a9b67f2f24497660dbcb574179a8dc173324a9d7502ae48ef7cbd",
+      "sha256": "600975cc6f0234404a5206d383f39b5e6608ab8936eb8d9185bff429404337c5",
       "executable": false
     },
     "docs/conversations.md": {
@@ -635,7 +635,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "1576d0511294235ff73a1c8c855a537b66d9ecfd9ce0cee9aba005ea27fe97e2",
+      "sha256": "809ede1d06467aa40ad9c39bd22357ac98c2c0a62fab639794fe24e5d6948e57",
       "executable": false
     },
     "docs/your-team.md": {
@@ -751,7 +751,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "8193cfb8d0b98957ae1fa5d280c51b626c17762da0843176f346d5767a907033",
+      "sha256": "6d7dab80ac5a8ef212bee8eb3e84a33b3221d5ce29586870c8f3ce44518d0609",
       "executable": false
     },
     "owner-deployment.json": {
@@ -823,7 +823,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "bfb2df516a10c6056a2490d9be5e021c6c12f33c10b6fd945bff983bbc4e98cf",
+      "sha256": "130a93812e1a3e410adb467ebfe8bba9cc14a48af8d1cbffe2a162787e72ff66",
       "executable": false
     },
     "RELEASE.json": {
@@ -1044,6 +1044,10 @@
     },
     "scripts/local/prerequisites.mjs": {
       "sha256": "532f9dbeea2652e26056b97ecf54a4694826a1475e8cda3bab7daf5210ec5d1a",
+      "executable": false
+    },
+    "scripts/local/remote-export.mjs": {
+      "sha256": "8e84c96f579d5dfd72a3b298237129fa0d3706cfed40e3614ca93d8a6ba9f966",
       "executable": false
     },
     "scripts/local/transfer.mjs": {
@@ -1518,6 +1522,10 @@
       "sha256": "bd5b5bc97ee20b910646161186717418951da673a4c294e09e75653c98892df0",
       "executable": false
     },
+    "src/base/modules/import-kit/src/d1/field-redaction.ts": {
+      "sha256": "c6424f47549e0f8abcdfa3b1b2f28fa5d0831ff39e036a9ef29edc6d0cf59d43",
+      "executable": false
+    },
     "src/base/modules/import-kit/src/d1/guards.ts": {
       "sha256": "7f8c7d43a1d5f41d88017a24435d88f9c7b5cb58140ca8d9d0a343697ec09e44",
       "executable": false
@@ -1648,6 +1656,10 @@
     },
     "src/base/modules/import-kit/src/d1/README.md": {
       "sha256": "4be048736ffaff8e8e5f9e29fc89f71e80f5e79eeeb010a49ef0d0a421540cfd",
+      "executable": false
+    },
+    "src/base/modules/import-kit/src/d1/redacted-custody.ts": {
+      "sha256": "e6dd3619ace00c17bf2febc45a26cdf15da134cfb2a858d8580fb33bc1c5e0b8",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/retained-values.ts": {
@@ -3448,6 +3460,10 @@
     },
     "src/platform/portability-policy.mjs": {
       "sha256": "62a8dbee28afa530ad72719f916acfcf753ef6980af952671432bea0d22dcd4f",
+      "executable": false
+    },
+    "src/platform/portability.server.ts": {
+      "sha256": "ac4c3e7d86de2964a3e80598834a7268cba9fb074daaead35841aba01ee679cd",
       "executable": false
     },
     "src/platform/repository.server.ts": {

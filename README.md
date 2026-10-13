@@ -106,8 +106,9 @@ provider request. A real deploy uses Base deploy-kit's owner-account mode: it
 creates or reuses the D1 database and Worker named after this project, applies
 pending migrations, uploads the build and checks health. It generates the
 production session secret and setup token once and keeps them in
-`.rer/deploy/production-secrets.json`; use that setup token to claim the
-production owner. `rer release --repo . --output DIR --dry-run`
+`.rer/deploy/production-secrets.json`. Claim the production owner with that
+setup token, and update to newer source later, with the commands in
+[Updating and deploying](docs/updating.md). `rer release --repo . --output DIR --dry-run`
 runs the Base release checks, including the publication scan.
 
 ## Where things live
