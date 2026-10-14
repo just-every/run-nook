@@ -1,5 +1,16 @@
 # Nook changes
 
+## Unreleased
+
+Nook runs on the published `@runeditrun/rer` 0.2.4 in package mode. `rer deploy`
+now claims the hosted owner itself once the deploy is healthy, using a one-time
+setup token it removes from the Worker afterwards: a hosted Nook keeps no setup
+token and your checkout keeps no `.rer/deploy/production-secrets.json`. Update is
+`git pull --ff-only` then `rer deploy`; removal is `rer deploy --remove --yes`;
+`rer` provides the Node and pnpm versions Nook needs. A workspace first deployed
+from 0.2.0 still holds an unused setup token and no owner: its next `rer deploy`
+claims the owner, and the old `.rer/deploy/production-secrets.json` can be deleted.
+
 ## 0.2.0 (14 October 2026)
 
 Changes since 0.1.0. Migration 0023 is the only new migration; update by

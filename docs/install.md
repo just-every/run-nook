@@ -1,13 +1,20 @@
 # Install Nook
 
-Run these commands from a Nook checkout with Node 22.20.0 and pnpm 10.12.4.
+Nook runs with the `rer` command. Install `rer` once (it needs Node 22 or later to start):
+
+```sh
+curl -fsSL https://runeditrun.com/install.sh | sh
+```
+
+`rer` runs each checkout's own pinned copy and provides the Node and pnpm versions Nook needs, so there is nothing else to install or choose.
 
 ## Start locally
 
-Install the pinned project dependencies, set up the first owner, then start Nook. Replace `EMAIL` and `NAME` with your email address and display name:
+Get the source, set up the first owner, then start Nook. Replace `EMAIL` and `NAME` with your email address and display name:
 
 ```sh
-rer install
+git clone https://github.com/just-every/run-nook.git
+cd run-nook
 rer setup --owner-email EMAIL --owner-name 'NAME'
 rer dev
 ```

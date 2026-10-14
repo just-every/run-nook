@@ -5,7 +5,7 @@ export const run: RunData = {
   repository: 'https://github.com/just-every/run-nook',
   clone: 'git clone https://github.com/just-every/run-nook.git nook',
   folder: 'nook',
-  requirements: 'Needs Node 22.20.0 and pnpm 10.12.4, on macOS, Linux or Windows with WSL2.',
+  requirements: 'Needs Git and Node 22 or later, on macOS, Linux or Windows with WSL2. rer provides the pinned Node and pnpm.',
   licence: 'MIT',
   docs: true,
   hosted: [],

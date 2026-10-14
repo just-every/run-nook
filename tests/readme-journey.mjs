@@ -7,9 +7,9 @@ import {join,resolve} from 'node:path'
 import {chromium} from '@playwright/test'
 
 // Run README's "Run it on your computer" commands in a fresh clone, in order.
-// Two lines are not executed literally: `verify` (this test is part of it) and
+// Three kinds of line are not executed literally: `verify` (this test is part of it),
 // the real deploy (it needs an owner account; tests/owner-deploy.test.mjs covers
-// it). Setup receives `--port`, as the README offers, so the clone cannot
+// it) and the clone and cd, which this test has already done. Setup receives `--port`, as the README offers, so the clone cannot
 // collide with another local app.
 const root=resolve(import.meta.dirname,'..')
 const readme=await readFile(join(root,'README.md'),'utf8')
@@ -21,8 +21,9 @@ for(const verb of ['setup','dev','outbox','verify','export','reset','import','de
 const freePort=()=>new Promise((ok,bad)=>{const server=createServer();server.once('error',bad);server.listen(0,'127.0.0.1',()=>{const {port}=server.address();server.close(()=>ok(port))})})
 const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),bin=await mkdtemp(join(tmpdir(),'nook-readme-bin-'))
 // README says `rer VERB`. The global rer runs the checkout's own pinned
-// launcher, including the foreground override, so the journey does exactly that.
-await writeFile(join(bin,'rer'),'#!/bin/sh\nexec node node_modules/@runeditrun/rer/global/rer.mjs "$@"\n',{mode:0o755})
+// launcher, including the foreground override, and installs a fresh clone's
+// dependencies itself, so the journey does exactly that.
+await writeFile(join(bin,'rer'),`#!/bin/sh\nexec node ${join(root,'node_modules/@runeditrun/rer/global/rer.mjs')} "$@"\n`,{mode:0o755})
 // The clone is a different checkout: it takes its own local operation, not verify's.
 const {RER_LOCAL_OPERATION:_,...env}={...process.env,PATH:bin+':'+process.env.PATH,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'}
 const run=line=>execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})
@@ -30,7 +31,7 @@ let dev,browser
 try{
  execFileSync('git',['clone','--quiet','--no-hardlinks',root,clone])
  for(const line of lines){
-  if(line==='rer verify'||(/^CLOUDFLARE_ACCOUNT_ID=/.test(line)))continue
+  if(line==='rer verify'||/^(CLOUDFLARE_ACCOUNT_ID=|git clone |cd )/.test(line))continue
   if(line==='rer dev'){
    dev=spawn('bash',['-c',line+' --foreground'],{cwd:clone,env,stdio:['ignore','pipe','pipe'],detached:true});let output=''
    dev.stdout.on('data',chunk=>output+=chunk);dev.stderr.on('data',chunk=>output+=chunk)

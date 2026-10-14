@@ -38,18 +38,16 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 
 ## Run it on your computer
 
-Use Node **22.20.0** and pnpm **10.12.4** (`.node-version` and `packageManager`
-pin them). Install the `rer` command once: `npx -y @runeditrun/rer cli install`
-(it runs this checkout's own pinned commands). Get the source with
-`git clone https://github.com/just-every/run-nook.git` and `cd run-nook`; every
-command below runs from that checkout.
-
-The commands use an example local identity. Replace `you@example.com` and
-`Your name` with your own email address and name, and use the same email address
-in the outbox command below.
+Install the `rer` command once: `curl -fsSL https://runeditrun.com/install.sh | sh`
+(or `npx -y @runeditrun/rer cli install`; it needs Node 22 or later to start). It
+runs this checkout's own pinned commands and provides the Node and pnpm versions
+Nook needs, so there is nothing else to install or choose. The commands use an
+example local identity. Replace `you@example.com` and `Your name` with your own
+email address and name, and use the same email address in the outbox command below.
 
 ```sh
-pnpm install --frozen-lockfile          # or: rer install
+git clone https://github.com/just-every/run-nook.git
+cd run-nook
 rer setup --owner-email you@example.com --owner-name 'Your name'
 rer dev
 ```
@@ -116,17 +114,19 @@ dependencies, `exports/` and deploy receipts.
 
 ```sh
 rer deploy --dry-run
-CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… OWNER_EMAIL=… MAIL_FROM=… SENDGRID_API_KEY=… \
+CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
   rer deploy
 ```
 
 The dry run builds and validates the Worker, assets and every migration with no
-provider request. A real deploy uses Base deploy-kit's owner-account mode: it
-creates or reuses the D1 database and Worker named after this project, applies
-pending migrations, uploads the build and checks health. It generates the
-production session secret and setup token once and keeps them in
-`.rer/deploy/production-secrets.json`. Claim the production owner with that
-setup token, and update to newer source later, with the commands in
+provider request. A real deploy creates or reuses the D1 database and Worker
+named after this project, applies pending migrations, uploads the build, checks
+health and then claims the owner for you: the owner is the email address you gave
+`rer setup` (set `OWNER_EMAIL` to use another), `rer` claims it once with a
+one-time setup token it removes afterwards, and you sign in by email at the
+address `rer deploy` prints. To update to newer source, run `git pull --ff-only`
+and then `rer deploy` again; to remove the deployment, run
+`rer deploy --remove --yes`. The commands are in
 [Updating and deploying](docs/updating.md). `rer release --repo . --output DIR --dry-run`
 runs the Base release checks, including the publication scan.
 

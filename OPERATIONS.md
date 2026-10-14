@@ -1,6 +1,7 @@
 # Nook operations
 
-Use Node 22.20.0 and pnpm 10.12.4. Every operation goes through
+`rer` provides Node 22.20.0 and pnpm 10.12.4 for this checkout; install neither
+yourself. Every operation goes through
 `rer VERB` (also `pnpm run VERB`); README.md gives the journey
 and `rer describe` the flags. The guided installer
 (`node scripts/install.mjs`) runs the same lifecycle from the same root
@@ -22,8 +23,8 @@ is stored in D1 (`oa_first_run`) and survives setup reruns.
 
 `doctor` checks local settings from `.dev.vars` and the owner-deploy inputs
 from the shell. After a local setup it exits 3 and names only
-`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and the production mail and
-secret inputs until you supply them for a deploy.
+`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and the production mail inputs
+until you supply them for a deploy.
 
 Every request checks its own session and the current conversation membership.
 A channel owner changes membership; new members see the channel's full history.
@@ -34,21 +35,25 @@ DMs have fixed participants. Owner and admin roles never open other people's DMs
 `deploy --dry-run` builds and validates the Worker, assets, every migration and
 `owner-deployment.json` with no provider request. `deploy` needs
 `CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN` in the shell, plus
-`OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` on the first deploy. It stages
-the build and migrations under `.rer/deploy/product`, generates the production
-`SESSION_SECRET` and `SETUP_TOKEN` once into owner-only
-`.rer/deploy/production-secrets.json`, and runs Base deploy-kit's owner
-controller: find-or-create the D1 database and Worker named after the project,
-apply pending migrations, upload, set secrets and check `/health`. `/health`
+`MAIL_FROM` and `SENDGRID_API_KEY` on the first deploy; `OWNER_EMAIL` defaults to
+the setup owner. It stages the build and migrations under `.rer/deploy/product`
+and runs rer's deploy-kit owner controller: find-or-create the D1 database and
+Worker named after the project, apply pending migrations, upload, set secrets and
+check `/health`. rer supplies the production `SESSION_SECRET` and a one-time
+`SETUP_TOKEN` itself; nothing secret is kept in the checkout. `/health`
 answers with the deploy identity (`deployment.sourceSha`, `fingerprint`,
 `versionId`) that deploy compares, and the Worker hands built files to the
 deploy's assets before any route (Base's `staticAssetResponse`), so they load
 behind `run_worker_first`; `rer verify` serves the build that way and fails on
 any built file that does not answer 200. Only the
-account credentials and those secrets reach the controller. `rer deploy` does
-not claim the production owner: POST that setup token to `/auth/bootstrap`
-with the command in docs/updating.md (303 creates the owner; the owner then
-signs in by email). Production auth requires the
+account credentials and the declared secrets reach the controller. After health
+passes, `rer deploy` claims the production owner by posting the setup token to
+`/auth/bootstrap` (303 creates the owner; an owner that already exists is kept),
+removes the token from the Worker, records that and checks health again; a later
+deploy no longer declares it, and the runtime runs without it once an owner exists.
+The owner signs in by email. `rer deploy --remove --yes` deletes what the deploy
+created for the environment; update is `git pull --ff-only` then `rer deploy`.
+Production auth requires the
 exact HTTPS origin, `AUTH_LOCAL=false`, SendGrid mail and Cloudflare's
 `CF-Connecting-IP`; the development outbox does not exist there.
 

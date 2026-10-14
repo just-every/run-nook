@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {execFileSync,spawnSync} from 'node:child_process'
 import {readFileSync} from 'node:fs'
-import {mkdtemp,readFile,rm,stat,symlink} from 'node:fs/promises'
+import {mkdtemp,rm,symlink} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join,resolve} from 'node:path'
 import {pathToFileURL} from 'node:url'
@@ -34,10 +34,8 @@ test('rer deploy builds the committed source, applies every migration to a new D
  assert.equal(first.provider.deployed,true)
  assert.deepEqual(first.provider.databases,[JSON.parse(readFileSync(join(root,'owner-deployment.json'),'utf8')).project.split('/')[1]+'-production-db'])
  for(const table of ['oa_operators','rer_mail_development_outbox','workspace'])assert.ok(first.provider.tables[0].includes(table),table)
- assert.deepEqual(first.provider.secrets.sort(),['MAIL_FROM','OWNER_EMAIL','SENDGRID_API_KEY','SESSION_SECRET','SETUP_TOKEN'])
- const secrets=join(clone,'.rer/deploy/production-secrets.json')
- assert.equal((await stat(secrets)).mode&0o777,0o600)
- const saved=JSON.parse(await readFile(secrets,'utf8'))
- assert.ok(saved.SETUP_TOKEN.length>=32&&saved.SESSION_SECRET.length>=32)
- for(const value of [owner.SENDGRID_API_KEY,saved.SETUP_TOKEN,saved.SESSION_SECRET])assert.ok(!first.output.includes(value),'deploy output never prints a secret')
+ assert.equal(first.provider.claims,1,'rer deploy claims the hosted owner once')
+ assert.deepEqual(first.provider.secrets.sort(),['MAIL_FROM','OWNER_EMAIL','SENDGRID_API_KEY','SESSION_SECRET'],'the spent setup token is retired from the Worker')
+ assert.match(first.result.message??first.output,/Claimed the hosted owner/)
+ for(const value of Object.values(owner))assert.ok(!first.output.includes(value),'deploy output never prints a secret')
 })
