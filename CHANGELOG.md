@@ -12,18 +12,13 @@ PWA install controls and browser-menu instructions. The service worker displays
 visible alerts and caches no requests or private content. Local packet checks
 do not prove delivery to a real browser or device.
 
-Team and message actions offer native member and message erasure with a preview,
-typed confirmation and a receipt. Erasure removes the selected live content,
-including from other open tabs. Member erasure also clears notification
-preferences, push devices and queued email/Web Push items; message and outcome
-erasure clears their queued items too. Portable row fences and erasure journals protect restore paths when
-the latest journal is available. Imported-author erasure removes the selected
-source copies and files, then withdraws the ZIP copy Nook retained for that
-import. After erasure completes, that retained archive cannot be opened or
-re-imported. These controls do not erase external archives or physical remnants.
+Erasure covers the new push data: erasing a member also removes their push
+devices and presence and their queued Web Push items, erasing a message removes
+its queued Web Push items as well as its email items, and erasing a decision or
+request now removes its queued email and Web Push items too.
 
-Erasing a person now also reaches imports that were still being applied, and
-removes the person's Slack ID from every other person's imported reactions while
+Erasing a person now also reaches imports that were still being applied,
+cancels their import previews and withdraws those uploads, and removes the person's Slack ID from every other person's imported reactions while
 the other reactors and the counts stay. If that redaction is too large for one
 request, the erasure still completes and its receipt says how many imported
 messages keep the ID. An import whose only change from an erasure was a removed
