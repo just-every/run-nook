@@ -14,10 +14,10 @@ The dry run builds and validates the Worker, assets, migrations and deployment s
 
 ## Deploy to your Cloudflare account
 
-You supply a Cloudflare account ID and a scoped API token. On the first deployment you also supply the mail-from address and a SendGrid API key. The owner is the email address you gave `rer setup`; set `OWNER_EMAIL` to use another:
+You supply a Cloudflare account ID and a scoped API token. On the first deployment you also supply the mail-from address and a SendGrid API key. Set `OWNER_EMAIL` to the real email address that will own the hosted workspace. Local `rer setup` is optional and is not required for deployment:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
+OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
   rer deploy
 ```
 
@@ -27,7 +27,7 @@ A dry run checks the build and settings only. It does not deploy anything, so ru
 
 ## The owner is claimed for you
 
-After the deploy is healthy, `rer deploy` claims the hosted owner automatically. It sets a one-time setup token, uses it once to create the owner account for the owner email, removes the token from the Worker and checks health again. Nothing for you to copy, and no token is needed afterwards. Open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you.
+After the deploy is healthy, `rer deploy` claims the hosted owner from `OWNER_EMAIL` automatically. There is no manual setup-token step. Open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you.
 
 If the owner already exists, the deploy keeps it. If the claim or the token's removal fails, the deploy says so and what to run; running the same `rer deploy` again finishes it.
 

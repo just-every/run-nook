@@ -38,28 +38,23 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 
 ## Run it on your computer
 
-Install the `rer` command once: `curl -fsSL https://runeditrun.com/install.sh | sh`
-(or `npx -y @runeditrun/rer cli install`; it needs Node 22 or later to start). It
-runs this checkout's own pinned commands and provides the Node and pnpm versions
-Nook needs, so there is nothing else to install or choose. The commands use an
-example local identity. Replace `you@example.com` and `Your name` with your own
-email address and name, and use the same email address in the outbox command below.
+Install the `rer` command once, clone Nook, then start it from the cloned folder:
 
 ```sh
-git clone https://github.com/just-every/run-nook.git
-cd run-nook
-rer setup --owner-email you@example.com --owner-name 'Your name'
+npm install -g @runeditrun/rer
+git clone https://github.com/just-every/run-nook.git && cd run-nook
 rer dev
 ```
 
-`setup` writes owner-only private settings to `.dev.vars`, builds the Worker,
-applies every local D1 migration, claims you as the first owner, puts a sign-in
-message in the development outbox and stops the app again. It prints
-`RER_SETUP_READY` and the next step. Pass `--port P` to choose the local port;
-later commands reuse it.
+`rer` installs this checkout's pinned Node and pnpm itself. You need npm and Git
+to start; no particular Node version or separate pnpm installation is required.
+`rer dev` prepares the local settings and database and creates a development
+owner automatically. Local `rer setup` is optional; you do not need to run it
+after `rer dev`, and it cannot replace an owner that already exists. If you want
+to choose the local owner, run setup before the first dev launch.
 
 `dev` starts the app with live reload and prints `RER_READY http://127.0.0.1:P`,
-`RER_SIGNED_IN you@example.com` and an `RER_OPEN` link. Open that link on this
+`RER_SIGNED_IN` with the development owner email and an `RER_OPEN` link. Open that link on this
 computer and Nook opens signed in as you through a local-only dev session. The
 link carries this checkout's dev key in its fragment, so treat it like a
 password and keep it on this computer. Your first visit lands on `/setup`:
@@ -76,7 +71,7 @@ outbox. Choose the newest sign-in message, follow its link and press
 
 ```sh
 rer outbox             # print the outbox link of the running app
-rer outbox --owner-email you@example.com   # request a fresh link
+rer outbox --owner-email EMAIL   # use the development owner email printed by rer dev
 rer dev --stop
 rer verify             # the complete test suite
 ```
@@ -90,7 +85,7 @@ installer.
 and data, and `rer doctor` reports tool versions, missing
 inputs and where your local state lives. `rer describe` lists
 every command and flag. Each verb is also a package script, for example
-`pnpm run dev -- --port 8790`.
+`npm run dev -- --port 8790`.
 
 ### Move or reset your data
 
@@ -114,17 +109,17 @@ dependencies, `exports/` and deploy receipts.
 
 ```sh
 rer deploy --dry-run
-CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
+OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
   rer deploy
 ```
 
 The dry run builds and validates the Worker, assets and every migration with no
 provider request. A real deploy creates or reuses the D1 database and Worker
 named after this project, applies pending migrations, uploads the build, checks
-health and then claims the owner for you: the owner is the email address you gave
-`rer setup` (set `OWNER_EMAIL` to use another), `rer` claims it once with a
-one-time setup token it removes afterwards, and you sign in by email at the
-address `rer deploy` prints. To update to newer source, run `git pull --ff-only`
+health and then claims the hosted owner from `OWNER_EMAIL`. Set it to your real
+email address at deploy; the local development identity is for this computer.
+No manual setup-token step is needed. Open the address `rer deploy` prints and
+sign in by email. To update to newer source, run `git pull --ff-only`
 and then `rer deploy` again; to remove the deployment, run
 `rer deploy --remove --yes`. The commands are in
 [Updating and deploying](docs/updating.md). `rer release --repo . --output DIR --dry-run`
