@@ -9,7 +9,7 @@ import {chromium} from '@playwright/test'
 // Run README's "Run it on your computer" commands in a fresh clone, in order.
 // Four kinds of line are not executed literally: `verify` (this test is part of it),
 // the real deploy (it needs an owner account; tests/owner-deploy.test.mjs covers
-// it) the npm global install (the shim below supplies the same launcher) and the clone
+// it), the npm global install (the shim below supplies the same launcher) and the clone
 // and cd, which this test has already done. Dev receives a free port so the clone
 // cannot collide with another local app.
 const root=resolve(import.meta.dirname,'..')
