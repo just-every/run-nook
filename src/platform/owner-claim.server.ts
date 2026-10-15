@@ -5,7 +5,6 @@ import {authBindings, type Bindings} from './operator-auth.server'
 export type OwnerClaimBindings = Bindings & {
  RER_OWNER_CLAIM_ISSUER?: string
  RER_OWNER_CLAIM_INSTALLATION_ID?: string
- RER_OWNER_CLAIM_APP_ORIGIN?: string
  RER_OWNER_CLAIM_PUBLIC_KEYS?: string
 }
 
@@ -26,7 +25,7 @@ export async function ownerClaim(bindings: OwnerClaimBindings, request: Request)
    authConfig:{origin:env.AUTH_ORIGIN,local:env.AUTH_LOCAL==='true',OWNER_EMAIL:env.OWNER_EMAIL,SESSION_SECRET:env.SESSION_SECRET,SETUP_TOKEN:env.SETUP_TOKEN},
    clientIp:request=>env.AUTH_LOCAL==='true'?'local':request.headers.get('CF-Connecting-IP')??'',
    issuer:env.RER_OWNER_CLAIM_ISSUER!,installationId:env.RER_OWNER_CLAIM_INSTALLATION_ID!,
-   appOrigin:env.RER_OWNER_CLAIM_APP_ORIGIN!,expectedEmail:env.OWNER_EMAIL,
+   appOrigin:env.AUTH_ORIGIN,expectedEmail:env.OWNER_EMAIL,
    publicKeys:JSON.parse(env.RER_OWNER_CLAIM_PUBLIC_KEYS??'null'),
   })(request)
  } catch(error) {
