@@ -1,6 +1,13 @@
 # Nook changes
 
-## Unreleased
+## 0.3.0 (2026-10-15)
+
+Changes since 0.2.0. The new migrations are
+`0024_import_redaction_steps.sql` and `0025_owner_signin.sql`; both are additive.
+Export before updating, preserve your private settings and applied migrations,
+then update the source and run `rer setup` locally or `rer deploy` for the same
+hosted installation. Never reset populated state to update. See
+[Updating and deploying](docs/updating.md) and [RELEASE.json](RELEASE.json).
 
 Nook runs on the published `@runeditrun/rer` 0.2.19 in package mode: `rer` runs
 that exact devDependency with the Node and pnpm versions the checkout declares.

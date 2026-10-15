@@ -31,6 +31,9 @@
 
 # Nook
 
+The current release is **0.3.0**. See the [release notes](CHANGELOG.md#030-2026-10-15)
+and [updating guide](docs/updating.md) before upgrading an existing Nook.
+
 Nook is a team workspace with private channels, fixed-participant DMs, threads,
 versioned decisions, commitments that only their assignee can accept, private
 files and calm attention. It runs as one Cloudflare Worker: React/TanStack Start
@@ -161,6 +164,13 @@ Setup applies pending migrations and keeps your owner and local data. If setup
 is needed after an update, `rer dev` tells you to run `rer setup` before it can
 start. Export first if you want a backup; see
 [Updating and deploying](docs/updating.md).
+
+Upgrading from **0.2.0** adds migrations `0024_import_redaction_steps.sql`
+(resumable imported-reaction erasure) and `0025_owner_signin.sql` (one-time
+hosted owner sign-in grants). Export before updating; `rer setup` applies them
+locally and `rer deploy` applies them to the existing hosted database. Keep your
+private settings and every previously applied migration; never reset populated
+state to update.
 
 ## Where things live
 

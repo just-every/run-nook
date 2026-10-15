@@ -1,60 +1,59 @@
 {
-  "version": "0.2.0",
-  "previousVersion": "0.1.0",
-  "date": "2026-10-14",
-  "publicReleaseNotes": "Nook 0.2.0 adds Web Push and an installable Nook app, finishes erasure across Slack import custody and imported reactions, exports a hosted workspace, and moves to the published rer 0.2.1 command line.\n\nWeb Push is a separate opt-in channel beside email. In You, each person can install Nook as an app and turn on push for that device, choosing mentions and commitments, urgent requests (and whether they come through quiet time), direct messages and followed-thread replies. Every push starts off. Alerts are encrypted to the browser vendor's push service and carry no message text, file names, urgent reasons or commitment wording; tapping one opens the conversation after a fresh sign-in check. Reading or marking an item done cancels its pending push, and failed deliveries show to the recipient, the sender and the owner for seven days. Migration 0023 adds the push tables and changes no email choices. Delivery was proven against local push endpoints, not on a real phone or desktop browser.\n\nErasing a person now also covers imports that were still being applied and removes their Slack ID from every other person's imported reactions, keeping the other reactors and counts. If the redaction is too large for one request the erasure still completes, and its receipt says how many imported messages keep the ID. An import whose only change from an erasure was a removed reaction can still be undone, and the latest archive holding it still restores.\n\nrer export --target remote exports a hosted Nook through the owner's session, and the update guide describes moving a deployed workspace to newer public source. Browser checks now include automated accessibility checks at desktop and phone widths, and the composer's routing control and the erasure dialogs pass them. The CONTRACT.md clauses now carry published IDs: NOOK-001 to NOOK-015 are the clauses earlier documents called C1 to C15.\n\nHosted operation on a real Cloudflare account, live email and push delivery to real devices, and virus scanning are not claimed.",
+  "version": "0.3.0",
+  "previousVersion": "0.2.0",
+  "date": "2026-10-15",
+  "publicReleaseNotes": "Nook 0.3.0 adds visible decision and request history, live thread reply counts, clearer invitations and channel access wording, and shared Notified names and urgent reasons. Phone composition stays above the tabs. History and Decisions & requests controls reference panels only while mounted; member erasure waits for the refreshed people list before its receipt returns focus to the surviving page.\n\nNook now pins the published rer 0.2.19 command line. A fresh local launch creates a placeholder owner; choosing a real local owner is optional and keeps the owner ID and data. Setup applies pending migrations during local updates. A hosted deploy claims the owner after health succeeds and removes its one-time setup token; rer signin provides single-use owner access with the deployment's own Cloudflare credentials. Local archive restore instructions recover the archived identities before setup.\n\nImported-reaction erasure continues in bounded steps until the erased Slack ID is absent, rather than completing with a retained ID. Migration 0024_import_redaction_steps.sql adds the resumable import/redaction state; 0025_owner_signin.sql adds hashed one-time owner sign-in grants. Both migrations are additive. Export before updating from 0.2.0, keep private settings and all applied migrations unchanged, then run rer setup locally or rer deploy against the existing hosted installation. Never reset populated state to update.\n\nKnown Base issues remain: invitation links expire after 15 minutes (invite the person again); the hosted Lobby can ask for a setup token after owner claim (open /signin); and rer 0.2.19 removal can fail with provider-incomplete-pagination on a nonempty R2 bucket (empty only that deployment's bucket and rerun removal). Reply counts include live replies only; Open thread still reaches erased-reply tombstones. Real-device Web Push receipt and virus scanning are not claimed.",
   "contractChanges": {
+    "NOOK-009": {
+      "change": "changed",
+      "summary": "Document both the offline filesystem-operator backup and the active hosted owner-session export, with restore remaining local.",
+      "was": "Full backup was described only as an offline filesystem-operator capability that bypasses app privacy; ordinary app-admin export was excluded.",
+      "now": "Offline local backup and hosted export through an active owner session both write verified archives and the erasure journal. Hosted import is not authorized; restore remains offline into an empty local destination. Sessions, sign-in tokens and outbox mail are excluded."
+    },
     "NOOK-013": {
       "change": "changed",
-      "summary": "Quiet time defers routine items; external delivery follows NOOK-014 email and NOOK-015 Web Push.",
-      "was": "External delivery of attention items is email under C14 only, with no paging guarantee.",
-      "now": "External delivery follows C14 (NOOK-014) email and C15 (NOOK-015) Web Push, with no paging guarantee.",
-      "migrationIds": [
-        "0023_web_push.sql"
-      ]
-    },
-    "NOOK-014": {
-      "change": "changed",
-      "summary": "Email notifications keep their rules; Web Push is now a separate channel under NOOK-015.",
-      "was": "Urgent stays an in-app request; there is no web push, SMS or native push.",
-      "now": "Urgent stays an in-app request; Web Push follows C15 (NOOK-015); there is no SMS or native push.",
-      "migrationIds": [
-        "0023_web_push.sql"
-      ]
-    },
-    "NOOK-015": {
-      "change": "added",
-      "summary": "Opt-in Web Push per device for mentions and commitments, urgent requests, direct messages and followed-thread replies under the email channel's identity, access, quiet-time, retry and visible-failure rules, with encrypted payloads that carry no message content and an installable app whose service worker caches nothing.",
-      "migrationIds": [
-        "0023_web_push.sql"
-      ]
+      "summary": "Make notified names, the urgent marker and urgent reasons visible to all current channel members.",
+      "was": "The clause specified recipient validation and attention routing but did not state whether members who were not notified could see notification metadata.",
+      "now": "All current channel members can see the message’s Notified names, Urgent marker and urgent reason, including members who were not notified. Attention routing and recipient validation retain their existing rules."
     }
   },
   "proseChanges": [
     {
       "document": "README.md",
       "change": "changed",
-      "date": "2026-10-14",
-      "summary": "Describe Web Push and the installable app, the exported state that excludes push data, and point hosted updates at the update guide.",
-      "was": "Notifications are in-app and email only; the README ends the production path at claiming the owner with the setup token.",
-      "now": "Web Push and installation controls are in You and start off; archives exclude push subscriptions, keys, presence and pending deliveries; docs/updating.md describes hosted export and updating to newer public source."
+      "date": "2026-10-15",
+      "summary": "Describe the 0.3.0 local and hosted owner journeys, safe updates, and offline identity recovery after restore.",
+      "was": "First setup required an explicit local owner, hosted setup described a manual setup-token claim, and archive import did not link the exact offline identity-recovery procedure.",
+      "now": "A fresh local launch creates a placeholder owner and optional setup keeps its ID and data. Hosted deploy claims the owner and removes the setup token; rer signin provides mail-free owner access. Local updates stop dev and apply pending migrations with setup. Restore links to offline identity recovery before setup; the 0.2.0 upgrade lists migrations 0024 and 0025."
     },
     {
       "document": "AGENTS.md",
       "change": "changed",
-      "date": "2026-10-13",
-      "summary": "The rer CLI and installer come from the pinned @runeditrun/rer package instead of vendored Base copies.",
-      "was": "The CLI, installer, operator-auth, mail, portability and deploy tooling are byte-exact copies of Base under scripts/base-cli and scripts/base-onboarding, refreshed from a Base checkout.",
-      "now": "The CLI, installer and command tooling come from the exact @runeditrun/rer devDependency; runtime copies of operator-auth, mail and portability are recorded in base-copies.json and refreshed from a reviewed Base commit."
+      "date": "2026-10-15",
+      "summary": "Run the exact package-mode rer dependency and treat local owner setup as optional.",
+      "was": "The guide ran the published rer package through a shorter first-run journey without describing the placeholder owner or the checkout-managed Node and pnpm versions.",
+      "now": "rer runs the exact pinned devDependency with the declared Node and pnpm versions; dev prepares a placeholder local owner and optional setup replaces its email while keeping the owner ID and data."
+    },
+    {
+      "document": "OPERATIONS.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Specify the proven local restore and hosted owner-claim procedures and bound prior-format recovery claims.",
+      "was": "Restore referred to general identity mapping, hosted owner claim required manual bootstrap, and the legacy recovery wording did not distinguish the supported backup-only portability-v1 path.",
+      "now": "Local restore recovers explicit archived identities offline before setup at the original D1 binding path. Deploy claims the hosted owner and removes the setup token. Backup-only portability-v1 recovery verifies checksums and records the unverified-metadata acknowledgement; older document formats remain separate offline procedures."
     }
   ],
   "extensionPointChanges": [],
   "migrations": [
     {
-      "id": "0023_web_push.sql",
-      "buyerSteps": "Add Web Push devices, the instance push key, presence and the push delivery queue. Every person's push choices start off and existing email choices and queued email are unchanged, so nothing is sent until someone turns push on. rer setup applies it locally and rer deploy applies it to D1; no other step is needed."
+      "id": "0024_import_redaction_steps.sql",
+      "buyerSteps": "Apply with rer setup locally or rer deploy against the existing hosted database. Adds import-kit preparation/stream-source tables and resumable reaction-redaction progress for pending member erasure. No manual data conversion or reset is needed."
+    },
+    {
+      "id": "0025_owner_signin.sql",
+      "buyerSteps": "Apply with rer setup locally or rer deploy against the existing hosted database. Adds hashed, expiring, single-use owner sign-in grants for rer signin. It creates no sign-in grant or notification merely by being applied."
     }
   ],
   "breaking": false,
-  "agentUpdateInstructions": "Updating from 0.1.0: export first (rer export locally, or rer export --target remote for a hosted Nook), fast-forward to the 0.2.0 source, run pnpm install, then rer setup for a local installation (it keeps the owner, data and private settings and applies 0023) or rer deploy for a hosted one with the same account and environment. Keep every applied migration byte unchanged; 0023 is the only new migration and it is additive. Never reset populated state to update. Push stays off for everyone until each person turns it on in You; HTTPS is required outside loopback. The clause IDs C1 to C15 in older notes and documents are NOOK-001 to NOOK-015 in CONTRACT.md, with unchanged meaning except NOOK-013, NOOK-014 and the new NOOK-015."
+  "agentUpdateInstructions": "Updating from 0.2.0 to 0.3.0: preserve the existing owner, data, private settings, resource identities and every applied migration byte. Stop local dev and export a private backup first (rer export locally, or rer export --target remote through the active hosted owner session). Fast-forward the checkout to the 0.3.0 source. rer manages the pinned dependency graph and tooling; run rer setup then rer dev locally, or rer deploy with the existing Cloudflare account and environment for a hosted Nook. The only new migrations are 0024_import_redaction_steps.sql and 0025_owner_signin.sql, both additive; never reset populated state to update. Existing email and push choices stay unchanged. The next hosted deploy claims an unclaimed 0.2.0 owner and removes its unused setup token; an old .rer/deploy/production-secrets.json can then be deleted. Restoring an archive is a separate empty-target operation: follow OPERATIONS.md#restoring-a-local-archive and recover the archived identities offline before setup. Keep the documented Lobby, invitation-lifetime and R2-removal limitations visible until their Base fixes ship."
 }
