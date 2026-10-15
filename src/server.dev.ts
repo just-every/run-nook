@@ -5,7 +5,10 @@ import worker from './server'
 import {withDevIdentity} from './base/modules/operator-auth/dev/index.mjs'
 import {devGate} from './base/modules/operator-auth/index.mjs'
 // @ts-ignore Product configuration uses the portable Base JavaScript API.
-import {authBindings,authConfig} from './platform/operator-auth-runtime.mjs'
+import {authBindings,authConfig,createConfiguredAuth} from './platform/operator-auth-runtime.mjs'
+// @ts-ignore Local-only invitation guidance uses the portable Base preview API.
+import {invitationKeyNotice} from './dev/invitation-confirmation.mjs'
+import {fontDocumentResponse} from './base/font-response'
 import branding from './branding.json'
 import {devPersonas} from './dev/personas'
 import {admitPersona,reactivatePersona} from './dev/admit.server'
@@ -22,6 +25,10 @@ export default {
   // Only a request the key gate admits touches a persona: an export suspends them, and entering as one again reactivates it.
   if(persona&&await keyed(env,request))await reactivatePersona(env.DB,as)
   const response=await layered.fetch(request,env,execution)
+  if(response.status===400&&url.pathname==='/auth/confirm'&&['GET','HEAD'].includes(request.method)){
+   const notice=await invitationKeyNotice(request,authBindings(env),createConfiguredAuth(env,branding))
+   if(notice)return (await fontDocumentResponse(notice))!
+  }
   // The persona's operator exists once the layer has answered; admit it to the product before the redirect lands.
   if(persona&&response.status===303)await admitPersona(env.DB,as)
   return response

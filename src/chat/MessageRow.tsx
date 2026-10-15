@@ -35,13 +35,14 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
   {continued?<span className="avatar-gutter" aria-hidden="true"/>:<Avatar person={{id:m.author??m.id,name:m.authorName}}/>}
   <div className="message-content"><div className="message-meta"><strong className={continued?'sr-only':undefined}>{m.authorName}</strong><time className={continued?'reveal':undefined} dateTime={m.created} title={time.toLocaleString([],{dateStyle:'full',timeStyle:'short'})}>{time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>{m.immutable&&<span className="edited">{m.retainedSource?'Retained body · read only':'Imported · read only'}</span>}{m.version>1&&!m.deleted&&!m.retainedSource&&<span className="edited">edited</span>}</div>
    <p className="message-body">{m.deleted?'Message deleted':m.slack?.text??m.body}</p>
-   {!!m.deleted&&!m.parent&&!thread&&<button type="button" className="reply-button text-button" onClick={()=>onThread(m)}>View thread</button>}
    {!m.deleted&&<>
+    {(m.urgent||!!m.notified?.length)&&<div className="message-routing">{m.urgent&&<strong>Urgent</strong>}{!!m.notified?.length&&<span>Notified: {m.notified.map(person=>person.name).join(', ')}</span>}{m.urgent&&m.urgentReason&&<span className="message-urgent-reason">{m.urgentReason}</span>}</div>}
     {!thread&&onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}
     {(m.attachments||[]).map(f=><div className="file-row reveal-host" key={f.id}>{f.state==='deleted'?<span className="muted">Attachment removed</span>:<><ImagePreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/><a href={`/api/attachments/${f.id}/download`} download={f.name}><strong>{f.name}</strong><small>{Math.max(1,Math.round(f.size/1024))} KB · Download</small></a>{!m.immutable&&f.author===user.id&&<button type="button" className="text-button reveal" onClick={()=>onRemove(f.id)}>Remove file</button>}</>}</div>)}
     {m.immutable&&<SlackHistory history={m.slack}/>}
     {!m.immutable&&<ReactionChips reactions={reactions}/>}
    </>}
+   {!m.parent&&!thread&&((m.replyCount??0)>0||!!m.deleted)&&<button type="button" className="reply-button text-button" onClick={()=>onThread(m)}><IconReply/>{m.replyCount?`${m.replyCount} ${m.replyCount===1?'reply':'replies'}`:'View thread'}</button>}
   </div>
   {!m.deleted&&<div className="message-tools reveal reveal-tap" role="group" aria-label="Message actions">
    {!m.immutable&&<ReactionPicker reactions={reactions}/>}

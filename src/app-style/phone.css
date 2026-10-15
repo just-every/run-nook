@@ -11,6 +11,7 @@
   .nook-app .title-prefix { margin-right: 4px; }
   .nook-app .header-actions { gap: 2px; }
   .nook-app .header-actions .soft-button { padding: 0 6px; gap: 4px; }
+  .nook-app .decisions-label { max-width: 90px; white-space: normal; line-height: 1.2; }
   .nook-app .header-members { padding-left: 12px; }
   .nook-app .header-members .avatar:nth-child(3), .nook-app .members-more { display: none; }
   .nook-app .body-grid, .nook-app .body-grid:is(.has-thread, .showing-outcomes) { grid-template-columns: minmax(0, 1fr); }

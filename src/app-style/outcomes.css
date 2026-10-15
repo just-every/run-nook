@@ -1,5 +1,5 @@
 /* A decision or request: a status line, a sentence, one meta line, and only the actions that are yours.
-   Discuss and More appear on hover or focus (reveal.css); Accept and Report done are always there.
+   Actions and version history stay visible on every screen.
    The panel and thread frames that hold these rows live in conversation.css. */
 
 .nook-app .outcome-card { margin: 0 -8px; padding: 12px 8px; border-bottom: 1px solid var(--line); }
@@ -28,3 +28,9 @@
 @media (hover: none) {
   .nook-app .card-actions .send { min-height: 40px; }
 }
+
+.nook-app .outcome-history { margin-top: 8px; }
+.nook-app .outcome-history > .text-button { min-height: 32px; }
+.nook-app .outcome-versions { margin: 8px 0 0; padding: 0 0 0 12px; list-style: none; border-left: 2px solid var(--line); }
+.nook-app .outcome-versions li { padding: 4px 0 12px; }
+.nook-app .outcome-versions li p { margin-bottom: 4px; overflow-wrap: anywhere; white-space: pre-wrap; }

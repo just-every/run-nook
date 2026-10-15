@@ -1,12 +1,13 @@
 import {useRef,useState} from 'react'
 import type {ReactNode} from 'react'
 import type {Outcome,Person} from './types'
+import {OutcomeHistory} from './OutcomeHistory'
 import {IconMore} from './icons'
 import {useDismiss} from './useDismiss'
 export const outcomeStatus=(o:Outcome)=>({'proposed':'Awaiting agreement','accepted':'Accepted','reported-complete':'Reported done','recorded':'Decision recorded','cancelled':'Cancelled'}[o.status]||o.status)
 const dueDate=(deadline:string)=>{const date=new Date(deadline+'T00:00');return Number.isNaN(date.getTime())?deadline:date.toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})}
 // A decision or request as a sentence, a status line, one meta line and only the actions that are yours.
-// Secondary verbs (Discuss, More) appear on hover or focus; `children` are extra actions placed in the same row.
+// Secondary verbs remain visible; `children` are extra actions placed in the same row.
 export function OutcomeCard({outcome:o,user,onAction,onDiscuss,onRevise,compact=false,children}:{outcome:Outcome;user:Person;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void;onRevise:(o:Outcome)=>void;compact?:boolean;children?:ReactNode}) {
  const [busy,setBusy]=useState(false)
  const menu=useRef<HTMLDetailsElement>(null)
@@ -23,9 +24,10 @@ export function OutcomeCard({outcome:o,user,onAction,onDiscuss,onRevise,compact=
   <div className="card-actions">
    {o.assignee===user.id&&o.status==='proposed'&&<button className="send" disabled={busy} onClick={()=>void run('accept')}>{busy?'Saving…':'Accept'}</button>}
    {o.assignee===user.id&&o.status==='accepted'&&<button className="send" disabled={busy} onClick={()=>void run('complete')}>{busy?'Saving…':'Report done'}</button>}
-   <button className="soft-button reveal" onClick={()=>onDiscuss(o)}>Discuss</button>
+   <button className="soft-button" onClick={()=>onDiscuss(o)}>Discuss</button>
    {children}
-   {o.author===user.id&&!['cancelled','reported-complete'].includes(o.status)&&<details ref={menu} className="card-more menu reveal"><summary className="icon-button" title="More"><IconMore/><span className="sr-only">More</span></summary><div className="popover end"><button onClick={()=>onRevise(o)}>Revise</button><button disabled={busy} onClick={()=>void run('cancel')}>Cancel {o.kind==='commitment'?'request':'decision'}</button></div></details>}
+   {o.author===user.id&&!['cancelled','reported-complete'].includes(o.status)&&<details ref={menu} className="card-more menu"><summary className="icon-button" title="More"><IconMore/><span className="sr-only">More</span></summary><div className="popover end"><button onClick={()=>onRevise(o)}>Revise</button><button disabled={busy} onClick={()=>void run('cancel')}>Cancel {o.kind==='commitment'?'request':'decision'}</button></div></details>}
   </div>
+  <OutcomeHistory outcome={o}/>
  </article>
 }

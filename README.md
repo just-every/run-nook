@@ -42,15 +42,16 @@ Install the `rer` command once, clone Nook, then start it from the cloned folder
 
 ```sh
 npm install -g @runeditrun/rer
-git clone https://github.com/just-every/run-nook.git && cd run-nook
+git clone https://github.com/just-every/run-nook.git nook && cd nook
 rer dev
 ```
 
 `rer` installs this checkout's pinned Node and pnpm itself. You need npm and Git
 to start; no particular Node version or separate pnpm installation is required.
-`rer dev` prepares the local settings and database and creates a development
-placeholder owner automatically. Local real-owner setup is optional. To replace
-that placeholder with your email, stop the app with `rer dev --stop`, run
+`rer dev` prepares the local settings and database and creates a placeholder
+owner, **Owner (owner@nook.test)**. Open the link it prints, then confirm that
+account on **Finish setup** to enter the workspace. This is a local account for
+trying Nook. To use your own email instead, stop the app with `rer dev --stop`, run
 `rer setup --owner-email you@example.com`, then start it again with `rer dev`.
 
 This keeps the same owner ID and your local data. You can also run setup before
@@ -58,7 +59,7 @@ the first dev launch to choose the local owner from the start.
 
 `dev` starts the app with live reload and prints `RER_READY http://127.0.0.1:P`,
 `RER_SIGNED_IN` with the development owner email and an `RER_OPEN` link. Open that link on this
-computer and Nook opens signed in as you through a local-only dev session. The
+computer and Nook opens signed in as the local owner through a local-only dev session. The
 link carries this checkout's dev key in its fragment, so treat it like a
 password and keep it on this computer. Your first visit lands on `/setup`:
 confirm the owner account there once and Nook opens the workspace. Until you do,

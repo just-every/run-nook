@@ -15,6 +15,7 @@ import {slackImportRoute} from './imports/routes'
 import {portabilityRoute} from './platform/portability.server'
 import {teamRoute} from './team/routes.server'
 import {context} from './platform/storage/context'
+import {outcomeVersions} from './platform/storage/outcome-history'
 import {readUpload} from './platform/storage/files'
 export {ChatHub} from './platform/storage/live'
 import {authRoute,outboxRoute,operatorAuth,acceptsRequest,authBindings} from './platform/operator-auth.server'
@@ -63,6 +64,7 @@ api.all('/api/*', async c => {
  if(action==='import-files'&&sub==='download'&&p.length===4&&req.method==='GET'){const file=await repository.imports(req.headers,'file',id);return new Response(file.body,{headers:{'Content-Type':file.metadata.mime,'Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(file.metadata.name)}`,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}})}
  if(action==='attachments'&&id&&p.length===4&&sub==='download'&&req.method==='GET'){const file=await repository.download(req.headers,id);return new Response(file.body,{headers:{'Content-Type':file.metadata.mime,'Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(file.metadata.name!)}`,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}})}
  if(action==='conversations'&&sub==='messages'&&p[4]==='window'&&p.length===5&&req.method==='GET')return c.json(await repository.read(req.headers,'historyWindow',id,{limit:Number(url.searchParams.get('limit')||50),before:url.searchParams.get('before'),thread:url.searchParams.get('thread'),around:url.searchParams.get('around'),firstUnread:url.searchParams.get('firstUnread')==='1'}))
+ if(action==='outcomes'&&id&&p.length===4&&sub==='versions'&&req.method==='GET')return c.json(await outcomeVersions(session,id,Number(url.searchParams.get('before')||0)))
  if(action==='messages'&&id&&p.length===3&&req.method==='GET')return c.json(await repository.read(req.headers,'message',id))
  let out: any
  if(action==='settings'&&p.length===2&&req.method==='PATCH')return c.json(await repository.write(req.headers,'settings','',input))

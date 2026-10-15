@@ -85,3 +85,11 @@ body:has(.nook-app) { margin: 0; overflow: hidden; background: var(--brand-paper
 @media (prefers-reduced-motion: reduce) {
   .nook-app * { scroll-behavior: auto !important; }
 }
+
+/* The local identity bar takes its own row, including when its switcher opens. */
+body:has(> #rer-dev-badge):has(> .nook-app) { display: flex; flex-direction: column; height: 100dvh; }
+body:has(> .nook-app) > #rer-dev-badge { flex: none; margin-bottom: 0; }
+body:has(> #rer-dev-badge) > .nook-app { flex: 1; min-height: 0; }
+body:has(> #rer-dev-badge) > .nook-app .app { height: 100%; }
+.nook-app .channel-invite { margin-bottom: 20px; }
+.nook-app .channel-invite p { margin: 4px 0 0; color: var(--ink-soft); font-size: var(--fs-meta); }

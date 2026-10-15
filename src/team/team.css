@@ -19,6 +19,8 @@
 .nook-app .team-invite .team-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); column-gap: var(--s4); }
 .nook-app .team-invite .team-check { display: flex; align-items: center; gap: 9px; padding: 6px 0; color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
 .nook-app .team-invite .team-invite-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+.nook-app .team-invite .team-invite-help { grid-column: 1 / -1; margin-top: 0; }
+.nook-app .team-invite .team-invite-help summary { width: auto; }
 
 /* People: a row per person, with the actions on intent */
 .nook-app .team-people, .nook-app .team-channel-list { margin: 0; padding: 0; list-style: none; }
