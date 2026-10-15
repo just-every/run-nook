@@ -11,7 +11,7 @@
   "operations": {
     "setup": "pnpm install --frozen-lockfile && pnpm exec rer install --non-interactive",
     "build": "pnpm exec rer build --non-interactive",
-    "verify": "pnpm exec rer verify --non-interactive",
+    "verify": "pnpm exec rer check --profile first-party && node scripts/edition-authoring/cli.mjs check && node scripts/edition-authoring/cli.mjs verify-base --offline && pnpm integration:check",
     "artifact": "node scripts/build-delivery-artifact.mjs",
     "recovery": "Keep the repository and installation private. Stop Nook; retain source, private settings and all additive migrations. Use rer export to a private archive, rer import into empty inactive local state, and the documented offline identity mapping before normal sign-in. Compare re-exported records and media. Local proof is not hosted deployment acceptance; see OPERATIONS.md."
   },
