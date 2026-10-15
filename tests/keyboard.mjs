@@ -61,7 +61,7 @@ export async function runKeyboard(origin,destination){
   await expect(page.getByText(erased.body,{exact:true})).toHaveCount(0)
   await expect.poll(async()=>(await json(page,'conversations')).find(c=>c.id===channel.id).readSeq).toBeGreaterThanOrEqual(erased.sequence)
   assert.ok((await json(page,'conversations')).find(c=>c.id===channel.id).readSeq<survivor.sequence,'visible tombstone does not read its unopened reply')
-  await tombstone.getByRole('button',{name:'View thread',exact:true}).click()
+  await tombstone.getByRole('button',{name:/\brepl(?:y|ies)$/}).click()
   await expect(page.locator('.thread-log').getByText(survivor.body,{exact:true})).toBeInViewport()
   await expect(page.locator('.thread-log').getByText('Message deleted',{exact:true})).toBeVisible()
   await expect(page.getByLabel('Reply in thread',{exact:true})).toHaveCount(0)

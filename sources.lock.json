@@ -4053,7 +4053,7 @@
       "executable": false
     },
     "tests/keyboard.mjs": {
-      "sha256": "17623b18077758e2ff709ba9bee8b4c4a8f36aa94b57669bedc6652badac7392",
+      "sha256": "811a23702e9986d45f814b683b9051fe5ce8f96e22b7501255f6686b00bb3e4f",
       "executable": false
     },
     "tests/local-d1-migrations.mjs": {
