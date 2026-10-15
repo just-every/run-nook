@@ -49,7 +49,7 @@ try{
   }
   const command=line.replace('--owner-email EMAIL','--owner-email '+ownerEmail)
   if(line==='rer export --output exports/nook.rer')assert.equal(dev.exitCode!=null||dev.signalCode!=null,true,'the app is stopped before export')
-  const output=run(command)
+  const output=run(line==='rer deploy --dry-run'?'OWNER_EMAIL=nativeowner@example.test MAIL_FROM=auth@example.test SENDGRID_API_KEY=test-only-sendgrid-key '+command:command)
   if(line==='rer dev --stop')await new Promise(ok=>dev.exitCode!=null||dev.signalCode?ok():dev.once('exit',ok))
  }
  assert.equal((await stat(join(clone,'exports/nook.rer'))).mode&0o077,0,'the archive is owner-only')
@@ -84,6 +84,8 @@ async function firstRun(origin,open){
  await phone.goto(origin+'/signin')
  await phone.locator('#auth-email').fill(ownerEmail)
  await phone.getByRole('button',{name:'Send sign-in link',exact:true}).click()
+ await phone.waitForURL(url=>url.pathname==='/__dev/outbox'||url.searchParams.get('notice')==='sent')
+ if(new URL(phone.url()).pathname!=='/__dev/outbox')await phone.getByRole('link',{name:'local development outbox',exact:true}).click()
  await phone.waitForURL(origin+'/__dev/outbox')
  await phone.locator('article').first().getByRole('link').first().click()
  await phone.getByRole('link',{name:'Open this link',exact:true}).first().click()

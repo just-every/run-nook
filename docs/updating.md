@@ -17,7 +17,7 @@ Setup applies pending migrations and keeps your owner, conversations, files and 
 
 ## Check a deploy locally
 
-Run the dry run before a real deployment:
+Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment, then run the dry run before a real deployment. rer 0.2.20 validates production sign-in configuration before building:
 
 ```sh
 rer deploy --dry-run

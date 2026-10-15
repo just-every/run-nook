@@ -665,7 +665,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "5e028fc89a2cc51d7774c5084e4012c733b5a45d39450e94afd59eaac00867b8",
+      "sha256": "54349b2cd937d6f2706a9d707476073144ddb670d41fb4f2f6c534d1db30a28f",
       "executable": false
     },
     "docs/your-team.md": {
@@ -793,7 +793,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "086ed411894af7afd6af7ebfc2f04418b3290691b2667a473afaea324be507d7",
+      "sha256": "a029cb4ed2f2b3a1c0ee34ccd7fe8f51e1c905460193e15b6fd94f06df28534e",
       "executable": false
     },
     "owner-deployment.json": {
@@ -865,7 +865,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "12e34395e72043489709139f8556d82c2f997d15faf4562a5f8d8da2b6776f20",
+      "sha256": "8ecd49aace4a01679ca8547f3de010b4d3416e9db98d93a7da599378ef368879",
       "executable": false
     },
     "RELEASE.json": {
@@ -4245,7 +4245,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "20c70574355b10419aa37071327f0144fea46df2023ed2f3e0006e015db31350",
+      "sha256": "7e5884817275f264e625bd354f40442e2914c1dc98804b430e13ac91e67001ba",
       "executable": false
     },
     "tests/recovery-support.mjs": {

@@ -115,6 +115,9 @@ dependencies, `exports/` and deploy receipts.
 
 ### Deploy to your own Cloudflare account
 
+Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment before
+the dry run. rer 0.2.20 validates production sign-in configuration before building.
+
 ```sh
 rer deploy --dry-run
 OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
