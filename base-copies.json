@@ -81,9 +81,9 @@
     {
       "path": "RUN-LOCALLY.md",
       "originPath": "export/RUN-LOCALLY.md",
-      "revision": "479094f0b26a639a1868fa521004581ec8dbcb63",
+      "revision": "a399ecbe314e011b8c1a40cf3ebd92fd414788f3",
       "files": {
-        "RUN-LOCALLY.md": "ace7de40380c1e85f03ecb0a1bd3f598cf9822fc9a089551a93a73d6d80d76c5"
+        "RUN-LOCALLY.md": "5b7979c000426d06038bac7aea0c3a9a6ebbe5c6259b8b4fc92fcd336ddeb910"
       },
       "modes": {
         "RUN-LOCALLY.md": "100644"
@@ -374,9 +374,9 @@
     {
       "path": "SEED-COMMAND-CONTRACT.md",
       "originPath": "export/SEED-COMMAND-CONTRACT.md",
-      "revision": "479094f0b26a639a1868fa521004581ec8dbcb63",
+      "revision": "a399ecbe314e011b8c1a40cf3ebd92fd414788f3",
       "files": {
-        "SEED-COMMAND-CONTRACT.md": "787ea40306757607fcb644b7016f569eae8a983f373d25915684558e7344217c"
+        "SEED-COMMAND-CONTRACT.md": "5fdeee8b97271415cd3dfe886852f98c2a610ebb9c2cec24f36cb072008f09bd"
       },
       "modes": {
         "SEED-COMMAND-CONTRACT.md": "100644"

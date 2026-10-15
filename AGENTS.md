@@ -2,13 +2,14 @@
 
 ## Run it locally
 
-Start the app this way in any checkout, in this order (install `rer` once with
-`npx -y @runeditrun/rer cli install`; it runs the checkout's pinned commands):
+Start the app in any checkout with `rer dev` (install `rer` once with
+`npx -y @runeditrun/rer cli install`). Nook runs in package mode: `rer` runs the
+exact `@runeditrun/rer` devDependency this checkout pins, with the Node and pnpm
+versions it declares.
 
 ```sh
-rer install
-rer setup --owner-email you@example.com
-rer dev          # opens signed in as the owner through RER_OPEN (lands on /setup first); --as admin|member|guest|signed-out; --login uses the outbox
+rer dev          # installs, sets up a placeholder local owner on first launch, opens signed in through RER_OPEN (lands on /setup first); --as admin|member|guest|signed-out; --login uses the outbox
+rer setup --owner-email you@example.com   # optional: a real local owner; stop dev first, keeps the owner ID and data
 rer verify
 rer reset --yes
 rer export --output exports/nook.rer

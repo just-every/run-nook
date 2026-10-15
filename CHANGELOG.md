@@ -2,14 +2,22 @@
 
 ## Unreleased
 
-Nook runs on the published `@runeditrun/rer` 0.2.4 in package mode. `rer deploy`
-now claims the hosted owner itself once the deploy is healthy, using a one-time
-setup token it removes from the Worker afterwards: a hosted Nook keeps no setup
-token and your checkout keeps no `.rer/deploy/production-secrets.json`. Update is
-`git pull --ff-only` then `rer deploy`; removal is `rer deploy --remove --yes`;
-`rer` provides the Node and pnpm versions Nook needs. A workspace first deployed
-from 0.2.0 still holds an unused setup token and no owner: its next `rer deploy`
-claims the owner, and the old `.rer/deploy/production-secrets.json` can be deleted.
+Nook runs on the published `@runeditrun/rer` 0.2.9 in package mode: `rer` runs
+that exact devDependency with the Node and pnpm versions the checkout declares.
+`rer dev` starts a fresh checkout with a placeholder local owner; local
+`rer setup --owner-email you@example.com` is optional and replaces it, keeping the
+owner ID and data. `rer deploy` now claims the hosted owner itself once the
+deploy is healthy, using a one-time setup token it removes from the Worker
+afterwards: a hosted Nook keeps no setup token and your checkout keeps no
+`.rer/deploy/production-secrets.json`. An unchanged repeat `rer deploy` writes
+nothing. Update is `git pull --ff-only` then `rer deploy`; removal is
+`rer deploy --remove --yes`, which now first empties the R2 bucket that deploy
+created (rechecking before each delete that it is still that bucket) and then
+deletes it, touching no other bucket; before 0.2.9 a bucket holding files was
+left behind. A failed `rer export --target remote` names the hosted export step
+that failed. A workspace first deployed from 0.2.0 still holds an unused setup
+token and no owner: its next `rer deploy` claims the owner, and the old
+`.rer/deploy/production-secrets.json` can be deleted.
 
 Erasing a person removes their Slack ID from other people's imported reactions
 even when the work exceeds one request: the erasure stays pending and continues

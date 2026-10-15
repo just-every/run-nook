@@ -1,10 +1,15 @@
 # Run it locally
 
-Install the `rer` command once: `npx -y @runeditrun/rer cli install`, or the
-installer script on the RER site (`curl -fsSL https://runeditrun.com/install.sh | sh`).
-`rer` runs every verb with the checkout's own pinned copy: the vendored
-`scripts/rer.mjs`, the `OPERATIONS.json` argv and the `package.json` aliases
-remain the machine contract until package mode, and `rer` runs them.
+Install the `rer` command once using the [RER installer](https://runeditrun.com).
+After the script or `npx` install, activate it in the current shell with
+`export PATH="$HOME/.local/bin:$PATH"`. First-party commands fetch and verify
+the exact pnpm version declared in `package.json` when it is missing, using
+`$HOME/.rer/pnpm`; no global pnpm installation or sudo is needed.
+First-party seeds pin the command implementation in either vendored mode or
+package mode. Vendored mode carries Base's exported CLI; package mode pins an
+exact `@runeditrun/rer` devDependency. In both modes the checkout's
+`OPERATIONS.json` argv and `package.json` aliases select the version that
+`rer VERB` runs.
 
 ## Launch with one command
 
@@ -35,11 +40,18 @@ with exit 3 and a message naming the field.
   activity. Set `--idle-timeout SECONDS` or `RER_SERVER_IDLE_SECONDS=N` to change
   it.
 - **Stopping.** `rer dev --stop` stops the server, and any launch still preparing.
+- **The run site.** A seed that declares a run site also prints `RER_SITE URL`
+  after the ready lines: its static marketing homepage, `/run` and docs, built
+  from edition identity and served on the first free port above the app's. The
+  app itself (`RER_READY`) is the installed instance: its `/` is the Lobby, with
+  Sign in, or Finish setup until the owner confirms first-run setup.
+  `rer build --site` writes the same site to its declared folder and names it;
+  `rer deploy --site --dry-run` prints the site Worker, custom domains and www
+  redirect it would create, with no provider request.
 
 ## Install for a real owner
 
-Use Node 22.20.0 and pnpm 10.12.4 for maintained first-party checkouts. To
-install with a real owner mailbox, run the verbs yourself from the runnable
+To install with a real owner mailbox, run the verbs yourself from the runnable
 edition's root: install locked dependencies, prepare its local owner, then start
 development:
 
@@ -55,25 +67,29 @@ copy cached at `~/.rer/node/node-vVERSION-PLATFORM-ARCH/`; when needed on
 supported platforms, the runner retrieves the official Node release and checks
 its SHA-256 against `SHASUMS256.txt`. It does not change global Node installations.
 Set `RER_NODE_AUTO=0` to disable automatic selection. If selection is disabled
-or acquisition fails, the command reports a repair invocation in this form:
-`npm exec --yes --package=node@VERSION -- node SCRIPT VERB --cwd PROJECT`.
+or acquisition fails, the command reports the required runtime and repair
+action. Resolve that runtime requirement, then repeat the same `rer` verb.
 Help, check, describe, doctor and stop do not select or acquire Node.
 A runtime that has just verified also drops its stale `.quarantine-` copies and
 Node's unused `include/` headers, which saves about 250 MB per Node release;
-`doctor` lists what it could not remove. `doctor` also warns, without failing,
+`rer doctor` lists what it could not remove. `rer doctor` also warns, without failing,
 about Node releases, workerd versions and pnpm pins that checkouts running on
 this computer set differently (each distinct pin keeps its own copy), and about
 a checkout on another volume than your home folder, where pnpm cannot clone
 packages from its store.
 
-After `RER_READY`, a seed with dev identity prints `RER_SIGNED_IN EMAIL` and
-`RER_OPEN URL`: open that URL on this computer and the app opens signed in as
-the owner, at `/setup` until first-run is finished. Other seeds, and
-`dev --login`, print `RER_SIGN_IN URL` for the local outbox: open it, follow
-the newest ordinary sign-in link and finish first-run setup at `/setup`. Until
-first-run completion is stored durably, app routes send the signed-in owner to
-`/setup`; signed-out visitors sign in and return there. Once complete,
-`/setup` opens the app or settings. The local outbox sends no external email.
+After `RER_READY`, a seed with dev identity normally prints `RER_SIGNED_IN EMAIL`
+and `RER_OPEN URL`: open that URL on this computer and the app opens signed in
+as the owner, at `/setup` until first-run is finished. With `rer dev --login`,
+open the printed `RER_OPEN` URL at `/__dev/key`: it exchanges the fragment's dev
+key for a cookie, then opens `/__dev/outbox`. Treat `RER_OPEN` as a credential;
+do not share it. A fresh browser needs that exchange before the outbox can open.
+For seeds without dev identity, open the printed `RER_SIGN_IN` URL directly.
+In the outbox, follow the newest ordinary sign-in link and finish first-run setup
+at `/setup`. Until first-run completion is stored durably, app routes send the
+signed-in owner to `/setup`; signed-out visitors sign in and return there.
+Once complete, `/setup` opens the app or settings. The local outbox sends no
+external email.
 
 The saved local port is used; a first setup saves the first free port from 8787. Explicit ports are decimal
 integers from 1 through 65535 and must be free; a busy requested port fails
@@ -83,7 +99,7 @@ readiness is bounded and failure stops the owned processes. Sign-in and dev-key
 cookies are named for the port, so checkouts open side by side on different
 ports in one browser each keep their own sign-in.
 
-A first `setup` without `--port` saves the first free port from 8787 and prints
+A first `rer setup` without `--port` saves the first free port from 8787 and prints
 it in one line; it never saves a port another process listens on, on any
 address. To move a checkout whose saved port is held by another checkout (or
 by nothing), run `rer setup --port N` in it: only the saved
@@ -98,7 +114,7 @@ reclaim (macOS: free, inactive, speculative and purgeable pages from
 `vm_stat`; Linux: `MemAvailable`), not the small "free" counter. A waiting
 message gives the queue position, the jobs ahead with their checkout paths and
 the available memory against the floor. Change the floor with
-`RER_JOBS_MIN_FREE_MEMORY_BYTES` (bytes; 0 turns it off). `dev` and `preview`
+`RER_JOBS_MIN_FREE_MEMORY_BYTES` (bytes; 0 turns it off). `rer dev` and `rer preview`
 never wait behind other checkouts' jobs; they start unless available memory is
 below their own floor, described next.
 
@@ -113,11 +129,12 @@ Review reset's exact removal inventory before confirmation; export domain data
 first if it should be restored, and import only into an empty destination.
 
 Queue waits report immediately with a reason and numeric one-based position,
-then refresh about every 15 seconds while waiting. From the runnable project
-root, inspect the live queue with
+then refresh about every 15 seconds while waiting. The running command reports
+its live queue position. Package mode has no queue status verb; vendored mode
+can inspect the live queue from the runnable project root with
 `node scripts/base-cli/modules/job-queue/cli.mjs status`.
 
-For the real owner mailbox, `setup` can prompt instead of receiving
+For the real owner mailbox, `rer setup` can prompt instead of receiving
 `--owner-email` on the command line. Setup builds the app, applies local
 migrations, prepares the first owner, requests an ordinary sign-in message and
 stops its temporary app before it exits. Existing owner data and private
@@ -130,8 +147,8 @@ checkout's dev key in its fragment: opening it signs the browser in through a
 real dev session, and the key is removed from the address bar and kept only as a
 host-only cookie. Treat that line as a credential and open it only on this
 computer. A dev-only badge switches between the owner, signed out and the
-seed's personas (`admin@dev.localhost` and so on). `dev --as PERSONA` starts as
-another persona or `signed-out`; `dev --login` turns dev identity off and uses
+seed's personas (`admin@dev.localhost` and so on). `rer dev --as PERSONA` starts as
+another persona or `signed-out`; `rer dev --login` turns dev identity off and uses
 the outbox: it prints `RER_SIGN_IN URL` and a `RER_OPEN` URL that opens that
 outbox. Choose the newest ordinary sign-in message and follow its link. No
 external email is sent. A successful sign-in consumes the link once. Seeds
@@ -147,7 +164,7 @@ serves live source edits.
 Both retain the same owner and `.wrangler/state`.
 
 Both also run the project's Cron Triggers on their schedule, read from the same
-files `check` reads for the deployed Worker (`wrangler.jsonc`, `wrangler.toml`,
+files `rer check` reads for the deployed Worker (`wrangler.jsonc`, `wrangler.toml`,
 a deploy template such as `deploy/wrangler.template.toml`). Each run prints one
 `RER_SCHEDULED TIME "CRON" ok MSms` line. If two of those files declare different
 schedules the server refuses to start and names both files; make them the same.
@@ -178,17 +195,27 @@ refuses other paths in the checkout, `..` segments, unsafe symlinks and any
 path served by the app. Import requires an empty destination and `--yes`
 confirms the restore.
 
+For a local save, reset and restore, run these in order from the same checkout:
+
 ```sh
-rer verify
+rer dev --stop
+rer export --output exports/x.rer
 rer reset --yes
-rer export --output exports/installation.rer
-rer import --input exports/installation.rer --yes
-rer deploy
-rer describe
+rer import --input exports/x.rer --yes
+rer setup --owner-email you@example.com
+rer dev
 ```
 
-Stop dev or preview with `--stop` or Ctrl-C before build or verification, and
-before reset and data transfer. Reset removes only the
+Stop the running app so no operation can write during the backup. Export saves
+its domain data before reset removes the local installation. Reset makes the
+destination empty, as import requires. Import restores the saved domain data;
+setup then establishes the owner and private local configuration excluded from
+the archive. Start development to use the restored installation.
+
+Other supported operations are `rer verify`, `rer deploy` and `rer describe`.
+
+Use `rer dev --stop` or `rer preview --stop` (or Ctrl-C) before `rer build`,
+`rer verify`, `rer reset` and data transfer. Reset removes only the
 declared local inventory: local database/storage state, owner and sessions,
 outbox, CLI and installer bookkeeping, and generated private settings. It
 keeps source, dependencies, exports and deployment receipts. It refuses active
@@ -209,27 +236,12 @@ hosted health or mail delivery.
 `rer describe` reads the current checkout's actual verbs,
 flags, aliases, pins, effects and local state without installing or running
 project commands. New verbs accept `--help`, `--cwd PATH`, `--non-interactive`
-and `--json`. Setup also accepts `--owner-name`, `--port`, `--host` and a
-private JSON `--answers FILE`. Dev and preview accept `--port`, `--host`,
-`--idle-timeout`, and `--stop`. Deploy accepts `--environment` and `--dry-run`;
-export/import accept their target, file and restore options. `check` accepts
+and `--json`. Setup also accepts `--owner-name`, `--port`, `--host`, a
+private JSON `--answers FILE` and `--door`. Dev and preview accept `--port`,
+`--host`, `--idle-timeout`, and `--stop`; dev also `--door` and `--direct`. Deploy accepts `--environment` and `--dry-run`;
+export/import accept their target, file and restore options. `rer check` accepts
 `--profile first-party`. Heavy commands accept `--no-queue` only when the
 original caller has `CI=true`. Release retains its own compatibility flags.
-
-The package-script aliases remain available from the same runnable root:
-
-```sh
-pnpm run deps
-pnpm run setup
-pnpm run dev
-```
-
-`deps` dispatches to `rer install`; forwarded flags follow `--`.
-
-Package aliases, when used, take the form `pnpm run VERB -- FLAGS`; use
-`pnpm run deploy -- --dry-run` because `pnpm deploy` is a different built-in
-command. `pnpm install --frozen-lockfile` is the equivalent dependency action
-to `rer install`.
 
 Local durable state is `.wrangler/state`; CLI bookkeeping is `.rer/local`,
 installer state is `.seed/installer`, and the default private settings file is
@@ -246,3 +258,49 @@ The first-party command profile is optional for independently authored
 projects. They may keep their own runtime, tools, installer, commands and
 provider choices. RER executes only their declared operations and does not
 impose Base pins, aliases, outbox or state layout.
+
+## The front door (opt-in)
+
+With the installed `rer` command, one process on one port can serve every
+checkout on this computer at its own name, starting each on its first visit
+and stopping it when idle:
+
+```sh
+rer door enable            # port 8700, 10 servers, 12 hours idle
+rer door add ~/review/*    # register checkouts; prints each URL
+```
+
+`rer door enable --port N --server-limit N --idle-timeout S` changes the
+policy. The door stores it with the `RER_*` variables in effect when you
+enable it, and every checkout it starts runs with exactly those, whoever
+starts the door later.
+
+Each checkout is then at `http://NAME.localhost:8700`, where NAME is its
+folder name (a second `cradle` becomes `cradle-2`); `http://localhost:8700`
+lists them with their state. Opening a stopped checkout's URL in a browser
+starts it (a page reloads once it is ready); images, scripts, API calls and
+WebSockets never start one. A checkout the door started stops after the idle
+time, and at the server limit the door stops its own least recently used one,
+never a server you started with `rer dev`; when it cannot make room, the page
+names what holds the limit. Each name is its own site, so sign-in cookies stay
+apart. A name stays with its checkout: `rer door remove NAME` stops serving
+it there but keeps the name reserved, and that checkout's next `rer dev` (or
+`rer door add`) registers it again. A checkout you move or rename keeps its
+name, address and sign-in: run `rer dev` (or `rer door add`) in its new folder.
+A copy of a checkout gets a name of its own.
+
+`rer door status` shows the door and every checkout; `--json` gives the same
+as data and `--links` adds sign-in links that start a checkout and sign that
+browser in. While the door is enabled, `rer dev` sets a fresh checkout up at
+its door URL. An existing checkout moves with `rer dev --door`, which keeps its
+data and changes only its saved address; `rer dev --direct` moves it back, and
+`rer dev --port N` always serves directly at `http://127.0.0.1:N`. A checkout
+whose pinned Base predates the door stays direct: the door lists it and a visit
+to its door URL starts it and sends the browser to its own address.
+
+Stay direct for a checkout that signs in through an external identity
+provider (Google, Microsoft and others reject `*.localhost` callback
+addresses). `rer door restart` drains and restarts the door: checkouts that
+were starting finish starting, and open tabs reconnect. After a reboot or logout the door needs `rer door start` (or any
+`rer dev` in a checkout that uses it); `rer door stop` and `rer door disable`
+stop it and opt this computer out.

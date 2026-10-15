@@ -583,11 +583,11 @@
       "executable": false
     },
     "AGENTS.md": {
-      "sha256": "037578e6d60ecf4a834e7919b0589ddc9bebb41f8b3054792b59968bfb037069",
+      "sha256": "6223e93ef4ce3f67a7b8a23200bdfe1852b647afbb3bf7eb4de43747cd63a8c3",
       "executable": false
     },
     "base-copies.json": {
-      "sha256": "18a3a559a1e06d82b2fa4717dc409eab56ce9a4b056654580a59c4f9639498e7",
+      "sha256": "b07ba2e6f42ebef91fd92a0e0c44ecf633955759883150a6120f1325d77823df",
       "executable": false
     },
     "BASE-LICENSE": {
@@ -595,7 +595,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "40cc7845943ace1399fdd51bbbecad5cb5aebc166f627d226e4fa5cf5c213e0d",
+      "sha256": "9d2767d273d0168dc396aba1c41d4c5f9cdaf13e0b4c8406dc5840926a4dad2f",
       "executable": false
     },
     "CLAUDE.md": {
@@ -603,7 +603,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "17d72c2f3826162affea291b0deb5edd56ef6e1d89ce5bd1cb20b93d87db1540",
+      "sha256": "ab09d519bb2a37cc928989473d3da2855f6e49c23fee1b2641106b7e0989477e",
       "executable": false
     },
     "deploy-site.json": {
@@ -859,7 +859,7 @@
       "executable": false
     },
     "RUN-LOCALLY.md": {
-      "sha256": "ace7de40380c1e85f03ecb0a1bd3f598cf9822fc9a089551a93a73d6d80d76c5",
+      "sha256": "5b7979c000426d06038bac7aea0c3a9a6ebbe5c6259b8b4fc92fcd336ddeb910",
       "executable": false
     },
     "scripts/archive.mjs": {
@@ -1163,7 +1163,7 @@
       "executable": false
     },
     "SEED-COMMAND-CONTRACT.md": {
-      "sha256": "787ea40306757607fcb644b7016f569eae8a983f373d25915684558e7344217c",
+      "sha256": "5fdeee8b97271415cd3dfe886852f98c2a610ebb9c2cec24f36cb072008f09bd",
       "executable": false
     },
     "seed.json": {
