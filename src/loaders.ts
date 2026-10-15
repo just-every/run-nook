@@ -9,12 +9,5 @@ export const loadWorkspace = createServerFn({method:'GET'}).handler(async () => 
  ])
  const {developmentMail} = await import('./platform/operator-auth.server')
  try { return {...await new Repository(env as unknown as import('./platform/repository.server').Bindings).workspace(getRequestHeaders()),developmentOutbox:developmentMail(env)} }
- catch(error) { if(error instanceof Fault && error.status === 401) throw redirect({to:'/signin'}); throw error }
-})
-
-
-// Public presentation capability only; never returns auth bindings or identity.
-export const loadSignInConfiguration = createServerFn({method:'GET'}).handler(async () => {
- const [{env},{developmentMail}] = await Promise.all([import('cloudflare:workers'),import('./platform/operator-auth.server')])
- return {developmentOutbox:developmentMail(env)}
+ catch(error) { if(error instanceof Fault && error.status === 401) throw redirect({href:'/signin'}); throw error }
 })

@@ -26,8 +26,18 @@ export async function invite(origin,ownerCookie,name,email=name.toLowerCase()+'@
  const prepared=await fetch(origin+'/api/team/invitations',{method:'POST',headers,body:JSON.stringify({email,role:'member',mode:'member',scopes:[channel.id]})});assert.equal(prepared.status,200,'explicit product invitation scope');
  const response=await fetch(origin+'/auth/invite',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',cookie:ownerCookie},body:JSON.stringify({email,displayName:name,role:'member',returnTo:'/app'})});assert.equal(response.status,202,'owner invitation');return signIn(origin,email,{requestLink:false});
 }
+// Browser follows the native form, then the synthetic mail transport's link.
+// The person-facing flow never opens a captured-mail inbox.
+export async function browserEmailSignIn(page,origin,email){
+ await page.goto(origin+'/signin');await page.getByLabel('Email',{exact:true}).fill(email);
+ await page.getByRole('button',{name:'Email a sign-in link',exact:true}).click();await page.waitForURL(url=>url.pathname==='/signin'&&url.searchParams.get('notice')==='sent');
+ const listing=await(await fetch(origin+'/__dev/outbox',{headers:keyHeaders})).text(),article=listing.split('<article>').slice(1).find(row=>row.toLowerCase().includes(`to: ${email.toLowerCase()}</p>`));
+ assert.ok(article,'synthetic mail addressed to the person');
+ const message=article.match(/href="([^\"]*\?message=[^\"]+)"/),detail=await(await fetch(new URL(unescape(message[1]),origin),{headers:keyHeaders})).text(),link=detail.match(/href="([^\"]*\/auth\/confirm\?[^\"]+)"/);
+ assert.ok(link,'synthetic mail confirmation');await page.goto(new URL(unescape(link[1]),origin).href);
+ await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.waitForURL(origin+'/app');await page.locator('.workspace#primary').waitFor();
+}
 export async function browserSignIn(page,origin,name){
  const owner=await signIn(origin,'nativeowner@example.test');await invite(origin,owner.cookie,name);
- const email=name.toLowerCase()+'@example.test';await page.goto(origin+'/signin');await page.locator('#auth-email').fill(email);await page.getByRole('button',{name:'Send sign-in link',exact:true}).click();await page.waitForURL(origin+'/__dev/outbox');
- await page.locator('article').filter({hasText:'To: '+email}).first().getByRole('link').first().click();await page.getByRole('link',{name:'Open this link',exact:true}).first().click();await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.waitForURL(origin+'/app');await page.locator('.workspace#primary').waitFor();
+ await browserEmailSignIn(page,origin,name.toLowerCase()+'@example.test');
 }

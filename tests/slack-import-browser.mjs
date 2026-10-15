@@ -1,3 +1,4 @@
+import {browserEmailSignIn} from './auth-support.mjs';
 // Parent runtime/browser lane: existing local Worker with native owner setup.
 import assert from 'node:assert/strict';
 import { chromium, expect } from '@playwright/test';
@@ -11,14 +12,7 @@ try {
     for (const width of [1440, 390]) {
         const context = await browser.newContext({ viewport: { width, height: width === 390 ? 844 : 1000 } }), page = await context.newPage();
         try {
-            await page.goto(origin + '/signin');
-            await page.locator('#auth-email').fill('nativeowner@example.test');
-            await page.getByRole('button', { name: 'Send sign-in link', exact: true }).click();
-            await page.waitForURL(origin + '/__dev/outbox');
-            await page.locator('article').filter({ hasText: 'To: nativeowner@example.test' }).first().getByRole('link').first().click();
-            await page.getByRole('link', { name: 'Open this link', exact: true }).first().click();
-            await page.getByRole('button', { name: 'Confirm', exact: true }).click();
-            await page.waitForURL(origin + '/app');
+            await browserEmailSignIn(page,origin,'nativeowner@example.test');
             await page.goto(origin + '/app?view=you');
             await page.getByRole('link',{name:'Import Slack history',exact:true}).click();
             const incomplete = zipFixture([['users.json', []], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', [{ type: 'message', user: 'Umissing', ts: '1.000001', text: 'Missing source actor' }]]]);

@@ -452,7 +452,7 @@
           "src/chat",
           "src/app-style",
           "src/NotFound.tsx",
-          "src/SignInScreen.tsx",
+          "src/portability",
           "public",
           "docs",
           "migrations",

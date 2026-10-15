@@ -1273,7 +1273,7 @@
     {
       "path": "src/base/modules/operator-auth",
       "originPath": "modules/operator-auth",
-      "revision": "756bf5a8544d792a51bb76f6e90a8ee5908a32a5",
+      "revision": "dcbd5e8b45c879f6713eb738373a80933bf98941",
       "files": {
         "src/base/modules/operator-auth/accounts/adapter.mjs": "989fca51e86ecc80cb150661b6d6cb8b6a57f82a85eb408d1fa6286a8372a3aa",
         "src/base/modules/operator-auth/accounts/admin.mjs": "ad164e6b03136b67407e6f0b9ac7089dbcad505f65c07ac05c991705e17c69b1",
@@ -1351,12 +1351,12 @@
         "src/base/modules/operator-auth/owner-signin-grant.mjs": "739808e5ad58b982d7d40a0ce2dc3836b90d57f515d8ce904cf6cf90965ed745",
         "src/base/modules/operator-auth/page.mjs": "5a6e74e3e1861dbe6906ab2e0219b498f1943c11e9c88a779819563ec32e7322",
         "src/base/modules/operator-auth/policy.mjs": "d535aba35621d333cd6faae49fc3c6cb72e1d5718741f02d363cbe3e8eaf153c",
-        "src/base/modules/operator-auth/README.md": "999850a2a54147326ab738eac1446dcb8b2321ba0046d767c1536172cefb611e",
+        "src/base/modules/operator-auth/README.md": "10699d8f086345f71c1f5fd1dd3b95dea72813ace61a9095dac5a4858d239e58",
         "src/base/modules/operator-auth/rejected-response.mjs": "38c4e7621901173d0bca9bc62587486951ce24d2e0e31e97f26e1dfe406c9726",
         "src/base/modules/operator-auth/routes.mjs": "30e43f0da6c7b512639fd5187b67e3114773948ed9bdef751e4c8950b60e2dca",
         "src/base/modules/operator-auth/service.mjs": "ea77181f36b03f3fc821e5d8b7fbd31594a99303c89621f7e2a0b8fcf60f62ac",
         "src/base/modules/operator-auth/signin/index.d.mts": "9acad80108b974454b1473c761222ba7daaeceb13b7c9842107cbf1b15745c10",
-        "src/base/modules/operator-auth/signin/index.mjs": "c902a6895f5ffb8c141eb3214d78ccd654dc094671569594c51b0a73dfb1f3ce"
+        "src/base/modules/operator-auth/signin/index.mjs": "4dfa87e4c9699834bfc0271e8c0ad39c50062a30548b57d2a147052dcdb56ec2"
       },
       "modes": {
         "src/base/modules/operator-auth/accounts/adapter.mjs": "100644",

@@ -10,8 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as ExportRouteImport } from './routes/export'
 import { Route as ImportsRouteImport } from './routes/imports'
-import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as DocsSlugRouteImport } from './routes/docs.$slug'
 
@@ -20,14 +20,14 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExportRoute = ExportRouteImport.update({
+  id: '/export',
+  path: '/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImportsRoute = ImportsRouteImport.update({
   id: '/imports',
   path: '/imports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SigninRoute = SigninRouteImport.update({
-  id: '/signin',
-  path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
@@ -43,38 +43,38 @@ const DocsSlugRoute = DocsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
+  '/export': typeof ExportRoute
   '/imports': typeof ImportsRoute
-  '/signin': typeof SigninRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/docs/': typeof DocsIndexRoute
 }
 export interface FileRoutesByTo {
   '/app': typeof AppRoute
+  '/export': typeof ExportRoute
   '/imports': typeof ImportsRoute
-  '/signin': typeof SigninRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/docs': typeof DocsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/app': typeof AppRoute
+  '/export': typeof ExportRoute
   '/imports': typeof ImportsRoute
-  '/signin': typeof SigninRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/docs/': typeof DocsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs/'
+  fullPaths: '/app' | '/export' | '/imports' | '/docs/$slug' | '/docs/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs'
-  id: '__root__' | '/app' | '/imports' | '/signin' | '/docs/$slug' | '/docs/'
+  to: '/app' | '/export' | '/imports' | '/docs/$slug' | '/docs'
+  id: '__root__' | '/app' | '/export' | '/imports' | '/docs/$slug' | '/docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRoute
+  ExportRoute: typeof ExportRoute
   ImportsRoute: typeof ImportsRoute
-  SigninRoute: typeof SigninRoute
   DocsSlugRoute: typeof DocsSlugRoute
   DocsIndexRoute: typeof DocsIndexRoute
 }
@@ -88,18 +88,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/export': {
+      id: '/export'
+      path: '/export'
+      fullPath: '/export'
+      preLoaderRoute: typeof ExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/imports': {
       id: '/imports'
       path: '/imports'
       fullPath: '/imports'
       preLoaderRoute: typeof ImportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signin': {
-      id: '/signin'
-      path: '/signin'
-      fullPath: '/signin'
-      preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/': {
@@ -121,8 +121,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
+  ExportRoute: ExportRoute,
   ImportsRoute: ImportsRoute,
-  SigninRoute: SigninRoute,
   DocsSlugRoute: DocsSlugRoute,
   DocsIndexRoute: DocsIndexRoute,
 }

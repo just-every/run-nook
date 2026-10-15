@@ -191,7 +191,7 @@
   "schedules": [],
   "queueConsumers": [],
   "healthPath": "/health",
-  "recovery": "Keep the repository and installation private. Stop Nook; retain source, private settings and all additive migrations. Use rer export to a private archive, rer import into empty inactive local state, and the documented offline identity mapping before normal sign-in. Compare re-exported records and media. Local proof is not hosted deployment acceptance; see OPERATIONS.md.",
+  "recovery": "Before leaving hosting, sign in as a Nook owner and open /export to download the native workspace archive, including database records and private file bytes. Keep it with the source and deployment snapshot. Restore with rer import into an empty stopped installation, then recover every retained identity before setup as documented at /docs/backups and OPERATIONS.md. Import rebuilds full-text search from messages. ChatHub holds derived connection frontiers and alarms, rebuilt on reconnect; live sockets, credentials and pending notifications are excluded. Verify messages, files and search before leaving.",
   "providerEffects": [
     "outbound-mail"
   ],

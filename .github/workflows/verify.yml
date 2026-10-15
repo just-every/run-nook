@@ -2,57 +2,49 @@ name: Verify
 on:
   push:
   pull_request:
+  schedule:
+    # Nightly at 02:17 Australia/Brisbane (UTC+10).
+    - cron: '17 16 * * *'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  verify:
+  fast:
     name: verify (${{ matrix.stage }})
-    runs-on: ubuntu-latest
-    # `rer verify` runs these same stages in order. CI splits them across
-    # runners: each pilot width applies the full realistic import (~29 minutes
-    # on this runner) before census, undo and, at 1440, the restore round trip.
-    timeout-minutes: 120
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
         include:
-          - stage: core
-            # rer verify ends with Base's hosted-output check on the same build.
-            command: pnpm verify:core && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" .
+          - stage: contracts
+            command: pnpm test:base && pnpm build:app && pnpm integration:check && pnpm typecheck && pnpm exec rer build --site && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" .
+          - stage: unit
+            command: pnpm test
+          - stage: runtime
+            # Includes both browser widths and the Slack import journeys.
+            command: pnpm build:app && pnpm test:runtime
+          - stage: notifications
+            command: pnpm build:app && pnpm test:notify && pnpm test:push
+    uses: ./.github/workflows/verify-stage.yml
+    with:
+      command: ${{ matrix.command }}
+
+  slow:
+    name: verify (${{ matrix.stage }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Full fresh-clone journeys retain every assertion; rer verify still
+          # runs all stages locally. Only their CI cadence changes.
+          - stage: README
+            command: pnpm test:readme
           - stage: pilot 1440
             command: pnpm test:pilot --width 1440
           - stage: pilot 390
             command: pnpm test:pilot --width 390
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Prepare hosted runner disk capacity
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          echo 'Disk capacity before removing unused preinstalled toolchains'
-          df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
-          # runner-images installs these Android, .NET and Haskell toolchains.
-          # This Node/Playwright verification job does not use them.
-          sudo rm -rf --one-file-system -- /usr/local/lib/android/sdk /usr/share/dotnet /usr/local/.ghcup
-          echo 'Disk capacity after removing unused preinstalled toolchains'
-          df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.12.4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.20.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - name: Prepare canonical temporary directory
-        run: |
-          mkdir -p ../scratch/tmp
-          echo "TMPDIR=$(realpath ../scratch/tmp)" >> "$GITHUB_ENV"
-      - run: ${{ matrix.command }}
-        env:
-          CI: 'true'
-          WRANGLER_SEND_METRICS: 'false'
+    uses: ./.github/workflows/verify-stage.yml
+    with:
+      command: ${{ matrix.command }}
+      timeout: 120

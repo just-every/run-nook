@@ -9,13 +9,8 @@ import {managementEdge} from './management-edge.mjs';
 import {issuerKeys,claimSettings} from './claim.mjs';
 
 async function until(check,label,timeout=10000) {const end=Date.now()+timeout;while(Date.now()<end){if(await check())return;await new Promise(ok=>setTimeout(ok,100))}throw Error(label)}
-async function browserOwner(page,origin) {
- await page.goto(origin+'/signin');await page.locator('#auth-email').fill('nativeowner@example.test');
- await page.getByRole('button',{name:'Send sign-in link',exact:true}).click();await page.waitForURL(origin+'/__dev/outbox');
- await page.locator('article').filter({hasText:'nativeowner@example.test'}).first().getByRole('link').first().click();
- await page.getByRole('link',{name:'Open this link',exact:true}).click();
- await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.waitForURL(origin+'/app');
-}
+import {browserEmailSignIn} from '../auth-support.mjs';
+const browserOwner=(page,origin)=>browserEmailSignIn(page,origin,'nativeowner@example.test');
 export async function editorProof(root,platformRoot,evidence) {
  const edge=await managementEdge(root,platformRoot);let native,browser;
  try {

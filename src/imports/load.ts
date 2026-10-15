@@ -9,7 +9,7 @@ export const loadImports = createServerFn({ method: 'GET' }).handler(async () =>
     }
     catch (error) {
         if (error instanceof Fault && error.status === 401)
-            throw redirect({ to: '/signin' });
+            throw redirect({ href: '/signin' });
         throw error;
     }
 });

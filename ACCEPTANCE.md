@@ -1,8 +1,10 @@
 # Nook acceptance
 
-`rer verify` is the acceptance command; CI runs its stages on
-every push as three parallel jobs (everything but the pilot, and the pilot at
-each width). It covers real Workers and local D1: runtime suites use the emitted build,
+`rer verify` is the complete local acceptance command. Push CI runs contracts,
+unit tests, runtime journeys at both widths, and notifications in four parallel
+jobs with 15-minute limits. The full README and realistic pilot fresh-clone
+journeys at 1440 and 390 retain every assertion and run nightly, on release tags,
+and manually. It covers real Workers and local D1: runtime suites use the emitted build,
 while the README and pilot journeys use the ordinary rer development workflow:
 
 - current sessions and conversation ACLs on every API, document and generated

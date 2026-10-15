@@ -13,6 +13,7 @@ import {ownerClaim} from './platform/owner-claim.server'
 import {editorRoute,editorDocument} from './platform/editor.server'
 import {slackImportRoute} from './imports/routes'
 import {portabilityRoute} from './platform/portability.server'
+import {signInRoute} from './platform/signin.server'
 import {teamRoute} from './team/routes.server'
 import {context} from './platform/storage/context'
 import {outcomeVersions} from './platform/storage/outcome-history'
@@ -99,6 +100,7 @@ export default withDemo({
   if(lobby) return lobby
   const url = new URL(request.url)
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
+  if(url.pathname==='/signin')return await signInRoute(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/notify/off') return unsubscribeRoute(env,request)
   if(url.pathname==='/auth/owner-claim') return await ownerClaim(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/api/editor/config'||url.pathname==='/api/editor/session') return editorRoute(env,request)

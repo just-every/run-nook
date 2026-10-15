@@ -41,16 +41,27 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 
 ## Run it on your computer
 
-You need **Node.js 22 or newer**, npm and Git to bootstrap `rer`. Install the
-`rer` command once, clone Nook, then start it from the cloned folder:
+You need npm and Git. Install the `rer` command once, clone the latest source
+from `main`, then start it from the cloned folder:
 
 ```sh
 npm install -g @runeditrun/rer
-git clone https://github.com/just-every/run-nook.git nook && cd nook
+git clone --branch main https://github.com/just-every/run-nook.git nook && cd nook
 rer dev
 ```
 
-Once bootstrapped, `rer` manages this checkout's pinned Node and pnpm versions.
+To run the **0.3.0 release** instead, use this clone command in place of the
+`main` clone above, then run `rer dev`:
+
+```sh
+git clone --branch v0.3.0 https://github.com/just-every/run-nook.git nook && cd nook
+```
+
+The release tag checks out a fixed version. The `git pull --ff-only` update
+instructions below apply to a checkout of `main`; see the
+[updating guide](docs/updating.md) for moving a release checkout forward.
+
+`rer` manages this checkout's pinned Node and pnpm versions.
 You do not need a separate pnpm installation.
 `rer dev` prepares the local settings and database and creates a placeholder
 owner, **Owner (owner@nook.test)**. Open the link it prints, then confirm that

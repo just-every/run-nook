@@ -17,7 +17,20 @@ Each archive binds its whole manifest and every part, and import checks that bin
 
 ## Export a hosted Nook
 
-A Nook deployed with `rer deploy` exports from your checkout through its owner-only export door. The archive and its journal are the same as a local export's, including file bytes.
+Before leaving hosting, sign in as a workspace owner and choose **Export your workspace** on Nook's sign-in page, or open `/export` on your own Nook. Download the workspace archive and keep this private `.rer` file alongside the source and deployment download from RER. RER's deployment snapshot alone cannot copy Nook's full-text database or live collaboration storage.
+
+Nook's archive includes the authoritative database records and actual private file bytes. Import rebuilds the full-text search index from the exported messages, including imported and retained history. ChatHub stores only connection frontiers and alarms; conversations, replay history and attention choices live in the exported database. A fresh ChatHub rebuilds its frontiers when people reconnect. Live sockets, credentials and pending notification deliveries do not travel.
+
+Move the browser download into the fresh checkout's `exports/` folder and make it private before importing. The destination must not have run setup:
+
+```sh
+chmod 600 exports/nook-workspace.rer
+rer import --input exports/nook-workspace.rer --yes
+```
+
+Then follow the identity recovery procedure above. Reopen the restored workspace and compare messages, file downloads and search results before stopping the original hosting. The archive's manifest also carries its erasure journal; retain your latest archive when restoring an older one.
+
+You can also export from your checkout through Nook's owner-only export door. The archive and its journal are the same as a local export's, including file bytes:
 
 1. Sign in to `https://YOUR-NOOK` as an owner. In the browser's developer tools (Application or Storage, then Cookies), copy the value of the `__Host-operator_session` cookie.
 2. Save it in a private file. Run this, paste `__Host-operator_session=VALUE` on one line, press Enter, then Ctrl-D:
