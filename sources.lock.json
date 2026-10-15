@@ -779,11 +779,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "aa1eb0438b505086cc5f0bd252f6953d937dcebb227f18cf9a81dc174556a418",
+      "sha256": "c237e068b9ca8a23482b38010abb8a7d56210295e5eff26306d7b53ee9599e4e",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "7473d144bafe494321d0e2690dff7ce665eb043b9c776acaf98abfcb538e105e",
+      "sha256": "85929a3df7c2b463fa2654b6d6eaf83d157999f6a3492883794a0fd2f841dada",
       "executable": false
     },
     "public/brand/band.svg": {
