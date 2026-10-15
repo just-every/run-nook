@@ -67,8 +67,9 @@ C14 in CONTRACT.md is the delivery contract. What an operator needs to know:
 
 - **Sender.** Notification email uses the same sender as sign-in mail:
   `MAIL_PROVIDER`, `MAIL_FROM` and the provider key in the owner deployment
-  (`MAIL_API_KEY`, populated from the `SENDGRID_API_KEY` deploy input for the
-  SendGrid default). Under
+  (`SENDGRID_API_KEY` for the SendGrid default). The owner-deploy declaration
+  also maps this same input to the shared `MAIL_API_KEY` binding that rer 0.2.20
+  validates before deploying; managed installs keep their existing bindings. Under
   `rer dev` and `rer preview` mail goes to the development outbox
   (request a link at `/signin` after opening `RER_OPEN`), and owners see "Email sending is not set up"
   in their settings until a real provider is configured.

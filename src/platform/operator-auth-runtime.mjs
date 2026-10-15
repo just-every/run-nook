@@ -26,8 +26,10 @@ export function mailSender(env){
   if(!developmentMail(env))throw new AuthError('invalid_configuration',503);
   return createMailSender({provider:'development',mode:'development'},{outbox:createD1DevelopmentOutbox({db:env.DB})});
  }
- if(!['sendgrid','resend','cloudflare'].includes(env.MAIL_PROVIDER)||!env.MAIL_API_KEY||(env.MAIL_PROVIDER==='cloudflare'&&!env.MAIL_ACCOUNT_ID))throw new AuthError('mail_configuration_required',503);
- try{return createMailSender({provider:env.MAIL_PROVIDER,mode:'production',apiKey:env.MAIL_API_KEY,...(env.MAIL_PROVIDER==='cloudflare'?{accountId:env.MAIL_ACCOUNT_ID}:{})})}
+ const credentials={sendgrid:'SENDGRID_API_KEY',resend:'RESEND_API_KEY',cloudflare:'CLOUDFLARE_EMAIL_API_TOKEN'};
+ const key=credentials[env.MAIL_PROVIDER];
+ if(!key||!env[key]||(env.MAIL_PROVIDER==='cloudflare'&&!env.CLOUDFLARE_EMAIL_ACCOUNT_ID))throw new AuthError('mail_configuration_required',503);
+ try{return createMailSender({provider:env.MAIL_PROVIDER,mode:'production',apiKey:env[key],...(env.MAIL_PROVIDER==='cloudflare'?{accountId:env.CLOUDFLARE_EMAIL_ACCOUNT_ID}:{})})}
  catch(error){if(error instanceof MailValidationError)throw new AuthError('invalid_mail_configuration',503);throw error}
 }
 export function authConfig(bindings,branding){
