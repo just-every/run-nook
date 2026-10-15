@@ -39,11 +39,11 @@ export async function pilotInstallation(root){
   dev=spawn(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs','dev','--foreground','--login'],{cwd:directory,env,stdio:['ignore','pipe','pipe'],detached:true});
   let output='';dev.stdout.on('data',chunk=>{output+=chunk;});dev.stderr.on('data',chunk=>{output+=chunk;});
   await new Promise((resolve,reject)=>{const deadline=Date.now()+10*60_000;const timer=setInterval(()=>{if(output.includes(`RER_READY ${origin}`)&&/RER_OPEN (http:\/\/\S+)/.test(output)){clearInterval(timer);resolve();}else if(dev.exitCode!==null||Date.now()>deadline){clearInterval(timer);reject(Error('Pilot dev did not become ready; credential-bearing output withheld'));}},200);});
-  const outbox=/RER_OPEN (http:\/\/\S+)/.exec(output)?.[1];
-  assert.ok(outbox,'rer dev --login opens the real outbox');
+  const open=/RER_OPEN (http:\/\/\S+)/.exec(output)?.[1];
+  assert.ok(open,'rer dev --login prints its one-click owner entry');
   const key=/^RER_DEV_KEY=(\S+)$/m.exec(await readFile(join(directory,'.rer/local/dev-key.env'),'utf8'))?.[1];
-  assert.ok(key,'fresh setup created its local outbox key');
-  return {origin,outbox,key,run,stop,directory,close:async()=>{await stop();await rm(directory,{recursive:true,force:true});}};
+  assert.ok(key,'fresh setup created its local development key');
+  return {origin,open,key,run,stop,directory,close:async()=>{await stop();await rm(directory,{recursive:true,force:true});}};
  }catch(error){
   try{await stop();}finally{if(dev&&dev.exitCode===null&&dev.signalCode===null){try{process.kill(-dev.pid,'SIGTERM');}catch{}}await rm(directory,{recursive:true,force:true});}
   throw error;
