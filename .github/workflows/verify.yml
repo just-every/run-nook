@@ -22,7 +22,8 @@ jobs:
             command: pnpm test
           - stage: runtime
             # Includes both browser widths and the Slack import journeys.
-            command: pnpm build:app && pnpm test:runtime
+            # The homepage journey serves dist/site on this runner too.
+            command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime
           - stage: notifications
             command: pnpm build:app && pnpm test:notify && pnpm test:push
     uses: ./.github/workflows/verify-stage.yml

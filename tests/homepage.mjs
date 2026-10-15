@@ -156,7 +156,7 @@ try {
   assert.equal(new URL(noJs.url()).pathname, '/docs/install', 'static mobile navigation works without JavaScript')
   await noJs.goto(new URL('/signin', instance).href)
   assert.equal(new URL(noJs.url()).pathname, '/signin', 'Sign in reaches the existing route without JavaScript')
-  assert.equal(await noJs.getByRole('navigation', {name: 'Public documentation'}).getByRole('link', {name: 'Read the Nook guides'}).getAttribute('href'), '/docs')
+  assert.equal(await noJs.getByRole('link', {name: 'Read the Nook guides', exact: true}).getAttribute('href'), '/docs')
   const emailInput = noJs.getByLabel(/email/i)
   assert.equal(await emailInput.count(), 1, '/signin exposes the operator email challenge without JavaScript')
   assert.equal(await emailInput.getAttribute('type'), 'email')
