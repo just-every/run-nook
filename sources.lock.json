@@ -593,7 +593,7 @@
       "executable": false
     },
     "base-copies.json": {
-      "sha256": "52c1f0f51f09f6873b7b18b59b23f8e44c7bfe68e26a6ba75cb7560442530b67",
+      "sha256": "11359ce7e5bfce4f49307b1da47789e78e5fe4006ada01e03aaedcca63730466",
       "executable": false
     },
     "BASE-LICENSE": {
@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "5e891fe10661bb2fa8fc4fa573d5022ebdb1b50449cbb20d7658f36cec0f46f8",
+      "sha256": "1341cf70901a95a8bb5bf136cd1d5f92962bfc29b4f773cb1a30dc0005882dd4",
       "executable": false
     },
     "CLAUDE.md": {
@@ -609,7 +609,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "ab09d519bb2a37cc928989473d3da2855f6e49c23fee1b2641106b7e0989477e",
+      "sha256": "35376e348625fc3de14c27dfd88aa2141b6feca482825bbc7cec3c003d66639f",
       "executable": false
     },
     "DEMO.md": {
@@ -625,11 +625,11 @@
       "executable": false
     },
     "docs/attention.md": {
-      "sha256": "2a79e0c541fbc61ae0b6f52e1a3bdc56fc2c5a97f991674e5e3ff7d4c643f37b",
+      "sha256": "4b822ca65295ea60dc5c808471ae460b8acd5484ed49c67bd06b6bd6a8a8b719",
       "executable": false
     },
     "docs/backups.md": {
-      "sha256": "600975cc6f0234404a5206d383f39b5e6608ab8936eb8d9185bff429404337c5",
+      "sha256": "44bc87411348107dff0b19e3d14c31253278842b9aa99266eb751464a7906f24",
       "executable": false
     },
     "docs/conversations.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "docs/install.md": {
-      "sha256": "78d674b13e40a10dbb0070c6d81e4bc9bd87790a1937fbeef30db75ae8c2635a",
+      "sha256": "ea3d6452c12bd15e5ac29d621eb34dd90b0ab2b4254e9f4aa3e94a8e3e93c4fb",
       "executable": false
     },
     "docs/moving-in-from-slack.md": {
@@ -665,7 +665,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "7fbb2710414e820456746e5437e9561382c274234d739b904f75dbd18d5af4d6",
+      "sha256": "bec12ffc25139bc17ca9fe24dba1c19ce1db4f0961834b43c6acb3f02bc7ac65",
       "executable": false
     },
     "docs/your-team.md": {
@@ -789,7 +789,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "f7d6644dd77ef1e4a4389a88545b5ad444a19a6208fc45576b5982a2e55d9782",
+      "sha256": "b6822f5a8cb343a3736ed221286a9303077e90a67d47eccdc631a900af7b6630",
       "executable": false
     },
     "owner-deployment.json": {
@@ -797,11 +797,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "00414d8ec135edd7096ade15ed9adb879b1a0a186f8efb23a3be8d898b60f173",
+      "sha256": "547747db727a9595d4ff7f08672739cb93cbaf897f846e6c7341e6f3800b13ec",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "101798df40b0f46b0ba8052c319cf97507b7a0af93f5452fd52f79809814c95a",
+      "sha256": "e878975d2638e45e9f00ec0513a3432d31d316c486e4f796dcaa0145890e1502",
       "executable": false
     },
     "public/brand/band.svg": {
@@ -861,7 +861,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "498b8c94472538c0871cb6ee07e4b69cb5e313a9df902a766e68f401fa7e527d",
+      "sha256": "b2526d8a59978b88384a3c8ef6cfb583d65897660634954e8eac2c4546435dc3",
       "executable": false
     },
     "RELEASE.json": {
@@ -1101,7 +1101,7 @@
       "executable": false
     },
     "scripts/local/transfer.mjs": {
-      "sha256": "33377b1418ef68c5879b2a6b8a8ebe9e7c576206f1374893fd2197af5555087a",
+      "sha256": "bca6120f54c84998b354ebd47a8f938c6e9d857f0c45f327ca4a555a016c97a4",
       "executable": false
     },
     "scripts/notify-test-mail.mjs": {
@@ -2561,7 +2561,7 @@
       "executable": false
     },
     "src/base/modules/operator-auth/identity/email-link/confirmation.mjs": {
-      "sha256": "20e3d8e91bb3562801abf762d84e93629c01469b89e646320e232946793e1499",
+      "sha256": "b01e1ea198eaada5085c4c60b836dbe458421d10553adf73cc906e54449e5a7f",
       "executable": false
     },
     "src/base/modules/operator-auth/identity/email-link/index.d.mts": {
@@ -2569,7 +2569,7 @@
       "executable": false
     },
     "src/base/modules/operator-auth/identity/email-link/index.mjs": {
-      "sha256": "db468e3ab38a8198b19306617974df5f2509a6251e4b578ba0c96646d5e9b6f3",
+      "sha256": "379863cda12285a93a5b901e53cb04ac614343890432b3cc097178839b2880e9",
       "executable": false
     },
     "src/base/modules/operator-auth/identity/email-link/message.mjs": {
@@ -2637,7 +2637,7 @@
       "executable": false
     },
     "src/base/modules/operator-auth/index.d.mts": {
-      "sha256": "68a29b714052218ed6c4528c1d2a61bdd5a7f59162ce8f5fb0dfc7380b358b0e",
+      "sha256": "d51648eaed1df60a210e96375c28764e48fe5c67c9dcfdb85c09f02ffa120f31",
       "executable": false
     },
     "src/base/modules/operator-auth/index.mjs": {
@@ -2665,7 +2665,7 @@
       "executable": false
     },
     "src/base/modules/operator-auth/README.md": {
-      "sha256": "b38e3698db2c298361f76a18bbea5b871f093f3b5477fd5216510e820ef526da",
+      "sha256": "1f5587112d53278df7af478dc1c0d8b6b36b2deabee48014cdbca3dd1e0546a7",
       "executable": false
     },
     "src/base/modules/operator-auth/rejected-response.mjs": {
@@ -2673,11 +2673,11 @@
       "executable": false
     },
     "src/base/modules/operator-auth/routes.mjs": {
-      "sha256": "060f5514244a228acb7aebac60658217a87745b18a0f76e8332a0dec2a3db3dc",
+      "sha256": "30e43f0da6c7b512639fd5187b67e3114773948ed9bdef751e4c8950b60e2dca",
       "executable": false
     },
     "src/base/modules/operator-auth/service.mjs": {
-      "sha256": "be4aee5deb9c18101acafe98f896faad0c282a795ccb85a4016e46f4d8d1f584",
+      "sha256": "ea77181f36b03f3fc821e5d8b7fbd31594a99303c89621f7e2a0b8fcf60f62ac",
       "executable": false
     },
     "src/base/modules/operator-auth/signin/index.d.mts": {
@@ -2977,7 +2977,7 @@
       "executable": false
     },
     "src/chat/Navigation.tsx": {
-      "sha256": "24374dff7265603bd218adb0f6a9cbdb8bc667e20d7a36fb778448534c760234",
+      "sha256": "358f9c1df0949efba1ce3950df8463b399130ad03d6d7c44b12ef71497a36779",
       "executable": false
     },
     "src/chat/OutcomeCard.tsx": {
@@ -4089,7 +4089,7 @@
       "executable": false
     },
     "tests/operator-auth.test.mjs": {
-      "sha256": "797d36ab104416fd0be6dc9c4d8b1216a972a6f92ebf63110013ad2500fee967",
+      "sha256": "48136827d3f8bbc385b2e93d6649874773c3f52b1ccedc5bf63af2e234f27c20",
       "executable": false
     },
     "tests/operator-recovery.test.mjs": {

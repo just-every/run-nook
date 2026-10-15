@@ -33,7 +33,7 @@ export function ChatActions({user,data,route,navigate,onDetails,onPreference}:{u
  const waiting=outcomes.some(o=>o.assignee===user.id&&(o.status==='proposed'||o.status==='accepted'))
  const showing=route.panel==='outcomes'
  return <>
-  <button className="decisions-toggle soft-button" aria-expanded={showing} aria-controls="decisions-panel" onClick={()=>navigate({panel:showing?null:'outcomes',landing:route.landing,...(showing?{focus:null}:{})})}><span className="decisions-label">Decisions &amp; requests</span>{open>0&&<><span className="header-count" aria-hidden="true">{open}</span><span className="sr-only">, {open} open</span></>}{waiting&&<><span className="needs-you-dot" aria-hidden="true"/><span className="sr-only">, waiting on you</span></>}</button>
+  <button className="decisions-toggle soft-button" aria-expanded={showing} aria-controls={data?'decisions-panel':undefined} onClick={()=>navigate({panel:showing?null:'outcomes',landing:route.landing,...(showing?{focus:null}:{})})}><span className="decisions-label">Decisions &amp; requests</span>{open>0&&<><span className="header-count" aria-hidden="true">{open}</span><span className="sr-only">, {open} open</span></>}{waiting&&<><span className="needs-you-dot" aria-hidden="true"/><span className="sr-only">, waiting on you</span></>}</button>
   <button className="header-members" title="Members and details" onClick={onDetails}>{members.slice(0,3).map(p=><Avatar key={p.id} person={p} size={24}/>)}{members.length>3&&<span className="members-more" aria-hidden="true">+{members.length-3}</span>}<span className="sr-only">Details</span></button>
   {data&&<ConversationMenu preferences={data.preferences} onPreference={onPreference}/>}
  </>

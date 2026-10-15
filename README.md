@@ -38,7 +38,8 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 
 ## Run it on your computer
 
-Install the `rer` command once, clone Nook, then start it from the cloned folder:
+You need **Node.js 22 or newer**, npm and Git to bootstrap `rer`. Install the
+`rer` command once, clone Nook, then start it from the cloned folder:
 
 ```sh
 npm install -g @runeditrun/rer
@@ -46,8 +47,8 @@ git clone https://github.com/just-every/run-nook.git nook && cd nook
 rer dev
 ```
 
-`rer` installs this checkout's pinned Node and pnpm itself. You need npm and Git
-to start; no particular Node version or separate pnpm installation is required.
+Once bootstrapped, `rer` manages this checkout's pinned Node and pnpm versions.
+You do not need a separate pnpm installation.
 `rer dev` prepares the local settings and database and creates a placeholder
 owner, **Owner (owner@nook.test)**. Open the link it prints, then confirm that
 account on **Finish setup** to enter the workspace. This is a local account for
@@ -105,9 +106,26 @@ rer import --input exports/nook.rer --yes
 The archive holds every conversation, message, decision, commitment, file and
 attention choice with integrity checks. It leaves out sessions, sign-in links,
 outbox mail, push subscriptions/keys/presence, pending deliveries and generated settings. After import, recover the archived people
-before setup with the offline mapping in [OPERATIONS.md](OPERATIONS.md).
+before setup using the offline procedure in
+[Restoring a local archive](OPERATIONS.md#restoring-a-local-archive).
 `reset` lists what it will remove and refuses without `--yes`; it keeps source,
 dependencies, `exports/` and deploy receipts.
+
+### Update a local Nook
+
+Run these from your existing checkout:
+
+```sh
+rer dev --stop
+git pull --ff-only
+rer setup
+rer dev
+```
+
+Setup applies pending migrations and keeps your owner and local data. If setup
+is needed after an update, `rer dev` tells you to run `rer setup` before it can
+start. Export first if you want a backup; see
+[Updating and deploying](docs/updating.md).
 
 ### Deploy to your own Cloudflare account
 
@@ -122,8 +140,23 @@ provider request. A real deploy creates or reuses the D1 database and Worker
 named after this project, applies pending migrations, uploads the build, checks
 health and then claims the hosted owner from `OWNER_EMAIL`. Set it to your real
 email address at deploy; the local development identity is for this computer.
-No manual setup-token step is needed. Open the address `rer deploy` prints and
-sign in by email. To update to newer source, run `git pull --ff-only`
+No manual setup-token step is needed. Open `/signin` at the address `rer deploy`
+prints and sign in by email. The current hosted Lobby can incorrectly say it is
+waiting for an owner and ask for a setup token; use `/signin` instead while the
+Base copy fix is pending.
+
+To sign in as the hosted owner without email, run this from the checkout that
+deployed Nook, using the same Cloudflare credentials:
+
+```sh
+CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer signin
+```
+
+It prints a private link that works once for the recorded owner and expires
+within 15 minutes. Open it immediately and keep it private. Use the same
+`--environment NAME` if you deployed a named environment.
+
+To update to newer source, run `git pull --ff-only`
 and then `rer deploy` again; to remove the deployment, run
 `rer deploy --remove --yes`. The commands are in
 [Updating and deploying](docs/updating.md). `rer release --repo . --output DIR --dry-run`

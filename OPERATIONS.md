@@ -148,9 +148,80 @@ substring matching of at least three characters; history, replay and attention
 read indexed pages. Export refuses while an upload, import or deletion is still
 pending rather than archive incomplete media; archives carry the actual R2 bytes.
 
-After an import, recover the archived people before running setup:
-`node scripts/storage/recover-identities.mjs SOURCE.sqlite NEW.sqlite MAPPING.json`
-with the full actor mapping described under identity recovery below.
+After an import, follow [Restoring a local archive](#restoring-a-local-archive)
+before running setup. This includes locating the restored D1 file, taking a
+WAL-safe snapshot, recovering every actor and installing the recovered database
+at the original binding filename.
+
+## Restoring a local archive
+
+Run these steps from the destination checkout after `rer import`. Keep it
+stopped until recovery and replacement are complete. If you already tried
+`rer dev` and saw `HTTP 409 (identity_recovery_required)`, stop it and continue
+here; importing content deliberately does not authorize a new owner.
+
+1. Stop the app and locate the restored D1 binding file:
+
+   ```sh
+   rer dev --stop
+   find .wrangler/state/v3/d1/miniflare-D1DatabaseObject -type f -name '*.sqlite'
+   ```
+
+   Select the file containing `nook_storage` with authority `normalized` and
+   the restored `nook_actors`. A normal installation has one D1 file here. If
+   there are several, inspect them read-only and identify the intended workspace;
+   do not select by age or filename order. Set the path below to that exact file.
+   Keep this variable for the replacement step.
+
+2. Take a consistent snapshot with Node 22+'s SQLite backup API, which includes
+   committed data still in the WAL. Do not copy the live `.sqlite` file with
+   `cp`. Use a new private recovery directory on each attempt:
+
+   ```sh
+   export NOOK_RESTORE_DB='.wrangler/state/v3/d1/miniflare-D1DatabaseObject/REPLACE-WITH-BINDING-FILENAME.sqlite'
+   mkdir -p exports
+   mkdir -m 700 exports/identity-recovery
+   node --input-type=module <<'JS'
+   import {DatabaseSync, backup} from 'node:sqlite';
+   const db = new DatabaseSync(process.env.NOOK_RESTORE_DB, {readOnly: true});
+   try {
+     if (db.prepare('SELECT authority FROM nook_storage WHERE id=1').get()?.authority !== 'normalized')
+       throw Error('Select the restored normalized Nook database');
+     await backup(db, 'exports/identity-recovery/source.sqlite');
+     console.log(JSON.stringify(db.prepare('SELECT id,name,email,role,active FROM nook_actors ORDER BY id').all(), null, 2));
+   } finally { db.close(); }
+   JS
+   ```
+
+   The printed actor list is private. Save `exports/identity-recovery/mapping.json`
+   in the `{owner,users:[{id,email,role}]}` format under
+   [Identity recovery](#identity-recovery). Include every retained actor,
+   including inactive people, with their original IDs and roles and the mailbox
+   each person will use. Choose an active owner. Then recover the snapshot:
+
+   ```sh
+   node scripts/storage/recover-identities.mjs exports/identity-recovery/source.sqlite exports/identity-recovery/recovered.sqlite exports/identity-recovery/mapping.json
+   ```
+
+3. While the app is still stopped, preserve the imported file and its sidecars,
+   then put the closed recovered file at **the original D1 binding path**, not
+   beside it under a new name. Keep the R2 directory unchanged:
+
+   ```sh
+   mv "$NOOK_RESTORE_DB" exports/identity-recovery/imported.sqlite
+   if [ -f "$NOOK_RESTORE_DB-wal" ]; then mv "$NOOK_RESTORE_DB-wal" exports/identity-recovery/imported.sqlite-wal; fi
+   if [ -f "$NOOK_RESTORE_DB-shm" ]; then mv "$NOOK_RESTORE_DB-shm" exports/identity-recovery/imported.sqlite-shm; fi
+   cp -p exports/identity-recovery/recovered.sqlite "$NOOK_RESTORE_DB"
+   rer setup --owner-email you@example.com
+   rer dev
+   ```
+
+   Use the mapped owner's mailbox for setup and the original local port (add
+   `--port PORT` to setup if needed). Setup retains the recovered bootstrap claim
+   and IDs. Open the new `RER_OPEN` link, confirm **Finish setup** if offered,
+   and check conversations, decisions, membership and downloaded file bytes.
+   Other recovered people use ordinary sign-in under their retained identities.
+   Keep the archive, mapping and recovery files private; do not commit them.
 
 ## Upgrading from the single workspace document
 
@@ -258,17 +329,14 @@ fields and sessions from the recovered workspace. Inactive identities remain
 inactive. Original files are retained untouched; unsuccessful recovery removes
 only its newly created destination. A populated operator store refuses.
 
-For a Base portability restore, locate the single restored `workspace` database
-under `.wrangler/state/v3/d1/miniflare-D1DatabaseObject` while stopped. Do not guess
-between multiple stores. Recover to a sibling new file with the same explicit
-mapping. Keep the original restored database and its closed sidecars in a private
-recovery directory outside live state, then put the verified recovered file at
-the original binding filename. Run setup with a mapped active owner's mailbox and the
-original origin. Setup sees the durable bootstrap claim and uses ordinary sign-in;
-it cannot create another owner. Every recovered participant signs in under the
-same stable ID and current membership. A fresh unrelated owner is never attached
-to an old identity or conversation. Retained IDs that have not completed this
-explicit recovery are dormant, not reported migrated.
+For a current Base portability restore, use the normalized recovery tool and
+the exact D1 replacement procedure in
+[Restoring a local archive](#restoring-a-local-archive). The legacy tool above
+is only for a database that still holds the single workspace document.
+Every recovered participant keeps the same stable ID and current membership.
+A fresh unrelated owner is never attached to an old identity or conversation.
+Retained IDs that have not completed explicit recovery are dormant, not reported
+migrated.
 
 Normal data movement uses the copied Base portability engine through
 `scripts/local/transfer.mjs`, with real D1 bindings and live function-valued

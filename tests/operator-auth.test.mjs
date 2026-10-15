@@ -1,9 +1,11 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {randomBytes} from 'node:crypto';
 import {readFileSync,readdirSync} from 'node:fs';
 import {sqliteBinding} from './sqlite-binding.mjs';
 import {createConfiguredAuth,developmentMail,acceptsRequest} from '../src/platform/operator-auth-runtime.mjs';
 import {createAuthHandler} from '../src/base/modules/operator-auth/index.mjs';
+import {ownerSigninDigest} from '../src/base/modules/operator-auth/owner-signin-grant.mjs';
 
 test('configured production auth delivers through the selected mail transport, fences trusted IPs and consumes native links once',async()=>{
  const db=sqliteBinding(),fetchBefore=globalThis.fetch,messages=[];
@@ -18,6 +20,19 @@ test('configured production auth delivers through the selected mail transport, f
   for(const invalid of [{MAIL_PROVIDER:'development'},{SENDGRID_API_KEY:undefined},{MAIL_FROM:''}])assert.throws(()=>createConfiguredAuth({...env,...invalid},brand),error=>error.status===503&&error.code==='mail_configuration_required');
   const missingIp=await call('/auth/bootstrap',{ip:null,headers:{'X-Forwarded-For':'192.0.2.10'},body:{token:env.SETUP_TOKEN,displayName:'Owner'}});assert.equal(missingIp.status,503);assert.equal((await missingIp.json()).error,'client_ip_unavailable');assert.equal(db.sqlite.prepare('SELECT count(*) AS n FROM oa_operators').get().n,0);
   const bootstrap=await call('/auth/bootstrap',{body:{token:env.SETUP_TOKEN,displayName:'Owner'}});assert.equal(bootstrap.status,303);assert.match(bootstrap.headers.get('set-cookie'),/^__Host-operator_session=/);assert.match(bootstrap.headers.get('set-cookie'),/; Secure/);
+  // rer signin's Cloudflare edge writes only the grant's digest. The real HTTP
+  // adapter must preview without consuming it and admit the recorded owner once.
+  const owner=db.sqlite.prepare("SELECT id,version FROM oa_operators WHERE role='owner'").get(),ownerToken=randomBytes(32).toString('base64url');
+  const grant=(token,version=owner.version)=>db.sqlite.prepare('INSERT INTO oa_owner_signins(id,token_hash,operator_id,operator_version,created_at,expires_at) VALUES(?,?,?,?,?,?)').run(crypto.randomUUID(),token,owner.id,version,Date.now(),Date.now()+600000);
+  grant(await ownerSigninDigest(ownerToken));
+  for(const method of ['GET','HEAD']){const preview=await call('/auth/owner-signin?token='+ownerToken,{method});assert.equal(preview.status,200);assert.equal(preview.headers.has('set-cookie'),false)}
+  assert.equal(db.sqlite.prepare('SELECT consumed_at FROM oa_owner_signins').get().consumed_at,null);
+  assert.equal((await call('/auth/owner-signin',{body:{token:ownerToken},headers:{Origin:'https://elsewhere.example.test'}})).status,403);
+  const ownerSignin=await call('/auth/owner-signin',{body:{token:ownerToken}});assert.equal(ownerSignin.status,303);
+  const ownerSession=await call('/auth/session',{method:'GET',headers:{Cookie:ownerSignin.headers.get('set-cookie').split(';')[0]}});assert.equal(ownerSession.status,200);assert.equal((await ownerSession.json()).operator.id,owner.id);
+  assert.equal((await call('/auth/owner-signin',{body:{token:ownerToken}})).status,400,'owner grant is single use');
+  const stale=randomBytes(32).toString('base64url');grant(await ownerSigninDigest(stale),owner.version+1);assert.equal((await call('/auth/owner-signin',{body:{token:stale}})).status,400,'grant cannot admit a different owner version');
+  assert.equal(db.sqlite.prepare("SELECT count(*) AS n FROM oa_auth_audit WHERE action='owner:signin-link'").get().n,1);assert.equal(messages.length,0,'owner sign-in needs no mail delivery');
   const count=()=>db.sqlite.prepare('SELECT count(*) AS n FROM oa_operators').get().n;
   const before=count();assert.equal((await call('/auth/magic-link',{body:{email:'unknown@example.test'}})).status,202);assert.equal(count(),before);assert.equal(messages.length,0);
   db.sqlite.prepare('UPDATE oa_limits SET count=?').run(Number.MAX_SAFE_INTEGER-1);

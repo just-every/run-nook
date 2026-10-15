@@ -1,6 +1,19 @@
 # Updating and deploying
 
-Deploy, update and removal are all `rer deploy` run from your Nook checkout. `rer` provides the Node and pnpm versions Nook needs; there is nothing to install or choose first.
+Run these commands from your Nook checkout. Node.js 22 or newer, npm and Git are required to bootstrap `rer`; once bootstrapped, `rer` manages the pinned Node and pnpm versions Nook needs.
+
+## Update a local Nook
+
+Export first if you want a backup ([Backups and export](backups.md)), then run:
+
+```sh
+rer dev --stop
+git pull --ff-only
+rer setup
+rer dev
+```
+
+Setup applies pending migrations and keeps your owner, conversations, files and other local data. If setup is needed after an update, `rer dev` stops and tells you to run `rer setup`. `--ff-only` refuses rather than merging when your checkout has its own commits. Private settings, `.rer/` and `exports/` are not tracked and stay as they are.
 
 ## Check a deploy locally
 
@@ -29,7 +42,19 @@ A dry run checks the build and settings only. It does not deploy anything, so ru
 
 After the deploy is healthy, `rer deploy` claims the hosted owner from `OWNER_EMAIL` automatically. There is no manual setup-token step. Open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you.
 
+The current hosted Lobby can incorrectly say it is waiting for its owner and ask for a setup token. This is a known Base copy issue awaiting the next patch; go directly to `/signin` instead.
+
 If the owner already exists, the deploy keeps it. If the claim or the token's removal fails, the deploy says so and what to run; running the same `rer deploy` again finishes it.
+
+## Sign in as the hosted owner without email
+
+From the checkout that deployed Nook, use the same Cloudflare credentials:
+
+```sh
+CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer signin
+```
+
+Use the same `--environment NAME` if the deploy used one. You can also supply credentials with `--env-file FILE`. `rer signin` writes a single-use grant for the recorded owner into the hosted auth database and prints a private link once; it does not save the link. Open it immediately: it works once, expires within 15 minutes and records its use in the owner's audit log. Update and redeploy older Nook source first so its runtime has the owner-signin migration.
 
 ## Update to newer Nook source
 
@@ -52,4 +77,6 @@ Export the hosted workspace first if you want a copy to return to ([Backups and 
 CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer deploy --remove --yes
 ```
 
-This deletes the Worker and the D1 database, R2 bucket and any queue that `rer deploy` created for this environment, with their data. Export first if you want to keep your workspace. It refuses without `--yes`. A bucket that still holds files stays: empty it in the Cloudflare dashboard, then run the same command again. Resources `rer deploy` did not create are never touched.
+This removes the Worker and the D1 database, R2 bucket and any queue that `rer deploy` created for this environment, with their data. Export first if you want to keep your workspace. It refuses without `--yes`. Removal is intended to empty its R2 bucket before deleting it. Resources `rer deploy` did not create are never touched.
+
+Known issue: hosted removal with stored files has failed with `provider-incomplete-pagination` while listing R2 objects. If that happens, empty only the deployment's bucket in the Cloudflare dashboard, then run the same command again. Do not treat a failed removal as complete.

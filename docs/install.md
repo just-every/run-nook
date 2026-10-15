@@ -8,8 +8,9 @@ git clone https://github.com/just-every/run-nook.git && cd run-nook
 rer dev
 ```
 
-You need npm and Git to start. `rer` installs the pinned Node and pnpm Nook needs;
-no particular Node version or separate pnpm installation is required.
+You need Node.js 22 or newer, npm and Git to bootstrap `rer`. Once bootstrapped,
+`rer` installs the pinned Node and pnpm Nook needs; no separate pnpm installation
+is required.
 
 `rer dev` prepares the private local settings and database and creates a
 placeholder development owner. Open the printed `RER_OPEN` link on this computer

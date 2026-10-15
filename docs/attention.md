@@ -8,6 +8,8 @@ Follow a conversation to receive its routine updates. Mute a conversation to pau
 
 An urgent request goes to explicitly selected conversation members and needs a reason. It remains visible during quiet time. A mention can also create an attention item.
 
+Every current channel member can see the message's **Notified** names, **Urgent** marker and urgent reason, including people who were not notified. These details explain the request to the channel; they are not private to its recipients.
+
 ## Manage an attention item
 
 Attention is a flat list of what needs you, each item with the conversation and the reason it reached you. Hover over an item (they are always shown on a phone) and choose **Dismiss** to clear it from your open list, or **Remind me in an hour** to snooze it for one hour. **Quiet for one hour** at the top of the page starts quiet time; **End quiet time** stops it. Nook records these states as done and snoozed. These actions change attention only; dismissing an item does not accept or complete a commitment.

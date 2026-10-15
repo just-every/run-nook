@@ -2,19 +2,46 @@
 
 ## Unreleased
 
-Nook runs on the published `@runeditrun/rer` 0.2.12 in package mode: `rer` runs
+Nook runs on the published `@runeditrun/rer` 0.2.19 in package mode: `rer` runs
 that exact devDependency with the Node and pnpm versions the checkout declares.
+Node.js 22 or newer is required to bootstrap `rer`; after that, it manages the
+pinned tools.
+
+Decisions and requests now show their version history. Revising a decision has
+clearer wording, and channel messages show live reply counts so you can reopen
+their threads. **Invite teammates** is available from the sidebar; Team uses
+plainer invitation and access wording, and channels are labelled **Public
+channel** or **Private channel**. Local invitation links opened in another
+browser explain how to unlock the checkout with its development link before
+confirming the invitation.
+
+Messages show **Notified** names and, for urgent requests, **Urgent** and the
+reason to every current channel member. On phones, the composer stays above the
+bottom tabs and the header reads **Decisions & requests**. History and
+Decisions & requests controls reference their panels only while those panels
+are mounted, including loading and unavailable-message/thread states. A separate
+demo mode supports the product demonstration without enabling it on ordinary
+deployments.
+
 `rer dev` starts a fresh checkout with a placeholder local owner; local
 `rer setup --owner-email you@example.com` is optional and replaces it, keeping the
 owner ID and data. `rer deploy` now claims the hosted owner itself once the
 deploy is healthy, using a one-time setup token it removes from the Worker
 afterwards: a hosted Nook keeps no setup token and your checkout keeps no
 `.rer/deploy/production-secrets.json`. An unchanged repeat `rer deploy` writes
-nothing. Update is `git pull --ff-only` then `rer deploy`; removal is
-`rer deploy --remove --yes`, which now first empties the R2 bucket that deploy
-created (rechecking before each delete that it is still that bucket) and then
-deletes it, touching no other bucket; before 0.2.9 a bucket holding files was
-left behind. The deploy hook returns the setup token it deployed to `rer`. A failed `rer export --target remote` names the hosted export step
+nothing. Hosted update is `git pull --ff-only` then `rer deploy`; local update
+is `rer dev --stop`, `git pull --ff-only`, `rer setup`, then `rer dev`. Setup
+applies pending migrations while keeping the owner and data, and `rer dev`
+detects when setup is needed. [Updating and deploying](docs/updating.md)
+documents both paths, `rer signin` for owner access with the deployment's
+Cloudflare credentials, and `rer deploy --remove --yes` for removal. Base's
+owner-signin runtime and additive migration 0025 make that mail-free owner
+access available in Nook. Removal
+is intended to empty only its own R2 bucket before deleting it; the known R2
+listing failure and manual cleanup are documented below and in that guide.
+The restore guidance links to the offline
+[local archive restore procedure](OPERATIONS.md#restoring-a-local-archive) before setup.
+The deploy hook returns the setup token it deployed to `rer`. A failed `rer export --target remote` names the hosted export step
 that failed. A workspace first deployed from 0.2.0 still holds an unused setup
 token and no owner: its next `rer deploy` claims the owner, and the old
 `.rer/deploy/production-secrets.json` can be deleted.
@@ -27,6 +54,21 @@ the messages whose reactions did, a number kept even if a step's progress is
 lost. It no longer completes while keeping the ID. Migration 0024 adds Base import-kit's stepwise tables and the
 step's place in the pending erasure; the import kit is refreshed unmodified from
 Base.
+
+Known issues:
+
+- The hosted Lobby can incorrectly say it is waiting for its owner and ask for
+  a setup token after `rer deploy` already claimed the owner. Go directly to
+  `/signin`; the copy fix belongs to Base's next patch.
+- Invitation links expire after 15 minutes. Invite the same person again if
+  their link expired; a longer invitation lifetime is pending in Base.
+- Hosted removal with stored files has failed with
+  `provider-incomplete-pagination` while listing R2 objects. If it occurs,
+  empty only the deployment's bucket in the Cloudflare dashboard and rerun
+  `rer deploy --remove --yes`; see [Updating and deploying](docs/updating.md).
+- Reply counts include live replies only. When every reply has been erased,
+  the reply-count link disappears; **Open thread** still reaches the
+  **Message deleted** tombstones.
 
 ## 0.2.0 (14 October 2026)
 
