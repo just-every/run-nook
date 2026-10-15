@@ -631,7 +631,7 @@
       "executable": false
     },
     "docs/install.md": {
-      "sha256": "df806a83f05452e5a9bbc8393deedde13e8e87c84951c3a5399bfbfb8848d5b2",
+      "sha256": "78d674b13e40a10dbb0070c6d81e4bc9bd87790a1937fbeef30db75ae8c2635a",
       "executable": false
     },
     "docs/moving-in-from-slack.md": {
@@ -839,7 +839,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "7010ecae0764d3b8a234bae7f681057609198a75ba6fe2d3d3ccc5e892095f9a",
+      "sha256": "4fc1520e529da3925beb6acbe551a72b65f89a1c1e194393ed981ca0a23544b4",
       "executable": false
     },
     "RELEASE.json": {
