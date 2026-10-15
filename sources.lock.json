@@ -979,7 +979,7 @@
       "executable": false
     },
     "scripts/deployment/command.mjs": {
-      "sha256": "1a02b5bae8bc43f08b63d31b281874f54e7849d0931085167dadcd0cc5de49f6",
+      "sha256": "824d55fe64990ff344ea7b44719e90de41f83bf87f507ac21f93a5c50e66aa40",
       "executable": false
     },
     "scripts/edition-authoring/base-copies.mjs": {

@@ -28,7 +28,8 @@ async function stageProduct(root){
 
 // rer deploy supplies the declared secrets (the production mailbox and mail provider
 // from the environment or --env-file, fresh session and setup secrets) and, after this
-// returns, claims the hosted owner with the one-time setup token and retires it.
+// returns, claims the hosted owner with the one-time setup token and retires it. The
+// hook returns the kit's state file and the token it deployed, for rer's own claim path.
 export function deployment(lifecycle){return async({root,options,store,signal,operationToken})=>{
  let declaration;try{declaration=JSON.parse(await readFile(join(root,'owner-deployment.json'),'utf8'))}catch{throw invalid('Restore a valid owner-deployment.json before deploying.')}
  const environment=options.environment??'production';
@@ -58,5 +59,8 @@ export function deployment(lifecycle){return async({root,options,store,signal,op
   throw error;
  }
  await main(['health',...args],env,{cwd:root});
- return {deployed:true,origin:result.origin};
+ // The token rer supplied is the Worker's only when this deploy sent it; an existing
+ // Worker keeps the secret it already holds, which this hook never saw.
+ const setupToken=result.sentSecrets?.includes('SETUP_TOKEN')?env.SETUP_TOKEN:undefined;
+ return {deployed:true,origin:result.origin,state:result.state,...setupToken?{setupToken}:{}};
 }}
