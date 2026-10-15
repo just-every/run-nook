@@ -1,3 +1,5 @@
+import {withDemo} from './base/modules/demo/index.mjs'
+import {seedDemo} from './demo'
 import {devices,register,remove,presence,revokeSession} from './push/devices'
 import {pushSnapshot} from './push/run'
 import start from '@tanstack/react-start/server-entry'
@@ -83,7 +85,7 @@ api.all('/api/*', async c => {
 })
 api.all('/api', async c => { await new Repository(c.env).session(c.req.raw.headers); return c.json({error:'Not found'},404) })
 api.onError((error,c) => { const status = error instanceof Fault || error instanceof AuthError ? error.status : 500; if(status === 500) console.error(error); return c.json({error:status === 500 ? 'Internal error' : error.message},status as any) })
-export default {
+export default withDemo({
  async fetch(request,env,execution) {
   // Built files first: a hosted deploy runs this Worker before its assets.
   const asset = await staticAssetResponse(request,env)
@@ -119,4 +121,4 @@ export default {
   const document=new Response(response.body,{status:response.status,statusText:response.statusText,headers})
   return isDocument?await editorDocument(document,env,request):document
  },
-} satisfies ExportedHandler<Bindings>
+} satisfies ExportedHandler<Bindings>, {seed:seedDemo})

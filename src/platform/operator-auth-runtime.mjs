@@ -17,6 +17,11 @@ export function acceptsRequest(bindings,request){
 // Sign-in mail and C14 notification mail share this one configured sender.
 export function mailSender(env){
  if(typeof env.MAIL_FROM!=='string'||!env.MAIL_FROM.trim())throw new AuthError('mail_configuration_required',503);
+ if(env.RER_DEMO==='1'){
+  const capture=createMailSender({provider:'development',mode:'development'},{outbox:createD1DevelopmentOutbox({db:env.DB})});
+  // Auth accepts a captured delivery on the hosted HTTPS demo as well as locally.
+  return {async send(message){return {...await capture.send(message),status:'accepted'}}};
+ }
  if(env.AUTH_LOCAL==='true'){
   if(!developmentMail(env))throw new AuthError('invalid_configuration',503);
   return createMailSender({provider:'development',mode:'development'},{outbox:createD1DevelopmentOutbox({db:env.DB})});

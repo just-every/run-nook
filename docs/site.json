@@ -23,6 +23,7 @@
     }
   ],
   "githubOnly": [
+    { "source": "DEMO.md", "reason": "Maintainer instructions for isolated local and hosted demo operation." },
     { "source": "ACCEPTANCE.md", "reason": "Maintainer release evidence and verification boundaries, including what has not yet been proven (hosted operation, live mail, mobile push, accessibility audit). Kept out of the owner-facing guides." },
     { "source": "AGENTS.md", "reason": "Contributor and coding-agent instructions for maintaining Nook." },
     { "source": "CHANGELOG.md", "reason": "Maintainer release history; user guides describe current behavior." },
