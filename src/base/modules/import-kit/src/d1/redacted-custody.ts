@@ -1,5 +1,5 @@
 import type { ImportPlan, TargetRow } from '../types.ts';
-import type { D1FieldRedaction, D1ImportContext, D1Sql } from './types.ts';
+import type { D1FieldMatch, D1FieldRedaction, D1ImportContext, D1Sql } from './types.ts';
 import type { InventorySnapshot } from './inventory-snapshot.ts';
 import { canonicalJson, sha256 } from '../provenance/identity.ts';
 import { redactFields } from './field-redaction.ts';
@@ -31,13 +31,24 @@ export function redactedCustody(plan: ImportPlan, next: ImportPlan, id: string, 
 /** Sanitize the adapter's native set without claiming any unrelated edit as an
  * imported value. Provenance retains the sanitized planned hash; other edits
  * therefore continue to conflict on undo. */
-export async function redactedNativeFields(kind: string, id: string, context: D1ImportContext, fields: readonly D1FieldRedaction[]): Promise<{ before: D1Sql[]; after: D1Sql[]; final: D1Sql[] }> {
+export async function redactedNativeFields(kind: string, id: string, context: D1ImportContext, fields: readonly D1FieldRedaction[], counts: D1FieldMatch[], owned?: (row: TargetRow) => boolean): Promise<{ before: D1Sql[]; after: D1Sql[]; final: D1Sql[] }> {
   const { database: db, targets } = context.storage, destination = context.destination;
+  if (owned) {
+    // One step of a resumable redaction rewrites only the rows its jobs own, each
+    // fenced by its exact snapshot; the final step proves no other row holds one.
+    const scope = targets.redaction ? await targets.redaction(db, destination, fields) : undefined;
+    const rows = (scope ? scope.rows : await targets.list(db, destination)).filter(owned);
+    const changed = rows.map(row => ({ row, next: { ...row, value: redactFields(row.value, fields, counts) } })).filter(({ row, next }) => next.value !== row.value);
+    const before = changed.map(({ row }) => row), after = changed.map(({ next }) => next);
+    if (scope) return { before: scope.matches(before).map(guard), after: [...scope.matches(before).map(guard), ...scope.write(after)], final: scope.matches(after).map(guard) };
+    const snapshot = (row: TargetRow) => targetGuards(targets, row, destination, row.targetKind, row.targetId);
+    return { before: before.flatMap(snapshot), after: changed.flatMap(({ row, next }) => [...snapshot(row), ...targets.write(next)]), final: after.flatMap(snapshot) };
+  }
   if (targets.redaction) {
     // Only rows holding a selected value are read, fenced and rewritten; one
     // holding-set predicate proves no other row holds one before and after.
     const scope = await targets.redaction(db, destination, fields);
-    const redacted = scope.rows.map(row => ({ ...row, value: redactFields(row.value, fields) }));
+    const redacted = scope.rows.map(row => ({ ...row, value: redactFields(row.value, fields, counts) }));
     if (redacted.some((row, index) => row.value === scope.rows[index].value)) throw new Error('IMPORT_REDACTION_SCOPE_MISMATCH');
     const kept = (row: TargetRow) => row.targetKind !== kind || row.targetId !== id;
     const rows = scope.rows.filter(kept), next = redacted.filter(kept);
@@ -51,8 +62,8 @@ export async function redactedNativeFields(kind: string, id: string, context: D1
   if (!before.length) throw new Error('IMPORT_NATIVE_SET_GUARD_REQUIRED');
   const after: D1Sql[] = [], survivors: TargetRow[] = [];
   for (const row of rows) {
+    const value = redactFields(row.value, fields, counts);
     if (row.targetKind === kind && row.targetId === id) continue;
-    const value = redactFields(row.value, fields);
     const next = value === row.value ? row : { ...row, value };
     survivors.push(next);
     if (next !== row) after.push(...targetGuards(targets, row, destination, row.targetKind, row.targetId), ...targets.write(next));

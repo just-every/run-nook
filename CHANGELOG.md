@@ -11,6 +11,14 @@ token and your checkout keeps no `.rer/deploy/production-secrets.json`. Update i
 from 0.2.0 still holds an unused setup token and no owner: its next `rer deploy`
 claims the owner, and the old `.rer/deploy/production-secrets.json` can be deleted.
 
+Erasing a person removes their Slack ID from other people's imported reactions
+even when the work exceeds one request: the erasure stays pending and continues
+in bounded steps of up to 25 imports until no reaction names them, and its
+receipt counts the messages whose reactions did. It no longer completes while
+keeping the ID. Migration 0024 adds Base import-kit's stepwise tables and the
+step's place in the pending erasure; the import kit is refreshed unmodified from
+Base.
+
 ## 0.2.0 (14 October 2026)
 
 Changes since 0.1.0. Migration 0023 is the only new migration; update by

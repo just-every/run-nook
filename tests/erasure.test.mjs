@@ -120,6 +120,7 @@ test('the source-author door composes real import-kit custody, keeps unrelated t
  }finally{f.close()}
  await sharedUploadErasure();
  await largeImportReactionErasure();
+ await steppedReactionErasure();
 });
 
 // A realistic import: one peer reaction names the author among 400 unrelated
@@ -138,11 +139,38 @@ async function largeImportReactionErasure(){
   const others=()=>f.db.prepare("SELECT id,body,source_record FROM nook_import_records WHERE body LIKE 'Unrelated %' ORDER BY id").all(),before=others();
   const c=new Context({...f.c.env,CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}},f.owner),target=f.db.prepare("SELECT job||':'||source_id AS id FROM nook_import_actors WHERE source_id='U1'").get().id;
   const receipt=await finishDoor(standard,c,await door(standard,c,'',{kind:'imported-author',target,confirmation:'ERASE'}));
-  assert.equal(receipt.counts.reactionsKept,undefined);
+  assert.equal(receipt.counts.reactions,1);
   assert.deepEqual(JSON.parse(f.db.prepare("SELECT source_record FROM nook_import_records WHERE body='Peer reacted'").get().source_record).reactions,[{name:'+1',count:2,users:['U2']},{name:'eyes',count:1,users:['U2']}]);
   assert.equal(before.length,400);assert.deepEqual(others(),before);
   // Only the import review keeps its reviewed actor choice; reactions, plan custody and provenance do not.
   assert.deepEqual(scanSql(f,/"U1"/).filter(table=>table!=='nook_import_reviews'),[]);
+ }finally{f.close()}
+}
+
+// The erased author reacted in 26 separate imports, more than one bounded step
+// rewrites. The erasure stays pending between steps and finishes with no copy.
+async function steppedReactionErasure(){
+ const {slackServiceFixture}=await import('./slack-import/sqlite-service.mjs'),{zipFixture}=await import('./slack-import/fixture.mjs');
+ const f=await slackServiceFixture();f.db.exec('PRAGMA foreign_keys=ON');try{
+  for(let k=0;k<26;k++){
+   const zip=zipFixture([['users.json',[{id:'U1',name:'One'},{id:'U2',name:'Two'}]],['channels.json',[{id:'C1',name:'general'}]],
+    ['general/2024-01-01.json',[...(k?[]:[{type:'message',user:'U1',text:'By the erased author',ts:'1700000000.000001'}]),{type:'message',user:'U2',text:'Peer reacted '+k,ts:'1700000001.000001',reactions:[{name:'+1',count:2,users:['U1','U2']}]}]]]);
+   const upload=await f.custody.localUpload(f.c,new Request('https://fixture.test/upload',{method:'POST',body:zip}));
+   const review={namespace:'stepped-'+k,channels:[{sourceId:'C1',name:'Imported '+k,members:[f.owner.operatorId]}],actors:{U1:null,U2:null},acceptedOmissions:[]};
+   let plan=await f.service.previewImport(f.c,{upload,review});
+   if(plan.needsOmissionReview){review.acceptedOmissions=[plan.omissionDigest];plan=await f.service.previewImport(f.c,{upload,review})}
+   await f.finish(plan);
+  }
+  const naming=()=>f.db.prepare(`SELECT count(*) AS n FROM nook_import_records WHERE source_record LIKE '%"users":[%"U1"%'`).get().n;
+  const c=new Context({...f.c.env,CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}},f.owner),target=f.db.prepare("SELECT job||':'||source_id AS id FROM nook_import_actors a WHERE source_id='U1' AND EXISTS(SELECT 1 FROM nook_import_records r WHERE r.job=a.job AND r.source_actor='U1')").get().id;
+  let r=await door(standard,c,'',{kind:'imported-author',target,confirmation:'ERASE'});const seen=[];
+  for(let n=0;r.state!=='complete'&&n<10;n++){seen.push([r.state,naming(),f.db.prepare('SELECT count(*) AS n FROM nook_erasure_work WHERE redaction IS NOT NULL').get().n]);r=await door(standard,c,'/'+r.id+'/resume',{})}
+  // Own message first, then 25 imports in one step (kept pending with its continuation), then the rest with the author.
+  assert.deepEqual(seen,[['pending',26,0],['pending',1,1]]);
+  assert.equal(r.state,'complete');assert.equal(r.counts.reactions,26);assert.equal(naming(),0);
+  assert.deepEqual(JSON.parse(f.db.prepare("SELECT source_record FROM nook_import_records WHERE body='Peer reacted 25'").get().source_record).reactions,[{name:'+1',count:2,users:['U2']}]);
+  // U1 stays an imported author of the other imports; no reaction anywhere, custody included, still names them.
+  assert.deepEqual(scanSql(f,/"users":\[[^\]]*"U1"/),[]);
  }finally{f.close()}
 }
 

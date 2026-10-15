@@ -1,7 +1,6 @@
-import {retireD1ImportCustody,D1RequestLimitError,type D1RelatedErasure,type D1ImportContext} from '../../imports/kit'
+import {retireD1ImportCustody,type D1RelatedErasure,type D1ImportContext} from '../../imports/kit'
 import {importTargets} from '../../imports/target'
-import {holding} from '../../imports/target-redaction'
-import {sql} from './statements'
+import {redactInSteps} from './redaction-steps'
 import {MAPPING_VERSION} from '../../imports/ids.mjs'
 import {importDigest} from '../../family/team-chat/import-capture.mjs'
 import {authority,authFence,type Context} from '../../platform/storage/context'
@@ -23,18 +22,11 @@ export async function eraseImportedTarget(c:Context,work:any,kind:'actor'|'messa
  const review=await c.one('SELECT r.kit_job,k.destination,k.namespace FROM nook_import_reviews r JOIN ik_jobs k ON k.operation_key=r.id AND k.principal_id=r.owner AND k.destination=r.owner WHERE r.domain_job=?',[job.id])
  if(review){
   if(review.destination!==job.owner||review.namespace!==job.namespace)throw Error('Import custody binding changed')
-  // Native rows, the portability fence, the redaction checkpoint and import custody commit in one batch.
+  // Native rows, the portability fence, the redaction checkpoint and import custody
+  // commit in one batch (with a reaction redaction, in its final step).
   const ctx:D1ImportContext={destination:job.owner,namespace:job.namespace,mappingVersion:MAPPING_VERSION,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence} AND (${scope.condition})`,params:[...c.credentials,...scope.params]})}}
-  try{await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint())}
-  catch(error){
-   // Field redaction reads and writes only the affected rows, in one atomic
-   // request. Refused for size before any write, the person's erasure still
-   // completes, and its receipt counts the imported messages that keep their
-   // Slack ID (docs/deleting-and-erasing.md).
-   if(!(error instanceof D1RequestLimitError)||!related?.fields)throw error
-   const held=holding(related.fields)
-   await retireD1ImportCustody({target:{kind,id:target},values,related:{...related,fields:undefined}},[...statements,sql(`UPDATE nook_erasure_receipts SET counts=json_set(counts,'$.reactionsKept',(SELECT COUNT(*) FROM nook_import_effect_revisions e WHERE e.destination=? AND (${held.sql}))) WHERE id=?`,job.owner,...held.params!,work.operation)],ctx,await f.checkpoint())
-  }
+  if(!related?.fields){await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint());return}
+  await redactInSteps(c,work,scope,{kind,id:target},values,related,statements,job.owner,ctx,f)
   return
  }
  // The original capture importer predates import-kit. Its immutable digest is
