@@ -18,7 +18,7 @@ export function OutcomeHistory({outcome}: {outcome:Outcome}){
   return ()=>{current=false}
  },[open,before,outcome.id,outcome.version])
  return <div className="outcome-history">
-  <button className="text-button" aria-expanded={open} aria-controls={id} onClick={()=>setOpen(value=>!value)}>Version history · {outcome.version}</button>
+  <button className="text-button" aria-expanded={open} aria-controls={open?id:undefined} onClick={()=>setOpen(value=>!value)}>Version history · {outcome.version}</button>
   {open&&<div id={id}>
    {error?<p role="alert">{error}</p>:!history?<p role="status">Loading versions…</p>:<>
     <ol className="outcome-versions">{history.items.map(version=><li key={version.version}><p className="outcome-meta"><strong>Version {version.version}</strong>{version.version===outcome.version?' · Current':''} · {version.actorName||'Erased member'}</p><p>{version.body}</p><p className="outcome-meta">{status(version.status)}{version.deadline?' · Due '+version.deadline:''}</p></li>)}</ol>
