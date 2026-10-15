@@ -35,5 +35,10 @@
         "ChatHub"
       ]
     }
-  ]
+  ],
+  "vars": {
+    "MAIL_PROVIDER": "sendgrid",
+    "MAIL_FROM": "",
+    "MAIL_RELAY_URL": ""
+  }
 }

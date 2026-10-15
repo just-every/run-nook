@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+Nook now pins `@runeditrun/rer` 0.2.22. RER Managed configures sign-in and
+notification mail automatically, with no
+provider account or key to enter. RER assigns `MAIL_PROVIDER=rer`, `MAIL_FROM`,
+`MAIL_RELAY_URL` and a private `MAIL_API_KEY` for each installation and
+environment. Free and Assisted hosting retain their existing Cloudflare and
+mail provider options.
+
 Nook pins `@runeditrun/rer` 0.2.20. Hosted removal empties uploaded files and
 removes the deployment in one command. The hosted front page reads the durable
 owner claim, so it offers Sign in before the separate first-run confirmation.

@@ -69,7 +69,9 @@ C14 in CONTRACT.md is the delivery contract. What an operator needs to know:
   `MAIL_PROVIDER`, `MAIL_FROM` and the provider key in the owner deployment
   (`SENDGRID_API_KEY` for the SendGrid default). The owner-deploy declaration
   also maps this same input to the shared `MAIL_API_KEY` binding that rer 0.2.20
-  validates before deploying; managed installs keep their existing bindings. Under
+  validates before deploying. RER Managed assigns `MAIL_PROVIDER=rer`,
+  `MAIL_FROM`, `MAIL_RELAY_URL` and a private `MAIL_API_KEY` automatically for
+  sign-in and notifications; no provider account or typed key is needed. Under
   `rer dev` and `rer preview` mail goes to the development outbox
   (request a link at `/signin` after opening `RER_OPEN`), and owners see "Email sending is not set up"
   in their settings until a real provider is configured.
@@ -280,9 +282,30 @@ directly from the repository. After `rer build`, run `pnpm integration:generate`
 to regenerate it with Base's spec reader, the project/setup digest, local setup
 manifest and pinned Managed workflow. `pnpm integration:check` fails Verify on
 drift against the emitted build. `AUTH_ORIGIN` is assigned by RER through
-`surfaces.app.originVariable`. Hosted setup offers SendGrid or Resend and requires
-the selected provider's key and a verified sender; each provider key is an
-optional deployment secret because only one is used. Local setup needs neither.
+`surfaces.app.originVariable`.
+
+For RER Managed, Configure assigns `MAIL_PROVIDER=rer`, `MAIL_FROM` and
+`MAIL_RELAY_URL` automatically and hides the mail inputs. Saving the plan creates
+the private `MAIL_API_KEY` for that installation and environment. You need no
+mail provider account, verified sender of your own or typed key. RER stores the
+credential in encrypted private settings and binds it to the app; the relay
+indexes only its hash. The underlying provider's key never reaches Nook or its
+build. Ordinary Configure saves preserve an existing credential.
+
+Sign-in and notification email use the same RER relay and sender policy, with
+the installation's app name as the sender display name. Production and preview
+share an allowance of 20 messages per minute, 200 per hour and 1,000 per day per
+installation. Valid send attempts consume the allowance even if the provider
+fails; provider acceptance does not establish inbox receipt. Sending requires
+current paid Managed access and active hosting, independently of AI credit.
+Disconnect or effective exit revokes the credentials. Rotation requires a new
+build and publish to bind the replacement; an ordinary Configure save cannot
+revive a credential explicitly revoked by the owner.
+
+Free and Assisted hosting keep their existing Cloudflare deployment and mail
+provider options. Hosted setup with SendGrid or Resend requires the selected
+provider's key and a verified sender; each provider key is an optional deployment
+secret because only one is used. Local setup needs neither.
 
 A managed installation admits its owner through the signed claim at
 `/auth/owner-claim`, mounted before the ordinary auth routes. Trusted runtime

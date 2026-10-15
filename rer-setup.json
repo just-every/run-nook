@@ -70,6 +70,10 @@
       "default": "sendgrid",
       "options": [
         {
+          "value": "rer",
+          "label": "RER managed mail"
+        },
+        {
           "value": "sendgrid",
           "label": "SendGrid"
         },
@@ -87,6 +91,35 @@
       "required": true,
       "group": "mail",
       "help": "Use a sender address verified with your chosen mail provider."
+    },
+    {
+      "name": "MAIL_RELAY_URL",
+      "label": "Managed mail relay URL",
+      "kind": "url",
+      "required": true,
+      "group": "mail",
+      "when": {
+        "field": "MAIL_PROVIDER",
+        "equals": "rer"
+      }
+    },
+    {
+      "name": "MAIL_API_KEY",
+      "label": "Managed mail key",
+      "kind": "secret",
+      "input": "entered",
+      "ownerVisible": true,
+      "required": false,
+      "group": "mail",
+      "presentations": [
+        {
+          "when": {
+            "field": "MAIL_PROVIDER",
+            "equals": "rer"
+          },
+          "required": true
+        }
+      ]
     },
     {
       "name": "SENDGRID_API_KEY",

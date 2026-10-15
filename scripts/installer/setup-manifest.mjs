@@ -2,8 +2,8 @@
 // sync with the hosted setup without requesting production mail credentials.
 export function localSetupManifest(manifest) {
  const local = structuredClone(manifest);
- const mailSecrets = new Set(['SENDGRID_API_KEY','RESEND_API_KEY']);
- local.fields = local.fields.filter(field => !mailSecrets.has(field.name));
+ const hostedMail = new Set(['SENDGRID_API_KEY','RESEND_API_KEY','MAIL_API_KEY','MAIL_RELAY_URL']);
+ local.fields = local.fields.filter(field => !hostedMail.has(field.name));
  Object.assign(local.fields.find(field => field.name === 'MAIL_PROVIDER'), {
   default:'development', options:[{value:'development',label:'Local development outbox'}],
  });

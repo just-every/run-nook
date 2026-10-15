@@ -174,14 +174,19 @@
       ]
     }
   ],
-  "publicVariables": {},
+  "publicVariables": {
+    "MAIL_PROVIDER": "sendgrid",
+    "MAIL_FROM": "",
+    "MAIL_RELAY_URL": ""
+  },
   "secretNames": [
     "SESSION_SECRET",
     "SETUP_TOKEN"
   ],
   "optionalSecretNames": [
     "SENDGRID_API_KEY",
-    "RESEND_API_KEY"
+    "RESEND_API_KEY",
+    "MAIL_API_KEY"
   ],
   "schedules": [],
   "queueConsumers": [],
@@ -195,5 +200,10 @@
       "path": "/signin",
       "originVariable": "AUTH_ORIGIN"
     }
+  },
+  "mail": {
+    "providers": [
+      "rer"
+    ]
   }
 }

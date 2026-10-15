@@ -113,6 +113,17 @@ before setup using the offline procedure in
 `reset` lists what it will remove and refuses without `--yes`; it keeps source,
 dependencies, `exports/` and deploy receipts.
 
+### RER Managed hosting
+
+RER Managed sets up sign-in and notification email automatically. You do not
+need a mail provider account or a key to type in. RER assigns
+`MAIL_PROVIDER=rer`, `MAIL_FROM`, `MAIL_RELAY_URL` and a private `MAIL_API_KEY`
+for the installation and environment. See the
+[operator guide](OPERATIONS.md#managed-packaging-owner-claim-and-editor-authority).
+
+Free and Assisted hosting keep their existing Cloudflare deployment and
+SendGrid or Resend mail options, with your own provider credentials.
+
 ### Deploy to your own Cloudflare account
 
 Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment before

@@ -70,7 +70,8 @@
         "RER_OWNER_CLAIM_ISSUER",
         "RER_OWNER_CLAIM_INSTALLATION_ID",
         "RER_OWNER_CLAIM_APP_ORIGIN",
-        "RER_OWNER_CLAIM_PUBLIC_KEYS"
+        "RER_OWNER_CLAIM_PUBLIC_KEYS",
+        "MAIL_RELAY_URL"
       ],
       "secretNames": [
         "SESSION_SECRET",
@@ -78,7 +79,8 @@
       ],
       "optionalSecretNames": [
         "SENDGRID_API_KEY",
-        "RESEND_API_KEY"
+        "RESEND_API_KEY",
+        "MAIL_API_KEY"
       ],
       "healthPath": "/health",
       "recovery": "Keep the repository and installation private. Stop Nook; retain source, private settings and all additive migrations. Use rer export to a private archive, rer import into empty inactive local state, and the documented offline identity mapping before normal sign-in. Compare re-exported records and media. Local proof is not hosted deployment acceptance; see OPERATIONS.md.",
@@ -87,6 +89,11 @@
           "path": "/signin",
           "originVariable": "AUTH_ORIGIN"
         }
+      },
+      "mail": {
+        "providers": [
+          "rer"
+        ]
       }
     }
   },

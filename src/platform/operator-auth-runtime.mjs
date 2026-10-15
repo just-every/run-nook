@@ -22,10 +22,10 @@ export function mailSender(env){
   if(!developmentMail(env))throw new AuthError('invalid_configuration',503);
   return createMailSender({provider:'development',mode:'development'},{outbox:createD1DevelopmentOutbox({db:env.DB})});
  }
- const credentials={sendgrid:'SENDGRID_API_KEY',resend:'RESEND_API_KEY',cloudflare:'CLOUDFLARE_EMAIL_API_TOKEN'};
+ const credentials={rer:'MAIL_API_KEY',sendgrid:'SENDGRID_API_KEY',resend:'RESEND_API_KEY',cloudflare:'CLOUDFLARE_EMAIL_API_TOKEN'};
  const key=credentials[env.MAIL_PROVIDER];
  if(!key||!env[key]||(env.MAIL_PROVIDER==='cloudflare'&&!env.CLOUDFLARE_EMAIL_ACCOUNT_ID))throw new AuthError('mail_configuration_required',503);
- try{return createMailSender({provider:env.MAIL_PROVIDER,mode:'production',apiKey:env[key],...(env.MAIL_PROVIDER==='cloudflare'?{accountId:env.CLOUDFLARE_EMAIL_ACCOUNT_ID}:{})})}
+ try{return createMailSender({provider:env.MAIL_PROVIDER,mode:'production',apiKey:env[key],...(env.MAIL_PROVIDER==='rer'?{relayUrl:env.MAIL_RELAY_URL}:{}),...(env.MAIL_PROVIDER==='cloudflare'?{accountId:env.CLOUDFLARE_EMAIL_ACCOUNT_ID}:{})})}
  catch(error){if(error instanceof MailValidationError)throw new AuthError('invalid_mail_configuration',503);throw error}
 }
 export function authConfig(bindings,branding){
@@ -36,7 +36,13 @@ export function createConfiguredAuth(bindings,branding){
  const env=authBindings(bindings),local=env.AUTH_LOCAL==='true';
  let valid=false;try{valid=acceptsRequest(env,new Request(env.AUTH_ORIGIN))}catch{}
  if(!valid)throw new AuthError('invalid_configuration',503);
- return createOperatorAuth({db:env.DB,config:authConfig(bindings,branding),mailSender:mailSender(env),
+ const sender=mailSender(env);
+ // Native auth adds this advisory header. The Managed relay owns headers and
+ // accepts only its message fields; keep every other unsupported input refused.
+ const authSender=env.MAIL_PROVIDER==='rer'?{send({headers,...message}){
+  return sender.send(headers?.['Auto-Submitted']==='auto-generated'&&Object.keys(headers).length===1?message:{...message,...(headers?{headers}:{})});
+ }}:sender;
+ return createOperatorAuth({db:env.DB,config:authConfig(bindings,branding),mailSender:authSender,
   // Cloudflare overwrites this header at the deployed Worker boundary. Never
   // trust Forwarded/X-Forwarded-For or use the local shared bucket in production.
   clientIp:request=>local?'local':request.headers.get('CF-Connecting-IP')??''});

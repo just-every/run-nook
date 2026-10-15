@@ -15,6 +15,10 @@ rer dev
 
 Setup applies pending migrations and keeps your owner, conversations, files and other local data. If setup is needed after an update, `rer dev` stops and tells you to run `rer setup`. `--ff-only` refuses rather than merging when your checkout has its own commits. Private settings, `.rer/` and `exports/` are not tracked and stay as they are.
 
+## RER Managed hosting
+
+RER Managed sets up sign-in and notification email automatically. You need no mail provider account or key to enter: RER assigns `MAIL_PROVIDER=rer`, `MAIL_FROM`, `MAIL_RELAY_URL` and a private `MAIL_API_KEY` for the installation and environment. Free and Assisted hosting keep their existing provider options; the owner-account Cloudflare deployment instructions follow.
+
 ## Check a deploy locally
 
 Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment, then run the dry run before a real deployment. rer 0.2.20 validates production sign-in configuration before building:
