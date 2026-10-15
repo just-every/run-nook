@@ -10,7 +10,9 @@ export async function runKeyboard(origin,destination){
  for(const p of [page,bob])p.on('pageerror',error=>errors.push(error.message))
  const json=async(p,path,data,method=data?'POST':'GET')=>{const r=await p.request.fetch(origin+'/api/'+path,{method,data});assert.equal(r.status(),200);return r.json()}
  try{
-  await page.goto(origin+'/signin');await page.keyboard.press('Tab');await page.keyboard.press('Enter');assert.equal(await page.evaluate(()=>document.activeElement.id),'auth');checks.push('anonymous skip link reaches sign-in form')
+  await page.goto(origin+'/signin');await page.keyboard.press('Tab');await expect(page.getByLabel('Email',{exact:true})).toBeFocused()
+  await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'Email a sign-in link',exact:true})).toBeFocused()
+  await page.keyboard.press('Shift+Tab');await expect(page.getByLabel('Email',{exact:true})).toBeFocused();checks.push('anonymous keyboard navigation reaches the email field and sign-in submit')
   const tag=Date.now().toString(36);await browserSignIn(page,origin,tag+'-Alice');await browserSignIn(bob,origin,tag+'-Bob');const member=await json(bob,'me')
   const channel=await json(page,'conversations',{name:'Keyboard room',kind:'private',participants:[member.id]})
   await page.goto(origin+`/app?view=chat&conversation=${channel.id}`);await page.getByLabel('Message Keyboard room',{exact:true}).waitFor()
