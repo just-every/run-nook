@@ -4197,11 +4197,11 @@
       "executable": false
     },
     "tests/pilot-journey.mjs": {
-      "sha256": "16451c190712314228696b223405b5fc28c1e78496ce78a2218049bd1503f9a9",
+      "sha256": "b2860c5d7a1276fb6a0867eca9780c870e4615b8f6070950253986cbe76c06e0",
       "executable": false
     },
     "tests/pilot/browser.mjs": {
-      "sha256": "3b8a3d09bbca4a596c4804024df982374e73ad63bcab66a726290bcf578cc79c",
+      "sha256": "2130471b423d81c87915dfc911ccb42cf8a47fc8892070bcdfed726380b7d8d9",
       "executable": false
     },
     "tests/pilot/census.mjs": {
@@ -4221,7 +4221,7 @@
       "executable": false
     },
     "tests/pilot/runtime.mjs": {
-      "sha256": "61ed1398739a775d5493840152dfd1a78811286af8661539a6c4832e397e5c41",
+      "sha256": "dad5a068435f355a2eb9cba24d26bbd06be2b8cb4a9d170392d716633caad7e2",
       "executable": false
     },
     "tests/push-journey.mjs": {
