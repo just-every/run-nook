@@ -5,7 +5,7 @@ import {migrateAccent} from '../brand/accent-colour.mjs';
 import {pageThemeHref} from '../brand/page-theme.mjs';
 import {createD1DevelopmentOutbox} from '../base/modules/mail/src/development/index.mjs';
 export function authBindings(env){return env.AUTH_LOCAL==='true'&&env.RER_DEV_ORIGIN?{...env,AUTH_ORIGIN:env.RER_DEV_ORIGIN}:env}
-export function developmentMail(bindings){const env=authBindings(bindings);try{const url=new URL(env.AUTH_ORIGIN);return env.AUTH_LOCAL==='true'&&env.MAIL_PROVIDER==='development'&&url.origin===env.AUTH_ORIGIN&&isLoopbackHost(url.hostname)&&['http:','https:'].includes(url.protocol)}catch{return false}}
+export function developmentMail(bindings){const env=authBindings(bindings);if(env.RER_DEMO==='1')return false;try{const url=new URL(env.AUTH_ORIGIN);return env.AUTH_LOCAL==='true'&&env.MAIL_PROVIDER==='development'&&url.origin===env.AUTH_ORIGIN&&isLoopbackHost(url.hostname)&&['http:','https:'].includes(url.protocol)}catch{return false}}
 export function acceptsRequest(bindings,request){
  const env=authBindings(bindings);
  try{
@@ -17,11 +17,7 @@ export function acceptsRequest(bindings,request){
 // Sign-in mail and C14 notification mail share this one configured sender.
 export function mailSender(env){
  if(typeof env.MAIL_FROM!=='string'||!env.MAIL_FROM.trim())throw new AuthError('mail_configuration_required',503);
- if(env.RER_DEMO==='1'){
-  const capture=createMailSender({provider:'development',mode:'development'},{outbox:createD1DevelopmentOutbox({db:env.DB})});
-  // Auth accepts a captured delivery on the hosted HTTPS demo as well as locally.
-  return {async send(message){return {...await capture.send(message),status:'accepted'}}};
- }
+ if(env.RER_DEMO==='1')return {async send(){return {provider:'development',status:'accepted',providerMessageId:null}}};
  if(env.AUTH_LOCAL==='true'){
   if(!developmentMail(env))throw new AuthError('invalid_configuration',503);
   return createMailSender({provider:'development',mode:'development'},{outbox:createD1DevelopmentOutbox({db:env.DB})});

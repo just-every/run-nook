@@ -57,17 +57,15 @@ try{
  run('rer export --output exports/after-import.rer')
  const digest=async name=>JSON.parse((await readFile(join(clone,'exports',name),'utf8')).trim().split('\n').at(-1)).contentHash
  assert.equal(await digest('after-import.rer'),await digest('nook.rer'),'export, import and export again carry identical content')
- console.log('README-JOURNEY passed: fresh clone, zero-setup dev opened signed in, personas, key-gated outbox email link, /setup at 1440 and 390, stop, export, reset, import and deploy dry run.')
+ console.log('README-JOURNEY passed: fresh clone, zero-setup dev opened signed in, personas, key-gated one-click owner entry, /setup at 1440 and 390, stop, export, reset, import and deploy dry run.')
 }finally{
  await browser?.close()
  if(dev&&dev.exitCode==null&&!dev.signalCode){try{execFileSync('node',['node_modules/@runeditrun/rer/bin/rer.mjs','dev','--stop'],{cwd:clone,env,stdio:'ignore'})}catch{process.kill(-dev.pid,'SIGTERM')}}
  await rm(clone,{recursive:true,force:true});await rm(bin,{recursive:true,force:true})
 }
 
-// The kept end-to-end email-link test. Dev identity signs the desktop browser in through a real dev
-// session (the link `dev` prints) and reaches /setup; the phone signs in the way a person does: the
-// owner's ordinary link is mailed to the key-gated outbox, opened, confirmed, and finishes setup.
-// The outbox does not exist for a request without the checkout's dev key.
+// Canonical local entry uses the checkout key and Base's one-click owner page.
+// Native production email-link consumption is covered by operator-auth and runtime.
 async function firstRun(origin,open){
  const desktop=await browser.newPage({viewport:{width:1440,height:1000}})
  await desktop.goto(open)
@@ -82,14 +80,7 @@ async function firstRun(origin,open){
  await phone.goto(open)
  await phone.waitForURL(origin+'/setup')
  await phone.goto(origin+'/signin')
- await phone.locator('#auth-email').fill(ownerEmail)
- await phone.getByRole('button',{name:'Send sign-in link',exact:true}).click()
- await phone.waitForURL(url=>url.pathname==='/__dev/outbox'||url.searchParams.get('notice')==='sent')
- if(new URL(phone.url()).pathname!=='/__dev/outbox')await phone.getByRole('link',{name:'local development outbox',exact:true}).click()
- await phone.waitForURL(origin+'/__dev/outbox')
- await phone.locator('article').first().getByRole('link').first().click()
- await phone.getByRole('link',{name:'Open this link',exact:true}).first().click()
- await phone.getByRole('button',{name:'Confirm',exact:true}).click()
+ await phone.getByRole('link',{name:'Continue as owner',exact:true}).click()
  await phone.waitForURL(origin+'/setup')
  await phone.getByRole('heading',{name:'Finish setup'}).waitFor()
  assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal scroll at 390')

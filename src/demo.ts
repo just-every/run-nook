@@ -1,51 +1,29 @@
 import type {Bindings} from './platform/repository.server'
-import {context} from './platform/storage/context'
-import {read as storeRead} from './platform/storage/read'
-import {write as storeWrite} from './platform/storage/commands'
-import {operatorAuth,authBindings} from './platform/operator-auth.server'
-import {firstRunResponse} from './base/setup'
+import {empty,mutate,type Identity} from './family/team-chat/domain'
 import {demoPeople} from './demo/people'
+import {saveDemo} from './demo/save'
 import {week} from './demo/week'
 
-/** Idempotent sample household; all product writes use Nook's own store APIs. */
-export async function seedDemo(input:Bindings,{ownerEmail,now}:{ownerEmail:string;now:Date}){
- if(input.RER_DEMO!=='1')throw Error('Sample data requires demo mode')
- const env=authBindings(input),people=demoPeople(env)
- const read=async(headers:Headers,action:string,id='')=>storeRead(await context(env,headers),action,id)
- const write=async(headers:Headers,action:string,id:string,value:Record<string,unknown>)=>storeWrite(await context(env,headers),action,id,value)
- const owner=await people.owner(ownerEmail),sessions=[owner]
- try{
-  const channels=new Map<string,string>()
-  for(const name of ['household','groceries','garden']){
-   const existing=(await read(owner,'conversations')).find((c:any)=>c.name===name)
-   const channel=existing??await write(owner,'conversations','',{name,kind:'channel'})
-   channels.set(name,channel.id)
-  }
-  for(const [email,name] of [['alex@demo.invalid','Alex Chen'],['morgan@demo.invalid','Morgan Reed']]){
-   sessions.push(await people.member(owner,email,name,[...channels.values()]))
-  }
-  const users=await Promise.all(sessions.map(headers=>read(headers,'me')))
-  for(const [index,item] of week.entries()){
-   const channel=channels.get(item.channel)!,author=sessions[item.author]
-   const message=await write(author,'messages',channel,{body:item.body,intent:`demo-week-${index}`})
-   if('reply' in item)await write(sessions[item.replyBy],'messages',channel,{body:item.reply,parent:message.id,intent:`demo-reply-${index}`})
-  }
-  const household=channels.get('household')!,garden=channels.get('garden')!
-  const cards=[
-   {channel:household,kind:'decision',body:'Shared dinners on Fridays at 7 pm; add guests here by Thursday.'},
-   {channel:household,kind:'commitment',body:'Pick up coffee and fresh bread for Saturday lunch',assignee:users[0].id,deadline:new Date(now.getTime()+2*86400000).toISOString().slice(0,10)},
-   {channel:garden,kind:'commitment',body:'Plant the herb seedlings beside the back steps',assignee:users[2].id},
-  ]
-  for(const card of cards){
-   const existing=(await read(sessions[1],'outcomes',card.channel)).find((o:any)=>o.body===card.body)
-   const outcome=existing??await write(sessions[1],'outcomes',card.channel,card)
-   if(card.channel===garden){
-    let current=outcome
-    if(current.status==='proposed')current=await write(sessions[2],'reviseOutcome',current.id,{action:'accept',version:current.version})
-    if(current.status==='accepted')await write(sessions[2],'reviseOutcome',current.id,{action:'complete',version:current.version})
-   }
-  }
-  const setup=await firstRunResponse(new Request(env.AUTH_ORIGIN+'/setup',{method:'POST',headers:{...Object.fromEntries(owner),origin:env.AUTH_ORIGIN,'content-type':'application/x-www-form-urlencoded'},body:'confirm=yes'}),env,operatorAuth(env))
-  if(setup?.status!==303)throw Error('Demo owner setup did not complete')
- }finally{for(const session of sessions)await people.leave(session)}
+/** Fixed sample identities and domain commands, with no mail or network calls. */
+export async function seedDemo(env:Bindings,{ownerEmail,now}:{ownerEmail:string;now:Date}){
+ if(env.RER_DEMO!=='1')throw Error('Sample data requires demo mode')
+ const state=empty(),people=await demoPeople(env,ownerEmail,now)
+ state.users=people
+ const command=(author:number,action:string,id:string,input:Record<string,unknown>,newId:string,daysAgo=0)=>
+  mutate(state,people[author] as Identity,action,id,input,newId,new Date(now.getTime()-daysAgo*86400000).toISOString())
+ for(const name of ['household','groceries','garden']){
+  command(0,'conversations','',{name,kind:'channel',participants:people.slice(1).map(p=>p.id)},'demo-'+name)
+ }
+ for(const [index,item] of week.entries()){
+  const id='demo-week-'+index,channel='demo-'+item.channel
+  command(item.author,'messages',channel,{body:item.body,intent:id},id,7-index)
+  if('reply' in item)command(item.replyBy,'messages',channel,{body:item.reply,parent:id,intent:id+'-reply'},id+'-reply',7-index)
+ }
+ command(1,'outcomes','demo-household',{kind:'decision',body:'Shared dinners on Fridays at 7 pm; add guests here by Thursday.'},'demo-dinners',2)
+ command(1,'outcomes','demo-household',{kind:'commitment',body:'Pick up coffee and fresh bread for Saturday lunch',assignee:people[0].id,deadline:new Date(now.getTime()+2*86400000).toISOString().slice(0,10)},'demo-shopping')
+ command(1,'outcomes','demo-garden',{kind:'commitment',body:'Plant the herb seedlings beside the back steps',assignee:people[2].id},'demo-herbs',1)
+ command(2,'reviseOutcome','demo-herbs',{action:'accept',version:1},'demo-herbs-accepted',1)
+ command(2,'reviseOutcome','demo-herbs',{action:'complete',version:2},'demo-herbs-complete')
+ await saveDemo(env.DB,state)
+ await env.DB.prepare('INSERT INTO oa_first_run(singleton,completed_by,completed_at) VALUES(1,?,?) ON CONFLICT DO NOTHING').bind(people[0].id,now.getTime()).run()
 }
