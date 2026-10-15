@@ -167,11 +167,28 @@ here; importing content deliberately does not authorize a new owner.
    find .wrangler/state/v3/d1/miniflare-D1DatabaseObject -type f -name '*.sqlite'
    ```
 
-   Select the file containing `nook_storage` with authority `normalized` and
-   the restored `nook_actors`. A normal installation has one D1 file here. If
-   there are several, inspect them read-only and identify the intended workspace;
-   do not select by age or filename order. Set the path below to that exact file.
-   Keep this variable for the replacement step.
+   Miniflare may also put `metadata.sqlite` here; it is bookkeeping, not the
+   workspace. Inspect the candidates read-only:
+
+   ```sh
+   node --input-type=module <<'JS'
+   import {readdirSync} from 'node:fs';
+   import {DatabaseSync} from 'node:sqlite';
+   const directory = '.wrangler/state/v3/d1/miniflare-D1DatabaseObject';
+   for (const file of readdirSync(directory).filter(name => name.endsWith('.sqlite'))) {
+     const db = new DatabaseSync(`${directory}/${file}`, {readOnly: true});
+     try {
+       if (db.prepare("SELECT name FROM sqlite_master WHERE name='nook_storage'").get())
+         console.log(`${directory}/${file}`, db.prepare('SELECT authority FROM nook_storage WHERE id=1').get(), db.prepare('SELECT count(*) AS actors FROM nook_actors').get());
+     } finally { db.close(); }
+   }
+   JS
+   ```
+
+   Select the file with authority `normalized` and the restored actors. If
+   several workspaces match, identify the intended one; do not select by age
+   or filename order. Set the path below to that exact file and keep this
+   variable for the replacement step.
 
 2. Take a consistent snapshot with Node 22+'s SQLite backup API, which includes
    committed data still in the WAL. Do not copy the live `.sqlite` file with

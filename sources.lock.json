@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "1341cf70901a95a8bb5bf136cd1d5f92962bfc29b4f773cb1a30dc0005882dd4",
+      "sha256": "fe082e6a4e8c5ed205aa7cfe16df987a4b6566734edd2f31686f54d2004f06ee",
       "executable": false
     },
     "CLAUDE.md": {
@@ -665,7 +665,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "bec12ffc25139bc17ca9fe24dba1c19ce1db4f0961834b43c6acb3f02bc7ac65",
+      "sha256": "f8bf2b949a5ee083672b7e4e114bfa4700eacbd688fabbcffeca7d2aaf886531",
       "executable": false
     },
     "docs/your-team.md": {
@@ -689,7 +689,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "c7e65c07a12308876a4275e91056166f7be1c061751729fa7d4d6a6bb43897ee",
+      "sha256": "52665c3f21f75f97870fee65cd7eda9d8ea64853b24403239f9b51b488a1ea30",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -784,12 +784,16 @@
       "sha256": "7ba0fd989617b8e1bd2abf09a211451b4e8032f3c77a802fe091c0502de6016d",
       "executable": false
     },
+    "migrations/0025_owner_signin.sql": {
+      "sha256": "98da904e768e35b43fb1be83d9dcc9c9b5d86ab3a795234ed5223c4fddc567d9",
+      "executable": false
+    },
     "OPERATIONS.json": {
       "sha256": "e55668d6203c785430074b69200173120b835dd6ccb08c75ffd1c6263be9400f",
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "b6822f5a8cb343a3736ed221286a9303077e90a67d47eccdc631a900af7b6630",
+      "sha256": "6624e1f38968427af85c5cd32bf38be943b7028c7582f838004db4c892407bb0",
       "executable": false
     },
     "owner-deployment.json": {
@@ -2392,6 +2396,10 @@
       "sha256": "ed47e235de1fc52aa4b92e9ab60be5f7fbb07d8f29a5fc3d3c0b3e86702c4da7",
       "executable": false
     },
+    "src/base/modules/operator-auth/accounts/email-change.mjs": {
+      "sha256": "32e60c1e7cfc5041edfb1456ff4a4f7e629410925e42fa694ad380af67983a66",
+      "executable": false
+    },
     "src/base/modules/operator-auth/accounts/index.d.mts": {
       "sha256": "bea6399182774eaa7a2269aa1575679af98ec5d3340325098edac4aac2445cc0",
       "executable": false
@@ -2410,6 +2418,10 @@
     },
     "src/base/modules/operator-auth/accounts/oa.mjs": {
       "sha256": "84508f8c507d12d3df4cd0d683baa8bbd5a3b60522bd08d31cf49ebb92a72aa1",
+      "executable": false
+    },
+    "src/base/modules/operator-auth/accounts/owner-signin.mjs": {
+      "sha256": "20a538bf6b343edc3209718174f63f7b2015d98f64c19fe5b5f878e02e83b3a0",
       "executable": false
     },
     "src/base/modules/operator-auth/accounts/provider-control.mjs": {
@@ -2442,6 +2454,10 @@
     },
     "src/base/modules/operator-auth/accounts/schema/operator-auth.sql": {
       "sha256": "389e6fc3201a73ab5e7280bbe4fdb793b652b84f157e444bab48cc3c25eb8c41",
+      "executable": false
+    },
+    "src/base/modules/operator-auth/accounts/schema/owner-signin.sql": {
+      "sha256": "98da904e768e35b43fb1be83d9dcc9c9b5d86ab3a795234ed5223c4fddc567d9",
       "executable": false
     },
     "src/base/modules/operator-auth/accounts/schema/provider-control.sql": {
@@ -2654,6 +2670,10 @@
     },
     "src/base/modules/operator-auth/loopback.mjs": {
       "sha256": "13b32a076bce23a3124be1745202c18eda553f298fad3d9f5cb93ac61aee3115",
+      "executable": false
+    },
+    "src/base/modules/operator-auth/owner-signin-grant.mjs": {
+      "sha256": "739808e5ad58b982d7d40a0ce2dc3836b90d57f515d8ce904cf6cf90965ed745",
       "executable": false
     },
     "src/base/modules/operator-auth/page.mjs": {

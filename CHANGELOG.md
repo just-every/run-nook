@@ -62,8 +62,9 @@ Known issues:
   `/signin`; the copy fix belongs to Base's next patch.
 - Invitation links expire after 15 minutes. Invite the same person again if
   their link expired; a longer invitation lifetime is pending in Base.
-- Hosted removal with stored files has failed with
-  `provider-incomplete-pagination` while listing R2 objects. If it occurs,
+- A real hosted removal with one uploaded file still fails on rer 0.2.19 with
+  `provider-incomplete-pagination` while listing R2 objects. The Worker and D1
+  are removed but the bucket and file remain; Base owns the next-patch fix. To clean up,
   empty only the deployment's bucket in the Cloudflare dashboard and rerun
   `rer deploy --remove --yes`; see [Updating and deploying](docs/updating.md).
 - Reply counts include live replies only. When every reply has been erased,

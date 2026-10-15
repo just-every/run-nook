@@ -79,4 +79,4 @@ CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer deploy --remove --yes
 
 This removes the Worker and the D1 database, R2 bucket and any queue that `rer deploy` created for this environment, with their data. Export first if you want to keep your workspace. It refuses without `--yes`. Removal is intended to empty its R2 bucket before deleting it. Resources `rer deploy` did not create are never touched.
 
-Known issue: hosted removal with stored files has failed with `provider-incomplete-pagination` while listing R2 objects. If that happens, empty only the deployment's bucket in the Cloudflare dashboard, then run the same command again. Do not treat a failed removal as complete.
+Known issue in rer 0.2.19: a real hosted removal with one uploaded file still fails with `provider-incomplete-pagination` while listing R2 objects. The Worker and D1 are removed, but the bucket and file remain. Base owns the pagination fix for its next patch. To finish cleanup, empty only the deployment's bucket in the Cloudflare dashboard, then run the same command again. Do not treat a failed removal as complete.
