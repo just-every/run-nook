@@ -42,7 +42,7 @@ A dry run checks the build and settings only. It does not deploy anything, so ru
 
 After the deploy is healthy, `rer deploy` claims the hosted owner from `OWNER_EMAIL` automatically. There is no manual setup-token step. Open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you.
 
-The current hosted Lobby can incorrectly say it is waiting for its owner and ask for a setup token. This is a known Base copy issue awaiting the next patch; go directly to `/signin` instead.
+Nook pins `@runeditrun/rer` 0.2.20. The hosted front page shows **Sign in** as soon as the owner is claimed; the separate first-run confirmation follows sign-in.
 
 If the owner already exists, the deploy keeps it. If the claim or the token's removal fails, the deploy says so and what to run; running the same `rer deploy` again finishes it.
 
@@ -77,6 +77,4 @@ Export the hosted workspace first if you want a copy to return to ([Backups and 
 CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer deploy --remove --yes
 ```
 
-This removes the Worker and the D1 database, R2 bucket and any queue that `rer deploy` created for this environment, with their data. Export first if you want to keep your workspace. It refuses without `--yes`. Removal is intended to empty its R2 bucket before deleting it. Resources `rer deploy` did not create are never touched.
-
-Known issue in rer 0.2.19: a real hosted removal with one uploaded file still fails with `provider-incomplete-pagination` while listing R2 objects. The Worker and D1 are removed, but the bucket and file remain. Base owns the pagination fix for its next patch. To finish cleanup, empty only the deployment's bucket in the Cloudflare dashboard, then run the same command again. Do not treat a failed removal as complete.
+This removes the Worker and the D1 database, R2 bucket and any queue that `rer deploy` created for this environment, with their data. Export first if you want to keep your workspace. It refuses without `--yes`. Removal empties its R2 bucket, including uploaded files, before deleting it. Resources `rer deploy` did not create are never touched.

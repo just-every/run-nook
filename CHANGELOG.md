@@ -1,5 +1,16 @@
 # Nook changes
 
+## Unreleased
+
+Nook pins `@runeditrun/rer` 0.2.20. Hosted removal empties uploaded files and
+removes the deployment in one command. The hosted front page reads the durable
+owner claim, so it offers Sign in before the separate first-run confirmation.
+The claim-state reader is refreshed unchanged from Base 8f8bddb; the existing
+Lobby wording and styling stay in place.
+
+Member erasure accumulates imported-reaction receipt counts across each associated
+Slack actor and clears completed actor progress atomically.
+
 ## 0.3.0 (2026-10-15)
 
 Changes since 0.2.0. The new migrations are
@@ -47,9 +58,7 @@ detects when setup is needed. [Updating and deploying](docs/updating.md)
 documents both paths, `rer signin` for owner access with the deployment's
 Cloudflare credentials, and `rer deploy --remove --yes` for removal. Base's
 owner-signin runtime and additive migration 0025 make that mail-free owner
-access available in Nook. Removal
-is intended to empty only its own R2 bucket before deleting it; the known R2
-listing failure and manual cleanup are documented below and in that guide.
+access available in Nook.
 The restore guidance links to the offline
 [local archive restore procedure](OPERATIONS.md#restoring-a-local-archive) before setup.
 The deploy hook returns the setup token it deployed to `rer`. A failed `rer export --target remote` names the hosted export step
@@ -68,16 +77,8 @@ Base.
 
 Known issues:
 
-- The hosted Lobby can incorrectly say it is waiting for its owner and ask for
-  a setup token after `rer deploy` already claimed the owner. Go directly to
-  `/signin`; the copy fix belongs to Base's next patch.
 - Invitation links expire after 15 minutes. Invite the same person again if
   their link expired; a longer invitation lifetime is pending in Base.
-- A real hosted removal with one uploaded file still fails on rer 0.2.19 with
-  `provider-incomplete-pagination` while listing R2 objects. The Worker and D1
-  are removed but the bucket and file remain; Base owns the next-patch fix. To clean up,
-  empty only the deployment's bucket in the Cloudflare dashboard and rerun
-  `rer deploy --remove --yes`; see [Updating and deploying](docs/updating.md).
 - Reply counts include live replies only. When every reply has been erased,
   the reply-count link disappears; **Open thread** still reaches the
   **Message deleted** tombstones.

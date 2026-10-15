@@ -128,9 +128,8 @@ named after this project, applies pending migrations, uploads the build, checks
 health and then claims the hosted owner from `OWNER_EMAIL`. Set it to your real
 email address at deploy; the local development identity is for this computer.
 No manual setup-token step is needed. Open `/signin` at the address `rer deploy`
-prints and sign in by email. The current hosted Lobby can incorrectly say it is
-waiting for an owner and ask for a setup token; use `/signin` instead while the
-Base copy fix is pending.
+prints and sign in by email. The hosted front page shows **Sign in** as soon as
+the owner is claimed.
 
 To sign in as the hosted owner without email, run this from the checkout that
 deployed Nook, using the same Cloudflare credentials:

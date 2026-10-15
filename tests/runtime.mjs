@@ -49,8 +49,8 @@ async function request(path,{method='GET',body,cookie='',status=200,extra={}}={}
 }
 // The owner's first visit to the app goes through first-run setup until it is confirmed once.
 async function finishFirstRun(cookie){
- assert.deepEqual(await (await fetch(origin+'/setup/state')).json(),{state:'unclaimed'})
- assert.match(await (await fetch(origin+'/')).text(),/href="\/setup"/)
+ assert.deepEqual(await (await fetch(origin+'/setup/state')).json(),{state:'claimed'})
+ assert.match(await (await fetch(origin+'/')).text(),/href="\/signin"/)
  const pending=await fetch(origin+'/app',{redirect:'manual',headers:{cookie}});assert.equal(pending.status,303);assert.equal(pending.headers.get('location'),'/setup')
  const signedOut=await fetch(origin+'/setup',{redirect:'manual'});assert.equal(signedOut.headers.get('location'),'/signin?returnTo=%2Fsetup')
  const page=await fetch(origin+'/setup',{headers:{cookie}});assert.equal(page.status,200);assert.match(await page.text(),/Finish setup/)

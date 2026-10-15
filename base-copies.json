@@ -1368,9 +1368,9 @@
     {
       "path": "src/base/setup-state.ts",
       "originPath": "foundation/runtime/setup-state.ts",
-      "revision": "8981bc2c4d9e61feca5787c83b4ed44056659dd9",
+      "revision": "8f8bddbfd725f0ba00e9b2bd83faa32f02903772",
       "files": {
-        "src/base/setup-state.ts": "41d478a3d4d9280b8af8b0e47f51fc4ec45413b5fe141b3aba724b75f7ae0983"
+        "src/base/setup-state.ts": "e4be71efeeec308d7a1ace213a2d58001cfdab2488140aac807bc71d70e47403"
       },
       "modes": {
         "src/base/setup-state.ts": "100644"

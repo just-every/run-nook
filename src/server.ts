@@ -21,7 +21,7 @@ export {ChatHub} from './platform/storage/live'
 import {authRoute,outboxRoute,operatorAuth,acceptsRequest,authBindings} from './platform/operator-auth.server'
 import {firstRunResponse} from './base/setup'
 import {lobbyResponse} from './base/lobby'
-import {setupStateResponse} from './base/setup-state'
+import {baseOwnerClaim,setupStateResponse} from './base/setup-state'
 import {identity} from './identity'
 import {notifySettings,updateNotifySettings} from './notify/preferences'
 import {unsubscribeRoute} from './notify/unsubscribe'
@@ -95,7 +95,7 @@ export default withDemo({
   const publicEnv = authBindings(env)
   const state = await setupStateResponse(request,publicEnv)
   if(state) return state
-  const lobby = await lobbyResponse(request,publicEnv,identity)
+  const lobby = await lobbyResponse(request,publicEnv,identity,baseOwnerClaim)
   if(lobby) return lobby
   const url = new URL(request.url)
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})

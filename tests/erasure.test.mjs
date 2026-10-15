@@ -118,10 +118,33 @@ test('the source-author door composes real import-kit custody, keeps unrelated t
   await assert.rejects(f.service.applyReviewed(f.c,plan.review,plan.fingerprint));
   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,1);
  }finally{f.close()}
+ await memberActorReactionCounts();
  await sharedUploadErasure();
  await largeImportReactionErasure();
  await steppedReactionErasure();
 });
+
+// A member can own different Slack identities across imports. Each actor's
+// completed step contributes its own count and leaves no progress for the next.
+async function memberActorReactionCounts(){
+ const {slackServiceFixture}=await import('./slack-import/sqlite-service.mjs'),{zipFixture}=await import('./slack-import/fixture.mjs');
+ const f=await slackServiceFixture();f.db.exec('PRAGMA foreign_keys=ON');try{
+  const accepted=await f.accept(await f.invite('former@example.test')),member=await f.auth.getSession(f.request('/auth/session',null,accepted.headers.get('set-cookie').split(';')[0]));
+  for(const [actor,count] of [['U1',1],['U3',2]]){
+   const zip=zipFixture([['users.json',[{id:actor,name:'Former colleague'},{id:'U2',name:'Peer'}]],['channels.json',[{id:'C1',name:'general'}]],
+    ['general/2024-01-01.json',[{type:'message',user:actor,text:'Former colleague message',ts:'1700000000.000001'},...Array.from({length:count},(_,i)=>({type:'message',user:'U2',text:`Peer ${actor} ${i}`,ts:`170000000${i+1}.000001`,reactions:[{name:'+1',count:2,users:[actor,'U2']}]}))]]]);
+   const upload=await f.custody.localUpload(f.c,new Request('https://fixture.test/upload',{method:'POST',body:zip}));
+   const review={namespace:'member-actor-'+actor,channels:[{sourceId:'C1',name:'Imported '+actor,members:[f.owner.operatorId,member.operatorId]}],actors:{[actor]:member.operatorId,U2:null},acceptedOmissions:[]};
+   const plan=await f.service.previewImport(f.c,{upload,review});await f.finish(plan);
+  }
+  const c=new Context({...f.c.env,CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}},f.owner);
+  const receipt=await finishDoor(standard,c,await door(standard,c,'',{kind:'member',target:member.operatorId,confirmation:'ERASE'}));
+  assert.equal(receipt.counts.reactions,3);
+  const peers=f.db.prepare('SELECT body,source_record FROM nook_import_records ORDER BY body').all();
+  assert.deepEqual(peers.map(row=>row.body),['Peer U1 0','Peer U3 0','Peer U3 1']);
+  for(const row of peers)assert.deepEqual(JSON.parse(row.source_record).reactions,[{name:'+1',count:2,users:['U2']}]);
+ }finally{f.close()}
+}
 
 // A realistic import: one peer reaction names the author among 400 unrelated
 // messages. The erasure rewrites only that message, and no copy of the id stays.

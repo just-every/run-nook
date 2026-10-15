@@ -30,9 +30,12 @@ export async function redactInSteps(c:Context,work:any,scope:Scope,target:{kind:
  // Each path must match while messages that name the person remain; it may match
  // nothing only when none does.
  const fields=related.fields!.map(field=>({...field,optional:current===0}))
- const receipt=sql("UPDATE nook_erasure_receipts SET counts=json_set(counts,'$.reactions',?) WHERE id=?",messages,work.operation)
+ const receipt=sql("UPDATE nook_erasure_receipts SET counts=json_set(counts,'$.reactions',coalesce(json_extract(counts,'$.reactions'),0)+?) WHERE id=?",messages,work.operation)
+ // The next associated actor starts its own count and continuation. Both this
+ // reset and the accumulated receipt commit only with this actor's final step.
+ const completed=sql('UPDATE nook_erasure_work SET redaction=NULL WHERE operation=?',work.operation)
  let result:D1CustodyRetirement|D1RetirementProgress
- try{result=await retireD1ImportCustody({target,values,related:{...related,fields}},[...statements,receipt],reserveReturn(ctx,1000-REQUEST_STATEMENTS),await f.checkpoint(),{resumable:true,continuation:state?.continuation})}
+ try{result=await retireD1ImportCustody({target,values,related:{...related,fields}},[...statements,receipt,completed],reserveReturn(ctx,1000-REQUEST_STATEMENTS),await f.checkpoint(),{resumable:true,continuation:state?.continuation})}
  catch(error){
   // Imported history changed between steps (an import was undone, say): start again from what is there now.
   if(state?.continuation&&['IMPORT_REDACTION_PATH_UNMATCHED','IMPORT_REDACTION_CONTINUATION_MISMATCH'].includes((error as Error).message)){await persist(c,work,scope,JSON.stringify({messages}));fail(409,'Imported history changed; resume the erasure')}

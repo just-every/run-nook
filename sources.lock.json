@@ -593,7 +593,7 @@
       "executable": false
     },
     "base-copies.json": {
-      "sha256": "11359ce7e5bfce4f49307b1da47789e78e5fe4006ada01e03aaedcca63730466",
+      "sha256": "8fc79ce0ba9bc07dd8b4246ed4764981e9f975aaf503ecd18c0b76e8e9b11a47",
       "executable": false
     },
     "BASE-LICENSE": {
@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "ddf4533e0f51eb2a9806782a0074b9e088ba4337323fd7028cde19c8ccccf370",
+      "sha256": "a379e5c5dc0f662e8ce62b215ee530d2c54b4a3a39602166159a670400811fb0",
       "executable": false
     },
     "CLAUDE.md": {
@@ -665,7 +665,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "f8bf2b949a5ee083672b7e4e114bfa4700eacbd688fabbcffeca7d2aaf886531",
+      "sha256": "d0d08eb640192576911f3822fb00726a397d8f1d0478920b22d543305f3d39c2",
       "executable": false
     },
     "docs/your-team.md": {
@@ -801,11 +801,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "ed8de4cea4ac2a2afd71cb87e4a4fd17085121e9f5a7943e291ee6d52f9c4b45",
+      "sha256": "a2df23a0f2d1550a7a934f76d1b14b44e3775d05d191d809d454993370576206",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "e878975d2638e45e9f00ec0513a3432d31d316c486e4f796dcaa0145890e1502",
+      "sha256": "37deabdd500d864839cda6de026301a9066d8a8a16e3488d74f03243b1720c1b",
       "executable": false
     },
     "public/brand/band.svg": {
@@ -865,7 +865,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "c7dddb9242fa2b72a360621e565da79714d130f26cf41963a8b19cb6605cc9e4",
+      "sha256": "81cca2cddb738d71f4dc3d550676aaffaba45ccc620f17aa0bea9b8f133327a8",
       "executable": false
     },
     "RELEASE.json": {
@@ -2869,7 +2869,7 @@
       "executable": false
     },
     "src/base/setup-state.ts": {
-      "sha256": "41d478a3d4d9280b8af8b0e47f51fc4ec45413b5fe141b3aba724b75f7ae0983",
+      "sha256": "e4be71efeeec308d7a1ace213a2d58001cfdab2488140aac807bc71d70e47403",
       "executable": false
     },
     "src/base/setup.ts": {
@@ -3765,7 +3765,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "3559a431593fa81a8716a4becf957864847a7c41ca4caa64033d20d817f712cc",
+      "sha256": "f75eb8890f423703e8d8a71d92c9ff6a9b7e70c271806761bb617db76d8a85b4",
       "executable": false
     },
     "src/SignInScreen.tsx": {
@@ -3889,7 +3889,7 @@
       "executable": false
     },
     "src/team/erasure/redaction-steps.ts": {
-      "sha256": "9a5bf63fcd8a37644a132e4729ee1ed325081a9d019c90e501ccd447ffbca28a",
+      "sha256": "40ff636ca1cfc25ae8f2374c146fb67c10a20ba66730a7f40788a8c1d4ec189e",
       "executable": false
     },
     "src/team/erasure/retained-archive.mjs": {
@@ -4025,7 +4025,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "d1fe54cab9e8e62dc11ae7fc00a4d81500936fcb543e93048e0ca0247b665308",
+      "sha256": "b0e603c33fd32f80411ad3974ec402d02e2c0320b867f3fba7d82a5fe8a99357",
       "executable": false
     },
     "tests/fake-account.mjs": {
@@ -4261,7 +4261,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "45242fd47d5b4d48b9cace892d052f92a86ece761641368c27fdc9e031d8cd32",
+      "sha256": "5d022ddb70ffaea7f79d2837c987f13f102a1352eb3ca936cc89ee85ef33d536",
       "executable": false
     },
     "tests/slack-files.test.mjs": {
