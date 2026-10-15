@@ -1031,9 +1031,9 @@
     {
       "path": "src/base/modules/mail/README.md",
       "originPath": "modules/mail/README.md",
-      "revision": "479094f0b26a639a1868fa521004581ec8dbcb63",
+      "revision": "b4b372b032b2ddd7fbf47efa1bf17e1d5235be98",
       "files": {
-        "src/base/modules/mail/README.md": "e44a72114c68510be55003cf73191cd66ccbdcabfc025abb3086a09cc29d7967"
+        "src/base/modules/mail/README.md": "2067e03ab3f25fcf55d0ada52a19c44689839c6ca322853529d497430d4aa429"
       },
       "modes": {
         "src/base/modules/mail/README.md": "100644"
@@ -1082,10 +1082,10 @@
     {
       "path": "src/base/modules/mail/src/adapters/rer",
       "originPath": "modules/mail/src/adapters/rer",
-      "revision": "1afef2aa7d0549e629a4bb11d0eda8c07a99f769",
+      "revision": "b4b372b032b2ddd7fbf47efa1bf17e1d5235be98",
       "files": {
-        "src/base/modules/mail/src/adapters/rer/contract.mjs": "b8ae90da173b40c7bde1a194ac35e9367802b9b608f050d63e2337a64e58454c",
-        "src/base/modules/mail/src/adapters/rer/index.mjs": "2f27ff23d1182b4792b13b777e44fe1de9f7568474df11f3b60655415d2a6635"
+        "src/base/modules/mail/src/adapters/rer/contract.mjs": "3dba4b2c07367775768b5d1683cb859ffd000a6eefd2236308a33ebf7ecad1dd",
+        "src/base/modules/mail/src/adapters/rer/index.mjs": "23faa46d74aa987e7fc51e1a78d83760414a169e8bc0101e399bb4d685c4ce14"
       },
       "modes": {
         "src/base/modules/mail/src/adapters/rer/contract.mjs": "100644",
@@ -1129,10 +1129,10 @@
     {
       "path": "src/base/modules/mail/src/core",
       "originPath": "modules/mail/src/core",
-      "revision": "1afef2aa7d0549e629a4bb11d0eda8c07a99f769",
+      "revision": "b4b372b032b2ddd7fbf47efa1bf17e1d5235be98",
       "files": {
         "src/base/modules/mail/src/core/errors.mjs": "8ffe417be05ef9f9f6eae1f84641f8da0e3c244f0a5ee712befc979dec455869",
-        "src/base/modules/mail/src/core/transport.mjs": "aecc91b5b12c2f315a3154679bb6780518453d04516c750517f06f25548ebb18",
+        "src/base/modules/mail/src/core/transport.mjs": "67b721f37bdde8a5f419ca88eda0e88650ffaca06bcbf91eab0e33c879d0e230",
         "src/base/modules/mail/src/core/validation.mjs": "fa1f79579a96fc7b12964d9515e98135993c18ea1af23922779139abc4221571"
       },
       "modes": {

@@ -37,12 +37,7 @@ export function createConfiguredAuth(bindings,branding){
  let valid=false;try{valid=acceptsRequest(env,new Request(env.AUTH_ORIGIN))}catch{}
  if(!valid)throw new AuthError('invalid_configuration',503);
  const sender=mailSender(env);
- // Native auth adds this advisory header. The Managed relay owns headers and
- // accepts only its message fields; keep every other unsupported input refused.
- const authSender=env.MAIL_PROVIDER==='rer'?{send({headers,...message}){
-  return sender.send(headers?.['Auto-Submitted']==='auto-generated'&&Object.keys(headers).length===1?message:{...message,...(headers?{headers}:{})});
- }}:sender;
- return createOperatorAuth({db:env.DB,config:authConfig(bindings,branding),mailSender:authSender,
+ return createOperatorAuth({db:env.DB,config:authConfig(bindings,branding),mailSender:sender,
   // Cloudflare overwrites this header at the deployed Worker boundary. Never
   // trust Forwarded/X-Forwarded-For or use the local shared bucket in production.
   clientIp:request=>local?'local':request.headers.get('CF-Connecting-IP')??''});

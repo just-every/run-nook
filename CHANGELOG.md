@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+Nook pins `@runeditrun/rer` 0.2.23 and adopts its unchanged Managed mail
+adapter. Sign-in and invitation mail now sends from Cloudflare Workers, relay
+redirects are refused, rate limits retain the notification retry schedule, and
+retired mail credentials show a plain problem. RER's Open app sign-in email is
+prefilled through Base's `login_hint` support.
+
 - Mark credential fixtures and examples explicitly synthetic so hosted source checks accept them.
 
 Nook now pins `@runeditrun/rer` 0.2.22. RER Managed configures sign-in and

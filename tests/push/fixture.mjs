@@ -6,11 +6,12 @@ import {createServer} from 'node:net';
 const require=createRequire(import.meta.url),{Miniflare,Log,LogLevel,convertV4MiniflareOptions}=createRequire(require.resolve('wrangler'))('miniflare');
 // Run the emitted application and actual Durable Object alarms. The sole fake is
 // the outbound HTTPS edge: no provider account or vendor request is used.
-export async function installation(edge,{bootstrap=true}={}){
+export async function installation(edge,{bootstrap=true,origin:configuredOrigin,workerOptions={}}={}){
  const port=await new Promise((resolve,reject)=>{const server=createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port))})});
- const origin='http://127.0.0.1:'+port,secret=crypto.randomUUID()+crypto.randomUUID(),token=crypto.randomUUID()+crypto.randomUUID();
+ const origin=configuredOrigin??'http://127.0.0.1:'+port,secret=crypto.randomUUID()+crypto.randomUUID(),token=crypto.randomUUID()+crypto.randomUUID();
  const modules=[{type:'ESModule',path:resolve('dist/server/index.js')},...(await readdir('dist/server/assets')).filter(name=>name.endsWith('.js')).map(name=>({type:'ESModule',path:resolve('dist/server/assets',name)}))];
  const options={port,host:'127.0.0.1',name:'nook-push-test',routes:['*/*'],modules,modulesRoot:resolve('dist/server'),compatibilityDate:'2026-09-08',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CHAT_HUB:{className:'ChatHub',useSQLite:true}},bindings:{AUTH_ORIGIN:origin,AUTH_LOCAL:'true',OWNER_EMAIL:'owner@example.test',SESSION_SECRET:secret,SETUP_TOKEN:token,MAIL_PROVIDER:'development',MAIL_FROM:'nook@example.test'},outboundService:edge,log:new Log(LogLevel.ERROR)};
+ Object.assign(options,workerOptions);
  const mf=new Miniflare(convertV4MiniflareOptions(options));
  try{
  let database=await mf.getD1Database('DB');
