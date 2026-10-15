@@ -12,7 +12,8 @@
     },
     {
       "id": "mail",
-      "label": "Local sign-in"
+      "label": "Sign-in email",
+      "help": "Hosting requires a mail provider and a verified sender. Local development uses the local outbox."
     }
   ],
   "fields": [
@@ -38,7 +39,7 @@
       "kind": "email",
       "required": true,
       "group": "owner",
-      "help": "Links stay in the local development outbox. No external mail is sent.",
+      "help": "The first owner uses this address to sign in.",
       "prefill": "account-email"
     },
     {
@@ -66,26 +67,62 @@
       "label": "Mail delivery",
       "kind": "select",
       "required": true,
-      "default": "development",
+      "default": "sendgrid",
       "options": [
         {
-          "value": "development",
-          "label": "Local development outbox"
+          "value": "sendgrid",
+          "label": "SendGrid"
+        },
+        {
+          "value": "resend",
+          "label": "Resend"
         }
       ],
       "group": "mail"
     },
     {
       "name": "MAIL_FROM",
-      "label": "Local sender",
+      "label": "Verified sender email",
       "kind": "email",
       "required": true,
-      "default": "auth@localhost.test",
       "group": "mail",
-      "when": {
-        "field": "MAIL_PROVIDER",
-        "equals": "development"
-      }
+      "help": "Use a sender address verified with your chosen mail provider."
+    },
+    {
+      "name": "SENDGRID_API_KEY",
+      "label": "SendGrid API key",
+      "kind": "secret",
+      "input": "entered",
+      "ownerVisible": true,
+      "required": false,
+      "group": "mail",
+      "presentations": [
+        {
+          "when": {
+            "field": "MAIL_PROVIDER",
+            "equals": "sendgrid"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "RESEND_API_KEY",
+      "label": "Resend API key",
+      "kind": "secret",
+      "input": "entered",
+      "ownerVisible": true,
+      "required": false,
+      "group": "mail",
+      "presentations": [
+        {
+          "when": {
+            "field": "MAIL_PROVIDER",
+            "equals": "resend"
+          },
+          "required": true
+        }
+      ]
     },
     {
       "name": "IDENTITY_PROVIDER",

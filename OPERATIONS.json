@@ -25,7 +25,7 @@
     "SENDGRID_API_KEY"
   ],
   "environmentSources": {
-    "MAIL_PROVIDER": "Development outbox selection in rer-setup.json. See OPERATIONS.md",
+    "MAIL_PROVIDER": "Hosted SendGrid or Resend in rer-setup.json; the generated local manifest selects the development outbox. See OPERATIONS.md",
     "MAIL_FROM": "Production sender for the Worker, supplied in the shell or an --env-file on the first deploy; setup keeps a local sender. See OPERATIONS.md",
     "SENDGRID_API_KEY": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
     "RESEND_API_KEY": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
@@ -44,7 +44,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -57,7 +58,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -70,7 +72,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -83,7 +86,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -96,7 +100,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -109,7 +114,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -122,7 +128,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -137,7 +144,8 @@
         "package.json",
         "rer-setup.json",
         "scripts/deployment/command.mjs",
-        "scripts/installer/local.mjs"
+        "scripts/installer/local.mjs",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": [
         "CLOUDFLARE_ACCOUNT_ID",
@@ -155,7 +163,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -168,7 +177,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -181,7 +191,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -194,7 +205,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -207,7 +219,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -220,7 +233,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },
@@ -233,7 +247,8 @@
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
-        "rer-setup.json"
+        "rer-setup.json",
+        "scripts/installer/local-setup.json"
       ],
       "requiredEnvironment": []
     },

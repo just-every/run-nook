@@ -4,8 +4,9 @@
 yourself. Every operation goes through
 `rer VERB` (also `pnpm run VERB`); README.md gives the journey
 and `rer describe` the flags. The guided installer
-(`node scripts/install.mjs`) runs the same lifecycle from the same root
-`rer-setup.json`.
+(`node scripts/install.mjs`) runs the same lifecycle from
+`scripts/installer/local-setup.json`, generated from the hosted `rer-setup.json`
+with local outbox inputs in place of production mail credentials.
 
 ## Local installation
 
@@ -182,6 +183,15 @@ produces the schema-2 Worker artifact (modules, assets, the D1, R2 and Durable
 Object declarations and every migration); `node scripts/delivery/build-local.mjs`
 builds the same bytes from clean committed source into a new local directory.
 None of these deploy.
+
+RER Managed Configure reads `management/integration/deployment-spec.json`
+directly from the repository. After `rer build`, run `pnpm integration:generate`
+to regenerate it with Base's spec reader, the project/setup digest, local setup
+manifest and pinned Managed workflow. `pnpm integration:check` fails Verify on
+drift against the emitted build. `AUTH_ORIGIN` is assigned by RER through
+`surfaces.app.originVariable`. Hosted setup offers SendGrid or Resend and requires
+the selected provider's key and a verified sender; each provider key is an
+optional deployment secret because only one is used. Local setup needs neither.
 
 A managed installation admits its owner through the signed claim at
 `/auth/owner-claim`, mounted before the ordinary auth routes. Trusted runtime

@@ -29,7 +29,8 @@
         "src/team/**",
         "src/editor/**",
         "src/routes/**",
-        "src/router.tsx"
+        "src/router.tsx",
+        "management/integration/**"
       ],
       "migrationDirectories": [
         "migrations"
@@ -55,7 +56,9 @@
   },
   "artifact": {
     "specInputs": {
-      "providerEffects": [],
+      "providerEffects": [
+        "outbound-mail"
+      ],
       "publicVariableNames": [
         "AUTH_ORIGIN",
         "AUTH_LOCAL",
@@ -73,12 +76,16 @@
         "SESSION_SECRET",
         "SETUP_TOKEN"
       ],
-      "optionalSecretNames": [],
+      "optionalSecretNames": [
+        "SENDGRID_API_KEY",
+        "RESEND_API_KEY"
+      ],
       "healthPath": "/health",
       "recovery": "Keep the repository and installation private. Stop Nook; retain source, private settings and all additive migrations. Use rer export to a private archive, rer import into empty inactive local state, and the documented offline identity mapping before normal sign-in. Compare re-exported records and media. Local proof is not hosted deployment acceptance; see OPERATIONS.md.",
       "surfaces": {
         "app": {
-          "path": "/signin"
+          "path": "/signin",
+          "originVariable": "AUTH_ORIGIN"
         },
         "page": {
           "path": "/"

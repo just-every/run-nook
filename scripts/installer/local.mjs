@@ -25,7 +25,7 @@ export const lifecycle=operatorInstaller({database:'DB',features,async prepare({
 lifecycle.localPrerequisites=localPrerequisites;
 export const {install}=lifecycle;
 export const commandAdapter=createCommandAdapter(lifecycle,{
- product:'Nook',browserModule:'scripts/installer/ui/seed.mjs',setup:{manifestFile:'rer-setup.json'},
+ product:'Nook',browserModule:'scripts/installer/ui/seed.mjs',setup:{manifestFile:'scripts/installer/local-setup.json'},
  input:{names:{email:'OWNER_EMAIL',name:'displayName'}},
  dev:developmentTarget,preview:previewTarget,verify:['pnpm',['run','verify:app']],
  deploy:Object.assign(deployment(lifecycle),{declaration:'owner-deployment.json'}),portability,

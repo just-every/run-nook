@@ -487,7 +487,9 @@
           "src/site",
           "src/client.tsx",
           "vite.site.config.ts",
-          "deploy-site.json"
+          "deploy-site.json",
+          "scripts/delivery/integration.mjs",
+          "management/integration"
         ]
       }
     }

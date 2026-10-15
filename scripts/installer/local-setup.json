@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "title": "Nook",
+  "groups": [
+    {
+      "id": "workspace",
+      "label": "Workspace"
+    },
+    {
+      "id": "owner",
+      "label": "First owner"
+    },
+    {
+      "id": "mail",
+      "label": "Local sign-in",
+      "help": "Hosting requires a mail provider and a verified sender. Local development uses the local outbox."
+    }
+  ],
+  "fields": [
+    {
+      "name": "WORKSPACE_NAME",
+      "label": "Workspace name",
+      "kind": "text",
+      "required": true,
+      "default": "Nook",
+      "group": "workspace"
+    },
+    {
+      "name": "PRIMARY_COLOR",
+      "label": "Brand colour",
+      "kind": "colour",
+      "required": true,
+      "default": "#c24e5b",
+      "group": "workspace"
+    },
+    {
+      "name": "OWNER_EMAIL",
+      "label": "Owner email",
+      "kind": "email",
+      "required": true,
+      "group": "owner",
+      "help": "The first owner uses this address to sign in.",
+      "prefill": "account-email"
+    },
+    {
+      "name": "SESSION_SECRET",
+      "label": "Session secret",
+      "kind": "secret",
+      "required": true,
+      "ownerVisible": false,
+      "input": "managed",
+      "generate": "hex",
+      "group": "owner"
+    },
+    {
+      "name": "SETUP_TOKEN",
+      "label": "Setup token",
+      "kind": "secret",
+      "required": true,
+      "ownerVisible": false,
+      "generate": "hex",
+      "group": "owner",
+      "input": "managed"
+    },
+    {
+      "name": "MAIL_PROVIDER",
+      "label": "Mail delivery",
+      "kind": "select",
+      "required": true,
+      "default": "development",
+      "options": [
+        {
+          "value": "development",
+          "label": "Local development outbox"
+        }
+      ],
+      "group": "mail"
+    },
+    {
+      "name": "MAIL_FROM",
+      "label": "Local sender",
+      "kind": "email",
+      "required": true,
+      "group": "mail",
+      "help": "Sign-in links stay in the local development outbox.",
+      "default": "auth@localhost.test"
+    },
+    {
+      "name": "IDENTITY_PROVIDER",
+      "label": "Identity provider",
+      "kind": "url",
+      "required": false,
+      "default": "",
+      "help": "Optional Auth install. Leave empty to use email links."
+    }
+  ],
+  "steps": [
+    {
+      "type": "owner-claim",
+      "mode": "signed",
+      "emailField": "OWNER_EMAIL",
+      "tokenField": "SETUP_TOKEN",
+      "path": "/auth/owner-claim"
+    }
+  ],
+  "dependencies": [
+    {
+      "interface": "oidc-provider@1",
+      "optional": true,
+      "cardinality": 1,
+      "address": "IDENTITY_PROVIDER",
+      "paths": [
+        "/auth/oidc/auth/callback",
+        "/auth/oidc/auth/logout"
+      ]
+    }
+  ]
+}

@@ -30,7 +30,7 @@
     "onboard": "node scripts/install.mjs",
     "build:app": "vite build",
     "verify:app": "pnpm verify:core && pnpm test:pilot",
-    "verify:core": "pnpm test:base && pnpm test && pnpm run build:app && pnpm typecheck && rer build --site && pnpm test:runtime && pnpm test:readme && pnpm test:notify && pnpm test:push",
+    "verify:core": "pnpm test:base && pnpm test && pnpm run build:app && pnpm integration:check && pnpm typecheck && rer build --site && pnpm test:runtime && pnpm test:readme && pnpm test:notify && pnpm test:push",
     "typecheck": "tsc --noEmit",
     "test": "node --test --test-concurrency=2 tests/*.test.mjs",
     "test:runtime": "node tests/runtime.mjs",
@@ -39,7 +39,9 @@
     "test:pilot": "node tests/pilot-journey.mjs",
     "test:base": "node scripts/edition-authoring/cli.mjs check && node scripts/edition-authoring/cli.mjs verify-base --offline && rer check --profile first-party",
     "test:notify": "node tests/notify-journey.mjs",
-    "test:push": "node --test --test-concurrency=1 tests/push-journey.mjs"
+    "test:push": "node --test --test-concurrency=1 tests/push-journey.mjs",
+    "integration:generate": "node scripts/delivery/integration.mjs",
+    "integration:check": "node scripts/delivery/integration.mjs --check"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.33",
@@ -52,7 +54,7 @@
     "@cloudflare/vite-plugin": "1.54.5",
     "@cloudflare/workers-types": "5.20260908.1",
     "@playwright/test": "1.63.0",
-    "@runeditrun/rer": "0.2.12",
+    "@runeditrun/rer": "0.2.15",
     "@types/node": "26.0.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",

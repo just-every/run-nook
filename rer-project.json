@@ -27,7 +27,8 @@
       "src/team/**",
       "src/editor/**",
       "src/routes/**",
-      "src/router.tsx"
+      "src/router.tsx",
+      "management/integration/**"
     ],
     "migrationDirectories": [
       "migrations"
@@ -43,6 +44,6 @@
   },
   "setup": {
     "path": "rer-setup.json",
-    "sha256": "4a1fbc8628fdfa4c8d2bfd71248810e7df5bc770cc5e7854c0f3e232f550b8bc"
+    "sha256": "6e2d4366e9530438c1c49c05cc24f7dab5c200489bc0572bc5b0fb697784aa81"
   }
 }

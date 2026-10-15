@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "parent": null,
   "edition": "just-every/nook",
-  "manifest": "2acc933522a6f48a8cdbe7f7f843607b47bc345f0ecb4745cc5d0a7630b1f685",
+  "manifest": "72839a3822c5244c6b8b8c9d4374bc56efaa114bbf3118ca15128c9791c851f1",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -527,7 +527,9 @@
           "src/site",
           "src/client.tsx",
           "vite.site.config.ts",
-          "deploy-site.json"
+          "deploy-site.json",
+          "scripts/delivery/integration.mjs",
+          "management/integration"
         ]
       },
       "baseline": null
@@ -659,7 +661,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "2acc933522a6f48a8cdbe7f7f843607b47bc345f0ecb4745cc5d0a7630b1f685",
+      "sha256": "72839a3822c5244c6b8b8c9d4374bc56efaa114bbf3118ca15128c9791c851f1",
       "executable": false
     },
     "IMPORT-APPLY.md": {
@@ -672,6 +674,10 @@
     },
     "LICENSE": {
       "sha256": "2f5076ef027045b9e0e72df8aa61ca8551e54b1877d531656d6e7985b2c32324",
+      "executable": false
+    },
+    "management/integration/deployment-spec.json": {
+      "sha256": "90e1134c4ca9d5b0ca440cb3a2cab8d307eb81c1071a2b3a98a62b4126e1e567",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -767,11 +773,11 @@
       "executable": false
     },
     "OPERATIONS.json": {
-      "sha256": "00e4f411a4906fb9d9651bbdea1455ce373a34d3573818adf59e12bddd2a9395",
+      "sha256": "e55668d6203c785430074b69200173120b835dd6ccb08c75ffd1c6263be9400f",
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "a4cf7c07eed5a66483b94f8bf29bec783d11bf845f4b05384f89da5ed7333eb9",
+      "sha256": "f7d6644dd77ef1e4a4389a88545b5ad444a19a6208fc45576b5982a2e55d9782",
       "executable": false
     },
     "owner-deployment.json": {
@@ -779,11 +785,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "db58dfe7e99436d91c2f989e8efb72fce6a0406a2b58c970be42529cb97334b3",
+      "sha256": "00414d8ec135edd7096ade15ed9adb879b1a0a186f8efb23a3be8d898b60f173",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "f25c49cc1fcb0906290b499a0da57633a903ce0d89c50d81e329c35ce6742484",
+      "sha256": "101798df40b0f46b0ba8052c319cf97507b7a0af93f5452fd52f79809814c95a",
       "executable": false
     },
     "public/brand/band.svg": {
@@ -851,11 +857,11 @@
       "executable": false
     },
     "rer-project.json": {
-      "sha256": "dfed26a8207c35f7897a15df53d198830165200647d45980ee4b13be36a8526f",
+      "sha256": "ed27528bc25b0c12ea748ec300bc9534645bd590b0ab29a17cccdcef20ab905b",
       "executable": false
     },
     "rer-setup.json": {
-      "sha256": "4a1fbc8628fdfa4c8d2bfd71248810e7df5bc770cc5e7854c0f3e232f550b8bc",
+      "sha256": "6e2d4366e9530438c1c49c05cc24f7dab5c200489bc0572bc5b0fb697784aa81",
       "executable": false
     },
     "RUN-LOCALLY.md": {
@@ -923,7 +929,7 @@
       "executable": false
     },
     "scripts/delivery/base/packaging.json": {
-      "sha256": "2b73a13bc33b3e7bc231bd978ff132900b7085469b78640575856bd206acc1c8",
+      "sha256": "d15c0bbffebd3ed3bbc4d66d11cf3a9c952a3e2fa5c2b5171113757bf07b4034",
       "executable": false
     },
     "scripts/delivery/base/paths.mjs": {
@@ -964,6 +970,10 @@
     },
     "scripts/delivery/config.mjs": {
       "sha256": "b16f8b12249df8d23602d4270f6206fb8b7a7d102cb91f6b48c14e44811ca8f2",
+      "executable": false
+    },
+    "scripts/delivery/integration.mjs": {
+      "sha256": "436192312dc2bc0392cfd37ab8d0a5f9ac9036809d50b4b8df418e1e22d08bba",
       "executable": false
     },
     "scripts/delivery/local-artifact.mjs": {
@@ -1034,12 +1044,20 @@
       "sha256": "429baab28d0fd86989aada609d0bf990e8d1bcbc234aa6e97f62a569729a0d5e",
       "executable": false
     },
+    "scripts/installer/local-setup.json": {
+      "sha256": "463f7c3ba167d385d6995eb73d50ca4fecd5c884b5ee9cc8c5de7c0188d1b0f9",
+      "executable": false
+    },
     "scripts/installer/local.mjs": {
-      "sha256": "2cbc9d2daa9d251c854389889edc56df8ca94dd29364119e17f800bf4f70694a",
+      "sha256": "9983aec79fc80f64656b70066ede8a111e3ba87bc41282da2fd260dc7389851a",
       "executable": false
     },
     "scripts/installer/seed.mjs": {
-      "sha256": "e47c44452bd21036eb6cbe35997c6577ddf53b1660032ef974beb286883b47ed",
+      "sha256": "b97dcdf2500b8ace221807b03df0cba19656752146a2b703530c50ec60c9833d",
+      "executable": false
+    },
+    "scripts/installer/setup-manifest.mjs": {
+      "sha256": "8882cb30e7fa5a5e44ea8afa4ad5baa09a3b1339813f88a1db28aaf4c7688ddc",
       "executable": false
     },
     "scripts/installer/ui/background.svg": {
