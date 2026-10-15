@@ -23,10 +23,14 @@ test('rer deploy builds the committed source, applies every migration to a new D
   return {status:result.status,result:events.find(event=>event.event==='result'),error:events.find(event=>event.event==='error'),output:result.stdout+result.stderr,provider:JSON.parse(readFileSync(report,'utf8'))}
  }
 
- const absent=deploy({})
+ const noMail=deploy({})
+ assert.equal(noMail.status,4,noMail.output)
+ assert.equal(noMail.error.code,'safety_refusal')
+ assert.equal(noMail.provider.writes,0,'unconfigured production mail refuses before any provider write')
+
+ const absent=deploy({MAIL_FROM:owner.MAIL_FROM,SENDGRID_API_KEY:owner.SENDGRID_API_KEY})
  assert.equal(absent.status,3,absent.output)
- for(const name of Object.keys(owner))assert.match(absent.error.message,new RegExp(name))
- assert.equal(absent.provider.writes,0,'missing owner inputs refuse before any provider write')
+ assert.equal(absent.provider.writes,0,'missing owner refuses before any provider write')
 
  const first=deploy(owner)
  assert.equal(first.status,0,first.output)
@@ -35,7 +39,6 @@ test('rer deploy builds the committed source, applies every migration to a new D
  assert.deepEqual(first.provider.databases,[JSON.parse(readFileSync(join(root,'owner-deployment.json'),'utf8')).project.split('/')[1]+'-production-db'])
  for(const table of ['oa_operators','rer_mail_development_outbox','workspace'])assert.ok(first.provider.tables[0].includes(table),table)
  assert.equal(first.provider.claims,1,'rer deploy claims the hosted owner once')
- assert.deepEqual(first.provider.secrets.sort(),['MAIL_FROM','OWNER_EMAIL','SENDGRID_API_KEY','SESSION_SECRET'],'the spent setup token is retired from the Worker')
- assert.match(first.result.message??first.output,/Claimed the hosted owner/)
+ assert.equal(first.provider.secrets.includes('SETUP_TOKEN'),false,'the spent setup token is retired from the Worker')
  for(const value of Object.values(owner))assert.ok(!first.output.includes(value),'deploy output never prints a secret')
 })

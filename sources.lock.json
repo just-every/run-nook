@@ -4121,7 +4121,7 @@
       "executable": false
     },
     "tests/owner-deploy.test.mjs": {
-      "sha256": "0b06369c8ddae99246a889a00ea5755a78e3136d2a2571ef4b69f39eb8f552dd",
+      "sha256": "5b1c06e870bae9a17f7b4414c3a15ccdfb2c17125d39c4fe518d4d3b44320486",
       "executable": false
     },
     "tests/part6-source.mjs": {
