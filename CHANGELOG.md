@@ -23,6 +23,10 @@ are mounted, including loading and unavailable-message/thread states. A separate
 demo mode supports the product demonstration without enabling it on ordinary
 deployments.
 
+Member erasure completion waits for the people list to refresh
+before showing its receipt, so closing it returns focus to the surviving page
+instead of a stale erased-person row.
+
 `rer dev` starts a fresh checkout with a placeholder local owner; local
 `rer setup --owner-email you@example.com` is optional and replaces it, keeping the
 owner ID and data. `rer deploy` now claims the hosted owner itself once the

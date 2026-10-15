@@ -7,12 +7,28 @@ import './erasure.css'
 // The first sentence stays in view; everything after it waits under "What erasing removes".
 function leadAndRest(text:string){const lead=text.match(/^.*?[.!?](?=\s|$)/s)?.[0]??text;return [lead,text.slice(lead.length).trim()] as const}
 type Receipt={id:string;state:string;seconds:number;memberMessageBodies:'erase'|'retain';counts:Record<string,number>}
-export function ErasureDialog({kind,target,request,onClose,onChanged,returnFocus}:{kind:'member'|'message'|'imported-author'|'imported-message';target:string;request:TeamRequest;onClose:()=>void;onChanged:()=>void;returnFocus?:Pick<HTMLElement,'focus'|'closest'|'isConnected'>|null}){
+export function ErasureDialog({kind,target,request,onClose,onChanged,returnFocus}:{kind:'member'|'message'|'imported-author'|'imported-message';target:string;request:TeamRequest;onClose:()=>void;onChanged:()=>void|Promise<void>;returnFocus?:Pick<HTMLElement,'focus'|'closest'|'isConnected'>|null}){
  const alive=useRef(true),completed=useRef(false),dialog=useRef<HTMLDialogElement>(null),[counts,setCounts]=useState<Record<string,number>|null>(null),[bodyPolicy,setBodyPolicy]=useState<'erase'|'retain'|null>(null),[typed,setTyped]=useState(''),[result,setResult]=useState<Receipt|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState('')
  useEffect(()=>{alive.current=true;const origin=returnFocus??document.activeElement as HTMLElement,scope=origin?.closest('.message-log,.team-surface'),fallback=scope?.matches('.team-surface')?scope.querySelector<HTMLElement>('h2'):scope as HTMLElement|null;dialog.current?.showModal();return()=>{alive.current=false;queueMicrotask(()=>{if(origin?.isConnected&&!completed.current)origin.focus();else if(fallback?.isConnected)fallback.focus()})}},[kind,target])
  useEffect(()=>{const abort=new AbortController();request<{counts:Record<string,number>;memberMessageBodies:'erase'|'retain'}>('/api/erasures/preview',{method:'POST',body:JSON.stringify({kind,target}),signal:abort.signal}).then(p=>{setCounts(p.counts);setBodyPolicy(p.memberMessageBodies)}).catch(e=>{if(!abort.signal.aborted)setError(e.message)});return()=>abort.abort()},[kind,target,request])
  function close(){dialog.current?.close();onClose()}
- async function run(){setBusy(true);setError('');try{let r=await request<Receipt>(result?`/api/erasures/${result.id}/resume`:'/api/erasures',{method:'POST',body:JSON.stringify(result?{}:{kind,target,confirmation:typed})});completed.current=r.state==='complete';setResult(r);onChanged();while(alive.current&&r.state==='pending'){await new Promise(resolve=>setTimeout(resolve,50));const next=await request<Receipt>(`/api/erasures/${r.id}/resume`,{method:'POST',body:'{}'});completed.current=next.state==='complete';setResult(next);onChanged();if(next.state==='pending'&&next.seconds>240)break;r=next}}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
+ async function publishReceipt(receipt:Receipt){
+  completed.current=receipt.state==='complete'
+  // Refresh the surviving surface before showing completion, so Close cannot
+  // return to a stale person/author row. Keep the receipt if the refresh fails.
+  try{await onChanged()}finally{if(alive.current)setResult(receipt)}
+ }
+ async function run(){setBusy(true);setError('');try{
+  let r=await request<Receipt>(result?`/api/erasures/${result.id}/resume`:'/api/erasures',{method:'POST',body:JSON.stringify(result?{}:{kind,target,confirmation:typed})})
+  await publishReceipt(r)
+  while(alive.current&&r.state==='pending'){
+   await new Promise(resolve=>setTimeout(resolve,50))
+   const next=await request<Receipt>(`/api/erasures/${r.id}/resume`,{method:'POST',body:'{}'})
+   await publishReceipt(next)
+   if(next.state==='pending'&&next.seconds>240)break
+   r=next
+  }
+ }catch(e){setError((e as Error).message)}finally{setBusy(false)}}
  const [lead,rest]=leadAndRest(kind==='member'?(bodyPolicy?memberErasureDescriptionFor(result?.memberMessageBodies??bodyPolicy):'Loading erasure policy…'):kind==='imported-author'?'Erase this source author’s imported messages, files, profile and retained originals. Other authors’ visible history remains.':'Erase this message, its revisions, attached files, reactions, follows and attention.')
  return <dialog ref={dialog} className="erasure-dialog" aria-labelledby="erasure-heading" onKeyDown={containDialogFocus} onCancel={e=>{e.preventDefault();close()}}><div className="dialog-heading"><h2 id="erasure-heading">Erase {kind==='imported-author'?'imported author':kind==='member'?'member':'message'}</h2><button className="icon-button" title="Close" onClick={close}><IconClose/><span className="sr-only">Close</span></button></div>
  <p className="erasure-lead">{lead}</p><details className="erasure-more"><summary>What erasing removes</summary>{rest&&<p>{rest}</p>}{kind==='member'&&<p>{priorDeletionScope}</p>}<p>History keeps threads navigable. Existing downloaded backups and offline browser copies remain outside this installation.</p></details>

@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "fe082e6a4e8c5ed205aa7cfe16df987a4b6566734edd2f31686f54d2004f06ee",
+      "sha256": "0b3d4066260899c95b98521d85d4edc73787e64bf631be4c5d2dd5117954334a",
       "executable": false
     },
     "CLAUDE.md": {
@@ -3821,7 +3821,7 @@
       "executable": false
     },
     "src/team/erasure/ErasureDialog.tsx": {
-      "sha256": "ab1d3a9eab36bcadff693c0d1710ccd80b6d7e7ba0618b0b8507fab94c5ce4b9",
+      "sha256": "fa6464c1865d183329b04a820df848a4e09ae5c134c9a1f94ca138a6f0916127",
       "executable": false
     },
     "src/team/erasure/expired-files.mjs": {
@@ -3961,7 +3961,7 @@
       "executable": false
     },
     "src/team/TeamPanel.tsx": {
-      "sha256": "888f8ab8b793de3cd1929820478504d375f62032351c987e07ebcf4060c0bfb2",
+      "sha256": "d8c14ba71f402bafdc81990911c3ef4ff2d61ce3a07653793f32f229d4d725e9",
       "executable": false
     },
     "src/team/types.ts": {
