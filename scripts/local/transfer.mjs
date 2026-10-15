@@ -4,7 +4,7 @@ import {constants} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import {Readable} from 'node:stream';
 import {getPlatformProxy,unstable_splitSqlQuery} from 'wrangler';
-import {createPortability,readArchive,PortabilityError} from '@runeditrun/rer/modules/portability';
+import {createPortability,readArchive,PortabilityError,MAX_PART_BYTES} from '@runeditrun/rer/modules/portability';
 import {readLegacyArchive} from '@runeditrun/rer/modules/portability/format';
 import {migrationReplay} from '@runeditrun/rer/modules/portability/migration-history';
 import {recoverLegacyArchive} from '@runeditrun/rer/internal/modules/portability/legacy-files.mjs';
@@ -26,7 +26,9 @@ export async function transfer(direction,path,{root=process.cwd(),legacyOutput,l
  const proxy=await getPlatformProxy({configPath:resolve(root,'wrangler.jsonc'),persist:{path:resolve(root,'.wrangler/state/v3')},remoteBindings:false});
  let service,id,complete=false,manifest,closing,created=false,journalCreated=false,journalPromoted=false;const temporary=path+'.partial',journalTemporary=path+'.journal.rer.partial';
  try{
-  service=await createPortability({db:proxy.env.DB,buckets:{FILES:proxy.env.FILES},policy:await productPolicy(proxy.env.DB),...(direction==='import'?{migrations:()=>migrations(root,proxy.env.DB)}:{})});
+  // New exports use smaller parts; retain the format's admission limit for
+  // archives written before that change.
+  service=await createPortability({db:proxy.env.DB,buckets:{FILES:proxy.env.FILES},policy:{...await productPolicy(proxy.env.DB),...(direction==='import'?{partBytes:MAX_PART_BYTES}:{})},...(direction==='import'?{migrations:()=>migrations(root,proxy.env.DB)}:{})});
   if(direction==='export'){
    // Dev personas are local-only people and never travel: suspend them through the product's own deactivation (it revokes their sessions and grants) so the archive holds them inactive. The next dev sign-in as a persona reactivates it.
    await proxy.env.DB.prepare("UPDATE oa_operators SET status='inactive' WHERE lower(email) LIKE '%@dev.localhost' AND status='active'").run();

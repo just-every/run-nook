@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "e5ecd4cd0a5202a7387de57b53e8c1afee682374d632fe0a9861fc533fbcae81",
+      "sha256": "993330dfa064f9448cf44004e058742d2d9dca2b3bc36f6b7ead89d19b3172b8",
       "executable": false
     },
     "CLAUDE.md": {
@@ -1105,7 +1105,7 @@
       "executable": false
     },
     "scripts/local/transfer.mjs": {
-      "sha256": "bca6120f54c84998b354ebd47a8f938c6e9d857f0c45f327ca4a555a016c97a4",
+      "sha256": "b6ca815ae486f0daf5fbaf8a978c4b32e3b1c26ee301cbb9d34a8e1914f2ed3f",
       "executable": false
     },
     "scripts/notify-test-mail.mjs": {
@@ -3629,7 +3629,7 @@
       "executable": false
     },
     "src/platform/portability-policy.mjs": {
-      "sha256": "62a8dbee28afa530ad72719f916acfcf753ef6980af952671432bea0d22dcd4f",
+      "sha256": "1a9072cf4211b094b20845334d71472727b67028fd43118051683c75ff9e0408",
       "executable": false
     },
     "src/platform/portability.server.ts": {
@@ -4201,7 +4201,7 @@
       "executable": false
     },
     "tests/pilot/runtime.mjs": {
-      "sha256": "f216329a117a341db265beecfb187a30d73a8f2f60db20a9c1a2e42ed9b6a1eb",
+      "sha256": "61ed1398739a775d5493840152dfd1a78811286af8661539a6c4832e397e5c41",
       "executable": false
     },
     "tests/push-journey.mjs": {

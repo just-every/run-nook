@@ -18,10 +18,16 @@ export async function pilotInstallation(root){
  const {RER_LOCAL_OPERATION:ignored,...env}={...process.env,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'};
  let dev;
  const run=async(verb,...args)=>{
-  try{return (await execute(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs',verb,...args],{cwd:directory,env,timeout:20*60_000,maxBuffer:8*1024*1024})).stdout;}
+  try{return (await execute(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs',verb,...args,...(['export','import','reset'].includes(verb)?['--json']:[])],{cwd:directory,env,timeout:20*60_000,maxBuffer:8*1024*1024})).stdout;}
   catch(error){
    const pending=String(error.stdout??'').includes('(reconcile_pending_object_work_before_export)')||String(error.stderr??'').includes('(reconcile_pending_object_work_before_export)');
-   throw Error(`Pilot rer ${verb} failed (exit ${error.code ?? 'unknown'}${pending?'; reconcile_pending_object_work_before_export':''}); CLI output withheld because it can contain sign-in credentials.`);
+   const events=String(error.stdout??'').split('\n').flatMap(line=>{try{return [JSON.parse(line)];}catch{return [];}});
+   const failure=events.find(event=>event.event==='error');
+   const code=typeof failure?.code==='string'&&/^[a-z][a-z0-9_]{0,80}$/.test(failure.code)?failure.code:undefined;
+   // Nook's transfer adapter puts only its machine reason in these parentheses.
+   // Report that reason and the CLI code, never raw messages, links or settings.
+   const reason=code==='transfer_refused'?/\(([a-z][a-z0-9_]{0,80})\)\.$/.exec(failure.message??'')?.[1]:undefined;
+   throw Error(`Pilot rer ${verb} failed (exit ${error.code ?? 'unknown'}${code?'; '+code:''}${reason?'; '+reason:''}${pending?'; reconcile_pending_object_work_before_export':''}); credential-bearing CLI output withheld.`);
   }
  };
  const stop=async()=>{

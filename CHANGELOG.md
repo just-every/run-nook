@@ -16,6 +16,10 @@ rer 0.2.20 retires `rer outbox` and makes `dev --login` automatic owner entry.
 Member erasure accumulates imported-reaction receipt counts across each associated
 Slack actor and clears completed actor progress atomically.
 
+New archives use smaller parts so restoring a full Slack history stays within
+rer 0.2.20's D1 transport limit while staging rows and the archive part together.
+The archive format and content checksum stay unchanged.
+
 ## 0.3.0 (2026-10-15)
 
 Changes since 0.2.0. The new migrations are

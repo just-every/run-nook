@@ -1,6 +1,9 @@
 import {normalizedPortability} from './storage/portability.mjs';
 export const portabilityPolicy={
  product:'team-chat/team-workspace',replaceableTables:['schema_migrations','nook_storage'],
+ // Restore stages both the row values and the encoded archive part in one D1
+ // call. Leave room for both representations and JSON escaping below 32 MiB.
+ partBytes:4*1024*1024,
  requiredConfiguration:['OWNER_EMAIL','SESSION_SECRET','SETUP_TOKEN','AUTH_ORIGIN','AUTH_LOCAL','MAIL_PROVIDER','MAIL_FROM'],
  ...normalizedPortability,
 };
