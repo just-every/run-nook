@@ -65,7 +65,7 @@ git pull --ff-only
 CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer deploy
 ```
 
-`--ff-only` refuses rather than merging when your checkout has its own commits; private settings, `.rer/` and `exports/` are not tracked and stay as they are. If the new source pins a different `rer`, `rer deploy` installs it first. Use the same Cloudflare account, and the same `--environment NAME` if the first deploy used one. The Worker keeps its secrets, so the mail inputs are not needed again.
+`--ff-only` refuses rather than merging when your checkout has its own commits; private settings, `.rer/` and `exports/` are not tracked and stay as they are. If the new source pins a different `rer`, `rer deploy` installs it first. Use the same Cloudflare account, and the same `--environment NAME` if the first deploy used one. The Worker keeps its secrets, so the mail inputs are not needed again after the 0.2.20 mail-binding update. When first updating from Nook 0.3.0 or earlier, supply `MAIL_FROM` and `SENDGRID_API_KEY` once with `rer deploy`: the existing SendGrid input now populates the shared `MAIL_API_KEY` Worker binding required by rer 0.2.20.
 
 Migrations only add to the database, so the existing workspace keeps its data, sessions and settings. If the deploy fails, nothing is removed: fix the cause and run the same deploy again.
 

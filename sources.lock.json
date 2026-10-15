@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "a379e5c5dc0f662e8ce62b215ee530d2c54b4a3a39602166159a670400811fb0",
+      "sha256": "e6de53cada21635464895990c986c13a0c0c365ec6eb7e4479b8f04d25295381",
       "executable": false
     },
     "CLAUDE.md": {
@@ -665,7 +665,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "d0d08eb640192576911f3822fb00726a397d8f1d0478920b22d543305f3d39c2",
+      "sha256": "5e028fc89a2cc51d7774c5084e4012c733b5a45d39450e94afd59eaac00867b8",
       "executable": false
     },
     "docs/your-team.md": {
@@ -793,11 +793,11 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "6624e1f38968427af85c5cd32bf38be943b7028c7582f838004db4c892407bb0",
+      "sha256": "702dde8f091d577296e55fa8d6ca268526e8b8536ab25cac4d6f2df095674d32",
       "executable": false
     },
     "owner-deployment.json": {
-      "sha256": "b15d53378ca4944f667ce5718719a292f3544e00c98daf0c9ee633ab343f1138",
+      "sha256": "bd80099d846740427c3ffe1874e07de2eed491a8fd8067a9cd137fcd5e60424c",
       "executable": false
     },
     "package.json": {
@@ -3617,11 +3617,11 @@
       "executable": false
     },
     "src/platform/operator-auth-runtime.mjs": {
-      "sha256": "7a8f02bdc8b63e355b494a7dbd12ed3021331cdf0deb45fdbc17910706c27b9a",
+      "sha256": "74050c48ff6e544fc93e898a9f08e66b7dc931ddf80442693c8684763eed600a",
       "executable": false
     },
     "src/platform/operator-auth.server.ts": {
-      "sha256": "6b30b3366967aa0c37e93e23bf819e8f1a9bd37c0e17dae7480c20fac288be13",
+      "sha256": "79834b33bb45265bcb038aa1b07381c824f097f378fb8ff21e032651d6545e29",
       "executable": false
     },
     "src/platform/owner-claim.server.ts": {
@@ -4109,7 +4109,7 @@
       "executable": false
     },
     "tests/operator-auth.test.mjs": {
-      "sha256": "48136827d3f8bbc385b2e93d6649874773c3f52b1ccedc5bf63af2e234f27c20",
+      "sha256": "93973fc55dc9436220da4a776530c1b8802af105c1be22176390f888332f9cf2",
       "executable": false
     },
     "tests/operator-recovery.test.mjs": {

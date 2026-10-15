@@ -42,7 +42,7 @@
       "environment": "MAIL_FROM"
     },
     {
-      "binding": "SENDGRID_API_KEY",
+      "binding": "MAIL_API_KEY",
       "environment": "SENDGRID_API_KEY"
     }
   ],

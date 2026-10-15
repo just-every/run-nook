@@ -6,7 +6,10 @@ Nook pins `@runeditrun/rer` 0.2.20. Hosted removal empties uploaded files and
 removes the deployment in one command. The hosted front page reads the durable
 owner claim, so it offers Sign in before the separate first-run confirmation.
 The claim-state reader is refreshed unchanged from Base 8f8bddb; the existing
-Lobby wording and styling stay in place.
+Lobby wording and styling stay in place. Nook maps its existing `SENDGRID_API_KEY`
+deploy input to the shared `MAIL_API_KEY` Worker binding and reads that binding
+for production mail. Existing installations supply their SendGrid inputs once
+on this update; subsequent deploys retain the binding.
 
 Member erasure accumulates imported-reaction receipt counts across each associated
 Slack actor and clears completed actor progress atomically.
