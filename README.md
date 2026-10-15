@@ -111,22 +111,6 @@ before setup using the offline procedure in
 `reset` lists what it will remove and refuses without `--yes`; it keeps source,
 dependencies, `exports/` and deploy receipts.
 
-### Update a local Nook
-
-Run these from your existing checkout:
-
-```sh
-rer dev --stop
-git pull --ff-only
-rer setup
-rer dev
-```
-
-Setup applies pending migrations and keeps your owner and local data. If setup
-is needed after an update, `rer dev` tells you to run `rer setup` before it can
-start. Export first if you want a backup; see
-[Updating and deploying](docs/updating.md).
-
 ### Deploy to your own Cloudflare account
 
 ```sh
@@ -161,6 +145,22 @@ and then `rer deploy` again; to remove the deployment, run
 `rer deploy --remove --yes`. The commands are in
 [Updating and deploying](docs/updating.md). `rer release --repo . --output DIR --dry-run`
 runs the Base release checks, including the publication scan.
+
+## Update a local Nook
+
+Run these from your existing checkout:
+
+```sh
+rer dev --stop
+git pull --ff-only
+rer setup
+rer dev
+```
+
+Setup applies pending migrations and keeps your owner and local data. If setup
+is needed after an update, `rer dev` tells you to run `rer setup` before it can
+start. Export first if you want a backup; see
+[Updating and deploying](docs/updating.md).
 
 ## Where things live
 
