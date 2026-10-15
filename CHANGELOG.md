@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Nook runs on the published `@runeditrun/rer` 0.2.9 in package mode: `rer` runs
+Nook runs on the published `@runeditrun/rer` 0.2.12 in package mode: `rer` runs
 that exact devDependency with the Node and pnpm versions the checkout declares.
 `rer dev` starts a fresh checkout with a placeholder local owner; local
 `rer setup --owner-email you@example.com` is optional and replaces it, keeping the
@@ -14,16 +14,17 @@ nothing. Update is `git pull --ff-only` then `rer deploy`; removal is
 `rer deploy --remove --yes`, which now first empties the R2 bucket that deploy
 created (rechecking before each delete that it is still that bucket) and then
 deletes it, touching no other bucket; before 0.2.9 a bucket holding files was
-left behind. A failed `rer export --target remote` names the hosted export step
+left behind. The deploy hook returns the setup token it deployed to `rer`. A failed `rer export --target remote` names the hosted export step
 that failed. A workspace first deployed from 0.2.0 still holds an unused setup
 token and no owner: its next `rer deploy` claims the owner, and the old
 `.rer/deploy/production-secrets.json` can be deleted.
 
 Erasing a person removes their Slack ID from other people's imported reactions
 even when the work exceeds one request: the erasure stays pending and continues
-in bounded steps of up to 25 imports until no reaction names them, and its
-receipt counts the messages whose reactions did. It no longer completes while
-keeping the ID. Migration 0024 adds Base import-kit's stepwise tables and the
+in bounded steps until no reaction names them, however large one import is
+(an import too big for one request is redacted in pages), and its receipt counts
+the messages whose reactions did, a number kept even if a step's progress is
+lost. It no longer completes while keeping the ID. Migration 0024 adds Base import-kit's stepwise tables and the
 step's place in the pending erasure; the import kit is refreshed unmodified from
 Base.
 
