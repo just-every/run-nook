@@ -3775,7 +3775,7 @@
       "executable": false
     },
     "src/team/erasure/redaction-steps.ts": {
-      "sha256": "e94846883c43890bbbf105a48793be4d51428b433e46c653a1df4dcafbe357c8",
+      "sha256": "9a5bf63fcd8a37644a132e4729ee1ed325081a9d019c90e501ccd447ffbca28a",
       "executable": false
     },
     "src/team/erasure/retained-archive.mjs": {

@@ -1,5 +1,6 @@
-import {retireD1ImportCustody,D1RequestLimitError,type D1CustodyRetirement,type D1ImportContext,type D1RelatedErasure,type D1RetirementProgress} from '../../imports/kit'
+import {retireD1ImportCustody,reserveReturn,D1RequestLimitError,type D1CustodyRetirement,type D1ImportContext,type D1RelatedErasure,type D1RetirementProgress} from '../../imports/kit'
 import {holding} from '../../imports/target-redaction'
+import {REQUEST_STATEMENTS} from '../../imports/request-budget'
 import {fail} from '../../family/team-chat/domain'
 import type {Context} from '../../platform/storage/context'
 import {sql} from './statements'
@@ -14,7 +15,9 @@ const same=(a:readonly unknown[],b:readonly unknown[])=>JSON.stringify(a)===JSON
  * The count is written before the first step commits, so a lost continuation or a
  * reset never changes the receipt. Each request takes one step. The person's own
  * rows, the receipt's reaction count and the move to file deletion commit only with
- * the final step. */
+ * the final step. The kit counts only its own statements against D1's 1,000 per
+ * request, so it is given Nook's 900-statement request budget: the sign-in, the
+ * work row and the saved progress run beside it. */
 export async function redactInSteps(c:Context,work:any,scope:Scope,target:{kind:string;id:string},values:string[],related:D1RelatedErasure,statements:Sql[],destination:string,ctx:D1ImportContext,f:Awaited<ReturnType<typeof fenceService>>){
  const state:{messages:number;continuation?:any}|undefined=work.redaction?JSON.parse(work.redaction):undefined,held=holding(related.fields!)
  const named=async():Promise<number>=>(await c.one(`SELECT COUNT(*) AS n FROM nook_import_effect_revisions e WHERE e.destination=? AND (${held.sql})`,[destination,...held.params!])).n
@@ -29,7 +32,7 @@ export async function redactInSteps(c:Context,work:any,scope:Scope,target:{kind:
  const fields=related.fields!.map(field=>({...field,optional:current===0}))
  const receipt=sql("UPDATE nook_erasure_receipts SET counts=json_set(counts,'$.reactions',?) WHERE id=?",messages,work.operation)
  let result:D1CustodyRetirement|D1RetirementProgress
- try{result=await retireD1ImportCustody({target,values,related:{...related,fields}},[...statements,receipt],ctx,await f.checkpoint(),{resumable:true,continuation:state?.continuation})}
+ try{result=await retireD1ImportCustody({target,values,related:{...related,fields}},[...statements,receipt],reserveReturn(ctx,1000-REQUEST_STATEMENTS),await f.checkpoint(),{resumable:true,continuation:state?.continuation})}
  catch(error){
   // Imported history changed between steps (an import was undone, say): start again from what is there now.
   if(state?.continuation&&['IMPORT_REDACTION_PATH_UNMATCHED','IMPORT_REDACTION_CONTINUATION_MISMATCH'].includes((error as Error).message)){await persist(c,work,scope,JSON.stringify({messages}));fail(409,'Imported history changed; resume the erasure')}
