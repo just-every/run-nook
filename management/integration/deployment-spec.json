@@ -188,9 +188,6 @@
     "app": {
       "path": "/signin",
       "originVariable": "AUTH_ORIGIN"
-    },
-    "page": {
-      "path": "/"
     }
   }
 }
