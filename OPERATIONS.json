@@ -27,10 +27,10 @@
   "environmentSources": {
     "MAIL_PROVIDER": "Hosted SendGrid or Resend in rer-setup.json; the generated local manifest selects the development outbox. See OPERATIONS.md",
     "MAIL_FROM": "Production sender for the Worker, supplied in the shell or an --env-file on the first deploy; setup keeps a local sender. See OPERATIONS.md",
-    "SENDGRID_API_KEY": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
-    "RESEND_API_KEY": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
-    "CLOUDFLARE_EMAIL_API_TOKEN": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
-    "CLOUDFLARE_EMAIL_ACCOUNT_ID": "Explicit production Worker binding for the selected mail provider; never needed by local setup or deploy dry-run. See OPERATIONS.md",
+    "SENDGRID_API_KEY": "Production credential for the selected mail provider; configure hosted mail before deploy, including dry-run. Local setup needs no provider credentials. See OPERATIONS.md",
+    "RESEND_API_KEY": "Production credential for the selected mail provider; configure hosted mail before deploy, including dry-run. Local setup needs no provider credentials. See OPERATIONS.md",
+    "CLOUDFLARE_EMAIL_API_TOKEN": "Production credential for the selected mail provider; configure hosted mail before deploy, including dry-run. Local setup needs no provider credentials. See OPERATIONS.md",
+    "CLOUDFLARE_EMAIL_ACCOUNT_ID": "Production credential for the selected mail provider; configure hosted mail before deploy, including dry-run. Local setup needs no provider credentials. See OPERATIONS.md",
     "CLOUDFLARE_ACCOUNT_ID": "Owner's Cloudflare account id, supplied in the shell only for owner-account deploy. See OPERATIONS.md",
     "CLOUDFLARE_API_TOKEN": "Owner's scoped Cloudflare API token, supplied in the shell only for owner-account deploy. See OPERATIONS.md"
   },
