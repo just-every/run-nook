@@ -8,6 +8,7 @@ provider account or key to enter. RER assigns `MAIL_PROVIDER=rer`, `MAIL_FROM`,
 `MAIL_RELAY_URL` and a private `MAIL_API_KEY` for each installation and
 environment. Free and Assisted hosting retain their existing Cloudflare and
 mail provider options.
+Local setup retains Nook's existing migration directory with the new CLI.
 
 Nook pins `@runeditrun/rer` 0.2.20. Hosted removal empties uploaded files and
 removes the deployment in one command. The hosted front page reads the durable

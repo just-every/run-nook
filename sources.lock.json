@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "c7ead7f039300f20de31cd6f3107d58bc763a97b40b38627fe4ea667ae3cffe7",
+      "sha256": "eba62d11ea2106559da5e95a81d726a54ab32419a8e34aa7c2376e88d7718b3e",
       "executable": false
     },
     "CLAUDE.md": {
@@ -1069,7 +1069,7 @@
       "executable": false
     },
     "scripts/installer/local.mjs": {
-      "sha256": "9983aec79fc80f64656b70066ede8a111e3ba87bc41282da2fd260dc7389851a",
+      "sha256": "d341ca53522244d7ade02671b21cf85213f8d942973a2db7486535c3f87c9240",
       "executable": false
     },
     "scripts/installer/seed.mjs": {

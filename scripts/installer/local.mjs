@@ -1,6 +1,7 @@
 import {writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {operatorInstaller,developmentTarget,previewTarget} from '@runeditrun/rer/operator-installer';
+import {localInstaller} from '@runeditrun/rer/local-installer';
 import {commandAdapter as createCommandAdapter} from '@runeditrun/rer/adapter';
 import {deployment} from '../deployment/command.mjs';
 import {readSettings} from '@runeditrun/rer/adapter-settings';
@@ -10,7 +11,7 @@ import {features} from './ui/seed.mjs';
 import {localPrerequisites,existingIdentity} from '../local/prerequisites.mjs';
 import {portability} from '../local/portability.mjs';
 import {brandAccent,migrateAccent} from '../../src/brand/accent-colour.mjs';
-export const lifecycle=operatorInstaller({database:'DB',features,async prepare({root,input,store}){
+const operator=operatorInstaller({database:'DB',features,async prepare({root,input,store}){
  try{assertBuildStateSafe(root)}catch{throw refuse('Preserve the existing local state and resolve its placement before setup.')}
  let owner;try{owner=await existingIdentity(root)}catch{store.report('Preserve the stopped identity store and follow OPERATIONS.md offline recovery before setup.');throw refuse('Preserve the stopped identity store and follow the documented explicit recovery before setup.')}
  const saved=(await readSettings(root,{file:'.dev.vars'})).values;
@@ -22,6 +23,11 @@ export const lifecycle=operatorInstaller({database:'DB',features,async prepare({
  if(input.WORKSPACE_NAME===undefined&&input.PRIMARY_COLOR===undefined)return;
  await writeFile(join(root,'src/branding.json'),JSON.stringify({name:saved.WORKSPACE_NAME??input.WORKSPACE_NAME??'Nook',primaryColor:migrateAccent(saved.PRIMARY_COLOR??input.PRIMARY_COLOR??brandAccent)},null,2)+'\n');
 }});
+// Nook keeps its migrations in migrations/, rather than Base's migrations/core/.
+// Read the source config so a dev restart applies newly acquired migrations too.
+export const lifecycle={...operator,...localInstaller({...operator.hooks,
+ migrate:({demo})=>['pnpm',['exec','wrangler','d1','migrations','apply','DB','--local','--persist-to',demo?.state??'.wrangler/state','--config','wrangler.jsonc']],
+}),install:operator.install};
 lifecycle.localPrerequisites=localPrerequisites;
 export const {install}=lifecycle;
 export const commandAdapter=createCommandAdapter(lifecycle,{
