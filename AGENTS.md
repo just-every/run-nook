@@ -8,7 +8,7 @@ exact `@runeditrun/rer` devDependency this checkout pins, with the Node and pnpm
 versions it declares.
 
 ```sh
-rer dev          # installs, sets up a placeholder local owner on first launch, opens signed in through RER_OPEN (lands on /setup first); --as admin|member|guest|signed-out; --login uses the outbox
+rer dev          # installs, sets up a placeholder local owner on first launch, opens signed in through RER_OPEN (lands on /setup first); --as admin|member|guest|signed-out; --login uses the same automatic entry
 rer setup --owner-email you@example.com   # optional: a real local owner; stop dev first, keeps the owner ID and data
 rer verify
 rer reset --yes
@@ -49,7 +49,7 @@ Add a guide in `docs/site.json` with its Markdown source and navigation label; g
 Local sign-in is a dev session behind this checkout's dev key (`rer dev` opens signed in; the
 personas live in `src/dev/personas.ts` and are admitted by `src/dev/admit.server.ts`; only
 `src/server.dev.ts` loads the dev layer, never `src/server.ts`, and `rer build` refuses output that
-contains it) or the key-gated Base outbox (`rer dev --login`). Never commit `.dev.vars`,
+contains it) or the key-gated Base outbox (open RER_OPEN, then request a link at `/signin`). Never commit `.dev.vars`,
 `.rer/`, `.seed/`, `.wrangler/`, archives or production secrets, and never print
 their values. Deploys, provider calls and publication need the owner's approval.
 Tests use isolated synthetic workspaces; do not weaken an assertion to make a

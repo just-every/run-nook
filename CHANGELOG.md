@@ -9,7 +9,9 @@ The claim-state reader is refreshed unchanged from Base 8f8bddb; the existing
 Lobby wording and styling stay in place. Nook maps its existing `SENDGRID_API_KEY`
 deploy input to the shared `MAIL_API_KEY` Worker binding and reads that binding
 for production mail. Existing installations supply their SendGrid inputs once
-on this update; subsequent deploys retain the binding.
+on this update; subsequent deploys retain the binding. Local instructions and
+the README journey request email links through Nook’s sign-in page because
+rer 0.2.20 retires `rer outbox` and makes `dev --login` automatic owner entry.
 
 Member erasure accumulates imported-reaction receipt counts across each associated
 Slack actor and clears completed actor progress atomically.

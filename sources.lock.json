@@ -589,7 +589,7 @@
       "executable": false
     },
     "AGENTS.md": {
-      "sha256": "6223e93ef4ce3f67a7b8a23200bdfe1852b647afbb3bf7eb4de43747cd63a8c3",
+      "sha256": "49b811197ac6fefd6f366bbccb174b6dc09eb39124b26d1f70d6432193b56e10",
       "executable": false
     },
     "base-copies.json": {
@@ -601,7 +601,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "e6de53cada21635464895990c986c13a0c0c365ec6eb7e4479b8f04d25295381",
+      "sha256": "5de41b533d679f16ad432aa56c83464c1eb5672e324baf5d97f5f2825c7bb155",
       "executable": false
     },
     "CLAUDE.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "docs/install.md": {
-      "sha256": "ea3d6452c12bd15e5ac29d621eb34dd90b0ab2b4254e9f4aa3e94a8e3e93c4fb",
+      "sha256": "15ae4b406ee50de69407bde491bb7f27ebcf8e1353da1856971b66de68968e17",
       "executable": false
     },
     "docs/moving-in-from-slack.md": {
@@ -793,7 +793,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "702dde8f091d577296e55fa8d6ca268526e8b8536ab25cac4d6f2df095674d32",
+      "sha256": "086ed411894af7afd6af7ebfc2f04418b3290691b2667a473afaea324be507d7",
       "executable": false
     },
     "owner-deployment.json": {
@@ -865,7 +865,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "81cca2cddb738d71f4dc3d550676aaffaba45ccc620f17aa0bea9b8f133327a8",
+      "sha256": "12e34395e72043489709139f8556d82c2f997d15faf4562a5f8d8da2b6776f20",
       "executable": false
     },
     "RELEASE.json": {
@@ -4245,7 +4245,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "15fcdd0e4d843d3f7e771d7591b05469fc6807f21e5859b296e923e7d0a684e6",
+      "sha256": "20c70574355b10419aa37071327f0144fea46df2023ed2f3e0006e015db31350",
       "executable": false
     },
     "tests/recovery-support.mjs": {

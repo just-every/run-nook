@@ -17,7 +17,7 @@ const readme=await readFile(join(root,'README.md'),'utf8')
 const section=readme.match(/^## Run it on your computer\n([\s\S]*?)(?=^## )/m)?.[1]
 assert.ok(section,'README keeps its local section')
 const lines=[...section.matchAll(/^```sh\n([\s\S]*?)^```/gm)].flatMap(match=>match[1].replace(/\\\n\s*/g,' ').split('\n')).map(line=>line.replace(/\s+#.*$/,'').trim()).filter(Boolean)
-for(const verb of ['dev','outbox','verify','export','reset','import','deploy'])assert.ok(lines.some(line=>line.startsWith('rer '+verb)),'README documents '+verb)
+for(const verb of ['dev','verify','export','reset','import','deploy'])assert.ok(lines.some(line=>line.startsWith('rer '+verb)),'README documents '+verb)
 
 const freePort=()=>new Promise((ok,bad)=>{const server=createServer();server.once('error',bad);server.listen(0,'127.0.0.1',()=>{const {port}=server.address();server.close(()=>ok(port))})})
 const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),bin=await mkdtemp(join(tmpdir(),'nook-readme-bin-'))
@@ -50,7 +50,6 @@ try{
   const command=line.replace('--owner-email EMAIL','--owner-email '+ownerEmail)
   if(line==='rer export --output exports/nook.rer')assert.equal(dev.exitCode!=null||dev.signalCode!=null,true,'the app is stopped before export')
   const output=run(command)
-  if(line==='rer outbox')assert.match(output,new RegExp(`RER_SIGN_IN http://127.0.0.1:${port}/__dev/outbox`))
   if(line==='rer dev --stop')await new Promise(ok=>dev.exitCode!=null||dev.signalCode?ok():dev.once('exit',ok))
  }
  assert.equal((await stat(join(clone,'exports/nook.rer'))).mode&0o077,0,'the archive is owner-only')
@@ -79,10 +78,12 @@ async function firstRun(origin,open){
  const keyless=await fetch(origin+'/__dev/outbox')
  assert.equal(keyless.status,404,'the outbox answers nothing without the dev key')
  assert.equal((await fetch(origin+'/auth/dev/enter?as=owner',{redirect:'manual'})).status,404,'dev sign-in answers nothing without the dev key')
- const link=/RER_OPEN (http:\/\/\S+)/.exec(run('rer outbox --owner-email '+ownerEmail))?.[1]
- assert.ok(link,'outbox prints the link that opens the key-gated outbox')
  const phone=await browser.newPage({viewport:{width:390,height:844}})
- await phone.goto(link)
+ await phone.goto(open)
+ await phone.waitForURL(origin+'/setup')
+ await phone.goto(origin+'/signin')
+ await phone.locator('#auth-email').fill(ownerEmail)
+ await phone.getByRole('button',{name:'Send sign-in link',exact:true}).click()
  await phone.waitForURL(origin+'/__dev/outbox')
  await phone.locator('article').first().getByRole('link').first().click()
  await phone.getByRole('link',{name:'Open this link',exact:true}).first().click()

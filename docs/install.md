@@ -33,15 +33,9 @@ set `OWNER_EMAIL` to your real email address when you run `rer deploy`; rer clai
 the hosted owner automatically, with no manual setup-token step. Sign in by email
 at the address deploy prints. See [Updating and deploying](updating.md).
 
-## Sign in through the local outbox
+## Try email-link sign-in locally
 
-`rer dev` prints an `RER_OPEN` link for the owner. To use the email-link sign-in flow instead, start the local outbox mode:
-
-```sh
-rer dev --login
-```
-
-Open the printed `RER_OPEN` link on this computer to unlock the local outbox, then open `/signin`, request a link, open the newest message in the outbox and choose **Confirm**. The local development mail stays in this checkout; no external mail provider is used for this flow.
+Open the `RER_OPEN` link first to unlock this checkout, then visit `/signin`, request a link, open the newest message in Nook's local outbox and choose **Confirm**. The local development mail stays in this checkout; no external mail provider is used. In rer 0.2.20, `rer dev --login` uses the same automatic owner entry as `rer dev`; the `rer outbox` command is retired.
 
 ## Use the guided installer
 

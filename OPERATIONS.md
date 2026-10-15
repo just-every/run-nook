@@ -18,7 +18,7 @@ its values in a report. Local sign-in uses the Base development outbox at
 `/__dev/outbox`, which checks the configured origin, Host and Fetch Metadata,
 answers only a request that holds this checkout's dev key (`.rer/local/dev-key.env`)
 and is unavailable remotely. `rer dev` opens signed in through a dev session (Nook's
-personas are `admin`, `member` and `guest` at `@dev.localhost`); `--login` uses the outbox. Health reads the operator-auth and outbox tables before
+personas are `admin`, `member` and `guest` at `@dev.localhost`); `--login` uses the same automatic owner entry. Health reads the operator-auth and outbox tables before
 reporting ready. The first owner sign-in lands on `/setup`; confirming it there
 is stored in D1 (`oa_first_run`) and survives setup reruns.
 
@@ -66,10 +66,9 @@ C14 in CONTRACT.md is the delivery contract. What an operator needs to know:
 - **Sender.** Notification email uses the same sender as sign-in mail:
   `MAIL_PROVIDER`, `MAIL_FROM` and the provider key in the owner deployment
   (`MAIL_API_KEY`, populated from the `SENDGRID_API_KEY` deploy input for the
-  SendGrid default; Base's mail module also supports
-  Resend with `RESEND_API_KEY`). No new variable or binding is needed. Under
+  SendGrid default). Under
   `rer dev` and `rer preview` mail goes to the development outbox
-  (`rer outbox`), and owners see "Email sending is not set up"
+  (request a link at `/signin` after opening `RER_OPEN`), and owners see "Email sending is not set up"
   in their settings until a real provider is configured.
 - **Off by default.** Nothing is emailed until a member turns it on under
   Profile → "Email me when…". Upgrading an installation changes no one's choice

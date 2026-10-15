@@ -73,13 +73,12 @@ A dev-only badge switches between you, signed out and one person for each other
 role: `admin@dev.localhost`, `member@dev.localhost` and `guest@dev.localhost` (a
 guest sees only the first channel). `dev --as member` starts as that person;
 `dev --as signed-out` starts signed out. To sign in the way a real person does,
-run `dev --login`: it prints `RER_SIGN_IN` and an `RER_OPEN` link to the local
-outbox. Choose the newest sign-in message, follow its link and press
-**Confirm**. No email is sent and no provider account is needed.
+open `RER_OPEN` first, visit `/signin` and request a link. Nook opens the local
+outbox: choose the newest sign-in message, follow its link and press **Confirm**.
+No email is sent and no provider account is needed. The legacy `dev --login` flag
+uses the same automatic owner entry as `dev` in rer 0.2.20.
 
 ```sh
-rer outbox             # print the outbox link of the running app
-rer outbox --owner-email EMAIL   # use the development owner email printed by rer dev
 rer dev --stop
 rer verify             # the complete test suite
 ```
