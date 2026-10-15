@@ -605,7 +605,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "eba62d11ea2106559da5e95a81d726a54ab32419a8e34aa7c2376e88d7718b3e",
+      "sha256": "70b2dfaf3bf385a49d0b0334e9198f486bdf7bf7adba92a225a99b3a8a1af5ee",
       "executable": false
     },
     "CLAUDE.md": {
@@ -4309,7 +4309,7 @@
       "executable": false
     },
     "tests/runtime-portability.mjs": {
-      "sha256": "0d6accc2368383af8d60842a159d86c76d2ab7e264c06b135da0d5c259e78357",
+      "sha256": "4d3d36d1cd4288c6f26b2deae7ebf6aa968108bd34a9363c82ceff1f635ec938",
       "executable": false
     },
     "tests/runtime.mjs": {

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Mark credential fixtures and examples explicitly synthetic so hosted source checks accept them.
+
 Nook now pins `@runeditrun/rer` 0.2.22. RER Managed configures sign-in and
 notification mail automatically, with no
 provider account or key to enter. RER assigns `MAIL_PROVIDER=rer`, `MAIL_FROM`,
