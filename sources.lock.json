@@ -587,7 +587,7 @@
       "executable": false
     },
     "base-copies.json": {
-      "sha256": "b07ba2e6f42ebef91fd92a0e0c44ecf633955759883150a6120f1325d77823df",
+      "sha256": "d4c259e73e9d443ff3f49253917911160b64a4c490940fb6a001b55018973589",
       "executable": false
     },
     "BASE-LICENSE": {
@@ -779,11 +779,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "c237e068b9ca8a23482b38010abb8a7d56210295e5eff26306d7b53ee9599e4e",
+      "sha256": "db58dfe7e99436d91c2f989e8efb72fce6a0406a2b58c970be42529cb97334b3",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "85929a3df7c2b463fa2654b6d6eaf83d157999f6a3492883794a0fd2f841dada",
+      "sha256": "f25c49cc1fcb0906290b499a0da57633a903ce0d89c50d81e329c35ce6742484",
       "executable": false
     },
     "public/brand/band.svg": {
@@ -1427,7 +1427,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/README.md": {
-      "sha256": "3288ce5e9de74e825a39001cbb1a178218658fb8c4979d95866e027239293853",
+      "sha256": "01da58977a16d8d5cdfea669d186e5629f8a3343c18e0262c4ac2c78af660277",
       "executable": false
     },
     "src/base/modules/import-kit/schema/importer-verification-receipt.schema.json": {
@@ -1507,7 +1507,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/erasure-related.ts": {
-      "sha256": "c5475cdfb3c72078adae031067075bf03ca8988a70827e20e1955d659d7b3873",
+      "sha256": "5ba3f916e6268df4cc5f2111c2e0dcef3bce038ccaff75faa3f479ccb908c1ac",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/erasure-report.ts": {
@@ -1531,7 +1531,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/erasure.ts": {
-      "sha256": "5f4244d296f94dbc8595e9bce457caea4a75a71abe0b4aaef61284f120c9e401",
+      "sha256": "932e3a6749c663f06295e32380b0994d839fadf6cbf49f0371efb2537bb0b3c8",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/evolutions/0001-preserved-undo.ts": {
@@ -1543,7 +1543,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/field-redaction.ts": {
-      "sha256": "aeb1632f4c92d58e47162ba2f2c3bcea0eb44ea042de457fa58d640d854536b7",
+      "sha256": "f7320418e95c0cba58048e526e561b567739b263f6e66299cc159d060fd3566f",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/guards.ts": {
@@ -1703,7 +1703,11 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/redacted-custody.ts": {
-      "sha256": "ebe603ddec48cb53a276f2f13eb3e98c85ae5c701cc89e1bfb8b56f8260cfe11",
+      "sha256": "4ff48e38c5063bab4911c4a117fc89fb32898f3924a35d01340e106a87fa2692",
+      "executable": false
+    },
+    "src/base/modules/import-kit/src/d1/redaction-step.ts": {
+      "sha256": "fca71a8e4b5d2c69694030bdcfaeab4a0dafad931a42920dbac6f7ee8126fa5c",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/retained-values.ts": {
@@ -1719,7 +1723,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/retirement-steps.ts": {
-      "sha256": "09f8c7b6ab5f11ad397444280f542d8e70e0a367c0106c8a40228f88beca8579",
+      "sha256": "55ff982d28289d6602f1be17515069440d69283ccb23c360a87c1c550f29363b",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/retirement-tally.ts": {
@@ -1727,7 +1731,7 @@
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/retirement.ts": {
-      "sha256": "b0c7bff3e5d048e3c9f75c0b232eac8fdb7621b530c68040c0ee1aec211ca4bb",
+      "sha256": "f7cc123b67f1dcf4b5f42ed333dcdccc394c55b55209bf3b80ad717dea4a48eb",
       "executable": false
     },
     "src/base/modules/import-kit/src/d1/reversal-fence-schema.ts": {

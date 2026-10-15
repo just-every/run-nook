@@ -3,7 +3,7 @@ import { authorize, guard, sql } from './database.ts';
 import { loadPlans } from './plans.ts';
 import { readOriginals } from './originals.ts';
 import { exactRows } from './sets.ts';
-import { fieldMatches, fieldRedactions, redactFields } from './field-redaction.ts';
+import { fieldMatches, fieldRedactions, inRange, redactFields, type EntryRange } from './field-redaction.ts';
 import { requestContext } from './budget.ts';
 import { redactedNativeFields } from './redacted-custody.ts';
 import { canonicalJson, sha256 } from '../provenance/identity.ts';
@@ -15,8 +15,9 @@ export interface RelatedSelection { identities: Set<string>; originals: Map<stri
  * aborts the erasure instead of keeping an unscanned copy. */
 /** Which jobs a bounded step reads. `clean` jobs were already read in an earlier
  * step and are fenced by their unchanged custody revision instead; `complete`
- * also proves the destination holds no other job. */
-export interface JobSelection { jobs: string[]; clean: Map<string, number>; complete: boolean }
+ * also proves the destination holds no other job. `range` limits a step over one
+ * job to a page of its entries: only they are counted and redacted. */
+export interface JobSelection { jobs: string[]; clean: Map<string, number>; complete: boolean; range?: EntryRange }
 
 export async function relatedSelection(context: D1ImportContext, related: D1RelatedErasure, selection?: JobSelection): Promise<RelatedSelection> {
   const db = context.storage.database;
@@ -29,7 +30,8 @@ export async function relatedSelection(context: D1ImportContext, related: D1Rela
     const plan = (await loadPlans([row], db, context.storage.targets.planCodec)).get(row.id)!;
     if (related.source) for (const entry of plan.entries) if (!entry.erased && related.source(entry.source)) identities.add(entry.identity);
     if (fields.length) {
-      for (const entry of plan.entries) {
+      for (const [ordinal, entry] of plan.entries.entries()) {
+        if (!inRange(selection?.range, ordinal)) continue;
         if (redactFields(entry.source.payload, fields, counts) !== entry.source.payload) redactedJobs.add(row.id);
         for (const effect of entry.effects) if (redactFields(effect.value, fields, counts) !== effect.value) redactedJobs.add(row.id);
       }
@@ -54,7 +56,11 @@ export async function relatedSelection(context: D1ImportContext, related: D1Rela
       const scope = selection ? sql('job_id IN (SELECT value FROM json_each(?))', JSON.stringify(rows.map(row => row.id))) : sql('job_id IN (SELECT id FROM ik_jobs WHERE destination=?)', context.destination);
       const { results } = await db.prepare(`SELECT * FROM ${table} WHERE ${scope.sql} ORDER BY id`).bind(...scope.params!).all<any>();
       guards.push(...exactRows(table, ['id', 'job_id', 'record_json'], results, scope));
-      for (const raw of results) { const before = JSON.parse(raw.record_json).before; if (before && redactFields(before.value, fields, counts) !== before.value) redactedJobs.add(raw.job_id); }
+      for (const raw of results) {
+        if (!inRange(selection?.range, raw.ordinal)) continue;
+        const before = JSON.parse(raw.record_json).before;
+        if (before && redactFields(before.value, fields, counts) !== before.value) redactedJobs.add(raw.job_id);
+      }
     }
     // Incomplete private plans cannot be safely field-rewritten. Cancel every
     // private preparation in this destination atomically, including other actors.
