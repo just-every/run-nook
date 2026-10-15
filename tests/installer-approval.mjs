@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import {spawn} from 'node:child_process'
+import {keyHeaders} from './dev-key.mjs'
 
 // Start the installer through its public launcher, as an owner does.
 export function launchInstaller(root,args,env){
@@ -40,7 +41,7 @@ export async function approveInstaller(installer,input,{phase='complete'}={}){
  assert.equal(state.phase,phase,state.error)
  if(phase==='failed'){assert.ok(state.error);return state}
  const origin=new URL(state.appUrl).origin
- const signInPage=await (await fetch(origin+'/signin')).text()
+ const signInPage=await (await fetch(origin+'/signin',{headers:keyHeaders})).text()
  assert.ok(signInPage.includes(input.WORKSPACE_NAME));assert.ok(signInPage.includes(input.PRIMARY_COLOR))
  assert.equal(new URL(state.appUrl).hostname,'127.0.0.1');assert.equal(new URL(state.appUrl).protocol,'http:')
  return origin
