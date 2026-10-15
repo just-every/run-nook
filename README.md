@@ -49,9 +49,12 @@ rer dev
 `rer` installs this checkout's pinned Node and pnpm itself. You need npm and Git
 to start; no particular Node version or separate pnpm installation is required.
 `rer dev` prepares the local settings and database and creates a development
-owner automatically. Local `rer setup` is optional; you do not need to run it
-after `rer dev`, and it cannot replace an owner that already exists. If you want
-to choose the local owner, run setup before the first dev launch.
+placeholder owner automatically. Local real-owner setup is optional. To replace
+that placeholder with your email, stop the app with `rer dev --stop`, run
+`rer setup --owner-email you@example.com`, then start it again with `rer dev`.
+
+This keeps the same owner ID and your local data. You can also run setup before
+the first dev launch to choose the local owner from the start.
 
 `dev` starts the app with live reload and prints `RER_READY http://127.0.0.1:P`,
 `RER_SIGNED_IN` with the development owner email and an `RER_OPEN` link. Open that link on this

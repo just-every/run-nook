@@ -12,12 +12,22 @@ You need npm and Git to start. `rer` installs the pinned Node and pnpm Nook need
 no particular Node version or separate pnpm installation is required.
 
 `rer dev` prepares the private local settings and database and creates a
-development owner. Open the printed `RER_OPEN` link on this computer to sign in;
-on a fresh installation, confirm the account at `/setup` to open the workspace.
+placeholder development owner. Open the printed `RER_OPEN` link on this computer
+to sign in; on a fresh installation, confirm the account at `/setup` to open the
+workspace.
 Keep the link private.
 
-Local `rer setup` is optional. To choose a local owner, run it before the first
-`rer dev`. Running it afterwards cannot replace the existing owner. For hosting,
+Local real-owner setup is optional. To replace the placeholder with your email,
+stop the app and run:
+
+```sh
+rer dev --stop
+rer setup --owner-email you@example.com
+rer dev
+```
+
+Setup keeps the same owner ID and your local data. You can also run setup before
+the first `rer dev` to choose the local owner from the start. For hosting,
 set `OWNER_EMAIL` to your real email address when you run `rer deploy`; rer claims
 the hosted owner automatically, with no manual setup-token step. Sign in by email
 at the address deploy prints. See [Updating and deploying](updating.md).
