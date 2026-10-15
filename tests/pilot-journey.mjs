@@ -29,5 +29,5 @@ try{
  const failed=outcomes.find(outcome=>outcome.status==='rejected');if(failed)throw failed.reason;
  const results=outcomes.map(outcome=>outcome.value),recovery=results.find(result=>result.recovery)?.recovery;
  await writeFile(join(destination,`pilot-results-${widths.join('-')}.json`),JSON.stringify({status:'passed',fixture:'Realistic synthetic fixture shaped from Slack’s documentation; no real Slack export or account used',parityClaim:false,runtime:'Ordinary rer dev --login with actual local Worker, D1 and R2',checks:results.map(result=>result.check),recovery,credentialsCaptured:false,resourcesClosed:true},null,2)+'\n');
- console.log(`PILOT-JOURNEY passed at ${widths.join(' and ')}: local owner entry, confirmed member invitation, private files, reviewed Slack history, audience revocation, no imported activity, guarded undo${recovery?' and identical rer restore':''}.`);
+ console.log(`PILOT-JOURNEY passed at ${widths.join(' and ')}: two real outbox sessions, private files, reviewed Slack history, audience revocation, no imported activity, guarded undo${recovery?' and identical rer restore':''}.`);
 }finally{await browser.close();}

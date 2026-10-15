@@ -5,17 +5,14 @@ import {importHistory,exerciseUndo} from './imports.mjs';
 import {pilotPhase} from './progress.mjs';
 
 export async function read(context,origin,path){const response=await context.request.get(origin+path);assert.equal(response.status(),200,path);return response.json();}
-export async function enterOwner(page,origin){
+async function requestSignIn(page,origin,email){
  try{
-  await page.goto(origin+'/signin');
-  await page.getByRole('link',{name:'Continue as owner',exact:true}).click();
-  await page.waitForURL(url=>['/setup','/app'].includes(url.pathname));
-  if(new URL(page.url()).pathname==='/setup'){
-   await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Finish setup',exact:true}).click();await page.waitForURL(url=>url.pathname==='/app');
-  }
-  const me=await read(page.context(),origin,'/api/me');
-  assert.deepEqual({name:me.name,role:me.role},{name:'Pilot owner',role:'owner'});
- }catch{throw Error('Pilot local owner entry failed; browser diagnostics withheld because this step handles authentication.');}
+  // Local /signin now offers one-click dev entry (covered by README-JOURNEY).
+  // This pilot still exercises native email proofs, without dev-minted invitations.
+  const response=await page.request.post(origin+'/auth/magic-link',{headers:{origin,accept:'application/json'},data:{email,returnTo:'/app'}});
+  assert.equal(response.status(),202,'native email sign-in request is accepted');
+  assert.equal((await response.json()).status,'accepted');
+ }catch{throw Error('Pilot sign-in request failed; browser diagnostics withheld because this step handles authentication.');}
 }
 export async function acceptOutbox(page,origin,email){
  try{
@@ -46,9 +43,10 @@ export async function pilotBrowser({browser,installation,width,destination}){
  const ownerContext=await browser.newContext({viewport,extraHTTPHeaders:{'x-rer-dev-key':key}}),memberContext=await browser.newContext({viewport,extraHTTPHeaders:{'x-rer-dev-key':key}});
  try{
   const owner=await ownerContext.newPage(),member=await memberContext.newPage(),stamp=`${width}-${Date.now()}`,name=`Pilot teammate ${width}`,email=`pilot-member-${stamp}@example.test`,channelName=`Pilot private ${stamp}`;
-  // The owner uses Base's canonical one-click local entry. The invited member
-  // still confirms the actual invitation; no test injects a session cookie.
-  await enterOwner(owner,origin);
+  // Both participants enter through ordinary outbox link confirmation, never
+  // cookies injected by a test or the dev-persona entrance.
+  await requestSignIn(owner,origin,'pilot-owner@example.test');
+  await acceptOutbox(owner,origin,'pilot-owner@example.test');
   await owner.goto(origin+'/app?view=channels');await expect(owner.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await owner.getByRole('button',{name:'Create channel',exact:true}).last().click();
   const dialog=owner.getByRole('dialog');await dialog.getByLabel('Channel name',{exact:true}).fill(channelName);await dialog.getByLabel('Visibility',{exact:true}).selectOption('private');await dialog.getByRole('button',{name:'Create channel',exact:true}).click();
   await owner.getByLabel('Message '+channelName,{exact:true}).waitFor();
@@ -86,7 +84,7 @@ export async function pilotBrowser({browser,installation,width,destination}){
   const retained=await read(ownerContext,origin,`/api/messages/${imported.markerId}`);assert.ok(retained.body.includes(imported.sharedMarker),'retained owner still reads imported history');
   for(const [page,label] of [[owner,'owner-retained'],[member,'member-revoked']]){assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.screenshot({path:join(destination,`pilot-${label}-${width}.png`),fullPage:true});}
   pilotPhase('revocation-complete',{width,sessions:2});
-  return {width,status:'passed',sessions:2,authentication:'canonical local owner entry and invitation GET/native POST confirmation',privateFile:true,importedActivityUnchanged:true,selectedAudience:true,audienceRevoked:true,undoBeforeLiveWork:true,undoRefusedAfterLiveWork:true,corpus:imported.corpus,readonlyReactionsMentionsAndEditedMarker:true};
+  return {width,status:'passed',sessions:2,authentication:'real outbox GET and native POST confirmation',privateFile:true,importedActivityUnchanged:true,selectedAudience:true,audienceRevoked:true,undoBeforeLiveWork:true,undoRefusedAfterLiveWork:true,corpus:imported.corpus,readonlyReactionsMentionsAndEditedMarker:true};
  }catch(error){
   // Playwright request failures may include request-header call logs. Preserve
   // useful assertions while withholding authentication headers from terminal.
