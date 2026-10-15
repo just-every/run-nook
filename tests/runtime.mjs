@@ -14,6 +14,8 @@ import {devKey} from './dev-key.mjs'
 import {workerEnvironment} from './worker-environment.mjs'
 
 const withoutBrowser=process.argv.includes('--without-browser');
+const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
+assert.ok(['all','core','installer'].includes(suite),'runtime suite must be all, core or installer');
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']
@@ -70,8 +72,10 @@ const login=async name=>{const actor=await signIn(origin,name.toLowerCase()+'@ex
 async function databasePath(dir) {let found;async function visit(path){for(const item of await readdir(path,{withFileTypes:true})){const child=resolve(path,item.name);if(item.isDirectory())await visit(child);else if(item.name.endsWith('.sqlite')){const db=new DatabaseSync(child,{readOnly:true});try{if(db.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='workspace'").get().n)found=child}finally{db.close()}}}}await visit(dir);assert.ok(found,'real D1 database found');return found}
 async function check(name,fn) { try { await fn() } catch (error) { console.error('DIAG wrangler output tail:\n'+output.slice(-12000)); throw error } checks++; evidence.checks.push({name,status:'passed'}); console.log(`PASS ${name}`) }
 try {
+ const port=await freePort()
+ if(suite!=='installer'){
  await command(['d1','migrations','apply','DB','--local','--persist-to',state,'--config','dist/server/wrangler.json'])
- lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root);const port=await freePort(); await start(port)
+ lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root);await start(port)
  const beforeDenied=(await sql('SELECT count(*) AS n FROM workspace'))[0].n
  await request('/api/me',{status:401})
  assert.equal((await sql('SELECT count(*) AS n FROM workspace'))[0].n,beforeDenied,'denied empty-workspace read does not initialize state')
@@ -118,8 +122,9 @@ try {
  await stop()
  await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  await lossConfig.close();lossConfig=null
- await(await import('./installer-workflow.mjs')).runInstallerWorkflow({root,states,port,check,evidence,databasePath,stop,start,command,env,getState:()=>state,setState:value=>{state=value},getOrigin:()=>origin})
- console.log(`${checks} emitted Worker/D1 checks passed; all four native session controls recorded under BASE-ACCESS-002`)
+ }
+ if(suite!=='core')await(await import('./installer-workflow.mjs')).runInstallerWorkflow({root,states,port,check,evidence,databasePath,stop,start,command,env,getState:()=>state,setState:value=>{state=value},getOrigin:()=>origin})
+ console.log(`${checks} emitted Worker/D1 checks passed; suite=${suite}`)
  evidence.status=withoutBrowser?'partial':'passed';evidence.checkCount=checks
 } catch(error) {evidence.status='failed';evidence.error=error.stack;evidence.workerLog=output.slice(-50000);throw error}
 finally {

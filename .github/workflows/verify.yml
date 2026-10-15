@@ -23,7 +23,7 @@ jobs:
           - stage: runtime
             # Includes both browser widths and the Slack import journeys.
             # The homepage journey serves dist/site on this runner too.
-            command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime
+            command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime --suite=core
           - stage: notifications
             command: pnpm build:app && pnpm test:notify && pnpm test:push
     uses: ./.github/workflows/verify-stage.yml
@@ -49,3 +49,10 @@ jobs:
     with:
       command: ${{ matrix.command }}
       timeout: 120
+
+  installer:
+    name: verify (installer)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/verify-stage.yml
+    with:
+      command: pnpm build:app && pnpm test:runtime --suite=installer

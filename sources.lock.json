@@ -577,7 +577,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "4d20b1fc49437b7d172c75469c58b1716f8327cf50956989b8cb5c2c147a76b7",
+      "sha256": "a13b45e1e22fce0f9295c0c9d5d5c042927eb28e606452c70f7dd8d2da041f28",
       "executable": false
     },
     ".gitignore": {
@@ -589,7 +589,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "fcd3cd21da04cdc18c19879b0d32c5f1b94731adda632018a7dff9c9e0fa01cf",
+      "sha256": "c6c2a95956aceb5166909089739c4d01eddda9853ac0ed7bc83eaaed91445294",
       "executable": false
     },
     "AGENTS.md": {
@@ -4313,7 +4313,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "d147e47d1c6303e82550857e1925e413ede3d3de56d96abdea98aa3cb898b934",
+      "sha256": "56fd6cfdc3f3dbac14b9d40f7ecb27ef6b64de7496525c383cdfc89761d0ee59",
       "executable": false
     },
     "tests/slack-files.test.mjs": {
