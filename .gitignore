@@ -11,3 +11,6 @@ dist/
 .dev.vars*
 evidence/
 .rer/
+
+# Disposable demo state
+.rer/demo/
