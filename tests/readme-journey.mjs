@@ -36,7 +36,7 @@ try{
   if(line==='rer dev'){
    dev=spawn('bash',['-c',line+' --port '+port+' --foreground'],{cwd:clone,env,stdio:['ignore','pipe','pipe'],detached:true});let output=''
    dev.stdout.on('data',chunk=>output+=chunk);dev.stderr.on('data',chunk=>output+=chunk)
-   const ready=await new Promise((ok,bad)=>{const timer=setInterval(()=>{const url=/RER_READY (http:\/\/\S+)/.exec(output)?.[1];if(url){clearInterval(timer);ok(url)}else if(dev.exitCode!=null){clearInterval(timer);bad(Error('dev exited: '+output))}},250);setTimeout(()=>{clearInterval(timer);bad(Error('dev never became ready: '+output))},10*60_000)})
+   const ready=await new Promise((ok,bad)=>{const timer=setInterval(()=>{const url=/RER_READY (http:\/\/\S+)/.exec(output)?.[1];if(url){clearInterval(timer);clearTimeout(deadline);ok(url)}else if(dev.exitCode!=null){clearInterval(timer);clearTimeout(deadline);bad(Error('dev exited: '+output))}},250);const deadline=setTimeout(()=>{clearInterval(timer);bad(Error('dev never became ready: '+output))},10*60_000)})
    assert.equal(ready,`http://127.0.0.1:${port}`,'zero-setup dev uses the selected port')
    ownerEmail=/RER_SIGNED_IN (\S+@\S+)/.exec(output)?.[1]
    assert.ok(ownerEmail,'zero-setup dev creates a signed-in owner')

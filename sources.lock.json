@@ -4245,7 +4245,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "87cad51acf7dcbe8f2aa8ab9a48f7c12ec0e0d2ab970eb8824a1b3858defdc9e",
+      "sha256": "15fcdd0e4d843d3f7e771d7591b05469fc6807f21e5859b296e923e7d0a684e6",
       "executable": false
     },
     "tests/recovery-support.mjs": {
