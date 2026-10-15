@@ -1,5 +1,9 @@
 {
   "version": 1,
   "domain": "run-nook.com",
-  "name": "Nook"
+  "name": "Nook",
+  "settings": {
+    "MAIL_PROVIDER": "development",
+    "MAIL_FROM": "Nook Demo <demo@demo.invalid>"
+  }
 }
