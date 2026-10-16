@@ -4,14 +4,15 @@ import {IconReact} from '../chat/icons'
 import {useDismiss} from '../chat/useDismiss'
 const choices=['👍','❤️','🎉','👀','✅','🙌']
 const names=(row?:Reaction)=>row?.actors.map(a=>a.name).join(', ')
-// One fetch per message. Chips, the quick 👍 and the picker all read it, so each emoji shows exactly once.
-export function useReactions(message:string,request:TeamRequest,refresh:number|string,accessEpoch:number|string,enabled=true){
+// The conversation supplies fresh summaries; mutation and actor continuation
+// retain their own authorized doors.
+export function useReactions(message:string,request:TeamRequest,refresh:number|string,accessEpoch:number|string,enabled=true,snapshot?:Reaction[]){
  const scope=useRef(0),writes=useRef(0),toggling=useRef(0),missed=useRef(false)
  const [rows,setRows]=useState<Reaction[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(''),[reload,setReload]=useState(0)
  // Another message or access epoch starts empty. A live refresh keeps the shown rows until the new ones land, so chips
  // never blink out. A refresh that overlapped a toggle may predate it: it is dropped and fetched again once toggles end.
  useEffect(()=>{scope.current++;toggling.current=0;missed.current=false;setRows([]);setBusy(false);setError('')},[message,accessEpoch,enabled])
- useEffect(()=>{if(!enabled)return;const current=scope.current,issued=writes.current,quiet=!toggling.current,controller=new AbortController();request<Reaction[]>(`/api/messages/${encodeURIComponent(message)}/reactions`,{signal:controller.signal}).then(value=>{if(controller.signal.aborted||current!==scope.current)return;if(quiet&&issued===writes.current&&!toggling.current)setRows(value);else missed.current=true}).catch(e=>{if(!controller.signal.aborted&&current===scope.current)setError(e.message)});return()=>controller.abort()},[message,refresh,accessEpoch,request,enabled,reload])
+ useEffect(()=>{if(!enabled)return;const current=scope.current,issued=writes.current,quiet=!toggling.current,controller=new AbortController();const result=snapshot&&reload===0?Promise.resolve(snapshot):request<Reaction[]>(`/api/messages/${encodeURIComponent(message)}/reactions`,{signal:controller.signal});result.then(value=>{if(controller.signal.aborted||current!==scope.current)return;if(quiet&&issued===writes.current&&!toggling.current)setRows(value);else missed.current=true}).catch(e=>{if(!controller.signal.aborted&&current===scope.current)setError(e.message)});return()=>controller.abort()},[message,refresh,accessEpoch,request,enabled,reload,snapshot])
  const toggle=async(emoji:string)=>{const current=scope.current;writes.current++;toggling.current++;setBusy(true);setError('');try{const next=await request<Reaction[]>(`/api/messages/${encodeURIComponent(message)}/reactions`,{method:'POST',body:JSON.stringify({emoji,add:!rows.find(r=>r.emoji===emoji)?.mine})});if(current===scope.current)setRows(next)}catch(e){if(current===scope.current)setError((e as Error).message)}finally{if(current===scope.current&&--toggling.current===0){setBusy(false);if(missed.current){missed.current=false;setReload(n=>n+1)}}}}
  async function more(row:Reaction){const current=scope.current;try{const page=await request<{actors:Reaction['actors'];cursor:string|null}>(`/api/messages/${encodeURIComponent(message)}/reaction-actors?emoji=${encodeURIComponent(row.emoji)}&after=${encodeURIComponent(row.cursor!)}`);if(current===scope.current)setRows(items=>items.map(r=>r.emoji===row.emoji?{...r,actors:[...r.actors,...page.actors],cursor:page.cursor}:r))}catch(e){if(current===scope.current)setError((e as Error).message)}}
  return {rows,busy,error,toggle,more}

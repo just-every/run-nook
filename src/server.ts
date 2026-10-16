@@ -15,7 +15,6 @@ import {slackImportRoute} from './imports/routes'
 import {portabilityRoute} from './platform/portability.server'
 import {signInRoute} from './platform/signin.server'
 import {teamRoute} from './team/routes.server'
-import {context} from './platform/storage/context'
 import {outcomeVersions} from './platform/storage/outcome-history'
 import {readUpload} from './platform/storage/files'
 export {ChatHub} from './platform/storage/live'
@@ -29,6 +28,7 @@ import {unsubscribeRoute} from './notify/unsubscribe'
 import {theme} from './theme'
 import {staticAssetResponse} from './base/static-assets'
 import {deploymentHealth} from './base/deployment-health'
+import {workspaceSnapshot} from './platform/storage/workspace'
 
 const api = new Hono<{ Bindings: Bindings }>()
 api.use('*', async (c,next) => { c.header('Cache-Control','no-store'); c.header('X-Content-Type-Options','nosniff'); await next() })
@@ -48,7 +48,8 @@ api.all('/api/*', async c => {
  }
  const p = url.pathname.split('/').filter(Boolean), action = p[1], id = p[2] ?? '', sub = p[3]
  // Authentication precedes route matching, including unknown protected paths.
- const session=await context(c.env,req.headers),team=await teamRoute(session,req,input);if(team)return team
+ const session=await repository.authenticated(req.headers),team=await teamRoute(session,req,input);if(team)return team
+ if(action==='workspace'&&p.length===2&&req.method==='GET')return c.json(await workspaceSnapshot(session,url.searchParams))
  if(action==='devices'){
   if(req.method!=='GET'&&req.headers.get('origin')!==url.origin)fail(403,'Origin denied')
   if(p.length===2&&req.method==='GET')return c.json(await devices(session))

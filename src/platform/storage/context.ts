@@ -17,7 +17,15 @@ export class Context {
  async check(conversation?:string){const row=await this.sql(`SELECT 1 AS ok WHERE ${authority} AND ${authFence}${conversation?' AND '+memberFence:''}`,...this.credentials,...(conversation?[conversation,this.uid]:[])).first();if(!row){const state=await this.db.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>();if(state?.authority!=='normalized')fail(503,'Offline normalized storage conversion required');const active=await this.sql(`SELECT 1 WHERE ${authFence}`,...this.credentials).first();fail(active?403:401,active?'Conversation access denied':'Sign in required')}}
  async rows<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T[]>{
   // Authorization is in the same SQL snapshot as the data, including empty reads.
-  const result=await this.sql(`SELECT * FROM (${sql}) WHERE ${authority} AND ${authFence}${conversation?' AND '+memberFence:''}`,...values,...this.credentials,...(conversation?[conversation,this.uid]:[])).all<T>();await this.check(conversation);return result.results
+  const fence=`${authority} AND ${authFence}${conversation?' AND '+memberFence:''}`,credentials=[...this.credentials,...(conversation?[conversation,this.uid]:[])]
+  const [result,guard]=await this.db.batch<T>([
+   this.sql(`SELECT * FROM (${sql}) WHERE ${fence}`,...values,...credentials),
+   this.sql(`SELECT 1 AS ok WHERE ${fence}`,...credentials),
+  ])
+  // D1 batches share a transaction, so empty reads and their authorization
+  // check use the same snapshot without another database round trip.
+  if(!guard.results.length)await this.check(conversation)
+  return result.results
  }
  async one<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T|null>{return (await this.rows<T>(sql,values,conversation))[0]??null}
  async batch(statements:D1PreparedStatement[],conversation?:string,condition='1',values:any[]=[]){

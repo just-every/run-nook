@@ -1,14 +1,14 @@
 import {useEffect,useState} from 'react'
 import type {TeamRequest} from './types'
-type Problem={error:string;retrying:boolean;at:number}
+type Problem={error:string;retrying?:boolean;at:number}
 type Settings={mentions:boolean;urgent:boolean;urgentQuiet:boolean;address:string;problem:Problem|null;notDelivered:(Problem&{recipient:string})[];workspace:{sending:'suppressed'|'provider'|'not-set-up';notDelivered:(Problem&{count:number})|null}|null}
 const reasons:Record<string,string>={'not-set-up':'email sending is not set up','refused':'the mail service refused it','rate-limited':'the mail service asked Nook to slow down','uncertain':'the mail service did not confirm it'}
 const when=(at:number)=>new Date(at).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
 const why=(p:Problem)=>`${reasons[p.error]??'it could not be sent'}, ${when(p.at)}${p.retrying?'; trying again':''}`
 // C14: email is off until the member turns it on. Choices save as they change.
-export function EmailControl({request,localDevelopment=false}:{request:TeamRequest;localDevelopment?:boolean}){
- const [settings,setSettings]=useState<Settings|null>(null),[notice,setNotice]=useState('')
- useEffect(()=>{const controller=new AbortController();request<Settings>('/api/notify',{signal:controller.signal}).then(setSettings).catch(()=>{});return()=>controller.abort()},[request])
+export function EmailControl({request,initial,localDevelopment=false}:{request:TeamRequest;initial?:Settings;localDevelopment?:boolean}){
+ const [settings,setSettings]=useState<Settings|null>(initial??null),[notice,setNotice]=useState('')
+ useEffect(()=>{setSettings(initial??null)},[initial])
  async function change(key:'mentions'|'urgent'|'urgentQuiet',value:boolean){setNotice('');try{setSettings(await request<Settings>('/api/notify',{method:'PATCH',body:JSON.stringify({[key]:value})}));setNotice('Email settings saved.')}catch{setNotice('Email settings were not saved.')}}
  if(!settings)return null
  const choice=(key:'mentions'|'urgent'|'urgentQuiet',label:string,disabled=false,className?:string)=><label className={className}><input type="checkbox" checked={settings[key]} disabled={disabled} onChange={event=>void change(key,event.target.checked)}/>{label}</label>

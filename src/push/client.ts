@@ -1,12 +1,13 @@
 import {useCallback,useEffect,useRef,useState} from 'react'
 import type {TeamRequest} from '../team/types'
 import {clearPushNotices} from './notices'
+import type {WorkspaceSnapshot} from '../chat/types'
 export type Choices={mentions:boolean;urgent:boolean;urgentQuiet:boolean;direct:boolean;threads:boolean}
 export type PushSettings=Choices&{problems:{error:string;state:string}[];notDelivered:{recipient:string;error:string}[];workspace:{count:number;error:string|null;state:string|null}|null}
 const decode=(value:string)=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))
 const STORE='nook.push.device'
 const supported=()=>typeof window!=='undefined'&&'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window
-export function usePush(user:string,request:TeamRequest,refresh:number|string,privateSignal:AbortSignal){
+export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapshot|null,privateSignal:AbortSignal){
  const [settings,setSettings]=useState<PushSettings|null>(null),[permission,setPermission]=useState<NotificationPermission|'unsupported'>('unsupported'),[enabled,setEnabled]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false)
  const [install,setInstall]=useState<any>(null),[standalone,setStandalone]=useState(false)
  useEffect(()=>{const show=(event:Event)=>{event.preventDefault();setInstall(event)};const installed=()=>{setStandalone(true);setInstall(null)};setStandalone(matchMedia('(display-mode: standalone)').matches);window.addEventListener('beforeinstallprompt',show);window.addEventListener('appinstalled',installed);return()=>{window.removeEventListener('beforeinstallprompt',show);window.removeEventListener('appinstalled',installed)}},[])
@@ -77,11 +78,10 @@ export function usePush(user:string,request:TeamRequest,refresh:number|string,pr
   return()=>{gone=true;clearInterval(timer);document.removeEventListener('visibilitychange',visible);if(supported())navigator.serviceWorker.removeEventListener('message',changed);if(device.current)void post('/api/devices/presence',{id:device.current,page:page.current,visible:false}).catch(()=>{})}
  },[post,sync,reconcile,loadSettings,privateSignal])
  useEffect(()=>{
-  let gone=false
-  void loadSettings().catch(e=>{if(!gone&&!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')})
-  if(supported())void sync().catch(()=>{})
-  return()=>{gone=true}
- },[refresh,sync,loadSettings,privateSignal])
+  if(!snapshot||privateSignal.aborted)return
+  settingsVersion.current++;setSettings(snapshot.notify.push as PushSettings)
+  if(supported())void (async()=>{const reg=registration.current??await navigator.serviceWorker.getRegistration('/');if(!privateSignal.aborted&&current.current===user)reg?.active?.postMessage({type:'nook-sync',user,...snapshot.pushSync})})().catch(()=>{})
+ },[snapshot,user,privateSignal])
  const change=useCallback(async(value:Partial<Choices>)=>{setBusy(true);setError('');try{const next=await post('/api/notify',{push:value},'PATCH');if(!privateSignal.aborted&&current.current===user){settingsVersion.current++;setSettings(next.push)}}catch(e){if(!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')}finally{if(!privateSignal.aborted)setBusy(false)}},[post,user,privateSignal])
  const enable=useCallback(async()=>{
   if(!supported())return

@@ -1,6 +1,17 @@
 import {fail} from '../family/team-chat/domain'
 import {Context} from '../platform/storage/context'
 export const emojis=['👍','❤️','🎉','👀','✅','🙌'] as const
+// The visible message window shares one bounded reaction projection. Actor
+// continuation still uses the ordinary, currently authorized public endpoint.
+export async function messageReactions(c:Context,conversation:string,ids:string[]){
+ if(!ids.length)return {} as Record<string,any[]>
+ const rows=await c.rows(`SELECT r.message,r.emoji,count(*) AS count,max(r.user=?) AS mine,
+ (SELECT json_group_array(json_object('id',a.id,'name',a.name)) FROM (SELECT actor.id,actor.name FROM nook_reactions part JOIN nook_actors actor ON actor.id=part.user WHERE part.message=r.message AND part.emoji=r.emoji ORDER BY part.user LIMIT 50) a) AS actors
+ FROM nook_reactions r JOIN nook_messages m ON m.id=r.message WHERE m.conversation=? AND m.id IN (SELECT value FROM json_each(?)) GROUP BY r.message,r.emoji`,[c.uid,conversation,JSON.stringify(ids)],conversation)
+ const result:Record<string,any[]>={}
+ for(const {message,actors:encoded,...row} of rows){const actors=JSON.parse(encoded);(result[message]??=[]).push({...row,mine:!!row.mine,actors,cursor:row.count>50?actors.at(-1).id:null})}
+ return result
+}
 export async function reactionActors(c:Context,id:string,emoji:string,after=''){
  if(!emojis.includes(emoji as typeof emojis[number])||after.length>128)fail(400,'Invalid reaction page')
  const message=await c.one('SELECT conversation FROM nook_messages WHERE id=?',[id]);if(!message)fail(404,'Native message unavailable');await c.check(message.conversation)

@@ -27,7 +27,7 @@ const focusRow=(event:MouseEvent<HTMLElement>)=>{
 }
 export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDelete,onRemove,thread=false,canErase=false,continued=false,outcomes=[],onOutcome}:Props) {
  const team=useTeamBindings(),[erasing,setErasing]=useState(false),eraseTrigger=useRef<HTMLButtonElement|null>(null)
- const reactions=useReactions(m.id,team.request,team.revision,team.accessEpoch,!m.immutable&&!m.deleted)
+ const reactions=useReactions(m.id,team.request,team.revision,team.accessEpoch,!m.immutable&&!m.deleted,m.reactions)
  const mine=!m.immutable&&m.author===user.id
  const time=new Date(m.created)
  return <article className={'message reveal-host'+(continued?' continued':'')+(m.deleted?' deleted':'')} id={(thread?'thread-message-':'message-')+m.id} data-message={m.id} data-immutable={m.immutable?'true':undefined} data-sequence={m.sequence} tabIndex={-1} onClick={focusRow}>

@@ -9,13 +9,17 @@ export type Bindings=StorageBindings
 // documents are admitted exclusively by the paused offline conversion command.
 export class Repository {
  constructor(private env:Bindings){}
- async session(headers:Headers){return read(await context(this.env,headers),'me')}
- async read(headers:Headers,action:string,id='',input={}){return read(await context(this.env,headers),action,id,input)}
- async write(headers:Headers,action:string,id:string,input:Record<string,any>){const c=await context(this.env,headers),result=await write(c,action,id,input);await c.hint();if(action==='edit'&&input.delete)await recoverDeletes(this.env);return result}
+ private authentication:Promise<Awaited<ReturnType<typeof context>>>|undefined
+ // A Repository belongs to one request. Every data statement still fences the
+ // current session and membership; only parsing the same session is shared.
+ authenticated(headers:Headers){return this.authentication??=context(this.env,headers)}
+ async session(headers:Headers){return read(await this.authenticated(headers),'me')}
+ async read(headers:Headers,action:string,id='',input={}){return read(await this.authenticated(headers),action,id,input)}
+ async write(headers:Headers,action:string,id:string,input:Record<string,any>){const c=await this.authenticated(headers),result=await write(c,action,id,input);await c.hint();if(action==='edit'&&input.delete)await recoverDeletes(this.env);return result}
  async imports(headers:Headers,action:string,id:string,input:any={}){return imports(await context(this.env,headers),action,id,input)}
  async upload(headers:Headers,id:string,input:Record<string,any>){return upload(await context(this.env,headers),id,input)}
  async download(headers:Headers,id:string){return download(await context(this.env,headers),id)}
  async deleteAttachment(headers:Headers,id:string){return remove(await context(this.env,headers),id)}
- async workspace(headers:Headers){const c=await context(this.env,headers);return {user:await read(c,'me'),conversations:await read(c,'conversations')}}
+ async workspace(headers:Headers){const c=await this.authenticated(headers);const [user,conversations]=await Promise.all([read(c,'me'),read(c,'conversations')]);return {user,conversations}}
  async live(request:Request){return connect(await context(this.env,request.headers),request)}
 }

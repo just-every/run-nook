@@ -1,13 +1,13 @@
 import {useEffect,useState} from 'react'
 import type {LocationState,Screen} from './types'
 const views:Screen[]=['chat','attention','channels','search','you','team']
-export function readLocation():LocationState {
- const p=new URLSearchParams(location.search),view=p.get('view') as Screen
+export function readLocation(search=location.search):LocationState {
+ const p=new URLSearchParams(search),view=p.get('view') as Screen
  const selected=views.includes(view)?view:p.has('conversation')?'chat':'channels',conversation=p.get('conversation'),thread=p.get('thread'),focus=p.get('focus'),panel=p.get('panel')==='outcomes'?'outcomes':null,before=p.get('before'),threadBefore=p.get('threadBefore')
  return {view:selected,conversation,thread,focus,panel,before,threadBefore,q:p.get('q')||'',landing:selected==='chat'&&Boolean(conversation)&&!thread&&!focus&&!panel&&!before&&!threadBefore}
 }
-export function useLocation() {
- const [route,setRoute]=useState<LocationState>({view:'channels',conversation:null,thread:null,focus:null,panel:null,before:null,threadBefore:null,q:'',landing:false})
+export function useLocation(initial?:LocationState) {
+ const [route,setRoute]=useState<LocationState>(initial??{view:'channels',conversation:null,thread:null,focus:null,panel:null,before:null,threadBefore:null,q:'',landing:false})
  useEffect(()=>{const update=()=>setRoute(readLocation());update();window.addEventListener('popstate',update);return ()=>window.removeEventListener('popstate',update)},[])
  function navigate(next:Partial<LocationState>,replace=false) {
   const state={...route,...next},selecting=state.view==='chat'&&Boolean(state.conversation)&&(route.view!=='chat'||state.conversation!==route.conversation),positionKeys=['thread','focus','panel','before','threadBefore'] as const,positionSpecified=positionKeys.some(key=>Object.prototype.hasOwnProperty.call(next,key)),explicitPosition=Boolean(state.thread||state.focus||state.panel==='outcomes'||state.before||state.threadBefore)
