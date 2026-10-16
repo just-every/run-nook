@@ -114,6 +114,7 @@ try {
   await check('owner/admin erasure, modal keyboard containment and accessibility at desktop/mobile widths',async()=>{await(await import('./erasure-browser-support.mjs')).runErasureJourney({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1/erasure')})})
   await check('keyboard focus, routing drafts and visible read frontier',async()=>{await(await import('./keyboard.mjs')).runKeyboard(origin,resolve(root,'evidence/nook-1'))})
   await check('team day-one desktop/mobile journey and native notification API',async()=>{await(await import('./team-browser.mjs')).runTeamBrowserSuite({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1')})})
+  await check('installed Nook opens its own app window at desktop/mobile widths',async()=>{await(await import('./pwa-install.mjs')).runPwaInstall({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1/install')})})
   await check('Slack wizard and imported history desktop/mobile',async()=>{await(await import('./slack-import-browser.mjs')).runSlackBrowser(origin)})
   await check('homepage responsive and keyboard behavior',async()=>{process.env.TEAM_CHAT_HOMEPAGE_ORIGIN=origin;process.env.TEAM_CHAT_HOMEPAGE_EVIDENCE_DIR=resolve(root,'evidence/nook-1');await import('./homepage.mjs')})
  }

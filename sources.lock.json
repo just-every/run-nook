@@ -869,7 +869,7 @@
       "executable": false
     },
     "public/sw.js": {
-      "sha256": "8b5724e4341c0d36282fb455a871eed0e99ab40b1f60afa2a2144bc318e5e49d",
+      "sha256": "833e26bc14d8419d29f0f439af1cb2d9415964774315f46077843eed647d26ac",
       "executable": false
     },
     "README.md": {
@@ -4260,6 +4260,10 @@
       "sha256": "280a9c67c6365c2c0802a250a5ac052c0e3a30edfab8d9c2bbb8dcd151795224",
       "executable": false
     },
+    "tests/push-service-worker.test.mjs": {
+      "sha256": "a97d24bc2115460e610e22c1b43c5903686396d4e54a0a44a3c4e620800c463e",
+      "executable": false
+    },
     "tests/push/archive.mjs": {
       "sha256": "d68a8b1207de63c1ed527333504d983c23e4c9a2e88069c2e0db9e3f2e056bf2",
       "executable": false
@@ -4296,6 +4300,10 @@
       "sha256": "be7d08cbf0671dc5de9958eddc55498537dcf0d7090a8aaab98b2ef22db96c6a",
       "executable": false
     },
+    "tests/pwa-install.mjs": {
+      "sha256": "ab5638e4a6be0843f50eb7a9cba1178cfb14526c79cae7515ef8f65f4b45c410",
+      "executable": false
+    },
     "tests/readme-journey.mjs": {
       "sha256": "fee5367dc51326654be2019b9a4061efe7ba0eacdf38473cded78a878ff0bfe9",
       "executable": false
@@ -4317,7 +4325,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "b7d58aab1f4cb85a3f19dd1c3876e84de8de807e3fa08e86732ff0f84997b21f",
+      "sha256": "2dc066cc6174d0d8a853470f8bda25fb52d7316c3dc2d04568fc37fa1ba9cf9c",
       "executable": false
     },
     "tests/slack-files.test.mjs": {
