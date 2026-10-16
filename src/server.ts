@@ -113,18 +113,21 @@ export default withDemo({
   if(url.pathname==='/auth/bootstrap' && (await env.DB.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>())?.authority!=='normalized')return Response.json({error:'offline_storage_conversion_required'},{status:503,headers:{'Cache-Control':'no-store'}})
   if(url.pathname==='/auth/bootstrap' && !await env.DB.prepare('SELECT singleton FROM oa_bootstrap WHERE singleton=1').first() && await env.DB.prepare('SELECT id FROM nook_actors LIMIT 1').first())return Response.json({error:'identity_recovery_required'},{status:409,headers:{'Cache-Control':'no-store'}})
   if(url.pathname.startsWith('/auth/')) return await authRoute(env,request)??new Response('Not found',{status:404})
-  if(url.pathname === '/setup' || url.pathname === '/app' || url.pathname.startsWith('/app/')) {
+  const application=url.pathname === '/app'||url.pathname.startsWith('/app/')
+  const authentication=application?repository.authenticated(request.headers).then(()=>null,error=>error):null
+  if(url.pathname === '/setup' || application) {
    // An owner who has not confirmed first-run setup is sent to /setup from every app route.
-   const setup = await firstRunResponse(request,env,operatorAuth(env),{theme})
+   const setup = await firstRunResponse(request,env,{getSession:()=>repository.nativeSession(request.headers)},{theme})
    if(setup) return setup
   }
-  if(url.pathname === '/app' || url.pathname.startsWith('/app/')) {
-   try { await repository.authenticated(request.headers) } catch(error) { if(error instanceof Fault && error.status === 401) return new Response(null,{status:307,headers:{Location:'/signin','Cache-Control':'no-store'}}); throw error }
+  if(application) {
+   const error=await authentication
+   if(error){if(error instanceof Fault&&error.status===401)return new Response(null,{status:307,headers:{Location:'/signin','Cache-Control':'no-store'}});throw error}
   }
   const response = await dispatch(request,() => api.fetch(request,env,execution),() => withRepository(repository,()=>start.fetch(request)))
   const isDocument = response.headers.get('content-type')?.includes('text/html')
   const headers = new Headers(response.headers); headers.set('Cache-Control',isDocument?'no-store, no-transform':'no-store'); headers.set('X-Content-Type-Options','nosniff')
   const document=new Response(response.body,{status:response.status,statusText:response.statusText,headers})
-  return isDocument?await editorDocument(document,env,request):document
+  return isDocument?await editorDocument(document,env,request,application?repository.nativeSession(request.headers):undefined):document
  },
 } satisfies ExportedHandler<Bindings>, {seed:seedDemo})

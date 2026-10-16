@@ -35,5 +35,5 @@ export class Context {
  event(conversation:string,kind:string,object:string){return [this.sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',conversation),this.sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,this.uid,conversation)]}
  async hint(){await this.env.CHAT_HUB.get(this.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/hint',{method:'POST'}).catch(()=>undefined)}
 }
-export async function context(bindings:StorageBindings,headers:Headers){const env={...bindings,...authBindings(bindings)};const session=await operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers}))??fail(401,'Sign in required');const c=new Context(env,session);await c.check();return c}
+export async function context(bindings:StorageBindings,headers:Headers,identity?:Promise<Session|null>){const env={...bindings,...authBindings(bindings)};const session=await(identity??operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers})))??fail(401,'Sign in required');const c=new Context(env,session);await c.check();return c}
 export function indexMessage(c:Context,id:string,conversation:string,body:string,source='native'){return c.sql('INSERT INTO nook_search(message,conversation,source,scope,body_lower) VALUES(?,?,?,?,?)',id,conversation,source,'|'+conversation+'|',body.toLowerCase())}

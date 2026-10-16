@@ -4,15 +4,19 @@ import {write} from './storage/commands'
 import {imports} from './storage/imports'
 import {upload,download,remove,recoverDeletes} from './storage/files'
 import {connect} from './storage/live'
+import {operatorAuth,authBindings} from './operator-auth.server'
+import type {Session} from '../base/modules/operator-auth/index.mjs'
 export type Bindings=StorageBindings
 // Normal application paths only use authorized row-level repositories. Legacy
 // documents are admitted exclusively by the paused offline conversion command.
 export class Repository {
  constructor(private env:Bindings){}
  private authentication:Promise<Awaited<ReturnType<typeof context>>>|undefined
+ private identity:Promise<Session|null>|undefined
+ nativeSession(headers:Headers){const env={...this.env,...authBindings(this.env)};return this.identity??=operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers}))}
  // A Repository belongs to one request. Every data statement still fences the
  // current session and membership; only parsing the same session is shared.
- authenticated(headers:Headers){return this.authentication??=context(this.env,headers)}
+ authenticated(headers:Headers){return this.authentication??=context(this.env,headers,this.nativeSession(headers))}
  async session(headers:Headers){return read(await this.authenticated(headers),'me')}
  async read(headers:Headers,action:string,id='',input={}){return read(await this.authenticated(headers),action,id,input)}
  async write(headers:Headers,action:string,id:string,input:Record<string,any>){const c=await this.authenticated(headers),result=await write(c,action,id,input);await c.hint();if(action==='edit'&&input.delete)await recoverDeletes(this.env);return result}

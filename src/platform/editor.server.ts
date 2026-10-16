@@ -1,16 +1,17 @@
 import {productAccess} from '../team/access'
 import {parseConfig} from '../base/modules/editor/src/config'
 import {operatorAuth, authBindings, type Bindings} from './operator-auth.server'
+import type {Session} from '../base/modules/operator-auth/index.mjs'
 
 export type EditorBindings = Bindings & {RER_MANAGEMENT_ORIGIN?:string;RER_INSTALLATION_ID?:string}
 const headers = {'Cache-Control':'no-store, private','Vary':'Cookie','X-Content-Type-Options':'nosniff'}
 function configuration(env:EditorBindings) {
  return parseConfig({enabled:true,managementOrigin:env.RER_MANAGEMENT_ORIGIN,installationId:env.RER_INSTALLATION_ID})
 }
-async function authority(env:EditorBindings,request:Request) {
+async function authority(env:EditorBindings,request:Request,identity?:Promise<Session|null>) {
  const origin=authBindings(env).AUTH_ORIGIN
  if(new URL(request.url).origin!==origin || (request.headers.has('origin') && request.headers.get('origin')!==origin) || request.headers.get('sec-fetch-site')==='cross-site') return null
- const session=await operatorAuth(env).getSession(request)
+ const session=await(identity??operatorAuth(env).getSession(request))
  if(!session || session.operator.role!=='owner' || session.operator.status!=='active' || session.expiresAt<=Date.now())return null
  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${session.operatorId}:${session.id}:${session.operator.version}`))
  // After asynchronous reads and key derivation, authorize the exact session in
@@ -40,7 +41,7 @@ export async function editorRoute(env:EditorBindings,request:Request) {
 /** This app had no CSP. Keep embedding closed except on the editable document.
  * A current owner's documents carry a marker, so only an owner's homepage asks
  * the editor doors for authority; visitors and members never call them. */
-export async function editorDocument(response:Response,env:EditorBindings,request:Request) {
+export async function editorDocument(response:Response,env:EditorBindings,request:Request,identity?:Promise<Session|null>) {
  const pathname=new URL(request.url).pathname
  const next=new Headers(response.headers)
  let frames="'none'"
@@ -52,6 +53,6 @@ export async function editorDocument(response:Response,env:EditorBindings,reques
  next.set('Content-Security-Policy',[...retained,`frame-src ${frames}`].join('; '))
  next.set('Cache-Control','no-store, private, no-transform');next.append('Vary','Cookie')
  const document=new Response(response.body,{status:response.status,statusText:response.statusText,headers:next})
- if(!request.headers.has('cookie')||!await authority(env,request).catch(()=>null))return document
+ if(!request.headers.has('cookie')||!await authority(env,request,identity).catch(()=>null))return document
  return new HTMLRewriter().on('head',{element(head){head.append('<meta name="nook-editor-owner" content="">',{html:true})}}).transform(document)
 }
