@@ -50,13 +50,13 @@ async function request(path,{method='GET',body,cookie='',status=200,extra={}}={}
 // The owner's first visit to the app goes through first-run setup until it is confirmed once.
 async function finishFirstRun(cookie){
  assert.deepEqual(await (await fetch(origin+'/setup/state')).json(),{state:'claimed'})
- assert.match(await (await fetch(origin+'/')).text(),/href="\/signin"/)
+ assert.match(await (await fetch(origin+'/')).text(),/href="\/signin(\?login_hint=[^"]*)?"/)
  const pending=await fetch(origin+'/app',{redirect:'manual',headers:{cookie}});assert.equal(pending.status,303);assert.equal(pending.headers.get('location'),'/setup')
  const signedOut=await fetch(origin+'/setup',{redirect:'manual'});assert.equal(signedOut.headers.get('location'),'/signin?returnTo=%2Fsetup')
  const page=await fetch(origin+'/setup',{headers:{cookie}});assert.equal(page.status,200);assert.match(await page.text(),/Finish setup/)
  const done=await fetch(origin+'/setup',{method:'POST',redirect:'manual',headers:{cookie,origin,'content-type':'application/x-www-form-urlencoded'},body:'confirm=yes'});assert.equal(done.status,303);assert.equal(done.headers.get('location'),'/app')
  assert.deepEqual(await (await fetch(origin+'/setup/state')).json(),{state:'claimed'})
- assert.match(await (await fetch(origin+'/')).text(),/href="\/signin"/)
+ assert.match(await (await fetch(origin+'/')).text(),/href="\/signin(\?login_hint=[^"]*)?"/)
  const again=await fetch(origin+'/setup',{redirect:'manual',headers:{cookie}});assert.equal(again.headers.get('location'),'/app','finished setup takes the owner into the app')
 }
 async function registered(name){

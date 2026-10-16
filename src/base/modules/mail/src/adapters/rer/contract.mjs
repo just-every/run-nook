@@ -5,6 +5,11 @@ import { rerListHeaderField } from './list-headers.mjs';
 const listEntries = /^[ \t]*<([^<>\s]+)>[ \t]*(?:,[ \t]*<([^<>\s]+)>[ \t]*)?$/;
 const relayMailbox = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+// Match platform c1e3ade01eecd4d027a4f5ed0304d5f6bd7da6bb: src/managed-mail/headers.ts:22.
+export function validateRerMessageKey(value) {
+  if (typeof value !== 'string' || value.length < 1 || value.length > 200 || /[^A-Za-z0-9._:-]/.test(value)) fail('invalid_message_key');
+}
+
 export function validateRerConfig(config) {
   let url;
   try { url = new URL(config.relayUrl); } catch { fail('rer_relay_url_required'); }

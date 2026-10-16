@@ -18,6 +18,11 @@ const fields = new Map([
   ['references', ['references', 'invalid_references']],
 ]);
 
+/** The relay's Message-ID, when its 202 body carries one in the grammar it accepts back as In-Reply-To/References. */
+export function rerMessageId(value) {
+  return typeof value === 'string' && value.length <= 2000 && messageIdPattern.test(value) ? value : null;
+}
+
 /** Validate a supported list/thread header and return its relay field, or null. */
 export function rerListHeaderField(name, value) {
   const mapping = fields.get(name.toLowerCase());

@@ -1,6 +1,9 @@
 import { canonicalJson } from './hash.mjs';
+const errorCodes = new WeakMap();
+// A verifier's original machine code remains independent of mutable properties.
+export const portabilityErrorCode = error => errorCodes.get(error);
 export class PortabilityError extends Error {
-  constructor(code, status=400) { super(code); this.code=code; this.status=status; }
+  constructor(code, status=400) { super(code); this.code=code; this.status=status; errorCodes.set(this,code); }
 }
 export function insist(condition, code, status=400) { if (!condition) throw new PortabilityError(code,status); }
 export const quote = name => '"'+name.replaceAll('"','""')+'"';
@@ -23,17 +26,24 @@ export function save(db,row) {
   return statement(db,'UPDATE rer_portability_jobs SET phase=?,completed=?,metadata=? WHERE id=?',row.phase,row.completed,canonicalJson(row.metadata),row.id);
 }
 export function partStatements(db,id,part) {
-  const json=canonicalJson(part), result=[statement(db,'INSERT INTO rer_portability_parts VALUES(?,?,?)',id,part.index,part.sha256)];
+  return partQueries(id,part).map(({sql,params})=>statement(db,sql,...params));
+}
+export function partQueries(id,part) {
+  const json=canonicalJson(part), result=[{sql:'INSERT INTO rer_portability_parts VALUES(?,?,?)',params:[id,part.index,part.sha256]}];
   for(let i=0,segment=0;i<json.length;segment++) {
     let end=Math.min(i+32000,json.length);
     const last=json.charCodeAt(end-1),next=json.charCodeAt(end);
     if(last>=0xd800 && last<=0xdbff && next>=0xdc00 && next<=0xdfff) end--;
-    result.push(statement(db,'INSERT INTO rer_portability_segments VALUES(?,?,?,?)',id,part.index,segment,json.slice(i,end)));i=end;
+    result.push({sql:'INSERT INTO rer_portability_segments VALUES(?,?,?,?)',params:[id,part.index,segment,json.slice(i,end)]});i=end;
   }
   return result;
 }
 export async function readPart(db,id,index) {
-  const rows=await all(db,'SELECT data FROM rer_portability_segments WHERE job=? AND part=? ORDER BY segment',id,index);
+  const rows=[];
+  for(let offset=0;;offset+=64) {
+    const page=await all(db,'SELECT data FROM rer_portability_segments WHERE job=? AND part=? ORDER BY segment LIMIT 64 OFFSET ?',id,index,offset);
+    rows.push(...page);if(page.length<64)break;
+  }
   insist(rows.length,'part_missing');
   return JSON.parse(rows.map(x=>x.data).join(''));
 }

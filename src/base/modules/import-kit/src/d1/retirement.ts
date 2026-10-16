@@ -9,6 +9,8 @@ import { overflow, redactionSteps } from './redaction-step.ts';
 import { headerAbsence, retirementScope, retirementWrites, scopeGuards } from './retirement-scope.ts';
 import { tallyBefore, tallyJournal, tallyStores } from './retirement-tally.ts';
 import { fieldRedactions } from './field-redaction.ts';
+import { retireD1ImportCustodyStep } from './retirement-bounded.ts';
+import type { D1ErasurePending, D1ErasureStepOptions } from './erasure-progress.ts';
 
 /** Erase a person from import custody and journal it, in one D1 batch with the
  * product's native statements.
@@ -27,11 +29,13 @@ import { fieldRedactions } from './field-redaction.ts';
  * retires custody, so an archive older than the erasure is refused whole once
  * the later journal is supplied; a batch without it proves no custody row changed. */
 export function retireD1ImportCustody(person: D1ImportPerson, nativeStatements: D1Sql[], input: D1ImportContext, checkpoint: D1Sql[]): Promise<D1CustodyRetirement>;
+export function retireD1ImportCustody(person: D1ImportPerson, nativeStatements: D1Sql[], input: D1ImportContext, checkpoint: D1Sql[], options: D1ErasureStepOptions): Promise<D1CustodyRetirement | D1ErasurePending>;
 export function retireD1ImportCustody(person: D1ImportPerson, nativeStatements: D1Sql[], input: D1ImportContext, checkpoint: D1Sql[], options: D1RetirementOptions): Promise<D1CustodyRetirement | D1RetirementProgress>;
-export async function retireD1ImportCustody(person: D1ImportPerson, nativeStatements: D1Sql[], input: D1ImportContext, checkpoint: D1Sql[], options: D1RetirementOptions = {}): Promise<D1CustodyRetirement | D1RetirementProgress> {
+export async function retireD1ImportCustody(person: D1ImportPerson, nativeStatements: D1Sql[], input: D1ImportContext, checkpoint: D1Sql[], options: D1RetirementOptions | D1ErasureStepOptions = {}): Promise<D1CustodyRetirement | D1RetirementProgress | D1ErasurePending> {
+  if ('operationKey' in options) return retireD1ImportCustodyStep(person, nativeStatements, input, checkpoint, options);
   person = { ...person, related: person.related ? { ...person.related, fields: fieldRedactions(person.related.fields) } : undefined };
   const context = requestContext({ ...input, originalErasurePolicy: input.originalErasurePolicy ?? 'withdraw-affected-artifacts' });
-  if (context.maxBatchBytes !== undefined) throw new Error('IMPORT_RETIREMENT_UNBOUNDED_ONLY');
+  if (context.maxBatchBytes !== undefined) throw new Error('IMPORT_RETIREMENT_OPERATION_KEY_REQUIRED');
   const values = [...new Set(person.values ?? [])].sort();
   for (const value of values) requireText(value, 'person value');
   if (person.target) { requireText(person.target.kind, 'target kind'); requireText(person.target.id, 'target id'); }

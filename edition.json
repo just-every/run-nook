@@ -20,7 +20,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "operations/operations.mjs",
@@ -66,7 +66,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "8981bc2c4d9e61feca5787c83b4ed44056659dd9",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "foundation/runtime/deployment-health.ts",
@@ -150,7 +150,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "edition-authoring"
@@ -174,7 +174,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "modules/operator-auth"
@@ -198,7 +198,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "271b4768e9e89b30053a66461de6e1a7bc4cf4cc",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "modules/mail"
@@ -222,7 +222,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "modules/portability"
@@ -242,20 +242,26 @@
       "source": {
         "kind": "local",
         "paths": [
-          "src/base/modules/import-kit"
+          "src/base/modules/import-kit",
+          "src/base/modules/d1-transport"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
-            "modules/import-kit"
+            "modules/import-kit",
+            "modules/d1-transport"
           ]
         },
         "mappings": [
           {
             "path": "src/base/modules/import-kit",
             "originPath": "modules/import-kit"
+          },
+          {
+            "path": "src/base/modules/d1-transport",
+            "originPath": "modules/d1-transport"
           }
         ]
       }
@@ -270,7 +276,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "modules/owner-claim"
@@ -294,7 +300,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "modules/editor"
@@ -331,11 +337,14 @@
           "scripts/delivery/base/schema/SETUP.schema.json",
           "scripts/delivery/base/schema/json-schema.mjs",
           "scripts/delivery/base/schema/setup-validation.mjs",
-          "scripts/delivery/base/spec.mjs"
+          "scripts/delivery/base/spec.mjs",
+          "scripts/delivery/base/native-export.mjs",
+          "scripts/delivery/base/sign-in.mjs",
+          "scripts/delivery/base/sql-statements.mjs"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "87835b4b9b1edc40da4410159dc66ee1bf0e98b5",
+          "revision": "d320c1436aaeb95d2485c1a0e69afa00ac8fb51a",
           "path": ".",
           "paths": [
             "modules/delivery-producer/artifact.mjs",
@@ -355,7 +364,10 @@
             "schema/SETUP.schema.json",
             "schema/json-schema.mjs",
             "schema/setup-validation.mjs",
-            "modules/delivery-producer/spec.mjs"
+            "modules/delivery-producer/spec.mjs",
+            "modules/delivery-producer/native-export.mjs",
+            "modules/delivery-producer/sign-in.mjs",
+            "modules/delivery-producer/sql-statements.mjs"
           ]
         },
         "mappings": [
@@ -430,6 +442,18 @@
           {
             "path": "scripts/delivery/base/spec.mjs",
             "originPath": "modules/delivery-producer/spec.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/native-export.mjs",
+            "originPath": "modules/delivery-producer/native-export.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/sign-in.mjs",
+            "originPath": "modules/delivery-producer/sign-in.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/sql-statements.mjs",
+            "originPath": "modules/delivery-producer/sql-statements.mjs"
           }
         ]
       }
