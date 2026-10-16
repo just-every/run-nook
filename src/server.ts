@@ -51,6 +51,10 @@ api.all('/api/*', async c => {
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),team=await teamRoute(session,req,input);if(team)return team
  if(action==='workspace'&&p.length===2&&req.method==='GET')return c.json(await workspaceSnapshot(session,url.searchParams))
+ if(action==='conversations'&&id&&sub==='messages'&&p.length===4&&req.method==='POST'&&url.searchParams.get('workspace')==='1'){
+  const message=await repository.write(req.headers,'messages',id,input),query=new URLSearchParams(url.searchParams);query.set('conversation',id)
+  return c.json({message,workspace:await workspaceSnapshot(session,query)})
+ }
  if(action==='conversations'&&id&&sub==='read'&&p.length===4&&req.method==='POST'){await repository.write(req.headers,'read',id,input);return c.json({ok:true,...await readAcknowledgement(session,id)})}
  if(action==='devices'){
   if(req.method!=='GET'&&req.headers.get('origin')!==url.origin)fail(403,'Origin denied')

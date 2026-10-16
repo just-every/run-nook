@@ -11,6 +11,7 @@ export const loadWorkspace=createServerFn({method:'GET'}).handler(async()=>{
  const {developmentMail}=await import('./platform/operator-auth.server')
  try{
   const query=new URL(getRequestUrl()).searchParams,route=readLocation(query.toString())
+  query.set('view',route.view)
   if(route.landing)query.set('landing','1')
   const value=await workspaceSnapshot(await requestRepository().authenticated(getRequestHeaders()),query)
   const snapshot={...value,data:value.data?{...value.data,key:windowKey(route)}:null}

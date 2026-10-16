@@ -2985,7 +2985,7 @@
       "executable": false
     },
     "src/chat/api.ts": {
-      "sha256": "543242ecfd868ad01d60cd905a464f0aaf5d2947c43b27ddfdf86bae379fa9b6",
+      "sha256": "a7ec76289fc1e90da551171fc6f09d5dc274c38a8db5f0428628e40d7733f561",
       "executable": false
     },
     "src/chat/AttentionView.tsx": {
@@ -2997,11 +2997,11 @@
       "executable": false
     },
     "src/chat/Composer.tsx": {
-      "sha256": "ad4d50ddcb9fcbdd2958dd3b0366bbcade23edee6536143594da3196e5e297f6",
+      "sha256": "3749c7a1aa32fcce8cfdf0f650fa7b3caf3965727053a416728cc06978530618",
       "executable": false
     },
     "src/chat/ConversationView.tsx": {
-      "sha256": "9b3c4f3695efba9fb8467d7d5128a48de82044beb4c5b58d27538a8d2d51d0de",
+      "sha256": "e9eb7b0b8de9f67d4cc81e327544b500ddcaa17389efff6e076827bcddc139ba",
       "executable": false
     },
     "src/chat/dialog-focus.ts": {
@@ -3021,7 +3021,7 @@
       "executable": false
     },
     "src/chat/location.ts": {
-      "sha256": "829ad350c88f0adb30f37fc37e09e8868d3924e483298f5942a5d054d954aed1",
+      "sha256": "bfcb655034fcb666ab8b1229ca07accf590b30f99b59f005adc45da42b567204",
       "executable": false
     },
     "src/chat/MessageRow.tsx": {
@@ -3077,11 +3077,11 @@
       "executable": false
     },
     "src/chat/useWorkspace.ts": {
-      "sha256": "47e1c88cabab543c245d840057b73c56cca2126557a791a9fee4102b1d720f31",
+      "sha256": "c4c699f3c5cf742522295488481e51ab878507be635940b71522bf76e1eb5050",
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "9c7bb178cb09c2f8ffe14c3878911d7819ea8744392d027e532b74dd0380cee6",
+      "sha256": "1aca230ac8cc84411ea16deb94f830314e3d6d79d25f4dd26a0c7be42d889997",
       "executable": false
     },
     "src/client.tsx": {
@@ -3609,7 +3609,7 @@
       "executable": false
     },
     "src/loaders.ts": {
-      "sha256": "5ea729a6a04d3db5ea06327c4e32b81a4ecda6e2ff7f192c52ae8a9a1a4e4518",
+      "sha256": "72717a4ae93ed98ad301519ff4ff98a0ec7121f9ad270b8c652e9d2d67072489",
       "executable": false
     },
     "src/NotFound.tsx": {
@@ -3825,7 +3825,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "40956ed5662f47abc281842713ab3f9d3cfe7d919d25be23b59711564a983dfd",
+      "sha256": "0a45b9f1616ed44bd27ed77b28fe923e040f2666477f80c475258390a91f952d",
       "executable": false
     },
     "src/site/pages.tsx": {

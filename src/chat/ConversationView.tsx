@@ -8,8 +8,8 @@ import {OutcomeCard} from './OutcomeCard'
 import {useReadVisibility} from './useReadVisibility'
 import {conversationName} from './Navigation'
 import {IconBack,IconBell,IconClose,IconPlus} from './icons'
-type Props={user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
-export function ConversationView({user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,onRead,mutate,onError,onAction,onDiscuss}:Props) {
+type Props={user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
+export function ConversationView({user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,sendMessage,onRead,mutate,onError,onAction,onDiscuss}:Props) {
  const log=useRef<HTMLDivElement>(null),threadLog=useRef<HTMLDivElement>(null)
  const showOutcomes=route.panel==='outcomes',[peek,setPeek]=useState<string|null>(null)
  useEffect(()=>{if(!showOutcomes)setPeek(null)},[showOutcomes])
@@ -80,7 +80,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
   else if(route.landing&&route.thread&&!target?.parent)navigate({thread:null,focus:null,landing:true},true)
  },[route.thread,route.focus,route.landing,data.rootWindow.target,navigate])
  useEffect(()=>{if(route.focus&&data.outcomes.some(o=>o.id===route.focus)){if(route.panel!=='outcomes')navigate({panel:'outcomes'},true);requestAnimationFrame(()=>{const card=document.getElementById('outcome-'+route.focus);card?.scrollIntoView({block:'start'});card?.focus({preventScroll:true})})}},[route.focus,data.outcomes])
- const sent=async()=>{if(!isCurrent())return;const positioned=Boolean(route.before||route.threadBefore||route.focus);if(positioned)navigate({landing:false,before:null,threadBefore:null,focus:null});else if(route.landing)navigate({landing:false},true);await refresh();requestAnimationFrame(()=>{const container=activeLog.current;if(isCurrent()&&container)container.scrollTop=container.scrollHeight})}
+ const sent=async()=>{if(!isCurrent())return;requestAnimationFrame(()=>{const container=activeLog.current;if(isCurrent()&&container)container.scrollTop=container.scrollHeight})}
  const latest=(inThread=false)=>{
   const current=inThread?threadCurrent:conversationCurrent
   if(!current())return
@@ -132,7 +132,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
     </div>
     {showLatest&&<button className="jump-latest soft-button" onClick={()=>latest()}>Latest messages</button>}
    </div>
-   <Composer key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} onSent={sent} onError={onError}/>
+   <Composer key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&root&&!showOutcomes?<>
@@ -145,7 +145,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
      </div>
      {showLatestReplies&&<button className="jump-latest soft-button" onClick={()=>latest(true)}>Latest replies</button>}
     </div>
-    {!root.deleted&&!root.immutable&&<Composer key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} onSent={sent} onError={onError}/>}
+    {!root.deleted&&!root.immutable&&<Composer key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
    </>:outcomesPanel}
   </aside>
  </div>

@@ -8,7 +8,7 @@ type Intent={body:string;intent:string;parent:string|null;attachments:string[];m
 type Draft={body:string;files:FileRecord[];recipient:string;urgent:boolean;reason:string;pending:Intent|null;upload:PendingUpload|null}
 const blank=():Draft=>({body:'',files:[],recipient:'',urgent:false,reason:'',pending:null,upload:null})
 function read(key:string):Draft{try{return {...blank(),...JSON.parse(sessionStorage.getItem(key)||'{}')}}catch{return blank()}}
-export function Composer({user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,onSent,onError}:{user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
+export function Composer({user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,sendMessage,onSent,onError}:{user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
  const fieldId=useId()
  const key=`nook:draft:${user.id}:${conversation}:${parent||'root'}`
  const isCurrent=usePrivateScope(privateSignal,key)
@@ -24,7 +24,7 @@ export function Composer({user,conversation,name,parent,members,privateSignal,vi
   setBusy(true);const end=beginWrite()
   try{
    const current=draftRef.current,pending=current.pending||{body:current.body,intent:crypto.randomUUID(),parent,attachments:current.files.map(f=>f.id),mentions:current.recipient?[current.recipient]:[],urgent:current.urgent,urgentReason:current.urgent?current.reason:null}
-   save({...current,pending});await api(`conversations/${conversation}/messages`,pending)
+   save({...current,pending});await sendMessage(pending)
    if(!active())return
    save(blank());sessionStorage.removeItem(key);setRetry(false);await onSent();if(active())textarea.current?.focus()
   }catch(e){if(!active())return;if(e instanceof ApiError&&[400,403,413,415,422].includes(e.status)){save({...draftRef.current,pending:null});setRetry(false)}else setRetry(true);onError(e)}finally{end();if(active())setBusy(false)}

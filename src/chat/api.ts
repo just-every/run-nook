@@ -37,13 +37,22 @@ async function replay(conversation:string,after:number){
 }
 export async function workspace(route:LocationState,previous:Projection|null):Promise<WorkspaceSnapshot>{
  const events=previous?await replay(previous.conversation,previous.frontier):null
+ const query=routeQuery(route)
+ if(previous?.rootWindow.target&&!events?.erased)query.set('target',previous.rootWindow.target.id)
+ const next=await api<WorkspaceSnapshot & {attention:Attention & Page<Attention['items'][number]>}>('workspace?'+query)
+ return completeSnapshot({...next,data:next.data?{...next.data,key:windowKey(route),newMessageCount:events?.newMessageCount??0,frontier:events?.cursor??next.data.frontier}:null})
+}
+function routeQuery(route:LocationState){
  const query=new URLSearchParams({view:route.view})
  for(const key of ['conversation','thread','focus','panel','before','threadBefore'] as const)if(route[key])query.set(key,route[key]!)
  if(route.landing)query.set('landing','1')
  if(window.matchMedia('(max-width: 850px)').matches)query.set('mobile','1')
- if(previous?.rootWindow.target&&!events?.erased)query.set('target',previous.rootWindow.target.id)
- const next=await api<WorkspaceSnapshot & {attention:Attention & Page<Attention['items'][number]>}>('workspace?'+query)
- return completeSnapshot({...next,data:next.data?{...next.data,key:windowKey(route),newMessageCount:events?.newMessageCount??0,frontier:events?.cursor??next.data.frontier}:null})
+ return query
+}
+export async function sendWorkspace(route:LocationState,input:unknown){
+ const query=routeQuery(route);query.set('workspace','1')
+ const result=await api<{workspace:WorkspaceSnapshot}>(`conversations/${route.conversation}/messages?${query}`,input),next=result.workspace
+ return completeSnapshot({...next,data:next.data?{...next.data,key:windowKey(route)}:null})
 }
 export async function completeSnapshot(next:WorkspaceSnapshot){
  const [attention,outcomes]=await Promise.all([attentionPages(next.attention as Attention & Page<Attention['items'][number]>),next.data?outcomeHistory(next.data.conversation,next.data.outcomes):[]])

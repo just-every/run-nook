@@ -14,7 +14,7 @@ export function useLocation(initial?:LocationState) {
   state.landing=typeof next.landing==='boolean'?next.landing:selecting?!explicitPosition:positionSpecified?false:route.landing&&state.view==='chat'
   const p=new URLSearchParams();p.set('view',state.view)
   for(const key of ['conversation','thread','focus','panel','before','threadBefore','q'] as const)if(state[key])p.set(key,state[key]!)
-  history[replace?'replaceState':'pushState'](null,'','/app?'+p);setRoute(state)
+  setRoute(state);history[replace?'replaceState':'pushState'](null,'','/app?'+p)
  }
  return {route,navigate}
 }
