@@ -37,7 +37,7 @@ async function replay(conversation:string,after:number){
 }
 export async function workspace(route:LocationState,previous:Projection|null):Promise<WorkspaceSnapshot>{
  const events=previous?await replay(previous.conversation,previous.frontier):null
- const query=new URLSearchParams()
+ const query=new URLSearchParams({view:route.view})
  for(const key of ['conversation','thread','focus','panel','before','threadBefore'] as const)if(route[key])query.set(key,route[key]!)
  if(route.landing)query.set('landing','1')
  if(window.matchMedia('(max-width: 850px)').matches)query.set('mobile','1')

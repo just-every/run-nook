@@ -8,7 +8,7 @@ type Intent={body:string;intent:string;parent:string|null;attachments:string[];m
 type Draft={body:string;files:FileRecord[];recipient:string;urgent:boolean;reason:string;pending:Intent|null;upload:PendingUpload|null}
 const blank=():Draft=>({body:'',files:[],recipient:'',urgent:false,reason:'',pending:null,upload:null})
 function read(key:string):Draft{try{return {...blank(),...JSON.parse(sessionStorage.getItem(key)||'{}')}}catch{return blank()}}
-export function Composer({user,conversation,name,parent,members,privateSignal,viewCurrent,onSent,onError}:{user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
+export function Composer({user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,onSent,onError}:{user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
  const fieldId=useId()
  const key=`nook:draft:${user.id}:${conversation}:${parent||'root'}`
  const isCurrent=usePrivateScope(privateSignal,key)
@@ -21,13 +21,13 @@ export function Composer({user,conversation,name,parent,members,privateSignal,vi
  const upload=useAttachmentUpload({conversation,isCurrent:active,getPending:()=>draftRef.current.upload,getCount:()=>draftRef.current.files.length,onPending:pending=>save({...draftRef.current,upload:pending}),onUploaded:file=>save({...draftRef.current,upload:null,files:[...draftRef.current.files,file]}),onError})
  async function send(){
   if(!active()||busy||upload.isBusy()||draftRef.current.upload)return
-  setBusy(true)
+  setBusy(true);const end=beginWrite()
   try{
    const current=draftRef.current,pending=current.pending||{body:current.body,intent:crypto.randomUUID(),parent,attachments:current.files.map(f=>f.id),mentions:current.recipient?[current.recipient]:[],urgent:current.urgent,urgentReason:current.urgent?current.reason:null}
    save({...current,pending});await api(`conversations/${conversation}/messages`,pending)
    if(!active())return
    save(blank());sessionStorage.removeItem(key);setRetry(false);await onSent();if(active())textarea.current?.focus()
-  }catch(e){if(!active())return;if(e instanceof ApiError&&[400,403,413,415,422].includes(e.status)){save({...draftRef.current,pending:null});setRetry(false)}else setRetry(true);onError(e)}finally{if(active())setBusy(false)}
+  }catch(e){if(!active())return;if(e instanceof ApiError&&[400,403,413,415,422].includes(e.status)){save({...draftRef.current,pending:null});setRetry(false)}else setRetry(true);onError(e)}finally{end();if(active())setBusy(false)}
  }
  async function remove(id:string){if(!active())return;try{await api(`attachments/${id}`,{delete:true},'PATCH');save({...draftRef.current,files:draftRef.current.files.filter(a=>a.id!==id)})}catch(e){if(active())onError(e)}}
  const locked=busy||Boolean(draft.pending)

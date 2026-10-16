@@ -1,3 +1,4 @@
+import {browseChannels} from '../../team/channels.server'
 import {Fault} from '../../family/team-chat/domain'
 import {allowedGrant} from '../../team/access'
 import {notifySettings} from '../../notify/preferences'
@@ -11,14 +12,16 @@ import {attentionSignature} from './workspace-signature'
 // checks current session/membership in its data snapshot. Continuations stay
 // bounded at their existing public endpoints.
 export async function workspaceSnapshot(c:Context,query:URLSearchParams){
- const [user,conversations,users,attention,notify,pushSync,projection,signature]=await Promise.all([
-  read(c,'me'),namedConversations(c),read(c,'users'),read(c,'attention'),
+ const identity=read(c,'me')
+ const [user,conversations,users,attention,notify,pushSync,projection,signature,channelPage]=await Promise.all([
+  identity,namedConversations(c),read(c,'users'),read(c,'attention'),
   notifySettings(c),pushSnapshot(c.env,c.uid),
   query.get('conversation')?conversationProjection(c,query).then(data=>({data,error:null})).catch((error:unknown)=>{if(error instanceof Fault&&[403,404].includes(error.status))return {data:null,error:{status:error.status,message:error.message}};throw error}):null,
   c.one(attentionSignature,[c.uid,c.uid]),
+  (query.get('view')??'channels')==='channels'?identity.then(user=>user.mode==='member'?browseChannels(c):null):null,
  ])
  await c.check()
- return {user,conversations,users,attention,notify,pushSync,data:projection?.data??null,dataError:projection?.error??null,signature:signature.v}
+ return {user,conversations,users,attention,notify,pushSync,channelPage,data:projection?.data??null,dataError:projection?.error??null,signature:signature.v}
 }
 export async function readAcknowledgement(c:Context,id:string){
  const [conversations,pushSync]=await Promise.all([read(c,'conversations'),pushSnapshot(c.env,c.uid)])

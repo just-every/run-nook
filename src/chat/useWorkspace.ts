@@ -8,7 +8,7 @@ const emptyAttention:Attention={items:[],deferredCount:0,observedAt:0,dndUntil:n
 export function useWorkspace(initial:InitialWorkspace,route:LocationState) {
  const [user,setUser]=useState(initial.user),[attentionLoaded,setAttentionLoaded]=useState(false),[conversations,setConversations]=useState(initial.conversations),[users,setUsers]=useState<Person[]>([]),[data,setData]=useState<Projection|null>(null),[attention,setAttention]=useState<Attention>(emptyAttention),[error,setError]=useState(''),[loading,setLoading]=useState(false),[revision,setRevision]=useState(0),[connected,setConnected]=useState(false),[accessEpoch,setAccessEpoch]=useState(0)
  const [snapshot,setSnapshot]=useState<WorkspaceSnapshot|null>(null)
- const latest=useRef(initial.snapshot??null),bootstrapped=useRef(false),hints=useRef(new Map<string,number>())
+ const latest=useRef(initial.snapshot??null),bootstrapped=useRef(false),writes=useRef(0),hints=useRef(new Map<string,number>())
  const current=useRef(route),cache=useRef<Projection|null>(null),generation=useRef(0),running=useRef<{signal:AbortSignal;promise:Promise<void>}|null>(null),again=useRef(false)
  const privateAccess=useRef({user:initial.user.id,controller:new AbortController()})
  // The live socket's 4001 close and a 401 response can both report a lost session;
@@ -62,6 +62,10 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState) {
   const pending={signal:privateSignal,promise:task()};running.current=pending
   try{await pending.promise}finally{if(running.current===pending)running.current=null;if(!privateSignal.aborted)setLoading(false)}
  },[onError,clearPrivate,privateSignal])
+ const beginWrite=useCallback(()=>{
+  writes.current++
+  return ()=>{writes.current=Math.max(0,writes.current-1);if(!privateSignal.aborted&&!writes.current&&(again.current||hints.current.size)&&!running.current)void refresh()}
+ },[refresh,privateSignal])
  const onRead=useCallback(async(ack:ReadAcknowledgement)=>{
   if(privateSignal.aborted||ack.user!==initial.user.id)return
   const previous=latest.current
@@ -91,13 +95,13 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState) {
    if(stopped||privateSignal.aborted)return
    socket=new WebSocket(`${location.protocol==='https:'?'wss:':'ws:'}//${location.host}/api/live`)
    socket.onopen=()=>{if(privateSignal.aborted)return;attempt=0;socketReady.current=true;setConnected(true)}
-   socket.onmessage=event=>{const hint=JSON.parse(event.data);if(hint.type==='ready'){const snapshot=latest.current,same=snapshot&&snapshot.signature===hint.signature&&snapshot.conversations.length===hint.conversations.length&&(!snapshot.data||!hint.conversations.some((c:{id:string;seq:number})=>c.id===snapshot.data?.conversation&&c.seq>snapshot.data.frontier))&&hint.conversations.every((c:{id:string;seq:number})=>snapshot.conversations.some(old=>old.id===c.id&&old.seq===c.seq));if(!same)void refresh();return}if(typeof hint.conversation==='string'&&Number.isSafeInteger(hint.frontier)){hints.current.set(hint.conversation,Math.max(hints.current.get(hint.conversation)??0,hint.frontier));if(!running.current)void refresh()}else void refresh()}
+   socket.onmessage=event=>{const hint=JSON.parse(event.data);if(hint.type==='ready'){const snapshot=latest.current,same=snapshot&&snapshot.signature===hint.signature&&snapshot.conversations.length===hint.conversations.length&&(!snapshot.data||!hint.conversations.some((c:{id:string;seq:number})=>c.id===snapshot.data?.conversation&&c.seq>snapshot.data.frontier))&&hint.conversations.every((c:{id:string;seq:number})=>snapshot.conversations.some(old=>old.id===c.id&&old.seq===c.seq));if(!same)void refresh();return}if(typeof hint.conversation==='string'&&Number.isSafeInteger(hint.frontier)){hints.current.set(hint.conversation,Math.max(hints.current.get(hint.conversation)??0,hint.frontier));if(!writes.current&&!running.current)void refresh()}else if(writes.current)again.current=true;else void refresh()}
    socket.onclose=event=>{if(!stopped&&!privateSignal.aborted){socketReady.current=false;setConnected(false);if(event.code===4001){onError(new ApiError(401,'Sign in required'));return}if(event.code===4003){clearPrivate();setError('You no longer have access to this conversation.');return}void refresh();reconnect=setTimeout(connect,Math.min(30000,1000*2**attempt++))}}
    socket.onerror=()=>socket?.close()
   }
   connect();window.addEventListener('focus',wake);window.addEventListener('online',wake);document.addEventListener('visibilitychange',wake)
   return ()=>{stopped=true;socketReady.current=false;clearTimeout(reconnect);socket?.close();window.removeEventListener('focus',wake);window.removeEventListener('online',wake);document.removeEventListener('visibilitychange',wake)}
  },[refresh,clearPrivate,onError,privateSignal])
- async function mutate<T>(path:string,input:unknown,method?:string):Promise<T>{try{if(privateSignal.aborted)throw Error('This workspace view is no longer active.');setError('');const result=await api<T>(path,input,method);if(privateSignal.aborted)throw Error('This workspace view is no longer active.');await refresh();if(privateSignal.aborted)throw Error('This workspace view is no longer active.');return result}catch(e){if(!privateSignal.aborted){onError(e);if(e instanceof ApiError&&e.status===409)await refresh()}throw e}}
- return {snapshot,user,attentionLoaded,conversations,users,data:data===cache.current&&data?.key===windowKey(route)?data:null,attention,error,setError,loading,revision,accessEpoch,privateSignal,conversationCurrent,threadCurrent,connected,refresh,onRead,mutate,onError,clearPrivate}
+ async function mutate<T>(path:string,input:unknown,method?:string):Promise<T>{const end=beginWrite();try{if(privateSignal.aborted)throw Error('This workspace view is no longer active.');setError('');const result=await api<T>(path,input,method);if(privateSignal.aborted)throw Error('This workspace view is no longer active.');await refresh();if(privateSignal.aborted)throw Error('This workspace view is no longer active.');return result}catch(e){if(!privateSignal.aborted){onError(e);if(e instanceof ApiError&&e.status===409)await refresh()}throw e}finally{end()}}
+ return {snapshot,user,attentionLoaded,conversations,users,data:data===cache.current&&data?.key===windowKey(route)?data:null,attention,error,setError,loading,revision,accessEpoch,privateSignal,conversationCurrent,threadCurrent,connected,refresh,beginWrite,onRead,mutate,onError,clearPrivate}
 }

@@ -20,6 +20,6 @@ export type DialogState = {kind:'new-message'}|{kind:'new-channel'}|{kind:'detai
 
 export type Page<T> = {items:T[];cursor:string;hasMore:boolean}
 
-export type WorkspaceSnapshot={signature:string;dataError?:{status:number;message:string}|null;user:Person;conversations:Conversation[];users:Person[];attention:Attention;data:Projection|null;notify:Awaited<ReturnType<typeof notifySettings>>;pushSync:{active:string[];badge:number}}
+export type WorkspaceSnapshot={channelPage?:{items:{id:string;name:string}[];cursor:string|null}|null;signature:string;dataError?:{status:number;message:string}|null;user:Person;conversations:Conversation[];users:Person[];attention:Attention;data:Projection|null;notify:Awaited<ReturnType<typeof notifySettings>>;pushSync:{active:string[];badge:number}}
 
 export type ReadAcknowledgement={user:string;conversation:string;conversations:Conversation[];pushSync:WorkspaceSnapshot['pushSync']}
