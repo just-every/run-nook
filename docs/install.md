@@ -33,10 +33,20 @@ set `OWNER_EMAIL` to your real email address when you run `rer deploy`; rer clai
 the hosted owner automatically, with no manual setup-token step. Sign in by email
 at the address deploy prints. See [Updating and deploying](updating.md).
 
-## Try email-link sign-in locally
+## Invite a teammate locally
 
-Open the `RER_OPEN` link first to unlock this checkout, then visit `/signin`, request a link, open the newest message in Nook's local outbox and choose **Confirm**. The local development mail stays in this checkout; no external mail provider is used. In rer 0.2.20, `rer dev --login` uses the same automatic owner entry as `rer dev`; the `rer outbox` command is retired.
+Start with the owner: open `RER_OPEN` and finish `/setup`, then create a channel.
+In the same browser, open `/auth/dev/enter?as=member` to create the independent
+local account `member@dev.localhost`. Return to `/auth/dev/enter?as=owner` and
+add that member through the channel's **Details** control. Open
+`/auth/dev/enter?as=member` again to use the channel as the teammate.
+
+Use `as=admin` or `as=guest` at the same route to try those local personas.
+A fresh browser must first open `RER_OPEN`. Local personas use fixed development
+addresses; they do not accept invitations addressed to arbitrary email accounts.
+Local development sends and stores no email and has no mail viewer.
+`rer dev --login` uses the same automatic owner entry as `rer dev`.
 
 ## Use the guided installer
 
-If you prefer a browser walkthrough, run `node scripts/install.mjs`. It opens the guided installer for the same local setup. Use [Your team](your-team.md) after setup to invite people and select their channel access.
+If you prefer a browser walkthrough, run `node scripts/install.mjs`. It opens the guided installer for the same local setup. Use [Your team](your-team.md) after setup to try local teammates or invite people to a hosted workspace and select their channel access.

@@ -11,7 +11,8 @@ import { createHash,scryptSync } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import {signIn,invite} from './auth-support.mjs'
 import {devKey} from './dev-key.mjs'
-import {workerEnvironment} from './worker-environment.mjs'
+import {mailRuntime} from './mail-runtime.mjs'
+import {mailEdge} from './mail-edge.mjs'
 
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
@@ -27,6 +28,7 @@ const {fromCrossJSON} = coreRequire('seroval')
 const routerPackage = coreRequire.resolve('@tanstack/router-core/package.json')
 const routerMetadata = JSON.parse(await readFile(routerPackage,'utf8'))
 const {defaultSerovalPlugins} = await import(pathToFileURL(resolve(dirname(routerPackage),routerMetadata.exports['.'].import.default)))
+const provider=mailEdge();
 let worker,output = '',origin,checks = 0,bootstrapCookie,lossConfig
 const sessionSecret=crypto.randomUUID()+crypto.randomUUID(),setupToken=crypto.randomUUID()+crypto.randomUUID()
 const evidence = {clause:'BASE-ACCESS-002',runtime:'emitted Worker with local D1',wire:'parameterless GET; x-tsr-serverFn=true; same-origin; identical headers and URL for all session controls',matrix:[],checks:[]}
@@ -36,14 +38,10 @@ const facts = async () => (await sql("SELECT (SELECT count(*) FROM nook_events) 
 async function start(port,{envFile}={}) {
  await released(port)
  origin=`http://127.0.0.1:${port}`; output=''
- await writeFile(resolve(state,'runtime.vars'),`AUTH_ORIGIN=${origin}\nRER_DEV_ORIGIN=${origin}\nAUTH_LOCAL=true\nOWNER_EMAIL=nativeowner@example.test\nSESSION_SECRET=${sessionSecret}\nSETUP_TOKEN=${setupToken}\nMAIL_PROVIDER=development\nMAIL_FROM=auth@localhost.test\nRER_DEV_KEY=${devKey}\n`,{mode:0o600})
- // Inspector sockets need no stable origin. Let workerd allocate one atomically
- // on every start rather than assuming the app's neighbouring port is free.
- worker=spawn(process.execPath,[...cli,'dev','--env-file',envFile??resolve(state,'runtime.vars'),'--local','--config',lossConfig?.path??'dist/server/wrangler.json','--persist-to',state,'--ip','127.0.0.1','--port',String(port),'--inspector-port','0','--show-interactive-dev-session=false'],{cwd:root,env:workerEnvironment(env),stdio:['ignore','pipe','pipe']})
- worker.stdout.on('data',c=>output+=c);worker.stderr.on('data',c=>output+=c)
- for(let i=0;i<160;i++) { if(worker.exitCode !== null) throw new Error(output); try { if((await fetch(origin+'/health')).ok) return } catch {} await new Promise(ok=>setTimeout(ok,125)) } throw new Error(output)
+ const bindings=envFile?Object.fromEntries((await readFile(envFile,'utf8')).trim().split('\n').filter(line=>line.includes('=')).map(line=>{const at=line.indexOf('=');return [line.slice(0,at),line.slice(at+1)]})):{};
+ worker=await mailRuntime({root,state,origin,bindings:{OWNER_EMAIL:'nativeowner@example.test',SESSION_SECRET:sessionSecret,SETUP_TOKEN:setupToken,RER_DEV_KEY:devKey,...bindings},configPath:lossConfig?.path,edge:provider});
 }
-async function stop() { if(worker && worker.exitCode === null) { worker.kill('SIGTERM'); await new Promise(ok=>worker.once('exit',ok)) } }
+async function stop(){if(worker){const current=worker;worker=undefined;await current.close()}}
 async function request(path,{method='GET',body,cookie='',status=200,extra={}}={}) {
  const response=await fetch(origin+path,{method,redirect:'manual',headers:{origin,...(cookie?{cookie}:{}),...(body!==undefined?{'content-type':'application/json'}:{}),...extra},body:body===undefined?undefined:JSON.stringify(body)})
  const raw=await response.text(); assert.equal(response.status,status,`${method} ${path}: ${raw}`)

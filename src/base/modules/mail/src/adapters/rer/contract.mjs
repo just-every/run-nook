@@ -1,4 +1,5 @@
 import { fail } from '../../core/errors.mjs';
+import { rerListHeaderField } from './list-headers.mjs';
 
 // The relay's own List-Unsubscribe rule: one or two <https:…>/<mailto:…> entries.
 const listEntries = /^[ \t]*<([^<>\s]+)>[ \t]*(?:,[ \t]*<([^<>\s]+)>[ \t]*)?$/;
@@ -17,7 +18,9 @@ export function rerHeaderFields(headers = {}) {
   const fields = {};
   for (const [name, value] of Object.entries(headers)) {
     const lower = name.toLowerCase();
-    if (lower === 'auto-submitted') {
+    const field = rerListHeaderField(lower, value);
+    if (field) fields[field] = value;
+    else if (lower === 'auto-submitted') {
       if (value.trim().toLowerCase() !== 'auto-generated') fail('unsupported_provider_setting');
     } else if (lower === 'list-unsubscribe') fields.listUnsubscribe = value;
     else if (lower === 'list-unsubscribe-post') {
@@ -41,7 +44,7 @@ export function rerHeaderFields(headers = {}) {
 export function validateRerMessage(message) {
   if (message.to.length !== 1) fail('rer_one_recipient_required');
   // The relay cannot preserve these features. Refuse them rather than silently
-  // dropping recipients, attachments or threading.
+  // dropping recipients or attachments.
   if (['cc', 'bcc', 'replyTo', 'attachments'].some(field => message[field] !== undefined)) fail('unsupported_provider_setting');
   rerHeaderFields(message.headers);
   if (!message.subject.trim() || message.subject.length > 200) fail('invalid_subject');

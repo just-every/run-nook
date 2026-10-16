@@ -45,7 +45,7 @@ RER Managed sets up sign-in and notification email automatically. You need no ma
 
 ## Check a deploy locally
 
-Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment, then run the dry run before a real deployment. rer 0.2.20 validates production sign-in configuration before building:
+Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment, then run the dry run before a real deployment. rer 0.2.25 validates production sign-in configuration before building:
 
 ```sh
 rer deploy --dry-run
@@ -70,7 +70,7 @@ A dry run checks the build and settings only. It does not deploy anything, so ru
 
 After the deploy is healthy, `rer deploy` claims the hosted owner from `OWNER_EMAIL` automatically. There is no manual setup-token step. Open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you.
 
-Nook pins `@runeditrun/rer` 0.2.20. The hosted front page shows **Sign in** as soon as the owner is claimed; the separate first-run confirmation follows sign-in.
+Nook pins `@runeditrun/rer` 0.2.25. The hosted front page shows **Sign in** as soon as the owner is claimed; the separate first-run confirmation follows sign-in.
 
 If the owner already exists, the deploy keeps it. If the claim or the token's removal fails, the deploy says so and what to run; running the same `rer deploy` again finishes it.
 
@@ -93,7 +93,7 @@ git pull --ff-only
 CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer deploy
 ```
 
-`--ff-only` refuses rather than merging when your checkout has its own commits; private settings, `.rer/` and `exports/` are not tracked and stay as they are. If the new source pins a different `rer`, `rer deploy` installs it first. Use the same Cloudflare account, and the same `--environment NAME` if the first deploy used one. The Worker keeps its secrets, so the mail inputs are not needed again after the 0.2.20 mail-binding update. When first updating from Nook 0.3.0 or earlier, supply `MAIL_FROM` and `SENDGRID_API_KEY` once with `rer deploy`: the existing SendGrid input also populates the shared `MAIL_API_KEY` Worker binding required by rer 0.2.20.
+`--ff-only` refuses rather than merging when your checkout has its own commits; private settings, `.rer/` and `exports/` are not tracked and stay as they are. If the new source pins a different `rer`, `rer deploy` installs it first. Use the same Cloudflare account, and the same `--environment NAME` if the first deploy used one. The Worker keeps its secrets, so the mail inputs are not needed again after the shared mail-binding update. When first updating from Nook 0.3.0 or earlier, supply `MAIL_FROM` and `SENDGRID_API_KEY` once with `rer deploy`: the existing SendGrid input also populates the shared `MAIL_API_KEY` Worker binding required by rer 0.2.25.
 
 Migrations only add to the database, so the existing workspace keeps its data, sessions and settings. If the deploy fails, nothing is removed: fix the cause and run the same deploy again.
 

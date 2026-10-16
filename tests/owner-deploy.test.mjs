@@ -37,7 +37,7 @@ test('rer deploy builds the committed source, applies every migration to a new D
  assert.equal(first.result.ok,true)
  assert.equal(first.provider.deployed,true)
  assert.deepEqual(first.provider.databases,[JSON.parse(readFileSync(join(root,'owner-deployment.json'),'utf8')).project.split('/')[1]+'-production-db'])
- for(const table of ['oa_operators','rer_mail_development_outbox','workspace'])assert.ok(first.provider.tables[0].includes(table),table)
+ for(const table of ['oa_operators','workspace'])assert.ok(first.provider.tables[0].includes(table),table)
  assert.equal(first.provider.claims,1,'rer deploy claims the hosted owner once')
  assert.equal(first.provider.secrets.includes('SETUP_TOKEN'),false,'the spent setup token is retired from the Worker')
  for(const value of Object.values(owner))assert.ok(!first.output.includes(value),'deploy output never prints a secret')

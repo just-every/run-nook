@@ -237,6 +237,6 @@ export async function runBrowser(origin,destination){
     checks.push(`${label}: immediate membership removal clears thread, outcomes, attention and search`)
    }finally{await aliceContext.close();await bobContext.close()}
   }
-  const report={status:'passed',runtime:'actual Worker/D1 with operator-auth local outbox',checks,captures};await writeFile(resolve(destination,'browser-results.json'),JSON.stringify(report,null,2)+'\n');return report
+  const report={status:'passed',runtime:'actual Worker/D1 with fake mail provider network edge',checks,captures};await writeFile(resolve(destination,'browser-results.json'),JSON.stringify(report,null,2)+'\n');return report
  }finally{await browser.close()}
 }

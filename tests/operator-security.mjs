@@ -32,11 +32,11 @@ export async function runOperatorSecurity({origin,owner,member,setupToken,reques
   await post('/api/team/access',{user:id,mode:'member',scopes:[welcome.id]});
   assert.deepEqual(await memberships(),[welcome.id],'inactive member is regranted exactly the chosen channels');
  });
- await check('workspace owner cannot read a member-only DM and outbox answers only the dev key and rejects hostile caller metadata before reads',async()=>{
+ await check('workspace owner cannot read a member-only DM and retired captured-mail routes remain absent',async()=>{
   const second=await invite(origin,owner.cookie,'DmParticipant');const dm=(await post('/api/conversations',{name:'Members only',kind:'dm',participants:[second.user.id]},member.cookie)).data;
   await post(`/api/conversations/${dm.id}/messages`,{body:'Private member bytes',intent:'member-secret'},member.cookie);
   for(const path of [`/api/conversations/${dm.id}/messages`,`/api/conversations/${dm.id}/members`,`/api/conversations/${dm.id}/replay`,`/api/conversations/${dm.id}/outcomes`,`/api/conversations/${dm.id}/preferences`])await get(path,owner.cookie,403);
   await get(`/api/conversations/${dm.id}/messages`,second.cookie);
-  await request('/__dev/outbox',{status:404});await request('/__dev/outbox',{status:200,extra:keyHeaders});await request('/__dev/outbox',{status:404,extra:{...keyHeaders,origin:'https://hostile.invalid'}});await request('/__dev/outbox',{status:404,extra:{...keyHeaders,'sec-fetch-site':'cross-site'}});
+  await request('/__dev/outbox',{status:404});await request('/__dev/outbox',{status:404,extra:keyHeaders});await request('/__dev/outbox',{status:404,extra:{...keyHeaders,origin:'https://hostile.invalid'}});await request('/__dev/outbox',{status:404,extra:{...keyHeaders,'sec-fetch-site':'cross-site'}});
  });
 }

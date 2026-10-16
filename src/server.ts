@@ -19,7 +19,7 @@ import {context} from './platform/storage/context'
 import {outcomeVersions} from './platform/storage/outcome-history'
 import {readUpload} from './platform/storage/files'
 export {ChatHub} from './platform/storage/live'
-import {authRoute,outboxRoute,operatorAuth,acceptsRequest,authBindings} from './platform/operator-auth.server'
+import {authRoute,operatorAuth,acceptsRequest,authBindings} from './platform/operator-auth.server'
 import {firstRunResponse} from './base/setup'
 import {lobbyResponse} from './base/lobby'
 import {baseOwnerClaim,setupStateResponse} from './base/setup-state'
@@ -32,7 +32,7 @@ import {deploymentHealth} from './base/deployment-health'
 
 const api = new Hono<{ Bindings: Bindings }>()
 api.use('*', async (c,next) => { c.header('Cache-Control','no-store'); c.header('X-Content-Type-Options','nosniff'); await next() })
-api.get('/health', async c => { operatorAuth(c.env); await c.env.DB.prepare('SELECT singleton FROM oa_bootstrap LIMIT 1').all();await c.env.DB.prepare('SELECT id FROM rer_mail_development_outbox LIMIT 1').all();return c.json({status:'ok',...deploymentHealth(c.env)}) })
+api.get('/health', async c => { operatorAuth(c.env); await c.env.DB.prepare('SELECT singleton FROM oa_bootstrap LIMIT 1').all();return c.json({status:'ok',...deploymentHealth(c.env)}) })
 api.all('/api/*', async c => {
  const req = c.req.raw, url = new URL(req.url), repository = new Repository(c.env)
  let input: Record<string,any> = {}
@@ -110,7 +110,6 @@ export default withDemo({
   if(url.pathname==='/auth/bootstrap' && (await env.DB.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>())?.authority!=='normalized')return Response.json({error:'offline_storage_conversion_required'},{status:503,headers:{'Cache-Control':'no-store'}})
   if(url.pathname==='/auth/bootstrap' && !await env.DB.prepare('SELECT singleton FROM oa_bootstrap WHERE singleton=1').first() && await env.DB.prepare('SELECT id FROM nook_actors LIMIT 1').first())return Response.json({error:'identity_recovery_required'},{status:409,headers:{'Cache-Control':'no-store'}})
   if(url.pathname.startsWith('/auth/')) return await authRoute(env,request)??new Response('Not found',{status:404})
-  if(url.pathname==='/__dev/key'||url.pathname==='/__dev/outbox'||url.pathname.startsWith('/__dev/outbox/')) return await outboxRoute(env,request)??new Response('Not found',{status:404})
   if(url.pathname === '/setup' || url.pathname === '/app' || url.pathname.startsWith('/app/')) {
    // An owner who has not confirmed first-run setup is sent to /setup from every app route.
    const setup = await firstRunResponse(request,env,operatorAuth(env),{theme})

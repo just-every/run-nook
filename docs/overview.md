@@ -18,4 +18,4 @@ Nook has no AI feature. Sign-in, invitation and opted-in notification email uses
 
 ## What has not been proven
 
-Hosted operation on a real Cloudflare account and live mail delivery, capacity beyond the recorded local measurement, real-device Web Push receipt (email is proven against the local development outbox; Web Push has a local encrypted network-edge proof), integrations, and a full accessibility audit have not been proven. Local synthetic verification is not a production, parity or adoption claim.
+Hosted operation on a real Cloudflare account and live mail delivery, capacity beyond the recorded local measurement, real-device Web Push receipt (email tests use a fake provider at the network edge; Web Push has a local encrypted network-edge proof), integrations, and a full accessibility audit have not been proven. Local synthetic verification is not a production, parity or adoption claim.

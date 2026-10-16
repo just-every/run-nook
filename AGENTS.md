@@ -49,7 +49,12 @@ Add a guide in `docs/site.json` with its Markdown source and navigation label; g
 Local sign-in is a dev session behind this checkout's dev key (`rer dev` opens signed in; the
 personas live in `src/dev/personas.ts` and are admitted by `src/dev/admit.server.ts`; only
 `src/server.dev.ts` loads the dev layer, never `src/server.ts`, and `rer build` refuses output that
-contains it) or the key-gated Base outbox (open RER_OPEN, then request a link at `/signin`). Never commit `.dev.vars`,
+contains it). Open `RER_OPEN` as the owner first and finish `/setup`. In that
+same browser, `/auth/dev/enter?as=member` creates `member@dev.localhost`; return via
+`/auth/dev/enter?as=owner` to grant channel access through the channel’s **Details** control, then re-enter
+as the member. `admin` and `guest` also have local personas. Arbitrary email
+invitations are for hosted installations. Local development sends and stores no
+mail and has no mail viewer. Never commit `.dev.vars`,
 `.rer/`, `.seed/`, `.wrangler/`, archives or production secrets, and never print
 their values. Deploys, provider calls and publication need the owner's approval.
 Tests use isolated synthetic workspaces; do not weaken an assertion to make a

@@ -18,7 +18,6 @@ export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceServic
   sql("UPDATE nook_conversations SET name='Direct conversation' WHERE kind='dm' AND (owner=? OR id IN (SELECT conversation FROM nook_dm_roster WHERE user=?))",target,target),
   sql("UPDATE nook_events SET kind='erasure',actor=NULL,object=lower(hex(randomblob(16))) WHERE actor=? OR object=?",target,target),
   sql('UPDATE oa_domain_rules SET created_by=NULL WHERE created_by=?',target),sql('UPDATE oa_first_run SET completed_by=NULL WHERE completed_by=?',target),
-  sql('DELETE FROM rer_mail_development_outbox WHERE instr(lower(message),lower(?))>0 OR instr(message,?)>0 OR instr(message,?)>0',person.email,person.display_name,target),
   ...(historical?[sql('INSERT INTO nook_erased_actors VALUES(?)',target)]:[]),...await f.row('nook_actors',{id:target}),...await f.row('oa_operators',{id:target}),
   sql('UPDATE oa_bootstrap SET claim_id=lower(hex(randomblob(16))) WHERE claim_id=?',target),sql('DELETE FROM nook_actors WHERE id=?',target),sql('DELETE FROM oa_operators WHERE id=?',target))
  // Owner claim proof keeps its authority nonce, never the erased person's values.

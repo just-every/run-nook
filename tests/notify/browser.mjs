@@ -3,7 +3,7 @@ import {mkdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import {expect} from '@playwright/test';
 // The member's "Email me when…" block and the owner's workspace line, at 1440 and
-// 390, from the outbox-signed-in sessions. The first pass turns mentions on with
+// 390, from the native sign-in sessions. The first pass turns mentions on with
 // the keyboard only; axe runs when the caller supplies its published source.
 export async function settingsBrowser({browser,origin,rowan,sam,evidence,axeSource,phase}){
  await mkdir(evidence,{recursive:true});
@@ -21,7 +21,10 @@ export async function settingsBrowser({browser,origin,rowan,sam,evidence,axeSour
     await expect.poll(async()=>(await (await context.request.get(origin+'/api/notify')).json()).mentions).toBe(true);
    }
    if(phase==='not-delivered'&&who==='member')await expect(block.getByRole('list')).toContainText('Casey');
-   if(who==='owner')await expect(block.getByRole('link',{name:'Set up mail'})).toBeVisible();
+   if(who==='owner'){
+    const settings=await (await context.request.get(origin+'/api/notify')).json();assert.equal(settings.workspace.sending,'provider');
+    await expect(block.getByRole('link',{name:'Set up mail'})).toHaveCount(0);
+   }
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'the block fits the viewport');
    await block.scrollIntoViewIfNeeded();await page.screenshot({path:join(evidence,`${phase}-${who}-${width}.png`)});
    if(axeSource){

@@ -13,7 +13,7 @@
     {
       "id": "mail",
       "label": "Local sign-in",
-      "help": "Hosting requires a mail provider and a verified sender. Local development uses the local outbox."
+      "help": "Hosting requires a mail provider and a verified sender. Local development sends and stores no email."
     }
   ],
   "fields": [
@@ -71,7 +71,7 @@
       "options": [
         {
           "value": "development",
-          "label": "Local development outbox"
+          "label": "Local development (no email sent)"
         }
       ],
       "group": "mail"
@@ -82,7 +82,7 @@
       "kind": "email",
       "required": true,
       "group": "mail",
-      "help": "Sign-in links stay in the local development outbox.",
+      "help": "Placeholder sender only. Local sign-in uses the private RER_OPEN development session; no email is sent or stored.",
       "default": "auth@localhost.test"
     },
     {

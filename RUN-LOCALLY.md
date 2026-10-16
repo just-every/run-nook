@@ -78,18 +78,13 @@ this computer set differently (each distinct pin keeps its own copy), and about
 a checkout on another volume than your home folder, where pnpm cannot clone
 packages from its store.
 
-After `RER_READY`, a seed with dev identity normally prints `RER_SIGNED_IN EMAIL`
+After `RER_READY`, a seed with dev identity prints `RER_SIGNED_IN EMAIL`
 and `RER_OPEN URL`: open that URL on this computer and the app opens signed in
-as the owner, at `/setup` until first-run is finished. With `rer dev --login`,
-open the printed `RER_OPEN` URL at `/__dev/key`: it exchanges the fragment's dev
-key for a cookie, then opens `/__dev/outbox`. Treat `RER_OPEN` as a credential;
-do not share it. A fresh browser needs that exchange before the outbox can open.
-For seeds without dev identity, open the printed `RER_SIGN_IN` URL directly.
-In the outbox, follow the newest ordinary sign-in link and finish first-run setup
-at `/setup`. Until first-run completion is stored durably, app routes send the
-signed-in owner to `/setup`; signed-out visitors sign in and return there.
-Once complete, `/setup` opens the app or settings. The local outbox sends no
-external email.
+as the owner, at `/setup` until first-run is finished. Legacy `rer dev --login`
+uses the same automatic sign-in. Treat `RER_OPEN` as a credential; do not share it.
+Until first-run completion is stored durably, app routes send the signed-in owner
+to `/setup`; signed-out visitors sign in and return there. Once complete,
+`/setup` opens the app or settings.
 
 The saved local port is used; a first setup saves the first free port from 8787. Explicit ports are decimal
 integers from 1 through 65535 and must be free; a busy requested port fails
@@ -146,13 +141,10 @@ after the application health check. With dev identity it then prints
 checkout's dev key in its fragment: opening it signs the browser in through a
 real dev session, and the key is removed from the address bar and kept only as a
 host-only cookie. Treat that line as a credential and open it only on this
-computer. A dev-only badge switches between the owner, signed out and the
-seed's personas (`admin@dev.localhost` and so on). `rer dev --as PERSONA` starts as
-another persona or `signed-out`; `rer dev --login` turns dev identity off and uses
-the outbox: it prints `RER_SIGN_IN URL` and a `RER_OPEN` URL that opens that
-outbox. Choose the newest ordinary sign-in message and follow its link. No
-external email is sent. A successful sign-in consumes the link once. Seeds
-without dev identity print only `RER_SIGN_IN URL` for the local outbox.
+computer. The app name and browser title identify Dev mode.
+`rer dev --as PERSONA` starts as
+another persona or `signed-out`. Legacy `rer dev --login` uses the same automatic
+sign-in. Captured email and its browser UI have been retired.
 
 Dev and preview are managed servers. In a terminal the first invocation stays
 active while serving; without one, `rer dev` returns once the app is ready and
@@ -217,14 +209,14 @@ Other supported operations are `rer verify`, `rer deploy` and `rer describe`.
 Use `rer dev --stop` or `rer preview --stop` (or Ctrl-C) before `rer build`,
 `rer verify`, `rer reset` and data transfer. Reset removes only the
 declared local inventory: local database/storage state, owner and sessions,
-outbox, CLI and installer bookkeeping, and generated private settings. It
+CLI and installer bookkeeping, and generated private settings. It
 keeps source, dependencies, exports and deployment receipts. It refuses active
 operations and ambiguous or linked state.
 
 Local export creates a private archive with an integrity receipt and explicit
 exclusions. Import validates the archive and restores into an empty destination.
 After import, run setup to establish the owner and local configuration. Auth,
-outbox, private settings and transient runtime state are excluded. Remote
+private settings and transient runtime state are excluded. Remote
 transfer is unsupported by the maintained references and fails visibly.
 
 Real deployment uses the owner-account procedure and its private credentials.
@@ -248,7 +240,7 @@ installer state is `.seed/installer`, and the default private settings file is
 `.dev.vars` with mode 0600. Setup writes this checkout's dev key to
 `.rer/local/dev-key.env` (mode 0600); a repeat setup keeps it and reset removes
 it, which also ends every browser's earlier dev cookie. Dev sign-in, personas
-and the development outbox answer only a request holding that key's cookie, so
+answer only a request holding that key's cookie, so
 a tunnel or local proxy to the app cannot reach them; anything else returns 404.
 Any local user or process that can read the checkout can read the key and sign
 in as the owner. `rer deploy` refuses the key, and `rer build` refuses output
@@ -257,7 +249,7 @@ that contains the dev layer.
 The first-party command profile is optional for independently authored
 projects. They may keep their own runtime, tools, installer, commands and
 provider choices. RER executes only their declared operations and does not
-impose Base pins, aliases, outbox or state layout.
+impose Base pins, aliases or state layout.
 
 ## The front door (opt-in)
 
@@ -304,3 +296,33 @@ addresses). `rer door restart` drains and restarts the door: checkouts that
 were starting finish starting, and open tabs reconnect. After a reboot or logout the door needs `rer door start` (or any
 `rer dev` in a checkout that uses it); `rer door stop` and `rer door disable`
 stop it and opt this computer out.
+
+## If hosted deployment stops
+
+Deploy and removal errors name the failing Cloudflare method and path (without
+credentials or query values), its error code and message when supplied, and the
+command that continues with the same environment. Keep `.rer/deploy/` private:
+it records ownership so a repeat reuses resources safely.
+
+`provider-incomplete-pagination` means Cloudflare advertised another list page
+but rer could not read a valid continuation, or returned a full page with no
+pagination information. A short list without `result_info`, a missing or empty
+terminal cursor, and a reached `total_pages` are complete. No resource is assumed
+absent from an incomplete list. Check the named call in Cloudflare, resolve the
+provider error or incomplete response, then rerun the printed command with the
+same account and environment. Do not delete the deployment record.
+
+`owner-claim-failed` means the hosted owner bootstrap did not confirm a claim.
+The app may already be deployed while sign-in remains unavailable. The error
+names the observed bootstrap POST, HTTP status and application error code when
+available; a seed hook that fails before an exchange can only report its hook
+cause. Correct that cause (for example, owner authorization or a supplied setup
+token that differs from the deployed token), then rerun the same deploy. Leave
+a stale supplied setup token unset so rer can issue a fresh token. A completed
+claim retires the one-time token; deploying again keeps an existing owner.
+
+`rer deploy --environment NAME --remove --yes` detaches the environment's queue
+consumers before deleting its queues, then confirms their absence in Cloudflare.
+It waits up to a minute for a deleted queue to disappear from the account list.
+If the provider still lists it, the error names the queue and the call; keep the
+record and rerun the printed removal command after resolving the cause.

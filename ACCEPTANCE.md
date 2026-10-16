@@ -15,8 +15,9 @@ while the README and pilot journeys use the ordinary rer development workflow:
 - private file staging, binding, download and erasure;
 - calm attention (follow, mute, quiet time, snooze, done) independent of unread
   and of accepted work;
-- `tests/notify-journey.mjs` (C14 email): a fresh local install with outbox
-  sign-in and rer's development outbox as the only mail edge, through public
+- `tests/notify-journey.mjs` (C14 email): the emitted Worker with local D1,
+  native email-link sign-in and a fake provider at the test harness's network edge,
+  through public
   doors: email off until a member turns it on (with the keyboard, at 1440 and
   390), one email for a mention while away and for a commitment proposal,
   nothing for a routine follow or during quiet time, urgent requests held or
@@ -34,20 +35,20 @@ while the README and pilot journeys use the ordinary rer development workflow:
   document conversion and root SQLite/native archive procedures are separate
   offline recovery paths in `OPERATIONS.md`; this is not recovery from every
   earlier format;
-- the rer command contract: setup, first-run `/setup`, outbox sign-in, preview,
+- the rer command contract: setup, first-run `/setup`, key-gated local dev sign-in, preview,
   doctor, reset, export/import round trip, the guided installer, owner-account
   deploy against a fake Cloudflare account, and a fresh-clone README journey;
 - normalized storage: an install from migrations 0001–0003 moving forward, 25 MiB R2 attachments and
   Durable Object fanout with replay from D1;
 - two people in two sessions at 1440 and 390: own sends never unread, viewing
   clears unread, Attention Accept and Discuss, threads and URL state;
-- day-one team surfaces at 1440 and 390: invitation through the outbox, guest
-  scope, deactivation, channel browse and join, reactions, inline image preview,
+- day-one team surfaces at 1440 and 390: hosted invitation semantics at the fake
+  provider edge, local teammate entry, guest scope, deactivation, channel browse and join, reactions, inline image preview,
   tab-title count and retirement of duplicate open-tab OS notifications;
 - Slack export import on synthetic fixtures: review, resumable apply,
   imported history and search, guarded undo, and the wizard at 1440 and 390;
-- `tests/pilot-journey.mjs`: a fresh local rer install/setup, two ordinary
-  outbox-authenticated browser sessions at 1440 and 390, invitation, private
+- `tests/pilot-journey.mjs`: a fresh local rer install/setup, two independent
+  dev-authenticated browser sessions at 1440 and 390, local teammate entry, private
   conversation/file, reviewed realistic Slack history with supplied files and
   an explicit missing-file choice, a complete root/thread/file census, source
   reactions/mentions/edited markers, selected audiences and revocation, unchanged
@@ -79,7 +80,7 @@ critical axe findings. This bounded check does not cover imported-author
 erasure and is not a full accessibility audit or WCAG claim. Hosted operation
 on a real Cloudflare account, live mail-provider delivery, capacity beyond local
 measurement, integrations and real-team adoption remain unproven. Email has a
-local development-outbox journey; C15 Web Push has the bounded local checks
+local journey with a fake provider at the network edge; C15 Web Push has the bounded local checks
 below. Neither establishes delivery to a real inbox, browser or device. The
 installable PWA is shipped, but offline operation is not supported: its service
 worker caches no requests or private content. There is no native iOS/Android

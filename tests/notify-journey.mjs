@@ -8,7 +8,7 @@ import {people} from './notify/people.mjs';
 import {settingsBrowser} from './notify/browser.mjs';
 import {axeSource} from './accessibility.mjs';
 // C14 through public doors: two people's sessions, the real run loop (ChatHub
-// alarm) and rer's development outbox as the only mail edge. Optional
+// alarm) and a fake network provider as the only mail edge. Optional
 // --evidence DIR keeps the screenshots; pinned axe checks always run.
 const root=resolve(import.meta.dirname,'..'),flag=name=>{const i=process.argv.indexOf(name);return i>0?process.argv[i+1]:undefined;};
 const evidence=flag('--evidence')??await mkdtemp(join(tmpdir(),'nook-notify-shots-'));
@@ -17,7 +17,7 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const installation=await notifyInstallation(root);let browser;
 const step=name=>console.log('NOTIFY '+name);
 try{
- const {signIn,invite}=people(installation),notices=to=>installation.outbox().filter(m=>m.to.includes(to)&&m.text.includes('/notify/off?t='));
+ const {signIn,invite}=people(installation),notices=to=>installation.messages().filter(m=>m.to.includes(to)&&m.text.includes('/notify/off?t='));
  const waitFor=async(check,label,ms=60_000)=>{const deadline=Date.now()+ms;for(;;){const value=await check();if(value)return value;if(Date.now()>deadline)throw Error('Timed out: '+label);await sleep(500);}};
  const about=(to,conversation)=>notices(to).filter(m=>m.text.includes('conversation='+conversation));
  const expectOne=async(to,conversation,label)=>{const [mail]=await waitFor(()=>about(to,conversation).length&&about(to,conversation),label);await sleep(QUIET);assert.equal(about(to,conversation).length,1,label+': exactly one email');return mail;};
@@ -78,17 +78,17 @@ try{
  const deleted=await room('Deleted',rowan),gone=await say(sam,deleted,'Soon deleted',{mentions:[rowan.user.id]});await sam.patch(`/api/messages/${gone.id}`,{delete:true,version:gone.version});
  await expectNone(rowan.email,removed,'removed from the conversation before the email was built');await expectNone(rowan.email,deleted,'message deleted before the email was built');
 
- step('a refused send retries, shows as not delivered, then succeeds once');
+ step('a rate-limited send retries, shows as not delivered, then succeeds once');
  await casey.patch('/api/notify',{mentions:true});const fault=await room('Fault',rowan,casey);
- await installation.sql("CREATE TRIGGER notify_journey_outbox_refuses BEFORE INSERT ON rer_mail_development_outbox BEGIN SELECT RAISE(ABORT,'refused'); END");
+ installation.setMailStatus(429);
  try{
   await say(rowan,fault,'Casey, can you take this?',{mentions:[casey.user.id]});
   const shown=await waitFor(async()=>(await rowan.get('/api/notify')).notDelivered.find(p=>p.recipient==='Casey'),'the sender sees email not delivered');
-  assert.equal(shown.error,'refused');assert.equal(shown.retrying,true);
-  const owner=await sam.get('/api/notify');assert.equal(owner.workspace.notDelivered.error,'refused','the owner sees it too');
+  assert.equal(shown.error,'rate-limited');assert.equal(shown.retrying,true);
+  const owner=await sam.get('/api/notify');assert.equal(owner.workspace.notDelivered.error,'rate-limited','the owner sees it too');
   await settingsBrowser({browser,origin:installation.origin,rowan,sam,evidence,axeSource,phase:'not-delivered'});
-  await waitFor(()=>installation.read("SELECT attempts FROM nook_notify_queue WHERE conversation=? AND attempts>=2",fault).length,'a second scheduled attempt',90_000);
- }finally{await installation.sql('DROP TRIGGER IF EXISTS notify_journey_outbox_refuses');}
+  await waitFor(async()=>(await installation.read("SELECT attempts FROM nook_notify_queue WHERE conversation=? AND attempts>=2",fault)).length,'a second scheduled attempt',90_000);
+ }finally{installation.setMailStatus(202);}
  await waitFor(()=>about(casey.email,fault).length,'delivery after the fault clears',120_000);await sleep(QUIET);
  assert.equal(about(casey.email,fault).length,1,'no duplicate after the retries');
  assert.equal((await rowan.get('/api/notify')).notDelivered.length,0,'the not-delivered line clears after success');
@@ -96,9 +96,9 @@ try{
  step('restart mid-queue');
  // A queued retry waits across a stop: the queue is in D1 and the alarm resumes it.
  const restart=await room('Restart',casey);
- await installation.sql("CREATE TRIGGER notify_journey_outbox_refuses BEFORE INSERT ON rer_mail_development_outbox BEGIN SELECT RAISE(ABORT,'refused'); END");
- try{await say(sam,restart,'Before the restart',{mentions:[casey.user.id]});await waitFor(()=>installation.read("SELECT 1 FROM nook_notify_queue WHERE conversation=? AND state='retrying'",restart).length,'a queued retry');await installation.stop();}
- finally{await installation.sql('DROP TRIGGER IF EXISTS notify_journey_outbox_refuses');}
+ installation.setMailStatus(429);
+ try{await say(sam,restart,'Before the restart',{mentions:[casey.user.id]});await waitFor(async()=>(await installation.read("SELECT 1 FROM nook_notify_queue WHERE conversation=? AND state='retrying'",restart)).length,'a queued retry');await installation.stop();}
+ finally{installation.setMailStatus(202);}
  assert.equal(about(casey.email,restart).length,0);await installation.start();
  await expectOne(casey.email,restart,'a restarted Worker loses and duplicates nothing');
 
@@ -115,7 +115,7 @@ try{
  const after=await room('After turning off',rowan);await say(sam,after,'Still there?',{mentions:[rowan.user.id]});await expectNone(rowan.email,after,'the next event sends nothing');
 
  step('no message text or file names in any email');
- const all=installation.outbox().filter(m=>m.text.includes('/notify/off?t='));assert.ok(all.length>=7);
+ const all=installation.messages().filter(m=>m.text.includes('/notify/off?t='));assert.ok(all.length>=7);
  for(const m of all)assert.ok(!(m.subject+m.text).includes(CANARY)&&!(m.subject+m.text).includes(FILE_CANARY)&&!(m.subject+m.text).includes('notify-canary'),'email carries no message text, file name or urgent reason');
- console.log(`NOTIFY-JOURNEY passed: ${all.length} notification emails through the development outbox; screenshots in ${evidence}`);
+ console.log(`NOTIFY-JOURNEY passed: ${all.length} notification emails through the fake network provider; screenshots in ${evidence}`);
 }finally{await browser?.close();await installation.close();if(!flag('--evidence'))await rm(evidence,{recursive:true,force:true});}

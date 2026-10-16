@@ -6,7 +6,7 @@ yourself. Every operation goes through
 and `rer describe` the flags. The guided installer
 (`node scripts/install.mjs`) runs the same lifecycle from
 `scripts/installer/local-setup.json`, generated from the hosted `rer-setup.json`
-with local outbox inputs in place of production mail credentials.
+without production mail credentials; local entry uses the checkout's dev session.
 
 ## Local installation
 
@@ -14,13 +14,20 @@ with local outbox inputs in place of production mail credentials.
 `OWNER_EMAIL`, and saves `AUTH_ORIGIN`, `AUTH_LOCAL`, `MAIL_PROVIDER` and
 `MAIL_FROM` in owner-only `.dev.vars`. A rerun keeps those bytes and the owner;
 a different owner or origin refuses with exit 4. Never print `.dev.vars` or put
-its values in a report. Local sign-in uses the Base development outbox at
-`/__dev/outbox`, which checks the configured origin, Host and Fetch Metadata,
-answers only a request that holds this checkout's dev key (`.rer/local/dev-key.env`)
-and is unavailable remotely. `rer dev` opens signed in through a dev session (Nook's
-personas are `admin`, `member` and `guest` at `@dev.localhost`); `--login` uses the same automatic owner entry. Health reads the operator-auth and outbox tables before
-reporting ready. The first owner sign-in lands on `/setup`; confirming it there
-is stored in D1 (`oa_first_run`) and survives setup reruns.
+its values in a report. `rer dev` prints a private `RER_OPEN` link that admits
+this browser using the checkout's dev key (`.rer/local/dev-key.env`) and opens a
+local owner session. Finish `/setup` first; its confirmation is stored in D1
+(`oa_first_run`) and survives setup reruns. `--login` uses the same automatic
+owner entry. Health checks the operator-auth schema before reporting ready.
+
+To try another person, create a channel as the owner, then open
+`/auth/dev/enter?as=member` in that same admitted browser. It creates the
+independent `member@dev.localhost` account. Return through
+`/auth/dev/enter?as=owner`, grant that member channel access with the channel’s **Details** control, and
+re-enter as the member. The `admin` and `guest` personas use the same route.
+A fresh browser must open `RER_OPEN` first. Local personas do not accept
+invitations to arbitrary email addresses. Local development sends and stores no
+mail and has no mail viewer; hosted email invitations keep their ordinary flow.
 
 `doctor` checks local settings from `.dev.vars` and the owner-deploy inputs
 from the shell. After a local setup it exits 3 and names only
@@ -33,7 +40,7 @@ DMs have fixed participants. Owner and admin roles never open other people's DMs
 
 ## Owner-account deploy
 
-Set the mail inputs before either deployment command: rer 0.2.20 checks production
+Set the mail inputs before either deployment command: rer 0.2.25 checks production
 sign-in configuration even for a dry run. `deploy --dry-run` builds and validates
 the Worker, assets, every migration and
 `owner-deployment.json` with no provider request. `deploy` needs
@@ -58,7 +65,7 @@ The owner signs in by email. `rer deploy --remove --yes` deletes what the deploy
 created for the environment; update is `git pull --ff-only` then `rer deploy`.
 Production auth requires the
 exact HTTPS origin, `AUTH_LOCAL=false`, SendGrid mail and Cloudflare's
-`CF-Connecting-IP`; the development outbox does not exist there.
+`CF-Connecting-IP`; local persona entry is unavailable there.
 
 
 ## Email notifications
@@ -68,13 +75,13 @@ C14 in CONTRACT.md is the delivery contract. What an operator needs to know:
 - **Sender.** Notification email uses the same sender as sign-in mail:
   `MAIL_PROVIDER`, `MAIL_FROM` and the provider key in the owner deployment
   (`SENDGRID_API_KEY` for the SendGrid default). The owner-deploy declaration
-  also maps this same input to the shared `MAIL_API_KEY` binding that rer 0.2.20
+  also maps this same input to the shared `MAIL_API_KEY` binding that rer 0.2.25
   validates before deploying. RER Managed assigns `MAIL_PROVIDER=rer`,
   `MAIL_FROM`, `MAIL_RELAY_URL` and a private `MAIL_API_KEY` automatically for
-  sign-in and notifications; no provider account or typed key is needed. Under
-  `rer dev` and `rer preview` mail goes to the development outbox
-  (request a link at `/signin` after opening `RER_OPEN`), and owners see "Email sending is not set up"
-  in their settings until a real provider is configured.
+  sign-in and notifications; no provider account or typed key is needed.
+  Local development sends and stores no mail. Without a hosted provider, owners
+  see "Email sending is not set up" in their settings. Email tests use a fake
+  provider only at the test harness's network edge.
 - **Off by default.** Nothing is emailed until a member turns it on under
   Profile → "Email me when…". Upgrading an installation changes no one's choice
   and queues nothing.
@@ -107,7 +114,7 @@ C14 in CONTRACT.md is the delivery contract. What an operator needs to know:
 `scripts/local/transfer.mjs`, with live product hooks that validate semantics,
 media hashes, private memberships, outcomes, attention and importer receipts
 before any restored row is published. Archives exclude sessions, sign-in tokens,
-the bootstrap claim, outbox mail and generated settings. Import needs an empty,
+the bootstrap claim and generated settings. Import needs an empty,
 stopped destination and `--yes`. `reset --yes` removes exactly the inventory it
 lists: local D1 state, `.rer/local`, `.seed/installer` and the generated
 `.dev.vars` files.
@@ -242,7 +249,9 @@ here; importing content deliberately does not authorize a new owner.
    `--port PORT` to setup if needed). Setup retains the recovered bootstrap claim
    and IDs. Open the new `RER_OPEN` link, confirm **Finish setup** if offered,
    and check conversations, decisions, membership and downloaded file bytes.
-   Other recovered people use ordinary sign-in under their retained identities.
+   Local dev entry opens the mapped owner; fixed local personas do not
+   impersonate arbitrary recovered mailboxes. Other recovered identities need
+   ordinary hosted email sign-in with a configured mail provider.
    Keep the archive, mapping and recovery files private; do not commit them.
 
 ## Upgrading from the single workspace document
@@ -317,7 +326,7 @@ confirmation; POST commits the Base owner bootstrap and the permanent
 `0012_owner_claim.sql` is the byte-exact Base ledger and
 `0013_claim_storage_fence.sql` refuses a claim over restored people that still
 need identity recovery. Never put a claim, setup token or cookie in a URL or a
-log. The local installer keeps its private bootstrap and outbox sign-in.
+log. The local installer keeps its private bootstrap; `rer dev` supplies local owner entry through `RER_OPEN`.
 
 The retained editor authority API uses `RER_MANAGEMENT_ORIGIN` and
 `RER_INSTALLATION_ID`. Its config and identity routes check the current owner
@@ -439,7 +448,7 @@ needs that checkout, so verify does not run it.
 
 Use **Erase message** for an accessible channel message, or **You → Team → Erase member** for an eligible other account. Owners/admins have no operator DM erasure door. Member erasure includes authored DM content. Owners can erase privileged other accounts; admins only accounts with the member role, including guest access. Self and last-active-owner erasure are refused. Preview contains counts only; type `ERASE` to commit.
 
-Erasure removes identity/auth credentials, invitations/outbox copies, personal state, authored message/revision/file content and selected imported copies. Authored decisions/commitments retain scope, kind, version count and state without performing any work transition. Other authors' accepted work retains its state, with erased assignee/action attribution removed. Separate content-free history retains thread positions, opaque structural actor IDs where needed, fixed DM roster/counters and immutable import ownership. Those structural IDs remain correlated. Retry digests preserve send/upload idempotency without storing caller-provided intent text. Event/audit actor and subject references are severed; random receipt IDs map only to counts and times after completion. `src/team/erasure/graph.ts` declares retained exceptions.
+Erasure removes identity/auth credentials, invitations, personal state, authored message/revision/file content and selected imported copies. Authored decisions/commitments retain scope, kind, version count and state without performing any work transition. Other authors' accepted work retains its state, with erased assignee/action attribution removed. Separate content-free history retains thread positions, opaque structural actor IDs where needed, fixed DM roster/counters and immutable import ownership. Those structural IDs remain correlated. Retry digests preserve send/upload idempotency without storing caller-provided intent text. Event/audit actor and subject references are severed; random receipt IDs map only to counts and times after completion. `src/team/erasure/graph.ts` declares retained exceptions.
 
 The original live message, attachment and actor rows are absent and their real primary keys are fenced through Base portability. D1 removal, transfer invalidation, fences and blob obligations commit together. R2 deletion follows and a receipt stays pending until every blob is verified absent. Background continuation processes bounded chunks while its stored operator session/role remains current; an eligible operator can transfer continuation to their current authority with **Pending erasures → Resume erasure**. Closing the dialog does not cancel accepted work. Uncertain upload attempts deliberately block completion: stop the runtime, run the existing paused `node scripts/storage/reconcile.mjs --paused --persist=.wrangler/state/v3` procedure for the authoritative local state, restart and resume. Never delete its work tables to obtain a completed receipt.
 

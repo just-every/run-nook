@@ -40,7 +40,7 @@ export const commandAdapter=createCommandAdapter(lifecycle,{
  site:{entry:'src/site/pages.tsx',output:'dist/site',declaration:'deploy-site.json',config:'vite.site.config.ts'},
  publicPages:['/','/signin','/docs','/docs/install'],
  // Local dev identity: the local-only Worker entry, the build output rer build scans for the dev layer,
- // and the kept end-to-end email-link test.
+ // and the kept end-to-end local teammate journey.
  devIdentity:{entry:'src/server.dev.ts',output:['dist'],emailLinkTest:'tests/readme-journey.mjs'},
  localOnlyKeys:['RER_DEV_ORIGIN','RER_DEV_IDENTITY'],
 });

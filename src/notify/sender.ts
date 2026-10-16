@@ -6,9 +6,9 @@ import type {ErrorClass} from './queue'
 export type Mail={deliveryId:string;to:string;subject:string;text:string}
 export type SendResult={ok:true}|{ok:false;error:ErrorClass;retryable:boolean}
 export type Send=(mail:Mail)=>Promise<SendResult>
-/** Where notification mail goes: the local development outbox, a configured provider, or nowhere. */
-export function sendingSetup(env:any):'outbox'|'provider'|'not-set-up'{try{mailSender(env);return env.RER_DEMO==='1'?'provider':developmentMail(env)?'outbox':'provider'}catch{return 'not-set-up'}}
-// Accepted by the provider (or captured by the development outbox) is not proof
+/** Where notification mail goes: silent development suppression, a configured provider, or nowhere. */
+export function sendingSetup(env:any):'suppressed'|'provider'|'not-set-up'{try{mailSender(env);return env.RER_DEMO==='1'?'provider':developmentMail(env)?'suppressed':'provider'}catch{return 'not-set-up'}}
+// Accepted by the provider is not proof
 // of inbox receipt. A definite refusal or an unconfirmed send is not retried:
 // retrying an uncertain send could deliver it twice.
 export function mailSend(env:any):Send{
@@ -19,8 +19,7 @@ export function mailSend(env:any):Send{
    if(result.status==='accepted'||result.status==='development')return {ok:true}
    if(result.status==='rate_limited')return {ok:false,error:'rate-limited',retryable:true}
    return result.status==='uncertain'?{ok:false,error:'uncertain',retryable:false}:{ok:false,error:'refused',retryable:false}
-  // A malformed message is refused for good. Base reports the development
-  // outbox failing to store a message as development_outbox_failed: retry that.
-  }catch(error){return {ok:false,error:'refused',retryable:!(error instanceof MailValidationError)||(error as {code?:string}).code==='development_outbox_failed'}}
+  // A malformed message is refused for good.
+  }catch(error){return {ok:false,error:'refused',retryable:!(error instanceof MailValidationError)}}
  }
 }

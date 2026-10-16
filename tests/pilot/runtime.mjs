@@ -1,12 +1,13 @@
 import {installDependencies} from '../install-dependencies.mjs';
 import assert from 'node:assert/strict';
 import {execFile,execFileSync,spawn} from 'node:child_process';
-import {copyFile,mkdir,mkdtemp,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import {createServer} from 'node:net';
 import {tmpdir} from 'node:os';
-import {dirname,join} from 'node:path';
+import {join} from 'node:path';
 import {promisify} from 'node:util';
 import {pilotPhase} from './progress.mjs';
+import {copyWorkingTree} from '../working-tree-copy.mjs';
 
 const execute=promisify(execFile);
 const freePort=()=>new Promise((resolve,reject)=>{const server=createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const {port}=server.address();server.close(()=>resolve(port));});});
@@ -37,19 +38,18 @@ export async function pilotInstallation(root){
  };
  try{
   execFileSync('git',['clone','--quiet','--no-hardlinks',root,directory],{stdio:'pipe'});
-  const files=execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean);
-  for(const file of files){await mkdir(dirname(join(directory,file)),{recursive:true});await copyFile(join(root,file),join(directory,file));}
+  await copyWorkingTree(root,directory);
   console.log('PILOT installing isolated working-tree copy');await installDependencies(directory,env);
   const port=await freePort(),origin=`http://127.0.0.1:${port}`;
   console.log('PILOT running real rer setup');const setupOutput=await run('setup','--owner-email','pilot-owner@example.test','--owner-name','Pilot owner','--port',String(port));assert.ok(setupOutput.includes('RER_SETUP_READY'),'rer setup reported ready');
   dev=spawn(process.execPath,['node_modules/@runeditrun/rer/global/rer.mjs','dev','--foreground','--login'],{cwd:directory,env,stdio:['ignore','pipe','pipe'],detached:true});
   let output='';dev.stdout.on('data',chunk=>{output+=chunk;});dev.stderr.on('data',chunk=>{output+=chunk;});
   await new Promise((resolve,reject)=>{const deadline=Date.now()+10*60_000;const timer=setInterval(()=>{if(output.includes(`RER_READY ${origin}`)&&/RER_OPEN (http:\/\/\S+)/.test(output)){clearInterval(timer);resolve();}else if(dev.exitCode!==null||Date.now()>deadline){clearInterval(timer);reject(Error('Pilot dev did not become ready; credential-bearing output withheld'));}},200);});
-  const outbox=/RER_OPEN (http:\/\/\S+)/.exec(output)?.[1];
-  assert.ok(outbox,'rer dev --login opens the real outbox');
+  const open=/RER_OPEN (http:\/\/\S+)/.exec(output)?.[1];
+  assert.ok(open,'rer dev --login opens the local owner identity');
   const key=/^RER_DEV_KEY=(\S+)$/m.exec(await readFile(join(directory,'.rer/local/dev-key.env'),'utf8'))?.[1];
-  assert.ok(key,'fresh setup created its local outbox key');
-  return {origin,outbox,key,run,stop,directory,close:async()=>{await stop();await rm(directory,{recursive:true,force:true});}};
+  assert.ok(key,'fresh setup created its local identity key');
+  return {origin,open,key,run,stop,directory,close:async()=>{await stop();await rm(directory,{recursive:true,force:true});}};
  }catch(error){
   try{await stop();}finally{if(dev&&dev.exitCode===null&&dev.signalCode===null){try{process.kill(-dev.pid,'SIGTERM');}catch{}}await rm(directory,{recursive:true,force:true});}
   throw error;

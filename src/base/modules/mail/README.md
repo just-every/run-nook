@@ -161,8 +161,24 @@ values are refused. `List-Unsubscribe` (one or two `<https:…>`/`<mailto:…>`
 entries, at most 2,000 characters) travels as `listUnsubscribe`, and
 `List-Unsubscribe-Post: List-Unsubscribe=One-Click` as `listUnsubscribePost:
 true`, which requires an HTTPS entry. The structured `unsubscribe` request
-assembles the same headers. Other recipients, attachments, reply-to and every
-other header are unsupported and fail before dispatch.
+assembles the same headers.
+
+`List-Id`, `List-Archive`, `List-Help`, `In-Reply-To` and `References` travel as
+`listId`, `listArchive`, `listHelp`, `inReplyTo` and `references`, respectively.
+They match platform's relay validation at `098ba40` (`src/managed-mail/headers.ts`):
+each is a string of at most 2,000 characters, without newlines or controls.
+`List-Id` accepts an optional ASCII phrase or quoted display name followed by an
+angle-bracketed ASCII dot-atom identifier containing a dot (at most 255
+characters). `List-Archive` and `List-Help` accept one or two angle-bracketed
+HTTPS or mailto URLs, using the relay's URL and mailbox checks. These three
+headers allow separator tabs. `In-Reply-To` accepts exactly one `<local@domain>`
+message ID with ASCII dot-atoms or a bracketed domain literal. `References`
+accepts 1–20 such IDs separated by ASCII spaces, without leading/trailing
+spaces, tabs or commas. Invalid values fail locally with `invalid_list_id`,
+`invalid_list_archive`, `invalid_list_help`, `invalid_in_reply_to` or
+`invalid_references`. Values are preserved; raw headers are never forwarded.
+Other recipients, attachments, reply-to and every other header are unsupported
+and fail before dispatch.
 
 HTTP 202 returns `accepted` with no provider message ID. HTTP 400, 401, 402,
 403 and 413 return `rejected`, and so does any 3xx (`provider_redirected`);

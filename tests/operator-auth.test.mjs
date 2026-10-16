@@ -42,7 +42,12 @@ test('configured production auth delivers through the selected mail transport, f
   const preview=await handler(new Request(url,{headers:{Host:url.host}}));assert.equal(preview.status,200);assert.equal(preview.headers.has('set-cookie'),false);assert.equal((await handler(new Request(url,{method:'HEAD',headers:{Host:url.host}}))).headers.has('set-cookie'),false);
   const native=()=>handler(new Request(env.AUTH_ORIGIN+'/auth/confirm',{method:'POST',headers:{Host:new URL(env.AUTH_ORIGIN).host,Origin:env.AUTH_ORIGIN,'CF-Connecting-IP':'192.0.2.20','Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({token:url.searchParams.get('token')})}));
   const confirmed=await native();assert.equal(confirmed.status,303);assert.equal((await native()).status,400);const cookie=confirmed.headers.get('set-cookie').split(';')[0];assert.equal((await call('/auth/session',{method:'GET',headers:{Cookie:cookie}})).status,200);
-  assert.equal(db.sqlite.prepare('SELECT count(*) AS n FROM rer_mail_development_outbox').get().n,0,'production never writes the development inbox');
-  const local={...env,AUTH_LOCAL:'true',AUTH_ORIGIN:'http://127.0.0.1:15820',MAIL_PROVIDER:'development'};assert.equal(developmentMail(local),true);assert.doesNotThrow(()=>createConfiguredAuth(local,brand));assert.throws(()=>createConfiguredAuth({...local,AUTH_ORIGIN:env.AUTH_ORIGIN},brand));
+  assert.equal(db.sqlite.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='rer_mail_development_outbox'").get().n,0,'retired captured mail storage is removed');
+  const local={...env,AUTH_LOCAL:'true',AUTH_ORIGIN:'http://127.0.0.1:15820',MAIL_PROVIDER:'development'};assert.equal(developmentMail(local),true);assert.throws(()=>createConfiguredAuth({...local,AUTH_ORIGIN:env.AUTH_ORIGIN},brand));
+  const localHandler=createAuthHandler(createConfiguredAuth(local,brand)),beforeSuppressed=messages.length;
+  const suppressed=await localHandler(new Request(local.AUTH_ORIGIN+'/auth/magic-link',{method:'POST',headers:{Host:new URL(local.AUTH_ORIGIN).host,Origin:local.AUTH_ORIGIN,'Content-Type':'application/json'},body:JSON.stringify({email:local.OWNER_EMAIL})}));
+  assert.equal(suppressed.status,202,'known local owner sign-in calls the development sender successfully');
+  assert.equal(messages.length,beforeSuppressed,'development sending makes no provider request');
+  assert.equal(db.sqlite.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='rer_mail_development_outbox'").get().n,0,'development sending creates no captured mail storage');
  }finally{globalThis.fetch=fetchBefore;db.close()}
 });

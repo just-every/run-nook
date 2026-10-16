@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
+import {confirmationLink} from './mail-edge.mjs';
 import {tinyPng} from './team-runtime.mjs';
 // The parent supplies and closes its one browser/runtime. This journey closes
-// every context it creates and never writes outbox HTML or credential URLs.
+// every context it creates and never writes provider messages or credential URLs.
 export async function runTeamBrowser({browser,origin,ownerCookie,destination}){
  await mkdir(destination,{recursive:true});const checks=[];
  const [cookieName,...cookieValue]=ownerCookie.split('=');
@@ -17,7 +18,7 @@ export async function runTeamBrowser({browser,origin,ownerCookie,destination}){
    const privateCreate=await ownerContext.request.post(origin+'/api/conversations',{data:{name:'Review '+stamp,kind:'private'}});assert.equal(privateCreate.status(),200);const review=await privateCreate.json();
    await owner.goto(origin+'/app?view=team');const form=owner.locator('.team-invite');await form.getByLabel('Name',{exact:true}).fill(name);await form.getByLabel('Email',{exact:true}).fill(email);await form.getByLabel(channel.name,{exact:true}).check();
    const issued=owner.waitForResponse(r=>r.url()===origin+'/auth/invite'&&r.request().method()==='POST');await form.getByRole('button',{name:'Send invitation',exact:true}).click();assert.equal((await issued).status(),202);
-   async function accept(page,mailbox){await page.goto(origin+'/__dev/outbox');await page.locator('article').filter({hasText:'To: '+mailbox}).first().getByRole('link').first().click();await page.getByRole('link',{name:'Open this link',exact:true}).first().click();assert.equal((await page.request.get(origin+'/auth/session')).status(),401);await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.waitForURL(url=>url.pathname==='/app');}
+   async function accept(page,mailbox){try{await page.goto(confirmationLink(origin,mailbox).href)}catch{throw Error('Native invitation preview failed; credential-bearing browser diagnostics withheld')}assert.equal((await page.request.get(origin+'/auth/session')).status(),401);await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.waitForURL(url=>url.pathname==='/app');}
    await accept(member,email);await member.getByLabel('Message '+channel.name,{exact:true}).fill('Ready to work together');await member.getByLabel('Attach file',{exact:true}).setInputFiles({name:'team-preview.png',mimeType:'image/png',buffer:tinyPng});await member.locator('.staged-files').getByText('team-preview.png',{exact:false}).waitFor();await member.getByRole('button',{name:'Send',exact:true}).click();const row=member.locator('.message').filter({hasText:'Ready to work together'});await row.waitFor();
    await row.getByRole('button',{name:/^Add 👍 reaction/}).click();await row.getByRole('button',{name:/^Remove 👍 reaction/}).waitFor();await row.getByAltText('team-preview.png',{exact:true}).waitFor();assert.equal(await row.getByAltText('team-preview.png',{exact:true}).evaluate(img=>img.complete&&img.naturalWidth>0),true);
    await member.reload();await member.locator('.message').filter({hasText:'Ready to work together'}).getByRole('button',{name:/^Remove 👍 reaction/}).waitFor();
@@ -26,7 +27,7 @@ export async function runTeamBrowser({browser,origin,ownerCookie,destination}){
    const prepare=await ownerContext.request.post(origin+'/api/team/invitations',{data:{email:guestEmail,role:'member',mode:'guest',scopes:[review.id]}});assert.equal(prepare.status(),200);assert.equal((await ownerContext.request.post(origin+'/auth/invite',{headers:{Origin:origin},data:{email:guestEmail,displayName:'Guest '+stamp,role:'member',returnTo:'/app?conversation='+review.id}})).status(),202);await accept(guest,guestEmail);
    await guest.getByLabel('Message '+review.name,{exact:true}).waitFor();assert.equal((await guestContext.request.get(origin+`/api/conversations/${channel.id}/messages`)).status(),403);assert.equal((await guestContext.request.get(origin+'/api/channels')).status(),403);await guest.screenshot({path:join(destination,`team-guest-${width}.png`),fullPage:true});
    const who=await (await memberContext.request.get(origin+'/api/me')).json();assert.equal((await ownerContext.request.post(origin+'/auth/operator/status',{headers:{Origin:origin},data:{operatorId:who.id,status:'inactive'}})).status(),200);await member.waitForURL(url=>url.pathname==='/signin');assert.equal(await member.getByText('Ready to work together',{exact:true}).count(),0);assert.equal((await memberContext.request.get(origin+'/auth/session')).status(),401);await member.screenshot({path:join(destination,`team-deactivated-${width}.png`),fullPage:true});
-   checks.push({width,status:'passed',flows:['owner UI actual Base invitation','outbox GET preview and one-use native confirmation','native image upload and inline private preview','reaction add and persistence','public unjoined directory and join','guest scope denial','existing client clears after deactivation'],credentialsCaptured:false});
+   checks.push({width,status:'passed',flows:['owner UI actual Base invitation','provider link GET preview and one-use native confirmation','native image upload and inline private preview','reaction add and persistence','public unjoined directory and join','guest scope denial','existing client clears after deactivation'],credentialsCaptured:false});
   }finally{await Promise.all([ownerContext.close(),memberContext.close(),guestContext.close()])}
  }
  const report={checks,notificationEvidence:'Separate browser permission/constructor journey required; no OS toast observation claimed',runtime:'parent-owned actual Worker/D1/R2/React',resourcesClosed:true};await writeFile(join(destination,'team-browser-results.json'),JSON.stringify(report,null,2)+'\n');return report;

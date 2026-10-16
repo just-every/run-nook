@@ -12,8 +12,8 @@ export type Screen = 'chat'|'attention'|'channels'|'search'|'you'|'team'
 export type LocationState = { view: Screen; conversation: string|null; thread: string|null; focus: string|null; panel: 'outcomes'|null; before: string|null; threadBefore: string|null; q: string; landing: boolean }
 export type MessageWindow = {items:Message[];root:Message|null;target:{id:string;parent:string|null;root:string}|null;cursor:string|null;freezeCursor?:string|null;hasMore:boolean;hasNewer:boolean;readSeq:number;readBarrierSeq:number|null;readThrough:number;frontier:number}
 export type Projection = { key:string; conversation: string; rootWindow:MessageWindow; threadWindow:MessageWindow|null; outcomes: Outcome[]; members: Person[]; roster:Person[]; preferences: Preferences; frontier: number; newMessageCount:number }
-// developmentOutbox: invitations go to the local development outbox (local mail only).
-export type InitialWorkspace = {user: Person; conversations: Conversation[]; developmentOutbox?: boolean}
+// Local development uses key-gated personas and silently suppresses default mail.
+export type InitialWorkspace = {user: Person; conversations: Conversation[]; localDevelopment?: boolean}
 export type DialogState = {kind:'new-message'}|{kind:'new-channel'}|{kind:'details'}|{kind:'edit';message:Message}|{kind:'delete';message:Message}|{kind:'outcome';source:string|null;outcomeKind:'decision'|'commitment'}|{kind:'revise';outcome:Outcome}
 
 export type Page<T> = {items:T[];cursor:string;hasMore:boolean}

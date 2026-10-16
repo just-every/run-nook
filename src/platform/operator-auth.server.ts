@@ -1,6 +1,4 @@
-import {createAuthHandler,AuthError,devGate,devNotFound} from '../base/modules/operator-auth/index.mjs'
-// @ts-ignore Portable Base development outbox.
-import {createD1DevelopmentOutbox,createDevelopmentOutboxHandler} from '../base/modules/mail/src/development/index.mjs'
+import {createAuthHandler,AuthError} from '../base/modules/operator-auth/index.mjs'
 // @ts-ignore Product configuration uses the portable Base JavaScript API.
 import {authBindings,developmentMail,acceptsRequest,createConfiguredAuth} from './operator-auth-runtime.mjs'
 import branding from '../branding.json'
@@ -16,16 +14,4 @@ export async function authRoute(env:Bindings,request:Request){
   }
   return fontDocumentResponse(await createAuthHandler(operatorAuth(env))(request))
  }catch(error){return Response.json({error:error instanceof AuthError?error.code:'auth_unavailable'},{status:error instanceof AuthError?error.status:503,headers:{'Cache-Control':'no-store'}})}
-}
-// The outbox and the key exchange answer only a local runtime that holds RER_DEV_KEY. A tunnel or
-// local proxy makes remote requests look local, so the outbox also needs the key gate's cookie (or
-// the rer harness's key header); without either it does not exist.
-export async function outboxRoute(bindings:Bindings,request:Request){
- const env=authBindings(bindings);
- if(!developmentMail(env))return devNotFound()
- const gate=devGate({key:env.RER_DEV_KEY,origin:env.AUTH_ORIGIN,local:true})
- if(!gate)return devNotFound()
- if(new URL(request.url).pathname==='/__dev/key')return gate.exchange(request)
- if(!await gate.admits(request))return devNotFound()
- return createDevelopmentOutboxHandler({local:true,outbox:createD1DevelopmentOutbox({db:env.DB}),origin:env.AUTH_ORIGIN})(request)
 }

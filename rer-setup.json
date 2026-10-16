@@ -13,7 +13,7 @@
     {
       "id": "mail",
       "label": "Sign-in email",
-      "help": "Hosting requires a mail provider and a verified sender. Local development uses the local outbox."
+      "help": "Hosting requires a mail provider and a verified sender. Local development sends and stores no email."
     }
   ],
   "fields": [

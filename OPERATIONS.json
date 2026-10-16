@@ -25,8 +25,8 @@
     "SENDGRID_API_KEY"
   ],
   "environmentSources": {
-    "MAIL_PROVIDER": "Hosted SendGrid or Resend in rer-setup.json; the generated local manifest selects the development outbox. See OPERATIONS.md",
-    "MAIL_FROM": "Production sender for the Worker, supplied in the shell or an --env-file on the first deploy; setup keeps a local sender. See OPERATIONS.md",
+    "MAIL_PROVIDER": "Hosted SendGrid or Resend in rer-setup.json; local setup selects development mode, which sends and stores no email. See OPERATIONS.md",
+    "MAIL_FROM": "Production sender for the Worker, supplied in the shell or an --env-file on the first deploy; setup retains a local placeholder sender without sending mail. See OPERATIONS.md",
     "SENDGRID_API_KEY": "Production credential for the selected mail provider; configure hosted mail before deploy, including dry-run. Local setup needs no provider credentials. See OPERATIONS.md",
     "RESEND_API_KEY": "Production credential for the selected mail provider; configure hosted mail before deploy, including dry-run. Local setup needs no provider credentials. See OPERATIONS.md",
     "CLOUDFLARE_EMAIL_API_TOKEN": "Production credential for the selected mail provider; configure hosted mail before deploy, including dry-run. Local setup needs no provider credentials. See OPERATIONS.md",
@@ -54,7 +54,7 @@
         "rer",
         "setup"
       ],
-      "effects": "Generate private settings, build, apply additive local migrations, bootstrap one explicit owner and request an ordinary outbox sign-in; stop temporary descendants.",
+      "effects": "Generate private settings, build, apply additive local migrations and bootstrap one explicit owner; stop temporary descendants. Local dev entry sends and stores no mail.",
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
@@ -68,7 +68,7 @@
         "rer",
         "dev"
       ],
-      "effects": "Serve Vite HMR on explicit loopback through the shared managed lifecycle; health and outbox gate readiness.",
+      "effects": "Serve Vite HMR on explicit loopback through the shared managed lifecycle; check health and open the owner through the per-checkout-key-gated local dev session.",
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
@@ -174,20 +174,6 @@
         "import"
       ],
       "effects": "Confirm and restore a verified Base archive into empty, inactive local state, then recover explicitly mapped identities offline.",
-      "inputs": [
-        "package.json",
-        "scripts/installer/local.mjs",
-        "rer-setup.json",
-        "scripts/installer/local-setup.json"
-      ],
-      "requiredEnvironment": []
-    },
-    "outbox": {
-      "argv": [
-        "rer",
-        "outbox"
-      ],
-      "effects": "Open the configured-loopback development outbox; no external message delivery.",
       "inputs": [
         "package.json",
         "scripts/installer/local.mjs",
@@ -328,6 +314,6 @@
   },
   "health": {
     "path": "/health",
-    "meaning": "D1 operator-auth and development outbox schema are readable; product admission additionally requires normalized storage and active Team access."
+    "meaning": "D1 operator-auth schema is readable; product admission additionally requires normalized storage and active Team access."
   }
 }

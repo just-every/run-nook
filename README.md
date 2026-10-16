@@ -80,22 +80,25 @@ password and keep it on this computer. Your first visit lands on `/setup`:
 confirm the owner account there once and Nook opens the workspace. Until you do,
 every app page sends you back to `/setup`.
 
-A dev-only badge switches between you, signed out and one person for each other
-role: `admin@dev.localhost`, `member@dev.localhost` and `guest@dev.localhost` (a
-guest sees only the first channel). `dev --as member` starts as that person;
-`dev --as signed-out` starts signed out. To sign in the way a real person does,
-open `RER_OPEN` first, visit `/signin` and request a link. Nook opens the local
-outbox: choose the newest sign-in message, follow its link and press **Confirm**.
-No email is sent and no provider account is needed. The legacy `dev --login` flag
-uses the same automatic owner entry as `dev` in rer 0.2.20.
+After the owner finishes setup, create a channel. To try a teammate, open
+`/auth/dev/enter?as=member` in that same browser. This creates the independent
+local account `member@dev.localhost`. Return through
+`/auth/dev/enter?as=owner`, add the member from the channel's **Details** control,
+then open `/auth/dev/enter?as=member` again to use that channel as the member.
+The `admin` and `guest` personas are also available at the same entry route.
+A fresh browser must open `RER_OPEN` before any local persona route works.
+These local personas do not accept invitations to arbitrary email addresses.
+Local development sends and stores no email and has no mail viewer; no mail
+provider account is needed. `rer dev --login` uses the same automatic owner
+entry as `rer dev`.
 
 ```sh
 rer dev --stop
 rer verify             # the complete test suite
 ```
 
-Only people the owner invites can join; a sign-in request for an unknown
-mailbox creates nothing. Prefer a
+On a hosted installation, only people the owner invites can join; a sign-in
+request for an unknown mailbox creates nothing. Prefer a
 browser wizard? `node scripts/install.mjs` opens the same setup as a guided
 installer.
 
@@ -118,7 +121,7 @@ rer import --input exports/nook.rer --yes
 
 The archive holds every conversation, message, decision, commitment, file and
 attention choice with integrity checks. It leaves out sessions, sign-in links,
-outbox mail, push subscriptions/keys/presence, pending deliveries and generated settings. After import, recover the archived people
+push subscriptions/keys/presence, pending deliveries and generated settings. After import, recover the archived people
 before setup using the offline procedure in
 [Restoring a local archive](OPERATIONS.md#restoring-a-local-archive).
 `reset` lists what it will remove and refuses without `--yes`; it keeps source,
@@ -138,7 +141,7 @@ SendGrid or Resend mail options, with your own provider credentials.
 ### Deploy to your own Cloudflare account
 
 Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment before
-the dry run. rer 0.2.20 validates production sign-in configuration before building.
+the dry run. rer 0.2.25 validates production sign-in configuration before building.
 
 ```sh
 rer deploy --dry-run

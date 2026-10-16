@@ -10,7 +10,7 @@ People can read a channel only while they are members. Direct conversations have
 
 Messages and product records are stored in D1; file bytes are stored in the private R2 bucket. A person who can read the installation's local storage or hosted D1 and R2 data can access that stored information. Application roles do not override that storage authority.
 
-Nook has no AI feature. Sign-in, invitation and opted-in notification email uses the provider configured by the workspace owner. Local development outbox mail remains in the local installation. Notification emails contain sender and conversation names and links, never message bodies, file names, urgent reasons or commitment wording.
+Nook has no AI feature. Sign-in, invitation and opted-in notification email uses the provider configured by the workspace owner. Local development sends and stores no email and has no mail viewer; local sign-in uses the checkout's private development session. Notification emails contain sender and conversation names and links, never message bodies, file names, urgent reasons or commitment wording.
 
 ## Push notifications
 

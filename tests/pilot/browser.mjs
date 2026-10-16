@@ -5,27 +5,12 @@ import {importHistory,exerciseUndo} from './imports.mjs';
 import {pilotPhase} from './progress.mjs';
 
 export async function read(context,origin,path){const response=await context.request.get(origin+path);assert.equal(response.status(),200,path);return response.json();}
-async function requestSignIn(page,origin,email){
- try{
-  // Local /signin now offers one-click dev entry (covered by README-JOURNEY).
-  // This pilot still exercises native email proofs, without dev-minted invitations.
-  const response=await page.request.post(origin+'/auth/magic-link',{headers:{origin,accept:'application/json'},data:{email,returnTo:'/app'}});
-  assert.equal(response.status(),202,'native email sign-in request is accepted');
-  assert.equal((await response.json()).status,'accepted');
- }catch{throw Error('Pilot sign-in request failed; browser diagnostics withheld because this step handles authentication.');}
-}
-export async function acceptOutbox(page,origin,email){
- try{
- await page.goto(origin+'/__dev/outbox');
- await page.locator('article').filter({hasText:'To: '+email}).first().getByRole('link').first().click();
- await page.getByRole('link',{name:'Open this link',exact:true}).first().click();
- assert.equal((await page.request.get(origin+'/auth/session')).status(),401,'GET confirmation does not sign in');
- await page.getByRole('button',{name:'Confirm',exact:true}).click();
+async function enterLocal(page,origin,as,open){
+ await page.goto(open??`${origin}/auth/dev/enter?as=${as}&returnTo=/app`);
  await page.waitForURL(url=>['/setup','/app'].includes(url.pathname));
  if(new URL(page.url()).pathname==='/setup'){
   await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Finish setup',exact:true}).click();await page.waitForURL(url=>url.pathname==='/app');
  }
- }catch{throw Error('Pilot outbox confirmation failed; browser diagnostics withheld because this step handles one-use sign-in links.');}
 }
 export async function search(page,origin,query){
  await page.goto(origin+'/app?view=search');await page.getByLabel('Search conversations',{exact:true}).fill(query);
@@ -34,25 +19,22 @@ export async function search(page,origin,query){
 }
 async function snapshot(context,origin){
  const [conversations,attention]=await Promise.all([read(context,origin,'/api/conversations'),read(context,origin,'/api/attention')]);
- const mail=await context.newPage();let mailCount;
- try{await mail.goto(origin+'/__dev/outbox');mailCount=await mail.locator('article').count();}finally{await mail.close();}
- return {unread:conversations.reduce((n,c)=>n+c.unread,0),attention:attention.items.length,deferred:attention.deferredCount,mail:mailCount};
+ return {unread:conversations.reduce((n,c)=>n+c.unread,0),attention:attention.items.length,deferred:attention.deferredCount};
 }
 export async function pilotBrowser({browser,installation,width,destination}){
  const {origin,key}=installation,viewport={width,height:width===390?844:1000};
  const ownerContext=await browser.newContext({viewport,extraHTTPHeaders:{'x-rer-dev-key':key}}),memberContext=await browser.newContext({viewport,extraHTTPHeaders:{'x-rer-dev-key':key}});
  try{
-  const owner=await ownerContext.newPage(),member=await memberContext.newPage(),stamp=`${width}-${Date.now()}`,name=`Pilot teammate ${width}`,email=`pilot-member-${stamp}@example.test`,channelName=`Pilot private ${stamp}`;
-  // Both participants enter through ordinary outbox link confirmation, never
-  // cookies injected by a test or the dev-persona entrance.
-  await requestSignIn(owner,origin,'pilot-owner@example.test');
-  await acceptOutbox(owner,origin,'pilot-owner@example.test');
+  const owner=await ownerContext.newPage(),member=await memberContext.newPage(),stamp=`${width}-${Date.now()}`,name='Dev member',channelName=`Pilot private ${stamp}`;
+  // The supported local owner and teammate identities enter in separate browsers.
+  await enterLocal(owner,origin,'owner',installation.open);
+  await enterLocal(member,origin,'member');
+  const person=await read(memberContext,origin,'/api/me');
   await owner.goto(origin+'/app?view=channels');await expect(owner.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await owner.getByRole('button',{name:'Create channel',exact:true}).last().click();
   const dialog=owner.getByRole('dialog');await dialog.getByLabel('Channel name',{exact:true}).fill(channelName);await dialog.getByLabel('Visibility',{exact:true}).selectOption('private');await dialog.getByRole('button',{name:'Create channel',exact:true}).click();
   await owner.getByLabel('Message '+channelName,{exact:true}).waitFor();
-  await owner.goto(origin+'/app?view=team');const invite=owner.locator('.team-invite');await invite.getByLabel('Name',{exact:true}).fill(name);await invite.getByLabel('Email',{exact:true}).fill(email);await invite.getByLabel(channelName,{exact:true}).check();await invite.getByRole('button',{name:'Send invitation',exact:true}).click();await expect(owner.getByRole('status').filter({hasText:/invitation/i})).toBeVisible();
-  await acceptOutbox(member,origin,email);
   const channels=await read(ownerContext,origin,'/api/conversations'),conversation=channels.find(c=>c.name===channelName);assert.ok(conversation);
+  const granted=await ownerContext.request.post(`${origin}/api/conversations/${conversation.id}/members`,{data:{user:person.id}});assert.equal(granted.status(),200);
   const body=`Private pilot file ${stamp}`,bytes=Buffer.from(`Only these two people can read this file: ${stamp}\n`);
   await member.goto(`${origin}/app?conversation=${conversation.id}`);await member.getByLabel('Message '+channelName,{exact:true}).fill(body);await member.getByLabel('Attach file',{exact:true}).setInputFiles({name:'pilot-private.txt',mimeType:'text/plain',buffer:bytes});await member.locator('.staged-files').getByText('pilot-private.txt',{exact:false}).waitFor();await member.getByRole('button',{name:'Send',exact:true}).click();await member.getByText(body,{exact:true}).waitFor();
   await owner.goto(`${origin}/app?conversation=${conversation.id}`);await owner.getByText(body,{exact:true}).waitFor();
@@ -65,8 +47,8 @@ export async function pilotBrowser({browser,installation,width,destination}){
   pilotPhase('private-file-complete',{width,sessions:2});
   const beforeOwner=await snapshot(ownerContext,origin),beforeMember=await snapshot(memberContext,origin);
   const imported=await importHistory({owner,member,ownerContext,memberContext,origin,stamp,name,width,destination});
-  assert.deepEqual(await snapshot(ownerContext,origin),beforeOwner,'import creates no owner unread, attention or mail');
-  assert.deepEqual(await snapshot(memberContext,origin),beforeMember,'import creates no member unread, attention or mail');
+  assert.deepEqual(await snapshot(ownerContext,origin),beforeOwner,'import creates no owner unread or attention');
+  assert.deepEqual(await snapshot(memberContext,origin),beforeMember,'import creates no member unread or attention');
   pilotPhase('imported-activity-unchanged',{width,sessions:2});
   await exerciseUndo({owner,ownerContext,origin,stamp,name,imported,width,destination});
   pilotPhase('revocation-start',{width});
@@ -84,7 +66,7 @@ export async function pilotBrowser({browser,installation,width,destination}){
   const retained=await read(ownerContext,origin,`/api/messages/${imported.markerId}`);assert.ok(retained.body.includes(imported.sharedMarker),'retained owner still reads imported history');
   for(const [page,label] of [[owner,'owner-retained'],[member,'member-revoked']]){assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.screenshot({path:join(destination,`pilot-${label}-${width}.png`),fullPage:true});}
   pilotPhase('revocation-complete',{width,sessions:2});
-  return {width,status:'passed',sessions:2,authentication:'real outbox GET and native POST confirmation',privateFile:true,importedActivityUnchanged:true,selectedAudience:true,audienceRevoked:true,undoBeforeLiveWork:true,undoRefusedAfterLiveWork:true,corpus:imported.corpus,readonlyReactionsMentionsAndEditedMarker:true};
+  return {width,status:'passed',sessions:2,authentication:'Base owner and member local identities',privateFile:true,importedActivityUnchanged:true,selectedAudience:true,audienceRevoked:true,undoBeforeLiveWork:true,undoRefusedAfterLiveWork:true,corpus:imported.corpus,readonlyReactionsMentionsAndEditedMarker:true};
  }catch(error){
   // Playwright request failures may include request-header call logs. Preserve
   // useful assertions while withholding authentication headers from terminal.

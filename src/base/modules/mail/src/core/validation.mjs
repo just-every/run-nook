@@ -1,6 +1,7 @@
 import { fail } from './errors.mjs';
 import { validateMessagingConfig, validateMessagingResult, identity, rfc3339 } from '../adapters/messaging/contract.mjs';
 import { validateRerConfig, validateRerMessage } from '../adapters/rer/contract.mjs';
+import { rerListHeaderField } from '../adapters/rer/list-headers.mjs';
 
 const providers = ['sendgrid', 'resend', 'cloudflare', 'rer', 'development', 'messaging'];
 const controls = /[\x00-\x1f\x7f]/;
@@ -62,7 +63,7 @@ export function parseAddress(value) {
   return name ? { email, name } : { email };
 }
 
-export function validateHeaders(headers = {}) {
+export function validateHeaders(headers = {}, provider) {
   record(headers, 'invalid_headers');
   const names = new Set();
   for (const name of Reflect.ownKeys(headers)) {
@@ -70,6 +71,8 @@ export function validateHeaders(headers = {}) {
     const lower = name.toLowerCase();
     if (reservedHeaders.has(lower) || names.has(lower)) fail('reserved_or_duplicate_header');
     names.add(lower);
+    // These relay grammars allow separator tabs and report field-specific errors.
+    if (provider === 'rer' && rerListHeaderField(lower, headers[name])) continue;
     bounded(headers[name], 8192, 'invalid_header_value', true);
   }
   return headers;
@@ -128,7 +131,7 @@ export function validateMessage(message, provider) {
   bounded(message.subject, 998, 'invalid_subject', true);
   for (const field of ['text', 'html']) if (message[field] !== undefined && typeof message[field] !== 'string') fail('invalid_body');
   if (!message.text?.trim() && !message.html?.trim()) fail('body_required');
-  if (message.headers !== undefined) validateHeaders(message.headers);
+  if (message.headers !== undefined) validateHeaders(message.headers, provider);
   if (message.attachments !== undefined) {
     if (!Array.isArray(message.attachments)) fail('invalid_attachments');
     for (const attachment of message.attachments) validateAttachment(attachment);

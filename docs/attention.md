@@ -18,7 +18,7 @@ In **You**, enable push on this device to receive alerts while away. Choose ment
 
 ## Email when you are away
 
-Nook can email you when you are away from the browser. Email is off until you turn it on under **Your profile → Email me when…**:
+On a hosted workspace with mail configured, Nook can email you when you are away from the browser. Local development sends and stores no email. Email is off until you turn it on under **Your profile → Email me when…**:
 
 - **Someone mentions me or asks me to take on a commitment** covers explicit mentions, a commitment proposed to you or changed after you were asked, and a report that a commitment you asked for is complete.
 - **Someone sends me an urgent request** covers urgent requests. Quiet time holds them like everything else unless you also tick **Let urgent requests through quiet time**.

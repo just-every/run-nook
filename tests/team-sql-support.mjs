@@ -1,5 +1,7 @@
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync,readdirSync} from 'node:fs';
+import {createMailSender} from '../src/base/modules/mail/index.mjs';
+import {mailEdge,mailBindings} from './mail-edge.mjs';
 import {createOperatorAuth,createAuthHandler} from '../src/base/modules/operator-auth/index.mjs';
 export async function teamFixture({bootstrap=true,database=':memory:'}={}){
  const db=new DatabaseSync(database);
@@ -12,8 +14,8 @@ export async function teamFixture({bootstrap=true,database=':memory:'}={}){
   async all(){return this.execute()}async run(){return this.execute()}async first(){return this.execute().results[0]??null}
  }
  const adapter={prepare:sql=>new Statement(sql),async batch(statements){db.exec('BEGIN IMMEDIATE');try{const values=statements.map(s=>s.execute());db.exec('COMMIT');return values}catch(e){db.exec('ROLLBACK');throw e}}};
- const mail=[];const origin='http://127.0.0.1:15820';
- const auth=createOperatorAuth({db:adapter,config:{origin,local:true,OWNER_EMAIL:'owner@example.test',SETUP_TOKEN:'synthetic-test-setup-token-thirty-two-characters',SESSION_SECRET:'synthetic-test-secret-at-least-thirty-two-characters',MAIL_FROM:'nook@example.test',ipLimit:1000,emailLimit:100},clientIp:()=> 'local',mailSender:{async send(message){mail.push(message);return {status:'development'}}}});
+ const edge=mailEdge(),mail=edge.messages;const sender=createMailSender({provider:'rer',mode:'production',apiKey:mailBindings.MAIL_API_KEY,relayUrl:mailBindings.MAIL_RELAY_URL},{fetch:(url,init)=>edge.fetch(new Request(url,init))});const origin='http://127.0.0.1:15820';
+ const auth=createOperatorAuth({db:adapter,config:{origin,local:true,OWNER_EMAIL:'owner@example.test',SETUP_TOKEN:'synthetic-test-setup-token-thirty-two-characters',SESSION_SECRET:'synthetic-test-secret-at-least-thirty-two-characters',MAIL_FROM:'nook@example.test',ipLimit:1000,emailLimit:100},clientIp:()=> 'local',mailSender:sender});
  const handle=createAuthHandler(auth);
  const request=(path,body,cookie)=>new Request(origin+path,{method:body?'POST':'GET',headers:{origin,host:new URL(origin).host,...(body?{'content-type':'application/json'}:{}),...(cookie?{cookie}:{})},...(body?{body:JSON.stringify(body)}:{})});
  const call=(path,body,cookie)=>handle(request(path,body,cookie));

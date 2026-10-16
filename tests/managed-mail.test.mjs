@@ -82,9 +82,9 @@ test('Managed Worker sends sign-in/invites, refuses redirects, retries 429 and e
   assert.equal(form.status,303);const problemPath=form.headers.get('location');assert.match(problemPath,/notice=mail_unavailable/);
   const notice=await (await raw(problemPath)).text();
   const alert=notice.match(/<p class="notice" role="alert">([^<]+)<\/p>/)?.[1];assert.ok(alert);assert.doesNotMatch(alert,/mail_unavailable|provider_rejected/);
-  assert.equal((await app.db.prepare('SELECT count(*) AS n FROM rer_mail_development_outbox').first()).n,0);
+  assert.equal((await app.db.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='rer_mail_development_outbox'").first()).n,0);
   if(edgeError)throw edgeError;
-  t.diagnostic('workerd: relay 401 -> failed/refused without retry; owner notification problem and plain sign-in alert; zero captured mail.');
+  t.diagnostic('workerd: relay 401 -> failed/refused without retry; owner notification problem and plain sign-in alert; no captured mail storage.');
 
   // Optional local visual proof uses the real Worker responses and built assets.
   if(process.env.NOOK_MAIL_SHOTS){
@@ -102,7 +102,7 @@ test('Managed Worker sends sign-in/invites, refuses redirects, retries 429 and e
    });
    await new Promise(resolve=>uiServer.listen(0,'127.0.0.1',resolve));
    const browserOrigin='http://127.0.0.1:'+uiServer.address().port;
-   browser=await chromium.launch({headless:true});
+   browser=await chromium.launch({headless:true,channel:'chromium'});
    await mkdir(process.env.NOOK_MAIL_SHOTS,{recursive:true});
    for(const width of [1440,390]){
     const context=await browser.newContext({viewport:{width,height:width===390?844:1000}});

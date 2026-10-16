@@ -154,6 +154,12 @@
       "name": "0025_owner_signin.sql",
       "sha256": "98da904e768e35b43fb1be83d9dcc9c9b5d86ab3a795234ed5223c4fddc567d9",
       "sql": "-- One-time owner sign-in links minted by `rer signin` with the deployment's own\n-- Cloudflare credentials, written straight into this table through the D1 API.\n-- Apply as a NEW numbered migration under the seed's next unused number; never\n-- rewrite an applied migration. Additive only. token_hash is the SHA-256 of the\n-- link token (owner-signin-grant.mjs); the token itself is never stored.\nCREATE TABLE IF NOT EXISTS oa_owner_signins (\n id TEXT PRIMARY KEY, token_hash TEXT NOT NULL UNIQUE,\n operator_id TEXT NOT NULL REFERENCES oa_operators(id), operator_version INTEGER NOT NULL,\n created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, consumed_at INTEGER\n);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0026_retire_captured_mail.sql",
+      "sha256": "69229cc6c630810c4e3b9705193fd1c2c3f953dc534422bc504f06171a6e6585",
+      "sql": "-- Development mail is silently suppressed. Erase captures from older installations.\nDROP TABLE IF EXISTS rer_mail_development_outbox;\n"
     }
   ],
   "compatibilityDate": "2026-09-08",
@@ -198,7 +204,11 @@
   "surfaces": {
     "app": {
       "path": "/signin",
-      "originVariable": "AUTH_ORIGIN"
+      "originVariable": "AUTH_ORIGIN",
+      "signIn": {
+        "path": "/signin",
+        "loginHint": true
+      }
     }
   },
   "mail": {

@@ -20,7 +20,7 @@ current action. Reported completion never means independent verification.
 Attention remains independent of unread and work authority. Follow/mute/quiet/snooze/
 done and explicit urgent requests are in-app choices. Email and Web Push are
 separate opt-in channels, and Nook includes an installable PWA. Email has local
-development-outbox evidence; Web Push has bounded local packet checks. Neither
+tests at the provider network edge; Web Push has bounded local packet checks. Neither
 proves live inbox or browser/OS delivery. The PWA service worker caches no
 requests or private content, so offline operation is not supported. Saved items,
 deeper needs-reply support and measured interruption outcomes remain future

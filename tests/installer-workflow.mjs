@@ -9,7 +9,8 @@ import {DatabaseSync} from 'node:sqlite'
 import {released} from './worker-ports.mjs'
 import {approveInstaller,launchInstaller} from './installer-approval.mjs'
 import {devKey} from './dev-key.mjs'
-// A setup rerun issues a fresh sign-in link (oa_tokens, outbox) by design; product
+import {copyWorkingTree} from './working-tree-copy.mjs'
+// A setup rerun may refresh local identity credentials; product
 // rows, people, sessions and the owner claim must not change.
 function workspaceSnapshot(path){const db=new DatabaseSync(path,{readOnly:true});try{const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE 'nook_%' OR name IN ('oa_operators','oa_sessions','oa_bootstrap')) AND name NOT LIKE 'nook_search%' ORDER BY name").all().map(row=>row.name);return JSON.stringify(names.map(name=>[name,db.prepare('SELECT * FROM '+name).all().map(row=>JSON.stringify(row)).sort()]))}finally{db.close()}}
 export async function runInstallerWorkflow(h){
@@ -19,11 +20,11 @@ export async function runInstallerWorkflow(h){
  const {RER_LOCAL_OPERATION:_,...baseEnv}=h.env,env={...baseEnv,RER_SERVER_JOURNEY:'1'}
  let app
  let state=h.getState(),origin=h.getOrigin(),guidedPort
- // The clone's app runs from its private file with the harness's dev key, so the workflow can read the outbox.
+ // The restarted clone uses the test provider edge and its own ordinary local identity key.
  async function start(port){h.setState(state);const vars=resolve(app,'.dev.vars');if(!(await readFile(vars,'utf8')).includes('RER_DEV_KEY='))await appendFile(vars,`RER_DEV_KEY=${devKey}\n`);await h.start(guidedPort??port,{envFile:resolve(app,'.dev.vars')});origin=h.getOrigin()}
  await check('guided Base installer → two-user full HTTP workflow → populated guided rerun/restart/archive/restore',async()=>{
   const {runWorkflow,verifyWorkflow,workflowReport}=await import(pathToFileURL(resolve(root,'scripts/workflow-proof.mjs')))
-  app=await mkdtemp(resolve(tmpdir(),'nook-guided-'));execFileSync('git',['clone','--quiet','--no-hardlinks',root,app])
+  app=await mkdtemp(resolve(tmpdir(),'nook-guided-'));execFileSync('git',['clone','--quiet','--no-hardlinks',root,app]);await copyWorkingTree(root,app)
   // `rer setup` writes the checkout's dev key before anything starts; the guided installer only reads it, so the clone gets the harness's key the same way.
   await mkdir(resolve(app,'.rer/local'),{recursive:true,mode:0o700});await writeFile(resolve(app,'.rer/local/dev-key.env'),`RER_DEV_KEY=${devKey}\n`,{mode:0o600})
   const localState=resolve(app,'.wrangler/state'),branding=await readFile(resolve(app,'src/branding.json'));
@@ -41,9 +42,10 @@ export async function runInstallerWorkflow(h){
    // Setup satisfies every local input; owner-account deploy inputs come only from the shell.
    const deployInputs={CLOUDFLARE_ACCOUNT_ID:'a'.repeat(32),CLOUDFLARE_API_TOKEN:'test-only-token',SESSION_SECRET:'test-only-production-session-secret',SETUP_TOKEN:'test-only-production-setup-token',OWNER_EMAIL:'nativeowner@example.test',MAIL_FROM:'auth@example.test',SENDGRID_API_KEY:'test-only-sendgrid-key'}
    const diagnostic=await new Promise((ok,bad)=>{const child=spawn(process.execPath,['node_modules/@runeditrun/rer/bin/rer.mjs','doctor','--json'],{cwd:app,env:{...env,...deployInputs},stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',()=>{});child.once('error',bad);child.once('close',code=>code===0?ok(text):bad(Error('Installed public diagnostics failed: '+text))) });const diagnosticResult=diagnostic.trim().split('\n').map(line=>JSON.parse(line)).find(event=>event.event==='result');assert.equal(diagnosticResult.diagnostics.ok,true);assert.deepEqual(diagnosticResult.diagnostics.missingInputs,[]);
+   const phase=(await installer.state()).phase;await installer.close();installer=undefined;await released(guidedPort);await start(port)
    const proof=await runWorkflow(origin);const initial=await verifyWorkflow(origin,proof)
-   const guide={failureThenResume:true,oneApprovalPerAttempt:true,providers:false,phase:(await installer.state()).phase,branding:input,appPort:Number(new URL(origin).port)}
-   await installer.close();installer=undefined
+   const guide={failureThenResume:true,oneApprovalPerAttempt:true,providers:false,phase,branding:input,appPort:Number(new URL(origin).port)}
+   await stop()
    const persisted=await databasePath(state),beforeBuild=await readFile(persisted)
    await new Promise((ok,bad)=>{const child=spawn(process.execPath,['node_modules/vite/bin/vite.js','build'],{cwd:app,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Populated rebuild failed')))})
    assert.deepEqual(await readFile(persisted),beforeBuild,'rebuilding preserves existing D1 bytes')
@@ -51,8 +53,8 @@ export async function runInstallerWorkflow(h){
    installer=await launchInstaller(app,['--port',String(port),'--resume'],env)
    assert.deepEqual((await installer.state()).draft,input,'the second wizard retains the approved setup')
    origin=await approveInstaller(installer,input)
-   const reinstalled=await verifyWorkflow(origin,proof,{preservedSessions:true})
-   await installer.close();installer=undefined;await released(guidedPort)
+   await installer.close();installer=undefined;await released(guidedPort);await start(port)
+   const reinstalled=await verifyWorkflow(origin,proof,{preservedSessions:true});await stop()
    assert.equal(await databasePath(state),persisted,'the second installation uses the populated D1 store')
    assert.ok(workspaceSnapshot(persisted)===beforeRerun,'guided reinstall preserves every workspace row, user, owner, session and private byte without writes')
    await start(port);const restarted=await verifyWorkflow(origin,proof);await stop()
