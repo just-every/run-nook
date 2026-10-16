@@ -38,7 +38,7 @@ function layout(page) {
     return {
       width: innerWidth,
       scrollWidth: document.documentElement.scrollWidth,
-      h1: box('h1'), primary: box('.hero-primary'), secondary: box('.hero-secondary'), brand: box('.site-brand'),
+      h1: box('h1'), primary: box('.hero-primary'), secondary: box('.hero-secondary[href="/docs"]'), brand: box('.site-brand'),
       alcove, cards,
       drawingFont: Math.min(...[...document.querySelectorAll(':is(.hero-alcove, .nook-drawing) :is(p, span, strong, small)')].filter(node => node.textContent.trim() && !node.closest('[aria-hidden="true"]')).map(node => Number.parseFloat(getComputedStyle(node).fontSize))),
     }
@@ -67,15 +67,15 @@ try {
   assert.equal(await desktop.getByRole('link', {name: 'Nook', exact: true}).count(), 1, 'the brand home link is named for the product')
   assert.deepEqual(await nav.locator('a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['/docs', sourceRepository])
   assert.equal(await desktop.locator('.hero-primary').getAttribute('href'), '/run')
-  assert.equal(await desktop.locator('.hero-secondary').getAttribute('href'), '/docs')
+  assert.equal(await desktop.locator('.hero-secondary[href="/docs"]').count(), 1)
   assert.equal(await desktop.locator('a[href="#"], a[href=""]').count(), 0, 'no placeholder links')
   assert.equal(await desktop.locator(':is(.hero-alcove, .nook-drawing) :is(button, input, a)').count(), 0, 'the drawings contain no false controls')
 
-  // Every link on the page leads somewhere real: on-site pages answer, off-site links go to the declared source.
+  // Every link on the page leads somewhere real: on-site pages answer, off-site links go to the declared source or the hosted demo.
   const hrefs = [...new Set(await desktop.locator('a[href]').evaluateAll(links => links.map(link => link.href)))]
   for (const href of hrefs) {
     const url = new URL(href)
-    if (url.origin !== origin.origin) { assert.ok(href.startsWith(sourceRepository), `off-site link is the source repository: ${href}`); continue }
+    if (url.origin !== origin.origin) { assert.ok(href.startsWith(sourceRepository) || href === 'https://demo.run-nook.com/', `off-site link is the source repository or the demo: ${href}`); continue }
     if (url.pathname === '/' && url.hash) { assert.equal(await desktop.locator(url.hash).count(), 1, `${url.hash} exists`); continue }
     const response = await desktop.request.get(href, {maxRedirects: 0})
     assert.ok(response.status() < 400, `${url.pathname} answers (${response.status()})`)
@@ -102,7 +102,7 @@ try {
   await desktop.keyboard.press('Enter')
   await desktop.waitForFunction(() => document.activeElement?.id === 'main-content')
 
-  await desktop.locator('.hero-secondary').click()
+  await desktop.locator('.hero-secondary[href="/docs"]').click()
   await desktop.waitForURL('**/docs')
   assert.equal(await desktop.getByRole('navigation', {name: 'Documentation'}).count(), 1, 'Read the docs opens the public guides')
 
@@ -116,7 +116,7 @@ try {
     assert.ok(narrow.drawingFont >= 13, `${viewport.width}px drawing strings stay readable`)
     if (viewport.width === 390) {
       assert.ok(narrow.secondary.bottom < 844, 'both actions are above the 390 fold')
-      for (const selector of ['.site-brand', '.site-nav a[href="/docs"]', '.hero-primary', '.hero-secondary']) {
+      for (const selector of ['.site-brand', '.site-nav a[href="/docs"]', '.hero-primary', '.hero-secondary[href="/docs"]', '.hero-secondary[href="https://demo.run-nook.com/"]']) {
         const bounds = await page.locator(selector).boundingBox()
         assert.ok(bounds && bounds.height >= 44, `${selector} is a 44px tap target`)
       }

@@ -3081,7 +3081,7 @@
       "executable": false
     },
     "src/brand/links.ts": {
-      "sha256": "123c806d0cb32a92d5b664f26e8898ba7f87c2f77b238b0228ceb54ffc9f323c",
+      "sha256": "35a7e3a429768e140d1c999ff25c35122545d73d53e096ed923ef8b8f834bd8d",
       "executable": false
     },
     "src/brand/NookFrame.tsx": {
@@ -3485,7 +3485,7 @@
       "executable": false
     },
     "src/homepage/Hero.tsx": {
-      "sha256": "fc9b535e1036cd3087e7dfbae4e2b50817537fce6ebd8b4ce89e3b7d896bb37e",
+      "sha256": "3a4063774be62f53ba79f5fe38b5491cb5de1c59c2f4b3b63985fb4cbdc28da2",
       "executable": false
     },
     "src/homepage/HeroAlcove.tsx": {
@@ -3517,7 +3517,7 @@
       "executable": false
     },
     "src/homepage/sections/GetStarted.tsx": {
-      "sha256": "cd7337c95f8f2f33e629a9d30f9e5e69371a36f9976aadfea63e0e60422a42ed",
+      "sha256": "342b5fe8a0be58a5d991273d7a0e1cc0425364893fb3beb6d7c3a9be682b5a11",
       "executable": false
     },
     "src/homepage/sections/MoveIn.tsx": {
@@ -4249,7 +4249,7 @@
       "executable": false
     },
     "tests/homepage.mjs": {
-      "sha256": "f62dda358244ac82b1ffd6f058145be2c759be5c7bb6895b42ffb859326418b2",
+      "sha256": "fd19a26b98f9e48f514b8dcb25707827d1ac3ce837f4180ba968cfc33584a902",
       "executable": false
     },
     "tests/import-fixture.mjs": {
