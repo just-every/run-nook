@@ -7,6 +7,7 @@ import {authFence,authority,type StorageBindings,Context} from './context'
 import {recoverDeletes} from './files'
 import {drainNotifications} from '../../notify/run'
 import {mailSend} from '../../notify/sender'
+import {attentionSignature} from './workspace-signature'
 type Subscriber={id:string;uid:string;version:number;key:string}
 const ATTENTION='@attention'
 // A peer that already disconnected cannot be closed again; that is not an error.
@@ -29,9 +30,9 @@ export class ChatHub extends DurableObject<StorageBindings>{
   try{if(!await this.active(info)){revokeSocket(socket,4001,'Access changed');return}const result=await this.env.DB.prepare(`SELECT c.id,c.seq FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND ${authFence} ORDER BY c.id LIMIT 1000`).bind(info.uid,info.id,info.uid,info.version).all<{id:string;seq:number}>();const current:Record<string,number|string>=Object.fromEntries(result.results.map(c=>[c.id,c.seq])),previous=await this.ctx.storage.get<Record<string,number|string>>(info.key)??{};
    // Triage (snooze, done, quiet time) moves no conversation frontier; a changed
    // signature tells this person's open tabs to refresh their own Attention.
-   const triage=await this.env.DB.prepare(`SELECT (SELECT count(*)||':'||total(COALESCE(snooze_until,0))||':'||total(state='open') FROM nook_attention WHERE user=?)||'|'||COALESCE((SELECT dnd_until FROM nook_settings WHERE user=?),'') AS v`).bind(info.uid,info.uid).first<{v:string}>();current[ATTENTION]=triage?.v??'';
+   const triage=await this.env.DB.prepare(attentionSignature).bind(info.uid,info.uid).first<{v:string}>();current[ATTENTION]=triage?.v??'';
    if(Object.keys(previous).some(id=>!Object.hasOwn(current,id))){revokeSocket(socket,4003,'Access changed');return}
-   for(const row of result.results)if(initial||previous[row.id]!==row.seq)socket.send(JSON.stringify({conversation:row.id,frontier:row.seq}));if(!initial&&previous[ATTENTION]!==undefined&&previous[ATTENTION]!==current[ATTENTION])socket.send(JSON.stringify({type:'refresh'}));if(initial&&!result.results.length)socket.send(JSON.stringify({type:'refresh'}));await this.ctx.storage.put(info.key,current)
+   if(initial)socket.send(JSON.stringify({type:'ready',conversations:result.results,signature:current[ATTENTION]}));else{for(const row of result.results)if(previous[row.id]!==row.seq)socket.send(JSON.stringify({conversation:row.id,frontier:row.seq}));if(previous[ATTENTION]!==undefined&&previous[ATTENTION]!==current[ATTENTION])socket.send(JSON.stringify({type:'refresh'}))}await this.ctx.storage.put(info.key,current)
   }catch{closeSocket(socket,1011,'Reconnect required')}
  }
  private running:Promise<void>|null=null;private again=false

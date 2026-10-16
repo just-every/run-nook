@@ -6,7 +6,6 @@ import { historicalMessage, importedSelect } from './projection';
 /** Imported display positions end at -1. They never enter native event, unread
  * or read-barrier calculations. Each destination has one immutable import. */
 export async function mixedWindow(c: Context, id: string, input: Record<string, any>) {
-    await c.check(id);
     const last = await c.one(`${importedSelect} WHERE r.conversation=? ORDER BY r.sequence DESC LIMIT 1`, [id], id);
     if (!last) return historyWindow(c, id, input);
     const limit = input.limit ?? 50, before = input.before == null || input.before === '' ? null : Number(input.before);

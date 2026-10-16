@@ -28,7 +28,8 @@ import {unsubscribeRoute} from './notify/unsubscribe'
 import {theme} from './theme'
 import {staticAssetResponse} from './base/static-assets'
 import {deploymentHealth} from './base/deployment-health'
-import {workspaceSnapshot} from './platform/storage/workspace'
+import {workspaceSnapshot,readAcknowledgement} from './platform/storage/workspace'
+import {withRepository} from './platform/request.server'
 
 const api = new Hono<{ Bindings: Bindings }>()
 api.use('*', async (c,next) => { c.header('Cache-Control','no-store'); c.header('X-Content-Type-Options','nosniff'); await next() })
@@ -50,6 +51,7 @@ api.all('/api/*', async c => {
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),team=await teamRoute(session,req,input);if(team)return team
  if(action==='workspace'&&p.length===2&&req.method==='GET')return c.json(await workspaceSnapshot(session,url.searchParams))
+ if(action==='conversations'&&id&&sub==='read'&&p.length===4&&req.method==='POST'){await repository.write(req.headers,'read',id,input);return c.json({ok:true,...await readAcknowledgement(session,id)})}
  if(action==='devices'){
   if(req.method!=='GET'&&req.headers.get('origin')!==url.origin)fail(403,'Origin denied')
   if(p.length===2&&req.method==='GET')return c.json(await devices(session))
@@ -99,7 +101,7 @@ export default withDemo({
   if(state) return state
   const lobby = await lobbyResponse(request,publicEnv,identity,baseOwnerClaim)
   if(lobby) return lobby
-  const url = new URL(request.url)
+  const url = new URL(request.url),repository=new Repository(env)
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
   if(url.pathname==='/signin')return await signInRoute(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/notify/off') return unsubscribeRoute(env,request)
@@ -117,9 +119,9 @@ export default withDemo({
    if(setup) return setup
   }
   if(url.pathname === '/app' || url.pathname.startsWith('/app/')) {
-   try { await new Repository(env).session(request.headers) } catch(error) { if(error instanceof Fault && error.status === 401) return new Response(null,{status:307,headers:{Location:'/signin','Cache-Control':'no-store'}}); throw error }
+   try { await repository.authenticated(request.headers) } catch(error) { if(error instanceof Fault && error.status === 401) return new Response(null,{status:307,headers:{Location:'/signin','Cache-Control':'no-store'}}); throw error }
   }
-  const response = await dispatch(request,() => api.fetch(request,env,execution),() => start.fetch(request))
+  const response = await dispatch(request,() => api.fetch(request,env,execution),() => withRepository(repository,()=>start.fetch(request)))
   const isDocument = response.headers.get('content-type')?.includes('text/html')
   const headers = new Headers(response.headers); headers.set('Cache-Control',isDocument?'no-store, no-transform':'no-store'); headers.set('X-Content-Type-Options','nosniff')
   const document=new Response(response.body,{status:response.status,statusText:response.statusText,headers})

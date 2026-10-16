@@ -80,8 +80,11 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
  useEffect(()=>{
   if(!snapshot||privateSignal.aborted)return
   settingsVersion.current++;setSettings(snapshot.notify.push as PushSettings)
+ },[snapshot?.notify,user,privateSignal])
+ useEffect(()=>{
+  if(!snapshot||privateSignal.aborted)return
   if(supported())void (async()=>{const reg=registration.current??await navigator.serviceWorker.getRegistration('/');if(!privateSignal.aborted&&current.current===user)reg?.active?.postMessage({type:'nook-sync',user,...snapshot.pushSync})})().catch(()=>{})
- },[snapshot,user,privateSignal])
+ },[snapshot?.pushSync,user,privateSignal])
  const change=useCallback(async(value:Partial<Choices>)=>{setBusy(true);setError('');try{const next=await post('/api/notify',{push:value},'PATCH');if(!privateSignal.aborted&&current.current===user){settingsVersion.current++;setSettings(next.push)}}catch(e){if(!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')}finally{if(!privateSignal.aborted)setBusy(false)}},[post,user,privateSignal])
  const enable=useCallback(async()=>{
   if(!supported())return

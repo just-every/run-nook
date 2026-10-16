@@ -43,8 +43,11 @@ export async function workspace(route:LocationState,previous:Projection|null):Pr
  if(window.matchMedia('(max-width: 850px)').matches)query.set('mobile','1')
  if(previous?.rootWindow.target&&!events?.erased)query.set('target',previous.rootWindow.target.id)
  const next=await api<WorkspaceSnapshot & {attention:Attention & Page<Attention['items'][number]>}>('workspace?'+query)
- const [attention,outcomes]=await Promise.all([attentionPages(next.attention),next.data?outcomeHistory(next.data.conversation,next.data.outcomes):[]])
- return {...next,attention,data:next.data?{...next.data,key:windowKey(route),outcomes,newMessageCount:events?.newMessageCount??0,frontier:events?.cursor??next.data.frontier}:null}
+ return completeSnapshot({...next,data:next.data?{...next.data,key:windowKey(route),newMessageCount:events?.newMessageCount??0,frontier:events?.cursor??next.data.frontier}:null})
+}
+export async function completeSnapshot(next:WorkspaceSnapshot){
+ const [attention,outcomes]=await Promise.all([attentionPages(next.attention as Attention & Page<Attention['items'][number]>),next.data?outcomeHistory(next.data.conversation,next.data.outcomes):[]])
+ return {...next,attention,data:next.data?{...next.data,outcomes}:null}
 }
 async function outcomeHistory(conversation:string,first:Outcome[]):Promise<Outcome[]>{
  if(first.length<1000)return first

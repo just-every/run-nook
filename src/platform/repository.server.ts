@@ -20,6 +20,5 @@ export class Repository {
  async upload(headers:Headers,id:string,input:Record<string,any>){return upload(await context(this.env,headers),id,input)}
  async download(headers:Headers,id:string){return download(await context(this.env,headers),id)}
  async deleteAttachment(headers:Headers,id:string){return remove(await context(this.env,headers),id)}
- async workspace(headers:Headers){const c=await this.authenticated(headers);const [user,conversations]=await Promise.all([read(c,'me'),read(c,'conversations')]);return {user,conversations}}
  async live(request:Request){return connect(await context(this.env,request.headers),request)}
 }

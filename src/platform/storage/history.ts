@@ -11,10 +11,9 @@ export async function firstUnreadMessage(c:Context,id:string,readSeq:number){
  return c.one('SELECT id FROM nook_message_history WHERE conversation=? AND sequence>? AND author<>? AND deleted=0 ORDER BY sequence LIMIT 1',[id,readSeq,c.uid],id)
 }
 export async function historyWindow(c:Context,id:string,input:Record<string,any>){
- await c.check(id)
+ const snapshot=await c.one('SELECT c.seq AS frontier,COALESCE(r.seq,0) AS readSeq FROM nook_conversations c LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=? WHERE c.id=?',[c.uid,id],id)
  const limit=input.limit??50,before=input.before?Number(input.before):null,thread=input.thread||null,around=input.around||null,firstUnread=input.firstUnread===true
  if(!Number.isSafeInteger(limit)||limit<1||limit>1000||before!==null&&(!Number.isSafeInteger(before)||before<1)||around&&before!==null||thread&&typeof thread!=='string'||around&&typeof around!=='string'||firstUnread&&(before!==null||thread||around))fail(400,'Invalid history window')
- const snapshot=await c.one('SELECT c.seq AS frontier,COALESCE(r.seq,0) AS readSeq FROM nook_conversations c LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=? WHERE c.id=?',[c.uid,id],id)
  // View thread and Back focus the root itself. A surviving reply keeps an
  // erased root addressable, without exposing erased reply targets or content.
  const unread=firstUnread?await firstUnreadMessage(c,id,snapshot.readSeq):null,targetId=around??unread?.id??null
@@ -34,9 +33,12 @@ export async function historyWindow(c:Context,id:string,input:Record<string,any>
   items=[...prior.reverse(),...after]
  }else items=(await historyPage(c,id,filter+(before===null?'':' AND m.sequence<?'),before===null?params:[...params,before],limit,true)).reverse()
  const cursor=items[0]?.sequence??before
- const earlier=cursor===null||cursor===undefined?null:await c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND ${filter} AND m.sequence<? ORDER BY m.sequence DESC LIMIT 1`,[id,...params,cursor],id)
- const later=items.length?await c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND ${filter} AND m.sequence>? ORDER BY m.sequence LIMIT 1`,[id,...params,items.at(-1).sequence],id):null
- const visible=[...items.map(m=>m.id),...(root?[root.id]:[])],barrier=await c.one(`SELECT MIN(sequence) AS sequence FROM (SELECT (SELECT m.sequence FROM nook_message_history m WHERE m.conversation=a.conversation AND m.author=a.user AND m.deleted=0 AND m.sequence>? AND m.id NOT IN (SELECT value FROM json_each(?)) ORDER BY m.sequence LIMIT 1) AS sequence FROM nook_author_counts a WHERE a.conversation=? AND a.user<>?)`,[snapshot.readSeq,JSON.stringify(visible),id,c.uid],id)
+ const visible=[...items.map(m=>m.id),...(root?[root.id]:[])]
+ const [earlier,later,barrier]=await Promise.all([
+  cursor===null||cursor===undefined?null:c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND ${filter} AND m.sequence<? ORDER BY m.sequence DESC LIMIT 1`,[id,...params,cursor],id),
+  items.length?c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND ${filter} AND m.sequence>? ORDER BY m.sequence LIMIT 1`,[id,...params,items.at(-1).sequence],id):null,
+  c.one(`SELECT MIN(sequence) AS sequence FROM (SELECT (SELECT m.sequence FROM nook_message_history m WHERE m.conversation=a.conversation AND m.author=a.user AND m.deleted=0 AND m.sequence>? AND m.id NOT IN (SELECT value FROM json_each(?)) ORDER BY m.sequence LIMIT 1) AS sequence FROM nook_author_counts a WHERE a.conversation=? AND a.user<>?)`,[snapshot.readSeq,JSON.stringify(visible),id,c.uid],id),
+ ])
  const renderedThrough=Math.max(snapshot.readSeq,...items.map(m=>m.sequence),root?.sequence??0),readBarrierSeq=barrier?.sequence??null,readThrough=Math.max(snapshot.readSeq,Math.min(renderedThrough,readBarrierSeq===null?renderedThrough:readBarrierSeq-1))
  return {items,root:root??null,target:target?{id:target.id,parent:target.parent,root:rootId}:null,cursor:cursor==null?null:String(cursor),hasMore:!!earlier,hasNewer:!!later,frontier:snapshot.frontier,readSeq:snapshot.readSeq,readBarrierSeq,readThrough}
 }

@@ -1,15 +1,15 @@
 import {canEraseChannelMessage} from '../team/erasure/policy'
 import {NookMark} from '../brand/NookMark'
 import {useEffect,useLayoutEffect,useRef,useState} from 'react'
-import type {Conversation,DialogState,LocationState,Message,Outcome,Person,Projection} from './types'
+import type {Conversation,DialogState,LocationState,Message,Outcome,Person,Projection,ReadAcknowledgement} from './types'
 import {Composer} from './Composer'
 import {MessageRow} from './MessageRow'
 import {OutcomeCard} from './OutcomeCard'
 import {useReadVisibility} from './useReadVisibility'
 import {conversationName} from './Navigation'
 import {IconBack,IconBell,IconClose,IconPlus} from './icons'
-type Props={user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
-export function ConversationView({user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,mutate,onError,onAction,onDiscuss}:Props) {
+type Props={user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
+export function ConversationView({user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,onRead,mutate,onError,onAction,onDiscuss}:Props) {
  const log=useRef<HTMLDivElement>(null),threadLog=useRef<HTMLDivElement>(null)
  const showOutcomes=route.panel==='outcomes',[peek,setPeek]=useState<string|null>(null)
  useEffect(()=>{if(!showOutcomes)setPeek(null)},[showOutcomes])
@@ -26,7 +26,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
  const isCurrent=threadCurrent
  // The panel is a companion on wide screens, so reading continues behind it; on a phone it replaces the log (mirrors api.ts).
  const reading=!(showOutcomes&&typeof window!=='undefined'&&window.matchMedia('(max-width: 850px)').matches)
- useReadVisibility(activeLog,c.id,activeWindow,user.id,reading,isCurrent,refresh,onError)
+ useReadVisibility(activeLog,c.id,activeWindow,user.id,reading,isCurrent,onRead,onError)
  const scrollKey=`nook:scroll:${user.id}:${c.id}:${route.thread||'root'}:${route.thread?route.threadBefore||'latest':route.before||'latest'}:${route.landing?'landing':'default'}`,focusKey=`nook:focus:${user.id}:${c.id}:${route.thread||'root'}:${route.thread?route.threadBefore||'latest':route.before||'latest'}:${route.landing?'landing':'default'}`
  // Parent private-scope layout effects commit before this initialization.
  // A child layout effect would still see the previous navigation scope.
