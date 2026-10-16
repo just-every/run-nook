@@ -3,16 +3,9 @@ import {sendPush} from './sender'
 import {PUSH_FOLD_MS,PUSH_GATHER_MS} from './queue'
 import {pushCancellation,pushHeldUntil} from './policy'
 import {authBindings} from '../platform/operator-auth.server'
-import {allowedGrant} from '../team/access'
+import {pushSnapshot} from './snapshot'
+export {pushSnapshot} from './snapshot'
 type Row={id:string;actor:string;message:string|null;reason:string}
-export async function pushSnapshot(env:any,user:string,now=Date.now()){
- // The foreground asks which opaque delivery IDs are still current.
- // Any still-current folded item keeps its notice active.
- // There is no endpoint/key or private content in this projection.
- const [rowResult,badgeResult,directResult]=await env.DB.batch([env.DB.prepare(`SELECT DISTINCT q.email AS id FROM nook_notify_queue q WHERE channel='push' AND q.user=? AND q.state IN ('sent','folded') AND (${pushCancellation}) IS NULL`).bind(user,now,now),env.DB.prepare(`SELECT count(*) AS n FROM nook_attention a WHERE a.user=? AND a.state<>'done' AND (a.snooze_until IS NULL OR a.snooze_until<=?) AND EXISTS(SELECT 1 FROM nook_members m WHERE m.user=a.user AND m.conversation=a.conversation AND ${allowedGrant('m.user','m.conversation')}) AND (a.message IS NULL OR EXISTS(SELECT 1 FROM nook_messages s WHERE s.id=a.message AND s.deleted=0)) AND NOT EXISTS(SELECT 1 FROM nook_reads r WHERE r.user=a.user AND r.conversation=a.conversation AND r.seq>=a.event_seq AND a.message IS NOT NULL)`).bind(user,now),env.DB.prepare(`SELECT count(DISTINCT q.conversation||':'||q.event_seq) AS n FROM nook_notify_queue q WHERE q.channel='push' AND q.user=? AND q.attention IS NULL AND q.state<>'cancelled' AND (${pushCancellation}) IS NULL`).bind(user,now,now)])
- const rows=rowResult.results,badge=badgeResult.results[0],direct=directResult.results[0]
- return {active:rows.map((r:any)=>r.id),badge:Number(badge?.n??0)+Number(direct?.n??0)}
-}
 export async function drainPush(bindings:any,now=Date.now(),network:typeof fetch=fetch):Promise<number|null>{
  // Keep the explicit-clock API while advancing it across asynchronous work.
  const started=Date.now(),clock=()=>now+Math.max(0,Date.now()-started)

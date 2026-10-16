@@ -51,14 +51,19 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
 }
 export async function search(c:Context,input:Record<string,any>,source='native'){return mixedSearch(c,input,source)}
 async function attention(c:Context,input:Record<string,any>){
- const dndUntil=(await c.one('SELECT dnd_until FROM nook_settings WHERE user=?',[c.uid]))?.dnd_until??null,now=Date.now();
+ const now=Date.now();
+ const [settings,rows,wake]=await Promise.all([
+ c.one('SELECT dnd_until FROM nook_settings WHERE user=?',[c.uid]),
  // Each authorized conversation contributes at most 100 candidates per state.
  // Old/done/private history cannot make a page scan an unbounded inbox.
- const rows=await c.rows(`WITH candidates AS (
+ c.rows(`WITH candidates AS (
  SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='open' AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
  UNION ALL
  SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
- ) SELECT a.* FROM candidates p JOIN nook_attention a ON a.id=p.id ORDER BY a.id LIMIT 100`,[input.after??'',c.uid,input.after??'',c.uid]);let deferredCount=0;const items=[];
+ ) SELECT a.* FROM candidates p JOIN nook_attention a ON a.id=p.id ORDER BY a.id LIMIT 100`,[input.after??'',c.uid,input.after??'',c.uid]),
+ c.one(`SELECT MIN(deadline) AS deadline FROM (SELECT (SELECT a.snooze_until FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND a.snooze_until>? ORDER BY a.snooze_until LIMIT 1) AS deadline FROM nook_members m WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')})`,[now,c.uid]),
+ ])
+ const dndUntil=settings?.dnd_until??null;let deferredCount=0;const items=[];
  const visible=rows.filter(a=>!(a.state==='snoozed'&&a.snooze_until>now||dndUntil>now&&a.reason!=='urgent-request'))
  deferredCount=rows.length-visible.length
  const messages=new Map<string,any>(),outcomes=new Map<string,any>()
@@ -72,7 +77,7 @@ async function attention(c:Context,input:Record<string,any>){
   for(const o of outcomeRows)outcomes.set(o.id,o)
  }))
  for(const a of visible){if(a.outcome&&!outcomes.has(a.outcome))fail(404,'Outcome unavailable');items.push({...a,message:messages.get(a.message)??null,outcome:outcomes.get(a.outcome)??null})}
- const wake=await c.one(`SELECT MIN(deadline) AS deadline FROM (SELECT (SELECT a.snooze_until FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND a.snooze_until>? ORDER BY a.snooze_until LIMIT 1) AS deadline FROM nook_members m WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')})`,[now,c.uid]);
+
  const deadlines=[wake?.deadline,dndUntil].filter((value):value is number=>typeof value==='number'&&value>now);
  return {items,deferredCount,dndUntil,observedAt:now,nextWakeAt:deadlines.length?Math.min(...deadlines):null,cursor:rows.at(-1)?.id??input.after??'',hasMore:rows.length===100,deferredCountScope:'this page'}
 }

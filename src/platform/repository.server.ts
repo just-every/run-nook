@@ -19,7 +19,9 @@ export class Repository {
  authenticated(headers:Headers){return this.authentication??=context(this.env,headers,this.nativeSession(headers))}
  async session(headers:Headers){return read(await this.authenticated(headers),'me')}
  async read(headers:Headers,action:string,id='',input={}){return read(await this.authenticated(headers),action,id,input)}
- async write(headers:Headers,action:string,id:string,input:Record<string,any>){const c=await this.authenticated(headers),result=await write(c,action,id,input);await c.hint();if(action==='edit'&&input.delete)await recoverDeletes(this.env);return result}
+ // Read acknowledgements change no event frontier; their response carries
+ // current counters, so a live broadcast would have no changed hint to send.
+ async write(headers:Headers,action:string,id:string,input:Record<string,any>){const c=await this.authenticated(headers),result=await write(c,action,id,input);if(action!=='read')await c.hint();if(action==='edit'&&input.delete)await recoverDeletes(this.env);return result}
  async imports(headers:Headers,action:string,id:string,input:any={}){return imports(await context(this.env,headers),action,id,input)}
  async upload(headers:Headers,id:string,input:Record<string,any>){return upload(await context(this.env,headers),id,input)}
  async download(headers:Headers,id:string){return download(await context(this.env,headers),id)}

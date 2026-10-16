@@ -13,6 +13,5 @@ export async function conversationProjection(c:Context,q:URLSearchParams){
  ])
  const selectedThread=landing?rootWindow.target?.parent?rootWindow.target.root:null:thread
  const threadWindow=selectedThread?await read(c,'historyWindow',id,{limit:50,thread:selectedThread,before:threadBefore,around:threadBefore?null:landing?rootWindow.target?.id:focus}):null
- await c.check(id)
  return {conversation:id,rootWindow,threadWindow,outcomes,members,roster,preferences,frontier:Math.min(rootWindow.frontier,threadWindow?.frontier??rootWindow.frontier),newMessageCount:0}
 }
