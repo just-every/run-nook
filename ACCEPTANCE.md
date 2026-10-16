@@ -1,6 +1,6 @@
 # Nook acceptance
 
-`rer verify` is the complete local acceptance command. Push CI runs contracts,
+`rer verify` is the complete local command for the implemented evidence described below. It does not establish unimplemented target journeys. Push CI runs contracts,
 unit tests, runtime journeys at both widths, and notifications in four parallel
 jobs with 15-minute limits. The guided installer, full README and realistic pilot fresh-clone
 journeys at 1440 and 390 retain every assertion and run nightly, on release tags,
@@ -103,3 +103,259 @@ provided. No native iOS/Android transport exists. WebKit forbids silent Web
 Push, so immediate sleeping-device clear/badge-only behavior is explicitly
 blocked; foreground read synchronization and badges accompanying visible
 alerts are the supported web behavior.
+
+## Target clause acceptance journeys
+
+The 16 October 2026 contract is the full target for an owned US team-chat product replacing Slack, Microsoft Teams and Google Chat. Each numbered journey below is through a user-facing app, HTTP/API, supported client, authorized provider or documented rer command. Build rounds must implement missing journeys and supply measured acceptance; a planned journey is never a passing test. Provider/network fakes belong only at that edge in automated tests; native-device, real migration, real media and hosted claims require the real environments named. App journeys must be used and inspected at 1440 and 390 with realistic data and the named denied-access/error end states; native/assistive-technology cases also run on their supported devices. Keep every permanent clause ID, including C1–C15 aliases, DOCS-001 and ERASURE-001.
+
+The statuses and citations below match CONTRACT.md at main `ece3278576aa813e4d8eb6a17502df7d77bc829d`. Existing local evidence above remains bounded as stated. The new SSO, hold and compliance clauses define separate authorities; they do not silently grant an ordinary owner/admin DM access or change today’s erasure behavior. Only implementation with its acceptance can change those product paths.
+
+- **NOOK-001 — Current identity and conversation membership (C1).** **Status: done.** Through signed-in HTTP, SSR, search, replay and generated loaders, revoke or expire a session and remove a participant; every subsequent private read/write is refused, including a workspace admin attempting another person’s DM.
+
+  Current evidence: `src/platform/request.server.ts`; `src/platform/storage/context.ts`; `tests/operator-security.mjs`; `tests/storage-guards.mjs`.
+
+- **NOOK-002 — Atomic messages, retries and replay (C2).** **Status: done.** Send through the conversation API, repeat the same intent after a lost acknowledgement, then change its payload; observe one ordered message, the original retry result and a conflict for changed intent. Race edits and delete; replay shows current tombstones without deleted bodies.
+
+  Current evidence: `src/platform/storage/messages.ts`; `src/platform/storage/commands.ts`; `tests/storage-flows.mjs`.
+
+- **NOOK-003 — Fixed DMs and channel membership (C3).** **Status: done.** Create channel/private/DM conversations through the app, add a channel member after earlier messages, and observe full-history disclosure and access. Remove that member and deny history/search/replay/files immediately; refuse DM participant changes and unrelated-admin DM access.
+
+  Current evidence: `src/platform/storage/commands.ts`; `src/team/channels.server.ts`; `tests/team-runtime.mjs`; `tests/storage-flows.mjs`; `tests/browser.mjs`.
+
+- **NOOK-004 — Decisions and commitments (C4).** **Status: done.** From a discussion, record a decision and propose a commitment. Another participant cannot revise the decision or accept for the assignee; the assignee accepts the exact version and reports completion. Reopen history and see human authorship, source context and reported status.
+
+  Current evidence: `src/platform/storage/outcomes.ts`; `src/platform/storage/outcome-history.ts`; `tests/storage-flows.mjs`; `tests/browser.mjs`.
+
+- **NOOK-005 — Read cursors and attention (C5).** **Status: done.** Read a thread from two sessions, reconnect one, and observe monotonic unread recovery with own sends excluded. Refuse read markers beyond the durable frontier; closing Attention does not accept work or mark unseen messages read.
+
+  Current evidence: `src/platform/storage/read.ts`; `src/chat/useReadVisibility.ts`; `tests/storage-flows.mjs`; `tests/browser.mjs`.
+
+- **NOOK-006 — Offline restore (C6).** **Status: done.** Use rer export/reset/import into an empty stopped installation, complete explicit identity recovery, and compare conversations, memberships, outcome versions, attention and downloaded file bytes. A populated destination, altered checksum or invalid graph is refused; no old delivery or session revives.
+
+  Current evidence: `src/platform/storage/portability.mjs`; `scripts/local/transfer.mjs`; `scripts/storage/recover-identities.mjs`; `tests/recovery.test.mjs`; `tests/pilot-journey.mjs`.
+
+- **NOOK-007 — Safe rendering and local binding (C7).** **Status: done.** Post active markup and malformed/oversized bodies through public APIs; markup stays inert and invalid input fails without writes. Cross-origin mutations, foreign sessions and unsafe local origins fail; production output excludes dev admission.
+
+  Current evidence: `src/platform/operator-auth-runtime.mjs`; `src/platform/request.server.ts`; `src/chat/MessageRow.tsx`; `tests/team-security.test.mjs`; `tests/operator-security.mjs`.
+
+- **NOOK-008 — Evidence limits (C8).** **Status: partial.** For a release candidate, reproduce the documented local public-door journeys, then separately record hosted multi-device, provider, migration and capacity results before those target clauses become done. Failed or unmeasured end states remain visible.
+
+  Current evidence: `ACCEPTANCE.md`; `tests/push-journey.mjs`; `tests/pilot-journey.mjs`. Local synthetic journeys exist; hosted, real-device and full-category acceptance remain unproven.
+
+- **NOOK-009 — Backup and export (C9).** **Status: done.** Use stopped rer export/import and authenticated rer export --target remote. Reject non-owner/expired remote sessions and any remote restore; inspect that archives retain private records, media and erasure journal while excluding live credentials, devices and pending deliveries.
+
+  Current evidence: `src/platform/portability.server.ts`; `src/platform/storage/portability.mjs`; `tests/exit-export.test.mjs`; `tests/team-portability.test.mjs`.
+
+- **NOOK-010 — Commitment revision and cancellation (C10).** **Status: done.** Accept a proposal and revise its text/deadline: renewed acceptance is required at the new version. Cancel and create a new proposal to change the fixed assignee. Refuse stale acceptance, cross-conversation moves and author impersonation of completion; cancellation stays terminal in history and deleted source refs reveal no body.
+
+  Current evidence: `src/platform/storage/outcomes.ts`; `src/platform/storage/outcome-history.ts`; `tests/storage-flows.mjs`; `tests/erasure.test.mjs`.
+
+- **NOOK-011 — Cached retries, synchronization and complete history (C11).** **Status: done.** Page beyond the tested history window and reconnect after missed edit/delete events. Repeat a previously successful intent after membership revocation; it must be denied before cached response lookup, with no missing or duplicated durable history.
+
+  Current evidence: `src/platform/storage/history.ts`; `src/platform/storage/commands.ts`; `src/platform/storage/live.ts`; `tests/storage-flows.mjs`; `tests/browser.mjs`.
+
+- **NOOK-012 — Private attachments (C12).** **Status: done.** Upload and bind ordered private files through the app, preview genuine PNG/JPEG and download exact bytes as an authorized participant. Deny outsiders and removed members, reject active/corrupt/oversized input, recover lost-put acknowledgements and verify deletion and backup round-trip.
+
+  Current evidence: `src/platform/storage/files.ts`; `src/team/preview.server.ts`; `src/team/ImagePreview.tsx`; `tests/team-image.test.mjs`; `tests/storage-flows.mjs`; `tests/team-browser.mjs`.
+
+- **NOOK-013 — Calm attention (C13).** **Status: done.** At 1440 and 390, follow a thread, mute its channel, send explicit mentions/urgent requests, snooze and complete triage, and enter quiet time. Restart and sign in elsewhere: preferences persist, due items return under current ACL, and neither triage nor reads accepts responsibility.
+
+  Current evidence: `src/family/team-chat/attention.ts`; `src/platform/storage/commands.ts`; `tests/attention.mjs`; `tests/storage-flows.mjs`; `tests/browser.mjs`.
+
+- **NOOK-014 — Email notifications (C14).** **Status: done.** Run the emitted-Worker notification journey through sign-in and settings with only the provider network edge substituted: opt in, mention/propose, fold bursts, hold quiet items, cancel read/deleted/revoked items, restart a retry, expose refusal/uncertainty and use the scanner-safe unsubscribe POST. Inspect that mail contains no private body or file name.
+
+  Current evidence: `src/notify/run.ts`; `src/notify/queue.ts`; `src/notify/compose.ts`; `tests/notify-journey.mjs`; `tests/notify.test.mjs`. Done for the specified local/provider-acknowledgement behavior; real inbox receipt is not established.
+
+- **DOCS-001 — Public documentation from Markdown.** **Status: done.** Build and open /docs; every declared page renders, links and anchors resolve, raw HTML remains inert, and every root/docs Markdown source is published or has a recorded exclusion reason. The app Lobby and private workspace keep their existing routes.
+
+  Current evidence: `src/docs/build/site.ts`; `src/docs/build/render.ts`; `docs/site.json`; `tests/docs-site.test.mjs`.
+
+- **ERASURE-001 — Member, message and imported-author erasure.** **Status: partial.** Through Team and message erasure doors, preview counts, confirm and resume a pending job. Try an unrelated DM, an insufficient role, self and last owner; deny each. Remove native/imported content and verified R2 bytes, preserve only declared structural tombstones, anonymise audit, and refuse an older archive when the latest erasure journal is supplied.
+
+  Current evidence: `src/team/erasure/service.ts`; `src/team/erasure/graph.ts`; `src/team/erasure/blobs.ts`; `tests/erasure.test.mjs`; `tests/erasure-browser.mjs`; `src/team/erasure/identity.ts`; `src/base/modules/operator-auth/accounts/owner-signin.mjs`; `migrations/0025_owner_signin.sql`. Native/imported cascade, blob verification and journal checks exist; retained owner-sign-in grants can obstruct eligible owner erasure, and Base auth-audit attribution is not covered by the product anonymization path. Full erasure must include these records.
+
+- **NOOK-015 — Web Push (C15).** **Status: partial.** Run pnpm test:push through subscription, preferences, emitted Worker and real alarm; independently decrypt the RFC 8291 packet and verify VAPID, revocation, quiet/read cancellation, per-device folding and visible failure. Separately demonstrate foreground/background/locked-device visible notification, tap authentication and badge reconciliation on supported Safari, Chromium and Firefox devices.
+
+  Current evidence: `src/push/run.ts`; `src/push/subscription.ts`; `src/push/crypto.ts`; `tests/push/journey.mjs`; `tests/push/packet.mjs`; `tests/push-service-worker.test.mjs`. Bounded local Web Push and PWA ship; browser-vendor/OS receipt and real-device installation evidence are missing. Native transport belongs to NOOK-021.
+
+- **NOOK-016 — Everyday conversations.** **Status: done.** Use two signed-in people at 1440 and 390 to create/join a channel, exchange roots/replies/reactions, open a thread link after reload and edit/delete a message. An outsider and a guest fail to discover private content or expand access.
+
+  Current evidence: `src/team/channels.server.ts`; `src/team/reactions.server.ts`; `src/chat/location.ts`; `tests/team-runtime.mjs`; `tests/team-browser.mjs`; `tests/browser.mjs`.
+
+- **NOOK-017 — Composition and personal workspace.** **Status: partial.** Compose formatted text/code and an attachment, leave and resume a draft on each supported client, deliberately interrupt a send and reconcile it once. Switch accounts/workspaces and inspect draft isolation; mark unread and change status/time zone without changing work acceptance.
+
+  Current evidence: `src/chat/Composer.tsx`; `src/chat/Navigation.tsx`; `src/platform/storage/messages.ts`; `tests/browser.mjs`. Plain-text composition, mentions and attachment sends exist; rich text, durable drafts, workspace switching, profile/presence and organization remain target work.
+
+- **NOOK-018 — Invitations, roles, guests and offboarding.** **Status: done.** Invite a member and scoped guest via Team, confirm once, browse/join as each and refuse guest expansion or owner DM snooping. Deactivate a person signed in twice, reactivate, and prove both old sessions remain invalid and explicit regrant is required.
+
+  Current evidence: `src/team/invitations.server.ts`; `src/team/access.ts`; `src/platform/operator-auth-runtime.mjs`; `tests/team-runtime.mjs`; `tests/operator-security.mjs`.
+
+- **NOOK-019 — Search conversations and files.** **Status: partial.** Find an old imported reply and a phrase inside a permitted PDF/text attachment using author/date/channel filters; open context from each client. Page a large corpus; remove membership/delete a file and confirm its snippets, counts and cached results disappear.
+
+  Current evidence: `src/imports/history.ts`; `src/chat/SearchView.tsx`; `tests/slack-import-history.test.mjs`; `tests/pilot-journey.mjs`. ACL-scoped native/imported message substring search exists; file search, operators and structured filters are missing.
+
+- **NOOK-020 — Saved items and channel pins.** **Status: missing.** Save a DM and pin a channel message, retrieve both after restart on another device, then remove membership and erase the source. Private saves stay private and every unavailable item loses its excerpt.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-021 — Native clients and dependable device catch-up.** **Status: missing.** Install production-signed apps on real iOS/Android and each desktop OS. In foreground, background, force-closed and locked states send a mention/DM/call invite, observe alert/badge and tap to context; disable permission and expose the reason. Read on another device, disconnect/reconnect, race a send retry and revoke membership: converge once, purge revoked caches and verify logout isolation. A web-Push test alone cannot satisfy this journey.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-022 — In-context voice, video and screen sharing.** **Status: missing.** From a private channel and DM run a three-person real audio/video call across desktop and phone, share a window, read captions, switch devices, interrupt networking and reconnect. Remove a participant and deny further media access; an outsider cannot join with a copied link. Refused microphone/camera permission and failed relay show actionable states.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-023 — Zoom, Google Meet and Teams meetings.** **Status: missing.** For each named provider connect a test tenant, create and join from a channel and DM on phone/desktop, reschedule then cancel, and revoke consent. Observe provider-confirmed links and honest failure; a private recording link never broadens provider access.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-024 — Asynchronous clips, transcripts and call artifacts.** **Status: missing.** Record a clip from phone and desktop, play with captions and seek from transcript; record a consented huddle and inspect its audience. Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-025 — App and bot platform.** **Status: missing.** Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty with secrets redacted.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-026 — Workflow builder and durable scheduled work.** **Status: missing.** Build a recurring stand-up form that posts a channel summary and proposes work only for explicit acceptance. Publish, trigger once, pause during an approval wait and restart; no duplicate post or unauthorized write occurs. Refuse a revoked connector and expose the failed step plus a safe human resume choice.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-027 — Engineering and project integrations.** **Status: missing.** Connect each named service, route a selected project/repository event, act from a card and follow a linked issue/PR from open to complete to reopened. Retry its webhook, remove source permission and revoke the grant: exactly one authorized effect and no leaked project context. Vector remains the authoritative work record.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-028 — Support, sales and operational signals.** **Status: missing.** For each named service route a real sandbox case/account/alert event, inspect an authorized preview, approve a supported write and observe source-confirmed state. Deliver duplicate/recovery events, disconnect the source and remove channel access; keep one linked thread, no false completion and a visible failed/uncertain action.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-029 — Connected documents and knowledge.** **Status: missing.** Connect each named provider, share an authorized document into a matching channel, retrieve its card/text as an allowed member and refuse a source-denied member. Revoke provider sharing or disconnect, refresh search/agent context and show unavailability without cached excerpts or broadened access.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-030 — Calendars, availability and meeting reminders.** **Status: missing.** Connect both calendars, create a cross-time-zone meeting from a DM, accept/change/cancel it at the provider and see exactly one current card/reminder. Show free/busy without private title access, cross a daylight-saving transition and revoke the grant before a scheduled action.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-031 — Shared channels between organizations.** **Status: missing.** Two independently administered organizations approve a channel, exchange messages/files/calls and install one narrowly scoped bot. Exercise a single-channel guest, denied directory lookup, conflicting retention/export policy, member removal and full org disconnect. Every client/search/agent/API loses revoked access while permitted historical copies are explicitly accounted for.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-032 — Recurring quiet schedules and notification policy.** **Status: partial.** Set a weekday quiet schedule and channel override, cross midnight/DST and restart without a page open. Send routine/mention/urgent events from another account, read on a second device and compare the activity feed, held items, badges and provider attempts with the recipient’s stated rules.
+
+  Current evidence: `src/platform/storage/commands.ts`; `src/notify/run.ts`; `src/push/run.ts`; `tests/attention.mjs`; `tests/notify-journey.mjs`. One-off quiet time, mute/follow and recipient urgency choices ship; recurring/time-zone/device schedules are missing.
+
+- **NOOK-033 — Personal and channel reminders.** **Status: partial.** Schedule a personal message reminder and recurring channel reminder, close every client and restart before due. Observe one eligible reminder at the chosen time, snooze/edit/cancel it, revoke the creator’s channel access and confirm no unauthorized later post.
+
+  Current evidence: `src/family/team-chat/attention.ts`; `src/platform/storage/commands.ts`; `tests/attention.mjs`. Attention snooze supplies a foundation; arbitrary reminders, recurrence and channel scheduling are missing.
+
+- **NOOK-034 — Scheduled and recurring messages.** **Status: missing.** Schedule a one-off and weekly stand-up, change the time across DST, restart at due time and replay a scheduler claim. See one post per occurrence, then pause/cancel and remove posting access: no new post or hidden failure.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-035 — Channel recaps and catch-up digests.** **Status: missing.** Request a channel/thread recap and daily unread digest over contradictory discussions and inaccessible channels. Check every factual point against a source link, remove access before delivery, correct a claim and cancel the schedule. No private snippet or invented acceptance survives.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-036 — AI search with cited answers.** **Status: missing.** Ask an answerable, contradictory and unanswerable question with private files and a hostile document in the corpus. Follow citations, revoke a source and repeat as a different member: deny cross-scope context, abstain where unsupported and perform no embedded instruction or external write.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-037 — SSO, SAML and lifecycle provisioning.** **Status: missing.** Use test tenants for all three IdPs, enforce SSO, rotate signing keys and reject wrong audience/issuer/replayed/expired assertions. SCIM-create a group/member, map one channel, suspend/delete and replay the event; every client and grant loses access without deleting preserved evidence. Exercise audited owner recovery without a blanket bypass.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-038 — Retention, legal hold and preservation.** **Status: missing.** Apply a short retention policy, hold a selected member/date range, edit/delete held messages and expire their files. Ordinary participants lose deleted content, a custodian preserves exact history, and an unauthorized admin cannot retrieve it. Release the hold and finish the queued erasure with actual byte verification and audited counts.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-039 — Compliance search and controlled exports.** **Status: missing.** Open a case, obtain required approval, export a held DM/file plus revision history and verify manifest completeness and hashes. Try the same through an ordinary admin session and deny it. Revoke the custodian mid-job, expire the download and inspect a durable audit of search, approval and retrieval.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-040 — Information protection and data handling.** **Status: partial.** Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning. Exercise an approved override and revoke it; inspect policy history, secret redaction and deletion of derived content after source erasure.
+
+  Current evidence: `src/platform/storage/context.ts`; `src/platform/storage/files.ts`; `src/push/crypto.ts`; `tests/team-security.test.mjs`. Current-membership private-message/file access and encrypted push exist; labels, DLP, organization AI policy and cross-tool enforcement are missing.
+
+- **NOOK-041 — Slack migration and cutover.** **Status: partial.** Use an authorized real Slack workspace export plus synthetic adversarial coverage, preview without writes, resolve an identity collision and a missing file, import public/private/DM/shared histories, verify complete counts/bytes/threads/search and deny outsiders. Interrupt/resume and undo a batch after native activity, confirming refusal where undo would destroy that activity.
+
+  Current evidence: `src/imports/archive-plan.mjs`; `src/imports/history.ts`; `src/imports/ImportWizard.tsx`; `tests/slack-import/journey.mjs`; `tests/pilot-journey.mjs`. Reviewed resumable public-channel JSON ZIP history, file choices, threads, provenance and guarded undo ship on synthetic fixtures; private/DM/shared import, full metadata parity and real-source cutover remain missing.
+
+- **NOOK-042 — Microsoft Teams migration.** **Status: missing.** Extract a real test tenant containing channels, private/shared channels, 1:1/group/meeting chats and protected files; page every source set, preview, import and verify counts, chronology and visibility. Revoke an export scope, interrupt/resume and undo without deleting later native work; show each omission.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-043 — Google Chat migration.** **Status: missing.** Import a real Workspace test export with spaces, threaded replies, DMs and files plus an externally owned space omitted by source policy. Compare coverage and exact visibility, interrupt/resume and undo after native activity, and confirm no notifications, accepted tasks or outsider access.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-044 — Campfire ONCE migration.** **Status: missing.** Take a consistent real Campfire test-instance backup with open/closed rooms, DMs and uploads, preview and migrate it, then compare messages/files and deny unrelated members. Reject an incomplete/unsupported backup and exercise resume and safe undo.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-045 — Zulip migration and topic continuity.** **Status: missing.** Export a real Zulip test organization with two topics in one channel, private conversations and uploads; import and navigate each topic independently, inspect consent omissions and verify private audiences. Resume once without duplicates and undo while preserving later native work.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-046 — Mattermost migration.** **Status: missing.** Export a real Mattermost test deployment spanning two teams, private channels, DMs, replies, saved/pinned items and attachments. Review/map roles, import and find every declared item while denying outsiders; interrupt/resume and undo without removing subsequent Nook messages.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-047 — Readable portability and controlled exit.** **Status: partial.** Export a populated workspace and a member-scoped conversation, read the HTML offline and enumerate JSON/file hashes against the source. Attempt another person’s DM as an ordinary admin, cancel/resume a large job, and verify all omissions are named. A successful operational backup alone does not prove readable exit.
+
+  Current evidence: `src/platform/storage/portability.mjs`; `src/platform/portability.server.ts`; `tests/exit-export.test.mjs`; `tests/team-portability.test.mjs`. Complete owner/operator backup with media and provenance ships; human-readable/selective exit and future feature exports remain missing.
+
+- **NOOK-048 — Team administration and reporting.** **Status: missing.** Populate a US 35-person team with guests, a private management channel, missed notifications and overdue linked work. Compare filtered report totals to authorized records, export CSV, remove a viewer’s access and verify both aggregates and drill-through stop exposing that scope; show a failed sync as incomplete data.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-049 — Reliability, performance and operating recovery.** **Status: partial.** On the supported hosted configuration, run a realistic multi-user workload with large history/files, interrupt fanout/provider access, restart workers and upgrade an installation without data loss. Measure sent-to-visible latency and complete reconnect count, recover from an owned backup and compare outcomes to the published objectives and component status.
+
+  Current evidence: `src/platform/storage/live.ts`; `src/platform/storage/messages.ts`; `scripts/storage/measure.mjs`; `tests/storage-flows.mjs`; `tests/recovery.test.mjs`. Normalized D1/R2, Durable Object replay and local restart/restore checks exist; hosted service levels, media/platform failure recovery and measured target capacity remain unproven.
+
+- **NOOK-050 — Owned installation and Base replacements.** **Status: partial.** Follow README installation, first-run setup and invited sign-in; upgrade existing data, run doctor, export/reset/recover and use the configured hosted owner claim. Check invalid config and missing secrets fail closed, operator disk custody is disclosed and no private value reaches logs/builds. Reproduce on a real supported owner account and inspect actual USD provider usage separately from local/fake-account tests.
+
+  Current evidence: `src/platform/operator-auth-runtime.mjs`; `src/platform/owner-claim.server.ts`; `src/platform/portability.server.ts`; `scripts/installer/local.mjs`; `tests/installer-workflow.mjs`; `tests/owner-deploy.test.mjs`; `tests/part6.mjs`. Base-backed local lifecycle, owner claim, portability and fake-account deployment checks exist; live hosted/provider/native operating proof and full cost reporting are missing.
+
+- **NOOK-051 — Auditable authority and actions.** **Status: partial.** Exercise membership revocation, export, erasure and an approved bot/workflow action, then filter/export their log through admin doors. Deny members and an erased actor; anonymize that actor and retain the action facts. Interrupt an external step and see uncertainty rather than a forged completion.
+
+  Current evidence: `src/team/erasure/audit.ts`; `src/base/modules/operator-auth/accounts/admin.mjs`; `tests/erasure.test.mjs`; `tests/operator-auth.test.mjs`. Auth and anonymized erasure audit foundations exist; unified administrator log, hold/export/app/agent coverage and filters are missing.
+
+- **NOOK-052 — Accessible, responsive daily use.** **Status: partial.** At both widths and on native clients, use keyboard and VoiceOver/NVDA to send/reply/search, accept work, upload, join a captioned call, migrate, change a policy and pause an agent. Inspect realistic long names/history, enlarged text, focus after deletion/reconnect and error announcements; run scoped automated accessibility checks and record manual limitations.
+
+  Current evidence: `src/chat/accessibility.css`; `src/chat/dialog-focus.ts`; `tests/accessibility.mjs`; `tests/keyboard.mjs`; `tests/browser.mjs`. Responsive/keyboard and bounded axe coverage exist for current conversations and erasure; new surfaces and complete assistive-technology conformance lack evidence.
+
+- **NOOK-053 — Conversation notes and lightweight lists.** **Status: missing.** Create and revise a private channel note/checklist, link a provider document, propose an item to another person and require their exact acceptance. Remove a member, export history and delete/hold the note; all sources keep their distinct permissions and authority.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-060 — Organization policy and channel lifecycle.** **Status: partial.** As owner create a delegated channel admin and a user group, rename/archive/restore a populated channel, transfer ownership and schedule guest expiry. Preview/refuse a private-to-public conversion that would expose earlier history, exercise group mentions and custom emoji, and deny app/compliance/DM operations outside the delegated grant. Verify expiry/revocation across phone, desktop, search and bot access.
+
+  Current evidence: `src/team/channels.server.ts`; `src/team/access.ts`; `src/team/invitations.server.ts`; `tests/team-runtime.mjs`; `tests/team-security.test.mjs`. Basic channel creation, browse/join and scoped guest access ship; custom roles/groups, channel archive/transfer, expiry and full organization policy are missing.
+
+- **NOOK-054 — Scoped company-context agents and MCP.** **Status: missing.** Provision a channel agent and read-only MCP client, connect a permission-scoped document and request a summary/post. Deny access to a second private channel, an unlisted tool and a malicious source instruction; revoke membership/grants mid-run and verify no cached context or further tool write escapes.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-055 — Accountable commitment assistant.** **Status: partial.** Discuss a vague request, a declined ask and an agreed ask. The assistant proposes only a cited candidate; deny author/agent acceptance on behalf of the assignee. Accept, revise a due date and close linked work: require renewed agreement and assignee completion, then pause the agent and verify no further chase or external write.
+
+  Current evidence: `src/platform/storage/outcomes.ts`; `src/family/team-chat/attention.ts`; `tests/storage-flows.mjs`; `tests/browser.mjs`. Human proposals, exact assignee acceptance, revision and completion reports ship; agent extraction, evidence tracking and controls are missing.
+
+- **NOOK-056 — Decisions that stay current.** **Status: partial.** Record a decision, change its linked authorized project/document to contradict it and produce a source-cited proposal for the original author. Make one source private and one stale, dismiss a false positive and revise the decision as its author; deny automatic/foreign revision and any wider audience leak.
+
+  Current evidence: `src/platform/storage/outcomes.ts`; `src/platform/storage/outcome-history.ts`; `tests/storage-flows.mjs`. Human versioned decisions and source links ship; contradiction monitoring and proposed agent resolution are missing.
+
+- **NOOK-057 — Calm follow-through across linked systems.** **Status: partial.** Accept a commitment linked to a PR and support case, deliver duplicate and out-of-order source events, then close/reopen one dependency and revoke another connector. Receive one calm evidence-linked update, an accurate blocked/unknown status and a proposed resolution; deny unauthorized writes and preserve assignee-only completion.
+
+  Current evidence: `src/notify/run.ts`; `src/family/team-chat/attention.ts`; `src/platform/storage/outcomes.ts`; `tests/notify-journey.mjs`; `tests/attention.mjs`. Human obligations and calm routing ship; connected-system reconciliation, batched agent updates and external-action grants are missing.
+
+- **NOOK-058 — Stale handoffs and proposed resolution.** **Status: missing.** Leave a handoff unaccepted, let an accepted dependency become overdue, then provide late evidence and an alternate suggested assignee. The agent separates those states, proposes a cited resolution to the permitted people, stops after resolution/pause and requires the new assignee’s own acceptance.
+
+  Current evidence: No implementing source/test; journey pending..
+
+- **NOOK-059 — Visible and controllable agent execution.** **Status: missing.** Start a scheduled handoff run, inspect and decline a proposed external write, interrupt the model/provider after a step, restart and revoke the grant. The owner sees a durable failed/uncertain state and exact remaining action; no duplicate write, resumed revoked access or unapproved commitment appears.
+
+  Current evidence: No implementing source/test; journey pending..
+
+**62 target clauses: 16 done, 18 partial, 28 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
