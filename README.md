@@ -41,17 +41,17 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 
 ## Run it on your computer
 
-You need npm and Git. Install the `rer` command once, clone the latest source
-from `main`, then start it from the cloned folder:
+You need npm and Git. One line installs the `rer` command, clones the latest
+source from `main` and starts it:
 
 ```sh
-npm install -g @runeditrun/rer
-git clone --branch main https://github.com/just-every/run-nook.git nook && cd nook
-rer dev
+npx -y @runeditrun/rer dev just-every/run-nook
 ```
 
-To run the **0.3.0 release** instead, use this clone command in place of the
-`main` clone above, then run `rer dev`:
+To start it again later, run `cd run-nook && rer dev`.
+
+To run the **0.3.0 release** instead, clone it in place of the line above,
+then run `rer dev` from the cloned folder:
 
 ```sh
 git clone --branch v0.3.0 https://github.com/just-every/run-nook.git nook && cd nook
@@ -64,7 +64,7 @@ instructions below apply to a checkout of `main`; see the
 `rer` manages this checkout's pinned Node and pnpm versions.
 You do not need a separate pnpm installation.
 `rer dev` prepares the local settings and database and creates a placeholder
-owner, **Owner (owner@nook.test)**. Open the link it prints, then confirm that
+owner, **Owner (owner@run-nook.test)**. Open the link it prints, then confirm that
 account on **Finish setup** to enter the workspace. This is a local account for
 trying Nook. To use your own email instead, stop the app with `rer dev --stop`, run
 `rer setup --owner-email you@example.com`, then start it again with `rer dev`.

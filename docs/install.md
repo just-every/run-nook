@@ -1,12 +1,12 @@
 # Install Nook
 
-Install `rer`, clone Nook and start it from the cloned folder:
+One line installs `rer`, clones Nook and starts it:
 
 ```sh
-npm install -g @runeditrun/rer
-git clone https://github.com/just-every/run-nook.git && cd run-nook
-rer dev
+npx -y @runeditrun/rer dev just-every/run-nook
 ```
+
+To start it again later, run `cd run-nook && rer dev`.
 
 You need Node.js 22 or newer, npm and Git to bootstrap `rer`. Once bootstrapped,
 `rer` installs the pinned Node and pnpm Nook needs; no separate pnpm installation

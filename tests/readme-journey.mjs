@@ -19,7 +19,9 @@ const readme=await readFile(join(root,'README.md'),'utf8')
 const section=readme.match(/^## Run it on your computer\n([\s\S]*?)(?=^## )/m)?.[1]
 assert.ok(section,'README keeps its local section')
 const lines=[...section.matchAll(/^```sh\n([\s\S]*?)^```/gm)].flatMap(match=>match[1].replace(/\\\n\s*/g,' ').split('\n')).map(line=>line.replace(/\s+#.*$/,'').trim()).filter(Boolean)
-for(const verb of ['dev','verify','export','reset','import','deploy'])assert.ok(lines.some(line=>line.startsWith('rer '+verb)),'README documents '+verb)
+const oneLine=/^npx -y @runeditrun\/rer dev just-every\/[\w-]+$/
+assert.ok(lines.some(line=>oneLine.test(line)),'README gives the one-line install')
+for(const verb of ['verify','export','reset','import','deploy'])assert.ok(lines.some(line=>line.startsWith('rer '+verb)),'README documents '+verb)
 
 const freePort=()=>new Promise((ok,bad)=>{const server=createServer();server.once('error',bad);server.listen(0,'127.0.0.1',()=>{const {port}=server.address();server.close(()=>ok(port))})})
 const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),bin=await mkdtemp(join(tmpdir(),'nook-readme-bin-'))
@@ -34,7 +36,9 @@ let dev,browser,ownerEmail
 try{
  execFileSync('git',['clone','--quiet','--no-hardlinks',root,clone])
  await copyWorkingTree(root,clone)
- for(const line of lines){
+ for(const original of lines){
+  // The one line clones, installs and starts; this test has already cloned, so it runs the same start in the clone.
+  const line=oneLine.test(original)?'rer dev':original
   if(line==='rer verify'||/^(npm install -g |OWNER_EMAIL=|CLOUDFLARE_ACCOUNT_ID=|git clone |cd )/.test(line))continue
   if(line==='rer dev'){
    dev=spawn('bash',['-c',line+' --port '+port+' --foreground'],{cwd:clone,env,stdio:['ignore','pipe','pipe'],detached:true});let output=''

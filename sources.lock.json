@@ -649,7 +649,7 @@
       "executable": false
     },
     "docs/install.md": {
-      "sha256": "4721aa80bb37875f71316b8ccc4464660fb26818fb8e424c4e21c4f139cefaee",
+      "sha256": "aed47589ea39f83db621eb497ee8f7e8380d5bdc6c9a6eb612c8ce0801cd4110",
       "executable": false
     },
     "docs/moving-in-from-slack.md": {
@@ -873,7 +873,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "cddf194278d75da89c2e6827c6840d24ab15cb03d7a1c551141fa7a7ff4a668b",
+      "sha256": "5feae800877e6ef0e0d8437a1280b90f0c314b6f8d2bd2487025dd5fcff3a5c6",
       "executable": false
     },
     "RELEASE.json": {
@@ -3837,7 +3837,7 @@
       "executable": false
     },
     "src/site/run.ts": {
-      "sha256": "fe63a279fbead3b521d207d814fc96e14a59b928c14675180bc206c1c6780d70",
+      "sha256": "67c9ed299689920216ce5bdc424c993bddf93deb93c8f3a32c69b495fed9bb01",
       "executable": false
     },
     "src/team/access.ts": {
@@ -4325,7 +4325,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "fee5367dc51326654be2019b9a4061efe7ba0eacdf38473cded78a878ff0bfe9",
+      "sha256": "ecc17abb95d845d032999b0bf11781194649c0c01a385745f52969071466b804",
       "executable": false
     },
     "tests/readme-team-flow.mjs": {
