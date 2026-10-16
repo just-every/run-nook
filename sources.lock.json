@@ -4057,7 +4057,7 @@
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "3bdbac7fa5e1c7d00b99a49d89e723044ee215c2c5569f142c29fd65e7e88e56",
+      "sha256": "aa315c10cd88875298c66a33855267b5dd28441159464c04a1c73557edbf9b95",
       "executable": false
     },
     "tests/cloudflare-account.mjs": {

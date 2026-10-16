@@ -114,7 +114,10 @@ export async function runBrowser(origin,destination){
     for(const body of updates)await json(alice,origin,`conversations/${channel.id}/messages`,{body,intent:crypto.randomUUID()})
     const deepReply=await json(bob,origin,`conversations/${channel.id}/messages`,{body:'Deep context reply for the release',parent:deep.id,intent:crypto.randomUUID()})
     const historyRequests=[]
-    const recordHistory=request=>{const url=new URL(request.url());if(request.method()==='GET'&&url.pathname.startsWith(`/api/conversations/${channel.id}/messages`))historyRequests.push(url)}
+    // Workspace refreshes bundle bounded history; target discovery still uses
+    // the dedicated message-window endpoint. Observe both public transports.
+    const bundledHistory=url=>url.pathname==='/api/workspace'&&url.searchParams.get('view')==='chat'&&url.searchParams.get('conversation')===channel.id
+    const recordHistory=request=>{const url=new URL(request.url());if(request.method()==='GET'&&(url.pathname.startsWith(`/api/conversations/${channel.id}/messages`)||bundledHistory(url)))historyRequests.push(url)}
     alice.on('request',recordHistory)
     // The bounded-latest-history scenario opens an explicit cursor at the authorized current frontier.
     const frontier=(await json(alice,origin,'conversations')).find(c=>c.id===channel.id).seq
@@ -136,8 +139,8 @@ export async function runBrowser(origin,destination){
     await nav(alice,'Search').click();await alice.getByLabel('Search conversations',{exact:true}).fill('Deep context reply');await alice.locator('.search-form').getByRole('button',{name:'Search',exact:true}).click();await alice.getByRole('button',{name:'Open in conversation',exact:true}).click()
     await expect(alice.locator('.thread-log').getByText('Deep context reply for the release',{exact:true})).toBeInViewport();await shot(alice,'deep-context')
     assert.ok(historyRequests.some(url=>url.searchParams.has('before')),'earlier history is fetched on explicit navigation')
-    assert.ok(historyRequests.some(url=>url.searchParams.get('around')!==null),'search uses direct target lookup')
-    assert.ok(historyRequests.every(url=>url.pathname.endsWith('/messages/window')),'the mounted conversation never exhausts the legacy full-history endpoint')
+    assert.ok(historyRequests.some(url=>url.searchParams.get('around')===deepReply.id||bundledHistory(url)&&url.searchParams.get('focus')===deepReply.id),'search uses direct target lookup')
+    assert.ok(historyRequests.every(url=>url.pathname.endsWith('/messages/window')||bundledHistory(url)),'the mounted conversation never exhausts the legacy full-history endpoint')
     alice.off('request',recordHistory)
     checks.push(`${label}: material revision and stale acceptance rejection; bounded latest and earlier windows, draft/history restoration, direct deep-context search`)
     await nav(bob,'Attention').click()
@@ -196,8 +199,9 @@ export async function runBrowser(origin,destination){
     await expect(alice.getByRole('button',{name:'Discard handover.txt',exact:true})).toHaveCount(1)
     await composer.fill(hostileMessage)
     let lost=false
-    await alice.route('**/api/conversations/*/messages',async route=>{if(!lost&&route.request().method()==='POST'){lost=true;const response=await route.fetch();assert.equal(response.status(),200);expectedFailures.set(route.request().url(),'message');intentionalAbort=true;await route.abort('failed')}else await route.continue()})
-    await composer.press('Enter');await alice.getByRole('button',{name:'Retry send',exact:true}).waitFor();await alice.unroute('**/api/conversations/*/messages');await alice.reload()
+    const messageSend=url=>url.pathname===`/api/conversations/${channel.id}/messages`
+    await alice.route(messageSend,async route=>{if(!lost&&route.request().method()==='POST'){lost=true;const response=await route.fetch();assert.equal(response.status(),200);expectedFailures.set(route.request().url(),'message');intentionalAbort=true;await route.abort('failed')}else await route.continue()})
+    await composer.press('Enter');await alice.getByRole('button',{name:'Retry send',exact:true}).waitFor();await alice.unroute(messageSend);await alice.reload()
     await alice.getByRole('button',{name:'Retry send',exact:true}).click();await expect(composer).toHaveValue('')
     const all=[];let after='';for(;;){const page=await json(alice,origin,`conversations/${channel.id}/messages?after=${encodeURIComponent(after)}&limit=100`);all.push(...page);if(page.length<100)break;after=page.at(-1).created+page.at(-1).id}
     assert.equal(all.filter(m=>m.body===hostileMessage).length,1,'unknown acknowledgement retry does not duplicate')
