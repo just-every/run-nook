@@ -3077,7 +3077,7 @@
       "executable": false
     },
     "src/chat/useWorkspace.ts": {
-      "sha256": "85e80298a5c584e1b2cc92b126a02adaeaf6bc0280e38059faa456ba42fe6157",
+      "sha256": "d6f507a097e9d53e64839e81003a7f974080c22f5d218318bd39d8f7fd06c93e",
       "executable": false
     },
     "src/ChatScreen.tsx": {

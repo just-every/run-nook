@@ -37,6 +37,10 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState) {
   if(privateSignal.aborted)return
   if(running.current){const previous=running.current;if(previous.signal===privateSignal){again.current=true;await previous.promise}else{await previous.promise;await refresh()}return}
   const task=async()=>{do{
+   // Route changes and same-frame live hints share the read that starts after
+   // React has committed navigation. Later invalidations still request a pass.
+   await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()))
+   if(privateSignal.aborted)return
    again.current=false;const epoch=generation.current
    try {
     const routeSnapshot=current.current,previous=cache.current?.key===windowKey(routeSnapshot)?cache.current:null
