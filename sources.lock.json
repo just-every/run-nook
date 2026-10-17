@@ -637,7 +637,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "363d3e24dbafc19beb08bd7a1ab34d968bc097a113e1d2f868e894bca6121abb",
+      "sha256": "d7d6a3ba13e58e400e955571915a4834a5f4bc4519af7864aecd939876b8855b",
       "executable": false
     },
     "DEMO.md": {
@@ -4045,7 +4045,7 @@
       "executable": false
     },
     "src/search/server.ts": {
-      "sha256": "ac1f1fd531eb04b43e72db51e7d5a70e6fc48fd24267c599b593f186100e40bc",
+      "sha256": "3df5b6a1cfd5cc16b72ca2d2a561d0024ecdbe0a13f259cffac531fed4d7c503",
       "executable": false
     },
     "src/server.dev.ts": {

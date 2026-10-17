@@ -38,9 +38,11 @@ function filters(alias:string,stamp:string,person:string){return `${access(alias
  AND (a.pinned=0 OR (${alias}.erased=0 AND EXISTS(SELECT 1 FROM nook_channel_pins pin WHERE pin.conversation=${alias}.conversation AND pin.message=${alias}.id)))
  AND (a.saved=0 OR (${alias}.erased=0 AND EXISTS(SELECT 1 FROM nook_saved_items saved WHERE saved.user=a.user AND saved.conversation=${alias}.conversation AND (saved.kind='message' AND saved.target=${alias}.id OR saved.kind='attachment' AND EXISTS(SELECT 1 FROM nook_attachments sf WHERE sf.id=saved.target AND sf.message=${alias}.id AND sf.state='attached' AND sf.object_key IS NOT NULL)))))`}
 
+// Drive FTS once from the query arguments; correlating MATCH with each history row rebuilds its hit list.
 function pageSql(useFts:boolean){
- const fts=(source:SearchSource,alias:string)=>useFts?`AND ${alias}.id IN (SELECT message FROM nook_search WHERE nook_search MATCH a.fts AND source='${source}')`:''
+ const fts=(source:SearchSource,alias:string)=>useFts?`AND ${alias}.id IN (SELECT message FROM search_matches WHERE source='${source}')`:''
  return `WITH a AS (SELECT ? AS user,? AS term,? AS slack_term,? AS after_source,? AS after_id,? AS conversation,? AS person,? AS after_date,? AS before_date,? AS has_file,? AS saved,? AS pinned,? AS source_only,? AS fts),
+ ${useFts?`search_matches AS MATERIALIZED (SELECT message,source FROM a CROSS JOIN nook_search WHERE nook_search MATCH a.fts),`:''}
  native_page AS MATERIALIZED (
   SELECT 0 AS source_class,m.id,m.conversation,m.body_lower AS search_body FROM nook_message_history m CROSS JOIN a
   WHERE m.deleted=0 AND (a.source_only IS NULL OR a.source_only='native') AND a.after_source=0 AND m.id>a.after_id
