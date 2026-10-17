@@ -54,7 +54,7 @@ try {
             assert.equal(await imported.getByRole('button', { name: 'Remove file', exact: true }).count(), 0);
             await imported.getByRole('button', { name: 'Open thread', exact: true }).click();
             await page.locator('.thread-log .message[data-immutable="true"]').nth(1).waitFor();
-            assert.equal(await page.getByRole('textbox', { name: 'Reply in thread', exact: true }).count(), 0);
+            await expect(page.getByRole('textbox', { name: 'Reply in thread', exact: true })).toBeVisible();
             await page.screenshot({ path: `evidence/nook-1/slack-history-thread-${width}.png`, fullPage: true });
             await page.goto(`${origin}/app?conversation=${channel.id}`);
             if (width === 390) {
