@@ -132,7 +132,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
     </div>
     {showLatest&&<button className="jump-latest soft-button" onClick={()=>latest()}>Latest messages</button>}
    </div>
-   <Composer key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>
+   {c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<Composer key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&root&&!showOutcomes?<>
@@ -145,7 +145,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
      </div>
      {showLatestReplies&&<button className="jump-latest soft-button" onClick={()=>latest(true)}>Latest replies</button>}
     </div>
-    {!root.deleted&&(!root.immutable||Boolean(root.provenance))&&<Composer key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
+    {!c.archived&&!root.deleted&&(!root.immutable||Boolean(root.provenance))&&<Composer key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
    </>:outcomesPanel}
   </aside>
  </div>

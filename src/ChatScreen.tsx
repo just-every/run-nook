@@ -74,7 +74,7 @@ function Workspace({initial}:{initial:InitialWorkspace}) {
    <main className="workspace" id="primary" tabIndex={-1}><header className="header"><div className="heading">
      {route.view==='chat'&&<button className="mobile-back icon-button" title="Channels" onClick={()=>nav('channels')}><IconBack/><span className="sr-only">Channels</span></button>}
      {route.view==='team'&&<button className="page-back icon-button" title="You" onClick={()=>nav('you')}><IconBack/><span className="sr-only">You</span></button>}
-     <h1>{route.view==='chat'&&c&&c.kind!=='dm'&&<span className="title-prefix" aria-hidden="true">#</span>}{title}</h1>{route.view==='chat'&&w.data?.preferences.muted&&<span className="title-tag">Muted</span>}</div>
+     <h1>{route.view==='chat'&&c&&c.kind!=='dm'&&<span className="title-prefix" aria-hidden="true">#</span>}{title}</h1>{route.view==='chat'&&c?.archived&&<span className="title-tag archived-tag">Archived</span>}{route.view==='chat'&&w.data?.preferences.muted&&<span className="title-tag">Muted</span>}</div>
     <div className="header-actions">
      {route.view==='chat'&&c&&<ChatActions user={w.user} data={w.data} route={route} navigate={navigate} onDetails={()=>setDialog({kind:'details'})} onPreference={input=>void w.mutate(`conversations/${c.id}/preferences`,input,'PATCH').catch(()=>{})}/>}
      {route.view==='channels'&&canCreate&&<><button className="soft-button" onClick={newMessage}><IconPlus/>New message</button><button className="soft-button" onClick={newChannel}><IconPlus/>Create channel</button></>}
@@ -89,6 +89,6 @@ function Workspace({initial}:{initial:InitialWorkspace}) {
     {route.view==='team'&&(canManage?<section className="page-content team-page"><div className="page-column">{teamPanel}</div></section>:<div className="empty-state"><p>Only owners and admins manage the team.</p><button className="soft-button" onClick={()=>nav('you')}>Back to You</button></div>)}
    </main><MobileTabs view={route.view} attentionCount={w.attention.items.length} onNavigate={nav}/>
   </div>
-  {dialog&&((canCreate&&['new-message','new-channel'].includes(dialog.kind))||Boolean(c&&w.data))&&<Dialogs key={dialog.kind} dialog={dialog} close={()=>setDialog(null)} user={w.user} users={w.users} conversation={c} data={w.data} mutate={w.mutate} onCreated={select}/>}
+  {dialog&&((canCreate&&['new-message','new-channel'].includes(dialog.kind))||Boolean(c&&w.data))&&<Dialogs key={dialog.kind} dialog={dialog} close={()=>setDialog(null)} user={w.user} users={w.users} conversation={c} data={w.data} mutate={w.mutate} refresh={w.refresh} onLeft={()=>{w.clearPrivate();navigate({view:'channels',conversation:null,thread:null,focus:null,panel:null,before:null,threadBefore:null});setDialog(null)}} onCreated={select}/>}
  </div></TeamBindings.Provider>
 }

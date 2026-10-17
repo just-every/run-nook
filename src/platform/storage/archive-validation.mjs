@@ -5,6 +5,7 @@ import {slackArchiveObjects} from '../../imports/archive-objects.mjs';
 import {slackArchivePlans} from '../../imports/archive-plan.mjs';
 import {validateSlackArchiveRecords} from '../../imports/archive-records.mjs';
 import {validateTeamArchive} from '../../team/portability.mjs';
+import {validateChannelArchive} from '../../team/channel-archive.mjs';
 // Offline archive graph validation. Linear indexes replace per-row scans so a
 // team's full history can be checked without quadratic work or a workspace cell.
 import {importDigest} from '../../family/team-chat/import-capture.mjs';
@@ -27,6 +28,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
 
  };
  for(const name of names)await readTable(name);
+ const channelActions=await validateChannelArchive(readTable,{conversations:tables.nook_conversations,actors:tables.nook_actors,events:tables.nook_events});
  const rows=name=>tables['nook_'+name];
  check(!tables.workspace.length,'legacy_document_in_normalized_archive');const authority=rows('storage');check(authority.length===1&&authority[0].id===1&&authority[0].authority==='normalized'&&authority[0].phase==='ready','invalid_storage_authority');
  check(!rows('upload_attempts').length&&!rows('object_deletes').length,'reconcile_pending_object_work_before_export');
@@ -73,7 +75,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
   for(let i=0;i<vs.length;i++){const v=vs[i],prior=vs[i-1];check((v.erasedAction?v.actor===null&&o.assigneeErased&&['accepted','reported-complete'].includes(v.status):actors.has(v.actor))&&typeof v.body==='string'&&deadline(v.deadline),'invalid_outcome_revision');if(['accepted','reported-complete'].includes(v.status))check(o.kind==='commitment'&&(v.erasedAction?o.assigneeErased:v.actor===o.assignee)&&prior?.status===(v.status==='accepted'?'proposed':'accepted')&&v.body===prior.body&&v.deadline===prior.deadline,'invalid_assignee_acceptance');else check(v.actor===o.author&&(o.kind==='decision'?['recorded','cancelled']:['proposed','cancelled']).includes(v.status),'invalid_author_revision');if(prior)check(!['cancelled','reported-complete'].includes(prior.status),'terminal_outcome_revised')}
  }
  for(const v of rows('outcome_versions'))check(out.has(v.outcome),'orphan_outcome_revision');
- for(const e of events.values()){if(e.kind==='erasure'){check(conv.has(e.conversation)&&e.actor===null&&/^[a-f0-9]{32}$/.test(e.object),'invalid_anonymous_event');continue;}const object=['message','edit','delete','reaction'].includes(e.kind)?msg.get(e.object):e.kind==='outcome'?out.get(e.object):e.kind==='attachment-delete'?files.get(e.object):['membership','access-revoked'].includes(e.kind)?actors.get(e.object):null;check(conv.has(e.conversation)&&object&&(e.kind==='membership'?conv.get(e.conversation).kind!=='dm':e.kind==='access-revoked'?e.actor===e.object&&conv.get(e.conversation).owner===e.actor:object.conversation===e.conversation)&&(['reaction','access-revoked'].includes(e.kind)?participant(e.conversation,e.actor):e.actor===null||participant(e.conversation,e.actor)),'invalid_event_object')}
+ for(const e of events.values()){if(e.kind==='erasure'){check(conv.has(e.conversation)&&e.actor===null&&/^[a-f0-9]{32}$/.test(e.object),'invalid_anonymous_event');continue;}const object=['message','edit','delete','reaction'].includes(e.kind)?msg.get(e.object):e.kind==='outcome'?out.get(e.object):e.kind==='attachment-delete'?files.get(e.object):['membership','access-revoked'].includes(e.kind)?actors.get(e.object):e.kind==='channel'?channelActions.get(e.object):null;check(conv.has(e.conversation)&&object&&(e.kind==='membership'?conv.get(e.conversation).kind!=='dm':e.kind==='access-revoked'?e.actor===e.object&&conv.get(e.conversation).owner===e.actor:object.conversation===e.conversation)&&(['reaction','access-revoked'].includes(e.kind)?participant(e.conversation,e.actor):e.actor===null||participant(e.conversation,e.actor)),'invalid_event_object')}
  index(rows('preferences'),p=>tuple(p.user,p.conversation),'duplicate_preference');for(const p of rows('preferences'))check(participant(p.conversation,p.user)&&[0,1].includes(p.muted)&&[0,1].includes(p.followed),'invalid_preference');
  const threadRoot=(id,user)=>{const root=msg.get(id)??imported.get(id);return root&&root.parent===null&&participant(root.conversation,user)?root:null};
  // The additive archive bridge stages the older columns and restores the new

@@ -1,0 +1,9 @@
+.nook-app .channel-settings { border-top: 1px solid var(--line); margin-top: var(--s4); padding-top: var(--s3); }
+.nook-app .channel-settings form { margin: var(--s4) 0; }
+.nook-app .channel-settings > .text-button { display: block; margin: var(--s3) 0 0; }
+.nook-app .channel-settings .channel-confirm { margin: var(--s3) 0; padding: var(--s3); border: 1px solid var(--line); border-radius: var(--r-control); font-size: var(--fs-ui); line-height: 1.5; }
+.nook-app .channel-confirm p { margin-top: 0; }
+.nook-app .channel-topic { white-space: pre-wrap; overflow-wrap: anywhere; }
+.nook-app .archived-notice { margin: var(--s3); padding: var(--s3); border: 1px solid var(--line); border-radius: var(--r-control); font-size: var(--fs-ui); color: var(--ink-soft); }
+
+@media(max-width:850px) { .nook-app .archived-tag { display: none; } }

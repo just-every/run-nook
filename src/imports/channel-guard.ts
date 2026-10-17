@@ -8,6 +8,8 @@ export function importedAttachment(attachment: string) {
  * Anonymous event labels alone cannot prove that an import owns the channel. */
 export function retainedChannelHistory(conversation: string) {
     return [
+        `EXISTS(SELECT 1 FROM nook_channel_settings s WHERE s.conversation=${conversation})`,
+        `EXISTS(SELECT 1 FROM nook_channel_actions a WHERE a.conversation=${conversation})`,
         `EXISTS(SELECT 1 FROM nook_message_history m WHERE m.conversation=${conversation})`,
         `EXISTS(SELECT 1 FROM nook_outcome_history o WHERE o.conversation=${conversation})`,
         `EXISTS(SELECT 1 FROM nook_attachment_history a WHERE a.conversation=${conversation} AND NOT (${importedAttachment('a')}))`,

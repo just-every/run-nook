@@ -2,7 +2,7 @@ import type {Reaction} from '../team/types'
 import type {notifySettings} from '../notify/preferences'
 import type { SlackPresentation } from '../imports/SlackHistory'
 export type Person = { id: string; name: string; active?:number; mode?:'member'|'guest'; role?:'owner'|'admin'|'member' }
-export type Conversation = { id: string; name: string; kind: 'channel'|'private'|'dm'; owner: string; seq: number; readSeq: number; unread: number; participants?: Person[] }
+export type Conversation = { id: string; name: string; kind: 'channel'|'private'|'dm'; owner: string; version?:number; manager?:string|null; topic?:string; archived?:boolean; seq: number; readSeq: number; unread: number; participants?: Person[] }
 export type FileRecord = { id: string; author: string; name: string; size: number; mime:string; state: 'staged'|'attached'|'deleted' }
 export type Message = { id: string; conversation: string; author: string|null; authorName: string; retainedSource?:'native'|'imported';immutable?:boolean; slack?:SlackPresentation; provenance?:{timestamp:string;label:string}; body: string; parent: string|null; version: number; deleted: number; created: string; sequence: number; attachments: FileRecord[]; replyCount?:number; reactions?:Reaction[]; notified?:{id:string;name:string}[]; urgent?:boolean; urgentReason?:string|null }
 export type Outcome = { id: string; conversation: string; erased?:boolean; author: string|null; authorName: string|null; assignee: string|null; assigneeName: string|null; kind: 'decision'|'commitment'; body: string; source: string|null; sourceState: string; version: number; status: string; deadline: string|null }

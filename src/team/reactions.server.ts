@@ -33,7 +33,7 @@ export async function react(c:Context,id:string,input:Record<string,any>){
  // Event production is driven by actual row changes in this same transaction.
  // Exact add/remove retries are no-ops, including their replay frontier.
  const exists=`EXISTS(SELECT 1 FROM nook_reactions WHERE message=? AND user=? AND emoji=?)`
- await c.batch([
+ await c.writeBatch([
   c.sql(`UPDATE nook_conversations SET seq=seq+1 WHERE id=? AND ${input.add?'NOT ':''}${exists}`,m.conversation,id,c.uid,input.emoji),
   c.sql(`INSERT INTO nook_events SELECT id,seq,'reaction',?,? FROM nook_conversations WHERE id=? AND ${input.add?'NOT ':''}${exists}`,id,c.uid,m.conversation,id,c.uid,input.emoji),
   input.add?c.sql('INSERT OR IGNORE INTO nook_reactions VALUES(?,?,?,?)',id,c.uid,input.emoji,new Date().toISOString()):c.sql('DELETE FROM nook_reactions WHERE message=? AND user=? AND emoji=?',id,c.uid,input.emoji)

@@ -1,5 +1,6 @@
 import {publishedImport} from '../../imports/projection'
 import {productAccess,allowedGrant} from '../../team/access'
+import {channelWritable} from '../../team/channel-policy'
 import {fail} from '../../family/team-chat/domain'
 import {operatorAuth,authBindings,type Bindings as AuthBindings} from '../operator-auth.server'
 import type {Session} from '../../base/modules/operator-auth/index.mjs'
@@ -31,6 +32,11 @@ export class Context {
  async batch(statements:D1PreparedStatement[],conversation?:string,condition='1',values:any[]=[]){
   const key=crypto.randomUUID();
   try{await this.db.batch([this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${authFence}${conversation?' AND '+memberFence:''} AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,...(conversation?[conversation,this.uid]:[]),...values),...statements,this.sql('DELETE FROM nook_guard WHERE id=?',key)])}catch(error){await this.check(conversation);if(String(error).includes('CHECK constraint')||String(error).includes('UNIQUE constraint'))fail(409,'Concurrent change or invalid command; reload and retry the same intent');throw error}
+ }
+ async writable(conversation:string){if(!await this.one(`SELECT 1 WHERE ${channelWritable('?')}`,[conversation],conversation))fail(409,'Channel is archived; restore it before posting')}
+ async writeBatch(statements:D1PreparedStatement[],conversation:string,condition='1',values:any[]=[]){
+  await this.writable(conversation)
+  try{await this.batch(statements,conversation,`${channelWritable('?')} AND (${condition})`,[conversation,...values])}catch(error){await this.writable(conversation);throw error}
  }
  event(conversation:string,kind:string,object:string){return [this.sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',conversation),this.sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,this.uid,conversation)]}
  async hint(){await this.env.CHAT_HUB.get(this.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/hint',{method:'POST'}).catch(()=>undefined)}

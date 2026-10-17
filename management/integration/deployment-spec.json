@@ -166,6 +166,12 @@
       "name": "0026_thread_follows.sql",
       "sha256": "db02d264e0e3616d98fb6088346983cb40fa6493b647f1ab9a00a710b350bf3c",
       "sql": "-- Native message transactions create these choices; importing old history does\n-- not backfill follows. Existing follows were all explicit choices.\nALTER TABLE nook_thread_follows ADD COLUMN source TEXT NOT NULL DEFAULT 'explicit'\n CHECK(source IN ('explicit','authored','replied','mentioned','dm'));\nCREATE INDEX nook_thread_follow_message ON nook_thread_follows(message,user);\nCREATE TABLE nook_thread_unfollows(user TEXT NOT NULL,message TEXT NOT NULL,PRIMARY KEY(user,message));\nCREATE INDEX nook_thread_unfollow_message ON nook_thread_unfollows(message,user);\nCREATE TABLE nook_thread_reads(user TEXT NOT NULL,message TEXT NOT NULL,seq INTEGER NOT NULL CHECK(seq>=0),PRIMARY KEY(user,message));\nCREATE INDEX nook_thread_read_message ON nook_thread_reads(message,user);\nCREATE INDEX nook_import_thread_history ON nook_import_records(conversation,parent,sequence);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0027_channel_lifecycle.sql",
+      "sha256": "311fd42557702b9aefecc590325bc971f533dff902167d39e9dfe1be13e1f2da",
+      "sql": "-- Creator attribution stays immutable. A missing settings row inherits that\n-- creator as manager; an explicit NULL records a vacant management position.\nCREATE TABLE nook_channel_settings(\n conversation TEXT PRIMARY KEY REFERENCES nook_conversations(id),\n manager TEXT,\n topic TEXT NOT NULL DEFAULT '' CHECK(length(topic)<=500),\n archived INTEGER NOT NULL DEFAULT 0 CHECK(archived IN (0,1))\n);\nCREATE TABLE nook_channel_actions(\n id TEXT PRIMARY KEY,\n conversation TEXT NOT NULL REFERENCES nook_conversations(id),\n version INTEGER NOT NULL CHECK(version>0),\n sequence INTEGER NOT NULL CHECK(sequence>0),\n action TEXT NOT NULL CHECK(action IN ('update','transfer','archive','restore','leave','vacate')),\n actor TEXT,\n subject TEXT,\n created TEXT NOT NULL,\n UNIQUE(conversation,version),\n UNIQUE(conversation,sequence)\n);\nCREATE INDEX nook_channel_action_history ON nook_channel_actions(conversation,version);\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

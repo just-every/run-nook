@@ -2,6 +2,7 @@ import {importedAuthors} from './erasure/imported-directory'
 import {erase,advance,preview as erasurePreview,receipt,pending} from './erasure/service'
 import {Context} from '../platform/storage/context'
 import {browseChannels,joinChannel} from './channels.server'
+import {channelDetails,updateChannel,transferChannel,archiveChannel,leaveChannel} from './channel-lifecycle.server'
 import {reactions,react,reactionActors} from './reactions.server'
 import {prepareInvitation,teamDirectory,regrant,removeAccess,cancelPreparation} from './invitations.server'
 import {preview} from './preview.server'
@@ -20,6 +21,13 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
  if(url.pathname==='/api/team/access'&&method==='POST')return Response.json(await regrant(c,input))
  if(url.pathname==='/api/team/remove'&&method==='POST')return Response.json(await removeAccess(c,input))
  if(url.pathname==='/api/channels'&&method==='GET')return Response.json(await browseChannels(c,url.searchParams.get('after')??''))
+ if(parts[1]==='channels'&&parts.length===3&&method==='PATCH')return Response.json(await updateChannel(c,parts[2],input))
+ if(parts[1]==='channels'&&parts.length===4){
+  if(parts[3]==='details'&&method==='GET')return Response.json(await channelDetails(c,parts[2]))
+  if(parts[3]==='transfer'&&method==='POST')return Response.json(await transferChannel(c,parts[2],input))
+  if(parts[3]==='archive'&&method==='POST')return Response.json(await archiveChannel(c,parts[2],input))
+  if(parts[3]==='leave'&&method==='POST')return Response.json(await leaveChannel(c,parts[2],input))
+ }
  if(parts.length===4&&parts[1]==='channels'&&parts[3]==='join'&&method==='POST')return Response.json(await joinChannel(c,parts[2]))
  if(parts.length===4&&parts[1]==='messages'&&parts[3]==='reaction-actors'&&method==='GET')return Response.json(await reactionActors(c,parts[2],url.searchParams.get('emoji')??'',url.searchParams.get('after')??''))
  if(parts.length===4&&parts[1]==='messages'&&parts[3]==='reactions'){

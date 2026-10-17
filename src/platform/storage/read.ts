@@ -1,3 +1,4 @@
+import {channelColumns} from '../../team/channel-policy'
 import {allowedGrant,productAccess,visibleIdentity} from '../../team/access'
 import {fail,text} from '../../family/team-chat/domain'
 import {Context} from './context'
@@ -35,7 +36,7 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
  if(action==='me'){const access=await c.one('SELECT mode FROM nook_access WHERE user=? AND active=1',[c.uid]);return {id:c.uid,name:c.session.operator.displayName,role:c.session.operator.role,mode:access?.mode}}
  if(action==='users')return c.rows(`SELECT o.id,o.display_name AS name FROM oa_operators o WHERE o.status='active' AND ${productAccess('o.id')} AND ${visibleIdentity('?', 'o.id')} ORDER BY o.id LIMIT 1000`,[c.uid,c.uid,c.uid])
  if(action==='settings')return {dndUntil:(await c.one('SELECT dnd_until FROM nook_settings WHERE user=?',[c.uid]))?.dnd_until??null}
- if(action==='conversations')return c.rows(`SELECT c.id,c.name,c.kind,c.owner,c.seq,COALESCE(r.seq,0) AS readSeq,c.message_count-COALESCE(r.total,0)-COALESCE(a.total,0)+COALESCE(r.own,0)-(${threadReadCount('m.user','c.id','COALESCE(r.seq,0)')}) AS unread FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=m.user LEFT JOIN nook_author_counts a ON a.conversation=c.id AND a.user=m.user WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=c.id AND (j.state<>'complete' OR NOT (${publishedImport}))) ORDER BY c.id LIMIT 1000`,[c.uid])
+ if(action==='conversations')return c.rows(`SELECT c.id,c.name,c.kind,c.owner,c.seq,${channelColumns()},COALESCE(r.seq,0) AS readSeq,c.message_count-COALESCE(r.total,0)-COALESCE(a.total,0)+COALESCE(r.own,0)-(${threadReadCount('m.user','c.id','COALESCE(r.seq,0)')}) AS unread FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=m.user LEFT JOIN nook_author_counts a ON a.conversation=c.id AND a.user=m.user WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=c.id AND (j.state<>'complete' OR NOT (${publishedImport}))) ORDER BY c.id LIMIT 1000`,[c.uid]).then(rows=>rows.map(row=>({...row,archived:!!row.archived})))
  if(action==='historyWindow'){
   const window=await mixedWindow(c,id,input),messages=await messageMetadata(c,id,[...window.items,...(window.root?[window.root]:[])])
   return {...window,...await threadWindowRead(c,id,window),items:messages.slice(0,window.items.length),root:window.root?messages.at(-1):null}
