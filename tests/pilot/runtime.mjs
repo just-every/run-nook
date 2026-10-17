@@ -33,7 +33,8 @@ export async function pilotInstallation(root){
  };
  const stop=async()=>{
   if(!dev||dev.exitCode!==null||dev.signalCode!==null)return;
-  try{await run('dev','--stop');}catch{try{process.kill(-dev.pid,'SIGTERM');}catch{}}
+  // Stop only this pilot's own dev process group; `rer dev --stop` reaches other runs on a shared machine.
+  try{process.kill(-dev.pid,'SIGTERM');}catch{}
   if(dev.exitCode===null&&dev.signalCode===null)await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Pilot dev did not stop')),30_000);dev.once('exit',()=>{clearTimeout(timer);resolve();});});
  };
  try{

@@ -23,7 +23,7 @@ async function journey(browser,width){
   return {check,recovery:await roundTrip(installation)};
  }finally{await installation.close();}
 }
-const browser=await chromium.launch({headless:true,channel:'chromium'});
+const browser=await chromium.launch({headless:true,channel:'chromium',args:['--use-mock-keychain','--password-store=basic']});
 try{
  const outcomes=await Promise.allSettled(widths.map(width=>journey(browser,width)));
  const failed=outcomes.find(outcome=>outcome.status==='rejected');if(failed)throw failed.reason;

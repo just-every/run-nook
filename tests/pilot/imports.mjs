@@ -93,7 +93,11 @@ export async function importHistory({owner,member,ownerContext,memberContext,ori
  const rootRecord=history.find(m=>m.provenance?.timestamp===fixture.markers.threadRoot.ts);
  await member.goto(`${origin}/app?conversation=${shared.id}&focus=${rootRecord.id}`);
  const root=member.locator('.message[data-immutable="true"]').filter({hasText:'THREAD_ROOT_CANARY_NOOK_R1'});await root.getByRole('button',{name:'Open thread',exact:true}).click();
- await expect(member.locator('.thread-log .message').filter({hasText:fixture.markers.threadReply.text})).toBeVisible();assert.equal(await member.getByRole('textbox',{name:'Reply in thread',exact:true}).count(),0);
+ await expect(member.locator('.thread-log .message').filter({hasText:fixture.markers.threadReply.text})).toBeVisible();
+ // Imported history stays read only; members continue an imported thread natively (NOOK-072, NOOK-077).
+ const importedRows=member.locator('.thread-log .message[data-immutable="true"]');assert.ok(await importedRows.count()>=2,'imported root and reply are in the thread');
+ for(const row of await importedRows.all()){await expect(row.getByText('Imported · read only',{exact:true})).toBeVisible();assert.equal(await row.locator('button').filter({hasText:/^(Edit|Delete|Remove file)$/}).count(),0,'imported thread messages cannot be changed');}
+ await expect(member.getByRole('textbox',{name:'Reply in thread',exact:true})).toBeVisible();
  await member.screenshot({path:join(destination,`pilot-history-thread-${width}.png`),fullPage:true});
  pilotPhase('history-ui-complete',{width,...corpus.totals});
  return {shared,restricted,sharedMarker,markerId:mention.id,fixture,attachment:attached.attachments[0],corpus:corpus.totals};
