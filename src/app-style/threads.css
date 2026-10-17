@@ -15,3 +15,5 @@
 .nook-app .thread-inline-message p { margin: 4px 0; }
 .nook-app .thread-inline .composer { margin: var(--s3) 0 0; }
 @media(max-width:850px) { .nook-app .thread-inline { padding-left: var(--s2); } .nook-app .thread-context .count { font-size: 12px; } }
+
+.nook-app .thread-excerpt { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }

@@ -1,0 +1,4 @@
+.nook-app .notification-exception { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 16px; padding: 12px 0; }
+.nook-app .notification-exception > .text-button { min-width: 0; text-align: left; overflow-wrap: anywhere; }
+.nook-app .notification-exception p { grid-column: 1; margin: 0; font-size: var(--fs-meta); }
+.nook-app .notification-exception .soft-button { grid-column: 2; grid-row: 1 / 3; margin-left: 0; }

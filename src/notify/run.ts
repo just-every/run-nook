@@ -1,3 +1,4 @@
+import {conversationLevel} from '../team/conversation-notify.server'
 import {recipientCancellation,attentionCancellation} from './policy'
 // @ts-ignore Product configuration uses the portable Base JavaScript API.
 import {authBindings} from '../platform/operator-auth-runtime.mjs'
@@ -11,6 +12,7 @@ export const tokenHash=async(token:string)=>hex(await crypto.subtle.digest('SHA-
 // Everything that decides whether an item may still be emailed is checked here,
 // when the email is built, not only when the event was recorded.
 const cancelReason=`CASE ${recipientCancellation}
+ WHEN ${conversationLevel('q.user','q.conversation')}='nothing' THEN 'conversation-silent'
  ${attentionCancellation('q.dedupe','(SELECT event_seq FROM nook_attention WHERE id=q.dedupe)')}
  WHEN NOT EXISTS(SELECT 1 FROM nook_notify_preferences p WHERE p.user=q.user AND CASE WHEN q.reason='urgent-request' THEN p.urgent ELSE p.mentions END=1) THEN 'turned-off' END`
 /** One pass of the delivery run loop. Returns when it next needs to run, or null. */

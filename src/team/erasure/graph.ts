@@ -30,7 +30,7 @@ export const graph={
   {table:'nook_import_actors',key:['job','source_id'],from:'nook_actors',on:{association:'id'},hook:'importedStep'},
   {table:'nook_outcomes',key:['id'],from:'nook_actors',on:{assignee:'id'},hook:'detachAssignee'},
   userEdge('nook_reads',['conversation','user']),userEdge('nook_preferences',['user','conversation']),userEdge('nook_thread_follows',['user','message']),userEdge('nook_thread_unfollows',['user','message']),userEdge('nook_thread_reads',['user','message']),userEdge('nook_settings',['user']),userEdge('nook_attention',['id']),userEdge('nook_notify_preferences',['user']),userEdge('nook_push_presence',['page']),userEdge('nook_push_devices',['id']),userEdge('nook_notify_queue',['id']),userEdge('nook_notify_queue',['id'],'actor'),userEdge('nook_reactions',['message','user','emoji']),
-  userEdge('nook_saved_items',['seq']),
+  userEdge('nook_saved_items',['seq']),userEdge('nook_conversation_notify',['user','conversation']),
   userEdge('oa_step_up_challenges',['id'],'operator_id'),userEdge('oa_sessions',['id'],'operator_id'),
   {table:'oa_tokens',key:['id'],from:'nook_actors',where:'operator_id=? OR issuer_id=?',params:['id','id'],phase:'identity'},
   userEdge('oa_external_identities',['issuer','subject'],'operator_id'),userEdge('oa_invitation_cancellations',['operator_id'],'operator_id'),

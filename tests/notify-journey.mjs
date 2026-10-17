@@ -34,7 +34,7 @@ try{
  assert.deepEqual(await rowan.get('/api/notify').then(s=>[s.mentions,s.urgent,s.urgentQuiet,s.address]),[false,false,false,rowan.email]);
  await expectNone(rowan.email,before,'nothing is emailed before a member turns email on');
 
- browser=await chromium.launch({channel:'chromium'});
+ browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
  step('settings block, keyboard opt-in and owner line');
  await settingsBrowser({browser,origin:installation.origin,rowan,sam,evidence,axeSource,phase:'settings'});
  assert.equal((await rowan.get('/api/notify')).mentions,true,'the keyboard opt-in reached the server');
@@ -72,6 +72,29 @@ try{
  assert.match((await expectOne(rowan.email,urgentHeld,'urgent through quiet time once chosen')).subject,/^Urgent request from Sam in #Urgent held$/);
  await rowan.patch('/api/settings',{dndUntil:null});await expectOne(rowan.email,quiet,'the held mention arrives when quiet time ends');
  assert.equal(about(rowan.email,urgentOff).length,0,'an event from before the opt-in is never emailed');
+
+ step('conversation nothing suppresses email and cancels an already queued mention');
+ const silentRoom=await room('Conversation email policy',rowan);
+ await rowan.patch('/api/settings',{dndUntil:Date.now()+3600_000});
+ try{
+  const pending=await say(sam,silentRoom,'Queued before the conversation policy changes',{mentions:[rowan.user.id]});
+  const queued=await installation.read("SELECT state FROM nook_notify_queue WHERE channel='email' AND message=?",pending.id);
+  assert.equal(queued.length,1,'an opted-in mention really entered the email queue');
+  assert.equal(queued[0].state,'pending','quiet time keeps the queued mention eligible for later delivery');
+  await rowan.patch(`/api/conversations/${silentRoom}/notify`,{level:'nothing'});
+  await waitFor(async()=>{
+   const [item]=await installation.read("SELECT state,error FROM nook_notify_queue WHERE channel='email' AND message=?",pending.id);
+   return item?.state==='cancelled'&&item.error==='conversation-silent';
+  },'the delivery run loop cancels the queued email after nothing is chosen');
+ }finally{await rowan.patch('/api/settings',{dndUntil:null});}
+ const silentMention=await say(sam,silentRoom,'Mention stays in Attention',{mentions:[rowan.user.id]});
+ const silentUrgent=await say(sam,silentRoom,'Urgent stays in Attention',{mentions:[rowan.user.id],urgent:true,urgentReason:`Silent ${CANARY}`});
+ for(const message of [silentMention,silentUrgent])assert.equal((await installation.read("SELECT 1 FROM nook_notify_queue WHERE channel='email' AND message=?",message.id)).length,0,'nothing prevents new email queue rows');
+ const silentAttention=(await rowan.get('/api/attention')).items;
+ assert.equal(silentAttention.find(item=>item.message?.id===silentMention.id)?.reason,'mention');
+ assert.equal(silentAttention.find(item=>item.message?.id===silentUrgent.id)?.reason,'urgent-request');
+ assert.deepEqual(await rowan.get('/api/notify').then(settings=>[settings.mentions,settings.urgent,settings.urgentQuiet]),[true,true,true],'conversation silence preserves the account email choices');
+ await expectNone(rowan.email,silentRoom,'nothing suppresses mention and urgent email even with urgent-through-quiet enabled');
 
  step('removal and deletion before the run loop cancel the email');
  const removed=await room('Removed',rowan);await say(sam,removed,'Before removal',{mentions:[rowan.user.id]});await sam.post(`/api/conversations/${removed}/members`,{user:rowan.user.id,remove:true});

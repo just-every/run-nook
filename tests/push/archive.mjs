@@ -4,6 +4,8 @@ import {productPolicy} from '../../src/platform/portability-policy.mjs';
 import {installation} from './fixture.mjs';
 export async function archive(c){
  const {call,db,mf,member}=c;
+ const policyRoom=c.archiveConversation;
+ await call(`/api/conversations/${policyRoom.id}/notify`,'PATCH',{level:'nothing',threads:'all'},member.cookie);
  // Use the same public Base export/import service and product policy as rer's
  // filesystem operator command, over this journey's actual D1 and R2 bindings.
  await call('/api/devices/presence','POST',{id:c.device.id,page:crypto.randomUUID(),visible:true},member.cookie);
@@ -24,6 +26,7 @@ export async function archive(c){
   const closing=records.at(-1);await imported.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash});
   for(const table of excluded)assert.equal((await restore.db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0,'restored '+table+' empty');
   assert.equal((await restore.db.prepare('SELECT push_mentions FROM nook_notify_preferences WHERE user=?').bind(member.user.id).first()).push_mentions,1);
+  assert.deepEqual(await restore.db.prepare('SELECT level,threads FROM nook_conversation_notify WHERE user=? AND conversation=?').bind(member.user.id,policyRoom.id).first(),{level:'nothing',threads:'all'});
   assert.equal((await restore.db.prepare('SELECT body FROM nook_messages WHERE id=?').bind(c.preserved.id).first()).body,c.preserved.body,'actual private content restored');
   assert.equal((await restore.db.prepare('SELECT count(*) AS n FROM oa_sessions').first()).n,0,'archive restores no live sessions');
   await restore.call('/api/me','GET',undefined,member.cookie,401);

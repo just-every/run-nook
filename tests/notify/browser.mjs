@@ -8,7 +8,7 @@ import {expect} from '@playwright/test';
 export async function settingsBrowser({browser,origin,rowan,sam,evidence,axeSource,phase}){
  await mkdir(evidence,{recursive:true});
  for(const width of [1440,390])for(const [who,person] of [['member',rowan],['owner',sam]]){
-  const context=await browser.newContext({viewport:{width,height:width===390?844:1000}}),at=person.cookie.indexOf('=');
+  const context=await browser.newContext({...(process.env.NOOK_BROWSER_BLOCK_SERVICE_WORKERS==='1'?{serviceWorkers:'block'}:{}),viewport:{width,height:width===390?844:1000}}),at=person.cookie.indexOf('=');
   await context.addCookies([{name:person.cookie.slice(0,at),value:person.cookie.slice(at+1),url:origin}]);
   try{
    const page=await context.newPage();await page.goto(origin+'/app?view=you');

@@ -1,3 +1,9 @@
-// Same opaque triage signature in the fresh document and the initial live
-// hint: opening the socket needs another read only if something changed.
-export const attentionSignature=`SELECT (SELECT count(*)||':'||total(COALESCE(snooze_until,0))||':'||total(state='open') FROM nook_attention WHERE user=?)||'|'||COALESCE((SELECT dnd_until FROM nook_settings WHERE user=?),'') AS v`
+// Personal choices change no conversation event frontier. Include their values
+// so open sessions refresh Threads, badges and notification settings together.
+export const attentionSignature=`WITH viewer AS (SELECT ? AS user), quiet AS (SELECT ? AS user)
+ SELECT (SELECT count(*)||':'||total(COALESCE(snooze_until,0))||':'||total(state='open') FROM nook_attention WHERE user=(SELECT user FROM viewer))||'|'||COALESCE((SELECT dnd_until FROM nook_settings WHERE user=(SELECT user FROM quiet)),'')||'|'||
+ (SELECT json_group_array(json_array(conversation,level,threads)) FROM (SELECT * FROM nook_conversation_notify WHERE user=(SELECT user FROM viewer) ORDER BY conversation))||'|'||
+ (SELECT json_group_array(json_array(conversation,muted,followed)) FROM (SELECT * FROM nook_preferences WHERE user=(SELECT user FROM viewer) ORDER BY conversation))||'|'||
+ (SELECT json_group_array(json_array(message,source)) FROM (SELECT * FROM nook_thread_follows WHERE user=(SELECT user FROM viewer) ORDER BY message))||'|'||
+ (SELECT json_group_array(message) FROM (SELECT * FROM nook_thread_unfollows WHERE user=(SELECT user FROM viewer) ORDER BY message))||'|'||
+ (SELECT json_group_array(json_array(message,seq)) FROM (SELECT * FROM nook_thread_reads WHERE user=(SELECT user FROM viewer) ORDER BY message)) AS v`

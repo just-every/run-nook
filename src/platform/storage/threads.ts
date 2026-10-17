@@ -1,3 +1,4 @@
+import {conversationThreads} from '../../team/conversation-notify.server'
 import {allowedGrant} from '../../team/access'
 import {fail} from '../../family/team-chat/domain'
 import {publishedImport} from '../../imports/projection'
@@ -54,7 +55,7 @@ export async function followThread(c:Context,id:string,input:Record<string,any>)
 }
 
 export async function threadPreferences(c:Context,conversation:string){
- return c.rows(`SELECT f.message,f.source FROM nook_thread_follows f JOIN (${liveThreadRoots}) r ON r.id=f.message WHERE f.user=? AND r.conversation=? ORDER BY f.message`,[c.uid,conversation],conversation)
+ return c.rows(`SELECT r.id AS message,COALESCE(f.source,'all') AS source FROM (${liveThreadRoots}) r LEFT JOIN nook_thread_follows f ON f.message=r.id AND f.user=? WHERE r.conversation=? AND (f.message IS NOT NULL OR ${conversationThreads('?','?')}='all') AND NOT EXISTS(SELECT 1 FROM nook_thread_unfollows u WHERE u.user=? AND u.message=r.id) ORDER BY r.id`,[c.uid,conversation,c.uid,conversation,c.uid],conversation)
 }
 
 export const threadSeen=(user:string,message='m')=>`EXISTS(SELECT 1 FROM nook_thread_reads tr WHERE tr.user=${user} AND tr.message=COALESCE(${message}.parent,${message}.id) AND tr.seq>=${message}.sequence)`
@@ -106,15 +107,20 @@ function decodeCursor(after:unknown):Cursor|null{
 export async function threads(c:Context,input:Record<string,any>,hydrate:(id:string)=>Promise<any>){
  const after=decodeCursor(input.after),limit=input.limit??50
  if(!Number.isSafeInteger(limit)||limit<1||limit>100)fail(400,'Invalid threads page')
- const rows=await c.rows(`WITH followed AS MATERIALIZED (
+ const rows=await c.rows(`WITH candidates AS MATERIALIZED (
+  SELECT user,message,source FROM nook_thread_follows WHERE user=?
+  UNION ALL
+  SELECT n.user,r.id,'all' AS source FROM nook_conversation_notify n JOIN (${liveThreadRoots}) r ON r.conversation=n.conversation
+  WHERE n.user=? AND n.threads='all' AND NOT EXISTS(SELECT 1 FROM nook_thread_follows f WHERE f.user=n.user AND f.message=r.id)
+ ), followed AS MATERIALIZED (
   SELECT f.message,f.source,r.created,v.id AS conversation,v.name,v.kind,v.owner,v.seq,
    max(COALESCE(cr.seq,0),COALESCE(tr.seq,0)) AS readSeq
-  FROM nook_thread_follows f JOIN (${liveThreadRoots}) r ON r.id=f.message
+  FROM candidates f JOIN (${liveThreadRoots}) r ON r.id=f.message
   JOIN nook_conversations v ON v.id=r.conversation JOIN nook_members m ON m.conversation=v.id AND m.user=f.user
   LEFT JOIN nook_preferences p ON p.user=f.user AND p.conversation=v.id
   LEFT JOIN nook_reads cr ON cr.user=f.user AND cr.conversation=v.id
   LEFT JOIN nook_thread_reads tr ON tr.user=f.user AND tr.message=f.message
-  WHERE f.user=? AND ${allowedGrant('m.user','m.conversation')} AND (COALESCE(p.muted,0)=0 OR f.source='explicit')
+  WHERE ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_thread_unfollows u WHERE u.user=f.user AND u.message=f.message) AND (COALESCE(p.muted,0)=0 OR f.source='explicit')
   AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=v.id AND (j.state<>'complete' OR NOT (${publishedImport})))
  ), summarized AS (
   SELECT f.*,
@@ -125,7 +131,7 @@ export async function threads(c:Context,input:Record<string,any>,hydrate:(id:str
   FROM followed f
  ), ordered AS (SELECT *,max(created,latestReplyAt) AS activity FROM summarized)
  SELECT * FROM ordered ${after?'WHERE (newestUnread,activity,message)<(?,?,?)':''}
- ORDER BY newestUnread DESC,activity DESC,message DESC LIMIT ?`,[c.uid,c.uid,c.uid,...(after?[after.unread,after.activity,after.id]:[]),limit+1])
+ ORDER BY newestUnread DESC,activity DESC,message DESC LIMIT ?`,[c.uid,c.uid,c.uid,c.uid,...(after?[after.unread,after.activity,after.id]:[]),limit+1])
  const hasMore=rows.length>limit,page=rows.slice(0,limit)
  const items=await Promise.all(page.map(async r=>({root:await hydrate(r.message),conversation:{id:r.conversation,name:r.name,kind:r.kind,owner:r.owner,seq:r.seq},source:r.source,unread:r.unread,latestReplyAt:r.latestReplyAt||null,lastSequence:r.lastSequence,readSeq:r.readSeq})))
  const last=page.at(-1),cursor=last?btoa(JSON.stringify({unread:last.newestUnread,activity:last.activity,id:last.message})):input.after??''

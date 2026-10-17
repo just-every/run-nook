@@ -50,6 +50,8 @@ api.all('/api/*', async c => {
  const p = url.pathname.split('/').filter(Boolean), action = p[1], id = p[2] ?? '', sub = p[3]
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),team=await teamRoute(session,req,input);if(team)return team
+ if(action==='notify'&&id==='conversations'&&p.length===3&&req.method==='GET')return c.json(await repository.read(req.headers,'conversationNotifyExceptions'))
+ if(action==='conversations'&&id&&sub==='notify'&&p.length===4){if(req.method==='GET')return c.json(await repository.read(req.headers,'conversationNotify',id));if(req.method==='PATCH')return c.json(await repository.write(req.headers,'conversationNotify',id,input))}
  if(action==='workspace'&&p.length===2&&req.method==='GET')return c.json(await workspaceSnapshot(session,url.searchParams))
  if(action==='conversations'&&id&&sub==='messages'&&p.length===4&&req.method==='POST'&&url.searchParams.get('workspace')==='1'){
   const message=await repository.write(req.headers,'messages',id,input),query=new URLSearchParams(url.searchParams);query.set('conversation',id)

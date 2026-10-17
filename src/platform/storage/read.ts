@@ -1,3 +1,4 @@
+import {readConversationNotify,conversationNotifyExceptions} from '../../team/conversation-notify.server'
 import {channelColumns} from '../../team/channel-policy'
 import {allowedGrant,productAccess,visibleIdentity} from '../../team/access'
 import {fail,text} from '../../family/team-chat/domain'
@@ -41,6 +42,8 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
   const window=await mixedWindow(c,id,input),messages=await messageMetadata(c,id,[...window.items,...(window.root?[window.root]:[])])
   return {...window,...await threadWindowRead(c,id,window),items:messages.slice(0,window.items.length),root:window.root?messages.at(-1):null}
  }
+ if(action==='conversationNotify')return readConversationNotify(c,id)
+ if(action==='conversationNotifyExceptions')return conversationNotifyExceptions(c)
  if(action==='threads')return threads(c,input,async id=>{const m=await message(c,id);return (await messageMetadata(c,m.conversation,[m]))[0]})
  if(action==='search')return mixedSearch(c,input)
  if(action==='attention')return attention(c,input)
