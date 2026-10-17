@@ -24,6 +24,8 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_events VALUES('review',1,'message','m',?)").run(guest);
   f.db.prepare("INSERT INTO nook_reactions VALUES('m',?,'👍',?)").run(guest,now);
   f.db.prepare("INSERT INTO nook_events VALUES('review',2,'reaction','m',?)").run(guest);f.db.prepare("UPDATE nook_conversations SET seq=2 WHERE id='review'").run();
+  f.db.prepare("INSERT INTO nook_saved_items(id,user,conversation,kind,target,created) VALUES('save-live',?,'review','message','m',?),('save-unavailable',?,'review','message','erased-source',?)").run(f.owner.operatorId,now,f.owner.operatorId,now);
+  f.db.prepare("INSERT INTO nook_channel_pins(id,conversation,message,actor,created) VALUES('pin-live','review','m',?,?)").run(f.owner.operatorId,now);
   const read=async table=>f.db.prepare('SELECT * FROM '+table).all();
   await validateTeamArchive({read});
   await assert.rejects(validateTeamArchive({read:async table=>table==='nook_guest_grants'?[{user:guest,conversation:'launch'}]:read(table)}),/invalid_guest_scope/);
@@ -56,6 +58,8 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_attachments VALUES('dm-deleted-file','old-dm',?,NULL,'','application/octet-stream',0,NULL,0,'deleted',?,NULL,'dm-upload',NULL)").run(creator,now);
   assert.equal((await f.call('/auth/operator/status',{operatorId:creator,status:'inactive'},f.ownerCookie)).status,200);
   await restoredArchive(await exportedArchive(f),{inspect:target=>{
+   assert.deepEqual(target.db.prepare('SELECT id,target FROM nook_saved_items ORDER BY seq').all().map(row=>({...row})),[{id:'save-live',target:'m'},{id:'save-unavailable',target:'erased-source'}]);
+   assert.equal(target.db.prepare("SELECT actor FROM nook_channel_pins WHERE id='pin-live'").get().actor,f.owner.operatorId);
    assert.equal(target.db.prepare('SELECT active FROM nook_actors WHERE id=?').get(creator).active,0);
    assert.equal(target.db.prepare('SELECT count(*) AS n FROM nook_members WHERE user=?').get(creator).n,0);
    assert.equal(target.db.prepare('SELECT author FROM nook_messages WHERE id=?').get('dm-message').author,creator);

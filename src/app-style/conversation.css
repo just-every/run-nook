@@ -43,16 +43,9 @@
 /* Darker berry keeps the destructive label readable on the tray's hover wash. */
 .nook-app .message-tools .popover .erase-item { color: #b04451; }
 .nook-app .message-tools .popover.strip { right: 0; }
-/* The More menu opens along the tray, in its own band, so while it is open (also after an edit dialog hands focus back
-   to Edit) it never covers the message below or that message's tray. */
-.nook-app .message-tools .popover.inline { top: -3px; right: calc(100% + 2px); left: auto; display: flex; min-width: 0; gap: 2px; padding: 3px; }
-.nook-app .message-tools .popover.inline > button { width: auto; min-height: 30px; white-space: nowrap; }
-/* With room beside the tray (not on a phone) the open strip joins the tray instead of floating over it: the tray grows to
-   the left, More stays where it was pressed and every other button keeps its place in the row. */
-@media (min-width: 851px) {
-  .nook-app .message-tools .message-more[open] { display: flex; flex-direction: row-reverse; align-items: center; gap: 2px; }
-  .nook-app .message-tools .popover.inline { position: static; padding: 0; background: none; box-shadow: none; }
-}
+/* Keep message actions within the viewport on phones and in narrow thread panes. */
+.nook-app .message-tools .popover.inline { position: fixed; top: var(--more-top,72px); right: var(--more-right,16px); left: auto; display: flex; flex-direction: column; width: 220px; min-width: 0; max-width: calc(100vw - 32px); max-height: calc(100dvh - 140px); overflow-y: auto; gap: 2px; padding: 3px; }
+.nook-app .message-tools .popover.inline > button { width: 100%; min-height: 30px; white-space: normal; text-align: left; }
 
 /* Stitch lines: a decision or request saved from a message, quietly under it */
 .nook-app .outcome-lines { display: flex; flex-direction: column; align-items: flex-start; margin-top: var(--s1); }

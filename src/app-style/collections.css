@@ -1,0 +1,22 @@
+.nook-app .saved-page .page-column { max-width: 860px; }
+.nook-app .collection-intro { margin: 0 0 var(--s4); }
+.nook-app .collection-intro > p { margin: 0 0 var(--s2); }
+.nook-app .collection-list { list-style: none; margin: 0; padding: 0; }
+.nook-app .collection-item { min-width: 0; padding: var(--s4) 0; border-top: 1px solid var(--line); }
+.nook-app .collection-meta { margin: 0 0 var(--s2); color: var(--ink-soft); font-size: var(--fs-meta); overflow-wrap: anywhere; }
+.nook-app .collection-author { margin: 0 0 var(--s1); font-size: var(--fs-ui); font-weight: 600; }
+.nook-app .collection-excerpt { display: -webkit-box; margin: 0 0 var(--s2); overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 5; }
+.nook-app .collection-url, .nook-app .collection-download { display: block; margin: var(--s2) 0; color: var(--ink); font-size: var(--fs-body); overflow-wrap: anywhere; }
+.nook-app .collection-footer, .nook-app .collection-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); }
+.nook-app .collection-footer { justify-content: space-between; margin-top: var(--s2); }
+.nook-app .collection-footer .collection-meta { margin: 0; }
+.nook-app .collection-actions { margin-left: -10px; }
+.nook-app .save-link-form { margin-bottom: var(--s4); padding-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.nook-app .save-link-form .field { max-width: 560px; }
+.nook-app dialog[data-kind=pins] { max-width: 640px; }
+@media (max-width: 850px) {
+ .nook-app dialog[data-kind=pins] { max-width: none; }
+ .nook-app .collection-footer { align-items: flex-start; flex-direction: column; gap: var(--s1); }
+ .nook-app .collection-footer .text-button { margin-left: -10px; }
+ .nook-app :is(.saved-page, .pins-view) .text-button { min-height: 40px; }
+}

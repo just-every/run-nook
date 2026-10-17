@@ -172,6 +172,12 @@
       "name": "0027_channel_lifecycle.sql",
       "sha256": "311fd42557702b9aefecc590325bc971f533dff902167d39e9dfe1be13e1f2da",
       "sql": "-- Creator attribution stays immutable. A missing settings row inherits that\n-- creator as manager; an explicit NULL records a vacant management position.\nCREATE TABLE nook_channel_settings(\n conversation TEXT PRIMARY KEY REFERENCES nook_conversations(id),\n manager TEXT,\n topic TEXT NOT NULL DEFAULT '' CHECK(length(topic)<=500),\n archived INTEGER NOT NULL DEFAULT 0 CHECK(archived IN (0,1))\n);\nCREATE TABLE nook_channel_actions(\n id TEXT PRIMARY KEY,\n conversation TEXT NOT NULL REFERENCES nook_conversations(id),\n version INTEGER NOT NULL CHECK(version>0),\n sequence INTEGER NOT NULL CHECK(sequence>0),\n action TEXT NOT NULL CHECK(action IN ('update','transfer','archive','restore','leave','vacate')),\n actor TEXT,\n subject TEXT,\n created TEXT NOT NULL,\n UNIQUE(conversation,version),\n UNIQUE(conversation,sequence)\n);\nCREATE INDEX nook_channel_action_history ON nook_channel_actions(conversation,version);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0028_saved_items.sql",
+      "sha256": "f92cbbb771332668b90682099d5179d7da97e35f98dcdbb9547e1c0f6892caee",
+      "sql": "-- References deliberately have no FKs: erasure and guarded import undo must\n-- remove source rows without restoring bodies or blocking on private bookmarks.\nCREATE TABLE nook_saved_items (\n seq INTEGER PRIMARY KEY AUTOINCREMENT,\n id TEXT NOT NULL UNIQUE,\n user TEXT NOT NULL,\n conversation TEXT NOT NULL,\n kind TEXT NOT NULL CHECK(kind IN ('message','attachment','link')),\n target TEXT NOT NULL CHECK(length(target) BETWEEN 1 AND 2048),\n created TEXT NOT NULL,\n UNIQUE(user,conversation,kind,target)\n);\nCREATE INDEX nook_saved_personal_page ON nook_saved_items(user,seq DESC);\nCREATE INDEX nook_saved_source ON nook_saved_items(kind,target);\nCREATE TABLE nook_channel_pins (\n seq INTEGER PRIMARY KEY AUTOINCREMENT,\n id TEXT NOT NULL UNIQUE,\n conversation TEXT NOT NULL,\n message TEXT NOT NULL,\n actor TEXT,\n created TEXT NOT NULL,\n UNIQUE(conversation,message)\n);\nCREATE INDEX nook_pin_channel_page ON nook_channel_pins(conversation,seq DESC);\nCREATE INDEX nook_pin_actor ON nook_channel_pins(actor);\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

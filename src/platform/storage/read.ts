@@ -52,7 +52,7 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
  if(action==='outcomes')return c.rows(`${outcomeSelect} WHERE o.conversation=? AND o.id>? ORDER BY o.id LIMIT 1000`,[id,input.after??''],id)
  await c.check(id);return fail(404,'Not found')
 }
-export async function search(c:Context,input:Record<string,any>,source='native'){return mixedSearch(c,input,source)}
+export async function search(c:Context,input:Record<string,any>,source:'native'|'imported'='native'){return mixedSearch(c,input,source)}
 async function attention(c:Context,input:Record<string,any>){
  const now=Date.now();
  const [settings,rows,wake]=await Promise.all([

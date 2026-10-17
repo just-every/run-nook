@@ -12,6 +12,9 @@ export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceServic
  const e=edge as any;return [e.table,[...e.key],e.where??Object.keys(e.on).map(key=>key+'=?').join(' AND '),(e.params??Object.keys(e.on)).map(()=>target)]
  })
  for(const [table,keys,where,params] of edges)result.push(...await fencedRows(c,f,table,keys,where,params),sql(`DELETE FROM ${table} WHERE ${where}`,...params))
+ // A redacted pin remains portable under its real primary key. Fence the old
+ // checkpoint, rather than banning the anonymous row from future archives.
+ if(await c.one('SELECT 1 FROM nook_channel_pins WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_channel_pins SET actor=NULL WHERE actor=?',target))
  result.push(sql("UPDATE nook_invite_plans SET state='cancelled' WHERE email=? OR issuer=?",person.email,target),sql('DELETE FROM nook_invite_plans WHERE email=? OR issuer=?',person.email,target),
   sql("INSERT INTO nook_channel_settings(conversation,manager) SELECT c.id,NULL FROM nook_conversations c LEFT JOIN nook_channel_settings s ON s.conversation=c.id WHERE c.kind<>'dm' AND CASE WHEN s.conversation IS NULL THEN c.owner ELSE s.manager END=? ON CONFLICT(conversation) DO UPDATE SET manager=NULL",target),
   sql('UPDATE nook_channel_actions SET actor=NULL WHERE actor=?',target),sql('UPDATE nook_channel_actions SET subject=NULL WHERE subject=?',target),

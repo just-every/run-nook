@@ -20,7 +20,7 @@ const {discardExpiredFiles,Context,erase,advance,receipt,preview,send,edit,remov
 after(()=>rm(dir,{recursive:true,force:true}));
 async function fixture(options){
  const f=await teamFixture(options),objects=new Map(),removed=[];f.db.exec('PRAGMA foreign_keys=ON');let interrupted=false;
- const env={DB:f.adapter,FILES:{async put(key,bytes){objects.set(key,new Uint8Array(bytes))},async get(key){const bytes=objects.get(key);return bytes?{body:new ReadableStream({start(c){c.enqueue(bytes);c.close()}}),arrayBuffer:async()=>bytes.buffer,size:bytes.length}:null},async head(key){return objects.has(key)?{size:objects.get(key).length}:null},async delete(key){if(interrupted)throw Error('network interruption');objects.delete(key);removed.push(key)},async list(){return {objects:[...objects.keys()].map(key=>({key,size:objects.get(key).length})),truncated:false}}},CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}};
+ const env={DB:f.adapter,SESSION_SECRET:'synthetic-test-secret-at-least-thirty-two-characters',FILES:{async put(key,bytes){objects.set(key,new Uint8Array(bytes))},async get(key){const bytes=objects.get(key);return bytes?{body:new ReadableStream({start(c){c.enqueue(bytes);c.close()}}),arrayBuffer:async()=>bytes.buffer,size:bytes.length}:null},async head(key){return objects.has(key)?{size:objects.get(key).length}:null},async delete(key){if(interrupted)throw Error('network interruption');objects.delete(key);removed.push(key)},async list(){return {objects:[...objects.keys()].map(key=>({key,size:objects.get(key).length})),truncated:false}}},CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}};
  const context=session=>new Context(env,session);
  async function person(name,options={}){const accepted=await f.accept(await f.invite(name.toLowerCase()+'@example.test',options));const cookie=accepted.headers.get('set-cookie').split(';')[0];return f.auth.getSession(f.request('/auth/session',null,cookie))}
  return {...f,env,objects,removed,context,person,interrupt:value=>{interrupted=value}};
@@ -34,10 +34,19 @@ test('member cascade keeps unrelated history and fixed DM roots, clears canaries
   const root=await send(c,'dm',{body:'CANARYBODY',intent:'CANARYINTENT'});await send(f.context(peer),'dm',{body:'unrelated reply',intent:'control',parent:root.id});
   await createOutcome(c,'launch',{kind:'decision',body:'CANARYDECISION'});await createOutcome(c,'launch',{kind:'commitment',body:'CANARYCOMMITMENT',assignee:peer.operatorId});
   const assigned=await createOutcome(owner,'launch',{kind:'commitment',body:'Other author work stays accepted',assignee:member.operatorId});await reviseOutcome(c,assigned.id,{action:'accept',version:1});
+  const collectionDoor=(actor,path,body)=>teamRoute(f.context(actor),new Request('https://fixture.test/api/'+path,{method:body?'POST':'GET',headers:{origin:'https://fixture.test'}}),body??{});
+  await collectionDoor(member,'saved',{conversation:'dm',message:root.id});
+  const peerSave=await(await collectionDoor(peer,'saved',{conversation:'dm',message:root.id})).json();
+  const shared=await send(owner,'launch',{body:'Other shared context',intent:'shared-pin'});
+  await collectionDoor(member,'conversations/launch/pins',{message:shared.id,pinned:true});
   const before=await exported(f);
   const r=await finish(owner,await erase(owner,'member',member.operatorId,{confirmation:'ERASE'}));
   assert.equal(r.counts.messages,1);assert.equal(r.counts.outcomes,2);assert.equal(f.db.prepare('SELECT count(*) AS n FROM oa_operators WHERE id=?').get(member.operatorId).n,0);
   const page=await historyWindow(f.context(peer),'dm',{thread:root.id});assert.equal(page.root.deleted,1);assert.equal(page.items[0].body,'unrelated reply');
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_saved_items WHERE user=?').get(member.operatorId).n,0);
+  assert.equal(f.db.prepare('SELECT actor FROM nook_channel_pins WHERE message=?').get(shared.id).actor,null);
+  const peerSaves=await(await collectionDoor(peer,'saved')).json();
+  assert.deepEqual(peerSaves.items.find(item=>item.id===peerSave.id),{id:peerSave.id,kind:'message',created:peerSave.created,unavailable:true});
   assert.equal(scanSql(f,/CANARY/i).length,0);
   const kept=f.db.prepare('SELECT * FROM nook_outcomes WHERE id=?').get(assigned.id);assert.equal(kept.status,'accepted');assert.equal(kept.assignee,null);assert.equal(kept.body,'Other author work stays accepted');
   await assertFenced(f,[['nook_messages',{id:root.id}],['nook_actors',{id:member.operatorId}],['oa_operators',{id:member.operatorId}]]);assert.doesNotMatch(JSON.stringify(r),new RegExp(member.operatorId));
@@ -45,7 +54,7 @@ test('member cascade keeps unrelated history and fixed DM roots, clears canaries
   const fresh=await fixture({bootstrap:false}),virgin=await fixture({bootstrap:false}),withJournal=await fixture({bootstrap:false});try{
    await restored(fresh,latest);assert.equal(fresh.db.prepare('SELECT count(*) AS n FROM nook_erased_actors').get().n,1);
    await assert.rejects(restored(fresh,before),e=>e.code==='erasure_epoch');
-   await assert.rejects(restored(withJournal,before,latest[0]),e=>e.code.startsWith('erased_row:'));
+   await assert.rejects(restored(withJournal,before,latest[0]),e=>e.code==='erasure_epoch');
    await restored(virgin,before);assert.equal(virgin.db.prepare("SELECT count(*) AS n FROM nook_messages WHERE body='CANARYBODY'").get().n,1);
   }finally{fresh.close();virgin.close();withJournal.close()}
  }finally{f.close()}

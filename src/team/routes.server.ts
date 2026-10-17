@@ -6,8 +6,20 @@ import {channelDetails,updateChannel,transferChannel,archiveChannel,leaveChannel
 import {reactions,react,reactionActors} from './reactions.server'
 import {prepareInvitation,teamDirectory,regrant,removeAccess,cancelPreparation} from './invitations.server'
 import {preview} from './preview.server'
+import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
+ if(parts[1]==='saved'){
+  if(parts.length===2&&method==='GET')return Response.json(await listSaved(c,Object.fromEntries(url.searchParams)))
+  if(parts.length===2&&method==='POST')return Response.json(await save(c,input))
+  if(parts.length===3&&method==='DELETE')return Response.json(await deleteSaved(c,parts[2]))
+ }
+ if(parts[1]==='conversations'&&parts.length===4&&parts[3]==='pins'){
+  if(method==='GET')return Response.json(await pins(c,parts[2],Object.fromEntries(url.searchParams)))
+  if(method==='POST')return Response.json(await pin(c,parts[2],input))
+ }
+ if(parts[1]==='conversations'&&parts.length===5&&parts[3]==='pins'&&method==='DELETE')return Response.json(await deletePin(c,parts[2],parts[4]))
+ if(parts[1]==='messages'&&parts.length===4&&parts[3]==='collections'&&method==='GET')return Response.json(await messageCollections(c,parts[2]))
  if(url.pathname.startsWith('/api/erasures')&&method!=='GET'&&request.headers.get('origin')!==url.origin)return Response.json({error:'Origin denied'},{status:403})
  if(url.pathname==='/api/erasures/imported-authors'&&method==='GET')return Response.json(await importedAuthors(c))
  if(url.pathname==='/api/erasures'&&method==='GET')return Response.json(await pending(c))

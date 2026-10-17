@@ -67,7 +67,7 @@ api.all('/api/*', async c => {
  if(action==='notify'&&p.length===2&&req.method==='GET')return c.json(await notifySettings(session))
  if(action==='notify'&&p.length===2&&req.method==='PATCH')return c.json(await updateNotifySettings(session,input))
  if(action==='imports'&&p.length===3&&['preview','apply'].includes(id)&&req.method==='POST')return c.json(await repository.imports(req.headers,id,'',input))
- if(action==='imports'&&id==='search'&&p.length===3&&req.method==='GET')return c.json(await repository.imports(req.headers,'search','',{q:url.searchParams.get('q'),after:url.searchParams.get('after')??''}))
+ if(action==='imports'&&id==='search'&&p.length===3&&req.method==='GET')return c.json(await repository.imports(req.headers,'search','',Object.fromEntries(url.searchParams)))
  if(action==='conversations'&&sub==='imported-history'&&p.length===4&&req.method==='GET')return c.json(await repository.imports(req.headers,'history',id,{after:url.searchParams.get('after')||'',limit:Number(url.searchParams.get('limit')||100)}))
  if(action==='import-files'&&sub==='download'&&p.length===4&&req.method==='GET'){const file=await repository.imports(req.headers,'file',id);return new Response(file.body,{headers:{'Content-Type':file.metadata.mime,'Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(file.metadata.name)}`,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}})}
  if(action==='attachments'&&id&&p.length===4&&sub==='download'&&req.method==='GET'){const file=await repository.download(req.headers,id);return new Response(file.body,{headers:{'Content-Type':file.metadata.mime,'Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(file.metadata.name!)}`,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}})}
@@ -83,7 +83,7 @@ api.all('/api/*', async c => {
  if(action==='conversations'&&id&&p.length===4&&sub==='preferences'&&req.method==='PATCH')return c.json(await repository.write(req.headers,'preferences',id,input))
  if(action==='attachments'&&id&&p.length===3&&(req.method==='DELETE'||(req.method==='PATCH'&&(input as Record<string,any>).delete===true)))return c.json(await repository.deleteAttachment(req.headers,id))
  if(action === 'logout' && p.length === 2 && req.method === 'POST') { await revokeSession(session);const result=await operatorAuth(c.env).signOut(req);c.header('Set-Cookie',result.cookie);out={ok:true} }
- else if(['me','users','search','settings','attention'].includes(action) && p.length === 2 && req.method === 'GET') out = await repository.read(req.headers,action,'',{q:url.searchParams.get('q'),after:url.searchParams.get('after')??''})
+ else if(['me','users','search','settings','attention'].includes(action) && p.length === 2 && req.method === 'GET') out = await repository.read(req.headers,action,'',Object.fromEntries(url.searchParams))
  else if(action === 'conversations' && p.length === 2) {
   if(req.method === 'GET') out = await repository.read(req.headers,action)
   if(req.method === 'POST') out = await repository.write(req.headers,action,'',input)

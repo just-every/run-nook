@@ -416,8 +416,8 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Published | 14 | 3 | 0 | 17 |
-| Target and push further | 0 | 23 | 40 | 63 |
-| All | 14 | 26 | 40 | 80 |
+| Target and push further | 0 | 24 | 39 | 63 |
+| All | 14 | 27 | 39 | 80 |
 
 | Clause | Title | Kind | Status | Evidence | Gap |
 | --- | --- | --- | --- | --- | --- |
@@ -441,8 +441,8 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | `NOOK-016` | Everyday conversations | target | partial | `src/team/channel-lifecycle.server.ts`; `src/team/channel-departure.ts`; `src/team/ChannelSettings.tsx`; `tests/channel-lifecycle.mjs` | Channels, DMs, threads, reactions, edit/delete, browse/join and self-service public/private/guest leave ship. Leaving revokes current reads and pending deliveries while preserving messages and personal choices; private managers transfer first. Mandatory organization-wide default-channel policy is missing; an archived public channel must retain a member able to restore it. |
 | `NOOK-017` | Composition and personal workspace | target | partial | `src/chat/Composer.tsx`; `src/chat/Navigation.tsx`; `src/platform/storage/messages.ts`; `tests/browser.mjs` | Plain-text composition, mentions and attachment sends exist; rich text, durable drafts, workspace switching, profile/presence, expiring custom status, custom profile fields, the people directory and organization remain target work; text is capped at 8,000 characters (`src/family/team-chat/domain.ts`), so the 40,000-character limit, snippet offer and typed-markup conversion are missing; built-in slash commands and Drafts & sent are missing. |
 | `NOOK-018` | Invitations, roles, guests and offboarding | target | partial | `src/team/invitations.server.ts`; `src/team/access.ts`; `src/platform/operator-auth-runtime.mjs`; `tests/team-runtime.mjs`; `tests/operator-security.mjs` | One-address confirmed email invitations, member/guest grants, deactivation and explicit regrant ship; bulk/CSV invitations, invitation links, approved-domain join and invitation requests are missing. |
-| `NOOK-019` | Search conversations and files | target | partial | `src/imports/history.ts`; `src/chat/SearchView.tsx`; `tests/slack-import-history.test.mjs`; `tests/pilot-journey.mjs` | ACL-scoped native/imported message substring search exists; file search, operators, structured filters and token search for one- and two-character terms are missing, as are typed modifiers, the per-conversation Files tab and the workspace Files view. |
-| `NOOK-020` | Saved items and channel pins | target | missing |  | No implementing source/test; acceptance journey above is pending. |
+| `NOOK-019` | Search conversations and files | target | partial | `src/search/server.ts`; `src/search/query.ts`; `src/chat/SearchView.tsx`; `tests/saved-search.mjs`; `tests/storage-flows.mjs`; `tests/slack-import-history.test.mjs` | Native/imported body substring search now accepts every term length, with channel/person/UTC date filters, supported typed modifier chips, saved/pinned/has-file predicates, source/time/author and bounded resumable ACL paging. Gap: word/token/prefix and full modifier semantics, file names/extracted contents, conversation-type filters, Files views and 80,000-message capacity proof remain. |
+| `NOOK-020` | Saved items and channel pins | target | partial | `src/team/saved.server.ts`; `src/team/saved-policy.ts`; `src/chat/SavedView.tsx`; `src/chat/PinsView.tsx`; `tests/saved-search.mjs` | Private ordered message/file/link saves and shared channel pins persist with actor/time, current-ACL context and unavailable-source tombstones; archive/erasure integration preserves no copied bodies. Gap: due reminders and native-client acceptance remain. |
 | `NOOK-021` | Native clients and dependable device catch-up | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-022` | In-context voice, video and screen sharing | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-023` | Zoom, Google Meet and Teams meetings | target | missing |  | No implementing source/test; acceptance journey above is pending. |

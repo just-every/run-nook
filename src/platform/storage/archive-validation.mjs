@@ -6,6 +6,7 @@ import {slackArchivePlans} from '../../imports/archive-plan.mjs';
 import {validateSlackArchiveRecords} from '../../imports/archive-records.mjs';
 import {validateTeamArchive} from '../../team/portability.mjs';
 import {validateChannelArchive} from '../../team/channel-archive.mjs';
+import {validateSavedArchive} from '../../team/saved-archive.mjs';
 // Offline archive graph validation. Linear indexes replace per-row scans so a
 // team's full history can be checked without quadratic work or a workspace cell.
 import {importDigest} from '../../family/team-chat/import-capture.mjs';
@@ -35,6 +36,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const actors=index(rows('actors'),a=>a.id,'duplicate_actor'),conv=index(rows('conversations'),c=>c.id,'duplicate_conversation'),msg=index(rows('messages'),m=>m.id,'duplicate_message'),out=index(rows('outcomes'),o=>o.id,'duplicate_outcome'),files=index(rows('attachments'),a=>a.id,'duplicate_attachment');
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
+ await validateSavedArchive(readTable,{manifest,actors,conversations:conv,messages:msg,imported,attachments:files});
  const members=index(rows('members'),m=>tuple(m.conversation,m.user),'duplicate_membership');for(const m of members.values())check(actors.has(m.user)&&conv.has(m.conversation),'invalid_membership');
  // Private/channel membership can change while history remains. Every DM
  // attribution requires its validated fixed roster, even after deactivation

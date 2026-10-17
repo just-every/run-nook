@@ -24,7 +24,7 @@ export function testHub() { return { idFromName: () => '', get: () => ({ fetch: 
 export async function slackServiceFixture() {
     const f = await teamFixture(), bucket = testBucket();
     const { Context } = await import('../../src/platform/storage/context.ts'), service = await import('../../src/imports/service.ts'), list = await import('../../src/imports/list.ts'), custody = await import('../../src/imports/custody.ts');
-    const c = new Context({ DB: f.adapter, FILES: bucket, CHAT_HUB: testHub() }, f.owner);
+    const c = new Context({ DB: f.adapter, SESSION_SECRET:'synthetic-test-secret-at-least-thirty-two-characters', FILES: bucket, CHAT_HUB: testHub() }, f.owner);
     const upload = () => custody.localUpload(c, new Request('https://fixture.test/upload', { method: 'POST', body: slackFixture() }));
     async function preview(uploadId, members = [f.owner.operatorId], namespace = 'archive-fixture') {
         const review = { namespace, channels: [{ sourceId: 'C1', name: 'Imported general', members }, { sourceId: 'C2', name: 'Imported engineering', members: [f.owner.operatorId] }], actors: { U1: f.owner.operatorId, U2: null, U404: null }, acceptedOmissions: [] };
