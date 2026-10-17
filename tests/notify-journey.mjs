@@ -34,7 +34,8 @@ try{
  assert.deepEqual(await rowan.get('/api/notify').then(s=>[s.mentions,s.urgent,s.urgentQuiet,s.address]),[false,false,false,rowan.email]);
  await expectNone(rowan.email,before,'nothing is emailed before a member turns email on');
 
- browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
+ // Full Chromium, as in dev-key.mjs: headless shell crashes when the app's service worker clears a badge.
+ browser=await chromium.launch({headless:true,channel:'chromium',args:['--use-mock-keychain','--password-store=basic']});
  step('settings block, keyboard opt-in and owner line');
  await settingsBrowser({browser,origin:installation.origin,rowan,sam,evidence,axeSource,phase:'settings'});
  assert.equal((await rowan.get('/api/notify')).mentions,true,'the keyboard opt-in reached the server');
