@@ -5,13 +5,26 @@ import {channelDeparture} from './channel-departure'
 import {channelColumns,channelManagement,channelManager} from './channel-policy'
 import {designatedDefault,mandatoryDefault} from './default-channels.server'
 
+// Keep this predicate flat: D1 limits expression depth to 100, including
+// Context's current-session and membership fences around it.
+const privateManagerDeparture=`EXISTS(SELECT 1 FROM nook_conversations leaving
+ LEFT JOIN nook_channel_settings settings ON settings.conversation=leaving.id
+ CROSS JOIN oa_operators actor JOIN nook_access actor_access ON actor_access.user=actor.id
+ WHERE leaving.id=? AND actor.id=? AND actor.status='active' AND actor_access.active=1 AND actor_access.mode='member' AND leaving.kind='private'
+ AND (CASE WHEN settings.conversation IS NULL THEN leaving.owner ELSE settings.manager END=actor.id
+ OR (actor.role IN ('owner','admin') AND NOT EXISTS(SELECT 1 FROM nook_members remaining
+ JOIN oa_operators other ON other.id=remaining.user JOIN nook_access access ON access.user=other.id
+ WHERE remaining.conversation=leaving.id AND remaining.user<>actor.id AND other.status='active' AND access.active=1 AND access.mode='member'
+ AND (other.role IN ('owner','admin') OR other.id=CASE WHEN settings.conversation IS NULL THEN leaving.owner ELSE settings.manager END)))))`
+
+
 export async function channelDetails(c:Context,id:string){
  text(id,128)
  const channel=await c.one(`SELECT c.id,c.name,c.kind,c.owner,${channelColumns()},${channelManagement('?','c.id')} AS manage FROM nook_conversations c WHERE c.id=?`,[c.uid,id],id)
  if(!channel)fail(404,'Channel unavailable')
  const policy=await c.one(`SELECT ${designatedDefault('?')} AS defaultChannel,${mandatoryDefault('?')} AS mandatory`,[id,id],id)
- const remainingManager=channel.archived&&await c.one(`SELECT 1 FROM nook_members remaining WHERE remaining.conversation=? AND remaining.user<>? AND ${channelManagement('remaining.user','remaining.conversation')} LIMIT 1`,[id,c.uid],id)
- const leaveReason=channel.kind==='dm'?'Direct conversation participants are fixed':policy.mandatory?'This is a mandatory default channel. An owner must remove its mandatory requirement before you can leave.':channel.kind==='private'&&channel.manager===c.uid?'Transfer management before leaving this private channel':channel.archived&&!remainingManager?'Restore this channel or transfer management before leaving its last manager position':null
+ const transferRequired=channel.kind==='private'&&await c.one(`SELECT 1 WHERE ${privateManagerDeparture}`,[id,c.uid],id)
+ const leaveReason=channel.kind==='dm'?'Direct conversation participants are fixed':policy.mandatory?'This is a mandatory default channel. An owner must remove its mandatory requirement before you can leave.':transferRequired?'Transfer management before leaving this private channel':null
  const canManage=channel.kind!=='dm'&&!!channel.manage
  const transferCandidates=canManage?await c.rows(`SELECT o.id,o.display_name AS name FROM nook_members m JOIN oa_operators o ON o.id=m.user WHERE m.conversation=? AND o.status='active' AND ${fullMember('o.id')} AND o.id IS NOT ? ORDER BY o.id LIMIT 50`,[id,channel.manager],id):[]
  const {manage,...data}=channel
@@ -65,6 +78,6 @@ export async function leaveChannel(c:Context,id:string,input:Record<string,any>)
   c.sql(`INSERT INTO nook_channel_settings(conversation,manager) SELECT leaving.id,NULL FROM nook_conversations leaving WHERE leaving.id=? AND ${channelManager('leaving.id')}=? ON CONFLICT(conversation) DO UPDATE SET manager=NULL`,id,c.uid),
   c.sql('UPDATE nook_conversations SET version=version+1 WHERE id=?',id),...action(c,id,'leave'),
   ...channelDeparture(c,id,c.uid),c.sql('DELETE FROM nook_members WHERE conversation=? AND user=?',id,c.uid)
- ],id,`${revision} AND NOT (${mandatoryDefault('?')}) AND NOT (EXISTS(SELECT 1 FROM nook_channel_settings WHERE conversation=? AND archived=1) AND NOT EXISTS(SELECT 1 FROM nook_members remaining WHERE remaining.conversation=? AND remaining.user<>? AND ${channelManagement('remaining.user','remaining.conversation')})) AND NOT EXISTS(SELECT 1 FROM nook_conversations leaving WHERE leaving.id=? AND leaving.kind='private' AND ${channelManager('leaving.id')}=?)`,[id,input.version,id,id,id,c.uid,id,c.uid])
+ ],id,`${revision} AND NOT (${mandatoryDefault('?')}) AND NOT (${privateManagerDeparture})`,[id,input.version,id,id,c.uid])
  await c.hint();return {id,left:true}
 }

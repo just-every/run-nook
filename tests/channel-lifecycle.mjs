@@ -24,6 +24,13 @@ export async function channelLifecycleJourney(h){
   await post(`/api/channels/${publicRoom.id}/join`,{},b.cookie)
   assert.ok((await get(`/api/conversations/${publicRoom.id}/messages`,b.cookie)).data.some(m=>m.id===message.id&&m.body===message.body))
   await get(`/api/channels/${privateRoom.id}/details`,x.cookie,403)
+  await post(`/api/conversations/${privateRoom.id}/members`,{user:h.owner.user.id},b.cookie)
+  await post(`/api/conversations/${privateRoom.id}/members`,{user:b.user.id,remove:true})
+  const vacated=(await get(`/api/channels/${privateRoom.id}/details`)).data
+  assert.equal(vacated.manager,null);assert.equal(vacated.canManage,true);assert.equal(vacated.canLeave,false)
+  await post(`/api/channels/${privateRoom.id}/leave`,{version:vacated.version},h.owner.cookie,409)
+  await post(`/api/channels/${privateRoom.id}/transfer`,{version:vacated.version,user:a.user.id})
+  await post(`/api/channels/${privateRoom.id}/leave`,{version:(await get(`/api/channels/${privateRoom.id}/details`)).data.version})
   const dm=(await post('/api/conversations',{name:'Fixed participants',kind:'dm',participants:[b.user.id]},a.cookie)).data
   await post(`/api/channels/${dm.id}/leave`,{version:1},a.cookie,403)
  })
@@ -43,8 +50,20 @@ export async function channelLifecycleJourney(h){
   assert.equal((await get(`/api/conversations/${publicRoom.id}/replay`,a.cookie)).data.frontier,frontier,'refused archive writes produce no event')
   assert.equal((await post(`/api/conversations/${publicRoom.id}/messages`,payload,a.cookie)).data.id,message.id,'committed intents still reconcile')
   assert.ok((await get(`/api/conversations/${publicRoom.id}/messages`,b.cookie)).data.some(m=>m.id===message.id))
-  const archived=await details(publicRoom.id)
-  await post(`/api/channels/${publicRoom.id}/archive`,{version:archived.version,archived:false},a.cookie)
+  // An archived public channel can have an empty audience without trapping
+  // its last manager. Public discovery remains the way back to read history.
+  for(const actor of [b,a])await post(`/api/channels/${publicRoom.id}/leave`,{version:(await details(publicRoom.id,actor)).version},actor.cookie)
+  await get(`/api/conversations/${publicRoom.id}/messages`,a.cookie,403)
+  const directory=(await get('/api/channels',x.cookie)).data
+  assert.ok(directory.items.some(channel=>channel.id===publicRoom.id&&channel.archived))
+  await post(`/api/channels/${publicRoom.id}/join`,{},x.cookie)
+  assert.ok((await get(`/api/conversations/${publicRoom.id}/messages`,x.cookie)).data.some(m=>m.id===message.id))
+  await post(`/api/conversations/${publicRoom.id}/messages`,{body:'Joining history does not restore posting',intent:crypto.randomUUID()},x.cookie,409)
+  await post(`/api/channels/${publicRoom.id}/leave`,{version:(await details(publicRoom.id,x)).version},x.cookie)
+  await post(`/api/channels/${publicRoom.id}/join`,{})
+  const archived=(await get(`/api/channels/${publicRoom.id}/details`)).data
+  await post(`/api/channels/${publicRoom.id}/archive`,{version:archived.version,archived:false})
+  await post(`/api/channels/${publicRoom.id}/join`,{},b.cookie)
   await post(`/api/conversations/${publicRoom.id}/messages`,{body:'Posting resumes after restore',intent:crypto.randomUUID()},b.cookie)
  })
  await defaultChannelsJourney(h)

@@ -4,7 +4,7 @@ Channels and direct conversations keep messages, replies, reactions and files to
 
 ## Channels and direct conversations
 
-Public channels can be browsed and joined by workspace members. Private channels are limited to their current members. Direct conversations have fixed participants. Owners and admins do not gain access to a direct conversation they are not part of.
+Public channels can be browsed and joined by workspace members. Private channels are limited to their current members. Direct conversations have fixed participants. Use **New message → Start a group message** to choose two or more teammates; only the selected people and you can read it. Owners and admins do not gain access to a direct conversation they are not part of.
 
 ## Finding your way around
 
@@ -26,9 +26,9 @@ Search matches case-insensitive text in conversations the person can read. Terms
 
 Open **Details** to change a channel’s name or topic, transfer management to a current full member, or archive and restore it. The manager and current channel members who are workspace owners or admins can manage the channel. Workspace roles never open a private channel by themselves.
 
-Archiving keeps history available and stops new posts, replies, edits, reactions, uploads and joins. Existing requests can still be resolved, and messages can still be erased. Restore from Details to resume posting.
+Archiving keeps history available and stops new posts, replies, edits, reactions, uploads. Public archived channels remain available in Browse public channels with **Join history**; joining never restores posting. Existing requests can still be resolved, and messages can still be erased. Restore from Details to resume posting.
 
-**Leave channel** removes the channel from your navigation and stops pending notifications. Your messages and personal follow/read choices stay. Public channels can be rejoined from Browse public channels; private channels require a manager to add you again. A private manager transfers management before leaving. Restore an archived public channel, or transfer its management to someone who can restore it, before leaving its last managerless audience. Mandatory/default-channel policy is not available yet.
+**Leave channel** removes the channel from your navigation and stops pending notifications. Your messages and personal follow/read choices stay. Public channels can be rejoined from Browse public channels; private channels require a manager to add you again. A private manager transfers management before leaving. You may leave an archived public channel even when nobody else remains. An owner or admin can join its history and restore it from Details. Owners can make an organization-wide default channel mandatory under Team → Default channels; remove that requirement before leaving.
 
 ## Saved context and pins
 

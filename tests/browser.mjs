@@ -228,6 +228,8 @@ export async function runBrowser(origin,destination){
     const dm=(await json(alice,origin,'conversations')).find(c=>c.kind==='dm'&&c.name===bobName)
     await bob.goto(origin+`/app?view=chat&conversation=${dm.id}`);await expect(bob.getByRole('heading',{name:aliceName,exact:true})).toBeVisible()
     checks.push(`${label}: two-interaction DM with participant-correct names`)
+    await (await import('./group-dm.mjs')).groupDmFlow({alice,bob,origin,aliceUser,bobUser,bobName})
+    checks.push(`${label}: app-created three-person DM, exact fixed roster and shared private history`)
     // Revocation clears active private content and all access-controlled views.
     await bob.goto(origin+`/app?view=chat&conversation=${channel.id}&thread=${deep.id}`);await bob.getByText('Detailed planning context',{exact:true}).waitFor()
     revocationExpected=true

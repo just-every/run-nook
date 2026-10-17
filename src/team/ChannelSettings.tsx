@@ -7,10 +7,10 @@ type Details={id:string;name:string;kind:string;version:number;manager:string|nu
 type Props={conversation:Conversation;members:Person[];user:Person;refresh:()=>Promise<void>;onLeft:()=>void}
 
 export function ChannelSettings({conversation,members,user,refresh,onLeft}:Props){
- const transferId=useId()
+ const transferId=useId(),membershipKey=members.map(person=>person.id).sort().join(',')
  const [details,setDetails]=useState<Details|null>(null),[name,setName]=useState(''),[topic,setTopic]=useState(''),[manager,setManager]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[confirm,setConfirm]=useState<'leave'|'archive'|null>(null)
  const load=async()=>{const next=await api<Details>(`channels/${conversation.id}/details`);setDetails(next);setName(next.name);setTopic(next.topic)}
- useEffect(()=>{let active=true;void api<Details>(`channels/${conversation.id}/details`).then(next=>{if(active){setDetails(next);setName(next.name);setTopic(next.topic)}}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[conversation.id,conversation.version])
+ useEffect(()=>{let active=true;void api<Details>(`channels/${conversation.id}/details`).then(next=>{if(active){setDetails(next);setName(next.name);setTopic(next.topic)}}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[conversation.id,conversation.version,membershipKey])
  const change=async(path:string,input:unknown,method='POST')=>{if(!details||busy)return;setBusy(true);setError('');try{await api(`channels/${conversation.id}`+path,input,method);await load();setConfirm(null);await refresh()}catch(e){setError(e instanceof Error?e.message:'Please try again.')}finally{setBusy(false)}}
  const leave=async()=>{if(!details||busy)return;setBusy(true);setError('');try{await api(`channels/${conversation.id}/leave`,{version:details.version});onLeft()}catch(e){setError(e instanceof Error?e.message:'Please try again.');setBusy(false)}}
  const candidates=details?.transferCandidates??members.filter(p=>p.id!==user.id&&p.active!==0)
