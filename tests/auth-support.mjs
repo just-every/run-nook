@@ -19,7 +19,7 @@ async function consumeLink(origin,email,{requestLink=true,productStatus=200}={})
 export async function invite(origin,ownerCookie,name,email=name.toLowerCase()+'@example.test'){
  const headers={Origin:origin,'Content-Type':'application/json',cookie:ownerCookie};
  const channels=await(await fetch(origin+'/api/conversations',{headers})).json();
- let channel=channels.find(c=>c.kind==='channel');
+ let channel=channels.find(c=>c.kind==='channel'&&!c.archived);
  if(!channel){const created=await fetch(origin+'/api/conversations',{method:'POST',headers,body:JSON.stringify({name:'Welcome',kind:'channel'})});assert.equal(created.status,200);channel=await created.json()}
  const prepared=await fetch(origin+'/api/team/invitations',{method:'POST',headers,body:JSON.stringify({email,role:'member',mode:'member',scopes:[channel.id]})});assert.equal(prepared.status,200,'explicit product invitation scope');
  const response=await fetch(origin+'/auth/invite',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',cookie:ownerCookie},body:JSON.stringify({email,displayName:name,role:'member',returnTo:'/app'})});assert.equal(response.status,202,'owner invitation');return signIn(origin,email,{requestLink:false});

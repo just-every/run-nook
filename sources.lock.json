@@ -4369,7 +4369,7 @@
       "executable": false
     },
     "tests/auth-support.mjs": {
-      "sha256": "cb94bfcd56a789ed20d1385081ac089de79f8eae5c7b575ebd94d56636c5c5d9",
+      "sha256": "0e56de34abcbdc5ee86eecd177fd86fbb1578d9d1d6f1211f57d468e68a4585d",
       "executable": false
     },
     "tests/browser-markup.mjs": {
@@ -4401,7 +4401,7 @@
       "executable": false
     },
     "tests/erasure-browser-support.mjs": {
-      "sha256": "d5aec52e5e5f78846bd3b0f39e90e2fece109d654098defb4ee14efe51529678",
+      "sha256": "52b5a66a62ae9d0242baa2825b6841f5eb6969bb582ea1cd3e0bf792aa220bf2",
       "executable": false
     },
     "tests/erasure-browser.mjs": {
@@ -4709,7 +4709,7 @@
       "executable": false
     },
     "tests/slack-import/journey.mjs": {
-      "sha256": "4361f988431dfdfc69f06025e8d3a4bfe829d42d3cc48561514be3fe4643802d",
+      "sha256": "d00ba8c91e7dd3486ba102dbb8a36d4688372eb2ca1818a943e0717f9ba92074",
       "executable": false
     },
     "tests/slack-import/lost-ack.mjs": {

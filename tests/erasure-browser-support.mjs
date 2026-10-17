@@ -16,7 +16,7 @@ export async function runErasureJourney({origin,ownerCookie,destination}){
  const adminName=`ErasureAdmin${tag}`,email=adminName.toLowerCase()+'@example.test'
  try{
   const channels=await(await fetch(origin+'/api/conversations',{headers:{cookie:ownerCookie}})).json()
-  const welcome=channels.find(c=>c.kind==='channel');assert.ok(welcome)
+  const welcome=channels.find(c=>c.kind==='channel'&&!c.archived);assert.ok(welcome)
   await request(ownerCookie,'/api/team/invitations',{email,role:'admin',mode:'member',scopes:[welcome.id]})
   const invited=await fetch(origin+'/auth/invite',{method:'POST',headers:{cookie:ownerCookie,Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({email,displayName:adminName,role:'admin',returnTo:'/app'})})
   assert.equal(invited.status,202)
