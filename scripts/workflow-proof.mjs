@@ -26,7 +26,9 @@ export async function verifyWorkflow(base,context,{sessionsExcluded=false,preser
  let outcome=(await b('conversations/'+context.conversation+'/outcomes')).data.find(o=>o.id===context.commitment)
  assert.equal(outcome.status,'accepted');assert.equal(outcome.version,2)
  let preferences=(await b('conversations/'+context.conversation+'/preferences')).data
- assert.equal(preferences.followed,true);assert.equal(preferences.muted,false);assert.deepEqual(preferences.threads,[context.root])
+ assert.equal(preferences.followed,true);assert.equal(preferences.muted,false)
+ // The explicit follow on the root, and the automatic follow from the urgent request's mention.
+ assert.deepEqual(preferences.threadFollows,[{message:context.root,source:'explicit'},{message:context.urgent,source:'mentioned'}].sort((x,y)=>x.message<y.message?-1:1))
  assert.equal((await b('settings')).data.dndUntil,context.quietUntil)
  let attention=(await b('attention')).data
  assert.equal(attention.items.length,0);assert.ok(attention.deferredCount>=2)
