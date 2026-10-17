@@ -65,7 +65,7 @@ try {
   const nav = desktop.getByRole('navigation', {name: 'Primary navigation'})
   assert.equal(await desktop.locator('.site-brand').getAttribute('href'), '/')
   assert.equal(await desktop.getByRole('link', {name: 'Nook', exact: true}).count(), 1, 'the brand home link is named for the product')
-  assert.deepEqual(await nav.locator('a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['/docs', sourceRepository])
+  assert.deepEqual(await nav.locator('a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['/docs', '/contract', sourceRepository])
   assert.equal(await desktop.locator('.hero-primary').getAttribute('href'), '/run')
   assert.equal(await desktop.locator('.hero-secondary[href="/docs"]').count(), 1)
   assert.equal(await desktop.locator('a[href="#"], a[href=""]').count(), 0, 'no placeholder links')

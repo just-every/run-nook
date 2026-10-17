@@ -4269,7 +4269,7 @@
       "executable": false
     },
     "tests/homepage.mjs": {
-      "sha256": "fd19a26b98f9e48f514b8dcb25707827d1ac3ce837f4180ba968cfc33584a902",
+      "sha256": "4998aa57421ff2e0b1ac3dfe251f480725565de93040c1a065b4877c70a329af",
       "executable": false
     },
     "tests/import-fixture.mjs": {
