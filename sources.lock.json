@@ -621,7 +621,7 @@
       "executable": false
     },
     "base-copies.json": {
-      "sha256": "41f287e4bb74bcdbe0cf7f05a56b7ade078f87a08afc3a8d04a9581e0c53097f",
+      "sha256": "0c0e39c159234c961d83ad1a6c64944f0d3da013aacc0fb6bfed8e6cd06669e5",
       "executable": false
     },
     "BASE-LICENSE": {
@@ -1345,7 +1345,7 @@
       "executable": false
     },
     "src/base/contract-style.ts": {
-      "sha256": "41afdf1cb60983b340283b13e414102387eb2a4af022d730220050a4384d0753",
+      "sha256": "4325f4eeabac2bef722808576605d7b657858b918729097c3412393fc6e4941f",
       "executable": false
     },
     "src/base/deployment-health.ts": {
