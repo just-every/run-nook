@@ -13,9 +13,9 @@ async function enterLocal(page,origin,as,open){
  }
 }
 export async function search(page,origin,query){
- await page.goto(origin+'/app?view=search');await page.getByLabel('Search conversations',{exact:true}).fill(query);
+ await page.goto(origin+'/app?view=search');await expect(page.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await page.getByLabel('Search conversations',{exact:true}).fill(query);
  await page.locator('.search-form').getByRole('button',{name:'Search',exact:true}).click();
- await expect(page.getByRole('status').filter({hasText:/\d+ matching messages?\./})).toBeVisible();
+ await expect(page.getByRole('status').filter({hasText:/^\d+ results loaded/})).toBeVisible();
 }
 async function snapshot(context,origin){
  const [conversations,attention]=await Promise.all([read(context,origin,'/api/conversations'),read(context,origin,'/api/attention')]);
@@ -53,7 +53,7 @@ export async function pilotBrowser({browser,installation,width,destination}){
   await exerciseUndo({owner,ownerContext,origin,stamp,name,imported,width,destination});
   pilotPhase('revocation-start',{width});
   await member.goto(`${origin}/app?conversation=${imported.shared.id}&focus=${imported.markerId}`);await expect(member.locator(`.message[data-message="${imported.markerId}"]`)).toBeVisible();
-  await owner.goto(`${origin}/app?conversation=${imported.shared.id}`);await owner.getByRole('button',{name:'Details',exact:true}).click();await owner.getByRole('dialog').getByRole('button',{name:'Remove '+name,exact:true}).click();await expect(owner.getByRole('dialog').getByRole('button',{name:'Add '+name,exact:true})).toBeVisible();
+  await owner.goto(`${origin}/app?conversation=${imported.shared.id}`);await expect(owner.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await owner.getByRole('button',{name:'Details',exact:true}).click();await owner.getByRole('dialog').getByRole('button',{name:'Remove '+name,exact:true}).click();await expect(owner.getByRole('dialog').getByRole('button',{name:'Add '+name,exact:true})).toBeVisible();
   await expect(member.locator('.message[data-immutable="true"]')).toHaveCount(0,{timeout:30_000});
   await member.screenshot({path:join(destination,`pilot-member-cleared-${width}.png`),fullPage:true});
   assert.equal((await memberContext.request.get(`${origin}/api/conversations/${imported.shared.id}/messages`)).status(),403,'removed audience cannot read history');

@@ -4589,7 +4589,7 @@
       "executable": false
     },
     "tests/pilot/browser.mjs": {
-      "sha256": "e587ffb46ff4485a918f65a968bdabb14ec0dd0357aac223a6ecdd17b2020c93",
+      "sha256": "db5bf4913882b8d7b37f172612f86e410b97e498e299bec2c1dc1cdd0f21a5d5",
       "executable": false
     },
     "tests/pilot/census.mjs": {
