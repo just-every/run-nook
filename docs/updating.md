@@ -4,27 +4,20 @@ Run these commands from your Nook checkout. You need npm and Git; `rer` manages 
 
 ## Choose release or latest source
 
-For a new checkout, install `rer` once:
+For a new checkout, one line installs `rer`, clones the latest source from `main` and starts it:
 
 ```sh
-npm install -g @runeditrun/rer
+npx -y @runeditrun/rer dev just-every/run-nook
 ```
 
-Clone the latest source from `main`:
-
-```sh
-git clone --branch main https://github.com/just-every/run-nook.git nook && cd nook
-rer dev
-```
-
-Or clone the fixed **0.3.0 release** instead:
+Or clone the fixed **0.3.0 release** instead (the line above installs `rer` if you do not have it yet):
 
 ```sh
 git clone --branch v0.3.0 https://github.com/just-every/run-nook.git nook && cd nook
 rer dev
 ```
 
-Choose one clone command. The release tag leaves Git at a fixed version (a detached HEAD); `git pull --ff-only` below applies to `main`. To move a release checkout to the latest source, stop Nook, export first if you want a backup, then run `git fetch origin` and `git switch main` before following the local or hosted update steps below. Keep any local source changes safe before switching.
+Choose the one line or the release clone. The release tag leaves Git at a fixed version (a detached HEAD); `git pull --ff-only` below applies to `main`. To move a release checkout to the latest source, stop Nook, export first if you want a backup, then run `git fetch origin` and `git switch main` before following the local or hosted update steps below. Keep any local source changes safe before switching.
 
 ## Update a local Nook
 
