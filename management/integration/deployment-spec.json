@@ -160,6 +160,12 @@
       "name": "0026_retire_captured_mail.sql",
       "sha256": "69229cc6c630810c4e3b9705193fd1c2c3f953dc534422bc504f06171a6e6585",
       "sql": "-- Development mail is silently suppressed. Erase captures from older installations.\nDROP TABLE IF EXISTS rer_mail_development_outbox;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0026_thread_follows.sql",
+      "sha256": "db02d264e0e3616d98fb6088346983cb40fa6493b647f1ab9a00a710b350bf3c",
+      "sql": "-- Native message transactions create these choices; importing old history does\n-- not backfill follows. Existing follows were all explicit choices.\nALTER TABLE nook_thread_follows ADD COLUMN source TEXT NOT NULL DEFAULT 'explicit'\n CHECK(source IN ('explicit','authored','replied','mentioned','dm'));\nCREATE INDEX nook_thread_follow_message ON nook_thread_follows(message,user);\nCREATE TABLE nook_thread_unfollows(user TEXT NOT NULL,message TEXT NOT NULL,PRIMARY KEY(user,message));\nCREATE INDEX nook_thread_unfollow_message ON nook_thread_unfollows(message,user);\nCREATE TABLE nook_thread_reads(user TEXT NOT NULL,message TEXT NOT NULL,seq INTEGER NOT NULL CHECK(seq>=0),PRIMARY KEY(user,message));\nCREATE INDEX nook_thread_read_message ON nook_thread_reads(message,user);\nCREATE INDEX nook_import_thread_history ON nook_import_records(conversation,parent,sequence);\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

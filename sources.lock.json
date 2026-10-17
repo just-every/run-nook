@@ -717,7 +717,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "cc5e599516014ca34904ce896cfefecf284d39db89e13b8643cc5c6cd785d036",
+      "sha256": "0f5db54263bc6236b1cb1d586dad8ef01faaba9129d943d53cf5c3be6804ceee",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
