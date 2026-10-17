@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { contractPageHtml } from '../base/contract-page'
 import { runPageHtml, siteNotFoundHtml, type SiteBuild, type SiteContext } from '../base/run-site'
 import { fontLinks } from '../base/font-head'
 import { productIdentity } from '../brand/product'
@@ -11,7 +12,7 @@ import { DocsPage } from '../docs/DocsPage'
 import { pages, repository, sections, version } from 'virtual:nook-docs'
 import { run } from './run'
 
-export async function sitePages({ styles }: SiteContext): Promise<SiteBuild> {
+export async function sitePages({ styles, contract }: SiteContext): Promise<SiteBuild> {
   const document = (title: string, description: string, body: ReactElement) => '<!doctype html>' + renderToStaticMarkup(
     <html lang="en"><head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>{title}</title><meta name="description" content={description} />
@@ -26,9 +27,10 @@ export async function sitePages({ styles }: SiteContext): Promise<SiteBuild> {
   return {
     pages: [
       { path: '/', html: document('Nook — Talk it through. Get it done.', '100% free, open source alternative to Slack and Microsoft Teams. Turn a message into a decision or a request. Everyone can see who’s on it.', <Homepage variant="site" />) },
-      { path: '/run', html: runPageHtml(identity, run) },
+      { path: '/run', html: runPageHtml(identity, run, contract) },
+      ...(contract ? [{ path: '/contract', html: contractPageHtml(identity, run, contract) }] : []),
       ...docs,
-      { path: '/404', html: siteNotFoundHtml(identity, run) },
+      { path: '/404', html: siteNotFoundHtml(identity, run, contract) },
     ],
     assets: ['rer-theme.css', 'fonts/fonts.css', 'brand/fonts', 'brand/mark.svg', 'brand/band.svg', 'favicon.svg'],
   }
