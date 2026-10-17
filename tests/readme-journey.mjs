@@ -85,7 +85,7 @@ async function firstRun(origin,open){
  const phone=await browser.newPage({viewport:{width:390,height:844}})
  await openOwner(phone,origin,open)
  await phone.goto(origin+'/signin')
- await phone.getByRole('link',{name:'Continue as owner',exact:true}).click()
+ await phone.getByRole('link',{name:'Sign in as Owner',exact:true}).click()
  await phone.waitForURL(origin+'/setup')
  await phone.getByRole('heading',{name:'Finish setup'}).waitFor()
  assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal scroll at 390')
