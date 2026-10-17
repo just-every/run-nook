@@ -120,7 +120,7 @@ Invite another person from the app's operator access screen, then choose
 it accepts their current invitation and opens `/app` with their assigned role.
 After opening `RER_OPEN`, this browser can switch people without email. A fresh
 browser profile first opens `RER_OPEN` to receive this checkout's key cookie.
-`rer dev --as person@example.com` also selects an invited or active person;
+`rer dev --as person@example.com` also selects an invited or active person, including one invited at a built-in persona's address (the persona name selects them too);
 for an email that is no one in the local database, it lists the people it takes.
 Local dev and demos silently suppress mail; there is no mail-reading step.
 Cancelled or expired invitations and inactive people cannot use these actions.
