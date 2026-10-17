@@ -613,7 +613,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "ccdfbdc513d01abd2945f667865080176dca258a0c8661584f77a8ba9e6212ee",
+      "sha256": "1cbb74ebe345b090fb38487848d6515dd454e101bdf98432dcd608806f73696c",
       "executable": false
     },
     "AGENTS.md": {
@@ -637,7 +637,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "256549b66ceea174f47532017d3ebdfd57a97224cc3f14ab3007abb44147842b",
+      "sha256": "c0faa5c13eb08592b9c8cdd38d3d91676d80c0048cf29ba9a94076e49f3b455b",
       "executable": false
     },
     "DEMO.md": {
@@ -717,7 +717,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "d1f8327c5e4578113e1198e212218d7ff7a90a3008c2828a138d1925dfc64ea5",
+      "sha256": "495fe2293d8a21fa543f4001873e07960563abee327245a5c232954b0fb61375",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -834,6 +834,10 @@
     },
     "migrations/0029_conversation_notify.sql": {
       "sha256": "d8d21288f27d880617425763de38e0cc95d519b67146d1ec4bf7409c74525614",
+      "executable": false
+    },
+    "migrations/0030_default_channels.sql": {
+      "sha256": "c466d9e4d2b281527b652a1e90911f1b9b958fc346939150e252a7e4fd07da98",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -3921,7 +3925,7 @@
       "executable": false
     },
     "src/platform/storage/archive-validation.mjs": {
-      "sha256": "6303caafa7f941e4c955f7ebfd08fa8a015116b1a6d316fa5a793847104a0617",
+      "sha256": "26c159db507b7a39f9f87cb7396a9dea3bd68152fb5413f170a58c78f55d751f",
       "executable": false
     },
     "src/platform/storage/commands.ts": {
@@ -3929,7 +3933,7 @@
       "executable": false
     },
     "src/platform/storage/context.ts": {
-      "sha256": "6fb138db5b97ca11f8f1aaa3784d7218d5bc1117d3856606155238e1bfe6c758",
+      "sha256": "b167e5650bb873bedad35de9741cd22c43e7638fa3dc619e3f81f1e14c91ead2",
       "executable": false
     },
     "src/platform/storage/files.ts": {
@@ -4105,7 +4109,7 @@
       "executable": false
     },
     "src/team/channel-lifecycle.server.ts": {
-      "sha256": "971413e78651191b0952d4f10b2d9a3fbf61bb9450aa440f9a5a23d23fedd932",
+      "sha256": "acf62f4c3a31e7d09dca17735391ff1584ae178b1ae1e61728fb9961144fc588",
       "executable": false
     },
     "src/team/channel-membership.server.ts": {
@@ -4129,11 +4133,23 @@
       "executable": false
     },
     "src/team/ChannelSettings.tsx": {
-      "sha256": "1f3f7603c26d73a040494f271e90037601914c456a202f578736f8a6b84dbb97",
+      "sha256": "87afb37065ad82b10a9c648a194a260020844de8c0c69e5c5f07b36d5d67ee61",
       "executable": false
     },
     "src/team/conversation-notify.server.ts": {
       "sha256": "0c49b28412c5864311d9b6fa86133d0dec044599c30330a3a367ce031d5784b1",
+      "executable": false
+    },
+    "src/team/default-channels.css": {
+      "sha256": "2867d6c5e19e60a4a6b0c5c5f9e6d2b24a28e12f270a1b9aa5b5b3010ce93987",
+      "executable": false
+    },
+    "src/team/default-channels.server.ts": {
+      "sha256": "4f3791d7449467e3575de46963dfc60782bd19079c49e7d320bc4cce484f305b",
+      "executable": false
+    },
+    "src/team/DefaultChannels.tsx": {
+      "sha256": "9c4a11ad4c321bc7262a41b3f990cc88bbba2aafc8fcbe0be773e754825a6b0b",
       "executable": false
     },
     "src/team/EmailControl.tsx": {
@@ -4173,11 +4189,11 @@
       "executable": false
     },
     "src/team/erasure/graph.ts": {
-      "sha256": "cf9cbfefcfaa30605e084bbb25d03d295b9455a2ce92db649724d5036d89fa88",
+      "sha256": "58b67634c9284c7e0ad292144fd6ba1ac6a09abde1c3b35c184e104c02387b70",
       "executable": false
     },
     "src/team/erasure/identity.ts": {
-      "sha256": "78c179f3c750ba7a434ace22c73eaac7d14a1ba9797e00b4f6f0b8a237731ee3",
+      "sha256": "1f585cf5c367c074a7668e746d65e00845f4fbce537dbf6e0d4ba4f595763857",
       "executable": false
     },
     "src/team/erasure/import-commit.ts": {
@@ -4293,7 +4309,7 @@
       "executable": false
     },
     "src/team/routes.server.ts": {
-      "sha256": "e93359a2426cab4cbe0d774d4c8604de29374807e7c2b79ce093c594092bbfc7",
+      "sha256": "bc4dcbc97db2547103c0694efcd50fb29132f3eedc52c1cba5da468ba30d2f0a",
       "executable": false
     },
     "src/team/saved-archive.mjs": {
@@ -4317,7 +4333,7 @@
       "executable": false
     },
     "src/team/TeamPanel.tsx": {
-      "sha256": "38520123968f9040755d1ffaa6d1b57b68b7536d730f547efebdab3dfb330f49",
+      "sha256": "05ab91dc32139d87f98d0ea5b2548761b3478c35dbb94747790ff1ff9cf8b609",
       "executable": false
     },
     "src/team/types.ts": {
@@ -4357,7 +4373,7 @@
       "executable": false
     },
     "tests/channel-lifecycle.mjs": {
-      "sha256": "a1e23675fd1eef59908b41d0064b49838e281b1359f69ef13d5961d803d2ee7a",
+      "sha256": "8d27867bc9b8083c4f99d9c5bac9bbcf5f5c33397f1fc7691f42a82ec43c9d06",
       "executable": false
     },
     "tests/cloudflare-account.mjs": {
@@ -4737,7 +4753,7 @@
       "executable": false
     },
     "tests/team-portability.test.mjs": {
-      "sha256": "4fb020255b3557504d8b91522614f238d03613cefb613caa9158304b1000f421",
+      "sha256": "57c8049b624db921391ba26b336463cf6789916bfc69e7ce451df87d1780cfc3",
       "executable": false
     },
     "tests/team-runtime.mjs": {

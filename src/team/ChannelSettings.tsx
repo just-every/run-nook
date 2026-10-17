@@ -3,7 +3,7 @@ import {api} from '../chat/api'
 import type {Conversation,Person} from '../chat/types'
 import './channel-settings.css'
 
-type Details={id:string;name:string;kind:string;version:number;manager:string|null;topic:string;archived:boolean;canManage:boolean;canLeave:boolean;leaveReason:string|null;transferCandidates?:Person[]}
+type Details={id:string;name:string;kind:string;version:number;manager:string|null;topic:string;archived:boolean;canManage:boolean;canLeave:boolean;leaveReason:string|null;archiveReason?:string|null;transferCandidates?:Person[]}
 type Props={conversation:Conversation;members:Person[];user:Person;refresh:()=>Promise<void>;onLeft:()=>void}
 
 export function ChannelSettings({conversation,members,user,refresh,onLeft}:Props){
@@ -29,7 +29,8 @@ export function ChannelSettings({conversation,members,user,refresh,onLeft}:Props
      <div className="field"><label htmlFor={transferId}>Transfer management</label><select id={transferId} value={manager} onChange={e=>setManager(e.target.value)} disabled={busy}><option value="">Choose a current member</option>{candidates.filter(p=>p.id!==details.manager).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
      <button className="soft-button" disabled={busy||!manager}>Transfer management</button>
     </form>
-    {details.archived?<button className="soft-button" disabled={busy} onClick={()=>void change('/archive',{version:details.version,archived:false})}>Restore channel</button>:<button className="text-button" disabled={busy} onClick={()=>setConfirm('archive')}>Archive channel</button>}
+    {details.archived?<button className="soft-button" disabled={busy} onClick={()=>void change('/archive',{version:details.version,archived:false})}>Restore channel</button>:<button className="text-button" disabled={busy||!!details.archiveReason} onClick={()=>setConfirm('archive')}>Archive channel</button>}
+    {details.archiveReason&&<p className="dialog-note">{details.archiveReason}</p>}
    </>:details.topic&&<p className="channel-topic">{details.topic}</p>}
    {confirm==='archive'&&<div className="channel-confirm"><p>Archive #{details.name}? Members keep the history. New messages, replies and uploads stop until the channel is restored.</p><button className="danger-button" disabled={busy} onClick={()=>void change('/archive',{version:details.version,archived:true})}>Confirm archive</button><button className="soft-button" disabled={busy} onClick={()=>setConfirm(null)}>Keep channel open</button></div>}
    {confirm==='leave'?<div className="channel-confirm"><p>Leave #{details.name}? Your messages stay. {details.kind==='private'?'A manager must add you again to return.':'You can rejoin it from Browse public channels.'}</p><button className="danger-button" disabled={busy} onClick={()=>void leave()}>Confirm leave</button><button className="soft-button" disabled={busy} onClick={()=>setConfirm(null)}>Stay in channel</button></div>:<button className="text-button" disabled={busy||!details.canLeave} onClick={()=>setConfirm('leave')}>Leave channel</button>}

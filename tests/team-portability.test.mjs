@@ -26,6 +26,9 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_events VALUES('review',2,'reaction','m',?)").run(guest);f.db.prepare("UPDATE nook_conversations SET seq=2 WHERE id='review'").run();
   f.db.prepare("INSERT INTO nook_saved_items(id,user,conversation,kind,target,created) VALUES('save-live',?,'review','message','m',?),('save-unavailable',?,'review','message','erased-source',?)").run(f.owner.operatorId,now,f.owner.operatorId,now);
   f.db.prepare("INSERT INTO nook_channel_pins(id,conversation,message,actor,created) VALUES('pin-live','review','m',?,?)").run(f.owner.operatorId,now);
+  f.db.prepare('INSERT INTO nook_default_policy VALUES(1,1)').run();
+  f.db.prepare("INSERT INTO nook_default_channels VALUES('launch',1)").run();
+  f.db.prepare("INSERT INTO nook_default_actions VALUES('default-audit',1,'launch',1,1,?,?)").run(f.owner.operatorId,now);
   const read=async table=>f.db.prepare('SELECT * FROM '+table).all();
   await validateTeamArchive({read});
   await assert.rejects(validateTeamArchive({read:async table=>table==='nook_guest_grants'?[{user:guest,conversation:'launch'}]:read(table)}),/invalid_guest_scope/);
@@ -60,6 +63,8 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   await restoredArchive(await exportedArchive(f),{inspect:target=>{
    assert.deepEqual(target.db.prepare('SELECT id,target FROM nook_saved_items ORDER BY seq').all().map(row=>({...row})),[{id:'save-live',target:'m'},{id:'save-unavailable',target:'erased-source'}]);
    assert.equal(target.db.prepare("SELECT actor FROM nook_channel_pins WHERE id='pin-live'").get().actor,f.owner.operatorId);
+   assert.equal(target.db.prepare("SELECT mandatory FROM nook_default_channels WHERE conversation='launch'").get().mandatory,1);
+   assert.equal(target.db.prepare("SELECT actor FROM nook_default_actions WHERE id='default-audit'").get().actor,f.owner.operatorId);
    assert.equal(target.db.prepare('SELECT active FROM nook_actors WHERE id=?').get(creator).active,0);
    assert.equal(target.db.prepare('SELECT count(*) AS n FROM nook_members WHERE user=?').get(creator).n,0);
    assert.equal(target.db.prepare('SELECT author FROM nook_messages WHERE id=?').get('dm-message').author,creator);
@@ -77,6 +82,9 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   await validateTeamArchive({read});
   await assert.rejects(validateTeamArchive({read:async table=>table==='nook_creator_revocations'?[]:read(table)}),/active_creator_without_membership/);
   await assert.rejects(validateTeamArchive({read:async table=>table==='nook_creator_revocations'?(await read(table)).map(r=>({...r,event_seq:999})):read(table)}),/invalid_creator_revocation/);
+  await f.accept(await f.invite('unvisited@example.test',{scopes:['review']}));
+  const unvisited=f.db.prepare("SELECT id FROM oa_operators WHERE email='unvisited@example.test'").get().id;
+  assert.equal(f.db.prepare('SELECT state FROM nook_default_admissions WHERE user=?').get(unvisited).state,'pending');
   const records=await exportedArchive(f);
   for (const historical of [false,true]) {
    const forged=structuredClone(records),items=forged.flatMap(r=>r.items??[]);
@@ -125,6 +133,7 @@ test('recovery validates current guest scope and fixed DM attribution while pres
    }
   }
   await restoredArchive(records,{inspect:async target=>{
+   assert.equal(target.db.prepare('SELECT state FROM nook_default_admissions WHERE user=?').get(unvisited).state,'pending');
    assert.equal(target.db.prepare('SELECT count(*) AS n FROM oa_sessions').get().n,0);assert.equal(target.db.prepare('SELECT count(*) AS n FROM oa_operators').get().n,0);
    assert.equal(target.db.prepare('SELECT count(*) AS n FROM nook_reactions WHERE user=?').get(guest).n,1);assert.equal(target.db.prepare('SELECT active FROM nook_access WHERE user=?').get(guest).active,0);
    assert.equal(target.db.prepare('SELECT count(*) AS n FROM nook_guest_grants').get().n,1);assert.equal(target.db.prepare('SELECT count(*) AS n FROM nook_invite_plans').get().n,0);
@@ -139,6 +148,8 @@ test('recovery validates current guest scope and fixed DM attribution while pres
     const source=join(directory,'source.sqlite'),destination=join(directory,'recovered.sqlite');target.db.prepare('VACUUM INTO ?').run(source);
     const retained=target.db.prepare('SELECT * FROM nook_actors').all();await recoverNormalized(source,destination,{owner:f.owner.operatorId,users:retained.map(a=>({id:a.id,email:a.email,role:a.role}))});
     const recovered=new DatabaseSync(destination);try{
+     assert.equal(recovered.prepare('SELECT state FROM nook_default_admissions WHERE user=?').get(unvisited).state,'complete');
+     assert.deepEqual(recovered.prepare('SELECT conversation FROM nook_members WHERE user=?').all(unvisited).map(row=>row.conversation),['review']);
      assert.equal(recovered.prepare('SELECT count(*) AS n FROM oa_sessions').get().n,0);
      assert.equal(recovered.prepare('SELECT status FROM oa_operators WHERE id=?').get(guest).status,'inactive');
      assert.deepEqual(recovered.prepare('SELECT conversation FROM nook_members WHERE user=?').all(creator).map(r=>r.conversation),['launch']);

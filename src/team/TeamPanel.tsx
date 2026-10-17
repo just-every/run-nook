@@ -2,6 +2,7 @@ import {canEraseMember,memberErasureDescription} from './erasure/policy'
 import {PendingErasures} from './erasure/PendingErasures'
 import {ImportedAuthors} from './erasure/ImportedAuthors'
 import {ErasureDialog} from './erasure/ErasureDialog'
+import {DefaultChannels} from './DefaultChannels'
 import {useEffect,useRef,useState} from 'react'
 import type {ChannelChoice,TeamRequest} from './types'
 type Person={id:string;name:string;email:string;role:string;status:string;mode:string;productActive:number}
@@ -36,5 +37,5 @@ export function TeamPanel({request,channels,role,userId,localDevelopment=false}:
  {erasing&&<ErasureDialog kind="member" target={erasing} returnFocus={eraseTrigger.current} request={request} onClose={()=>setErasing(null)} onChanged={refresh}/>}
  <div className="team-section"><h2>People</h2><ul className="team-people">{people.map(p=><li className="reveal-host" key={p.id}><div className="team-person"><strong>{p.name}</strong><span>{p.email}</span><small>{personSummary(p)}</small></div>{p.id!==userId&&(role==='owner'||p.role==='member')&&<div className="team-actions reveal">{canEraseMember(userId,role,p.id,p.role)&&<button className="soft-button" disabled={busy} onClick={e=>{eraseTrigger.current=e.currentTarget;setErasing(p.id)}}>Erase member</button>}{p.status==='invited'?<button className="soft-button" disabled={busy} onClick={()=>void action('/auth/invite/cancel',{operatorId:p.id},'Invitation cancelled. Its email link can no longer be used.')}>Cancel invitation</button>:<button className="soft-button" disabled={busy} onClick={()=>void action('/auth/operator/status',{operatorId:p.id,status:p.status==='active'?'inactive':'active'})}>{p.status==='active'?'Deactivate':'Reactivate account only'}</button>}{p.status==='active'&&<label>Remove channel access<select defaultValue="" onChange={e=>{if(e.target.value)void action('/api/team/remove',{user:p.id,conversation:e.target.value});e.target.value=''}}><option value="">Choose channel</option>{eligible.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}</div>}</li>)}</ul>
  <details className="team-about"><summary>About erasing people</summary><p>{memberErasureDescription} Message and thread positions remain; previously downloaded backups do not change.</p></details></div>
- {role==='owner'&&<ImportedAuthors request={request}/>}<PendingErasures request={request}/></section>
+ <DefaultChannels request={request}/>{role==='owner'&&<ImportedAuthors request={request}/>}<PendingErasures request={request}/></section>
 }

@@ -1,6 +1,7 @@
 import {importedAuthors} from './erasure/imported-directory'
 import {erase,advance,preview as erasurePreview,receipt,pending} from './erasure/service'
 import {Context} from '../platform/storage/context'
+import {defaultChannels,updateDefaultChannels} from './default-channels.server'
 import {browseChannels,joinChannel} from './channels.server'
 import {channelDetails,updateChannel,transferChannel,archiveChannel,leaveChannel} from './channel-lifecycle.server'
 import {reactions,react,reactionActors} from './reactions.server'
@@ -9,6 +10,10 @@ import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
+ if(url.pathname==='/api/team/default-channels'){
+  if(method==='GET')return Response.json(await defaultChannels(c))
+  if(method==='PATCH')return Response.json(await updateDefaultChannels(c,input))
+ }
  if(parts[1]==='saved'){
   if(parts.length===2&&method==='GET')return Response.json(await listSaved(c,Object.fromEntries(url.searchParams)))
   if(parts.length===2&&method==='POST')return Response.json(await save(c,input))

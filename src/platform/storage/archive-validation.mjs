@@ -35,6 +35,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  check(!rows('upload_attempts').length&&!rows('object_deletes').length,'reconcile_pending_object_work_before_export');
  const actors=index(rows('actors'),a=>a.id,'duplicate_actor'),conv=index(rows('conversations'),c=>c.id,'duplicate_conversation'),msg=index(rows('messages'),m=>m.id,'duplicate_message'),out=index(rows('outcomes'),o=>o.id,'duplicate_outcome'),files=index(rows('attachments'),a=>a.id,'duplicate_attachment');
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
+ await validateDefaultChannels(readTable,manifest,actors,conv);
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
  await validateSavedArchive(readTable,{manifest,actors,conversations:conv,messages:msg,imported,attachments:files});
  const notifyRows=manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_conversation_notify')?[]:await readTable('nook_conversation_notify');
@@ -119,4 +120,26 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
   check(a.state==='attached'?!!a.message:a.state==='staged'?a.message===null:true,'invalid_attachment_state');
   if(a.state==='deleted')check(a.object_key===null&&a.name===''&&a.mime==='application/octet-stream'&&a.size===0&&a.sha256===null,'deleted_attachment_retained');else check(a.size>=1&&a.size<=25*1024*1024&&string(a.name)&&a.name.length<=120&&a.name.trim()===a.name&&!/[\x00-\x1f\x7f/\\<>:"|?*]/.test(a.name)&&['text/plain','image/png','image/jpeg','application/pdf'].includes(a.mime)&&typeof a.object_key==='string'&&a.object_key.startsWith('private/')&&/^[a-f0-9]{64}$/.test(a.sha256),'invalid_object_metadata');
  }
+}
+async function validateDefaultChannels(read,manifest,actors,conversations){
+ const added=async name=>manifest?.tables&&!manifest.tables.some(table=>table.name===name)?[]:read(name);
+ const [policy,defaults,actions,admissions,settings,access]=await Promise.all(['nook_default_policy','nook_default_channels','nook_default_actions','nook_default_admissions','nook_channel_settings','nook_access'].map(added));
+ const fields=(row,names)=>Object.keys(row).sort().join()===names.sort().join();
+ check(policy.length<=1&&policy.every(row=>fields(row,['id','version'])&&row.id===1&&integer(row.version,1)),'invalid_default_policy');
+ const version=policy[0]?.version??0,archived=new Set(settings.filter(row=>row.archived).map(row=>row.conversation)),live=new Map(),seen=new Set(),versions=new Set();
+ for(const row of [...actions].sort((a,b)=>a.version-b.version)){
+  const key=tuple(row.version,row.conversation);
+  check(fields(row,['id','version','conversation','enabled','mandatory','actor','created'])&&string(row.id)&&!seen.has(row.id)&&!seen.has(key)&&integer(row.version,1)&&row.version<=version&&conversations.get(row.conversation)?.kind==='channel'&&[0,1].includes(row.enabled)&&[0,1].includes(row.mandatory)&&(row.enabled||!row.mandatory)&&time(row.created)&&(row.actor===null||actors.has(row.actor)&&!actors.get(row.actor).erased),'invalid_default_action');
+  seen.add(row.id);seen.add(key);versions.add(row.version);
+  check(row.enabled?live.get(row.conversation)!==row.mandatory:live.has(row.conversation),'redundant_default_action');
+  if(row.enabled)live.set(row.conversation,row.mandatory);else live.delete(row.conversation);
+ }
+ check(versions.size===version,'missing_default_policy_history');
+ const configured=new Map();
+ for(const row of defaults){check(fields(row,['conversation','mandatory'])&&conversations.get(row.conversation)?.kind==='channel'&&!archived.has(row.conversation)&&[0,1].includes(row.mandatory)&&!configured.has(row.conversation),'invalid_default_channel');configured.set(row.conversation,row.mandatory)}
+ check(configured.size<=50&&configured.size===live.size&&[...configured].every(([id,mandatory])=>live.get(id)===mandatory),'default_policy_history_mismatch');
+ const grants=new Map(access.map(row=>[row.user,row])),users=new Set();
+ for(const row of admissions){const grant=grants.get(row.user);check(fields(row,['user','state'])&&actors.has(row.user)&&!actors.get(row.user).erased&&!users.has(row.user)&&['pending','complete'].includes(row.state)&&(row.state!=='pending'||grant?.mode==='member'&&grant.active===1&&actors.get(row.user).active===1),'invalid_default_admission');users.add(row.user)}
+ // Missing old-archive markers retire without joining; identity recovery also
+ // retires a pending marker before that person can obtain a fresh session.
 }

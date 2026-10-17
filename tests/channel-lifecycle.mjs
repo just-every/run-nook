@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
+import {signIn} from './auth-support.mjs'
 
-export async function channelLifecycleJourney({post,patch,get,registered,check}){
+export async function channelLifecycleJourney(h){
+ const {post,patch,get,registered,check}=h
  const a=await registered('ChannelManager'),b=await registered('ChannelColleague'),x=await registered('ChannelOutside')
  const details=async(id,actor=a)=>(await get(`/api/channels/${id}/details`,actor.cookie)).data
  const publicRoom=(await post('/api/conversations',{name:'Launch operations',kind:'channel',participants:[b.user.id]},a.cookie)).data
@@ -45,4 +47,57 @@ export async function channelLifecycleJourney({post,patch,get,registered,check})
   await post(`/api/channels/${publicRoom.id}/archive`,{version:archived.version,archived:false},a.cookie)
   await post(`/api/conversations/${publicRoom.id}/messages`,{body:'Posting resumes after restore',intent:crypto.randomUUID()},b.cookie)
  })
+ await defaultChannelsJourney(h)
+}
+export async function defaultChannelsJourney({post,patch,get,registered,check,owner,origin}){
+ await check('NOOK-016/060 new-member defaults, mandatory leave, scoped authority and explicit readmission',async()=>{
+  const existing=await registered('DefaultExisting'),policyPath='/api/team/default-channels';
+  const one=(await post('/api/conversations',{name:'Announcements default',kind:'channel'})).data;
+  const two=(await post('/api/conversations',{name:'Welcome default',kind:'channel'})).data;
+  const privateRoom=(await post('/api/conversations',{name:'Selected invitation access',kind:'private'})).data;
+  const initial=(await get(policyPath)).data;
+  await patch(policyPath,{version:initial.version,channels:[{id:privateRoom.id,mandatory:false}]},owner.cookie,400);
+  const choices=[{id:one.id,mandatory:true},{id:two.id,mandatory:false}];
+  let policy=(await patch(policyPath,{version:initial.version,channels:choices})).data;
+  await patch(policyPath,{version:initial.version,channels:[]},owner.cookie,409);
+  assert.ok(!policy.channels.some(channel=>channel.id===privateRoom.id));
+  assert.ok(!(await get('/api/conversations',existing.cookie)).data.some(channel=>channel.id===one.id||channel.id===two.id));
+  const newcomer=await registered('DefaultNewcomer');
+  const joined=(await get('/api/conversations',newcomer.cookie)).data;
+  assert.ok(joined.some(channel=>channel.id===one.id)&&joined.some(channel=>channel.id===two.id));
+  await get(policyPath,newcomer.cookie,403);
+  await patch(policyPath,{version:policy.version,channels:[]},newcomer.cookie,403);
+  const mandatory=(await get(`/api/channels/${one.id}/details`,newcomer.cookie)).data;
+  assert.equal(mandatory.canLeave,false);
+  await post(`/api/channels/${one.id}/leave`,{version:mandatory.version},newcomer.cookie,409);
+  await post(`/api/channels/${one.id}/archive`,{version:(await get(`/api/channels/${one.id}/details`)).data.version,archived:true},owner.cookie,409);
+  const loose=(await get(`/api/channels/${two.id}/details`,newcomer.cookie)).data;
+  await post(`/api/channels/${two.id}/leave`,{version:loose.version},newcomer.cookie);
+  const again=await signIn(origin(),'defaultnewcomer@example.test');
+  assert.ok(!(await get('/api/conversations',again.cookie)).data.some(channel=>channel.id===two.id));
+  async function inviteRole(email,role,mode){
+   await post('/api/team/invitations',{email,role,mode,scopes:[privateRoom.id]});
+   await post('/auth/invite',{email,role,displayName:email.split('@')[0]},owner.cookie,202);
+   return signIn(origin(),email,{requestLink:false});
+  }
+  const guest=await inviteRole('defaultguest@example.test','member','guest');
+  assert.deepEqual((await get('/api/conversations',guest.cookie)).data.map(channel=>channel.id),[privateRoom.id]);
+  await get(policyPath,guest.cookie,403);
+  const admin=await inviteRole('defaultadmin@example.test','admin','member');
+  policy=(await get(policyPath,admin.cookie)).data;
+  await patch(policyPath,{version:policy.version,channels:[{id:one.id,mandatory:false}]},admin.cookie,403);
+  policy=(await patch(policyPath,{version:policy.version,channels:[choices[0]]},admin.cookie)).data;
+  assert.ok(policy.history.some(action=>action.actor===admin.user.id&&action.conversation===two.id&&!action.enabled));
+  assert.ok(policy.history.every(action=>!('body'in action)));
+  await post('/auth/operator/status',{operatorId:newcomer.user.id,status:'inactive'});
+  await post('/auth/operator/status',{operatorId:newcomer.user.id,status:'active'});
+  const denied=await signIn(origin(),'defaultnewcomer@example.test',{productStatus:401});
+  await get('/api/conversations',denied.cookie,401);
+  await post('/api/team/access',{user:newcomer.user.id,mode:'member',scopes:[privateRoom.id]});
+  const restored=await signIn(origin(),'defaultnewcomer@example.test');
+  assert.deepEqual((await get('/api/conversations',restored.cookie)).data.map(channel=>channel.id),[privateRoom.id]);
+  await patch(policyPath,{version:policy.version,channels:[]});
+  const archivable=(await get(`/api/channels/${one.id}/details`)).data;
+  await post(`/api/channels/${one.id}/archive`,{version:archivable.version,archived:true});
+ });
 }

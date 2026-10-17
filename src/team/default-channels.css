@@ -1,0 +1,9 @@
+.default-channels fieldset{border:0;padding:0;margin:1rem 0;min-width:0}
+.default-channels legend{font-weight:600;margin-bottom:.5rem}
+.default-channel-choice{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--line)}
+.default-channel-choice label{display:flex;align-items:center;gap:.5rem;min-width:0}
+.default-channel-choice label span{overflow-wrap:anywhere}
+.default-channel-history{padding-left:1.25rem}
+.default-channel-history li{margin:.75rem 0;overflow-wrap:anywhere}
+.default-channel-history small{display:block;color:var(--ink-soft)}
+@media(max-width:480px){.default-channel-choice{align-items:flex-start;flex-wrap:wrap}}
