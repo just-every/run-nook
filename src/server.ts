@@ -42,7 +42,7 @@ api.all('/api/*', async c => {
   if(req.method==='POST' && /^\/api\/conversations\/[^/]+\/attachments$/.test(url.pathname) && req.headers.get('content-type')!=='application/json'){await repository.session(req.headers);const upload=await readUpload(req);return c.json(await repository.upload(req.headers,url.pathname.split('/')[3],upload))}
   if(req.headers.get('content-type') !== 'application/json') fail(415,'JSON required')
   const reader = req.body?.getReader(); let size = 0; const chunks: Uint8Array[] = []
-  if(reader) { while(true) { const {done,value} = await reader.read(); if(done) break; size += value.length; if(size > (req.method==='POST' && /^\/api\/conversations\/[^/]+\/attachments$/.test(url.pathname) ? 36*1024*1024 : /^\/api\/imports\/(preview|apply)$/.test(url.pathname) ? 41*1024*1024 : 65536)) { await reader.cancel(); fail(413,'Body too large') }; chunks.push(value) } }
+  if(reader) { while(true) { const {done,value} = await reader.read(); if(done) break; size += value.length; if(size > (req.method==='POST' && /^\/api\/conversations\/[^/]+\/attachments$/.test(url.pathname) ? 36*1024*1024 : /^\/api\/imports\/(preview|apply)$/.test(url.pathname) ? 41*1024*1024 : /^(?:\/api\/conversations\/[^/]+\/messages|\/api\/messages\/[^/]+)$/.test(url.pathname) ? 256*1024 : 65536)) { await reader.cancel(); fail(413,'Body too large') }; chunks.push(value) } }
   const bytes = new Uint8Array(size); let offset = 0; for(const chunk of chunks) { bytes.set(chunk,offset); offset += chunk.length }
   try { input = JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes)) } catch { fail(400,'Invalid JSON') }
   if(!input || typeof input !== 'object' || Array.isArray(input)) fail(400,'JSON object required')

@@ -46,7 +46,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
   const save=()=>{if(isCurrent()&&container.getBoundingClientRect().height>0)sessionStorage.setItem(scrollKey,ended()?'end':String(container.scrollTop))};save()
   atEnd.current=ended()
   let userScrolled=false
-  const scrollingIntent=(event:Event)=>{if(!(event instanceof KeyboardEvent)||['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))userScrolled=true}
+  const scrollingIntent=(event:Event)=>{if(event.type==='pointerdown'&&event.target!==container)return;if(!(event instanceof KeyboardEvent)||['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))userScrolled=true}
   const freeze=()=>{
    if(!isCurrent())return
    save();atEnd.current=ended()

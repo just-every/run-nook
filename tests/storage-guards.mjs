@@ -37,10 +37,10 @@ export async function storageGuards(h){
   const list=(await get('/api/conversations')).data,counts=await facts();await restart();assert.deepEqual(await facts(),counts);assert.deepEqual((await get('/api/conversations')).data,list);assert.equal((await get('/api/me')).data.id,owner.user.id);
  });
  await check('public origin/input/host boundaries and emitted asset isolation remain enforced',async()=>{
-  for(const body of [null,[],42,'bad',{body:'  ',intent:'empty'},{body:'x'.repeat(8001),intent:'bounded'},{body:'x',intent:'y'.repeat(129)}])await post(path+'/messages',body,owner.cookie,400);
+  for(const body of [null,[],42,'bad',{body:'  ',intent:'empty'},{body:'x'.repeat(40001),intent:'bounded'},{body:'x',intent:'y'.repeat(129)}])await post(path+'/messages',body,owner.cookie,400);
   await request('/api/conversations',{method:'POST',body:{name:'Wrong type'},cookie:owner.cookie,status:415,extra:{'content-type':'text/plain'}});
   for(const after of ['-1','1.5','NaN'])await get(path+'/replay?after='+after,owner.cookie,400);for(const limit of ['0','1001','1.5','NaN'])await get(path+'/messages?limit='+limit,owner.cookie,400);
-  await post(path+'/messages',{body:'x'.repeat(66000),intent:'oversized-json'},owner.cookie,413);await request('/api/conversations',{method:'POST',body:{name:'Cross origin'},cookie:owner.cookie,status:403,extra:{origin:'https://attacker.invalid'}});
+  await post(path+'/messages',{body:'x'.repeat(262145),intent:'oversized-json'},owner.cookie,413);await request('/api/conversations',{method:'POST',body:{name:'Cross origin'},cookie:owner.cookie,status:403,extra:{origin:'https://attacker.invalid'}});
   for(const path of ['/missing','/assets/missing.js','/@vite/client'])await get(path,owner.cookie,404);
   const status=await new Promise((ok,bad)=>{const q=httpRequest(origin()+'/api/me',{headers:{host:'unsupported.invalid',cookie:owner.cookie}},r=>{r.resume();r.once('end',()=>ok(r.statusCode))});q.on('error',bad);q.end()});assert.equal(status,404);assert.equal((await request('/health')).data.status,'ok');await request('/');
   for(const file of (await readdir(resolve(root,'dist/client/assets'))).filter(name=>name.endsWith('.js')))assert.doesNotMatch(await readFile(resolve(root,'dist/client/assets',file),'utf8'),/cloudflare:workers|passwordHash|UPDATE nook_messages/);

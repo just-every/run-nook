@@ -5,6 +5,12 @@ import {Fault} from './fault.mjs'
 export {Fault} from './fault.mjs'
 export const fail = (status: number, message: string): never => { throw new Fault(status, message) }
 export const text = (v: unknown, max = 8000): string => typeof v === 'string' && v.trim() && v.length <= max ? v.trim() : fail(400, 'Invalid text')
+export const MESSAGE_LIMIT = 40000
+export const messageBody = (value:unknown):string => {
+ if(typeof value!=='string'||!value.trim())return fail(400,'Invalid text')
+ if(value.length>MESSAGE_LIMIT)return fail(400,'message_too_long')
+ return value.trim()
+}
 export type User = { id: string; name: string; active: boolean; email?: string; role?: 'owner'|'admin'|'member'; salt?: string; hash?: string; algorithm?: 'pbkdf2'|'scrypt' }
 export type Identity = Pick<User, 'id' | 'name'>
 export type Conversation = { id: string; name: string; kind: string; owner: string; seq: number; members: string[] }
@@ -53,7 +59,7 @@ export function mutate(s: State, u: Identity, action: string, id: string, input:
   if (input.delete !== undefined && typeof input.delete !== 'boolean') fail(400,'delete must be boolean')
   const m = s.messages.find(x => x.id === id) ?? fail(404,'Message missing'), c = acl(s,u,m.conversation)
   if (m.author !== u.id) fail(403,'Only author may edit'); if (m.deleted) fail(409,'Message deleted'); if (input.version !== m.version) fail(409,'Message changed; reload')
-  m.body = input.delete ? '' : text(input.body); m.version++; m.deleted = input.delete ? 1 : 0
+  m.body = input.delete ? '' : messageBody(input.body); m.version++; m.deleted = input.delete ? 1 : 0
   if (input.delete) { for(const a of s.attachments)if(a.message===id)erase(a); m.payload = '[erased]'; s.revisions = s.revisions.filter(r => r.message !== id); for (const o of s.outcomes) if (o.source === id) o.source = null }
   s.revisions.push({ message: id, version: m.version, body: m.body, at: now }); event(c,input.delete ? 'delete' : 'edit',id); return visibleMessage(s,m)
  }
@@ -76,7 +82,7 @@ export function mutate(s: State, u: Identity, action: string, id: string, input:
  }
  if (action === 'messages') {
   if (input.parent !== undefined && input.parent !== null && typeof input.parent !== 'string') fail(400,'Invalid parent')
-  const body = text(input.body), intent = text(input.intent,128), parent = input.parent || null
+  const body = messageBody(input.body), intent = text(input.intent,128), parent = input.parent || null
   if(input.attachments!==undefined&&(!Array.isArray(input.attachments)||input.attachments.length>5||input.attachments.some((x:any)=>typeof x!=='string')||new Set(input.attachments).size!==input.attachments.length))fail(400,'Invalid attachment IDs')
   const ids:string[]=input.attachments??[]
   const attentionPayload=messageAttentionInput(input)

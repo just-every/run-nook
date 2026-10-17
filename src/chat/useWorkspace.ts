@@ -3,6 +3,7 @@ import {api,ApiError,workspace,sendWorkspace,completeSnapshot,windowKey} from '.
 import {useAttentionWake} from './useAttentionWake'
 import {usePrivateScope} from './usePrivateScope'
 import {clearPushNotices} from '../push/notices'
+import {clearConversationDrafts,clearUserDrafts} from './drafts'
 import type {Attention,InitialWorkspace,LocationState,Person,Projection,WorkspaceSnapshot,ReadAcknowledgement} from './types'
 const emptyAttention:Attention={items:[],deferredCount:0,observedAt:0,dndUntil:null,nextWakeAt:null}
 export function useWorkspace(initial:InitialWorkspace,route:LocationState,navigate:(next:Partial<LocationState>,replace?:boolean)=>void) {
@@ -24,12 +25,13 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
   // A fresh render gets a new lifetime; old callbacks retain the aborted one.
   privateAccess.current.controller.abort();privateAccess.current.controller=new AbortController();generation.current++;again.current=false;hints.current.clear();latest.current=null
   const ids=[current.current.conversation,cache.current?.conversation];cache.current=null
+  clearConversationDrafts(initial.user.id,ids.filter((id):id is string=>Boolean(id)))
   for(const key of Object.keys(sessionStorage))if(key.startsWith('nook:')&&ids.some(id=>id&&key.includes(':'+id+':')))sessionStorage.removeItem(key)
   setSnapshot(null);setConversations([]);setUsers([]);setData(null);setAttention(emptyAttention);setAttentionLoaded(false);setRevision(r=>r+1);setAccessEpoch(r=>r+1)
  },[])
  const onError=useCallback((e:unknown)=>{
   if(privateSignal.aborted)return
-  if(e instanceof ApiError && e.status===401){if(leaving.current)return;leaving.current=true;clearPrivate();setConversations([]);setUsers([]);sessionStorage.clear();void clearPushNotices().finally(()=>window.location.replace('/signin'));return}
+  if(e instanceof ApiError && e.status===401){if(leaving.current)return;leaving.current=true;clearUserDrafts(initial.user.id);clearPrivate();setConversations([]);setUsers([]);sessionStorage.clear();void clearPushNotices().finally(()=>window.location.replace('/signin'));return}
   if(e instanceof ApiError && e.status===403)clearPrivate()
   setError(e instanceof Error?e.message:'Something went wrong. Please try again.')
  },[clearPrivate,privateSignal])

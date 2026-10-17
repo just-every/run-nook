@@ -2,7 +2,7 @@ import {enqueuePushMessage} from '../../push/queue'
 import {erasedIntent} from '../../team/erasure/intent.mjs'
 import {erase} from '../../team/erasure/service'
 import {allowedGrant} from '../../team/access'
-import {fail,text} from '../../family/team-chat/domain'
+import {fail,text,messageBody} from '../../family/team-chat/domain'
 import {messageAttentionInput} from '../../family/team-chat/attention'
 import {Context,indexMessage} from './context'
 import {message} from './read'
@@ -10,7 +10,7 @@ import {historyPage} from './history'
 import {enqueueMessage} from '../../notify/queue'
 import {automaticFollows,liveThreadRoots} from './threads'
 export async function send(c:Context,id:string,input:Record<string,any>){
- const body=text(input.body),intent=text(input.intent,128);if(input.parent!==undefined&&input.parent!==null&&typeof input.parent!=='string')fail(400,'Invalid parent');const parent=input.parent||null;
+ const body=messageBody(input.body),intent=text(input.intent,128);if(input.parent!==undefined&&input.parent!==null&&typeof input.parent!=='string')fail(400,'Invalid parent');const parent=input.parent||null;
  const ids=input.attachments??[];if(!Array.isArray(ids)||ids.length>5||ids.some(x=>typeof x!=='string')||new Set(ids).size!==ids.length)fail(400,'Invalid attachment IDs');const attention=messageAttentionInput(input),payload=JSON.stringify({body,parent,attachments:ids,...attention});
  const digest=await erasedIntent(c.uid,intent,id)
  const [erased,old]=await Promise.all([
@@ -32,7 +32,7 @@ async function sentMessage(c:Context,conversation:string,id:string){
  return (await historyPage(c,conversation,'m.id=?',[id],1))[0]??fail(404,'Message unavailable')
 }
 export async function edit(c:Context,id:string,input:Record<string,any>){
- if(input.delete!==undefined&&typeof input.delete!=='boolean')fail(400,'delete must be boolean');if(!Number.isSafeInteger(input.version))fail(400,'Version required');const old=await message(c,id);if(old.author!==c.uid)fail(403,'Only author may edit');if(old.deleted||old.version!==input.version)fail(409,'Message changed; reload');const body=input.delete?'':text(input.body),now=new Date().toISOString();
+ if(input.delete!==undefined&&typeof input.delete!=='boolean')fail(400,'delete must be boolean');if(!Number.isSafeInteger(input.version))fail(400,'Version required');const old=await message(c,id);if(old.author!==c.uid)fail(403,'Only author may edit');if(old.deleted||old.version!==input.version)fail(409,'Message changed; reload');const body=input.delete?'':messageBody(input.body),now=new Date().toISOString();
  if(input.delete){const receipt=await erase(c,'message',id,{confirmation:'ERASE',version:input.version},true);return {...await message(c,id),receipt}}
  const statements=[...c.event(old.conversation,'edit',id),c.sql('UPDATE nook_messages SET body=?,body_lower=?,version=version+1 WHERE id=?',body,body.toLowerCase(),id),c.sql('DELETE FROM nook_search WHERE message=?',id),indexMessage(c,id,old.conversation,body),c.sql('INSERT INTO nook_revisions VALUES(?,?,?,?)',id,input.version+1,body,now)];
  await c.writeBatch(statements,old.conversation,'EXISTS(SELECT 1 FROM nook_messages WHERE id=? AND author=? AND version=? AND deleted=0)',[id,c.uid,input.version]);await c.hint();return message(c,id)

@@ -1,0 +1,17 @@
+.nook-app .quick-switcher { width: min(560px, calc(100vw - 32px)); }
+.nook-app .quick-results { max-height: min(430px, 55dvh); overflow: auto; margin: 0 -8px; }
+.nook-app .quick-results > button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px 8px; text-align: left; border-radius: var(--r-control); overflow-wrap: anywhere; }
+.nook-app .quick-results > button[aria-selected=true] { background: var(--wash); outline: 1px solid var(--line-field); outline-offset: -1px; }
+.nook-app .quick-results small { display: block; color: var(--ink-soft); margin-top: 4px; }
+.nook-app .shortcut-list { display: grid; gap: 6px; }
+.nook-app .shortcut-list button { display: flex; justify-content: space-between; gap: 16px; text-align: left; padding: 10px 4px; border-bottom: 1px solid var(--line-field); }
+.nook-app .shortcut-list kbd { color: var(--ink-soft); font: inherit; white-space: nowrap; }
+.nook-app .quick-nav-trigger { font-size: 13px; }
+
+.nook-app .quick-nav-trigger svg { display: none; }
+@media (max-width: 850px) {
+ .nook-app .quick-nav-trigger .quick-nav-label, .nook-app .quick-help { display: none; }
+ .nook-app .quick-nav-trigger svg { display: block; width: 20px; height: 20px; }
+ .nook-app .header-actions .quick-nav-trigger { width: 32px; min-width: 32px; padding: 0; }
+ .nook-app dialog.quick-switcher { width: 100%; max-width: none; }
+}
