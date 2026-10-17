@@ -4,7 +4,8 @@ import type {MessageWindow,ReadAcknowledgement} from './types'
 type ReadProgress={conversation:string;user:string;isCurrent:()=>boolean;seen:Set<string>;inflight:boolean;sent:number;active:boolean;inspect:(()=>void)|null}
 // A loaded item is not read. Outside-window barriers come from the server; the
 // viewport check further narrows that bound. Own sends never advance a cursor.
-export function useReadVisibility(container:React.RefObject<HTMLElement|null>,conversation:string,window:MessageWindow,user:string,enabled:boolean,isCurrent:()=>boolean,onRead:(ack:ReadAcknowledgement)=>Promise<void>,onError:(e:unknown)=>void){
+export function useReadVisibility(container:React.RefObject<HTMLElement|null>,conversation:string,window:MessageWindow,user:string,enabled:boolean,isCurrent:()=>boolean,onRead:(ack:ReadAcknowledgement)=>Promise<void>,onError:(e:unknown)=>void,threadRead?:{thread:string;onRead:()=>Promise<void>}){
+ if(threadRead)window={...window,readSeq:window.threadReadSeq??window.readSeq,readThrough:window.threadReadThrough??window.readThrough,readBarrierSeq:null}
  const progress=useRef<ReadProgress|null>(null)
  if(!progress.current||progress.current.conversation!==conversation||progress.current.user!==user||progress.current.isCurrent!==isCurrent)progress.current={conversation,user,isCurrent,seen:new Set(),inflight:false,sent:0,active:true,inspect:null}
  const scope=progress.current
@@ -33,7 +34,7 @@ export function useReadVisibility(container:React.RefObject<HTMLElement|null>,co
    // A late response belongs to its original identity/conversation. It may
    // acknowledge that server read, but cannot change a replacement scope.
    const current=()=>isCurrent()&&progress.current===scope&&scope.active
-   void api<ReadAcknowledgement>(`conversations/${conversation}/read`,{seq:frontier}).then(ack=>{if(current()){scope.sent=Math.max(scope.sent,frontier);return onRead(ack)}}).catch(error=>{if(current())onError(error)}).finally(()=>{if(current()){scope.inflight=false;scope.inspect?.()}})
+   void api<ReadAcknowledgement>(threadRead?`messages/${threadRead.thread}/read`:`conversations/${conversation}/read`,{seq:frontier}).then(ack=>{if(current()){scope.sent=Math.max(scope.sent,frontier);return threadRead?threadRead.onRead():onRead(ack)}}).catch(error=>{if(current())onError(error)}).finally(()=>{if(current()){scope.inflight=false;scope.inspect?.()}})
   })}
   // The list can still be laying out on the first check; check again whenever its size settles.
   const resized=new ResizeObserver(inspect);resized.observe(root)

@@ -18,7 +18,7 @@
   .nook-app .body-grid > .decisions { display: none; }
   .nook-app .body-grid:is(.has-thread, .showing-outcomes) > .decisions { display: flex; flex: 1; overflow: hidden; }
   .nook-app .body-grid:is(.has-thread, .showing-outcomes) > .chat { display: none; }
-  .nook-app .mobile-tabs { position: fixed; right: 0; bottom: 0; left: 0; z-index: 20; display: grid; height: calc(56px + env(safe-area-inset-bottom, 0px)); grid-template-columns: repeat(4, 1fr); padding: 0 8px env(safe-area-inset-bottom, 0px); background: var(--surface-rail); }
+  .nook-app .mobile-tabs { position: fixed; right: 0; bottom: 0; left: 0; z-index: 20; display: grid; height: calc(56px + env(safe-area-inset-bottom, 0px)); grid-template-columns: repeat(5, 1fr); padding: 0 8px env(safe-area-inset-bottom, 0px); background: var(--surface-rail); }
   .nook-app .mobile-tabs button { position: relative; display: flex; min-height: 56px; align-items: center; justify-content: center; gap: 6px; color: var(--ink-soft); font-size: var(--fs-ui); font-weight: 500; }
   .nook-app .mobile-tabs button[aria-current=page] { color: var(--ink); }
   .nook-app .mobile-tabs button[aria-current=page]::before { content: ''; position: absolute; top: 0; left: 50%; width: 16px; height: 3px; margin-left: -8px; border-radius: 0 0 3px 3px; background: var(--brand-rose); }

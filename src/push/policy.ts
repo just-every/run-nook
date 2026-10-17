@@ -5,7 +5,8 @@ export const pushCancellation=`CASE ${recipientCancellation}
  WHEN NOT EXISTS(SELECT 1 FROM nook_push_devices d JOIN oa_sessions s ON s.id=d.session JOIN oa_operators o ON o.id=d.user WHERE d.id=q.device AND d.user=q.user AND s.operator_id=d.user AND s.operator_version=d.version AND o.version=d.version AND s.revoked_at IS NULL AND s.expires_at>? AND (json_extract(d.subscription,'$.expirationTime') IS NULL OR json_extract(d.subscription,'$.expirationTime')>?)) THEN 'device-inactive'
  WHEN NOT EXISTS(SELECT 1 FROM nook_notify_preferences p WHERE p.user=q.user AND CASE q.reason WHEN 'urgent-request' THEN p.push_urgent WHEN 'direct-message' THEN p.push_direct WHEN 'thread-follow' THEN p.push_threads ELSE p.push_mentions END=1) THEN 'turned-off'
  WHEN q.reason IN ('direct-message','thread-follow') AND EXISTS(SELECT 1 FROM nook_preferences p WHERE p.user=q.user AND p.conversation=q.conversation AND p.muted=1) THEN 'muted'
- WHEN q.reason='thread-follow' AND NOT EXISTS(SELECT 1 FROM nook_messages m JOIN nook_thread_follows t ON t.message=m.parent AND t.user=q.user WHERE m.id=q.message) THEN 'unfollowed' END`
+ WHEN q.reason='thread-follow' AND NOT EXISTS(SELECT 1 FROM nook_messages m JOIN nook_thread_follows t ON t.message=m.parent AND t.user=q.user WHERE m.id=q.message) THEN 'unfollowed'
+ WHEN q.reason='direct-message' AND EXISTS(SELECT 1 FROM nook_messages m JOIN nook_thread_unfollows u ON u.message=m.parent AND u.user=q.user WHERE m.id=q.message) THEN 'unfollowed' END`
 
 // A third clock binding follows pushCancellation's two expiration bindings.
 // This expression is reused for selection and the final pre-send authority check.

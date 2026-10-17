@@ -46,7 +46,7 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_author_counts VALUES('old-dm',?,1)").run(creator);
   f.db.prepare("INSERT INTO nook_reads VALUES('old-dm',?,1,1,1)").run(creator);
   f.db.prepare("INSERT INTO nook_preferences VALUES(?,'old-dm',0,1)").run(creator);
-  f.db.prepare("INSERT INTO nook_thread_follows VALUES(?,'dm-message')").run(creator);
+  f.db.prepare("INSERT INTO nook_thread_follows(user,message) VALUES(?,'dm-message')").run(creator);
   f.db.prepare("INSERT INTO nook_outcomes VALUES('dm-work','old-dm',?,?,'commitment','Retained commitment','dm-message',1,1,'proposed',NULL)").run(creator,f.owner.operatorId);
   f.db.prepare("INSERT INTO nook_outcome_versions VALUES('dm-work',1,?,'Retained commitment','proposed',NULL)").run(creator);
   f.db.prepare("INSERT INTO nook_events VALUES('old-dm',2,'outcome','dm-work',?)").run(creator);f.db.prepare("UPDATE nook_conversations SET seq=2 WHERE id='old-dm'").run();

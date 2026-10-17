@@ -36,3 +36,9 @@ An urgent request is a request inside Nook, not a page. Web Push follows your ch
 Use **You → Install Nook** when your browser offers it, or install from the browser menu. On iPhone or iPad, use Share → Add to Home Screen, open Nook from there, then enable push. Notifications require a compatible browser and permission. Reopen Nook to reconcile a subscription removed by the browser; a visible error gives you a way to enable again without repeated permission prompts.
 
 Push waits while a Nook page is visibly active and has a fresh heartbeat. Hidden or suspended pages do not suppress delivery indefinitely. Opening Nook synchronizes read notifications and badges. Sleeping devices may keep old notifications until opened; no silent background clear is sent.
+
+## Keep up with threads
+
+Open **Threads** to see discussions you started, replied to, were mentioned in or explicitly followed. Both people in a one-to-one DM follow its threads automatically. Imported history creates no follows; replying to an imported thread starts following it.
+
+Reply inline or open the full discussion. **Mark thread read** clears that thread’s unread replies on your other sessions without closing Attention or reading another thread. **Unfollow thread** stays in effect after later mentions; replying yourself follows it again. A muted conversation appears here only for threads you explicitly follow. Removing channel access removes its threads at the next refresh.

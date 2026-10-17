@@ -106,6 +106,7 @@ try {
  const normalizedHarness={check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
  await(await import('./storage-guards.mjs')).storageGuards(normalizedHarness)
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
+ await(await import('./threads.mjs')).threadJourney(normalizedHarness)
  await(await import('./media-adversarial.mjs')).runMedia(normalizedHarness)
  await check('actual team invitations, scopes, reactions, preview and revocation',async()=>{await(await import('./team-runtime.mjs')).runTeamSurfaces({origin,ownerCookie:owner.cookie})})
  await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{const checks=await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>restart({transferFaults:null}),sql});evidence.slackImports=checks})

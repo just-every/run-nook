@@ -75,7 +75,7 @@ export async function importJourney({ origin, owner, restart, sql }) {
     assert.equal(thread.items[0].provenance.timestamp, history[1].provenance.timestamp);
     assert.equal(thread.readThrough, 0);
     await call(`/api/conversations/${engineering.id}/messages/window?around=${history[0].id}`, { status: 404 });
-    await call(`/api/conversations/${general.id}/messages`, { actor: member, body: { body: 'Native reply cannot rewrite imported thread', parent: history[0].id, intent: 'immutable-root-' + suffix }, status: 400 });
+    assert.deepEqual((await call(`/api/conversations/${general.id}/preferences`,{actor:member})).threads,[], 'Importing history never creates follows');
     const file = await fetch(`${origin}/api/attachments/${history[0].attachments[0].id}/download`, { headers: { cookie: member.cookie } });
     assert.equal(file.status, 200);
     assert.equal(await file.text(), 'hello');
@@ -142,6 +142,15 @@ export async function importJourney({ origin, owner, restart, sql }) {
     assert.ok(older.items[0].sequence < 0);
     assert.equal(older.hasNewer, true);
 
+    const importedRoot=(await call(`/api/conversations/${liveChannel.id}/messages`)).find(m=>m.immutable&&!m.parent);
+    const nativeReply=await call(`/api/conversations/${liveChannel.id}/messages`,{actor:member,body:{body:'Continue the imported discussion in Nook',parent:importedRoot.id,intent:'imported-reply-'+suffix}});
+    assert.equal(nativeReply.parent,importedRoot.id);
+    assert.equal((await call(`/api/conversations/${liveChannel.id}/preferences`,{actor:member})).threadFollows.find(f=>f.message===importedRoot.id)?.source,'replied');
+    assert.ok((await call('/api/threads',{actor:member})).items.some(t=>t.root.id===importedRoot.id));
+    const continued=await call(`/api/conversations/${liveChannel.id}/messages/window?thread=${importedRoot.id}`,{actor:member});
+    assert.ok(continued.items.some(m=>m.id===nativeReply.id));
+    assert.equal(continued.root.body,importedRoot.body,'Native participation does not rewrite the source');
+    await call(`/api/slack-imports/${ready2.review}/undo`,{body:{},status:409});
     report.push({ name: 'undo rejects later live work and preserves it', passed: true });
     if (sql) {
         // A job one apply request cannot finish: requests fill the import kit's statement budget.

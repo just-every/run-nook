@@ -4,6 +4,7 @@ import {Context} from './context'
 import {read} from './read'
 import {send,edit} from './messages'
 import {createOutcome,reviseOutcome} from './outcomes'
+import {followThread,readThread} from './threads'
 import {PUSH_GATHER_MS} from '../../push/queue'
 const future=(value:any)=>Number.isSafeInteger(value)&&value>Date.now()&&value<=Date.now()+7*86400000?value:fail(400,'Choose a future time within seven days')
 export async function write(c:Context,action:string,id:string,input:Record<string,any>):Promise<any>{
@@ -21,7 +22,8 @@ export async function write(c:Context,action:string,id:string,input:Record<strin
    c.sql("UPDATE nook_notify_queue SET due=CASE WHEN channel='push' THEN max(created+?,?) ELSE ? END WHERE user=? AND state='pending' AND due>?",PUSH_GATHER_MS,wake,wake,c.uid,wake)])
   await c.hint();return {dndUntil:until}
  }
- if(action==='follow'){if(typeof input.follow!=='boolean')fail(400,'Follow must be boolean');const m=await c.one('SELECT conversation FROM nook_messages WHERE id=? AND parent IS NULL AND deleted=0',[id]);if(!m)fail(404,'Thread root unavailable');await c.batch([input.follow?c.sql('INSERT OR IGNORE INTO nook_thread_follows VALUES(?,?)',c.uid,id):c.sql('DELETE FROM nook_thread_follows WHERE user=? AND message=?',c.uid,id)],m.conversation,'EXISTS(SELECT 1 FROM nook_messages WHERE id=? AND parent IS NULL AND deleted=0)',[id]);return {followed:input.follow}}
+ if(action==='follow')return followThread(c,id,input)
+ if(action==='threadRead')return readThread(c,id,input)
  if(action==='attentionAction'){if(!['done','snooze'].includes(input.action))fail(400,'Choose done or snooze');const a=await c.one('SELECT conversation FROM nook_attention WHERE id=? AND user=?',[id,c.uid]);if(!a)fail(404,'Attention item unavailable');await c.batch([c.sql('UPDATE nook_attention SET state=?,snooze_until=? WHERE id=? AND user=?',input.action==='done'?'done':'snoozed',input.action==='snooze'?future(input.until):null,id,c.uid)],a.conversation);return {ok:true}}
  return fail(404,'Not found')
 }

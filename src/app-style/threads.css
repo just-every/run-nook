@@ -1,0 +1,17 @@
+.nook-app .threads-page .page-column { max-width: 860px; }
+.nook-app .threads-intro { margin: 0 0 var(--s5); }
+.nook-app .thread-card { border-top: 1px solid var(--line); padding: var(--s4) 0; }
+.nook-app .thread-context, .nook-app .thread-author, .nook-app .thread-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s2); }
+.nook-app .thread-context { justify-content: space-between; margin-bottom: var(--s3); }
+.nook-app .thread-context .text-button { overflow-wrap: anywhere; text-align: left; }
+.nook-app .thread-author { font-size: var(--fs-ui); }
+.nook-app .thread-author time { color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .thread-excerpt { margin: var(--s2) 0; }
+.nook-app .thread-source { margin: var(--s2) 0; font-size: var(--fs-meta); color: var(--ink-soft); }
+.nook-app .thread-actions { margin-left: -8px; }
+.nook-app .thread-inline { border-left: 2px solid var(--line); padding-left: var(--s4); margin-top: var(--s3); }
+.nook-app .thread-inline-replies { max-height: 360px; overflow: auto; }
+.nook-app .thread-inline-message { padding: var(--s2) 0; font-size: var(--fs-ui); }
+.nook-app .thread-inline-message p { margin: 4px 0; }
+.nook-app .thread-inline .composer { margin: var(--s3) 0 0; }
+@media(max-width:850px) { .nook-app .thread-inline { padding-left: var(--s2); } .nook-app .thread-context .count { font-size: 12px; } }

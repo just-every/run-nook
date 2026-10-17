@@ -19,7 +19,7 @@ const deadline=d=>d===null||typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&
 export async function validateNormalizedArchive({read,manifest,db,tables:stagedTables}){
  const rawRead=read;await validateRetainedBodies(rawRead);read=erasureArchiveRead(rawRead);
  const history=await validateTeamArchive({read,manifest});
- const names=['workspace','nook_storage','nook_upload_attempts','nook_object_deletes','nook_actors','nook_conversations','nook_members','nook_messages','nook_revisions','nook_events','nook_author_counts','nook_reads','nook_outcomes','nook_outcome_versions','nook_preferences','nook_thread_follows','nook_settings','nook_attention','nook_attachments','nook_imports','nook_import_channels','nook_import_actors','nook_import_records','nook_import_files','nook_import_receipts'];
+ const names=['workspace','nook_storage','nook_upload_attempts','nook_object_deletes','nook_actors','nook_conversations','nook_members','nook_messages','nook_revisions','nook_events','nook_author_counts','nook_reads','nook_outcomes','nook_outcome_versions','nook_preferences','nook_thread_follows','nook_thread_unfollows','nook_thread_reads','nook_settings','nook_attention','nook_attachments','nook_imports','nook_import_channels','nook_import_actors','nook_import_records','nook_import_files','nook_import_receipts'];
  const tables={};
  const readTable=async name=>{
   if(tables[name])return tables[name];
@@ -32,6 +32,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  check(!rows('upload_attempts').length&&!rows('object_deletes').length,'reconcile_pending_object_work_before_export');
  const actors=index(rows('actors'),a=>a.id,'duplicate_actor'),conv=index(rows('conversations'),c=>c.id,'duplicate_conversation'),msg=index(rows('messages'),m=>m.id,'duplicate_message'),out=index(rows('outcomes'),o=>o.id,'duplicate_outcome'),files=index(rows('attachments'),a=>a.id,'duplicate_attachment');
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
+ const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
  const members=index(rows('members'),m=>tuple(m.conversation,m.user),'duplicate_membership');for(const m of members.values())check(actors.has(m.user)&&conv.has(m.conversation),'invalid_membership');
  // Private/channel membership can change while history remains. Every DM
  // attribution requires its validated fixed roster, even after deactivation
@@ -50,7 +51,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const storedCounts=index(rows('author_counts'),r=>tuple(r.conversation,r.user),'duplicate_author_count');check(storedCounts.size===authorTotals.size,'invalid_author_counter');for(const [key,total] of authorTotals)check(storedCounts.get(key)?.total===total,'invalid_author_counter');
  for(const m of msg.values()){
   const e=events.get(tuple(m.conversation,m.sequence));check(string(m.id)&&participant(m.conversation,m.author)&&integer(m.version,1)&&[0,1].includes(m.deleted)&&typeof m.body==='string'&&m.body_lower===m.body.toLowerCase()&&time(m.created)&&string(m.intent)&&(m.erased?e?.kind==='erasure'&&/^[a-f0-9]{64}$/.test(m.intent_digest):e?.kind==='message'&&e.object===m.id),'invalid_message');
-  if(m.parent)check(msg.get(m.parent)?.conversation===m.conversation&&msg.get(m.parent).parent===null,'invalid_thread');
+  if(m.parent){const parent=msg.get(m.parent)??imported.get(m.parent);check(parent?.conversation===m.conversation&&parent.parent===null,'invalid_thread');}
   const rs=(revisions.get(m.id)??[]).sort((a,b)=>a.version-b.version);check(m.erased?rs.length===0:rs.length>0&&rs.at(-1).version===m.version&&rs.at(-1).body===m.body,'message_revision_mismatch');
   if(m.deleted)check(m.body===''&&m.payload==='[erased]'&&rs.every(r=>r.body===''),'deleted_message_retained');else{
    check(rs.length===m.version&&rs.every((r,i)=>r.version===i+1),'missing_message_revision');let p;try{p=JSON.parse(m.payload)}catch{}check(p&&Object.keys(p).sort().join()==='attachments,body,mentions,parent,urgent,urgentReason'&&typeof p.body==='string'&&p.body===rs[0].body&&p.parent===m.parent&&Array.isArray(p.attachments)&&p.attachments.length<=5&&new Set(p.attachments).size===p.attachments.length,'invalid_intent');
@@ -74,14 +75,22 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  for(const v of rows('outcome_versions'))check(out.has(v.outcome),'orphan_outcome_revision');
  for(const e of events.values()){if(e.kind==='erasure'){check(conv.has(e.conversation)&&e.actor===null&&/^[a-f0-9]{32}$/.test(e.object),'invalid_anonymous_event');continue;}const object=['message','edit','delete','reaction'].includes(e.kind)?msg.get(e.object):e.kind==='outcome'?out.get(e.object):e.kind==='attachment-delete'?files.get(e.object):['membership','access-revoked'].includes(e.kind)?actors.get(e.object):null;check(conv.has(e.conversation)&&object&&(e.kind==='membership'?conv.get(e.conversation).kind!=='dm':e.kind==='access-revoked'?e.actor===e.object&&conv.get(e.conversation).owner===e.actor:object.conversation===e.conversation)&&(['reaction','access-revoked'].includes(e.kind)?participant(e.conversation,e.actor):e.actor===null||participant(e.conversation,e.actor)),'invalid_event_object')}
  index(rows('preferences'),p=>tuple(p.user,p.conversation),'duplicate_preference');for(const p of rows('preferences'))check(participant(p.conversation,p.user)&&[0,1].includes(p.muted)&&[0,1].includes(p.followed),'invalid_preference');
- index(rows('thread_follows'),f=>tuple(f.user,f.message),'duplicate_follow');for(const f of rows('thread_follows'))check(msg.has(f.message)&&participant(msg.get(f.message).conversation,f.user)&&msg.get(f.message).parent===null,'invalid_thread_follow');
+ const threadRoot=(id,user)=>{const root=msg.get(id)??imported.get(id);return root&&root.parent===null&&participant(root.conversation,user)?root:null};
+ // The additive archive bridge stages the older columns and restores the new
+ // source column using its explicit default. Only that verified old manifest
+ // may omit it; a current archive must carry a valid source.
+ const oldFollowColumns=manifest?.tables?.find(t=>t.name==='nook_thread_follows')?.columns?.every(c=>c.name!=='source');
+ const follows=index(rows('thread_follows'),f=>tuple(f.user,f.message),'duplicate_follow');for(const f of follows.values())check(threadRoot(f.message,f.user)&&['explicit','authored','replied','mentioned','dm'].includes(f.source===undefined&&oldFollowColumns?'explicit':f.source),'invalid_thread_follow');
+ index(rows('thread_unfollows'),f=>tuple(f.user,f.message),'duplicate_unfollow');for(const f of rows('thread_unfollows'))check(threadRoot(f.message,f.user)&&!follows.has(tuple(f.user,f.message)),'invalid_thread_unfollow');
+ const positions=new Map(rows('messages').map(m=>[tuple(m.conversation,m.sequence),m]));
+ index(rows('thread_reads'),r=>tuple(r.user,r.message),'duplicate_thread_read');for(const r of rows('thread_reads')){const root=threadRoot(r.message,r.user),mark=positions.get(tuple(root?.conversation,r.seq));check(root&&integer(r.seq)&&(r.seq===0||mark&&(mark.id===r.message||mark.parent===r.message)),'invalid_thread_read');}
  index(rows('settings'),s=>s.user,'duplicate_settings');for(const s of rows('settings'))check(actors.has(s.user)&&(s.dnd_until===null||integer(s.dnd_until)),'invalid_quiet_deadline');
  index(rows('attention'),a=>a.id,'duplicate_attention');index(rows('attention'),a=>tuple(a.user,a.conversation,a.event_seq),'duplicate_attention_source');for(const a of rows('attention')){const source=a.message?msg.get(a.message):out.get(a.outcome),e=events.get(tuple(a.conversation,a.event_seq));check(string(a.id)&&participant(a.conversation,a.user)&&!!a.message!==!!a.outcome&&source?.conversation===a.conversation&&e?.object===(a.message||a.outcome)&&e.kind===(a.message?'message':'outcome')&&['open','done','snoozed'].includes(a.state)&&(a.state==='snoozed'?integer(a.snooze_until):a.snooze_until===null)&&time(a.created),'invalid_attention');check(a.message?['urgent-request','mention','thread-follow','conversation-follow'].includes(a.reason):source.kind==='commitment'&&['commitment-proposal','commitment-update'].includes(a.reason),'invalid_attention_reason')}
  const slackReviews=await slackArchiveObjects({read:readTable,manifest},actors,[...files.values()]);
  const slackProofs=await slackArchivePlans(readTable,slackReviews);
  const slackDomains=validateSlackArchiveRecords(slackProofs,tables);
  const slackIntents=new Set(slackReviews.map(review=>review.id));
- const jobs=index(rows('imports'),j=>j.id,'duplicate_import'),channels=index(rows('import_channels'),c=>tuple(c.job,c.source_id),'duplicate_import_channel'),importActors=index(rows('import_actors'),a=>tuple(a.job,a.source_id),'duplicate_import_actor'),imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
+ const jobs=index(rows('imports'),j=>j.id,'duplicate_import'),channels=index(rows('import_channels'),c=>tuple(c.job,c.source_id),'duplicate_import_channel'),importActors=index(rows('import_actors'),a=>tuple(a.job,a.source_id),'duplicate_import_actor');
  index(rows('imports'),j=>tuple(j.owner,j.intent),'duplicate_import_intent');index(rows('import_channels'),c=>c.conversation,'duplicate_import_destination');index(rows('import_records'),r=>r.key,'duplicate_source_key');index(rows('import_records'),r=>tuple(r.conversation,r.sequence),'duplicate_import_sequence');
  for(const j of jobs.values()){
   check(string(j.id)&&actors.has(j.owner)&&string(j.intent)&&j.state==='complete'&&time(j.created)&&string(j.namespace)&&[j.plan_digest,j.capture_digest,j.preview_digest].every(v=>/^[a-f0-9]{64}$/.test(v)),'invalid_import_job');

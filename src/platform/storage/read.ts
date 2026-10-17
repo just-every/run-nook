@@ -5,6 +5,7 @@ import {messageReactions} from '../../team/reactions.server'
 import {historyPage} from './history'
 import {mixedWindow} from '../../imports/window'
 import {mixedHistory,mixedSearch} from '../../imports/history'
+import {threadPreferences,threads,threadWindowRead,threadReadCount} from './threads'
 import {historicalMessage,importedSelect,publishedImport} from '../../imports/projection'
 export const attachmentColumns='id,conversation,author,message,name,mime,size,sha256,expires,state,created'
 // Counts cover the whole authorized thread, independently of the current page.
@@ -34,16 +35,17 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
  if(action==='me'){const access=await c.one('SELECT mode FROM nook_access WHERE user=? AND active=1',[c.uid]);return {id:c.uid,name:c.session.operator.displayName,role:c.session.operator.role,mode:access?.mode}}
  if(action==='users')return c.rows(`SELECT o.id,o.display_name AS name FROM oa_operators o WHERE o.status='active' AND ${productAccess('o.id')} AND ${visibleIdentity('?', 'o.id')} ORDER BY o.id LIMIT 1000`,[c.uid,c.uid,c.uid])
  if(action==='settings')return {dndUntil:(await c.one('SELECT dnd_until FROM nook_settings WHERE user=?',[c.uid]))?.dnd_until??null}
- if(action==='conversations')return c.rows(`SELECT c.id,c.name,c.kind,c.owner,c.seq,COALESCE(r.seq,0) AS readSeq,c.message_count-COALESCE(r.total,0)-COALESCE(a.total,0)+COALESCE(r.own,0) AS unread FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=m.user LEFT JOIN nook_author_counts a ON a.conversation=c.id AND a.user=m.user WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=c.id AND (j.state<>'complete' OR NOT (${publishedImport}))) ORDER BY c.id LIMIT 1000`,[c.uid])
+ if(action==='conversations')return c.rows(`SELECT c.id,c.name,c.kind,c.owner,c.seq,COALESCE(r.seq,0) AS readSeq,c.message_count-COALESCE(r.total,0)-COALESCE(a.total,0)+COALESCE(r.own,0)-(${threadReadCount('m.user','c.id','COALESCE(r.seq,0)')}) AS unread FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=m.user LEFT JOIN nook_author_counts a ON a.conversation=c.id AND a.user=m.user WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=c.id AND (j.state<>'complete' OR NOT (${publishedImport}))) ORDER BY c.id LIMIT 1000`,[c.uid])
  if(action==='historyWindow'){
   const window=await mixedWindow(c,id,input),messages=await messageMetadata(c,id,[...window.items,...(window.root?[window.root]:[])])
-  return {...window,items:messages.slice(0,window.items.length),root:window.root?messages.at(-1):null}
+  return {...window,...await threadWindowRead(c,id,window),items:messages.slice(0,window.items.length),root:window.root?messages.at(-1):null}
  }
+ if(action==='threads')return threads(c,input,async id=>{const m=await message(c,id);return (await messageMetadata(c,m.conversation,[m]))[0]})
  if(action==='search')return mixedSearch(c,input)
  if(action==='attention')return attention(c,input)
  if(action==='members')return c.rows(`SELECT o.id,o.display_name AS name FROM nook_members m JOIN oa_operators o ON o.id=m.user WHERE m.conversation=? AND ${allowedGrant('m.user','m.conversation')} ORDER BY o.id LIMIT 50`,[id],id)
  if(action==='roster')return c.rows(`SELECT a.id,a.name,EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=r.conversation AND m.user=r.user AND ${allowedGrant('m.user','m.conversation')}) AS active FROM nook_dm_roster r JOIN nook_actor_history a ON a.id=r.user WHERE r.conversation=? ORDER BY a.id LIMIT 50`,[id],id)
- if(action==='preferences'){const p=await c.one('SELECT muted,followed FROM nook_preferences WHERE user=? AND conversation=?',[c.uid,id],id);return {muted:!!p?.muted,followed:!!p?.followed,threads:(await c.rows('SELECT f.message FROM nook_thread_follows f JOIN nook_messages m ON m.id=f.message WHERE f.user=? AND m.conversation=? AND m.deleted=0 LIMIT 1000',[c.uid,id],id)).map(r=>r.message)}}
+ if(action==='preferences'){const [p,threadFollows]=await Promise.all([c.one('SELECT muted,followed FROM nook_preferences WHERE user=? AND conversation=?',[c.uid,id],id),threadPreferences(c,id)]);return {muted:!!p?.muted,followed:!!p?.followed,threads:threadFollows.map(f=>f.message),threadFollows}}
  if(action==='replay'){const frontier=(await c.one('SELECT seq FROM nook_conversations WHERE id=?',[id],id)).seq;const after=input.after??0;if(!Number.isSafeInteger(after)||after<0)fail(400,'Invalid cursor');if(after>frontier)fail(400,'Invalid cursor');const events=await c.rows('SELECT conversation,seq,kind,object FROM nook_events WHERE conversation=? AND seq>? ORDER BY seq LIMIT 100',[id,after],id);return {events,cursor:events.at(-1)?.seq??after,frontier,hasMore:(events.at(-1)?.seq??after)<frontier}}
  if(action==='messages'){await c.check(id);return messageMetadata(c,id,await mixedHistory(c,id,input,async input=>{const limit=input.limit??100,after=input.after??'';if(typeof after!=='string'||!Number.isSafeInteger(limit)||limit<1||limit>1000)fail(400,'Invalid history page');let seq=0;if(after){const row=await c.one('SELECT sequence FROM nook_message_history WHERE conversation=? AND (created||id)=?',[id,after],id);if(!row)fail(400,'History cursor unavailable');seq=row.sequence}return historyPage(c,id,'m.sequence>?',[seq],limit)}))}
  if(action==='outcomes')return c.rows(`${outcomeSelect} WHERE o.conversation=? AND o.id>? ORDER BY o.id LIMIT 1000`,[id,input.after??''],id)

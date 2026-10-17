@@ -77,6 +77,8 @@ api.all('/api/*', async c => {
  let out: any
  if(action==='settings'&&p.length===2&&req.method==='PATCH')return c.json(await repository.write(req.headers,'settings','',input))
  if(action==='attention'&&id&&p.length===3&&req.method==='POST')return c.json(await repository.write(req.headers,'attentionAction',id,input))
+ if(action==='threads'&&p.length===2&&req.method==='GET')return c.json(await repository.read(req.headers,'threads','',{after:url.searchParams.get('after')??'',limit:Number(url.searchParams.get('limit')||50)}))
+ if(action==='messages'&&id&&p.length===4&&sub==='read'&&req.method==='POST')return c.json(await repository.write(req.headers,'threadRead',id,input))
  if(action==='messages'&&id&&p.length===4&&sub==='follow'&&req.method==='POST')return c.json(await repository.write(req.headers,'follow',id,input))
  if(action==='conversations'&&id&&p.length===4&&sub==='preferences'&&req.method==='PATCH')return c.json(await repository.write(req.headers,'preferences',id,input))
  if(action==='attachments'&&id&&p.length===3&&(req.method==='DELETE'||(req.method==='PATCH'&&(input as Record<string,any>).delete===true)))return c.json(await repository.deleteAttachment(req.headers,id))

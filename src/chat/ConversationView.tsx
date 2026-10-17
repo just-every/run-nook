@@ -26,7 +26,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
  const isCurrent=threadCurrent
  // The panel is a companion on wide screens, so reading continues behind it; on a phone it replaces the log (mirrors api.ts).
  const reading=!(showOutcomes&&typeof window!=='undefined'&&window.matchMedia('(max-width: 850px)').matches)
- useReadVisibility(activeLog,c.id,activeWindow,user.id,reading,isCurrent,onRead,onError)
+ useReadVisibility(activeLog,c.id,activeWindow,user.id,reading,isCurrent,onRead,onError,route.thread?{thread:route.thread,onRead:refresh}:undefined)
  const scrollKey=`nook:scroll:${user.id}:${c.id}:${route.thread||'root'}:${route.thread?route.threadBefore||'latest':route.before||'latest'}:${route.landing?'landing':'default'}`,focusKey=`nook:focus:${user.id}:${c.id}:${route.thread||'root'}:${route.thread?route.threadBefore||'latest':route.before||'latest'}:${route.landing?'landing':'default'}`
  // Parent private-scope layout effects commit before this initialization.
  // A child layout effect would still see the previous navigation scope.
@@ -136,7 +136,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&root&&!showOutcomes?<>
-    <div className="panel-bar thread-bar"><button className="icon-button" title="Back" onClick={back}><IconBack/><span className="sr-only">Back</span></button><h2>Thread</h2>{!root.immutable&&<button className="soft-button" onClick={()=>void mutate(`messages/${root.id}/follow`,{follow:!followed}).catch(()=>{})}><IconBell/>{followed?'Unfollow thread':'Follow thread'}</button>}</div>
+    <div className="panel-bar thread-bar"><button className="icon-button" title="Back" onClick={back}><IconBack/><span className="sr-only">Back</span></button><h2>Thread</h2>{(!root.immutable||Boolean(root.provenance))&&<button className="soft-button" onClick={()=>void mutate(`messages/${root.id}/follow`,{follow:!followed}).catch(()=>{})}><IconBell/>{followed?'Unfollow thread':'Follow thread'}</button>}</div>
     <div className="log-frame">
      <div className="message-log thread-log" ref={threadLog} role="region" aria-label="Thread messages" tabIndex={0}>
       <div className="history-controls">{data.threadWindow?.hasMore&&data.threadWindow.cursor&&<button className="text-button" onClick={()=>navigate({threadBefore:data.threadWindow!.cursor,focus:null})}>Load earlier replies</button>}</div>
@@ -145,7 +145,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
      </div>
      {showLatestReplies&&<button className="jump-latest soft-button" onClick={()=>latest(true)}>Latest replies</button>}
     </div>
-    {!root.deleted&&!root.immutable&&<Composer key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
+    {!root.deleted&&(!root.immutable||Boolean(root.provenance))&&<Composer key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
    </>:outcomesPanel}
   </aside>
  </div>

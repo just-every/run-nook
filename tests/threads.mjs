@@ -1,0 +1,57 @@
+import assert from 'node:assert/strict'
+
+export async function threadJourney({post,patch,get,registered,check,restart}){
+ const a=await registered('ThreadA'),b=await registered('ThreadB'),c=await registered('ThreadC')
+ const room=(await post('/api/conversations',{name:'Launch coordination',kind:'private',participants:[b.user.id,c.user.id]},a.cookie)).data
+ const send=async(actor,body,parent=null,mentions=[]) => (await post(`/api/conversations/${room.id}/messages`,{body,parent,mentions,intent:crypto.randomUUID()},actor.cookie)).data
+ const prefs=async actor=>(await get(`/api/conversations/${room.id}/preferences`,actor.cookie)).data
+ const source=async(actor,id)=>(await prefs(actor)).threadFollows.find(f=>f.message===id)?.source
+ const list=async actor=>(await get('/api/threads',actor.cookie)).data.items
+ await check('NOOK-072 automatic follows, sticky unfollow, DM default and atomic retry',async()=>{
+  const root=await send(a,'Review the launch brief')
+  assert.equal(await source(a,root.id),'authored')
+  const reply=await send(b,'The rollout window works',root.id)
+  assert.equal(await source(b,root.id),'replied')
+  assert.equal((await get('/api/attention',a.cookie)).data.items.find(i=>i.message?.id===reply.id)?.reason,'thread-follow')
+  await send(a,'Please check the support handoff',root.id,[c.user.id])
+  assert.equal(await source(c,root.id),'mentioned')
+  await post(`/api/messages/${root.id}/follow`,{follow:false},c.cookie)
+  const mention=await send(a,'Can you confirm?',root.id,[c.user.id])
+  assert.equal(await source(c,root.id),undefined)
+  assert.equal((await get('/api/attention',c.cookie)).data.items.find(i=>i.message?.id===mention.id)?.reason,'mention')
+  const plain=await send(b,'Final checklist is ready',root.id)
+  assert.ok(!(await get('/api/attention',c.cookie)).data.items.some(i=>i.message?.id===plain.id))
+  await send(c,'Confirmed',root.id)
+  assert.equal(await source(c,root.id),'replied')
+  const dm=(await post('/api/conversations',{name:'Launch DM',kind:'dm',participants:[b.user.id]},a.cookie)).data
+  const payload={body:'Can we talk?',intent:crypto.randomUUID()}
+  const dmRoot=(await post(`/api/conversations/${dm.id}/messages`,payload,a.cookie)).data
+  assert.equal((await post(`/api/conversations/${dm.id}/messages`,payload,a.cookie)).data.id,dmRoot.id)
+  assert.equal((await get(`/api/conversations/${dm.id}/preferences`,b.cookie)).data.threadFollows.find(f=>f.message===dmRoot.id)?.source,'dm')
+  assert.equal((await get(`/api/conversations/${dm.id}/preferences`,b.cookie)).data.threads.filter(id=>id===dmRoot.id).length,1)
+ })
+ await check('NOOK-071 paged Threads, isolated read, restart, mute and membership loss',async()=>{
+  const root=await send(a,'Thread with an unread reply'),other=await send(a,'Keep this separate')
+  const reply=await send(b,'I checked the packet',root.id),otherReply=await send(b,'This still needs reading',other.id)
+  assert.equal((await list(a)).find(t=>t.root.id===root.id).unread,1)
+  const attention=(await get('/api/attention',a.cookie)).data.items.map(i=>i.id)
+  await post(`/api/messages/${root.id}/read`,{seq:otherReply.sequence},a.cookie,400)
+  await post(`/api/messages/${root.id}/read`,{seq:reply.sequence},a.cookie)
+  assert.equal((await list(a)).find(t=>t.root.id===root.id).unread,0)
+  assert.equal((await list(a)).find(t=>t.root.id===other.id).unread,1)
+  assert.deepEqual((await get('/api/attention',a.cookie)).data.items.map(i=>i.id),attention,'read never closes attention')
+  if(restart)await restart()
+  assert.equal((await list(a)).find(t=>t.root.id===root.id).unread,0)
+  const first=(await get('/api/threads?limit=1',a.cookie)).data
+  assert.equal(first.items.length,1);assert.ok(first.hasMore)
+  const next=(await get('/api/threads?limit=1&after='+encodeURIComponent(first.cursor),a.cookie)).data
+  assert.notEqual(first.items[0].root.id,next.items[0].root.id)
+  await patch(`/api/conversations/${room.id}/preferences`,{muted:true},c.cookie)
+  assert.ok(!(await list(c)).some(t=>t.root.conversation===room.id))
+  await post(`/api/messages/${root.id}/follow`,{follow:true},c.cookie)
+  assert.ok((await list(c)).some(t=>t.root.id===root.id&&t.source==='explicit'))
+  await post(`/api/conversations/${room.id}/members`,{user:c.user.id,remove:true},a.cookie)
+  assert.ok(!(await list(c)).some(t=>t.root.conversation===room.id))
+  await post(`/api/messages/${root.id}/read`,{seq:reply.sequence},c.cookie,404)
+ })
+}

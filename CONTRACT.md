@@ -416,8 +416,8 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Published | 14 | 3 | 0 | 17 |
-| Target and push further | 0 | 22 | 41 | 63 |
-| All | 14 | 25 | 41 | 80 |
+| Target and push further | 0 | 23 | 40 | 63 |
+| All | 14 | 26 | 40 | 80 |
 
 | Clause | Title | Kind | Status | Evidence | Gap |
 | --- | --- | --- | --- | --- | --- |
@@ -487,8 +487,8 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | `NOOK-068` | Safe link previews and app unfurls | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-069` | Two-factor authentication without SSO | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-070` | Polls, GIFs, thread broadcast, bookmarks and translation | target | missing |  | No implementing source/test; acceptance journey above is pending. |
-| `NOOK-071` | Threads view and group-DM conversion | target | missing |  | No implementing source/test; acceptance journey above is pending. |
-| `NOOK-072` | Automatic thread following and channel-wide thread replies | target | partial | `src/family/team-chat/attention.ts`; `src/platform/storage/messages.ts`; `src/push/queue.ts`; `src/push/policy.ts`; `tests/attention.mjs`; `tests/push/routing.mjs` | Explicit thread follows drive the `thread-follow` Attention reason and Web Push for followed-thread replies; automatic follows from authoring, replying and mentions, the one-to-one DM default, follow sources, sticky unfollow, the all-thread-replies setting and the thread badge choice are missing. |
+| `NOOK-071` | Threads view and group-DM conversion | target | partial | `src/chat/ThreadsView.tsx`; `src/platform/storage/threads.ts`; `tests/threads.mjs`; `work/sd-cp-nook/shots/NOOK-071/` | Paged current-ACL Threads, unread replies, inline reply, isolated durable thread reads, explicit-only muted threads and membership revocation ship on web at 1440/390. All unreads with undo, group-DM conversion and native-client evidence remain missing. |
+| `NOOK-072` | Automatic thread following and channel-wide thread replies | target | partial | `src/platform/storage/threads.ts`; `src/platform/storage/messages.ts`; `src/push/queue.ts`; `tests/threads.mjs`; `tests/slack-import/journey.mjs`; `work/sd-cp-nook/shots/NOOK-072/` | Atomic authored/replied/mentioned and one-to-one DM follows, source metadata, sticky unfollow, native continuation of imported roots, thread unread/read reconciliation and current-ACL routing ship. Import remains inert. All-thread replies with mobile overrides, the thread badge choice, broadcast-mention integration and real native/device alert evidence remain missing. |
 | `NOOK-073` | Active-elsewhere device routing | target | partial | `src/push/policy.ts`; `src/push/devices.ts`; `tests/push/presence.mjs` | A fresh, session-bound visible-page heartbeat holds all of the member's Web Push and an alarm releases it at 45-second expiry; input- and lock-based desktop activity, routing by device class, release delays, "always send to mobile", call/urgent bypass, native heartbeats and `held-active-elsewhere` records are missing. |
 | `NOOK-074` | Native sign-in and finding the installation | target | partial | `src/base/modules/operator-auth/identity/email-link/confirmation.mjs`; `src/team/invitations.server.ts`; `src/base/modules/operator-auth/identity/oidc/presets.mjs`; `tests/operator-auth.test.mjs`; `tests/operator-security.mjs` | Browser magic-link sign-in and invitations ship, with confirmation GET/HEAD never consuming a link and native POST consuming once; the Base OIDC module copy has Google and Microsoft presets but Nook does not wire it. Installation descriptors, open-in-app links and QR codes, managed deployment, email codes, universal and app links, QR sign-in from desktop, personal providers and system-browser native SSO are missing. |
 | `NOOK-075` | External participants without a Nook installation | target | missing |  | No implementing source/test; acceptance journey above is pending. |

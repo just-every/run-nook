@@ -16,7 +16,7 @@ export function enqueuePushMessage(c:Context,message:string,now:number){return c
  LEFT JOIN nook_attention a ON a.message=s.id AND a.user=m.user
  WHERE s.id=? AND m.user<>s.author AND ${allowedGrant('m.user','m.conversation')} AND
  CASE WHEN j.value IS NOT NULL AND json_extract(s.payload,'$.urgent')=1 THEN p.push_urgent=1 WHEN j.value IS NOT NULL THEN p.push_mentions=1
- ELSE COALESCE(f.muted,0)=0 AND (v.kind='dm' AND p.push_direct=1 OR t.message IS NOT NULL AND p.push_threads=1) END`,now+PUSH_GATHER_MS,now,now,message)}
+ ELSE COALESCE(f.muted,0)=0 AND (v.kind='dm' AND p.push_direct=1 AND NOT EXISTS(SELECT 1 FROM nook_thread_unfollows u WHERE u.user=m.user AND u.message=s.parent) OR t.message IS NOT NULL AND p.push_threads=1) END`,now+PUSH_GATHER_MS,now,now,message)}
 export function enqueuePushOutcome(c:Context,outcome:string,version:number,now:number){const prefix=`${outcome}.${version}`;return c.sql(`INSERT OR IGNORE INTO nook_notify_queue(id,dedupe,user,conversation,actor,outcome,reason,due,created,updated,channel,device,event_seq,attention)
  SELECT 'push:'||a.id||':'||d.id,'push:'||a.id||':'||d.id,a.user,a.conversation,?,o.id,
  CASE WHEN o.status='reported-complete' THEN 'commitment-complete' WHEN o.version=1 THEN 'commitment-proposal' ELSE 'commitment-revision' END,?,?,?,'push',d.id,a.event_seq,a.id

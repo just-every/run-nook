@@ -1,5 +1,6 @@
 import {fail} from '../../family/team-chat/domain'
 import {Context} from './context'
+import {threadSeen} from './threads'
 // Every projection uses one indexed page and at most five attachment rows per
 // message. Public sequence is also the exclusive window cursor.
 const projection=`m.id,m.conversation,m.author,m.body,m.parent,m.version,m.deleted,m.created,m.intent,m.sequence,m.retained_body,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE o.name END AS authorName,(SELECT json_group_array(json_object('id',a.id,'conversation',a.conversation,'author',a.author,'message',a.message,'name',a.name,'mime',a.mime,'size',a.size,'sha256',a.sha256,'expires',a.expires,'state',a.state,'created',a.created)) FROM (SELECT * FROM nook_attachment_history WHERE message=m.id ORDER BY position LIMIT 5) a) AS files`
@@ -8,7 +9,7 @@ export async function historyPage(c:Context,id:string,where:string,values:unknow
  return rows.map(({files,...m})=>({...m,...(m.retained_body?{immutable:true,retainedSource:'native'}:{}),attachments:JSON.parse(files)}))
 }
 export async function firstUnreadMessage(c:Context,id:string,readSeq:number){
- return c.one('SELECT id FROM nook_message_history WHERE conversation=? AND sequence>? AND author<>? AND deleted=0 ORDER BY sequence LIMIT 1',[id,readSeq,c.uid],id)
+ return c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND m.sequence>? AND m.author<>? AND m.deleted=0 AND NOT (${threadSeen('?')}) ORDER BY m.sequence LIMIT 1`,[id,readSeq,c.uid,c.uid],id)
 }
 export async function historyWindow(c:Context,id:string,input:Record<string,any>){
  const snapshot=await c.one('SELECT c.seq AS frontier,COALESCE(r.seq,0) AS readSeq FROM nook_conversations c LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=? WHERE c.id=?',[c.uid,id],id)
@@ -37,7 +38,7 @@ export async function historyWindow(c:Context,id:string,input:Record<string,any>
  const [earlier,later,barrier]=await Promise.all([
   cursor===null||cursor===undefined?null:c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND ${filter} AND m.sequence<? ORDER BY m.sequence DESC LIMIT 1`,[id,...params,cursor],id),
   items.length?c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND ${filter} AND m.sequence>? ORDER BY m.sequence LIMIT 1`,[id,...params,items.at(-1).sequence],id):null,
-  c.one(`SELECT MIN(sequence) AS sequence FROM (SELECT (SELECT m.sequence FROM nook_message_history m WHERE m.conversation=a.conversation AND m.author=a.user AND m.deleted=0 AND m.sequence>? AND m.id NOT IN (SELECT value FROM json_each(?)) ORDER BY m.sequence LIMIT 1) AS sequence FROM nook_author_counts a WHERE a.conversation=? AND a.user<>?)`,[snapshot.readSeq,JSON.stringify(visible),id,c.uid],id),
+  c.one(`SELECT MIN(sequence) AS sequence FROM (SELECT (SELECT m.sequence FROM nook_message_history m WHERE m.conversation=a.conversation AND m.author=a.user AND m.deleted=0 AND m.sequence>? AND NOT (${threadSeen('?')}) AND m.id NOT IN (SELECT value FROM json_each(?)) ORDER BY m.sequence LIMIT 1) AS sequence FROM nook_author_counts a WHERE a.conversation=? AND a.user<>?)`,[snapshot.readSeq,c.uid,JSON.stringify(visible),id,c.uid],id),
  ])
  const renderedThrough=Math.max(snapshot.readSeq,...items.map(m=>m.sequence),root?.sequence??0),readBarrierSeq=barrier?.sequence??null,readThrough=Math.max(snapshot.readSeq,Math.min(renderedThrough,readBarrierSeq===null?renderedThrough:readBarrierSeq-1))
  return {items,root:root??null,target:target?{id:target.id,parent:target.parent,root:rootId}:null,cursor:cursor==null?null:String(cursor),hasMore:!!earlier,hasNewer:!!later,frontier:snapshot.frontier,readSeq:snapshot.readSeq,readBarrierSeq,readThrough}

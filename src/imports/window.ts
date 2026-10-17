@@ -2,6 +2,7 @@ import { fail } from '../family/team-chat/domain';
 import type { Context } from '../platform/storage/context';
 import { firstUnreadMessage, historyPage, historyWindow } from '../platform/storage/history';
 import { historicalMessage, importedSelect } from './projection';
+import { threadSeen } from '../platform/storage/threads';
 
 /** Imported display positions end at -1. They never enter native event, unread
  * or read-barrier calculations. Each destination has one immutable import. */
@@ -51,7 +52,7 @@ export async function mixedWindow(c: Context, id: string, input: Record<string, 
     const earlier = cursor == null ? [] : await page(cursor, '<', 1, true);
     const later = items.length ? await page(items.at(-1).sequence, '>', 1) : [];
     const visible = [...items, ...(root ? [root] : [])].filter(m => !m.immutable||m.retainedSource==='native');
-    const barrier = await c.one(`SELECT MIN(sequence) AS sequence FROM (SELECT (SELECT m.sequence FROM nook_message_history m WHERE m.conversation=a.conversation AND m.author=a.user AND m.deleted=0 AND m.sequence>? AND m.id NOT IN (SELECT value FROM json_each(?)) ORDER BY m.sequence LIMIT 1) AS sequence FROM nook_author_counts a WHERE a.conversation=? AND a.user<>?)`, [snapshot.readSeq, JSON.stringify(visible.map(m => m.id)), id, c.uid], id);
+    const barrier = await c.one(`SELECT MIN(sequence) AS sequence FROM (SELECT (SELECT m.sequence FROM nook_message_history m WHERE m.conversation=a.conversation AND m.author=a.user AND m.deleted=0 AND m.sequence>? AND NOT (${threadSeen('?')}) AND m.id NOT IN (SELECT value FROM json_each(?)) ORDER BY m.sequence LIMIT 1) AS sequence FROM nook_author_counts a WHERE a.conversation=? AND a.user<>?)`, [snapshot.readSeq, c.uid, JSON.stringify(visible.map(m => m.id)), id, c.uid], id);
     const renderedThrough = Math.max(snapshot.readSeq, ...visible.map(m => m.sequence));
     const readBarrierSeq = barrier?.sequence ?? null;
     const readThrough = Math.max(snapshot.readSeq, Math.min(renderedThrough, readBarrierSeq === null ? renderedThrough : readBarrierSeq - 1));
