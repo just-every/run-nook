@@ -144,7 +144,9 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
   **Acceptance evidence:** Run pnpm test:push through subscription, preferences, emitted Worker and real alarm; independently decrypt the RFC 8291 packet and verify VAPID, revocation, quiet/read cancellation, per-device folding and visible failure. Separately demonstrate foreground/background/locked-device visible notification, tap authentication and badge reconciliation on supported Safari, Chromium and Firefox devices. **Defaults:** a newly invited member grants browser permission in a fresh profile without opening settings, and a DM, a mention and a keyword hit each show exactly one notification; a channel set to `all new messages` notifies on a colleague's plain message and a channel left at `mentions` does not. **Defaults include automatic follows:** a reply in a thread the member started in a `mentions` channel shows one notification without any explicit follow. **Cross-device routing:** with the member's Chrome page focused and in use, a DM shows on that page and no Web Push reaches their phone's installed PWA; after the page is idle 10 minutes the phone notifies (NOOK-073).
 
 
-## Complete workplace messaging target
+## Target clauses
+
+### Complete workplace messaging target
 
 - **NOOK-016 — Everyday conversations.** People create discoverable team channels, private channels, one-to-one and fixed-participant group DMs; send messages, open replies in a root thread, add/remove emoji reactions and edit/delete their own messages. A durable link opens the intended conversation/thread under current membership. Channel browsing and idempotent join never reveal private conversations; guests cannot browse or join outside their grant. Members leave any channel they belong to themselves, from every client and the API, except an organization-wide default channel an owner has made mandatory. Leaving removes the channel from navigation, unread and notifications and keeps the member's messages; returning to a private channel needs a manager to add them again, and the last manager of a private channel must transfer management before leaving.
 
