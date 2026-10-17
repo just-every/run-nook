@@ -18,7 +18,7 @@
       "edition": null
     }
   ],
-  "description": "Loopback native sessions, D1 chat/outcomes/replay/private media and calm attention in React/Start, with local guided migrations and validated offline recovery.",
+  "description": "Keep team conversations, decisions and commitments together so work stays clear.",
   "capabilities": [
     {
       "id": "http-dispatch",
