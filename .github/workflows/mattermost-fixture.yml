@@ -22,7 +22,6 @@ jobs:
             -e MM_SERVICESETTINGS_ENABLELOCALMODE=true \
             -e MM_TEAMSETTINGS_ENABLEOPENSERVER=true \
             -e MM_EMAILSETTINGS_REQUIREEMAILVERIFICATION=false \
-            -e MM_EXPORTSETTINGS_DIRECTORY=/mm/mattermost-data/export \
             mattermost/mattermost-preview:12.0.0
           for i in $(seq 1 120); do
             if curl --fail --silent http://127.0.0.1:8065/api/v4/system/ping >/dev/null; then exit 0; fi
@@ -47,9 +46,11 @@ jobs:
             sleep 2
           done
           test "$status" = success
-          archive=$(docker exec nook-mattermost-source find /mm/mattermost-data/export -type f -name '*.zip' | head -1)
-          test -n "$archive"
-          docker cp "nook-mattermost-source:$archive" fixture/mattermost-export.zip
+          docker exec nook-mattermost-source mmctl export list --local --json > "$RUNNER_TEMP/exports.json"
+          archive=$(jq -r '.[0]' "$RUNNER_TEMP/exports.json")
+          test -n "$archive" && test "$archive" != null
+          docker exec nook-mattermost-source mmctl export download "$archive" /tmp/nook-source.zip --local --num-retries 0
+          docker cp nook-mattermost-source:/tmp/nook-source.zip fixture/mattermost-export.zip
           sha256sum fixture/mattermost-export.zip
       - uses: actions/upload-artifact@v4
         with:
