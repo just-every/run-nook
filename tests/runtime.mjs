@@ -16,7 +16,7 @@ import {mailEdge} from './mail-edge.mjs'
 
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
-assert.ok(['all','core','core-api','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
+assert.ok(['all','core','core-api','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']
@@ -68,6 +68,12 @@ async function registered(name){
 const login=async name=>{const actor=await signIn(origin,name.toLowerCase()+'@example.test');return {response:new Response(null,{headers:{'set-cookie':actor.cookie}}),data:{user:actor.user}}}
 
 async function databasePath(dir) {let found;async function visit(path){for(const item of await readdir(path,{withFileTypes:true})){const child=resolve(path,item.name);if(item.isDirectory())await visit(child);else if(item.name.endsWith('.sqlite')){const db=new DatabaseSync(child,{readOnly:true});try{if(db.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='workspace'").get().n)found=child}finally{db.close()}}}}await visit(dir);assert.ok(found,'real D1 database found');return found}
+async function validateArchive(){
+ const db=new DatabaseSync(await databasePath(state),{readOnly:true});try{
+  const {validateNormalizedArchive}=await import('../src/platform/storage/archive-validation.mjs')
+  await validateNormalizedArchive({read:async table=>db.prepare('SELECT * FROM '+table).all()})
+ }finally{db.close()}
+}
 async function check(name,fn) { try { await fn() } catch (error) { console.error('DIAG wrangler output tail:\n'+output.slice(-12000)); throw error } checks++; evidence.checks.push({name,status:'passed'}); console.log(`PASS ${name}`) }
 try {
  const port=await freePort()
@@ -85,9 +91,10 @@ try {
  for(const file of assets.filter(x=>x.startsWith('loaders-')&&x.endsWith('.js'))) { const source=await readFile(resolve(root,'dist/server/assets',file),'utf8'); fnId=source.match(/id: "([a-f0-9]{64})",\s*name: "loadWorkspace"/)?.[1] ?? fnId }
  let broadcastFixture
  assert.ok(fnId,'private generated transport must exist in emitted artifact')
- if(['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports'].includes(suite)){
+ if(['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion'].includes(suite)){
  const post=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status});
  if(suite==='slack-imports'){await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>{await stop();await start(port)},sql})})}
+ else if(suite==='conversion'){await(await import('./group-conversion.mjs')).offboardedConversion({post,get,owner,member,registered,check,validateArchive,restart:async()=>{await stop();await start(port)}})}
  else if(suite==='composition'){const harness={post,get,request,owner,member,outsider,registered,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin};if(!process.argv.includes('--browser-only'))await(await import('./profiles.mjs')).profilesJourney(harness);if(!withoutBrowser)await check('NOOK-017 composition and personal workspace at both widths',()=>import('./composition-browser.mjs').then(m=>m.compositionBrowser({origin,owner,member,outsider,destination:'evidence/composition'})))}
  else if(suite==='search'){const harness={post,get,patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),request,owner,member,outsider,registered,check,restart:async()=>{await stop();await start(port)},sql};if(!process.argv.includes('--browser-only'))await(await import('./search.mjs')).searchJourney(harness);if(!withoutBrowser)await(await import('./search-browser.mjs')).searchBrowser({origin,owner,member,destination:'evidence/search'})}
  else if(suite==='files'){const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status});const harness={post,get,patch,request,owner,member,outsider,registered,check,restart:async()=>{await stop();await start(port)},sql};if(!process.argv.includes('--browser-only'))await(await import('./files.mjs')).filesJourney(harness);if(!withoutBrowser)await(await import('./files-browser.mjs')).filesBrowser({origin,owner,member,destination:'evidence/files'})}
@@ -95,10 +102,10 @@ try {
  else if(suite==='broadcast'){const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status});const {people}=await(await import('./broadcast.mjs')).broadcastJourney({post,get,patch,request,owner,member,outsider,check,origin:()=>origin,restart:async()=>{await stop();await start(port)},sql});if(!withoutBrowser)await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people})}
  else if(suite==='reminders'){if(!process.argv.includes('--browser-only')){const harness={post,get,request,patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin};await(await import('./reminders.mjs')).remindersJourney(harness);await(await import('./saved-reminders.mjs')).savedRemindersJourney(harness);}if(!withoutBrowser)await(await import('./reminders-browser.mjs')).remindersBrowser({origin,owner,member})}
  else if(suite==='scheduled'){if(!process.argv.includes('--browser-only'))await (await import('./scheduled.mjs')).scheduledJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});if(!withoutBrowser)await check('NOOK-034 schedule and review messages at both widths',()=>import('./scheduled-browser.mjs').then(m=>m.scheduledBrowser({origin,owner,member,memberOccurrences:!process.argv.includes('--browser-only')})))}
- else{await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});
- await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
+ else{if(!process.argv.includes('--browser-only'))await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,registered,validateArchive,restart:async()=>{await stop();await start(port)},sql});
+ if(!withoutBrowser)await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
  }
- if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports'].includes(suite)){
+ if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion'].includes(suite)){
  await check('BASE-ACCESS-002 same-wire missing/expired/revoked/valid session matrix',async()=>{
   for(const [label,cookie,valid] of [['missing','',false],['expired',expired.cookie,false],['revoked',revoked.cookie,false],['valid',owner.cookie,true]]) {
    const before=await facts(),rows=[]
@@ -118,7 +125,7 @@ try {
  const restart=async(options={})=>{await stop();if(Object.hasOwn(options,'transferFaults')){await lossConfig.close();lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root,options.transferFaults)}await start(port)}
  const reconcile=async()=>{await stop();await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/storage/reconcile.mjs','--paused','--persist='+resolve(state,'v3'),'--discard-expired'],{cwd:root,env,stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',value=>text+=value);child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error(text)))});await restart({transferFaults:null})}
  await (await import('./storage-flows.mjs')).storageFlows({check,post,patch,get,request,sql,owner,member,outsider,c,origin:()=>origin,restart,reconcile,facts})
- const normalizedHarness={check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
+ const normalizedHarness={validateArchive,check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
  await(await import('./storage-guards.mjs')).storageGuards(normalizedHarness)
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
  await(await import('./threads.mjs')).threadJourney(normalizedHarness)
@@ -136,7 +143,7 @@ try {
  await check('actual team invitations, scopes, reactions, preview and revocation',async()=>{await(await import('./team-runtime.mjs')).runTeamSurfaces({origin,ownerCookie:owner.cookie})})
  await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{const checks=await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>restart({transferFaults:null}),sql});evidence.slackImports=checks})
  }
- if(suite!=='core-api'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports'].includes(suite)){
+ if(suite!=='core-api'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion'].includes(suite)){
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
   broadcastFixture??=await(await import('./broadcast.mjs')).broadcastJourney({check,post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,sql,origin:()=>origin,restart:async()=>{await stop();await start(port)}})
   await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people:broadcastFixture.people})
@@ -159,7 +166,8 @@ try {
  }
  if(['all','core','core-api','installer'].includes(suite))await(await import('./profiles.mjs')).profilesJourney({post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin})
  await stop()
- if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
+ if(suite==='all'||suite==='core')await new Promise((ok,bad)=>{const child=spawn(process.execPath,['tests/runtime.mjs','--suite=conversion'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Isolated group-conversion journey failed')))})
+ if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  await lossConfig.close();lossConfig=null
  }
  if(suite==='all'||suite==='installer')await(await import('./installer-workflow.mjs')).runInstallerWorkflow({root,states,port,check,evidence,databasePath,stop,start,command,env,getState:()=>state,setState:value=>{state=value},getOrigin:()=>origin})

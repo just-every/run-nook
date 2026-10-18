@@ -601,7 +601,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "5af267793df7168c32ace6d11642c89b2313321be19184fb104d2ff2fd68fd82",
+      "sha256": "343a0052c31c96908eeaaef531eabee9e2ef52e831a3ced42ae8bc8524a5a67c",
       "executable": false
     },
     ".gitignore": {
@@ -613,7 +613,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "2f6719bcbef113ac2938485b6a7447211abdd5f78b255e7a3ed48d9849bddf16",
+      "sha256": "a6405a43f42c3a04c8375b6b7e28fd92b4d0e8969b4a9f63694ab0f647ce8aad",
       "executable": false
     },
     "AGENTS.md": {
@@ -637,7 +637,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "7de3c5fdf7e8dcf58e77861df4fdf897c095cb31b688146cd7af32997ed725a0",
+      "sha256": "a0338633c87da258fd7b6349bafb495c1155a745c171fabecfbe8d6acc2fa3d4",
       "executable": false
     },
     "DEMO.md": {
@@ -661,7 +661,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "30623671285179b74d68e55de64ad3d51874f3b8991221e479643d2133bdfacd",
+      "sha256": "7805833fcdde167dcc55d59c154af148f5d9310278ed20e39d295ba232b4edf4",
       "executable": false
     },
     "docs/conversations.md": {
@@ -3369,7 +3369,7 @@
       "executable": false
     },
     "src/chat/Dialogs.tsx": {
-      "sha256": "6f3d1d76042c67ef6512600b6085c7cc30281fe28dd2c8ee420657756753e522",
+      "sha256": "da0df5f5fa0b03033e89f994776e4527c23d2224a67be21d8dc1eb80bab8e6a9",
       "executable": false
     },
     "src/chat/drafts.ts": {
@@ -4213,7 +4213,7 @@
       "executable": false
     },
     "src/platform/storage/read.ts": {
-      "sha256": "f4e4fcc1652a559eaed58662e493bb00e91a901cd7661b55ea614fc54a3d87bc",
+      "sha256": "dfd60e56f73a590c80a38e394594650260a3b696edf08370a153a8e6a0cfd54d",
       "executable": false
     },
     "src/platform/storage/threads.ts": {
@@ -4669,7 +4669,7 @@
       "executable": false
     },
     "src/team/group-conversion.server.ts": {
-      "sha256": "f51ff6f167e77a170874fb4259991f64fa3425d640278e0300ecb7ccd5d403c3",
+      "sha256": "9a0e0e80e03c6164f9dfe8cc87b0619d823c8afc411744aceffe51907acba7e3",
       "executable": false
     },
     "src/team/image-format.d.mts": {
@@ -4858,6 +4858,10 @@
     },
     "tests/files.mjs": {
       "sha256": "552ba8970b233b69440269cc04215858a497877ae2cf5bb4eb18366e1d08d7c4",
+      "executable": false
+    },
+    "tests/group-conversion.mjs": {
+      "sha256": "3aaf0aa7c8d5c0d588ef203b8d05a07092392e6f0790c1e0c7e0cfecdaf266ea",
       "executable": false
     },
     "tests/group-dm.mjs": {
@@ -5149,7 +5153,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "a613a7ff1260f06262cd92471570a72d4526d53b16aefacf2bafb736bb4196a7",
+      "sha256": "52c244225318e89c8fdceeca1db07ebecce67a626232e76d39593287960cb163",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
@@ -5285,11 +5289,11 @@
       "executable": false
     },
     "tests/unreads-browser.mjs": {
-      "sha256": "f21bcefa5abd39cd5a8668fcd2587b2a5a95423524f683bb072f6e3e04312fcf",
+      "sha256": "fc0170d5ea3a63c9c944e40927ef770e2985134c7a9fc53b5307249b9a158713",
       "executable": false
     },
     "tests/unreads.mjs": {
-      "sha256": "c226cb68c34fdbf59cec29ff3d7ecc90604f3d3d4b7b74b8da21a441ab2a1615",
+      "sha256": "9f769f5163561129325e3cb930092ad2077e5fdee7a7cf76281d03dbe6e2e554",
       "executable": false
     },
     "tests/worker-environment.mjs": {
