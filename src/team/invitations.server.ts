@@ -16,7 +16,7 @@ function configuration(input:Record<string,any>){
 }
 export async function prepareInvitation(c:Context,input:Record<string,any>){
  const email=normalizeEmail(input.email),cfg=configuration(input),scopes=JSON.stringify(cfg.scopes);requireManager(c,cfg.role)
- const selected=await c.rows("SELECT c.id FROM nook_conversations c JOIN nook_members m ON m.conversation=c.id WHERE c.id IN (SELECT value FROM json_each(?)) AND c.kind<>'dm' AND NOT EXISTS(SELECT 1 FROM nook_channel_settings WHERE conversation=c.id AND archived=1) AND m.user=?",[scopes,c.uid]);if(selected.length!==cfg.scopes.length)fail(400,'Choose current channels you can access')
+ const selected=await c.rows("SELECT c.id FROM nook_conversations c JOIN nook_members m ON m.conversation=c.id WHERE c.id IN (SELECT value FROM json_each(?)) AND c.kind<>'dm' AND NOT EXISTS(SELECT 1 FROM nook_channel_settings WHERE conversation=c.id AND archived=1) AND m.user=? AND (SELECT count(*) FROM nook_members cap WHERE cap.conversation=c.id)<1000",[scopes,c.uid]);if(selected.length!==cfg.scopes.length)fail(400,'Choose current channels you can access')
  const current=await c.one("SELECT * FROM nook_invite_plans WHERE email=? AND state<>'cancelled'",[email]);
  if(current){
   if(current.state==='accepted'||current.role!==cfg.role||current.mode!==cfg.mode||current.scopes!==scopes||current.issuer!==c.uid||current.issuer_version!==c.session.operator.version)fail(409,'Cancel the pending invitation before changing its scope')
@@ -44,7 +44,7 @@ export async function regrant(c:Context,input:Record<string,any>){
   c.sql('UPDATE nook_actors SET active=1 WHERE id=?',user),
   ...(cfg.mode==='guest'?[c.sql('INSERT INTO nook_guest_grants SELECT ?,value FROM json_each(?)',user,scopes)]:[]),
   c.sql('INSERT INTO nook_members SELECT value,? FROM json_each(?)',user,scopes)
- ],undefined,`${manager} AND ${fullMember('?')} AND ?<>? AND EXISTS(SELECT 1 FROM oa_operators target JOIN oa_operators actor ON actor.id=? WHERE target.id=? AND target.status='active' AND NOT EXISTS(SELECT 1 FROM nook_access cur WHERE cur.user=target.id AND cur.active=1) AND (actor.role='owner' OR target.role='member') AND (?='member' OR target.role='member')) AND NOT EXISTS(SELECT 1 FROM json_each(?) j WHERE NOT EXISTS(SELECT 1 FROM nook_conversations ch JOIN nook_members m ON m.conversation=ch.id WHERE ch.id=j.value AND ch.kind<>'dm' AND ${channelWritable('ch.id')} AND m.user=? AND (SELECT count(*) FROM nook_members cap WHERE cap.conversation=ch.id)<50))`,[c.uid,c.uid,user,c.uid,c.uid,user,cfg.mode,scopes,c.uid]);
+ ],undefined,`${manager} AND ${fullMember('?')} AND ?<>? AND EXISTS(SELECT 1 FROM oa_operators target JOIN oa_operators actor ON actor.id=? WHERE target.id=? AND target.status='active' AND NOT EXISTS(SELECT 1 FROM nook_access cur WHERE cur.user=target.id AND cur.active=1) AND (actor.role='owner' OR target.role='member') AND (?='member' OR target.role='member')) AND NOT EXISTS(SELECT 1 FROM json_each(?) j WHERE NOT EXISTS(SELECT 1 FROM nook_conversations ch JOIN nook_members m ON m.conversation=ch.id WHERE ch.id=j.value AND ch.kind<>'dm' AND ${channelWritable('ch.id')} AND m.user=? AND (SELECT count(*) FROM nook_members cap WHERE cap.conversation=ch.id)<1000))`,[c.uid,c.uid,user,c.uid,c.uid,user,cfg.mode,scopes,c.uid]);
  await c.hint();return {ok:true}
 }
 export async function removeAccess(c:Context,input:Record<string,any>){

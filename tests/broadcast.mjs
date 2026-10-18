@@ -1,7 +1,8 @@
+import {signIn} from './auth-support.mjs'
 import assert from 'node:assert/strict'
 // Public-route sends and settings against the emitted Worker. Synthetic people
 // and session ages are fixture setup, not an application implementation path.
-export async function broadcastJourney({post,patch,get,request,sql,owner,member,outsider,check,restart}){
+export async function broadcastJourney({post,patch,get,request,sql,owner,member,outsider,check,restart,origin}){
  const change=patch??((path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}));patch=change
  const firstNames=['Ana','Morgan','Jordan','Sam','Riley','Priya','Alex','Taylor','Chris','Jamie','Dana','Casey'],lastNames=['Chen','Rivera','Patel','Lee','Brooks','Alvarez','Kim','Martin','Reed','Nguyen']
  const people=Array.from({length:118},(_,index)=>({id:'broadcast-person-'+index,name:firstNames[index%firstNames.length]+' '+lastNames[Math.floor(index/firstNames.length)],email:'broadcast-'+index+'@example.test'}))
@@ -98,6 +99,16 @@ export async function broadcastJourney({post,patch,get,request,sql,owner,member,
   const messages=(await get('/api/conversations/'+allowed.id+'/messages')).data;assert.equal(messages.length,2);assert.ok(messages.every(m=>m.broadcast.recipients===7))
   assert.equal((await get('/api/conversations/'+blocked.id+'/messages')).data.length,0)
   await restart();await post('/api/reminders',{...reminderInput,confirmBroadcast:true});assert.equal((await get('/api/conversations/'+allowed.id+'/messages')).data.length,2)
+ })
+ await check('NOOK-065 a real new teammate joins and receives broadcasts in the large channel',async()=>{
+  const email='broadcast-new-joiner@example.test'
+  await post('/api/team/invitations',{email,role:'member',mode:'member',scopes:[room.id]})
+  await request('/auth/invite',{method:'POST',cookie:owner.cookie,body:{email,displayName:'Avery Collins',role:'member',returnTo:'/app'},status:202})
+  const newcomer=await signIn(typeof origin==='function'?origin():origin,email,{requestLink:false})
+  assert.ok((await get(`/api/conversations/${room.id}/members`)).data.some(person=>person.id===newcomer.user.id))
+  const message=(await send({body:'@channel Welcome Avery to the launch team.',confirmBroadcast:true},member.cookie)).data
+  assert.ok((await snapshot(message.id)).some(person=>person.id===newcomer.user.id))
+  assert.ok((await get('/api/attention',newcomer.cookie)).data.items.some(item=>item.message?.id===message.id&&item.reason==='broadcast'))
  })
  return {room,people}
 }

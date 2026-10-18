@@ -872,6 +872,10 @@
       "sha256": "bf6a650fe07425d64a7d778e9d9292806a84244d0576413ed0276e843aea4abf",
       "executable": false
     },
+    "migrations/0038_channel_invitation_capacity.sql": {
+      "sha256": "378bebd8ad60aee679bc60cd828fb107cb1d153aea82873e6e4b584327f95df4",
+      "executable": false
+    },
     "OPERATIONS.json": {
       "sha256": "6faa9c4609e691f56f26e2c4c72f95eb49810d4227bb48cc3795c796ac57829f",
       "executable": false
@@ -4489,7 +4493,7 @@
       "executable": false
     },
     "src/team/invitations.server.ts": {
-      "sha256": "183ff667849bb0b22c0bf45697d3ea6bfdfcafc254c0f729ad8f28a5d8acee55",
+      "sha256": "2a522c1614bdfef8cd2e503c8fb7d1985e9a6c803086a7ccb7a262469357c661",
       "executable": false
     },
     "src/team/legacy-recovery.mjs": {
@@ -4597,7 +4601,7 @@
       "executable": false
     },
     "tests/broadcast.mjs": {
-      "sha256": "20a326718576356c0f057e3f7890ff435cdeec76d4f1045de113d746e1ad9c11",
+      "sha256": "0907335ac7b3cfdf2f017f64b32c4aceecc9a11539a3a8b40833474a20b38b50",
       "executable": false
     },
     "tests/browser-markup.mjs": {
@@ -4925,7 +4929,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "2a2283671aef22b8c674532c6de56276d1f16de7b7a307790593690597e9b6da",
+      "sha256": "cbe1b0604ffeb8690786b1cf4d4723c4bdd64009220e5ee2d93636678daee2c8",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
