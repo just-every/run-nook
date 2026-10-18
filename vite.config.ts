@@ -1,3 +1,4 @@
+import {campfireSqlite} from './scripts/campfire-sqlite.mjs'
 import {demoSockets} from './src/base/modules/demo/vite.mjs'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -18,5 +19,5 @@ const server = { fs: { strict: true, allow: ['src', 'public', 'node_modules', 'd
 
 export default defineConfig(({command,isPreview}) => {
  if(command === 'build') assertBuildStateSafe(process.cwd())
- return { server, plugins: [demoSockets(), cloudflare({ inspectorPort: false, persistState: {path: persistencePath(process.cwd(),process.env.RER_STATE_DIR)}, viteEnvironment: { name: 'ssr' }, ...(command === 'serve' && !isPreview ? { config: serve } : process.env.RER_DEV_ORIGIN ? { config: { vars: local('RER_DEV_ORIGIN') } } : {}) }), docsSite(), tanstackStart(), react(), archiveOutputGuard()] }
+ return { server, plugins: [campfireSqlite(),demoSockets(), cloudflare({ inspectorPort: false, persistState: {path: persistencePath(process.cwd(),process.env.RER_STATE_DIR)}, viteEnvironment: { name: 'ssr' }, ...(command === 'serve' && !isPreview ? { config: serve } : process.env.RER_DEV_ORIGIN ? { config: { vars: local('RER_DEV_ORIGIN') } } : {}) }), docsSite(), tanstackStart(), react(), archiveOutputGuard()] }
 })

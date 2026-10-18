@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "room_id": 1,
+    "creator_id": 1,
+    "created_at": "2026-10-18 19:09:21.753000",
+    "updated_at": "2026-10-18 19:09:21.753000",
+    "body": "<div>Welcome to the Lantern team.</div>"
+  },
+  {
+    "id": 2,
+    "room_id": 2,
+    "creator_id": 1,
+    "created_at": "2026-10-18 19:09:21.761000",
+    "updated_at": "2026-10-18 19:09:21.761000",
+    "body": "<div>Kickoff is Tuesday. Café notes and 日本語 are welcome.</div>"
+  },
+  {
+    "id": 3,
+    "room_id": 2,
+    "creator_id": 2,
+    "created_at": "2026-10-18 19:09:21.771000",
+    "updated_at": "2026-10-18 19:09:21.771000",
+    "body": "<div>I will bring the launch checklist.</div>"
+  },
+  {
+    "id": 4,
+    "room_id": 2,
+    "creator_id": 3,
+    "created_at": "2026-10-18 19:09:21.774000",
+    "updated_at": "2026-10-18 19:09:21.774000",
+    "body": "<div>Accessibility review is ready.<br />Thank you, everyone.</div>"
+  },
+  {
+    "id": 5,
+    "room_id": 3,
+    "creator_id": 1,
+    "created_at": "2026-10-18 19:09:21.777000",
+    "updated_at": "2026-10-18 19:09:21.777000",
+    "body": "<div>Budget planning: keep the supplier estimate within this room.</div>"
+  },
+  {
+    "id": 6,
+    "room_id": 3,
+    "creator_id": 2,
+    "created_at": "2026-10-18 19:09:21.780000",
+    "updated_at": "2026-10-18 19:09:21.780000",
+    "body": "<div>Draft estimate attached.</div>"
+  },
+  {
+    "id": 7,
+    "room_id": 4,
+    "creator_id": 2,
+    "created_at": "2026-10-18 19:09:21.782000",
+    "updated_at": "2026-10-18 19:09:21.782000",
+    "body": "<div>Aisha, can you review the launch announcement?</div>"
+  },
+  {
+    "id": 8,
+    "room_id": 4,
+    "creator_id": 3,
+    "created_at": "2026-10-18 19:09:21.784000",
+    "updated_at": "2026-10-18 19:09:21.784000",
+    "body": "<div>Yes. I will send edits this afternoon.</div>"
+  },
+  {
+    "id": 9,
+    "room_id": 5,
+    "creator_id": 1,
+    "created_at": "2026-10-18 19:09:21.785000",
+    "updated_at": "2026-10-18 19:09:21.785000",
+    "body": "<div>This small group owns the final launch decision.</div>"
+  },
+  {
+    "id": 10,
+    "room_id": 5,
+    "creator_id": 3,
+    "created_at": "2026-10-18 19:09:21.789000",
+    "updated_at": "2026-10-18 19:09:21.789000",
+    "body": "<div>The handover note is attached.</div>"
+  }
+]

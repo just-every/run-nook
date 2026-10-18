@@ -1,3 +1,4 @@
+import {campfireKitSource} from './campfire-effects.mjs';
 import { reviewMetadata, captureArtifactName } from './review-binding.mjs';
 import { canonicalJson, sha256, type SourceBundle, type ImportMapping } from './kit.ts';
 import { effectInputs, MAPPING_VERSION } from './ids.mjs';
@@ -6,6 +7,7 @@ import { assertSlackEffect } from './policy.mjs';
  * ZIP remains separately in owner-only R2 custody; no unselected bodies enter
  * channel effects. This artifact is the exact reviewed normalized capture. */
 export function kitSource(capture: any, owner: string, uploadId: string, reviewId: string) {
+    if(capture.sourceType==='campfire')return campfireKitSource(capture,owner,uploadId,reviewId);
     const { domainJob, effects } = effectInputs(capture, owner, uploadId, reviewId);
     const normalized = canonicalJson({ ...reviewMetadata(capture), namespace: capture.namespace, archiveDigest: capture.archiveDigest, digest: capture.digest, omissions: capture.omissions, effects });
     const artifact = { name: captureArtifactName(capture), sha256: sha256(normalized), size: Buffer.byteLength(normalized), original: { status: 'available' as const, base64: Buffer.from(normalized).toString('base64') } };

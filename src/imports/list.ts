@@ -2,7 +2,8 @@ import type { Context } from '../platform/storage/context';
 import { owner } from './custody.ts';
 import { budgeted } from './request-budget.ts';
 import { statusView } from './status.ts';
-import { MAPPING_VERSION } from './ids.mjs';
+import {MAPPING_VERSION} from './ids.mjs';
+import {CAMPFIRE_MAPPING_VERSION} from './campfire-effects.mjs';
 import { reconcileReviewed } from './reconcile';
 import { decode } from '../base/modules/import-kit/src/d1/jobs.ts';
 
@@ -13,13 +14,13 @@ import { decode } from '../base/modules/import-kit/src/d1/jobs.ts';
 // Erased plans or withdrawn uploads need reconciliation before advertising
 // that their saved custody still allows continuation or reversal.
 const JOB_COLUMNS = 'id,fingerprint,destination,namespace,mapping_version,principal_id,operation_key,state,checkpoint,total,fence,error';
-export async function listImports(c: Context) {
+export async function listImports(c: Context,kind='slack') {
     c = budgeted(c);
     await owner(c);
-    const reviews = await c.rows("SELECT r.*,u.state AS upload_state FROM nook_import_reviews r LEFT JOIN nook_import_uploads u ON u.id=r.upload AND u.owner=r.owner WHERE r.owner=? AND r.state<>'discarded' ORDER BY r.created DESC LIMIT 50", [c.uid]);
+    const reviews = await c.rows("SELECT r.*,u.state AS upload_state FROM nook_import_reviews r LEFT JOIN nook_import_uploads u ON u.id=r.upload AND u.owner=r.owner WHERE r.owner=? AND r.state<>'discarded' AND CASE WHEN json_extract(r.summary_json,'$.sourceType')='campfire' THEN 'campfire' ELSE 'slack' END=? ORDER BY r.created DESC LIMIT 50", [c.uid,kind]);
     // A lost create acknowledgement leaves kit_job empty; its job is found by
     // operation key here, and resume records it under full guards.
-    const rows = reviews.length ? await c.rows(`SELECT ${JOB_COLUMNS} FROM ik_jobs WHERE destination=? AND principal_id=? AND mapping_version=? AND operation_key IN (SELECT value FROM json_each(?))`, [c.uid, c.uid, MAPPING_VERSION, JSON.stringify(reviews.map(r => r.id))]) : [];
+    const rows = reviews.length ? await c.rows(`SELECT ${JOB_COLUMNS} FROM ik_jobs WHERE destination=? AND principal_id=? AND mapping_version=? AND operation_key IN (SELECT value FROM json_each(?))`, [c.uid, c.uid, kind==='campfire'?CAMPFIRE_MAPPING_VERSION:MAPPING_VERSION, JSON.stringify(reviews.map(r => r.id))]) : [];
     const jobs = [];
     for (let review of reviews) {
         const candidate = rows.find(j => j.operation_key === review.id);

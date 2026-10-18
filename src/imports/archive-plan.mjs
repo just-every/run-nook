@@ -1,3 +1,4 @@
+import {mappingVersion} from './formats.mjs';
 import { canonicalJson, sha256 } from './kit.ts';
 import { planFingerprint } from '../base/modules/import-kit/src/plan/index.ts';
 import { MAPPING_VERSION } from './ids.mjs';
@@ -36,7 +37,7 @@ export async function slackArchivePlans(read, reviews) {
         }
         const job = jobs.get(review.kit_job);
         check(job,'invalid_slack_job_binding');const plan = decodeSlackPlan(job,data.ik_d1_plan_chunks);
-        check(job && job.mapping_version === MAPPING_VERSION && job.destination === review.owner && job.principal_id === review.owner && job.operation_key === review.id && job.namespace === review.namespace && (plan.erasure?.reviewedFingerprint??job.fingerprint) === review.fingerprint && ['completed', 'undone', 'rolled_back'].includes(job.state), 'invalid_slack_job_binding');
+        check(job && job.mapping_version === mappingVersion(review) && job.destination === review.owner && job.principal_id === review.owner && job.operation_key === review.id && job.namespace === review.namespace && (plan.erasure?.reviewedFingerprint??job.fingerprint) === review.fingerprint && ['completed', 'undone', 'rolled_back'].includes(job.state), 'invalid_slack_job_binding');
         check(review.state === (job.state === 'completed' ? 'completed' : 'undone'), 'invalid_slack_review_state');
         const summary = JSON.parse(review.summary_json);
         const { effects } = await validateReviewedPlan(read, review, job, plan);

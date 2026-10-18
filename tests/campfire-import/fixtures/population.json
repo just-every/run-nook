@@ -1,0 +1,162 @@
+{
+  "people": [
+    {
+      "id": 1,
+      "name": "Maya Chen",
+      "email": "maya@campfire-fixture.test"
+    },
+    {
+      "id": 2,
+      "name": "Leo Martin",
+      "email": "leo@campfire-fixture.test"
+    },
+    {
+      "id": 3,
+      "name": "Aisha Patel",
+      "email": "aisha@campfire-fixture.test"
+    },
+    {
+      "id": 4,
+      "name": "Sam Rivera",
+      "email": "sam@campfire-fixture.test"
+    }
+  ],
+  "rooms": [
+    {
+      "id": 1,
+      "type": "opens",
+      "name": "All Talk",
+      "participants": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": 2,
+      "type": "opens",
+      "name": "Project Lantern",
+      "participants": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": 3,
+      "type": "closeds",
+      "name": "Budget planning",
+      "participants": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 4,
+      "type": "directs",
+      "name": null,
+      "participants": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": 5,
+      "type": "directs",
+      "name": null,
+      "participants": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "id": 1,
+      "room": 1,
+      "creator": 1,
+      "body": "<div>Welcome to the Lantern team.</div>"
+    },
+    {
+      "id": 2,
+      "room": 2,
+      "creator": 1,
+      "body": "<div>Kickoff is Tuesday. Café notes and 日本語 are welcome.</div>"
+    },
+    {
+      "id": 3,
+      "room": 2,
+      "creator": 2,
+      "body": "<div>I will bring the launch checklist.</div>",
+      "file": {
+        "name": "launch-checklist.txt",
+        "mime": "text/plain",
+        "text": "Lantern launch checklist\n1. Review accessibility\n2. Confirm launch owner\n"
+      }
+    },
+    {
+      "id": 4,
+      "room": 2,
+      "creator": 3,
+      "body": "<div>Accessibility review is ready.<br>Thank you, everyone.</div>"
+    },
+    {
+      "id": 5,
+      "room": 3,
+      "creator": 1,
+      "body": "<div>Budget planning: keep the supplier estimate within this room.</div>"
+    },
+    {
+      "id": 6,
+      "room": 3,
+      "creator": 2,
+      "body": "<div>Draft estimate attached.</div>",
+      "file": {
+        "name": "supplier-estimate.csv",
+        "mime": "text/csv",
+        "text": "item,amount,currency\nLaunch materials,275,AUD\n"
+      }
+    },
+    {
+      "id": 7,
+      "room": 4,
+      "creator": 2,
+      "body": "<div>Aisha, can you review the launch announcement?</div>"
+    },
+    {
+      "id": 8,
+      "room": 4,
+      "creator": 3,
+      "body": "<div>Yes. I will send edits this afternoon.</div>"
+    },
+    {
+      "id": 9,
+      "room": 5,
+      "creator": 1,
+      "body": "<div>This small group owns the final launch decision.</div>"
+    },
+    {
+      "id": 10,
+      "room": 5,
+      "creator": 3,
+      "body": "<div>The handover note is attached.</div>",
+      "file": {
+        "name": "handover.txt",
+        "mime": "text/plain",
+        "text": "Lantern handover\nMaya: launch owner\nLeo: communications\nAisha: accessibility\n"
+      }
+    }
+  ],
+  "upstreamAclChecks": {
+    "unrelatedUserDenied": [
+      3,
+      4,
+      5
+    ],
+    "administratorDeniedOtherPeoplesDm": 4
+  },
+  "transport": "real upstream HTTP routes; no direct database writes"
+}

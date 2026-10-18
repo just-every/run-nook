@@ -8,3 +8,5 @@ export function effectInputs(capture: any, owner: string, uploadId: string, revi
 export function captureJobId(capture: any, uploadId: string): string;
 
 export function fileObjectKey(owner: string, upload: string, job: string, review: string, file: string): string;
+
+export function captureNativeId(capture:any,kind:string,key:string):string;

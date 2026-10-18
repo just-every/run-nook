@@ -5,7 +5,7 @@ export const loadImports = createServerFn({ method: 'GET' }).handler(async () =>
     try {
         const c = await context(env as any, getRequestHeaders());
         await owner(c);
-        return await listImports(c);
+        return {...await listImports(c),campfireJobs:(await listImports(c,'campfire')).jobs};
     }
     catch (error) {
         if (error instanceof Fault && error.status === 401)

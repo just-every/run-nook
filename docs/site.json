@@ -44,6 +44,11 @@
           "label": "Moving in from Slack"
         },
         {
+          "slug": "campfire-import",
+          "source": "docs/campfire-import.md",
+          "label": "Moving in from Campfire"
+        },
+        {
           "slug": "backups",
           "source": "docs/backups.md",
           "label": "Backups and export"

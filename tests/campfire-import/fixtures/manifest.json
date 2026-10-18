@@ -1,0 +1,240 @@
+{
+  "implementation": "once-campfire-express",
+  "packageVersion": "0.1.0",
+  "sourceCommit": "bb70a7d478160c016393d981e3538987247d3b3d",
+  "railsReferenceCommit": "659f95748a115a360a37db9bf80a5361a560e14f",
+  "backup": {
+    "format": 1,
+    "implementation": "once-campfire-express",
+    "created_at": "2026-10-18T19:09:30.030Z"
+  },
+  "archive": {
+    "path": "once-campfire-express.tar.gz",
+    "bytes": 11280,
+    "sha256": "8cd110a3909dc396c3b95027e71053964414ed97c72fe4cd0856bf452eeb30da"
+  },
+  "snapshot": {
+    "path": "storage/db/production.sqlite3",
+    "bytes": 221184,
+    "sha256": "f1630670b66f601099414584f6025628eb351bbdfa81feca5f509e6fd83d46d6",
+    "integrityCheck": "ok",
+    "foreignKeyViolations": 0
+  },
+  "schemaMigrations": [],
+  "schemaInventorySha256": "eff855a7c1e1e973db45ead6dc9dc1da1563e7bbc57a746f2c670bb2d0898434",
+  "counts": {
+    "users": 4,
+    "rooms": 5,
+    "memberships": 15,
+    "messages": 10,
+    "action_text_rich_texts": 10,
+    "active_storage_blobs": 3,
+    "active_storage_attachments": 3,
+    "sessions": 0,
+    "boosts": 0,
+    "push_subscriptions": 0,
+    "webhooks": 0
+  },
+  "rooms": [
+    {
+      "id": 1,
+      "name": "All Talk",
+      "type": "Rooms::Open",
+      "creator_id": 1,
+      "participants": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Project Lantern",
+      "type": "Rooms::Open",
+      "creator_id": 1,
+      "participants": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Budget planning",
+      "type": "Rooms::Closed",
+      "creator_id": 1,
+      "participants": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 4,
+      "name": null,
+      "type": "Rooms::Direct",
+      "creator_id": 2,
+      "participants": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": 5,
+      "name": null,
+      "type": "Rooms::Direct",
+      "creator_id": 1,
+      "participants": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "files": [
+    {
+      "message": 3,
+      "record_type": "Message",
+      "relation": "attachment",
+      "id": 1,
+      "filename": "launch-checklist.txt",
+      "content_type": "text/plain",
+      "byte_size": 73,
+      "checksum": "AaqnRQRVw/bGIy1R8BzYyA==",
+      "path": "storage/files/03/47/03478a09a41a8c2e1e0989b61490",
+      "sha256": "47645105ca67ec93fd7f62e2992df73f73a77e44f03a58d1c48605e1be668aa5"
+    },
+    {
+      "message": 6,
+      "record_type": "Message",
+      "relation": "attachment",
+      "id": 2,
+      "filename": "supplier-estimate.csv",
+      "content_type": "text/csv",
+      "byte_size": 46,
+      "checksum": "AzwmQwcQv+b6c9gljrcKFA==",
+      "path": "storage/files/57/2c/572cd85cd909ffdb3ca68b8f2460",
+      "sha256": "fe331d435ea66b7e6b24c50212d2f94621ed11ed65881c0deda0932c4a0a5d0f"
+    },
+    {
+      "message": 10,
+      "record_type": "Message",
+      "relation": "attachment",
+      "id": 3,
+      "filename": "handover.txt",
+      "content_type": "text/plain",
+      "byte_size": 77,
+      "checksum": "cO21tiWK/DP8S/OsK9ZT4Q==",
+      "path": "storage/files/7e/2f/7e2fa7c958a172d8d2f4762efb0a",
+      "sha256": "31e9013ed0cd29e3275c6520f7490f55bb6f9e3dd0698d976fe352f91e1f42f9"
+    }
+  ],
+  "members": [
+    {
+      "path": "._storage",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/._backup.json",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/._db",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/._files",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/backup.json",
+      "bytes": 93,
+      "sha256": "7cc915e3d1575083949c79496f492af877b1248aad7c17efb3a2fc518f42682f"
+    },
+    {
+      "path": "storage/db/._jobs.sqlite3",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/db/._production.sqlite3",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/db/jobs.sqlite3",
+      "bytes": 8192,
+      "sha256": "c78977ad955944c0d424c7f08019eb023a5fae9cedcb0f4e0251a12468a4c0ad"
+    },
+    {
+      "path": "storage/db/production.sqlite3",
+      "bytes": 221184,
+      "sha256": "f1630670b66f601099414584f6025628eb351bbdfa81feca5f509e6fd83d46d6"
+    },
+    {
+      "path": "storage/files/._03",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/._57",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/._7e",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/03/._47",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/03/47/._03478a09a41a8c2e1e0989b61490",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/03/47/03478a09a41a8c2e1e0989b61490",
+      "bytes": 73,
+      "sha256": "47645105ca67ec93fd7f62e2992df73f73a77e44f03a58d1c48605e1be668aa5"
+    },
+    {
+      "path": "storage/files/57/._2c",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/57/2c/._572cd85cd909ffdb3ca68b8f2460",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/57/2c/572cd85cd909ffdb3ca68b8f2460",
+      "bytes": 46,
+      "sha256": "fe331d435ea66b7e6b24c50212d2f94621ed11ed65881c0deda0932c4a0a5d0f"
+    },
+    {
+      "path": "storage/files/7e/._2f",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/7e/2f/._7e2fa7c958a172d8d2f4762efb0a",
+      "bytes": 163,
+      "sha256": "c73e18f9b1979ea2b021ffddcd43113a90c67a55d235dc786a44f1a00075aa7b"
+    },
+    {
+      "path": "storage/files/7e/2f/7e2fa7c958a172d8d2f4762efb0a",
+      "bytes": 77,
+      "sha256": "31e9013ed0cd29e3275c6520f7490f55bb6f9e3dd0698d976fe352f91e1f42f9"
+    }
+  ]
+}

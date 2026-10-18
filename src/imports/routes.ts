@@ -6,7 +6,8 @@ import { Fault, fail } from '../family/team-chat/domain';
 import { metered } from './request-budget.ts';
 export async function slackImportRoute(request: Request, env: StorageBindings): Promise<Response | null> {
     const url = new URL(request.url);
-    if (url.pathname !== '/api/slack-imports' && !url.pathname.startsWith('/api/slack-imports/'))
+    const kind=url.pathname.startsWith('/api/campfire-imports')?'campfire':'slack',base='/api/'+kind+'-imports';
+    if (url.pathname !== base && !url.pathname.startsWith(base+'/'))
         return null;
     try {
         // Every statement this request runs, sign-in included, counts toward its budget.
@@ -15,9 +16,9 @@ export async function slackImportRoute(request: Request, env: StorageBindings): 
         if (request.method !== 'GET' && request.headers.get('origin') !== url.origin)
             fail(403, 'Origin required');
         if (request.method === 'POST' && parts.length === 3 && parts[2] === 'upload') {
-            if (request.headers.get('content-type') !== 'application/zip')
+            if (request.headers.get('content-type') !== (kind==='campfire'?'application/gzip':'application/zip'))
                 fail(415, 'ZIP required');
-            result = await inspectUpload(c, await localUpload(c, request));
+            result = await inspectUpload(c, await localUpload(c, request,kind));
         }
         else {
             let body: any = {};
@@ -46,7 +47,7 @@ export async function slackImportRoute(request: Request, env: StorageBindings): 
                 }
             }
             if (parts.length === 2 && request.method === 'GET')
-                result = await listImports(c);
+                result = await listImports(c,kind);
             else if (parts.length === 3 && parts[2] === 'preview' && request.method === 'POST')
                 result = await previewImport(c, body);
             else if (parts.length === 3 && parts[2] === 'cleanup' && request.method === 'POST')
@@ -71,7 +72,7 @@ export async function slackImportRoute(request: Request, env: StorageBindings): 
         return Response.json(result, { headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
     }
     catch (error) {
-        const message = error instanceof Error ? error.message : 'Import failed', status = error instanceof Fault ? error.status : /^(ZIP_REJECTED|SLACK_INVALID)/.test(message) ? 400 : /(IMPORT_|PLAN_|JOB_|REVIEW_|SOURCE_|TARGET_|CONFLICT|constraint)/.test(message) ? 409 : 500;
+        const message = error instanceof Error ? error.message : 'Import failed', status = error instanceof Fault ? error.status : /^(ZIP_REJECTED|SLACK_INVALID|CAMPFIRE_INVALID)/.test(message) ? 400 : /(IMPORT_|PLAN_|JOB_|REVIEW_|SOURCE_|TARGET_|CONFLICT|constraint)/.test(message) ? 409 : 500;
         return Response.json({ error: status === 500 ? 'Import failed; retry the same reviewed job' : message }, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
     }
 }
