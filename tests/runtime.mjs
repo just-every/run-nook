@@ -131,7 +131,6 @@ try {
  await(await import('./saved-reminders.mjs')).savedRemindersJourney(normalizedHarness)
  await(await import('./saved-search.mjs')).savedSearchJourney(normalizedHarness)
  await(await import('./personal.mjs')).personalJourney(normalizedHarness)
- await(await import('./profiles.mjs')).profilesJourney(normalizedHarness)
  await(await import('./files.mjs')).filesJourney(normalizedHarness)
  await(await import('./media-adversarial.mjs')).runMedia(normalizedHarness)
  await check('actual team invitations, scopes, reactions, preview and revocation',async()=>{await(await import('./team-runtime.mjs')).runTeamSurfaces({origin,ownerCookie:owner.cookie})})
@@ -143,7 +142,6 @@ try {
   await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people:broadcastFixture.people})
   await check('NOOK-019 Files at both widths',async()=>{await(await import('./files-browser.mjs')).filesBrowser({origin,owner,member,destination:'evidence/files'})})
   await check('NOOK-017 Drafts and sent at both widths',async()=>{await(await import('./personal-browser.mjs')).personalBrowser({origin,owner,member})})
-  await check('NOOK-017 composition and personal workspace at both widths',()=>import('./composition-browser.mjs').then(m=>m.compositionBrowser({origin,owner,member,outsider,destination:'evidence/composition'})))
   await check('NOOK-033 reminder journeys at both widths',async()=>{await(await import('./reminders-browser.mjs')).remindersBrowser({origin,owner,member})})
   await check('NOOK-034 schedule and review messages at both widths',async()=>{await(await import('./scheduled-browser.mjs')).scheduledBrowser({origin,owner,member})})
   await check('NOOK-071 All unreads and group conversion at both widths',async()=>{await(await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider})})
@@ -156,8 +154,10 @@ try {
   await check('installed Nook opens its own app window at desktop/mobile widths',async()=>{await(await import('./pwa-install.mjs')).runPwaInstall({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1/install')})})
   await check('Slack wizard and imported history desktop/mobile',async()=>{await(await import('./slack-import-browser.mjs')).runSlackBrowser(origin)})
   await check('homepage responsive and keyboard behavior',async()=>{process.env.TEAM_CHAT_HOMEPAGE_ORIGIN=origin;process.env.TEAM_CHAT_HOMEPAGE_EVIDENCE_DIR=resolve(root,'evidence/nook-1');await import('./homepage.mjs')})
+  await check('NOOK-017 composition and personal workspace at both widths',()=>import('./composition-browser.mjs').then(m=>m.compositionBrowser({origin,owner,member,outsider,destination:'evidence/composition'})))
  }
  }
+ if(['all','core','core-api','installer'].includes(suite))await(await import('./profiles.mjs')).profilesJourney({post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin})
  await stop()
  if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  await lossConfig.close();lossConfig=null
