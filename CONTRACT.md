@@ -413,7 +413,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests at commit `f47849ee14d041b0b6e9f5cd97428c56bd98ee1f` (18 October 2026).
+Judged from the code and tests at commit `f2b402baeed2dd9827b407f5e55fd81bfd1ba198` (18 October 2026).
 
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |

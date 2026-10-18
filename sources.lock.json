@@ -637,7 +637,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "0df48c72adf022619f9e202b15237c152ebe78e286212519df5a2c203c293667",
+      "sha256": "839b46c63d43cddbec1354d93d675698948f497d1e9cc1c8495b0de7e0e2fad2",
       "executable": false
     },
     "DEMO.md": {
@@ -721,7 +721,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "a2b3ef3d856f022e64d9c00e60a05ed174cc38cdf7264432af8bf8f1b5ffbf96",
+      "sha256": "5338108ab0089099fe01e65697967a5ac891de39d2bc9dfb7cf612e11bd69cf7",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
