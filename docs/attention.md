@@ -68,3 +68,11 @@ Owners set workspace broadcast policy in **Team**, and channel managers can choo
 Mute and **Ignore @channel, @here and @everyone** in a conversation’s notification settings suppress broadcasts. Quiet time defers them, with no urgent bypass. Email and Web Push each have their own broadcast choice in **You**, initially following the corresponding mention choice. A conversation set to Nothing sends no external alert. Ordinary message reads and work acceptance remain independent.
 
 Scheduled messages and channel reminders show broadcast consent before saving. Membership, audience size, broadcast policy and posting permission are checked again at each occurrence. A changed policy produces a visible failed occurrence for review. User groups, app/webhook/workflow transports, native clients and real-device receipt remain outside the current evidence.
+
+## Thread replies on your devices
+
+You follow threads you start, reply to, or are mentioned in, including channel-wide mentions. Unfollow stays in effect after another mention; replying yourself follows again. In a conversation's **Notification settings**, choose all thread replies for desktop/web or override this for phones and tablets. An individual unfollow still wins. **You → Push notifications → This device** lets you correct its device class. Nothing silences alerts while explicit mentions remain in Attention.
+
+**Count thread replies only when they mention me** changes unread and Web Push badge counts for your account, including other open sessions. It leaves ordinary replies in Threads and does not read them or silence their alerts. Newly enabling push turns on supported mentions, DMs and followed-thread replies once; later device registration preserves your explicit choices. Email is independent and stays off until you choose it.
+
+A notification for a single thread offers **Unfollow thread** where browser actions are supported. The action requires the same signed-in recipient and current thread access; a refused action asks you to open Nook. A burst spanning several threads offers **Manage threads** so you can choose which to unfollow. Native apps, real device receipt, recurring quiet schedules and cross-device active-elsewhere routing remain separate acceptance gaps.

@@ -1,3 +1,5 @@
+import {literal} from '../../broadcast/policy'
+import {countedMessage} from './thread-badge'
 import {fail} from '../../family/team-chat/domain'
 import {allowedGrant} from '../../team/access'
 import {Context} from './context'
@@ -10,7 +12,7 @@ export async function unreads(c:Context,input:Record<string,any>){
  if(typeof after!=='string'||after.length>256||conversation!==undefined&&typeof conversation!=='string')fail(400,'Invalid unread cursor')
  if(conversation){
   const seq=Number(after||0);if(!Number.isSafeInteger(seq)||seq<0)fail(400,'Invalid unread cursor')
-  const rows=await historyPage(c,conversation,`m.sequence>? AND m.sequence>COALESCE((SELECT seq FROM nook_reads WHERE conversation=m.conversation AND user=?),0) AND m.author<>? AND m.deleted=0 AND NOT (${threadSeen('?')})`,[seq,c.uid,c.uid,c.uid],51)
+  const rows=await historyPage(c,conversation,`m.sequence>? AND m.sequence>COALESCE((SELECT seq FROM nook_reads WHERE conversation=m.conversation AND user=?),0) AND m.author<>? AND m.deleted=0 AND ${countedMessage(literal(c.uid))} AND NOT (${threadSeen('?')})`,[seq,c.uid,c.uid,c.uid],51)
   return {items:rows.slice(0,50),cursor:String(rows.slice(0,50).at(-1)?.sequence??seq),hasMore:rows.length>50}
  }
  // The same ordering as the sidebar. Explicit paging never calls a short page complete.

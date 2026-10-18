@@ -1,3 +1,5 @@
+import {literal} from '../../broadcast/policy'
+import {broadcastRecipient} from '../../broadcast/audience'
 import {conversationThreads} from '../../team/conversation-notify.server'
 import {allowedGrant} from '../../team/access'
 import {fail} from '../../family/team-chat/domain'
@@ -28,8 +30,8 @@ export function automaticFollows(c:Pick<Context,'uid'|'sql'>,conversation:string
   c.sql('DELETE FROM nook_thread_unfollows WHERE user=? AND message=?',c.uid,thread),
   c.sql(`INSERT INTO nook_thread_follows(user,message,source) VALUES(?,?,?) ON CONFLICT(user,message) DO UPDATE SET source=excluded.source WHERE nook_thread_follows.source NOT IN ('explicit','authored')`,c.uid,thread,source),
   c.sql(`INSERT OR IGNORE INTO nook_thread_follows(user,message,source)
-   SELECT m.user,?,'mentioned' FROM nook_members m JOIN json_each(?) j ON j.value=m.user
-   WHERE m.conversation=? AND m.user<>? AND ${allowedGrant('m.user','m.conversation')}
+   SELECT m.user,?,'mentioned' FROM nook_members m
+   WHERE (m.user IN (SELECT value FROM json_each(?)) OR ${broadcastRecipient(literal(message),'m.user')}) AND m.conversation=? AND m.user<>? AND ${allowedGrant('m.user','m.conversation')}
    AND NOT EXISTS(SELECT 1 FROM nook_thread_unfollows u WHERE u.user=m.user AND u.message=?)`,thread,JSON.stringify(mentions),conversation,c.uid,thread),
   c.sql(`INSERT OR IGNORE INTO nook_thread_follows(user,message,source)
    SELECT m.user,?,'dm' FROM nook_members m JOIN nook_conversations v ON v.id=m.conversation
@@ -55,7 +57,7 @@ export async function followThread(c:Context,id:string,input:Record<string,any>)
 }
 
 export async function threadPreferences(c:Context,conversation:string){
- return c.rows(`SELECT r.id AS message,COALESCE(f.source,'all') AS source FROM (${liveThreadRoots}) r LEFT JOIN nook_thread_follows f ON f.message=r.id AND f.user=? WHERE r.conversation=? AND (f.message IS NOT NULL OR ${conversationThreads('?','?')}='all') AND NOT EXISTS(SELECT 1 FROM nook_thread_unfollows u WHERE u.user=? AND u.message=r.id) ORDER BY r.id`,[c.uid,conversation,c.uid,conversation,c.uid],conversation)
+ return c.rows(`SELECT r.id AS message,COALESCE(f.source,'all') AS source FROM (${liveThreadRoots}) r LEFT JOIN nook_thread_follows f ON f.message=r.id AND f.user=? WHERE r.conversation=? AND (f.message IS NOT NULL OR ${conversationThreads('?','?')}='all' OR ${conversationThreads(literal(c.uid),literal(conversation),"'mobile'")}='all') AND NOT EXISTS(SELECT 1 FROM nook_thread_unfollows u WHERE u.user=? AND u.message=r.id) ORDER BY r.id`,[c.uid,conversation,c.uid,conversation,c.uid],conversation)
 }
 
 export const threadSeen=(user:string,message='m')=>`EXISTS(SELECT 1 FROM nook_thread_reads tr WHERE tr.user=${user} AND tr.message=COALESCE(${message}.parent,${message}.id) AND tr.seq>=${message}.sequence)`
@@ -111,7 +113,7 @@ export async function threads(c:Context,input:Record<string,any>,hydrate:(id:str
   SELECT user,message,source FROM nook_thread_follows WHERE user=?
   UNION ALL
   SELECT n.user,r.id,'all' AS source FROM nook_conversation_notify n JOIN (${liveThreadRoots}) r ON r.conversation=n.conversation
-  WHERE n.user=? AND n.threads='all' AND NOT EXISTS(SELECT 1 FROM nook_thread_follows f WHERE f.user=n.user AND f.message=r.id)
+  WHERE n.user=? AND (n.threads='all' OR n.mobile_threads='all') AND NOT EXISTS(SELECT 1 FROM nook_thread_follows f WHERE f.user=n.user AND f.message=r.id)
  ), followed AS MATERIALIZED (
   SELECT f.message,f.source,r.created,v.id AS conversation,v.name,v.kind,v.owner,v.seq,
    max(COALESCE(cr.seq,0),COALESCE(tr.seq,0)) AS readSeq

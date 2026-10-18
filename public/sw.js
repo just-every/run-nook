@@ -11,14 +11,21 @@ self.addEventListener('push',event=>{
  if(!value||typeof value!=='object'||Array.isArray(value))value={};
  // Every accepted push displays an alert. Never implement silent badge clears:
  // WebKit revokes a subscription when a push does not show a notification.
- const data={url:safeURL(value.url),user:typeof value.user==='string'?value.user:'',ids:Array.isArray(value.ids)?value.ids.filter(id=>typeof id==='string').slice(0,100):[]};
- await self.registration.showNotification('Nook',{body:typeof value.body==='string'?value.body.slice(0,500):'Open Nook to view new activity.',icon:'/icons/nook-192.png',badge:'/icons/nook-192.png',tag:typeof value.tag==='string'&&value.tag?value.tag:'nook',renotify:true,data});
+ const thread=typeof value.thread==='string'&&/^[a-zA-Z0-9-]{1,160}$/.test(value.thread)?value.thread:null;
+ const data={thread,url:safeURL(value.url),user:typeof value.user==='string'?value.user:'',ids:Array.isArray(value.ids)?value.ids.filter(id=>typeof id==='string').slice(0,100):[]};
+ await self.registration.showNotification('Nook',{body:typeof value.body==='string'?value.body.slice(0,500):'Open Nook to view new activity.',icon:'/icons/nook-192.png',badge:'/icons/nook-192.png',tag:typeof value.tag==='string'&&value.tag?value.tag:'nook',renotify:true,actions:[{action:thread?'unfollow':'threads',title:thread?'Unfollow thread':'Manage threads'}],data});
  await badge(value.badge);
 })())});
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{
  // A freshly loaded app may not yet be controlled by this worker. Reuse it as
  // well, preferring the conversation already open over another Nook window.
- const url=safeURL(event.notification.data?.url),windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+ let url=safeURL(event.notification.data?.url);
+ if(event.action==='unfollow'&&event.notification.data?.thread){try{
+  const who=await fetch('/api/me',{credentials:'same-origin',cache:'no-store'});if(!who.ok||(await who.json()).id!==event.notification.data.user)throw Error('Sign in as the notification recipient to unfollow');
+  const response=await fetch('/api/messages/'+encodeURIComponent(event.notification.data.thread)+'/follow',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({follow:false})});if(!response.ok)throw Error('Thread unavailable or sign-in expired');return;
+ }catch{await self.registration.showNotification('Thread not unfollowed',{body:'Open Nook to sign in and check your current thread access.',data:{url},tag:'nook-unfollow-failed'});}}
+ if(event.action==='threads')url=self.location.origin+'/app?view=threads';
+ const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
  const apps=windows.filter(client=>new URL(client.url).origin===self.location.origin&&new URL(client.url).pathname==='/app');
  const conversation=new URL(url).searchParams.get('conversation');
  const existing=apps.find(client=>new URL(client.url).searchParams.get('conversation')===conversation)??apps[0];

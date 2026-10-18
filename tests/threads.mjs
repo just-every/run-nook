@@ -36,7 +36,7 @@ export async function threadJourney({post,patch,get,registered,check,restart}){
   const send=async(body,parent=null,mentions=[]) => (await post(`/api/conversations/${room.id}/messages`,{body,parent,mentions,intent:crypto.randomUUID()},b.cookie)).data
   const attention=async()=>(await get('/api/attention',c.cookie)).data.items
   assert.equal((await get(path,c.cookie)).data.level,'mentions')
-  await patch(path,{mobileLevel:'all'},c.cookie,400)
+  assert.equal((await patch(path,{mobileLevel:'all'},c.cookie)).data.mobileLevel,'all')
   await patch(path,{threads:null},c.cookie,400)
   await patch(path,{level:'all',threads:'followed'},c.cookie)
   const root=await send('A fresh incident')

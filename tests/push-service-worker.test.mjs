@@ -50,3 +50,16 @@ test('service worker keeps every push visible and opens its conversation on acti
  windows=[client('external','https://elsewhere.example.test/app')];
  for(const unsafe of ['https://elsewhere.example.test/app','/signin','javascript:alert(1)'])assert.deepEqual(await click(unsafe),[['open',origin+'/app']]);
 });
+
+// NOOK-072: action uses the ordinary session-bound follow door, including a
+// recipient check so a notice left by another account cannot change its state.
+test('notification unfollow checks the recipient and reports a refused action',async()=>{
+ const handlers=new Map(),shown=[],requests=[];let current='ana',refused=false
+ const self={location:{origin:'https://nook.example.test'},navigator:{},addEventListener:(name,fn)=>handlers.set(name,fn),registration:{showNotification:async(title,data)=>shown.push({title,...data})},clients:{matchAll:async()=>[],openWindow:async()=>{}}}
+ const fetch=async(path,options)=>{requests.push({path,options});return path==='/api/me'?{ok:true,json:async()=>({id:current})}:{ok:!refused}}
+ runInNewContext(await readFile(new URL('../public/sw.js',import.meta.url),'utf8'),{self,URL,fetch})
+ const click=async()=>{let pending;handlers.get('notificationclick')({action:'unfollow',notification:{data:{url:'/app?view=threads',user:'ana',thread:'root-thread'},close(){}},waitUntil:p=>{pending=p}});await pending}
+ await click();assert.equal(requests.at(-1).path,'/api/messages/root-thread/follow');assert.deepEqual(JSON.parse(requests.at(-1).options.body),{follow:false});assert.equal(requests.at(-1).options.credentials,'same-origin');assert.equal(shown.length,0)
+ current='sam';requests.length=0;await click();assert.deepEqual(requests.map(r=>r.path),['/api/me']);assert.equal(shown.at(-1).title,'Thread not unfollowed')
+ current='ana';refused=true;await click();assert.equal(shown.at(-1).title,'Thread not unfollowed')
+})

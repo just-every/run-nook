@@ -262,6 +262,12 @@
       "name": "0042_typing.sql",
       "sha256": "ac4c96c42fdbd903b6be1cffff8e117b13a0d55a765fa17b2cd5dd322fdb1ae4",
       "sql": "-- Advisory, session-bound state. This table is intentionally not portable.\nCREATE TABLE nook_typing(\n session TEXT NOT NULL,page TEXT NOT NULL,user TEXT NOT NULL,conversation TEXT NOT NULL,expires INTEGER NOT NULL,\n PRIMARY KEY(session,page)\n);\nCREATE INDEX nook_typing_conversation ON nook_typing(conversation,expires,user);\nCREATE INDEX nook_typing_expiry ON nook_typing(expires);\nCREATE TRIGGER nook_typing_session_deleted AFTER DELETE ON oa_sessions BEGIN\n DELETE FROM nook_typing WHERE session=OLD.id;\nEND;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0043_thread_delivery.sql",
+      "sha256": "6a86bf80a432247d4c3f27432ececcc092754faba28a1bf708bfbce3e2589c92",
+      "sql": "ALTER TABLE nook_conversation_notify ADD COLUMN mobile_level TEXT CHECK(mobile_level IS NULL OR mobile_level IN ('all','mentions','nothing'));\nALTER TABLE nook_conversation_notify ADD COLUMN mobile_threads TEXT CHECK(mobile_threads IS NULL OR mobile_threads IN ('all','followed'));\nALTER TABLE nook_push_devices ADD COLUMN device_class TEXT NOT NULL DEFAULT 'desktop' CHECK(device_class IN ('desktop','mobile'));\nALTER TABLE nook_notify_preferences ADD COLUMN push_initialized INTEGER NOT NULL DEFAULT 1 CHECK(push_initialized IN (0,1));\n-- Old archives missing this column also retain their deliberate choices.\nALTER TABLE nook_notify_preferences ADD COLUMN thread_badge TEXT NOT NULL DEFAULT 'all' CHECK(thread_badge IN ('all','mentions'));\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

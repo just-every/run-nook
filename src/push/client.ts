@@ -2,15 +2,18 @@ import {useCallback,useEffect,useRef,useState} from 'react'
 import type {TeamRequest} from '../team/types'
 import {clearPushNotices} from './notices'
 import type {WorkspaceSnapshot} from '../chat/types'
-export type Choices={broadcasts:boolean;mentions:boolean;urgent:boolean;urgentQuiet:boolean;direct:boolean;threads:boolean}
+export type Choices={threadBadge:'all'|'mentions';broadcasts:boolean;mentions:boolean;urgent:boolean;urgentQuiet:boolean;direct:boolean;threads:boolean}
 export type PushSettings=Choices&{problems:{error:string;state:string}[];notDelivered:{recipient:string;error:string}[];workspace:{count:number;error:string|null;state:string|null}|null}
 const decode=(value:string)=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))
 const STORE='nook.push.device'
+const classification=(user:string):'desktop'|'mobile'=>{const saved=localStorage.getItem('nook.push.class.'+user);return saved==='desktop'||saved==='mobile'?saved:/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1?'mobile':'desktop'}
 const supported=()=>typeof window!=='undefined'&&'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window
 export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapshot|null,privateSignal:AbortSignal){
  const [settings,setSettings]=useState<PushSettings|null>(null),[permission,setPermission]=useState<NotificationPermission|'unsupported'>('unsupported'),[enabled,setEnabled]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false)
  const [install,setInstall]=useState<any>(null),[standalone,setStandalone]=useState(false)
  useEffect(()=>{const show=(event:Event)=>{event.preventDefault();setInstall(event)};const installed=()=>{setStandalone(true);setInstall(null)};setStandalone(matchMedia('(display-mode: standalone)').matches);window.addEventListener('beforeinstallprompt',show);window.addEventListener('appinstalled',installed);return()=>{window.removeEventListener('beforeinstallprompt',show);window.removeEventListener('appinstalled',installed)}},[])
+ const [deviceClass,setDeviceClass]=useState<'desktop'|'mobile'>('desktop')
+ useEffect(()=>setDeviceClass(classification(user)),[user])
  const device=useRef<string|null>(null),registration=useRef<ServiceWorkerRegistration|null>(null),current=useRef(user);current.current=user
  const page=useRef(crypto.randomUUID()),inflight=useRef<Promise<void>|null>(null)
  // Delivery status belongs to the account, even without browser push support.
@@ -49,7 +52,7 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
    if(sub&&sub.options.applicationServerKey){const key=new Uint8Array(sub.options.applicationServerKey),expected=decode(info.publicKey);if(key.length!==expected.length||key.some((v,i)=>v!==expected[i])){await sub.unsubscribe();sub=null}}
    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decode(info.publicKey)})
    if(current.current!==user){await sub.unsubscribe();return}
-   const result=await post('/api/devices',{transport:'webpush',subscription:sub.toJSON()})
+   const result=await post('/api/devices',{transport:'webpush',subscription:sub.toJSON(),deviceClass:classification(user)})
    device.current=result.id;localStorage.setItem(STORE,JSON.stringify({user,id:result.id}));setEnabled(true)
    await post('/api/devices/presence',{id:result.id,page:page.current,visible:document.visibilityState==='visible'})
    await sync()
@@ -89,8 +92,8 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
  const enable=useCallback(async()=>{
   if(!supported())return
   setBusy(true);setError('')
-  try{const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;setPermission(permission);if(permission!=='granted')return;localStorage.setItem('nook.push.'+user,'on');await reconcile();if(!settings?.mentions&&!settings?.urgent&&!settings?.direct&&!settings?.threads){const next=await post('/api/notify',{push:{mentions:true}},'PATCH');if(!privateSignal.aborted&&current.current===user){settingsVersion.current++;setSettings(next.push)}}}catch(e){if(!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable; try enabling again')}finally{if(!privateSignal.aborted)setBusy(false)}
- },[user,reconcile,post,settings,privateSignal])
+  try{const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;setPermission(permission);if(permission!=='granted')return;localStorage.setItem('nook.push.'+user,'on');await reconcile();await loadSettings()}catch(e){if(!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable; try enabling again')}finally{if(!privateSignal.aborted)setBusy(false)}
+ },[user,reconcile,post,loadSettings,privateSignal])
  const disable=useCallback(async()=>{
   setBusy(true);setError('')
   try{await clearPushNotices();localStorage.removeItem('nook.push.'+user);let stored;try{stored=JSON.parse(localStorage.getItem(STORE)??'null')}catch{}
@@ -98,5 +101,6 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
    const reg=registration.current??await navigator.serviceWorker.getRegistration('/');await (await reg?.pushManager.getSubscription())?.unsubscribe();reg?.active?.postMessage({type:'nook-sync',user,active:[],badge:0});localStorage.removeItem(STORE);device.current=null;setEnabled(false)
   }catch(e){setError(e instanceof Error?e.message:'Push unavailable');throw e}finally{setBusy(false)}
  },[post,user])
- return {settings,permission,enabled,error,busy,change,enable,disable,install,standalone,installApp:()=>{void install?.prompt();setInstall(null)}}
+ const changeDeviceClass=async(value:'desktop'|'mobile')=>{localStorage.setItem('nook.push.class.'+user,value);setDeviceClass(value);setBusy(true);try{if(enabled)await reconcile()}catch(e){setError(e instanceof Error?e.message:'Device settings unavailable')}finally{setBusy(false)}}
+ return {deviceClass,changeDeviceClass,settings,permission,enabled,error,busy,change,enable,disable,install,standalone,installApp:()=>{void install?.prompt();setInstall(null)}}
 }
