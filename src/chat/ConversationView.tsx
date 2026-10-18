@@ -132,7 +132,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
     </div>
     {showLatest&&<button className="jump-latest soft-button" onClick={()=>latest()}>Latest messages</button>}
    </div>
-   {c.convertedTo?<p className="archived-notice">This group DM moved to a private channel and is read-only. <button className="text-button" onClick={()=>navigate({view:'chat',conversation:c.convertedTo!,thread:null,focus:null,before:null,threadBefore:null,panel:null})}>Open private channel</button></p>:c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<Composer onSchedule={(draft,onScheduled)=>openDialog({kind:'schedule',draft,onScheduled})} restricted={c.canPost===false||c.canPost===0} key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
+   {c.convertedTo?<p className="archived-notice">This group DM moved to a private channel and is read-only. <button className="text-button" onClick={()=>navigate({view:'chat',conversation:c.convertedTo!,thread:null,focus:null,before:null,threadBefore:null,panel:null})}>Open private channel</button></p>:c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<Composer onEditLast={message=>openDialog({kind:'edit',message})} onSchedule={(draft,onScheduled)=>openDialog({kind:'schedule',draft,onScheduled})} restricted={c.canPost===false||c.canPost===0} key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&root&&!showOutcomes?<>
@@ -145,7 +145,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
      </div>
      {showLatestReplies&&<button className="jump-latest soft-button" onClick={()=>latest(true)}>Latest replies</button>}
     </div>
-    {!(c.archived||!!c.convertedTo)&&!root.deleted&&(!root.immutable||Boolean(root.provenance))&&<Composer onSchedule={(draft,onScheduled)=>openDialog({kind:'schedule',draft,onScheduled})} restricted={c.canReply===false||c.canReply===0} key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
+    {!(c.archived||!!c.convertedTo)&&!root.deleted&&(!root.immutable||Boolean(root.provenance))&&<Composer onEditLast={message=>openDialog({kind:'edit',message})} onSchedule={(draft,onScheduled)=>openDialog({kind:'schedule',draft,onScheduled})} restricted={c.canReply===false||c.canReply===0} key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
    </>:outcomesPanel}
   </aside>
  </div>

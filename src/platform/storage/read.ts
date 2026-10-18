@@ -1,3 +1,4 @@
+import {latestEditable} from './latest-edit'
 import {personalReminderAttention} from '../../reminders/service'
 import {broadcastSuppressed} from '../../broadcast/policy'
 import {broadcastSummary} from '../../broadcast/recipients'
@@ -38,6 +39,7 @@ export async function message(c:Context,id:string){const m=await c.one(`SELECT m
 export const outcomeSelect=`SELECT o.*,a.name AS authorName,CASE WHEN EXISTS(SELECT 1 FROM nook_erased_assignees e WHERE e.outcome=o.id) THEN 'Erased member' ELSE b.name END AS assigneeName,CASE WHEN o.source IS NULL THEN CASE WHEN o.source_version IS NULL THEN 'none' ELSE 'deleted' END WHEN m.version=o.source_version THEN 'current' ELSE 'changed' END AS sourceState FROM nook_outcome_history o LEFT JOIN nook_actor_history a ON a.id=o.author LEFT JOIN nook_actor_history b ON b.id=o.assignee LEFT JOIN nook_messages m ON m.id=o.source`
 export async function outcome(c:Context,id:string){const o=await c.one(`${outcomeSelect} WHERE o.id=? AND EXISTS(SELECT 1 FROM nook_members WHERE conversation=o.conversation AND user=?)`,[id,c.uid]);if(!o)fail(404,'Outcome unavailable');await c.check(o.conversation);return o}
 export async function read(c:Context,action:string,id='',input:Record<string,any>={}){
+ if(action==='latestEditable')return latestEditable(c,id,input.thread,async mid=>{const m=await message(c,mid);return (await messageMetadata(c,m.conversation,[m]))[0]})
  if(action==='message'){const m=await message(c,id);return (await messageMetadata(c,m.conversation,[m]))[0]}
  if(action==='me'){const profile=await c.one("SELECT zone,status_emoji,status_text,status_expires,presence_enabled,typing_enabled FROM nook_profiles WHERE user=?",[c.uid]);const status=profile&&(!profile.status_expires||profile.status_expires>Date.now())&&(profile.status_text||profile.status_emoji)?{emoji:profile.status_emoji,text:profile.status_text,expiresAt:profile.status_expires}:null;const access=await c.one('SELECT mode FROM nook_access WHERE user=? AND active=1',[c.uid]);return {id:c.uid,name:c.session.operator.displayName,role:c.session.operator.role,mode:access?.mode,zone:profile?.zone??'UTC',presenceEnabled:profile?.presence_enabled!==0,typingEnabled:profile?.typing_enabled!==0,status}}
  if(action==='users')return c.rows(`SELECT o.id,o.display_name AS name,(SELECT mode FROM nook_access WHERE user=o.id) AS mode FROM oa_operators o WHERE o.status='active' AND ${productAccess('o.id')} AND ${visibleIdentity('?', 'o.id')} ORDER BY o.id LIMIT 1000`,[c.uid,c.uid,c.uid])

@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from 'react'
 import type {Conversation,LocationState,Person,Screen} from './types'
 import type {TeamRequest} from '../team/types'
 import {QuickSwitcher} from './QuickSwitcher'
+import {recordVisit} from './recent-navigation'
 import {containDialogFocus} from './dialog-focus'
 import {IconClose,IconSearch} from './icons'
 
@@ -11,6 +12,7 @@ export function QuickNavigation(props:Props){
  const {route,conversations,select,nav,request,signal,error}=props,[panel,setPanel]=useState<'switch'|'dm'|'help'|null>(null)
  const [mac,setMac]=useState(false)
  useEffect(()=>setMac(/Mac|iPhone|iPad/.test(navigator.platform)),[])
+ useEffect(()=>{if(signal.aborted||route.view!=='chat'||!route.conversation)return;try{recordVisit(props.user.id,{key:'c:'+route.conversation});if(route.thread)recordVisit(props.user.id,{key:'t:'+route.thread,conversation:route.conversation})}catch(e){error(e)}},[props.user.id,route.view,route.conversation,route.thread,signal,error])
  useEffect(()=>{if(signal.aborted)setPanel(null);const abort=()=>setPanel(null);signal.addEventListener('abort',abort);return()=>signal.removeEventListener('abort',abort)},[signal])
  function adjacent(direction:number,unread=false){const items=conversations.filter(c=>!unread||c.unread>0),at=items.findIndex(c=>c.id===route.conversation),next=at<0?(direction>0?items[0]:items.at(-1)):items[(at+direction+items.length)%items.length];if(next)select(next);setPanel(null)}
  async function markRead(){const current=conversations.find(c=>c.id===route.conversation);if(route.view!=='chat'||!current)return;try{await request('/api/conversations/'+encodeURIComponent(current.id)+'/read',{method:'POST',body:JSON.stringify({seq:current.seq}),signal});if(!signal.aborted)await props.refresh()}catch(e){if(!signal.aborted)error(e)}}
@@ -37,5 +39,5 @@ export function QuickNavigation(props:Props){
 function ShortcutSheet({actions,close,command}:{actions:{label:string;keys:string;run:()=>void}[];close:()=>void;command:string}){
  const dialog=useRef<HTMLDialogElement>(null)
  useEffect(()=>{const trigger=document.activeElement as HTMLElement;dialog.current?.showModal();return()=>{if(trigger?.isConnected)trigger.focus({preventScroll:true})}},[])
- return <dialog ref={dialog} className="quick-switcher" aria-labelledby="shortcut-title" onKeyDown={containDialogFocus} onCancel={e=>{e.preventDefault();close()}}><div className="dialog-heading"><h2 id="shortcut-title">Keyboard shortcuts</h2><button className="icon-button" aria-label="Close" onClick={close}><IconClose/></button></div><div className="shortcut-list">{actions.map(action=><button key={action.label} onClick={action.run}><span>{action.label}</span><kbd>{action.keys}</kbd></button>)}</div><h3>Built-in commands</h3><div className="shortcut-list">{builtins.map(([name,args,description])=><p key={name}><strong>/{name} {args}</strong> · {description}</p>)}</div><p className="dialog-note">{command}/ opens this sheet. Enter sends a message; Shift Enter adds a line. Escape closes a dialog.</p></dialog>
+ return <dialog ref={dialog} className="quick-switcher" aria-labelledby="shortcut-title" onKeyDown={containDialogFocus} onCancel={e=>{e.preventDefault();close()}}><div className="dialog-heading"><h2 id="shortcut-title">Keyboard shortcuts</h2><button className="icon-button" aria-label="Close" onClick={close}><IconClose/></button></div><div className="shortcut-list">{actions.map(action=><button key={action.label} onClick={action.run}><span>{action.label}</span><kbd>{action.keys}</kbd></button>)}</div><p className="dialog-note"><kbd>↑</kbd> in an empty composer edits your last message in that conversation or thread. The composer’s Edit last message button does the same.</p><h3>Built-in commands</h3><div className="shortcut-list">{builtins.map(([name,args,description])=><p key={name}><strong>/{name} {args}</strong> · {description}</p>)}</div><p className="dialog-note">{command}/ opens this sheet. Enter sends a message; Shift Enter adds a line. Escape closes a dialog.</p></dialog>
 }
