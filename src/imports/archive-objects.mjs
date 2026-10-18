@@ -1,3 +1,4 @@
+import {assertMattermostFileSize} from './mattermost-effects.mjs';
 import {assertCampfireFileSize} from './campfire-effects.mjs';
 import { assertSlackFileSize } from './policy.mjs';
 const check = (ok, code) => { if (!ok) throw Error(code); };
@@ -18,12 +19,12 @@ export async function slackArchiveObjects({ read, manifest }, actors, attachment
     };
     for (const file of attachments) if (file.object_key !== null) add(file.object_key, file.size, file.sha256, file.mime);
     for (const upload of uploads) {
-        check(actors.has(upload.owner) && ['ready', 'discarded'].includes(upload.state) && digest(upload.archive_digest) && ['archive.zip','archive.campfire.tar.gz'].some(name=>upload.object_key===`private/imports/${upload.owner}/${upload.id}/${name}`), 'invalid_slack_upload');
+        check(actors.has(upload.owner) && ['ready', 'discarded'].includes(upload.state) && digest(upload.archive_digest) && ['archive.zip','archive.campfire.tar.gz','archive.mattermost.zip'].some(name=>upload.object_key===`private/imports/${upload.owner}/${upload.id}/${name}`), 'invalid_slack_upload');
         check(Number.isSafeInteger(upload.size) && upload.size > 0 && upload.size <= 32 * 1024 * 1024, 'invalid_slack_upload_size');
         if (upload.state === 'ready') add(upload.object_key, upload.size, upload.archive_digest, upload.object_key.endsWith('.tar.gz')?'application/gzip':'application/zip');
     }
     for (const object of objects) {
-        const upload = uploadById.get(object.upload),campfire=upload?.object_key.endsWith('.tar.gz');
+        const upload = uploadById.get(object.upload),campfire=upload?.object_key.endsWith('.tar.gz')||upload?.object_key.endsWith('archive.mattermost.zip');
         if(campfire)assertCampfireFileSize(object.size);else assertSlackFileSize(object.size);
         check(upload && upload.owner === object.owner && object.object_key.startsWith(`private/imports/${object.owner}/${object.upload}/files/`) && ['ready', 'deleted'].includes(object.state) && digest(object.sha256) && Number.isSafeInteger(object.size) && object.size > 0 && (campfire?/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(object.mime):['text/plain','image/png','image/jpeg','application/pdf'].includes(object.mime)), 'invalid_slack_file_custody');
         if (object.state === 'ready') {

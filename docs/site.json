@@ -72,6 +72,11 @@
           "slug": "readable-export",
           "source": "docs/readable-export.md",
           "label": "Readable exports"
+        },
+        {
+          "slug": "mattermost-import",
+          "source": "docs/mattermost-import.md",
+          "label": "Move from Mattermost"
         }
       ]
     }
