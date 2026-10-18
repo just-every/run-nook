@@ -3,7 +3,8 @@ import { slackFixture, largeSlackFixture, zipFixture } from './fixture.mjs';
 import { invite, signIn } from '../auth-support.mjs';
 export async function importJourney({ origin, owner, restart, sql }) {
     const report = [], suffix = crypto.randomUUID().slice(0, 8), member = await invite(origin, owner.cookie, 'ImportReader' + suffix), outsider = await invite(origin, owner.cookie, 'ImportOutsider' + suffix);
-    async function call(path, { actor = owner, body, zip, status = 200, method } = {}) { const r = await fetch(origin + path, { method: method ?? (body !== undefined || zip ? 'POST' : 'GET'), headers: { Origin: origin, cookie: actor.cookie, ...(zip ? { 'Content-Type': 'application/zip' } : body !== undefined ? { 'Content-Type': 'application/json' } : {}) }, body: zip ?? (body !== undefined ? JSON.stringify(body) : undefined) }); const raw = await r.text(); assert.equal(r.status, status, `${path}: ${raw}`); return r.headers.get('content-type')?.includes('json') ? JSON.parse(raw) : raw; }
+    // Worker restarts must not reuse a pooled socket to the disposed listener.
+    async function call(path, { actor = owner, body, zip, status = 200, method } = {}) { const r = await fetch(origin + path, { method: method ?? (body !== undefined || zip ? 'POST' : 'GET'), headers: { Connection: 'close', Origin: origin, cookie: actor.cookie, ...(zip ? { 'Content-Type': 'application/zip' } : body !== undefined ? { 'Content-Type': 'application/json' } : {}) }, body: zip ?? (body !== undefined ? JSON.stringify(body) : undefined) }); const raw = await r.text(); assert.equal(r.status, status, `${path}: ${raw}`); return r.headers.get('content-type')?.includes('json') ? JSON.parse(raw) : raw; }
     const welcome=(await call('/api/conversations')).find(c=>c.kind==='channel'&&!c.archived);
     async function scopedActor(name,role,mode){
         const email=(name+suffix).toLowerCase()+'@example.test';
