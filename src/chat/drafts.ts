@@ -1,7 +1,7 @@
 import type {FileRecord} from './types'
 import type {PendingUpload} from './useAttachmentUpload'
 
-export type Intent={body:string;intent:string;parent:string|null;attachments:string[];mentions:string[];urgent:boolean;urgentReason:string|null}
+export type Intent={adminOverride?:true;body:string;intent:string;parent:string|null;attachments:string[];mentions:string[];urgent:boolean;urgentReason:string|null}
 export type Draft={body:string;files:FileRecord[];recipient:string;urgent:boolean;reason:string;pending:Intent|null;upload:PendingUpload|null;delivery:'draft'|'pending'|'unconfirmed'|'failed';failure:string}
 export type DraftScope={user:string;conversation:string;parent:string|null}
 export const blankDraft=():Draft=>({body:'',files:[],recipient:'',urgent:false,reason:'',pending:null,upload:null,delivery:'draft',failure:''})
@@ -14,7 +14,7 @@ function decode(raw:string):Draft{
  const value=JSON.parse(raw)
  if(!value||typeof value.body!=='string'||!Array.isArray(value.files)||value.files.some((file:FileRecord)=>!file||typeof file.id!=='string'||typeof file.name!=='string')||typeof value.recipient!=='string'||typeof value.urgent!=='boolean'||typeof value.reason!=='string')throw Error('Saved draft could not be read. Its stored contents have not been changed.')
  const pending=value.pending??null,upload=value.upload??null
- if(pending&&(typeof pending.body!=='string'||typeof pending.intent!=='string'||!(pending.parent===null||typeof pending.parent==='string')||!strings(pending.attachments)||!strings(pending.mentions)||typeof pending.urgent!=='boolean'||!(pending.urgentReason===null||typeof pending.urgentReason==='string')))throw Error('Saved send could not be read. Its stored contents have not been changed.')
+ if(pending&&((pending.adminOverride!==undefined&&pending.adminOverride!==true)||typeof pending.body!=='string'||typeof pending.intent!=='string'||!(pending.parent===null||typeof pending.parent==='string')||!strings(pending.attachments)||!strings(pending.mentions)||typeof pending.urgent!=='boolean'||!(pending.urgentReason===null||typeof pending.urgentReason==='string')))throw Error('Saved send could not be read. Its stored contents have not been changed.')
  if(upload&&(!['name','mime','sha256','intent'].every(key=>typeof upload[key]==='string')||typeof upload.size!=='number'))throw Error('Saved upload could not be read. Its stored contents have not been changed.')
  return {...blankDraft(),...value,pending,upload,delivery:pending?'unconfirmed':value.delivery==='failed'?'failed':'draft',failure:typeof value.failure==='string'?value.failure:''}
 }

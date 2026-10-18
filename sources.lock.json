@@ -613,7 +613,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "53668253789b8d61a7a578e9ff891634f0824ba6b3e2e579fda4e608a14d45bc",
+      "sha256": "4cd625b307e486e816c233c42671cb45c3702f6ff37f534457933c7a2a0253c0",
       "executable": false
     },
     "AGENTS.md": {
@@ -637,7 +637,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "2d566673d08232e9bcb20e3f9f61f4180b4400c50b4e84fbdb635de71837bd57",
+      "sha256": "bc6148de2dc6d8664dc78a58caf060c0e190bbe6cc11b714b277e2c338616442",
       "executable": false
     },
     "DEMO.md": {
@@ -717,7 +717,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "495fe2293d8a21fa543f4001873e07960563abee327245a5c232954b0fb61375",
+      "sha256": "1039eb1073d2953d3f722207718946d06f3784cb1f6ac3dba15be132f9feeb65",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -840,6 +840,10 @@
       "sha256": "c466d9e4d2b281527b652a1e90911f1b9b958fc346939150e252a7e4fd07da98",
       "executable": false
     },
+    "migrations/0031_posting_permissions.sql": {
+      "sha256": "12482fdfbd46dc2dc57d37a3afc96b0c6b8883e06584c076b0c526d40f5607fd",
+      "executable": false
+    },
     "OPERATIONS.json": {
       "sha256": "6faa9c4609e691f56f26e2c4c72f95eb49810d4227bb48cc3795c796ac57829f",
       "executable": false
@@ -853,11 +857,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "aef8946c2251e77d2a0a006336581b6214662376d140528f0a69dda6b5c85b78",
+      "sha256": "df893e84953c97c3208f56e64ef0c9d9022e7554ef294402b37e7e757faf3741",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "164fb44d0e876a03f341e4c543edbc65636deff54b5fde23a6a8e878a97b6550",
+      "sha256": "24c59d02216a7a9d16dc1a9a6d243c43398c3642df745b73e2ed3b19c9e40f67",
       "executable": false
     },
     "public/brand/band.svg": {
@@ -3217,7 +3221,7 @@
       "executable": false
     },
     "src/chat/Composer.tsx": {
-      "sha256": "1f0a5a778cc965019627e93bfe4df6be8ee1eb89ed4b36e75f32d204384be9a4",
+      "sha256": "e0f7721f4c8a1befb2d0b562e82912ba97d51d97cd655b5f9b37730eb1c36002",
       "executable": false
     },
     "src/chat/ConversationNotifications.tsx": {
@@ -3225,7 +3229,7 @@
       "executable": false
     },
     "src/chat/ConversationView.tsx": {
-      "sha256": "c3dda3c8799d68d0826252ad1aee6a4852de0a381ba8fb4e383128c3ec05962c",
+      "sha256": "6fdbd10445507d37d801562e96940cff709525587cafb462f30d8077d2592f40",
       "executable": false
     },
     "src/chat/dialog-focus.ts": {
@@ -3237,7 +3241,7 @@
       "executable": false
     },
     "src/chat/drafts.ts": {
-      "sha256": "1311d770432a2398b173612709ecddcbd8bd3120733d1bf95d773755e487f69c",
+      "sha256": "229781b68875b5a434807f39eee854c4dd2980bbc68fafdaa09ab2c7752c554b",
       "executable": false
     },
     "src/chat/icons.tsx": {
@@ -3253,7 +3257,7 @@
       "executable": false
     },
     "src/chat/MessageRow.tsx": {
-      "sha256": "8a51c69f93b416f47b738197a34ec6291e3ccbeb36bfb497535cc13c478189f4",
+      "sha256": "ee2aa7f3156a545dac8121dd5d035d8090ae7730a65e73c4f1c3cdf8aa551e71",
       "executable": false
     },
     "src/chat/Navigation.tsx": {
@@ -3301,11 +3305,11 @@
       "executable": false
     },
     "src/chat/ThreadsView.tsx": {
-      "sha256": "b68942a3c6e15751e3345cc085e72e35decb21ac6fe51df7461b1f8d491db401",
+      "sha256": "a0cee7c7e83875304cbd0f1782c4a7716962e2d9f05062a609645bab3b773210",
       "executable": false
     },
     "src/chat/types.ts": {
-      "sha256": "01e3b54a8a69763699333204917194ac040711d92704aee294015c18a8082ca4",
+      "sha256": "e46391296972ea20dbb2840954f5bcedc1ea4a7d06b63a3165518fbd6b0cb8ed",
       "executable": false
     },
     "src/chat/useAttachmentUpload.ts": {
@@ -3937,7 +3941,7 @@
       "executable": false
     },
     "src/platform/storage/archive-validation.mjs": {
-      "sha256": "26c159db507b7a39f9f87cb7396a9dea3bd68152fb5413f170a58c78f55d751f",
+      "sha256": "9c257c091c0d0852e0614708e1bfd9c1edc907c82f3d9478d43a8e4d6c2d2c1e",
       "executable": false
     },
     "src/platform/storage/commands.ts": {
@@ -3965,7 +3969,7 @@
       "executable": false
     },
     "src/platform/storage/messages.ts": {
-      "sha256": "59e4b01f8d7e7bb2d7466620321f3605b0f12a94942db3d63a0b8e147fd321f3",
+      "sha256": "02069e25c5afbafddccdc6ff8304478b09a81928e68c63a04116ce7e3b558427",
       "executable": false
     },
     "src/platform/storage/outcome-history.ts": {
@@ -3981,7 +3985,7 @@
       "executable": false
     },
     "src/platform/storage/read.ts": {
-      "sha256": "f6c948a1e8164bc30efc8170a58a5d15ef3c8c6540903999498eac573009e647",
+      "sha256": "a566bb859896ac0dacf965b0e87a8e5b155d7ed58bac67c8d7ac2f10a60e001d",
       "executable": false
     },
     "src/platform/storage/threads.ts": {
@@ -4145,7 +4149,7 @@
       "executable": false
     },
     "src/team/ChannelSettings.tsx": {
-      "sha256": "d1f8218be1dd7f2bfeddddbdd57bfd16e179a18afceae1d58b93b88164858e6c",
+      "sha256": "58fcd1de1f4766fa286ce91ac1ffddaf3c77532d26cfe63a3357be135a05f75f",
       "executable": false
     },
     "src/team/conversation-notify.server.ts": {
@@ -4205,7 +4209,7 @@
       "executable": false
     },
     "src/team/erasure/graph.ts": {
-      "sha256": "c7020f4170e4611ac3ebbbc80103be72839b1a84005fb32da73668f7b2325e3b",
+      "sha256": "645b21b12aa37adbd111d5787e782dd78888acad6a0a5c847c3bc798bf26ca4c",
       "executable": false
     },
     "src/team/erasure/identity.ts": {
@@ -4308,6 +4312,22 @@
       "sha256": "f8027f115c6758734bab28fdc9b5563f6880cc5cac734f9ab7092063b683be23",
       "executable": false
     },
+    "src/team/posting-archive.mjs": {
+      "sha256": "4693626744d87dabdb52095c7ea0012c3801aebacafdbd459ca52d00c6dc9fdf",
+      "executable": false
+    },
+    "src/team/posting-policy.ts": {
+      "sha256": "cdcddc9b95bb7204118fd9e656f30e3e78bd483f2856ee448715460be8e9072b",
+      "executable": false
+    },
+    "src/team/posting.server.ts": {
+      "sha256": "23892e1dee8f53fd79816ea1df7004354f65d86741137257e39c1dfc1321980d",
+      "executable": false
+    },
+    "src/team/PostingSettings.tsx": {
+      "sha256": "f353bd6893d7fe1cf5030e0c915cfe7731860083b155c0cc2d146ab8beafd2b2",
+      "executable": false
+    },
     "src/team/preview.server.ts": {
       "sha256": "649dea7a6bf5bcbbcfb28ed706964c7ed804f04b6f780b448c36c13296b46b59",
       "executable": false
@@ -4325,7 +4345,7 @@
       "executable": false
     },
     "src/team/routes.server.ts": {
-      "sha256": "bc4dcbc97db2547103c0694efcd50fb29132f3eedc52c1cba5da468ba30d2f0a",
+      "sha256": "b2d7265f4742bf9c590771c9cc83e0644488e4213efddb191b816c4b7107710f",
       "executable": false
     },
     "src/team/saved-archive.mjs": {
@@ -4612,6 +4632,14 @@
       "sha256": "525d2ba10a5667c138a88d6da1194ccd8641d14468a6caa398ff9270e7b9fd4f",
       "executable": false
     },
+    "tests/posting-browser.mjs": {
+      "sha256": "693b75f64c48ddfb4bb8a2928f1cba3a9d9010f25d062f7ac1cc243145cc6d35",
+      "executable": false
+    },
+    "tests/posting.mjs": {
+      "sha256": "dec67da95d4472525b7e5bdb308c08135c946538954033527e11a0233bb919f7",
+      "executable": false
+    },
     "tests/push-journey.mjs": {
       "sha256": "280a9c67c6365c2c0802a250a5ac052c0e3a30edfab8d9c2bbb8dcd151795224",
       "executable": false
@@ -4681,7 +4709,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "e481efaa294ccdad68faf55b653c9a3914ccc837d7539c34ee111ffaae02f2e7",
+      "sha256": "4fdfff03811cdf124b5f3c6102a5d38936aee22a5ca99e82d625363116bb8cb9",
       "executable": false
     },
     "tests/saved-search.mjs": {
@@ -4773,7 +4801,7 @@
       "executable": false
     },
     "tests/team-portability.test.mjs": {
-      "sha256": "57c8049b624db921391ba26b336463cf6789916bfc69e7ce451df87d1780cfc3",
+      "sha256": "17d39dbf823acb237650d4e5bbca56f480a05017c2506b864f25440afd82a6a3",
       "executable": false
     },
     "tests/team-runtime.mjs": {

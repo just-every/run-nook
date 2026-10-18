@@ -29,6 +29,8 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare('INSERT INTO nook_default_policy VALUES(1,1)').run();
   f.db.prepare("INSERT INTO nook_default_channels VALUES('launch',1)").run();
   f.db.prepare("INSERT INTO nook_default_actions VALUES('default-audit',1,'launch',1,1,?,?)").run(f.owner.operatorId,now);
+  f.db.prepare("INSERT INTO nook_posting_policy VALUES('review','selected','same')").run();
+  f.db.prepare("INSERT INTO nook_posting_people VALUES('review',?)").run(f.owner.operatorId);
   const read=async table=>f.db.prepare('SELECT * FROM '+table).all();
   await validateTeamArchive({read});
   await assert.rejects(validateTeamArchive({read:async table=>table==='nook_guest_grants'?[{user:guest,conversation:'launch'}]:read(table)}),/invalid_guest_scope/);
@@ -62,6 +64,8 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   assert.equal((await f.call('/auth/operator/status',{operatorId:creator,status:'inactive'},f.ownerCookie)).status,200);
   await restoredArchive(await exportedArchive(f),{inspect:target=>{
    assert.deepEqual(target.db.prepare('SELECT id,target FROM nook_saved_items ORDER BY seq').all().map(row=>({...row})),[{id:'save-live',target:'m'},{id:'save-unavailable',target:'erased-source'}]);
+   assert.equal(target.db.prepare("SELECT level FROM nook_posting_policy WHERE conversation='review'").get().level,'selected');
+   assert.equal(target.db.prepare("SELECT user FROM nook_posting_people WHERE conversation='review'").get().user,f.owner.operatorId);
    assert.equal(target.db.prepare("SELECT actor FROM nook_channel_pins WHERE id='pin-live'").get().actor,f.owner.operatorId);
    assert.equal(target.db.prepare("SELECT mandatory FROM nook_default_channels WHERE conversation='launch'").get().mandatory,1);
    assert.equal(target.db.prepare("SELECT actor FROM nook_default_actions WHERE id='default-audit'").get().actor,f.owner.operatorId);

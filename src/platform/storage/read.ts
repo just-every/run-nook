@@ -1,3 +1,4 @@
+import {canPost} from '../../team/posting-policy'
 import {readConversationNotify,conversationNotifyExceptions} from '../../team/conversation-notify.server'
 import {channelColumns} from '../../team/channel-policy'
 import {allowedGrant,productAccess,visibleIdentity} from '../../team/access'
@@ -21,12 +22,12 @@ async function messageMetadata(c:Context,conversation:string,items:any[]){
  SELECT p.id,
  (SELECT COUNT(*) FROM nook_message_history reply WHERE reply.conversation=? AND reply.parent=p.id AND reply.deleted=0)+
  (SELECT COUNT(*) FROM nook_import_history reply JOIN nook_imports j ON j.id=reply.job WHERE reply.conversation=? AND reply.parent=p.id AND (reply.erased=0 OR reply.retained_body=1) AND j.state='complete' AND ${publishedImport}) AS replyCount,
- COALESCE(json_extract(n.routing,'$.urgent'),0) AS urgent,json_extract(n.routing,'$.urgentReason') AS urgentReason,
+ COALESCE(json_extract(n.routing,'$.adminOverride'),0) AS adminOverride,COALESCE(json_extract(n.routing,'$.urgent'),0) AS urgent,json_extract(n.routing,'$.urgentReason') AS urgentReason,
  (SELECT json_group_array(json_object('id',a.id,'name',a.name)) FROM json_each(n.routing,'$.mentions') recipient JOIN nook_actor_history a ON a.id=recipient.value) AS notified
  FROM requested p LEFT JOIN native n ON n.id=p.id`,[ids,conversation,conversation,conversation],conversation),
   messageReactions(c,conversation,items.filter(m=>!m.immutable&&!m.deleted).map(m=>m.id)),
  ])
- const metadata=new Map(rows.map(row=>[row.id,{replyCount:row.replyCount,urgent:!!row.urgent,urgentReason:row.urgentReason,notified:JSON.parse(row.notified)}]))
+ const metadata=new Map(rows.map(row=>[row.id,{replyCount:row.replyCount,adminOverride:!!row.adminOverride,urgent:!!row.urgent,urgentReason:row.urgentReason,notified:JSON.parse(row.notified)}]))
  return items.map(m=>({...m,...metadata.get(m.id),reactions:reactions[m.id]??[]}))
 }
 export async function message(c:Context,id:string){const m=await c.one(`SELECT m.*,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE a.name END AS authorName FROM nook_message_history m JOIN nook_actor_history a ON a.id=m.author WHERE m.id=? AND EXISTS(SELECT 1 FROM nook_members WHERE conversation=m.conversation AND user=?)`,[id,c.uid]);if(!m){const source=await c.one(`${importedSelect} WHERE r.id=? AND EXISTS(SELECT 1 FROM nook_members WHERE conversation=r.conversation AND user=?)`,[id,c.uid]);if(!source)fail(404,'Message unavailable');await c.check(source.conversation);return historicalMessage(c,source)}await c.check(m.conversation);const {payload,body_lower,ordinal,author_ordinal,...publicMessage}=m;return {...publicMessage,...(m.retained_body?{immutable:true,retainedSource:'native'}:{}),attachments:await c.rows(`SELECT ${attachmentColumns} FROM nook_attachment_history WHERE message=? ORDER BY position LIMIT 5`,[id],m.conversation)}}
@@ -37,7 +38,7 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
  if(action==='me'){const access=await c.one('SELECT mode FROM nook_access WHERE user=? AND active=1',[c.uid]);return {id:c.uid,name:c.session.operator.displayName,role:c.session.operator.role,mode:access?.mode}}
  if(action==='users')return c.rows(`SELECT o.id,o.display_name AS name,(SELECT mode FROM nook_access WHERE user=o.id) AS mode FROM oa_operators o WHERE o.status='active' AND ${productAccess('o.id')} AND ${visibleIdentity('?', 'o.id')} ORDER BY o.id LIMIT 1000`,[c.uid,c.uid,c.uid])
  if(action==='settings')return {dndUntil:(await c.one('SELECT dnd_until FROM nook_settings WHERE user=?',[c.uid]))?.dnd_until??null}
- if(action==='conversations')return c.rows(`SELECT c.id,c.name,c.kind,c.owner,c.seq,${channelColumns()},COALESCE(r.seq,0) AS readSeq,c.message_count-COALESCE(r.total,0)-COALESCE(a.total,0)+COALESCE(r.own,0)-(${threadReadCount('m.user','c.id','COALESCE(r.seq,0)')}) AS unread FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=m.user LEFT JOIN nook_author_counts a ON a.conversation=c.id AND a.user=m.user WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=c.id AND (j.state<>'complete' OR NOT (${publishedImport}))) ORDER BY c.id LIMIT 1000`,[c.uid]).then(rows=>rows.map(row=>({...row,archived:!!row.archived})))
+ if(action==='conversations')return c.rows(`SELECT c.id,c.name,c.kind,c.owner,c.seq,${channelColumns()},${canPost('c.id','m.user','NULL')} AS canPost,${canPost('c.id','m.user',"'thread'")} AS canReply,COALESCE(r.seq,0) AS readSeq,c.message_count-COALESCE(r.total,0)-COALESCE(a.total,0)+COALESCE(r.own,0)-(${threadReadCount('m.user','c.id','COALESCE(r.seq,0)')}) AS unread FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=m.user LEFT JOIN nook_author_counts a ON a.conversation=c.id AND a.user=m.user WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=c.id AND (j.state<>'complete' OR NOT (${publishedImport}))) ORDER BY c.id LIMIT 1000`,[c.uid]).then(rows=>rows.map(row=>({...row,archived:!!row.archived})))
  if(action==='historyWindow'){
   const window=await mixedWindow(c,id,input),messages=await messageMetadata(c,id,[...window.items,...(window.root?[window.root]:[])])
   return {...window,...await threadWindowRead(c,id,window),items:messages.slice(0,window.items.length),root:window.root?messages.at(-1):null}

@@ -6,7 +6,8 @@ import {usePrivateScope} from './usePrivateScope'
 import {IconAttach,IconClose,IconMention} from './icons'
 import {blankDraft,clearSentDraft,draftKey,readDraft,recordSendFailure,writeDraft,type Draft} from './drafts'
 import {MESSAGE_LIMIT} from '../family/team-chat/domain'
-export function Composer({user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,sendMessage,onSent,onError}:{user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
+export function Composer({restricted=false,user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,sendMessage,onSent,onError}:{restricted?:boolean;user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
+ const [override,setOverride]=useState(false)
  const fieldId=useId()
  const scope={user:user.id,conversation,parent},key=draftKey(scope)
  const isCurrent=usePrivateScope(privateSignal,key)
@@ -25,7 +26,7 @@ export function Composer({user,conversation,name,parent,members,privateSignal,vi
  const upload=useAttachmentUpload({conversation,isCurrent:active,getPending:()=>draftRef.current.upload,getCount:()=>draftRef.current.files.length,onPending:pending=>{if(!save({...draftRef.current,upload:pending},Boolean(pending))&&pending)throw Error('Upload was not started because its retry intent could not be saved in this browser.')},onUploaded:file=>save({...draftRef.current,upload:null,files:[...draftRef.current.files,file]}),onError})
  async function send(){
   if(!active()||sending.current||upload.isBusy()||draftRef.current.upload)return
-  const current=draftRef.current,pending=current.pending||{body:current.body,intent:crypto.randomUUID(),parent,attachments:current.files.map(f=>f.id),mentions:current.recipient?[current.recipient]:[],urgent:current.urgent,urgentReason:current.urgent?current.reason:null}
+  const current=draftRef.current,pending=current.pending||{body:current.body,intent:crypto.randomUUID(),parent,attachments:current.files.map(f=>f.id),mentions:current.recipient?[current.recipient]:[],urgent:current.urgent,urgentReason:current.urgent?current.reason:null,...(override?{adminOverride:true as const}:{})}
   if(!pending.body.trim()||pending.body.length>MESSAGE_LIMIT)return
   if(!save({...current,pending,delivery:'pending',failure:''},true))return
   sending.current=true;setBusy(true);const end=beginWrite()
@@ -53,7 +54,9 @@ export function Composer({user,conversation,name,parent,members,privateSignal,vi
  const showRouting=routingOpen||draft.urgent||Boolean(draft.recipient)
  const note=upload.uploading?'Uploading…':draft.upload?'Finish the file upload to send':''
  const overlength=draft.body.length>MESSAGE_LIMIT,countId=fieldId+'-count',retry=Boolean(draft.pending)&&!busy
+ if(restricted&&!override&&!draft.pending?.adminOverride)return <div className="archived-notice" role="status">Posting is restricted by this channel’s permissions. You can still read, react, save and follow.{(user.role==='owner'||user.role==='admin')&&<button className="text-button" onClick={()=>setOverride(true)}>Post with admin override</button>}</div>
  return <form className="composer" data-urgent={draft.urgent||undefined} onSubmit={e=>{e.preventDefault();void send()}}>
+  {(override||draft.pending?.adminOverride)&&<p className="draft-note">This post will be labelled and audited as an admin override. <button type="button" className="text-button" onClick={()=>setOverride(false)}>Cancel override</button></p>}
   <label className="sr-only" htmlFor={'compose-'+(parent||'root')}>{parent?'Reply in thread':'Message '+name}</label>
   <textarea ref={textarea} id={'compose-'+(parent||'root')} rows={1} value={draft.body} readOnly={locked} required placeholder={parent?'Reply in thread…':`Message ${name}…`} aria-invalid={overlength||undefined} aria-describedby={hintId+(draft.body.length>=36000?' '+countId:'')} onChange={e=>save({...draftRef.current,body:e.target.value,delivery:'draft',failure:''})} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(draft.body.trim())void send()}}}/>
   <label className={'attach-button icon-button'+(locked?' disabled':'')} title="Attach file"><IconAttach/><span className="sr-only">Attach file</span><input aria-label="Attach file" type="file" accept=".txt,.png,.jpg,.jpeg,.pdf" disabled={locked||upload.uploading} onChange={e=>{const file=e.target.files?.[0];if(file)void upload.select(file);e.target.value=''}}/></label>

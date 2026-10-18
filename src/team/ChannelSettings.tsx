@@ -1,4 +1,5 @@
 import {useEffect,useId,useState} from 'react'
+import {PostingSettings} from './PostingSettings'
 import {api} from '../chat/api'
 import type {Conversation,Person} from '../chat/types'
 import './channel-settings.css'
@@ -32,6 +33,7 @@ export function ChannelSettings({conversation,members,user,refresh,onLeft}:Props
     {details.archived?<button className="soft-button" disabled={busy} onClick={()=>void change('/archive',{version:details.version,archived:false})}>Restore channel</button>:<button className="text-button" disabled={busy||!!details.archiveReason} onClick={()=>setConfirm('archive')}>Archive channel</button>}
     {details.archiveReason&&<p className="dialog-note">{details.archiveReason}</p>}
    </>:details.topic&&<p className="channel-topic">{details.topic}</p>}
+   <PostingSettings id={conversation.id} version={details.version} canManage={details.canManage} members={members} refresh={async()=>{await load();await refresh()}}/>
    {confirm==='archive'&&<div className="channel-confirm"><p>Archive #{details.name}? Members keep the history. New messages, replies and uploads stop until the channel is restored.</p><button className="danger-button" disabled={busy} onClick={()=>void change('/archive',{version:details.version,archived:true})}>Confirm archive</button><button className="soft-button" disabled={busy} onClick={()=>setConfirm(null)}>Keep channel open</button></div>}
    {confirm==='leave'?<div className="channel-confirm"><p>Leave #{details.name}? Your messages stay. {details.kind==='private'?'A manager must add you again to return.':'You can rejoin it from Browse public channels.'}</p><button className="danger-button" disabled={busy} onClick={()=>void leave()}>Confirm leave</button><button className="soft-button" disabled={busy} onClick={()=>setConfirm(null)}>Stay in channel</button></div>:<button className="text-button" disabled={busy||!details.canLeave} onClick={()=>setConfirm('leave')}>Leave channel</button>}
    {!details.canLeave&&details.leaveReason&&<p className="dialog-note">{details.leaveReason}</p>}

@@ -418,8 +418,8 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Published | 15 | 2 | 0 | 17 |
-| Target and push further | 1 | 23 | 39 | 63 |
-| All | 16 | 25 | 39 | 80 |
+| Target and push further | 1 | 24 | 38 | 63 |
+| All | 16 | 26 | 38 | 80 |
 
 | Clause | Title | Kind | Status | Evidence | Gap |
 | --- | --- | --- | --- | --- | --- |
@@ -484,7 +484,7 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | `NOOK-063` | Slack-compatible webhooks and Web API | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-064` | Zapier, Make and n8n connectors | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-065` | Channel-wide mentions: @channel, @here and @everyone | target | missing |  | No implementing source/test; acceptance journey above is pending. |
-| `NOOK-066` | Channel posting permissions and announcement channels | target | missing |  | No implementing source/test; acceptance journey above is pending. |
+| `NOOK-066` | Channel posting permissions and announcement channels | target | partial | `src/team/posting.server.ts`; `src/team/posting-policy.ts`; `src/team/PostingSettings.tsx`; `src/platform/storage/messages.ts`; `tests/posting.mjs`; `tests/posting-browser.mjs`; `tests/team-portability.test.mjs` | Web/API announcement permissions ship for everyone, owners/admins, channel manager or named members, with independent replies, atomic send/edit fences, labelled admin override, channel audit, archive validation and erasure of named grants. User groups, broadcast policy and app/webhook/workflow/scheduler/native write-door acceptance remain missing with their underlying features. |
 | `NOOK-067` | Forwarding messages and email into conversations | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-068` | Safe link previews and app unfurls | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-069` | Two-factor authentication without SSO | target | missing |  | No implementing source/test; acceptance journey above is pending. |

@@ -2,6 +2,8 @@
 const userEdge=(table:string,key:string[],column='user')=>({table,key,from:'nook_actors',on:{[column]:'id'},phase:'identity' as const})
 const messageEdge=(table:string,key:string[])=>({table,key,from:'nook_messages',on:{message:'id'}})
 export const retained = [
+ {table:'nook_posting_policy',reason:'Channel posting levels retain no person or private body.'},
+ {table:'nook_posting_changes',reason:'Body-free permission modes, counts and channel audit links survive; channel action actor attribution is independently erased.'},
  {table:'nook_default_actions',reason:'Organization policy history retains channel IDs, flags, versions and times; erased people lose their audit attribution.'},
  {table:'nook_saved_items',reason:'Other people retain private source IDs or scoped URLs and save times. Only current ACL and live sources hydrate them; erased owners lose their rows.'},
  {table:'nook_channel_pins',reason:'Shared pins retain source IDs and pin times without body copies. Unavailable sources become tombstones and erased actors lose attribution.'},
@@ -31,7 +33,7 @@ export const graph={
   {table:'nook_import_actors',key:['job','source_id'],from:'nook_actors',on:{association:'id'},hook:'importedStep'},
   {table:'nook_outcomes',key:['id'],from:'nook_actors',on:{assignee:'id'},hook:'detachAssignee'},
   userEdge('nook_reads',['conversation','user']),userEdge('nook_preferences',['user','conversation']),userEdge('nook_thread_follows',['user','message']),userEdge('nook_thread_unfollows',['user','message']),userEdge('nook_thread_reads',['user','message']),userEdge('nook_settings',['user']),userEdge('nook_attention',['id']),userEdge('nook_notify_preferences',['user']),userEdge('nook_push_presence',['page']),userEdge('nook_push_devices',['id']),userEdge('nook_notify_queue',['id']),userEdge('nook_notify_queue',['id'],'actor'),userEdge('nook_reactions',['message','user','emoji']),
-  userEdge('nook_saved_items',['seq']),userEdge('nook_conversation_notify',['user','conversation']),userEdge('nook_default_admissions',['user']),
+  userEdge('nook_posting_people',['conversation','user']),userEdge('nook_saved_items',['seq']),userEdge('nook_conversation_notify',['user','conversation']),userEdge('nook_default_admissions',['user']),
   {table:'oa_provider_sessions',key:['session_id'],from:'oa_sessions',on:{session_id:'id'},hook:'authIdentity'},
   {table:'oa_provider_session_pins',key:['session_id'],from:'oa_sessions',on:{session_id:'id'},hook:'authIdentity'},
   userEdge('oa_owner_signins',['id'],'operator_id'),userEdge('oa_credentials',['id'],'operator_id'),

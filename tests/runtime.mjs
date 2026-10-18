@@ -109,6 +109,7 @@ try {
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
  await(await import('./threads.mjs')).threadJourney(normalizedHarness)
  await(await import('./channel-lifecycle.mjs')).channelLifecycleJourney(normalizedHarness)
+ await(await import('./posting.mjs')).postingJourney(normalizedHarness)
  await(await import('./saved-search.mjs')).savedSearchJourney(normalizedHarness)
  await(await import('./media-adversarial.mjs')).runMedia(normalizedHarness)
  await check('actual team invitations, scopes, reactions, preview and revocation',async()=>{await(await import('./team-runtime.mjs')).runTeamSurfaces({origin,ownerCookie:owner.cookie})})
@@ -116,6 +117,7 @@ try {
  }
  if(suite!=='core-api'){
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
+  await check('NOOK-066 posting settings and restricted composers at both widths',async()=>{await(await import('./posting-browser.mjs')).postingBrowser({origin,owner,member})})
   await check('React/Start desktop and mobile native journey',async()=>{await(await import('./browser.mjs')).runBrowser(origin,resolve(root,'evidence/nook-1'))})
   await check('owner/admin erasure, modal keyboard containment and accessibility at desktop/mobile widths',async()=>{await(await import('./erasure-browser-support.mjs')).runErasureJourney({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1/erasure')})})
   await check('keyboard focus, routing drafts and visible read frontier',async()=>{await(await import('./keyboard.mjs')).runKeyboard(origin,resolve(root,'evidence/nook-1'))})

@@ -6,6 +6,7 @@ import {slackArchivePlans} from '../../imports/archive-plan.mjs';
 import {validateSlackArchiveRecords} from '../../imports/archive-records.mjs';
 import {validateTeamArchive} from '../../team/portability.mjs';
 import {validateChannelArchive} from '../../team/channel-archive.mjs';
+import {validatePostingArchive} from '../../team/posting-archive.mjs';
 import {validateSavedArchive} from '../../team/saved-archive.mjs';
 // Offline archive graph validation. Linear indexes replace per-row scans so a
 // team's full history can be checked without quadratic work or a workspace cell.
@@ -36,6 +37,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const actors=index(rows('actors'),a=>a.id,'duplicate_actor'),conv=index(rows('conversations'),c=>c.id,'duplicate_conversation'),msg=index(rows('messages'),m=>m.id,'duplicate_message'),out=index(rows('outcomes'),o=>o.id,'duplicate_outcome'),files=index(rows('attachments'),a=>a.id,'duplicate_attachment');
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
  await validateDefaultChannels(readTable,manifest,actors,conv);
+ await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
  await validateSavedArchive(readTable,{manifest,actors,conversations:conv,messages:msg,imported,attachments:files});
  const notifyRows=manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_conversation_notify')?[]:await readTable('nook_conversation_notify');
@@ -60,7 +62,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
   if(m.parent){const parent=msg.get(m.parent)??imported.get(m.parent);check(parent?.conversation===m.conversation&&parent.parent===null,'invalid_thread');}
   const rs=(revisions.get(m.id)??[]).sort((a,b)=>a.version-b.version);check(m.erased?rs.length===0:rs.length>0&&rs.at(-1).version===m.version&&rs.at(-1).body===m.body,'message_revision_mismatch');
   if(m.deleted)check(m.body===''&&m.payload==='[erased]'&&rs.every(r=>r.body===''),'deleted_message_retained');else{
-   check(rs.length===m.version&&rs.every((r,i)=>r.version===i+1),'missing_message_revision');let p;try{p=JSON.parse(m.payload)}catch{}check(p&&Object.keys(p).sort().join()==='attachments,body,mentions,parent,urgent,urgentReason'&&typeof p.body==='string'&&p.body===rs[0].body&&p.parent===m.parent&&Array.isArray(p.attachments)&&p.attachments.length<=5&&new Set(p.attachments).size===p.attachments.length,'invalid_intent');
+   check(rs.length===m.version&&rs.every((r,i)=>r.version===i+1),'missing_message_revision');let p;try{p=JSON.parse(m.payload)}catch{}check(p&&(Object.keys(p).sort().join()==='attachments,body,mentions,parent,urgent,urgentReason'||p.adminOverride===true&&Object.keys(p).sort().join()==='adminOverride,attachments,body,mentions,parent,urgent,urgentReason')&&typeof p.body==='string'&&p.body===rs[0].body&&p.parent===m.parent&&Array.isArray(p.attachments)&&p.attachments.length<=5&&new Set(p.attachments).size===p.attachments.length,'invalid_intent');
    check(Array.isArray(p.mentions)&&p.mentions.length<=50&&new Set(p.mentions).size===p.mentions.length&&p.mentions.every(id=>participant(m.conversation,id))&&typeof p.urgent==='boolean'&&(p.urgent?p.mentions.length&&string(p.urgentReason)&&p.urgentReason.length<=240:p.urgentReason===null),'invalid_intent_attention');
    for(let position=0;position<p.attachments.length;position++){const a=files.get(p.attachments[position]);check(a&&a.message===m.id&&a.conversation===m.conversation&&a.author===m.author&&a.position===position&&['attached','deleted'].includes(a.state),'invalid_ordered_attachment')}
   }
