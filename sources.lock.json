@@ -613,7 +613,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "69f85d53d918c9df0b1bb02bc26a0ff46d47710f7b27a3c1508291f7d959201b",
+      "sha256": "cc82f9855d15fd7cf7aae9dffc8a4566c30682112190e9c651b3a2fe33647855",
       "executable": false
     },
     "AGENTS.md": {
@@ -725,7 +725,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "b9743cbaf3016a476497a2893dff189bf88884460c0c0c82a0ec86cb857e06f4",
+      "sha256": "f0a0ffb3dc05944a42b317d7ebd9b96a4f8a4d40ec31ad338a1a0d345e6223b7",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
