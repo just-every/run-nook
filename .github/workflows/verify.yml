@@ -29,6 +29,8 @@ jobs:
           - stage: runtime browser
             # Both widths, Slack import, installed app and homepage remain on every push.
             command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime --suite=core-browser
+          - stage: readable exit
+            command: pnpm build:app && pnpm test:runtime --suite=readable-export
           - stage: thread delivery
             command: pnpm build:app && node --test --test-concurrency=1 tests/thread-delivery.mjs
           - stage: group conversion

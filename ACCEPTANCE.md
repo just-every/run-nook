@@ -1,7 +1,7 @@
 # Nook acceptance
 
 `rer verify` is the complete local command for the implemented evidence described below. It does not establish unimplemented target journeys. Push CI runs contracts,
-unit tests, runtime journeys at both widths, and notifications in eleven parallel
+unit tests, runtime journeys at both widths, and notifications in thirteen parallel
 jobs with 15-minute limits. The guided installer, full README and realistic pilot fresh-clone
 journeys at 1440 and 390 retain every assertion and run nightly, on release tags,
 and manually. It covers real Workers and local D1: runtime suites use the emitted build,
@@ -61,7 +61,7 @@ The pilot uses a realistic synthetic fixture shaped from Slack’s documentation
 Private inline image evidence is split between `tests/team-image.test.mjs`, which accepts genuine PNG bytes and rejects active content, truncation and corruption, and `tests/team-browser.mjs`, which loads a private image preview through the actual Worker at both widths. `ImagePreview.tsx` fetches the ACL-checked PNG/JPEG endpoint and renders a revocable blob URL; downloads remain forced attachments. These checks do not establish virus scanning.
 
 The separate docs site suite checks manifest coverage and rejects broken pages,
-anchors and raw HTML. `docs/site.json` currently publishes 11 public guide
+anchors and raw HTML. `docs/site.json` currently publishes 12 public guide
 routes. An earlier local browser pass exercised the sidebar, table of contents
 and pager at 1440/900/390; its axe check covered the docs home and the long
 mobile guide with its menu open.
@@ -308,7 +308,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
 - **NOOK-047 — Readable portability and controlled exit.** **Status: partial.** Export a populated workspace and a member-scoped conversation, read the HTML offline and enumerate JSON/file hashes against the source. Attempt another person’s DM as an ordinary admin, cancel/resume a large job, and verify all omissions are named. A successful operational backup alone does not prove readable exit.
 
-  Current evidence: `src/platform/storage/portability.mjs`; `src/platform/portability.server.ts`; `tests/exit-export.test.mjs`; `tests/team-portability.test.mjs`. Complete owner/operator backup with media and provenance ships; human-readable/selective exit and future feature exports remain missing.
+  Current evidence: `src/exit/routes.ts`; `src/exit/store.ts`; `src/exit/pages.ts`; `src/exit/files.ts`; `src/exit/catalog.ts`; `src/exit/format.ts`; `src/exit/ReadableExport.tsx`; `src/exit/archive.mjs`; `tests/readable-export.test.mjs`; `tests/readable-export-archive.test.mjs`; `tests/readable-export-browser.mjs`. Current-member conversation/permitted-scope exports ship as versioned JSON, JSONL and self-contained offline HTML with complete paged native/imported threads, recorded revisions/tombstones, reactions, decisions, acceptance history, source mappings and checksum-verified attached bytes. Durable cancel/reload/resume and count reconciliation expose completeness; selected-source changes, corruption and current-ACL revocation block download. Jobs retain no copied bodies/bytes and do not survive operational restore; exact post-adoption membership history does. Remaining: organization-wide/protected compliance policy and authority (NOOK-039), and workflow/app/agent artifacts when their underlying features ship. Earlier membership direction/time and source revisions never recorded by Nook cannot be reconstructed; each is explicitly named as a source omission. Browser assembly requires memory for the selected records and embedded bytes; scope can be narrowed without a record cap.
 
 - **NOOK-048 — Team administration and reporting.** **Status: missing.** Populate a US 35-person team with guests, a private management channel, missed notifications and overdue linked work. Compare filtered report totals to authorized records, export CSV, remove a viewer’s access and verify both aggregates and drill-through stop exposing that scope; show a failed sync as incomplete data. Repeat totals and drill-through at the NOOK-049 capacity installation (1,000 members, 5,000 channels).
 

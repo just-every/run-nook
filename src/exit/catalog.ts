@@ -1,0 +1,40 @@
+import {publishedImport} from '../imports/projection'
+import {messageAuthorLabel,actorLabel} from '../imports/slack-records.mjs'
+import type {ExportRecord} from './types'
+
+type Dataset={name:string;sql:string;project?:(row:Record<string,any>)=>Record<string,any>}
+const scoped=(alias:string)=>`${alias}.conversation IN (SELECT conversation FROM scope)`
+const source=`JOIN nook_imports j ON j.id=r.job AND j.state='complete' AND ${publishedImport}`
+// Keys are injective JSON tuples. Their lexical order is a paging order only;
+// readers sort timestamps/version numbers for display, never infer chronology.
+export const datasets:Dataset[]=[
+ {name:'conversations',sql:`SELECT json_array(c.id) AS _key,c.id AS conversation,c.id,c.name,c.kind,c.owner,c.seq,c.version,s.topic,s.archived,s.manager FROM nook_conversations c LEFT JOIN nook_channel_settings s ON s.conversation=c.id WHERE c.id IN (SELECT conversation FROM scope)`},
+ {name:'members',sql:`SELECT json_array(m.conversation,m.user) AS _key,m.conversation,m.user,a.name,a.erased FROM nook_members m LEFT JOIN nook_actor_history a ON a.id=m.user WHERE ${scoped('m')}`},
+ {name:'dm_roster',sql:`SELECT json_array(m.conversation,m.user) AS _key,m.conversation,m.user,a.name,a.erased FROM nook_dm_roster m LEFT JOIN nook_actor_history a ON a.id=m.user WHERE ${scoped('m')}`},
+ {name:'membership_history',sql:`SELECT json_array(m.conversation,m.seq) AS _key,m.conversation,m.seq,m.user,m.action,m.at FROM nook_exit_membership m WHERE ${scoped('m')}`},
+ {name:'messages',sql:`SELECT json_array(m.conversation,m.id) AS _key,m.conversation,m.id,m.author,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE a.name END AS authorName,m.body,m.parent,m.version,m.deleted,m.erased,m.retained_body,m.created,m.sequence FROM nook_message_history m LEFT JOIN nook_actor_history a ON a.id=m.author WHERE ${scoped('m')}`},
+ {name:'message_versions',sql:`SELECT json_array(m.conversation,r.message,r.version) AS _key,m.conversation,r.message,r.version,r.body,r.at FROM nook_revisions r JOIN nook_messages m ON m.id=r.message WHERE ${scoped('m')}`},
+ {name:'reactions',sql:`SELECT json_array(m.conversation,r.message,r.user,r.emoji) AS _key,m.conversation,r.message,r.user,a.name AS actorName,r.emoji,r.created FROM nook_reactions r JOIN nook_messages m ON m.id=r.message LEFT JOIN nook_actor_history a ON a.id=r.user WHERE ${scoped('m')}`},
+ {name:'outcomes',sql:`SELECT json_array(o.conversation,o.id) AS _key,o.conversation,o.id,o.author,a.name AS authorName,o.assignee,b.name AS assigneeName,o.kind,o.body,o.source,o.source_version,o.version,o.status,o.deadline,o.erased,EXISTS(SELECT 1 FROM nook_erased_assignees e WHERE e.outcome=o.id) AS assigneeErased FROM nook_outcome_history o LEFT JOIN nook_actor_history a ON a.id=o.author LEFT JOIN nook_actor_history b ON b.id=o.assignee WHERE ${scoped('o')}`},
+ {name:'outcome_versions',sql:`SELECT json_array(o.conversation,v.outcome,v.version) AS _key,o.conversation,v.outcome,v.version,v.actor,a.name AS actorName,v.body,v.status,v.deadline FROM (SELECT outcome,version,actor,body,status,deadline FROM nook_outcome_versions UNION ALL SELECT outcome,version,NULL,body,status,deadline FROM nook_erased_outcome_actions) v JOIN nook_outcomes o ON o.id=v.outcome LEFT JOIN nook_actor_history a ON a.id=v.actor WHERE ${scoped('o')}`},
+ {name:'events',sql:`SELECT json_array(e.conversation,e.seq) AS _key,e.conversation,e.seq,e.kind,e.object,e.actor FROM nook_events e WHERE ${scoped('e')}`},
+ {name:'imported_messages',sql:`SELECT json_array(r.conversation,r.id) AS _key,r.conversation,r.id,r.job,r.key,r.source_actor,r.source_timestamp,r.source_record,r.body,r.parent,r.sequence,r.erased,r.retained_body,j.namespace,a.source_record AS actor_record,(SELECT json_group_array(f.source_id) FROM nook_import_files f JOIN nook_attachments af ON af.id=f.attachment AND af.state='attached' WHERE f.message=r.id) AS supplied_files FROM nook_import_history r ${source} LEFT JOIN nook_import_actors a ON a.job=r.job AND a.source_id=r.source_actor WHERE ${scoped('r')}`,project:row=>{
+  const {source_record,actor_record,supplied_files,...data}=row,record=JSON.parse(source_record),actor=JSON.parse(actor_record??'{}'),supplied=JSON.parse(supplied_files??'[]')
+  const references=[...(Array.isArray(record.files)?record.files:[]),...(record.file?[record.file]:[])]
+  return {...data,authorName:row.erased?(row.retained_body?'Former member':'Erased author'):messageAuthorLabel(actor,record)??row.source_actor,sourceRecord:record,
+   reactions:Array.isArray(record.reactions)?record.reactions:[],
+   omissions:references.filter(f=>!supplied.includes(f.id)).map(f=>({code:'source-file-unavailable',sourceId:f.id??null,name:f.name??null,reason:'The source referenced this file but Nook has no attached bytes. External file URLs were not fetched.'}))}
+ }},
+ {name:'source_conversations',sql:`SELECT json_array(ch.conversation,ch.job,ch.source_id) AS _key,ch.conversation,ch.job,ch.source_id,j.namespace,ch.source_record FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job AND j.state='complete' AND ${publishedImport} WHERE ${scoped('ch')}`,project:row=>{const {source_record,...data}=row;return {...data,sourceRecord:JSON.parse(source_record)}}},
+ {name:'source_actors',sql:`SELECT DISTINCT json_array(r.conversation,a.job,a.source_id) AS _key,r.conversation,a.job,a.source_id,a.association,a.source_record FROM nook_import_actors a JOIN nook_import_records r ON r.job=a.job AND (r.source_actor=a.source_id OR instr(r.body,'<@'||a.source_id||'>')>0 OR instr(r.body,'<@'||a.source_id||'|')>0 OR EXISTS(SELECT 1 FROM json_each(r.source_record,'$.reactions') reaction JOIN json_each(reaction.value,'$.users') person WHERE person.value=a.source_id)) ${source} WHERE ${scoped('r')}`,project:row=>{const {source_record,...data}=row;const source=JSON.parse(source_record);return {...data,name:actorLabel(source)??row.source_id,bot:source.is_bot===true,app:source.is_app_user===true}}},
+ {name:'source_files',sql:`SELECT json_array(r.conversation,f.id) AS _key,r.conversation,f.id,f.job,f.message,f.source_id,f.attachment,f.position FROM nook_import_files f JOIN nook_import_history r ON r.id=f.message ${source} WHERE ${scoped('r')}`},
+ {name:'files',sql:`SELECT json_array(a.conversation,a.id) AS _key,a.conversation,a.id,a.author,a.message,a.name,a.mime,a.size,a.sha256,a.state,a.created,a.position,a.erased FROM nook_attachment_history a WHERE ${scoped('a')} AND a.message IS NOT NULL AND a.state IN ('attached','deleted')`,project:row=>({...row,link:row.state==='attached'?'sha256:'+row.sha256:null,omission:row.state==='deleted'?'File bytes and identifying metadata were deleted or erased.':null})},
+ {name:'pins',sql:`SELECT json_array(p.conversation,p.id) AS _key,p.conversation,p.id,p.message,p.actor,p.created FROM nook_channel_pins p WHERE ${scoped('p')}`},
+ {name:'posting_policy',sql:`SELECT json_array(p.conversation) AS _key,p.conversation,p.level,p.replies FROM nook_posting_policy p WHERE ${scoped('p')}`},
+ {name:'posting_people',sql:`SELECT json_array(p.conversation,p.user) AS _key,p.conversation,p.user FROM nook_posting_people p WHERE ${scoped('p')}`},
+ {name:'channel_history',sql:`SELECT json_array(a.conversation,a.id) AS _key,a.conversation,a.id,a.version,a.sequence,a.action,a.actor,a.subject,a.created,p.level,p.replies,p.people FROM nook_channel_actions a LEFT JOIN nook_posting_changes p ON p.action=a.id WHERE ${scoped('a')}`},
+]
+export function exportRecord(dataset:Dataset,row:Record<string,any>):ExportRecord {
+ const {_key,...data}=row
+ return {type:dataset.name,conversation:data.conversation,data:dataset.project?dataset.project(data):data}
+}

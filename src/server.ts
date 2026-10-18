@@ -1,3 +1,4 @@
+import {readableExportRoute} from './exit/routes'
 import {broadcastRecipients} from './broadcast/recipients'
 import {BroadcastConfirmation,BroadcastDenied,previewBroadcast} from './broadcast/audience'
 import {broadcastPolicy,updateBroadcastPolicy,readIgnore,updateIgnore} from './broadcast/settings'
@@ -54,7 +55,8 @@ api.all('/api/*', async c => {
  }
  const p = url.pathname.split('/').filter(Boolean), action = p[1], id = p[2] ?? '', sub = p[3]
  // Authentication precedes route matching, including unknown protected paths.
- const session=await repository.authenticated(req.headers),team=await teamRoute(session,req,input);if(team)return team
+ const session=await repository.authenticated(req.headers),exit=await readableExportRoute(session,req,input);if(exit)return exit
+ const team=await teamRoute(session,req,input);if(team)return team
  if(action==='messages'&&id&&sub==='broadcast-recipients'&&p.length===4&&req.method==='GET')return c.json(await broadcastRecipients(session,id,url.searchParams.get('after')??''))
  if(action==='broadcast'&&id==='presence'&&p.length===3&&req.method==='GET')return c.json({away:!!(await session.one('SELECT away FROM nook_broadcast_choices WHERE user=?',[session.uid]))?.away})
  if(action==='broadcast'&&id==='presence'&&p.length===3&&req.method==='POST')return c.json(await broadcastPresence(session,input as Record<string,unknown>))

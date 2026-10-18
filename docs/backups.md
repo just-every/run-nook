@@ -59,3 +59,7 @@ Slack imports travel in the genuine archive with their immutable source history,
 Deleting a message from the live workspace does not change an archive or backup created earlier. Keep old archives private and apply your own retention policy to every copy.
 
 Normal exports also save a private erasure journal as `<archive>.journal.rer`. Keep the latest sidecar with your backup. See [Deleting and erasing](deleting-and-erasing.md) for restore refusal and the limit when a new installation has never received a later journal.
+
+## Readable conversation copies
+
+For offline HTML, versioned JSON or JSONL of the conversations you can currently read, use **You → Readable export**, or **Details → Readable export** for one conversation. These copies include recorded threads, history, reactions, outcomes and checksum-verified attached bytes. They follow membership and grant no organization-wide compliance authority. See [Readable exports](readable-export.md) for preparation, cancellation/resume, source omissions and the documented format. Keep operational backups as well when you need to restore a Nook installation.

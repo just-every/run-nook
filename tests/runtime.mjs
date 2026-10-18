@@ -16,7 +16,7 @@ import {mailEdge} from './mail-edge.mjs'
 
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
-assert.ok(['all','core','core-api','core-api-storage','core-api-product','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
+assert.ok(['all','core','core-api','core-api-storage','core-api-product','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']
@@ -91,10 +91,11 @@ try {
  for(const file of assets.filter(x=>x.startsWith('loaders-')&&x.endsWith('.js'))) { const source=await readFile(resolve(root,'dist/server/assets',file),'utf8'); fnId=source.match(/id: "([a-f0-9]{64})",\s*name: "loadWorkspace"/)?.[1] ?? fnId }
  let broadcastFixture
  assert.ok(fnId,'private generated transport must exist in emitted artifact')
- if(['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads'].includes(suite)){
+ if(['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export'].includes(suite)){
  const post=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status});
  if(suite==='slack-imports'){await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>{await stop();await start(port)},sql})})}
  else if(suite==='conversion'){await(await import('./group-conversion.mjs')).offboardedConversion({post,get,owner,member,registered,check,validateArchive,restart:async()=>{await stop();await start(port)}})}
+ else if(suite==='readable-export'){await check('NOOK-047 readable scoped exports at both widths',()=>import('./readable-export-browser.mjs').then(m=>m.readableExportBrowser({origin,owner,member})))}
  else if(suite==='threads'){await(await import('./threads.mjs')).threadJourney({post,get,patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),registered,check,restart:async()=>{await stop();await start(port)}})}
  else if(suite==='keyboard'){await check('NOOK-052 authoritative last edit and current-ACL quick navigation at both widths',()=>import('./keyboard-gaps.mjs').then(m=>m.keyboardGaps({origin,owner,member})))}
  else if(suite==='composition'){const harness={post,get,request,owner,member,outsider,registered,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin};if(!process.argv.includes('--browser-only'))await(await import('./profiles.mjs')).profilesJourney(harness);if(!withoutBrowser)await check('NOOK-017 composition and personal workspace at both widths',()=>import('./composition-browser.mjs').then(m=>m.compositionBrowser({origin,owner,member,outsider,destination:'evidence/composition'})))}
@@ -107,7 +108,7 @@ try {
  else{if(!process.argv.includes('--browser-only'))await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,registered,validateArchive,restart:async()=>{await stop();await start(port)},sql});
  if(!withoutBrowser)await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
  }
- if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads'].includes(suite)){
+ if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export'].includes(suite)){
  if(suite!=='core-api-product'){
  await check('BASE-ACCESS-002 same-wire missing/expired/revoked/valid session matrix',async()=>{
   for(const [label,cookie,valid] of [['missing','',false],['expired',expired.cookie,false],['revoked',revoked.cookie,false],['valid',owner.cookie,true]]) {
@@ -151,10 +152,11 @@ try {
  await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{const checks=await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>restart({transferFaults:null}),sql});evidence.slackImports=checks})
  }
  }
- if(!['core-api','core-api-storage','core-api-product'].includes(suite)&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads'].includes(suite)){
+ if(!['core-api','core-api-storage','core-api-product'].includes(suite)&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export'].includes(suite)){
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
   broadcastFixture??=await(await import('./broadcast.mjs')).broadcastJourney({check,post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,sql,origin:()=>origin,restart:async()=>{await stop();await start(port)}})
   await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people:broadcastFixture.people})
+  if(['all','core'].includes(suite))await check('NOOK-047 readable scoped exports at both widths',()=>import('./readable-export-browser.mjs').then(m=>m.readableExportBrowser({origin,owner,member})))
   await check('NOOK-019 Files at both widths',async()=>{await(await import('./files-browser.mjs')).filesBrowser({origin,owner,member,destination:'evidence/files'})})
   await check('NOOK-017 Drafts and sent at both widths',async()=>{await(await import('./personal-browser.mjs')).personalBrowser({origin,owner,member})})
   await check('NOOK-033 reminder journeys at both widths',async()=>{await(await import('./reminders-browser.mjs')).remindersBrowser({origin,owner,member})})
@@ -176,7 +178,7 @@ try {
  if(['all','core','core-api','core-api-product','installer'].includes(suite))await(await import('./profiles.mjs')).profilesJourney({post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin})
  await stop()
  if(suite==='all'||suite==='core')await new Promise((ok,bad)=>{const child=spawn(process.execPath,['tests/runtime.mjs','--suite=conversion'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Isolated group-conversion journey failed')))})
- if(suite!=='core-api-product'&&suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
+ if(suite!=='core-api-product'&&suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  if(['all','core','threads'].includes(suite))await new Promise((ok,bad)=>{const child=spawn(process.execPath,['--test','--test-concurrency=1','tests/thread-delivery.mjs'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Thread delivery journey failed')))})
  await lossConfig.close();lossConfig=null
  }

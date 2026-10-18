@@ -62,6 +62,11 @@
           "slug": "updating",
           "source": "docs/updating.md",
           "label": "Updating and deploying"
+        },
+        {
+          "slug": "readable-export",
+          "source": "docs/readable-export.md",
+          "label": "Readable exports"
         }
       ]
     }
