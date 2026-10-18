@@ -4549,7 +4549,7 @@
       "executable": false
     },
     "tests/owner-deploy.test.mjs": {
-      "sha256": "c09666c8fb2dbe9aadf800318d168f696141d4b5fc575fd4a7502f0907cdb797",
+      "sha256": "0a89f2c27f015b66af15b4ae87a264169d6fe8f39ff76732f697f7e2901e69df",
       "executable": false
     },
     "tests/part6-source.mjs": {

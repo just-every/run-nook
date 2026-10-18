@@ -18,7 +18,7 @@ test('rer deploy builds the committed source, applies every migration to a new D
  await symlink(join(root,'node_modules'),join(clone,'node_modules'),'dir')
  const report=join(clone,'.rer-test-provider.json')
  const deploy=(env)=>{
-  const result=spawnSync(process.execPath,['--import',pathToFileURL(join(root,'tests/fake-cloudflare.mjs')).href,'node_modules/@runeditrun/rer/bin/rer.mjs','deploy','--json','--non-interactive'],{cwd:clone,encoding:'utf8',timeout:15*60_000,env:{...cloneEnvironment,NOOK_FAKE_CLOUDFLARE_REPORT:report,...env}})
+  const result=spawnSync(process.execPath,['--import',pathToFileURL(join(root,'tests/fake-cloudflare.mjs')).href,'node_modules/@runeditrun/rer/bin/rer.mjs','deploy','--owner-name','Nook Owner','--json','--non-interactive'],{cwd:clone,encoding:'utf8',timeout:15*60_000,env:{...cloneEnvironment,NOOK_FAKE_CLOUDFLARE_REPORT:report,...env}})
   const events=result.stdout.trim().split('\n').filter(Boolean).map(line=>JSON.parse(line))
   return {status:result.status,result:events.find(event=>event.event==='result'),error:events.find(event=>event.event==='error'),output:result.stdout+result.stderr,provider:JSON.parse(readFileSync(report,'utf8'))}
  }
@@ -35,7 +35,7 @@ test('rer deploy builds the committed source, applies every migration to a new D
  const first=deploy(owner)
  assert.equal(first.status,0,first.output)
  assert.equal(first.result.ok,true)
- assert.equal(first.provider.deployed,true)
+ assert.equal(first.provider.deployed,true,JSON.stringify(first.result))
  assert.deepEqual(first.provider.databases,[JSON.parse(readFileSync(join(root,'owner-deployment.json'),'utf8')).project.split('/')[1]+'-production-db'])
  for(const table of ['oa_operators','workspace'])assert.ok(first.provider.tables[0].includes(table),table)
  assert.equal(first.provider.claims,1,'rer deploy claims the hosted owner once')
