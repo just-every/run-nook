@@ -22,10 +22,11 @@ const repeats={none:'Once',daily:'Every day',weekdays:'Every weekday',weekly:'Ev
 
 export function RemindersView({revision,privateSignal,userId,onError,onOpen,refresh,conversations}:Props){
  const [page,setPage]=useState<ReminderPage|null>(null),[editor,setEditor]=useState<{existing?:Reminder}|null>(null),[busy,setBusy]=useState(false)
+ const readEpoch=useRef(0),writing=useRef(false)
  const current=usePrivateScope(privateSignal,'reminders'),dialog=useRef<HTMLDialogElement>(null),titleId=useId()
  useEffect(()=>{
-  let cancelled=false
-  void api<ReminderPage>('reminders').then(next=>{if(!cancelled&&current())setPage(next)}).catch(error=>{if(!cancelled&&current())onError(error)})
+  let cancelled=false;const epoch=++readEpoch.current
+  void api<ReminderPage>('reminders').then(next=>{if(!cancelled&&current()&&!writing.current&&epoch===readEpoch.current)setPage(next)}).catch(error=>{if(!cancelled&&current())onError(error)})
   return()=>{cancelled=true}
  },[revision,current,onError])
  useEffect(()=>{
@@ -35,13 +36,19 @@ export function RemindersView({revision,privateSignal,userId,onError,onOpen,refr
   return()=>{if(trigger?.isConnected)trigger.focus({preventScroll:true})}
  },[editor])
  const act=async(item:Reminder,action:'complete'|'snooze'|'cancel')=>{
-  if(!current()||busy)return
-  setBusy(true)
+  if(!current()||busy||writing.current)return
+  writing.current=true;readEpoch.current++;setBusy(true)
   try{
    await api('reminders/'+encodeURIComponent(item.id),{action,version:item.version,...(action==='snooze'?{until:Date.now()+20*60_000}:{})},'PATCH')
-   if(current())await refresh()
+   if(current()){
+    await refresh()
+    // Workspace refresh publishes a revision; its list effect is asynchronous.
+    // Keep actions fenced until this card holds the server's new version.
+    const next=await api<ReminderPage>('reminders')
+    if(current()){readEpoch.current++;setPage(next)}
+   }
   }catch(error){if(current())onError(error)}
-  finally{if(current())setBusy(false)}
+  finally{writing.current=false;if(current())setBusy(false)}
  }
  const more=async()=>{
   if(!page||busy||!current())return

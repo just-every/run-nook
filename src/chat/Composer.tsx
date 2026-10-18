@@ -3,7 +3,7 @@ import {useTeamBindings} from '../team/TeamBindings'
 import {ConfirmBroadcast} from '../broadcast/ConfirmBroadcast'
 import {useEffect,useId,useRef,useState} from 'react'
 import {api} from './api'
-import type {Person} from './types'
+import type {Message,Person} from './types'
 import {useAttachmentUpload} from './useAttachmentUpload'
 import {usePrivateScope} from './usePrivateScope'
 import {IconAttach,IconClose,IconMention} from './icons'
@@ -15,7 +15,8 @@ import {useFormatting} from './composition/useFormatting'
 import {useCompositionDelivery} from './composition/useCompositionDelivery'
 import {BuiltinSuggestions} from '../commands/BuiltinSuggestions'
 import {messageIntent} from './composition/long-message'
-export function Composer({restricted=false,user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,sendMessage,onSent,onError,onSchedule}:{onSchedule?:(draft:{body:string;parent:string|null;mentions:string[];urgent:boolean;urgentReason:string|null;files:Draft['files']},saved:()=>void)=>void;restricted?:boolean;user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
+import {emptyForEditing,useLastMessageEdit} from './useLastMessageEdit'
+export function Composer({restricted=false,user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,sendMessage,onSent,onError,onSchedule,onEditLast}:{onEditLast?:(message:Message)=>void;onSchedule?:(draft:{body:string;parent:string|null;mentions:string[];urgent:boolean;urgentReason:string|null;files:Draft['files']},saved:()=>void)=>void;restricted?:boolean;user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
  const team=useTeamBindings()
  const typing=useTyping({conversation,user:user.id,signal:privateSignal,enabled:user.typingEnabled!==false})
  const [override,setOverride]=useState(false)
@@ -49,6 +50,8 @@ export function Composer({restricted=false,user,conversation,name,parent,members
  function downloadText(){const url=URL.createObjectURL(new Blob([draftRef.current.body],{type:'text/plain;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download='message.txt';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
  async function remove(id:string){if(!active())return;try{await api(`attachments/${id}`,{delete:true},'PATCH');save({...draftRef.current,files:draftRef.current.files.filter(a=>a.id!==id)})}catch(e){if(active())onError(e)}}
  const locked=busy||Boolean(draft.pending)||Boolean(draft.plan)
+ const canEditLast=()=>!locked&&!storageError&&!upload.isBusy()&&emptyForEditing(draftRef.current)
+ const lastEdit=useLastMessageEdit({user:user.id,conversation,parent,current:active,eligible:canEditLast,onEdit:onEditLast,onError})
  const routingId=fieldId+'-routing',hintId=fieldId+'-hint'
  const [routingOpen,setRoutingOpen]=useState(false),options=useRef<HTMLDetailsElement>(null)
  // A draft that already carries a recipient or urgency (reload, saved draft) opens its menu so the choice stays visible.
@@ -62,7 +65,7 @@ export function Composer({restricted=false,user,conversation,name,parent,members
   {confirmation&&<ConfirmBroadcast preview={confirmation} onConfirm={()=>void send(true)} onCancel={delivery.cancelConfirmation}/>}
   {(override||draft.pending?.adminOverride||draft.plan?.parts[0]?.adminOverride)&&<p className="draft-note">This post will be labelled and audited as an admin override. <button type="button" className="text-button" onClick={()=>setOverride(false)}>Cancel override</button></p>}
   <label className="sr-only" htmlFor={'compose-'+(parent||'root')}>{parent?'Reply in thread':'Message '+name}</label>
-  <textarea ref={textarea} id={'compose-'+(parent||'root')} rows={1} value={draft.body} readOnly={locked} required placeholder={parent?'Reply in thread…':`Message ${name}…`} aria-invalid={overlength&&!draft.plan||undefined} aria-describedby={hintId+(draft.body.length>=36000?' '+countId:'')} onChange={e=>changeBody(e.target.value,e.target.selectionStart,(e.nativeEvent as InputEvent).isComposing)} onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'&&formatting.canUndo&&!locked){e.preventDefault();undoFormatting();return}if((e.ctrlKey||e.metaKey)&&['b','i'].includes(e.key.toLowerCase())&&!locked){e.preventDefault();format(e.key.toLowerCase()==='b'?'bold':'italic');return}if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(draft.body.trim())void send()}}}/>
+  <textarea ref={textarea} id={'compose-'+(parent||'root')} rows={1} value={draft.body} readOnly={locked} required placeholder={parent?'Reply in thread…':`Message ${name}…`} aria-invalid={overlength&&!draft.plan||undefined} aria-describedby={hintId+(draft.body.length>=36000?' '+countId:'')} onChange={e=>changeBody(e.target.value,e.target.selectionStart,(e.nativeEvent as InputEvent).isComposing)} onKeyDown={e=>{if(e.nativeEvent.isComposing||e.keyCode===229)return;if(e.key==='ArrowUp'&&!e.altKey&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&onEditLast&&canEditLast()){e.preventDefault();void lastEdit.edit();return}if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'&&formatting.canUndo&&!locked){e.preventDefault();undoFormatting();return}if((e.ctrlKey||e.metaKey)&&['b','i'].includes(e.key.toLowerCase())&&!locked){e.preventDefault();format(e.key.toLowerCase()==='b'?'bold':'italic');return}if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(draft.body.trim())void send()}}}/>
   <CompositionTools disabled={locked} enabled={formatting.enabled} onToggle={formatting.toggle} onFormat={format} onInsert={insert} members={members} channels={team.channels??[]} onMention={person=>insert('@'+person.name+' ',person)} onDownload={downloadText} canUndo={formatting.canUndo} onUndo={undoFormatting}/>
   {draft.body&&hasFormatting&&draft.body.length<=MESSAGE_LIMIT&&<details className="composition-preview" open><summary>Formatted preview</summary><SafeMarkdown text={draft.pending?.body??draft.body} literal={formatting.literal||!formatting.enabled}/></details>}
   {!locked&&<BuiltinSuggestions body={draft.body} onChoose={body=>{save({...draftRef.current,body});textarea.current?.focus()}}/>}
@@ -74,8 +77,10 @@ export function Composer({restricted=false,user,conversation,name,parent,members
   {!!draft.files.length&&<div className="staged-files">{draft.files.map(f=><span key={f.id}>{f.name}<button type="button" className="icon-button" disabled={locked} aria-label={'Discard '+f.name} onClick={()=>void remove(f.id)}><IconClose/><span className="sr-only">Remove</span></button></span>)}</div>}
   {onSchedule&&<button type="button" className="schedule-draft text-button" disabled={locked||upload.uploading||Boolean(draft.upload)||!draft.body.trim()||overlength||override} onClick={()=>onSchedule({body:draft.body,parent,mentions:messageIntent(draft,parent,override).mentions,urgent:draft.urgent,urgentReason:draft.urgent?draft.reason:null,files:draft.files},()=>save(blankDraft()))}>Schedule for later</button>}
   <button className="send" disabled={busy||upload.uploading||Boolean(draft.upload)||!draft.body.trim()||(overlength&&!draft.plan)}>{busy?'Sending…':retry||draft.delivery==='failed'?'Retry send':'Send'}</button>
-  <span id={hintId} className="sr-only">Enter to send, Shift+Enter for a new line</span>
-  {(typing.label||note||draft.upload||retry||busy||draft.delivery==='failed'||formatting.error||storageError||draft.body.length>=36000)&&<div className="composer-notes">
+  <span id={hintId} className="sr-only">Enter to send, Shift+Enter for a new line. Up arrow in an empty composer edits your last message.</span>
+  {(onEditLast||typing.label||note||draft.upload||retry||busy||draft.delivery==='failed'||formatting.error||storageError||draft.body.length>=36000)&&<div className="composer-notes">
+   {onEditLast&&<button type="button" className="text-button" disabled={lastEdit.busy||!canEditLast()} aria-keyshortcuts="ArrowUp" onClick={()=>void lastEdit.edit()}>{lastEdit.busy?'Finding last message…':'Edit last message'}</button>}
+   {lastEdit.note&&<p className="draft-note" role="status">{lastEdit.note}</p>}
    {typing.label&&<p className="draft-note" role="status">{typing.label}</p>}
    {draft.body.length>=36000&&<p id={countId} role={overlength&&!draft.plan?'alert':undefined} className={overlength&&!draft.plan?'warning':'draft-note'}>{draft.plan?`${draft.body.length.toLocaleString()} characters kept in this ${draft.plan.kind==='snippet'?'text snippet':'split message'}.`:overlength?`Message is ${draft.body.length-MESSAGE_LIMIT} characters over the 40,000-character limit and cannot be sent. All text is kept. Choose a snippet or split below.`:`${MESSAGE_LIMIT-draft.body.length} characters remaining`}</p>}
    {overlength&&!draft.plan&&<div className="long-message-actions"><button type="button" className="text-button" disabled={locked||upload.uploading||Boolean(draft.upload)} onClick={()=>delivery.startLong('snippet')}>Post as snippet</button><button type="button" className="text-button" disabled={locked||upload.uploading||Boolean(draft.upload)} onClick={()=>delivery.startLong('split')}>Split into messages</button></div>}
