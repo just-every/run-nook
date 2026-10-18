@@ -4973,7 +4973,7 @@
       "executable": false
     },
     "tests/reminders-browser.mjs": {
-      "sha256": "fbe7d323415063bca82b583ab5444b9982a921ba96fb22f84c18f2922d5c0435",
+      "sha256": "9f0afc3092911f65cdc1b5c989d4180165811c2a8b4a7113ce7c36b128899795",
       "executable": false
     },
     "tests/reminders.mjs": {
