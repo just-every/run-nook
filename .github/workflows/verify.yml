@@ -26,6 +26,8 @@ jobs:
           - stage: runtime browser
             # Both widths, Slack import, installed app and homepage remain on every push.
             command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime --suite=core-browser
+          - stage: search
+            command: pnpm build:app && pnpm test:runtime --suite=search
           - stage: email notifications
             command: pnpm build:app && pnpm test:notify
           - stage: push notifications

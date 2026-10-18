@@ -168,9 +168,11 @@ separate IPv4 loopback port and keep the public origin for links and cookies.
 Files are private downloads of 1 byte to 25 MiB each, five ordered attachments
 per message and at most 50 pending uploads per uploader. Bytes live in private R2
 and D1 holds metadata and opaque object keys; there is no workspace-wide byte
-quota beyond the platform's own limits. Search is indexed, case-insensitive exact
-substring matching of at least three characters; history, replay and attention
-read indexed pages. Export refuses while an upload, import or deletion is still
+quota beyond the platform's own limits. Search combines terms of every length, phrases, Unicode token prefixes,
+case-insensitive substrings and exclusions, with typed filters and current ACL.
+Private filenames and UTF-8/PDF text are searched; unsupported or unindexed
+contents are named. PDF extraction is bounded to 100 pages and 1 MiB of text.
+History, replay and attention read indexed pages. Export refuses while an upload, import or deletion is still
 pending rather than archive incomplete media; archives carry the actual R2 bytes.
 
 After an import, follow [Restoring a local archive](#restoring-a-local-archive)

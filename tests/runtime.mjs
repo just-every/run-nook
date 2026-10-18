@@ -16,7 +16,7 @@ import {mailEdge} from './mail-edge.mjs'
 
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
-assert.ok(['all','core','core-api','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','slack-imports'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
+assert.ok(['all','core','core-api','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','slack-imports'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']
@@ -85,9 +85,10 @@ try {
  for(const file of assets.filter(x=>x.startsWith('loaders-')&&x.endsWith('.js'))) { const source=await readFile(resolve(root,'dist/server/assets',file),'utf8'); fnId=source.match(/id: "([a-f0-9]{64})",\s*name: "loadWorkspace"/)?.[1] ?? fnId }
  let broadcastFixture
  assert.ok(fnId,'private generated transport must exist in emitted artifact')
- if(['unreads','scheduled','reminders','broadcast','personal','files','slack-imports'].includes(suite)){
+ if(['unreads','scheduled','reminders','broadcast','personal','files','search','slack-imports'].includes(suite)){
  const post=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status});
  if(suite==='slack-imports'){await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>{await stop();await start(port)},sql})})}
+ else if(suite==='search'){const harness={post,get,patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),request,owner,member,outsider,registered,check,restart:async()=>{await stop();await start(port)},sql};if(!process.argv.includes('--browser-only'))await(await import('./search.mjs')).searchJourney(harness);if(!withoutBrowser)await(await import('./search-browser.mjs')).searchBrowser({origin,owner,member,destination:'evidence/search'})}
  else if(suite==='files'){const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status});const harness={post,get,patch,request,owner,member,outsider,registered,check,restart:async()=>{await stop();await start(port)},sql};if(!process.argv.includes('--browser-only'))await(await import('./files.mjs')).filesJourney(harness);if(!withoutBrowser)await(await import('./files-browser.mjs')).filesBrowser({origin,owner,member,destination:'evidence/files'})}
  else if(suite==='personal'){const harness={post,get,request,owner,member,outsider,registered,check,restart:async()=>{await stop();await start(port)},sql};if(!process.argv.includes('--browser-only'))await(await import('./personal.mjs')).personalJourney(harness);if(!withoutBrowser)await(await import('./personal-browser.mjs')).personalBrowser({origin,owner,member})}
  else if(suite==='broadcast'){const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status});const {people}=await(await import('./broadcast.mjs')).broadcastJourney({post,get,patch,request,owner,member,outsider,check,origin:()=>origin,restart:async()=>{await stop();await start(port)},sql});if(!withoutBrowser)await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people})}
@@ -96,7 +97,7 @@ try {
  else{await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});
  await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
  }
- if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','slack-imports'].includes(suite)){
+ if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','slack-imports'].includes(suite)){
  await check('BASE-ACCESS-002 same-wire missing/expired/revoked/valid session matrix',async()=>{
   for(const [label,cookie,valid] of [['missing','',false],['expired',expired.cookie,false],['revoked',revoked.cookie,false],['valid',owner.cookie,true]]) {
    const before=await facts(),rows=[]
@@ -134,7 +135,7 @@ try {
  await check('actual team invitations, scopes, reactions, preview and revocation',async()=>{await(await import('./team-runtime.mjs')).runTeamSurfaces({origin,ownerCookie:owner.cookie})})
  await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{const checks=await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>restart({transferFaults:null}),sql});evidence.slackImports=checks})
  }
- if(suite!=='core-api'&&!['unreads','scheduled','reminders','broadcast','personal','files','slack-imports'].includes(suite)){
+ if(suite!=='core-api'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','slack-imports'].includes(suite)){
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
   broadcastFixture??=await(await import('./broadcast.mjs')).broadcastJourney({check,post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,sql,origin:()=>origin,restart:async()=>{await stop();await start(port)}})
   await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people:broadcastFixture.people})
@@ -155,7 +156,7 @@ try {
  }
  }
  await stop()
- if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','slack-imports'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
+ if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','slack-imports'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  await lossConfig.close();lossConfig=null
  }
  if(suite==='all'||suite==='installer')await(await import('./installer-workflow.mjs')).runInstallerWorkflow({root,states,port,check,evidence,databasePath,stop,start,command,env,getState:()=>state,setState:value=>{state=value},getOrigin:()=>origin})

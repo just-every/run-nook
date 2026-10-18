@@ -28,6 +28,9 @@ importers:
       react-dom:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
+      unpdf:
+        specifier: 1.9.0
+        version: 1.9.0
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.54.5
@@ -76,6 +79,14 @@ importers:
         version: 4.142.0(@cloudflare/workers-types@5.20260908.1)(@types/node@26.0.0)
 
 packages:
+
+  unpdf@1.9.0:
+    resolution: {integrity: sha512-YIXl+jZUBneP22IkRUwFA1b71l+Ad2uX7o7dMfxLSLuCOtaKAQvak7Sz3MtdVsWTsocblznSIGidfXyhnBgBMA==}
+    peerDependencies:
+      '@napi-rs/canvas': ^0.1.69 || ^1.0.0
+    peerDependenciesMeta:
+      '@napi-rs/canvas':
+        optional: true
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -1592,6 +1603,8 @@ packages:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
 
 snapshots:
+
+  unpdf@1.9.0: {}
 
   '@babel/code-frame@7.27.1':
     dependencies:

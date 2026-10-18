@@ -1,68 +1,9 @@
 import {fail} from '../family/team-chat/domain'
-
+import type {SearchQuery} from './parse'
+export {parseSearch} from './parse'
+export type {SearchQuery} from './parse'
 export type SearchSource='native'|'imported'
-export type SearchQuery={text:string;conversation:string|null;person:string|null;afterDate:string|null;beforeDate:string|null;hasFile:boolean;saved:boolean;pinned:boolean;hints:string[]}
 export type SearchPosition={source:0|1;id:string}
-const supported='Supported filters: from:, in:, has:file, has:pin, is:saved, before:, after: and on:.'
-
-function reference(value:unknown,label:string):string|null{
- if(value===undefined||value===null||value==='')return null
- if(typeof value!=='string'||value.length>128||value.trim()!==value||/[\u0000-\u001f\u007f]/.test(value))return fail(400,`Invalid ${label} filter`)
- return value
-}
-function date(value:unknown,label:string){
- const valueString=reference(value,label)
- if(valueString===null)return null
- if(!/^\d{4}-\d{2}-\d{2}$/.test(valueString))fail(400,`Use YYYY-MM-DD for ${label}`)
- const at=Date.parse(valueString+'T00:00:00.000Z')
- if(!Number.isFinite(at)||new Date(at).toISOString().slice(0,10)!==valueString)fail(400,`Invalid ${label} date`)
- return valueString
-}
-function same(previous:string|null,next:string,label:string){
- if(previous!==null&&previous!==next)fail(400,`Choose one ${label} filter`)
- return next
-}
-/** Plain words retain substring semantics; recognized modifiers are removed.
- * Dates are UTC days, with inclusive after and exclusive before boundaries. */
-export function parseSearch(input:Record<string,unknown>):SearchQuery{
- const raw=input.q??''
- if(typeof raw!=='string'||raw.length>512||/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(raw))return fail(400,'Search must contain at most 512 characters')
- const result:SearchQuery={text:'',conversation:reference(input.conversation,'conversation'),person:reference(input.person,'person'),afterDate:date(input.afterDate,'after'),beforeDate:date(input.beforeDate,'before'),hasFile:false,saved:false,pinned:false,hints:[]}
- const tokens:string[]=[];let token='',quoted=false
- for(const character of raw){
-  if(character==='"'){quoted=!quoted;continue}
-  if(/\s/u.test(character)&&!quoted){if(token)tokens.push(token);token=''}else token+=character
- }
- if(quoted)fail(400,'Close the quoted search phrase')
- if(token)tokens.push(token)
- const words:string[]=[]
- for(const part of tokens){
-  const colon=part.indexOf(':'),modifier=colon>0?part.slice(0,colon).toLowerCase():'',value=colon>0?part.slice(colon+1):''
-  if(modifier==='from'){
-   const person=reference(value.replace(/^@/,''),'person')??fail(400,'Choose a person after from:')
-   result.person=same(result.person,person,'person')
-  }else if(modifier==='in'&&!value.startsWith('@')){
-   const conversation=reference(value.replace(/^#/,''),'conversation')??fail(400,'Choose a channel after in:')
-   result.conversation=same(result.conversation,conversation,'conversation')
-  }else if(modifier==='has'&&value==='file')result.hasFile=true
-  else if(modifier==='has'&&value==='pin')result.pinned=true
-  else if(modifier==='is'&&value==='saved')result.saved=true
-  else if(['after','before','on'].includes(modifier)){
-   const day=date(value,modifier)??fail(400,`Choose a date after ${modifier}:`)
-   if(modifier!=='before')result.afterDate=result.afterDate&&result.afterDate>day?result.afterDate:day
-   const end=modifier==='on'?new Date(Date.parse(day+'T00:00:00.000Z')+86400_000).toISOString().slice(0,10):day
-   if(modifier!=='after')result.beforeDate=result.beforeDate&&result.beforeDate<end?result.beforeDate:end
-  }else{
-   words.push(part)
-   if(modifier&&!result.hints.length)result.hints.push('Unrecognized modifiers are searched as text. '+supported)
-  }
- }
- result.text=(tokens.length===words.length&&!raw.includes('"')?raw.trim():words.join(' ')).toLowerCase()
- if(result.afterDate&&result.beforeDate&&result.afterDate>=result.beforeDate)fail(400,'The before date must follow the after date')
- if(!result.text&&!result.conversation&&!result.person&&!result.afterDate&&!result.beforeDate&&!result.hasFile&&!result.saved&&!result.pinned)fail(400,'Enter search text or choose a filter')
- return result
-}
-
 const bytes=(value:string)=>new TextEncoder().encode(value)
 const encode=(value:Uint8Array)=>btoa(Array.from(value,b=>String.fromCharCode(b)).join('')).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'')
 function decode(value:string){
