@@ -1,3 +1,4 @@
+import {drainSavedReminders} from '../../team/saved-reminders.server'
 import {drainPush} from '../../push/run'
 import {continueErasures} from '../../team/erasure/continuation'
 import {drainBlobs} from '../../team/erasure/blobs'
@@ -20,6 +21,7 @@ export class ChatHub extends DurableObject<StorageBindings>{
  async fetch(request:Request){
   // A post-commit hint never waits for delivery: it starts or extends the one
   // running broadcast and returns. The alarm and authoritative replay repair any miss.
+  if(new URL(request.url).pathname==='/reminders'){await this.soon(0);return new Response(null,{status:204})}
   if(new URL(request.url).pathname==='/hint'){this.ctx.waitUntil(this.broadcast());await this.soon(5000);return new Response(null,{status:204})}
   const info=JSON.parse(request.headers.get('x-nook-subscriber')??'null') as Subscriber;if(!info||request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket required',{status:400});if(!await this.active(info))return new Response('Sign in required',{status:401});info.key=crypto.randomUUID();
   const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(info);await this.deliver(server,true);await this.soon(5000);return new Response(null,{status:101,webSocket:client})
@@ -48,6 +50,7 @@ export class ChatHub extends DurableObject<StorageBindings>{
  async alarm(){
   // Durable periodic frontier comparison repairs a lost final hint while clients
   // remain connected. D1 replay, never the hint, decides which events are missing.
+  let reminderNext:number|null=null;try{reminderNext=await drainSavedReminders(this.env)}catch{console.error('Saved reminder scheduling failed');reminderNext=Date.now()+60_000}
   await this.broadcast();await recoverDeletes(this.env);await drainBlobs(this.env);await continueErasures(this.env);
   // C14 email: an away member has no socket, so pending queue rows keep the alarm
   // armed until they are sent, cancelled or given up. The queue lives in D1, so a
@@ -55,7 +58,7 @@ export class ChatHub extends DurableObject<StorageBindings>{
   let next:number|null=null;try{next=await drainNotifications(this.env,mailSend(this.env))}catch(error){console.error('Notification delivery pass failed',error instanceof Error?error.message:'');next=Date.now()+60_000}
   let pushNext:number|null=null;try{pushNext=await drainPush(this.env)}catch{console.error('Push delivery pass failed');pushNext=Date.now()+60_000}
   const live=this.ctx.getWebSockets().length||(await this.env.DB.prepare('SELECT object_key FROM nook_object_deletes UNION ALL SELECT operation FROM nook_erasure_work LIMIT 1').first())?Date.now()+5000:null
-  const at=[live,next,pushNext].filter((value):value is number=>value!==null);if(at.length)await this.ctx.storage.setAlarm(Math.max(Math.min(...at),Date.now()+1000))
+  const at=[live,next,pushNext,reminderNext].filter((value):value is number=>value!==null);if(at.length)await this.ctx.storage.setAlarm(Math.max(Math.min(...at),Date.now()+1000))
  }
  async webSocketMessage(socket:WebSocket){await this.deliver(socket,true)}
  // The configured compatibility date lets the runtime complete the close handshake.

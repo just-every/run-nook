@@ -1,3 +1,4 @@
+import {actOnSavedReminder} from '../../team/saved-reminders.server'
 import {changeChannelMember} from '../../team/channel-membership.server'
 import {fullMember} from '../../team/access'
 import {fail,text} from '../../family/team-chat/domain'
@@ -31,6 +32,7 @@ export async function write(c:Context,action:string,id:string,input:Record<strin
  }
  if(action==='follow')return followThread(c,id,input)
  if(action==='threadRead')return readThread(c,id,input)
+ if(action==='attentionAction'&&id.startsWith('saved:'))return actOnSavedReminder(c,id.slice(6),input)
  if(action==='attentionAction'){if(!['done','snooze'].includes(input.action))fail(400,'Choose done or snooze');const a=await c.one('SELECT conversation FROM nook_attention WHERE id=? AND user=?',[id,c.uid]);if(!a)fail(404,'Attention item unavailable');await c.batch([c.sql('UPDATE nook_attention SET state=?,snooze_until=? WHERE id=? AND user=?',input.action==='done'?'done':'snoozed',input.action==='snooze'?future(input.until):null,id,c.uid)],a.conversation);return {ok:true}}
  return fail(404,'Not found')
 }

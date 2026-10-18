@@ -33,7 +33,7 @@ export const graph={
   {table:'nook_import_actors',key:['job','source_id'],from:'nook_actors',on:{association:'id'},hook:'importedStep'},
   {table:'nook_outcomes',key:['id'],from:'nook_actors',on:{assignee:'id'},hook:'detachAssignee'},
   userEdge('nook_reads',['conversation','user']),userEdge('nook_preferences',['user','conversation']),userEdge('nook_thread_follows',['user','message']),userEdge('nook_thread_unfollows',['user','message']),userEdge('nook_thread_reads',['user','message']),userEdge('nook_settings',['user']),userEdge('nook_attention',['id']),userEdge('nook_notify_preferences',['user']),userEdge('nook_push_presence',['page']),userEdge('nook_push_devices',['id']),userEdge('nook_notify_queue',['id']),userEdge('nook_notify_queue',['id'],'actor'),userEdge('nook_reactions',['message','user','emoji']),
-  userEdge('nook_posting_people',['conversation','user']),userEdge('nook_saved_items',['seq']),userEdge('nook_conversation_notify',['user','conversation']),userEdge('nook_default_admissions',['user']),
+  userEdge('nook_posting_people',['conversation','user']),userEdge('nook_saved_reminders',['saved']),userEdge('nook_saved_items',['seq']),userEdge('nook_conversation_notify',['user','conversation']),userEdge('nook_default_admissions',['user']),
   {table:'oa_provider_sessions',key:['session_id'],from:'oa_sessions',on:{session_id:'id'},hook:'authIdentity'},
   {table:'oa_provider_session_pins',key:['session_id'],from:'oa_sessions',on:{session_id:'id'},hook:'authIdentity'},
   userEdge('oa_owner_signins',['id'],'operator_id'),userEdge('oa_credentials',['id'],'operator_id'),

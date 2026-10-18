@@ -75,13 +75,13 @@ export function savedProjection(pageSql:string){return `WITH page AS MATERIALIZE
  CASE WHEN v.kind='link' THEN v.target END AS url,
  lm.id AS message,lm.body,lm.parent,lm.created AS message_created,lm.author,lm.author_name,lm.source,
  af.id AS attachment,af.name,af.mime,af.size,af.message AS attachment_message,af.created AS attachment_created,
- v.actor,pinner.display_name AS actor_name
+ v.actor,pinner.display_name AS actor_name,(SELECT json_object('due',reminder.due,'timeZone',reminder.time_zone,'state',reminder.state,'reason',reminder.reason) FROM nook_saved_reminders reminder WHERE reminder.saved=p.id) AS reminder_json
  FROM page p LEFT JOIN visible v ON v.id=p.id LEFT JOIN live lm ON lm.item_id=v.id
  LEFT JOIN nook_attachments af ON v.kind='attachment' AND af.id=v.target AND af.conversation=v.conversation AND af.state='attached' AND af.object_key IS NOT NULL AND ${savedLiveMessage('af.message','af.conversation')}
  LEFT JOIN oa_operators pinner ON pinner.id=v.actor
  ORDER BY p.seq DESC`}
 export function savedItem(row:any,shared=false){
- const base={id:row.id,kind:row.kind,created:row.created,...(shared?{pinnedBy:row.actor_name?{id:row.actor,name:row.actor_name}:null}: {})}
+ const base={...(!shared&&row.reminder_json?{reminder:JSON.parse(row.reminder_json)}:{}),id:row.id,kind:row.kind,created:row.created,...(shared?{pinnedBy:row.actor_name?{id:row.actor,name:row.actor_name}:null}: {})}
  if(!row.conversation||!(row.message||row.attachment||row.url))return {...base,unavailable:true}
  const context={conversation:row.conversation,conversationName:row.conversation_name,conversationKind:row.conversation_kind}
  return {...base,unavailable:false,...context,...(row.message?{message:{id:row.message,body:row.body,parent:row.parent,created:row.source==='imported'?sourceCreated(row.message_created):row.message_created,author:row.author,authorName:row.author_name,source:row.source}}:row.attachment?{attachment:{id:row.attachment,name:row.name,mime:row.mime,size:row.size,message:row.attachment_message,created:row.attachment_created}}:{url:row.url})}

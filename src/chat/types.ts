@@ -1,3 +1,4 @@
+import type {SavedItem} from './collection-types'
 import type {Reaction} from '../team/types'
 import type {notifySettings} from '../notify/preferences'
 import type { SlackPresentation } from '../imports/SlackHistory'
@@ -9,7 +10,7 @@ export type Outcome = { id: string; conversation: string; erased?:boolean; autho
 export type FollowSource = 'explicit'|'authored'|'replied'|'mentioned'|'dm'|'all'
 export type Preferences = { muted: boolean; followed: boolean; threads: string[]; threadFollows?:{message:string;source:FollowSource}[] }
 export type AttentionItem = { id: string; conversation: string; reason: string; state:string; created:string; message: {id:string;body:string;author:string;deleted:number;parent:string|null;urgentReason:string|null;authorName?:string}|null; outcome: Outcome|null }
-export type Attention = { items: AttentionItem[]; deferredCount: number; observedAt:number; dndUntil: number|null; nextWakeAt: number|null }
+export type Attention = { items: AttentionItem[];reminders?:{items:SavedItem[];hasMore:boolean}; deferredCount: number; observedAt:number; dndUntil: number|null; nextWakeAt: number|null }
 export type Replay = { events: {seq:number;kind:string;object:string}[]; cursor: number; frontier: number; hasMore: boolean }
 export type Screen = 'chat'|'attention'|'threads'|'channels'|'search'|'you'|'team'|'saved'
 export type LocationState = { view: Screen; conversation: string|null; thread: string|null; focus: string|null; panel: 'outcomes'|null; before: string|null; threadBefore: string|null; q: string; landing: boolean }

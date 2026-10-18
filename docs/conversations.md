@@ -32,7 +32,7 @@ Archiving keeps history available and stops new posts, replies, edits, reactions
 
 ## Saved context and pins
 
-Choose **More → Save for later** on a message or **Save file** on an attachment. **Saved** is a private, ordered list, available in the desktop rail and under **You** on a phone. You can also save an HTTP or HTTPS link associated with a conversation; Nook does not fetch it. Saves survive sign-in on another device and duplicate saves retain their original order. Due reminders are not available yet.
+Choose **More → Save for later** on a message or **Save file** on an attachment. **Saved** is a private, ordered list, available in the desktop rail and under **You** on a phone. You can also save an HTTP or HTTPS link associated with a conversation; Nook does not fetch it. Saves survive sign-in on another device and duplicate saves retain their original order. Choose **Remind me** on a saved item to pick a future date and time in the time zone shown. Edit or cancel it from Saved. When due, it appears privately in **Attention**, where you can dismiss it or snooze it for an hour; quiet time holds it. Reminders survive restart and never change unread messages or accepted work. If the source is erased or you lose access before it is due, the reminder is cancelled.
 
 Channel members can choose **More → Pin to channel** and retrieve shared context from **Conversation options → Pinned messages**, with who pinned it and when. Direct conversations do not have shared pins. Archived channels keep pins readable but cannot change them.
 

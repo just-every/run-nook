@@ -69,7 +69,7 @@ async function attentionPages(first:Attention & Page<Attention['items'][number]>
   const page=after?await api<Attention & Page<Attention['items'][number]>>('attention?after='+encodeURIComponent(after)):first
   observedAt=Math.min(observedAt,page.observedAt);items.push(...page.items);deferredCount+=page.deferredCount;dndUntil=page.dndUntil
   if(page.nextWakeAt!==null)nextWakeAt=nextWakeAt===null?page.nextWakeAt:Math.min(nextWakeAt,page.nextWakeAt)
-  if(!page.hasMore)return {items,deferredCount,observedAt,dndUntil,nextWakeAt}
+  if(!page.hasMore)return {items,reminders:first.reminders,deferredCount,observedAt,dndUntil,nextWakeAt}
   if(page.cursor===after)throw Error('Attention could not be read.');after=page.cursor
  }
 }
