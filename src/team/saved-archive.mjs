@@ -17,7 +17,7 @@ export async function validateSavedArchive(read,{manifest,actors,conversations,m
   if(archived&&!archived.has(name))return [];
   const result=await read(name);check(Array.isArray(result),'invalid_collection_table');return result;
  };
- const [saves,pins]=await Promise.all([rows('nook_saved_items'),rows('nook_channel_pins')]);
+ const [saves,pins,reminders]=await Promise.all([rows('nook_saved_items'),rows('nook_channel_pins'),rows('nook_saved_reminders')]);
  const liveActor=value=>id(value)&&actors.has(value)&&!actors.get(value).erased;
  const binding=(target,conversation,map)=>!map.has(target)||map.get(target).conversation===conversation;
  const messageBinding=(target,conversation)=>binding(target,conversation,messages)&&binding(target,conversation,imported);
@@ -28,6 +28,12 @@ export async function validateSavedArchive(read,{manifest,actors,conversations,m
   if(row.kind==='message')check(messageBinding(row.target,row.conversation),'invalid_saved_message_scope');
   if(row.kind==='attachment')check(binding(row.target,row.conversation,attachments),'invalid_saved_file_scope');
  }
+ const saved=new Map(saves.map(row=>[row.id,row]));
+ for(const row of reminders){
+  let zone=false;try{new Intl.DateTimeFormat('en-US',{timeZone:row.time_zone});zone=typeof row.time_zone==='string'&&row.time_zone.length<=100}catch{}
+  check(fields(row,['saved','user','due','time_zone','state','reason','updated'])&&saved.get(row.saved)?.user===row.user&&liveActor(row.user)&&Number.isSafeInteger(row.due)&&row.due>0&&row.due<=8.64e15&&zone&&['pending','ready','done','cancelled'].includes(row.state)&&(row.reason===null||row.state==='cancelled'&&row.reason==='source-unavailable')&&Number.isSafeInteger(row.updated)&&row.updated>0,'invalid_saved_reminder');
+ }
+ unique(reminders,row=>row.saved,'duplicate_saved_reminder');
  for(const row of pins){
   check(fields(row,['seq','id','conversation','message','actor','created'])&&sequence(row.seq)&&id(row.id)&&id(row.conversation)&&id(row.message)&&time(row.created)&&(row.actor===null||liveActor(row.actor)),'invalid_channel_pin');
   const conversation=conversations.get(row.conversation);

@@ -196,6 +196,12 @@
       "name": "0031_posting_permissions.sql",
       "sha256": "12482fdfbd46dc2dc57d37a3afc96b0c6b8883e06584c076b0c526d40f5607fd",
       "sql": "CREATE TABLE nook_posting_policy(\n conversation TEXT PRIMARY KEY REFERENCES nook_conversations(id),\n level TEXT NOT NULL CHECK(level IN ('everyone','admins','managers','selected')),\n replies TEXT NOT NULL CHECK(replies IN ('everyone','same'))\n);\nCREATE TABLE nook_posting_people(\n conversation TEXT NOT NULL REFERENCES nook_conversations(id),\n user TEXT NOT NULL,\n PRIMARY KEY(conversation,user)\n);\nCREATE TABLE nook_posting_changes(\n action TEXT PRIMARY KEY REFERENCES nook_channel_actions(id),\n level TEXT NOT NULL CHECK(level IN ('everyone','admins','managers','selected')),\n replies TEXT NOT NULL CHECK(replies IN ('everyone','same')),\n people INTEGER NOT NULL CHECK(people>=0)\n);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0032_saved_reminders.sql",
+      "sha256": "ef7e18df388cbcc13f7d362f5956029b1f25d8cc4c24d76aa24cf1a280f05e7c",
+      "sql": "CREATE TABLE nook_saved_reminders(\n saved TEXT PRIMARY KEY REFERENCES nook_saved_items(id) ON DELETE CASCADE,\n user TEXT NOT NULL,\n due INTEGER NOT NULL CHECK(due>0),\n time_zone TEXT NOT NULL,\n state TEXT NOT NULL CHECK(state IN ('pending','ready','done','cancelled')),\n reason TEXT CHECK(reason IS NULL OR reason='source-unavailable'),\n updated INTEGER NOT NULL\n);\nCREATE INDEX nook_saved_reminder_due ON nook_saved_reminders(state,due);\nCREATE INDEX nook_saved_reminder_owner ON nook_saved_reminders(user,state,due);\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

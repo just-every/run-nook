@@ -1,3 +1,4 @@
+import {ReminderCards} from './ReminderCards'
 import '../app-style/attention.css'
 import type {Attention,AttentionItem,Conversation,Outcome,Person} from './types'
 import {OutcomeCard} from './OutcomeCard'
@@ -14,9 +15,10 @@ export function AttentionView({attention,user,conversations,onOpen,onAction,onDi
    <button className="soft-button" onClick={()=>act('settings',{dndUntil:quiet?null:Date.now()+3600000},'PATCH')}>{quiet?'End quiet time':'Quiet for one hour'}</button>
   </div>
   {attention.deferredCount>0&&<p className="muted">{attention.deferredCount} saved for later.</p>}
+  <ReminderCards items={attention.reminders?.items??[]} hasMore={!!attention.reminders?.hasMore} onOpen={onOpen} mutate={mutate}/>
   {attention.items.map(item=><article key={item.id} id={'attention-'+item.id} className="attention-card reveal-host"><div className="attention-context">{conversations.find(c=>c.id===item.conversation)?.name||'Conversation'} · <span>{reasonText(item)}</span></div>
    {item.outcome?<OutcomeCard outcome={item.outcome} user={user} onAction={onAction} onDiscuss={onDiscuss} onRevise={onRevise}>{triage(item)}</OutcomeCard>:<><p className="message-body">{item.message?.deleted?'Message deleted':item.message?.body||'This message is no longer available.'}</p>{item.message?.urgentReason&&<p className="urgent-reason">{item.message.urgentReason}</p>}<div className="card-actions"><button className="soft-button" onClick={()=>discuss(item)}>Discuss</button>{triage(item)}</div></>}
   </article>)}
-  {!attention.items.length&&<div className="empty-state"><NookMark/><h3>You're all caught up</h3><p>New requests and replies will appear here.</p></div>}
+  {!attention.items.length&&!attention.reminders?.items.length&&<div className="empty-state"><NookMark/><h3>You're all caught up</h3><p>New requests and replies will appear here.</p></div>}
  </div></section>
 }

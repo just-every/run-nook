@@ -1,3 +1,4 @@
+import {SavedReminder} from './SavedReminder'
 import {useEffect,useId,useRef,useState} from 'react'
 import {api} from './api'
 import type {Conversation,Person} from './types'
@@ -42,6 +43,7 @@ export function SavedView({user,conversations,revision,privateSignal,onOpen,onEr
     {item.kind==='attachment'&&<><a className="collection-download" href={`/api/attachments/${encodeURIComponent(item.attachment.id)}/download`} download={item.attachment.name}>{item.attachment.name}</a><p className="collection-meta">{Math.max(1,Math.round(item.attachment.size/1024))} KB · {item.attachment.mime}</p><button className="text-button" onClick={()=>{if(current())onOpen(item.conversation,item.attachment.message,null)}}>Open in conversation</button></>}
     {item.kind==='link'&&<a className="collection-url" href={item.url} target="_blank" rel="noopener noreferrer">{item.url}<span className="sr-only"> (opens in new tab)</span></a>}
    </>}
+   {!item.unavailable&&<SavedReminder id={item.id} reminder={item.reminder??null} disabled={busy!==null} current={current} onChanged={()=>setReload(value=>value+1)} onError={onError}/>}
    <div className="collection-footer"><span className="collection-meta">Saved <time dateTime={item.created}>{new Date(item.created).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}</time></span><button className="text-button" disabled={busy!==null} onClick={()=>void remove(item.id)}>{busy===item.id?'Removing…':'Remove from Saved'}</button></div>
   </li>)}</ol>}
   {loading&&!page&&<p className="muted">Loading saved items…</p>}

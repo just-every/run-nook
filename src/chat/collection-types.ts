@@ -1,5 +1,6 @@
+import type {SavedReminderState} from './SavedReminder'
 export type CollectionMessage={id:string;body:string;parent:string|null;created:string;author:string|null;authorName:string|null;source:'native'|'imported'}
-type SavedBase={id:string;created:string}
+type SavedBase={id:string;created:string;reminder?:SavedReminderState|null}
 type AvailableSource={unavailable:false;conversation:string;conversationName:string;conversationKind:'channel'|'private'|'dm'}
 export type SavedItem=SavedBase&(
  |{unavailable:true;kind:'message'|'attachment'|'link'}

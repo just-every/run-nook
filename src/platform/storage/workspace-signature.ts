@@ -6,4 +6,5 @@ export const attentionSignature=`WITH viewer AS (SELECT ? AS user), quiet AS (SE
  (SELECT json_group_array(json_array(conversation,muted,followed)) FROM (SELECT * FROM nook_preferences WHERE user=(SELECT user FROM viewer) ORDER BY conversation))||'|'||
  (SELECT json_group_array(json_array(message,source)) FROM (SELECT * FROM nook_thread_follows WHERE user=(SELECT user FROM viewer) ORDER BY message))||'|'||
  (SELECT json_group_array(message) FROM (SELECT * FROM nook_thread_unfollows WHERE user=(SELECT user FROM viewer) ORDER BY message))||'|'||
+ (SELECT json_group_array(json_array(saved,due,state,updated)) FROM (SELECT * FROM nook_saved_reminders WHERE user=(SELECT user FROM viewer) ORDER BY saved))||'|'||
  (SELECT json_group_array(json_array(message,seq)) FROM (SELECT * FROM nook_thread_reads WHERE user=(SELECT user FROM viewer) ORDER BY message)) AS v`
