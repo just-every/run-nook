@@ -22,7 +22,7 @@ async function root(c:Context,id:string,live=true){
 // Run between the new message row and attention/push routing in the same batch.
 // Explicit/authored choices retain their source; participation restores an unfollow,
 // while mentions and DM defaults must respect a sticky unfollow.
-export function automaticFollows(c:Context,conversation:string,message:string,parent:string|null,mentions:string[]){
+export function automaticFollows(c:Pick<Context,'uid'|'sql'>,conversation:string,message:string,parent:string|null,mentions:string[]){
  const thread=parent??message,source=parent?'replied':'authored'
  return [
   c.sql('DELETE FROM nook_thread_unfollows WHERE user=? AND message=?',c.uid,thread),

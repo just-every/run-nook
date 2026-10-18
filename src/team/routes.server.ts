@@ -1,3 +1,4 @@
+import {listSchedules,createSchedule,changeSchedule,schedulePreview,scheduleOccurrences,scheduleAudience} from '../scheduled/service'
 import {convertGroup} from './group-conversion.server'
 import {setSavedReminder} from './saved-reminders.server'
 import {postingPermissions,updatePosting} from './posting.server'
@@ -13,6 +14,14 @@ import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
+ if(parts[1]==='scheduled'){
+  if(parts.length===4&&parts[3]==='occurrences'&&method==='GET')return Response.json(await scheduleOccurrences(c,parts[2],url.searchParams.get('after')??''))
+  if(parts.length===2&&method==='GET')return Response.json(await listSchedules(c,url.searchParams.get('after')??''))
+  if(parts.length===3&&parts[2]==='preview'&&method==='POST')return Response.json(schedulePreview(input))
+  if(parts.length===3&&method==='PATCH')return Response.json(await changeSchedule(c,parts[2],input))
+ }
+ if(parts[1]==='conversations'&&parts.length===4&&parts[3]==='scheduled-audience'&&method==='GET')return Response.json(await scheduleAudience(c,parts[2]))
+ if(parts[1]==='conversations'&&parts.length===4&&parts[3]==='scheduled'&&method==='POST')return Response.json(await createSchedule(c,parts[2],input))
  if(url.pathname==='/api/team/default-channels'){
   if(method==='GET')return Response.json(await defaultChannels(c))
   if(method==='PATCH')return Response.json(await updateDefaultChannels(c,input))

@@ -418,8 +418,8 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Published | 15 | 2 | 0 | 17 |
-| Target and push further | 2 | 23 | 38 | 63 |
-| All | 17 | 25 | 38 | 80 |
+| Target and push further | 3 | 23 | 37 | 63 |
+| All | 18 | 25 | 37 | 80 |
 
 | Clause | Title | Kind | Status | Evidence | Gap |
 | --- | --- | --- | --- | --- | --- |
@@ -458,7 +458,7 @@ Judged from the code and tests at commit `ece3278576aa813e4d8eb6a17502df7d77bc82
 | `NOOK-031` | Shared channels between organizations | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-032` | Recurring quiet schedules and notification policy | target | partial | `src/team/conversation-notify.server.ts`; `src/chat/ConversationNotifications.tsx`; `src/platform/storage/messages.ts`; `src/push/policy.ts`; `src/notify/run.ts`; `tests/threads.mjs`; `tests/push/routing.mjs`; `tests/notify-journey.mjs` | Web conversation levels (all new messages, mentions, nothing), all-thread replies, mute exclusivity, exception list/reset, current-ACL routing, delivery-time cancellation and durable archive/erasure integration ship. Nothing silences pending/new email and push while explicit mentions/urgent requests remain in Attention. Mobile overrides reject unsupported input. Recurring/time-zone/device schedules, keywords, mobile/native classification and routing, channel-broadcast replies, org/new-member push defaults and email onboarding remain missing. |
 | `NOOK-033` | Personal and channel reminders | target | partial | `src/family/team-chat/attention.ts`; `src/platform/storage/commands.ts`; `tests/attention.mjs` | Attention snooze supplies a foundation; arbitrary reminders, recurrence, channel scheduling and natural-language `/remind` parsing are missing. |
-| `NOOK-034` | Scheduled and recurring messages | target | missing |  | No implementing source/test; acceptance journey above is pending. |
+| `NOOK-034` | Scheduled and recurring messages | target | done | `src/scheduled/service.ts`; `src/scheduled/runner.ts`; `src/scheduled/files.ts`; `src/scheduled/time.mjs`; `src/scheduled/ScheduleEditor.tsx`; `src/scheduled/ScheduledView.tsx`; `tests/scheduled.mjs`; `tests/scheduled-browser.mjs`; `tests/erasure.test.mjs`; `tests/exit-export.test.mjs` |  |
 | `NOOK-035` | Channel recaps and catch-up digests | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-036` | AI search with cited answers | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-037` | SSO, SAML and lifecycle provisioning | target | missing |  | No implementing source/test; acceptance journey above is pending. |
