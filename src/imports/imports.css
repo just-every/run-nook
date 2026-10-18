@@ -6,7 +6,29 @@ body:has(.imports-page){margin:0;background:var(--brand-paper)}
 .imports-page h1{margin:4px 0 12px;font:650 clamp(1.75rem,3vw,2.25rem)/1.15 var(--brand-font-display);font-variation-settings:'opsz' 48;letter-spacing:-.02em}.imports-page h2{margin:0 0 12px;font:600 18px/1.35 var(--brand-font-text)}.imports-page h3{margin:16px 0 8px;font-size:15px;font-weight:600}
 .imports-page a{color:var(--brand-ink);text-decoration:underline;text-decoration-color:currentColor;text-decoration-thickness:1px;text-underline-offset:3px}.imports-page a.import-back{display:inline-block;margin-bottom:24px;color:var(--brand-ink-soft);font-size:14px;text-decoration:none}.imports-page a.import-back:hover{color:var(--brand-ink);text-decoration:underline}.import-eyebrow{margin:0;color:var(--brand-ink-soft);font-size:12.5px;font-weight:500}
 .imports-page>section,.imports-page>form{margin-top:40px;padding-top:40px;border-top:1px solid rgb(42 29 33 / .10)}.imports-page form>section{margin-top:24px;padding-top:24px;border-top:1px solid rgb(42 29 33 / .10)}
-.imports-page label{display:flex;flex-direction:column;gap:6px;margin:16px 0;font-size:14px;font-weight:500}.imports-page input:not([type=checkbox]),.imports-page select{width:100%;min-height:40px;padding:0 12px;border:1px solid #b3a19a;border-radius:10px;font:inherit;font-size:15px;font-weight:400;background:var(--brand-card);color:inherit}.imports-page input[type=file]{padding:8px 12px}
+.imports-page label{display:flex;flex-direction:column;gap:6px;margin:16px 0;font-size:14px;font-weight:500}.imports-page input:not([type=checkbox]),.imports-page select{width:100%;min-height:40px;padding:0 12px;border:1px solid #b3a19a;border-radius:10px;font:inherit;font-size:15px;font-weight:400;background-color:var(--brand-card);color:inherit}.imports-page input[type=file]{padding:8px 12px}
+
+/* Shared with chat by ChatScreen: theme ink, an inset chevron, and room for text.
+   Multiple and size>1 lists retain their native controls (Base #247). */
+:is(.nook-app, .imports-page) { --rer-muted: var(--brand-ink-soft); --rer-text: var(--brand-ink); }
+:is(.nook-app, .imports-page) select:not([multiple],[size]:not([size="1"])) {
+  --rer-select-ink: var(--rer-muted);
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: normal;
+  padding-inline-end: 40px;
+  text-overflow: ellipsis;
+  text-indent: 4px;
+  background-image:
+    linear-gradient(to top right, transparent calc(50% - 1.1px), var(--rer-select-ink) calc(50% - .55px), var(--rer-select-ink) calc(50% + .55px), transparent calc(50% + 1.1px)),
+    linear-gradient(to top left, transparent calc(50% - 1.1px), var(--rer-select-ink) calc(50% - .55px), var(--rer-select-ink) calc(50% + .55px), transparent calc(50% + 1.1px));
+  background-repeat: no-repeat;
+  background-position: right 20px center, right 14px center;
+  background-size: 6px 6px;
+}
+:is(.nook-app, .imports-page) select:not([multiple],[size]:not([size="1"])):focus-visible { --rer-select-ink: var(--rer-text); }
+:is(.nook-app, .imports-page) select:not([multiple],[size]:not([size="1"])):disabled { --rer-select-ink: color-mix(in srgb, var(--rer-muted) 55%, transparent); }
+
 .imports-page input:not([type=checkbox]):focus-visible,.imports-page select:focus-visible{outline:none;border-color:var(--brand-ink);box-shadow:0 0 0 1px var(--brand-ink)}
 .imports-page small{color:var(--brand-ink-soft);font-size:12.5px;font-weight:400;overflow-wrap:anywhere}.imports-page fieldset{min-width:0;margin:24px 0;padding:0;border:0}.imports-page legend{margin-bottom:4px;padding:0;font-size:15px;font-weight:600}
 .imports-page fieldset fieldset{margin:12px 0 8px 0;padding-left:16px;border-left:2px solid rgb(42 29 33 / .10)}.imports-page fieldset fieldset legend{color:var(--brand-ink-soft);font-size:12.5px;font-weight:500}

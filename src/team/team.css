@@ -13,7 +13,8 @@
 /* Invite someone */
 .nook-app .team-invite { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3) var(--s4); }
 .nook-app .team-invite label { display: grid; gap: 6px; color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 500; }
-.nook-app .team-invite :is(input:not([type=checkbox]), select) { width: 100%; min-width: 0; min-height: 40px; padding: 0 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
+.nook-app .team-invite :is(input:not([type=checkbox]), select) { width: 100%; min-width: 0; min-height: 40px; padding: 0 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background-color: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
+.nook-app .team-invite select:not([multiple],[size]:not([size="1"])) { padding-inline-end: 40px; }
 .nook-app .team-invite fieldset { grid-column: 1 / -1; min-width: 0; max-height: none; margin: 0; padding: 0; overflow: visible; border: 0; }
 .nook-app .team-invite legend { margin-bottom: var(--s1); padding: 0; color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 500; }
 .nook-app .team-invite .team-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); column-gap: var(--s4); }
@@ -32,7 +33,9 @@
 .nook-app .team-person small { color: var(--ink-soft); font-size: var(--fs-meta); }
 .nook-app .team-people .team-actions { display: flex; flex: none; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s1); }
 .nook-app .team-actions label { display: inline-flex; align-items: center; gap: var(--s2); padding-left: 10px; color: var(--ink-soft); font-size: var(--fs-ui); font-weight: 500; }
-.nook-app .team-actions select { min-height: 32px; max-width: 160px; padding: 0 8px; border: 1px solid var(--line-field); border-radius: var(--r-control); background: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
+.nook-app .team-actions select { min-height: 32px; max-width: 160px; padding: 0 8px; border: 1px solid var(--line-field); border-radius: var(--r-control); background-color: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
+/* Keep the native control's intrinsic width when its 16px arrow gutter becomes explicit padding. */
+.nook-app .team-actions select:not([multiple],[size]:not([size="1"])) { width: calc-size(max-content, size - 16px); }
 .nook-app .team-actions select:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 .nook-app .team-about { margin-top: var(--s4); }
 .nook-app .team-about summary { width: max-content; cursor: pointer; color: var(--ink-soft); font-size: var(--fs-ui); font-weight: 500; }
@@ -44,7 +47,7 @@
 .nook-app .team-surface > section p { margin: 0 0 var(--s3); color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
 .nook-app .team-surface > section p[role] { color: var(--ink); font-size: var(--fs-ui); }
 .nook-app .team-surface > section label { display: grid; gap: 6px; max-width: 360px; color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 500; }
-.nook-app .team-surface > section select { min-height: 40px; padding: 0 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
+.nook-app .team-surface > section select { min-height: 40px; padding: 0 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background-color: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
 .nook-app .team-surface > section select:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 .nook-app .team-surface > section code { font-size: 12.5px; overflow-wrap: anywhere; }
 

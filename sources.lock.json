@@ -1285,7 +1285,7 @@
       "executable": false
     },
     "src/app-style/controls.css": {
-      "sha256": "1545a84f9e34d96c62856c75a86bd5cd5035795d2173d87cbfeff1bca638d42e",
+      "sha256": "023d1030b1435136bfc42408e4d7ac5e78482bf81ff4d976a4c033cee0123fc9",
       "executable": false
     },
     "src/app-style/conversation-notifications.css": {
@@ -3337,7 +3337,7 @@
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "e0e71f2f4d3621c4ad46fa549fc36c2001b8582ae2d1209f879253a32faa242b",
+      "sha256": "fa62229176660fe8fd4b1d9669ec01375f40c4c2b48cc9b9b98b626c77307a29",
       "executable": false
     },
     "src/client.tsx": {
@@ -3705,7 +3705,7 @@
       "executable": false
     },
     "src/imports/imports.css": {
-      "sha256": "1e540b3ec9bf3ffd6d617eaef5f04ddee75ea5aef16c35a8d58c9d8c1562bea9",
+      "sha256": "873010c89cbab72f756992239a8972a191a97dd42388d12a4aa26071911f858d",
       "executable": false
     },
     "src/imports/ImportWizard.tsx": {
@@ -4341,7 +4341,7 @@
       "executable": false
     },
     "src/team/team.css": {
-      "sha256": "17e26e437a042572d2ec6e2865964d8d6f993ef72cbccfdd32931057c522bb9c",
+      "sha256": "b611ad58f68a0a991d7e246a711feca2aa4c8d60b9ca1a2165114c89b797b209",
       "executable": false
     },
     "src/team/TeamBindings.tsx": {

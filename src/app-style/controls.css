@@ -36,8 +36,10 @@
 
 /* Fields */
 .nook-app .field { display: flex; flex-direction: column; gap: 6px; margin: var(--s3) 0; font-size: var(--fs-ui); font-weight: 500; }
-.nook-app .field :is(input, textarea, select) { width: 100%; min-width: 0; padding: 9px 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background: var(--surface-raised); color: var(--ink); font: inherit; font-weight: 400; }
+.nook-app .field :is(input, textarea, select) { width: 100%; min-width: 0; padding: 9px 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background-color: var(--surface-raised); color: var(--ink); font: inherit; font-weight: 400; }
 .nook-app :is(.field, .search-form, .team-invite) :is(input, textarea, select):focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+/* Replace the native control's 1px internal top/bottom inset when removing its appearance. */
+.nook-app .field select:not([multiple],[size]:not([size="1"])) { padding-block: 10px; }
 .nook-app .field textarea { min-height: 95px; resize: vertical; }
 .nook-app .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
 @media (max-width: 520px) { .nook-app .field-row { grid-template-columns: 1fr; } }
