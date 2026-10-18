@@ -28,6 +28,8 @@ jobs:
             command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime --suite=core-browser
           - stage: group conversion
             command: pnpm build:app && pnpm test:runtime --suite=conversion
+          - stage: keyboard navigation
+            command: pnpm build:app && pnpm test:runtime --suite=keyboard
           - stage: composition
             command: pnpm build:app && pnpm test:runtime --suite=composition
           - stage: search
