@@ -413,7 +413,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Baseline judged from commit `299006989e101c13d979a26d8cca6929b8350057`; NOOK-019 updated on 18 October 2026 from `tests/search.mjs` and `tests/search-browser.mjs`.
+Judged from the code and tests at commit `299006989e101c13d979a26d8cca6929b8350057` (18 October 2026). NOOK-019 updated from `tests/search.mjs` and `tests/search-browser.mjs`.
 
 Current code/test coverage is recorded per clause below and mirrored in ACCEPTANCE.md. Evidence identifies the implemented subset; a partial row’s Gap records the broader acceptance still required, including where a shipped subset is covered by another clause. These statuses do not reduce the requirements above.
 
