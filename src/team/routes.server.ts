@@ -1,3 +1,4 @@
+import {convertGroup} from './group-conversion.server'
 import {setSavedReminder} from './saved-reminders.server'
 import {postingPermissions,updatePosting} from './posting.server'
 import {importedAuthors} from './erasure/imported-directory'
@@ -16,6 +17,7 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
   if(method==='GET')return Response.json(await defaultChannels(c))
   if(method==='PATCH')return Response.json(await updateDefaultChannels(c,input))
  }
+ if(parts[1]==='conversations'&&parts.length===4&&parts[3]==='convert'&&method==='POST')return Response.json(await convertGroup(c,parts[2],input))
  if(parts[1]==='saved'){
   if(parts.length===2&&method==='GET')return Response.json(await listSaved(c,Object.fromEntries(url.searchParams)))
   if(parts.length===2&&method==='POST')return Response.json(await save(c,input))

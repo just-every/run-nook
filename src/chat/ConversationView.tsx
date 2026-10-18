@@ -128,11 +128,11 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
     <div className="message-log" ref={log} aria-label="Conversation messages" role="region" tabIndex={0}>
      <div className="history-controls">{data.rootWindow.hasMore&&data.rootWindow.cursor&&<button className="text-button" onClick={()=>navigate({before:data.rootWindow.cursor,focus:null})}>Load earlier messages</button>}</div>
      {roots.map((m,index)=>{const divider=m.sequence>c.readSeq&&(index===0||roots[index-1].sequence<=c.readSeq)&&c.unread>0;return <div className="message-group" key={m.id}>{divider&&<div className="new-divider">New messages</div>}{row(m,false,roots[index-1],divider)}</div>})}
-     {!roots.length&&<div className="empty-state"><NookMark/><h2>Start the conversation</h2><p>{c.kind==='dm'?`Say hello to ${name}.`:`Say something to #${name}.`}</p></div>}
+     {c.convertedFrom&&<p className="dialog-note">This private channel continues a group DM with its full history and original participants.</p>}{!roots.length&&!c.convertedTo&&<div className="empty-state"><NookMark/><h2>Start the conversation</h2><p>{c.kind==='dm'?`Say hello to ${name}.`:`Say something to #${name}.`}</p></div>}
     </div>
     {showLatest&&<button className="jump-latest soft-button" onClick={()=>latest()}>Latest messages</button>}
    </div>
-   {c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<Composer restricted={c.canPost===false||c.canPost===0} key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
+   {c.convertedTo?<p className="archived-notice">This group DM moved to a private channel and is read-only. <button className="text-button" onClick={()=>navigate({view:'chat',conversation:c.convertedTo!,thread:null,focus:null,before:null,threadBefore:null,panel:null})}>Open private channel</button></p>:c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<Composer restricted={c.canPost===false||c.canPost===0} key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&root&&!showOutcomes?<>
@@ -145,7 +145,7 @@ export function ConversationView({user,conversation:c,data,route,privateSignal,c
      </div>
      {showLatestReplies&&<button className="jump-latest soft-button" onClick={()=>latest(true)}>Latest replies</button>}
     </div>
-    {!c.archived&&!root.deleted&&(!root.immutable||Boolean(root.provenance))&&<Composer restricted={c.canReply===false||c.canReply===0} key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
+    {!(c.archived||!!c.convertedTo)&&!root.deleted&&(!root.immutable||Boolean(root.provenance))&&<Composer restricted={c.canReply===false||c.canReply===0} key={user.id+':'+c.id+':'+root.id} user={user} conversation={c.id} name={name} parent={root.id} members={data.members} privateSignal={privateSignal} viewCurrent={threadCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
    </>:outcomesPanel}
   </aside>
  </div>

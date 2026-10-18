@@ -37,3 +37,9 @@ Choose **More → Save for later** on a message or **Save file** on an attachmen
 Channel members can choose **More → Pin to channel** and retrieve shared context from **Conversation options → Pinned messages**, with who pinned it and when. Direct conversations do not have shared pins. Archived channels keep pins readable but cannot change them.
 
 Every list reload checks current access and source availability. Losing membership or erasing a source removes its excerpt and leaves an unavailable item; no saved body copy is kept. You can remove your own unavailable save. Pin and save links open their original context under the same access checks.
+
+## All unreads and group conversations
+
+Open **All unreads** in the sidebar, or from **You** on a phone, to catch up in sidebar order. Reading the list leaves messages unread until you open their conversation or choose **Mark conversation read** or **Mark all read**. Undo is available for ten seconds. A later read from another session wins over undo; Attention and accepted work are unchanged. Ctrl Shift A (Command Shift A on a Mac) opens the view; Shift Escape marks all read. You can hide its sidebar entry under You.
+
+In a group DM’s **Details**, choose a private channel name and **Convert to private channel**. Its full history and original participants move together, with the same message, thread and file IDs. The fixed DM becomes read-only with a link to the channel. Only an original participant may convert it, and every original participant must still have access; restore missing access explicitly before converting. Later invitations follow normal private-channel permissions and disclose full history.

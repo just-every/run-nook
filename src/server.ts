@@ -1,3 +1,4 @@
+import {unreads,markUnreads} from './platform/storage/unreads'
 import {withDemo} from './base/modules/demo/index.mjs'
 import {seedDemo} from './demo'
 import {devices,register,remove,presence,revokeSession} from './push/devices'
@@ -50,6 +51,7 @@ api.all('/api/*', async c => {
  const p = url.pathname.split('/').filter(Boolean), action = p[1], id = p[2] ?? '', sub = p[3]
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),team=await teamRoute(session,req,input);if(team)return team
+ if(action==='unreads'&&p.length===2){if(req.method==='GET')return c.json(await unreads(session,Object.fromEntries(url.searchParams)));if(req.method==='POST')return c.json(await markUnreads(session,input))}
  if(action==='notify'&&id==='conversations'&&p.length===3&&req.method==='GET')return c.json(await repository.read(req.headers,'conversationNotifyExceptions'))
  if(action==='conversations'&&id&&sub==='notify'&&p.length===4){if(req.method==='GET')return c.json(await repository.read(req.headers,'conversationNotify',id));if(req.method==='PATCH')return c.json(await repository.write(req.headers,'conversationNotify',id,input))}
  if(action==='workspace'&&p.length===2&&req.method==='GET')return c.json(await workspaceSnapshot(session,url.searchParams))

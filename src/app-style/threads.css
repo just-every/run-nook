@@ -17,3 +17,6 @@
 @media(max-width:850px) { .nook-app .thread-inline { padding-left: var(--s2); } .nook-app .thread-context .count { font-size: 12px; } }
 
 .nook-app .thread-excerpt { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
+
+.read-undo{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--surface-raised,#f2f5ed);border-bottom:1px solid var(--line,#ddd)}
+.thread-inline-message time{font-size:12px;color:var(--muted,#666)}

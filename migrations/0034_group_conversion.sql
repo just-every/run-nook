@@ -1,0 +1,1 @@
+CREATE TABLE nook_group_conversions(id TEXT PRIMARY KEY,source TEXT NOT NULL UNIQUE REFERENCES nook_conversations(id),destination TEXT NOT NULL UNIQUE REFERENCES nook_conversations(id),actor TEXT,created TEXT NOT NULL);
