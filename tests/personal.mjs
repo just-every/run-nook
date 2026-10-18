@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
-export async function personalJourney({owner,member,outsider,post,get,request,check,restart,sql}){
+export async function personalJourney({owner,registered,post,get,request,check,restart,sql}){
+ const member=await registered('PersonalSender'),outsider=await registered('PersonalOutside')
  await check('NOOK-017 sent history pages own recent messages under current access',async()=>{
   const room=(await post('/api/conversations',{name:'Regional customer launch',kind:'private',participants:[member.user.id]})).data
   const expected=new Set()
