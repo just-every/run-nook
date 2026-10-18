@@ -1,10 +1,10 @@
+import {inspectSource,captureSource,sourceKind,publicCampfire,summaryCampfire,campfireFileHashes} from './formats.mjs';
 import { fail } from '../family/team-chat/domain';
 import type { Context } from '../platform/storage/context';
-import { inspectSlackArchive, captureSlackArchive } from './slack.mjs';
 import { importDigest } from '../family/team-chat/import-capture.mjs';
 import { owner, ownerBatch, uploadBytes, stageFiles, cleanupImportObjects } from './custody.ts';
 import { kitSource } from './source.ts';
-import { nativeId } from './ids.mjs';
+import { captureNativeId } from './ids.mjs';
 import { assertSlackCaptureAdmitted } from './policy.mjs';
 import { importContext, importPredicate } from './authorization.ts';
 import { budgeted, left } from './request-budget.ts';
@@ -13,14 +13,15 @@ import { statusView } from './status.ts';
 import { planD1Import, preflightD1ImportJob, createD1ImportJob, resumeD1Import, readD1ImportJob, undoD1Import, rollbackD1Import } from './kit.ts';
 async function people(c: Context) { return (await c.rows("SELECT o.id,o.email,o.display_name AS name,o.version,a.mode,a.generation FROM oa_operators o JOIN nook_access a ON a.user=o.id AND a.active=1 WHERE o.status='active' ORDER BY o.id")).map(u => ({ ...u, active: true })); }
 function publicInspection(i: any) { return { channels: i.channels.map((c: any) => ({ sourceId: c.id, name: c.name, visibility: 'public' })), actors: i.actors, omissions: i.omissions, completeness: i.completeness, sourceAuthenticityVerified: false }; }
-function summary(capture: any) { return { reviewDigest: capture.reviewDigest, externalActors: capture.externalActors, skippedKinds: capture.skippedKinds, missingFiles: capture.missingFiles, missingFileInventoryDigest: capture.missingFileInventoryDigest, counts: capture.counts, omissions: capture.omissions, omissionDigest: capture.omissionDigest, omissionsAccepted: capture.omissionsAccepted, blockers: capture.blockers, blocked: capture.blocked, channels: capture.channels.map(({ sourceRecord, ...c }: any) => c), actors: capture.actors.map(({ sourceRecord, ...a }: any) => a), archiveDigest: capture.archiveDigest, captureDigest: capture.digest, completeness: 'unknown', sourceAuthenticityVerified: false }; }
-export async function inspectUpload(c: Context, id: string) { c = budgeted(c); const users = await people(c), inspected = inspectSlackArchive(await uploadBytes(c, id), users); await owner(c); return { upload: id, owner: c.uid, users, ...publicInspection(inspected) }; }
+function summary(capture: any) { if(capture.sourceType==='campfire')return summaryCampfire(capture);return { reviewDigest: capture.reviewDigest, externalActors: capture.externalActors, skippedKinds: capture.skippedKinds, missingFiles: capture.missingFiles, missingFileInventoryDigest: capture.missingFileInventoryDigest, counts: capture.counts, omissions: capture.omissions, omissionDigest: capture.omissionDigest, omissionsAccepted: capture.omissionsAccepted, blockers: capture.blockers, blocked: capture.blocked, channels: capture.channels.map(({ sourceRecord, ...c }: any) => c), actors: capture.actors.map(({ sourceRecord, ...a }: any) => a), archiveDigest: capture.archiveDigest, captureDigest: capture.digest, completeness: 'unknown', sourceAuthenticityVerified: false }; }
+async function inspectedUpload(c:Context,id:string,users:any[]){const upload=await c.one('SELECT object_key FROM nook_import_uploads WHERE id=? AND owner=?',[id,c.uid]);if(!upload)fail(404,'Import upload unavailable');return inspectSource(await uploadBytes(c,id),sourceKind(upload),users)}
+export async function inspectUpload(c: Context, id: string) { c = budgeted(c); const users = await people(c), inspected = await inspectedUpload(c,id,users); await owner(c); return { upload: id, owner: c.uid, users, ...(inspected.source?.implementation==='once-campfire-express'?publicCampfire(inspected,users):publicInspection(inspected)) }; }
 export async function previewImport(c: Context, input: any) {
     c = budgeted(c);
     await owner(c);
     if (!input || typeof input !== 'object' || Array.isArray(input) || typeof input.upload !== 'string')
         fail(400, 'Upload required');
-    const users = await people(c), inspected = inspectSlackArchive(await uploadBytes(c, input.upload), users), capture = captureSlackArchive(inspected, input.review, c.uid, users), result = summary(capture), preview = { ...result, missingFileInventory: capture.missingFileInventory };
+    const users = await people(c), inspected = await inspectedUpload(c,input.upload,users), capture = captureSource(inspected,input.review,c.uid,users), result = summary(capture), preview = { ...result, ...(capture.sourceType==='campfire'?{fileHashes:campfireFileHashes(capture)}:{}), missingFileInventory: capture.missingFileInventory };
     if (capture.blocked)
         return { ...preview, needsOmissionReview: false };
     if (!capture.omissionsAccepted)
@@ -63,10 +64,10 @@ export async function applyReviewed(c: Context, id: string, fingerprint: string)
         fail(409, 'Reviewed authority changed or previous import cleanup is incomplete');
     let jobId = review.kit_job;
     if (!jobId) {
-        const users = await people(c), capture = captureSlackArchive(inspectSlackArchive(await uploadBytes(c, review.upload), users), JSON.parse(review.review_json), c.uid, users), { source, mapping } = kitSource(capture, c.uid, review.upload, review.id), plan = await planD1Import(source, mapping, importContext(c, review));
+        const users = await people(c), capture = captureSource(await inspectedUpload(c,review.upload,users),JSON.parse(review.review_json),c.uid,users), { source, mapping } = kitSource(capture, c.uid, review.upload, review.id), plan = await planD1Import(source, mapping, importContext(c, review));
         if (plan.fingerprint !== fingerprint)
             fail(409, 'Reviewed source or mappings changed');
-        const duplicate = await c.one('SELECT 1 AS present WHERE EXISTS(SELECT 1 FROM nook_import_records WHERE key IN (SELECT value FROM json_each(?))) OR EXISTS(SELECT 1 FROM nook_conversations WHERE id IN (SELECT value FROM json_each(?)))', [JSON.stringify(capture.messages.map((m: any) => m.key)), JSON.stringify(capture.channels.map((ch: any) => nativeId(capture.namespace, 'channel', ch.sourceId)))]);
+        const duplicate = await c.one('SELECT 1 AS present WHERE EXISTS(SELECT 1 FROM nook_import_records WHERE key IN (SELECT value FROM json_each(?))) OR EXISTS(SELECT 1 FROM nook_conversations WHERE id IN (SELECT value FROM json_each(?)))', [JSON.stringify(capture.messages.map((m: any) => m.key)), JSON.stringify(capture.channels.map((ch: any) => captureNativeId(capture, 'channel', ch.sourceId)))]);
         // Existing operation receipts remain resumable after a lost create ack.
         const prior = await c.one('SELECT id FROM ik_jobs WHERE operation_key=? AND principal_id=?', [review.id, c.uid]);
         if (duplicate && !prior) fail(409, 'Source history already belongs to another import');

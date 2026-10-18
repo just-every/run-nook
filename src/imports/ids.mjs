@@ -1,9 +1,11 @@
+import {campfireNativeId,campfireCaptureJobId} from './campfire-effects.mjs';
 import { isAutomation } from './slack-records.mjs';
 import { compareSourceMessages } from './timestamps.mjs';
 import { importDigest } from '../family/team-chat/import-capture.mjs';
 import { assertSlackCaptureAdmitted, assertSlackEffect } from './policy.mjs';
 export const nativeId = (namespace, kind, key) => 'slack-' + importDigest([namespace, kind, key]).slice(0, 40);
-export const captureJobId = (capture, uploadId) => nativeId(capture.namespace, 'capture', capture.digest + ':' + uploadId);
+export const captureJobId = (capture, uploadId) => capture.sourceType==='campfire'?campfireCaptureJobId(capture,uploadId):nativeId(capture.namespace, 'capture', capture.digest + ':' + uploadId);
+export const captureNativeId=(capture,kind,key)=>capture.sourceType==='campfire'?campfireNativeId(capture.namespace,kind,key):nativeId(capture.namespace,kind,key);
 export function fileObjectKey(owner, upload, job, review, file) {
     if (typeof review !== 'string' || !/^[A-Za-z0-9_.-]{1,128}$/.test(review)) throw Error('SLACK_INVALID: review identity required');
     return `private/imports/${owner}/${upload}/files/${job}/${review}/${file}`;

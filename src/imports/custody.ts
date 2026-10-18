@@ -6,10 +6,11 @@ import { budgeted, left } from './request-budget';
 export { owner, ownerBatch } from './owner';
 export { cleanupImportObjects } from './object-store';
 import { sha256, ZIP_LIMITS } from './zip.mjs';
-import { nativeId, captureJobId, fileObjectKey } from './ids.mjs';
-import { inspectSlackArchive } from './slack.mjs';
+import { captureNativeId, captureJobId, fileObjectKey } from './ids.mjs';
+import { inspectSource,sourceKind } from './formats.mjs';
+import {assertCampfireFileSize} from './campfire-effects.mjs';
 import { assertSlackCaptureAdmitted, assertSlackFileSize } from './policy.mjs';
-export async function localUpload(c: Context, request: Request) {
+export async function localUpload(c: Context, request: Request,kind='slack') {
     c = budgeted(c);
     await owner(c);
     const reader = request.body?.getReader() ?? fail(400, 'ZIP upload required');
@@ -28,15 +29,15 @@ export async function localUpload(c: Context, request: Request) {
     }
     const bytes = Buffer.concat(chunks), archiveDigest = sha256(bytes);
     // Reject invalid archives before retaining any owner custody objects.
-    inspectSlackArchive(bytes);
+    await inspectSource(bytes,kind,[]);
     let upload = await c.one("SELECT * FROM nook_import_uploads WHERE owner=? AND archive_digest=? AND state<>'discarded'", [c.uid, archiveDigest]);
     if (!upload) {
-        const id = crypto.randomUUID(), key = `private/imports/${c.uid}/${id}/archive.zip`;
+        const id = crypto.randomUUID(), key = `private/imports/${c.uid}/${id}/${kind==='campfire'?'archive.campfire.tar.gz':'archive.zip'}`;
         await ownerBatch(c, [c.sql("INSERT INTO nook_import_uploads VALUES(?,?,?,?,?,'reserved',?)", id, c.uid, archiveDigest, key, bytes.length, Date.now())]);
         upload = await c.one('SELECT * FROM nook_import_uploads WHERE id=? AND owner=?', [id, c.uid]);
     }
     if (upload.state === 'reserved') {
-        await putCustodyObjects(c, [{ key: upload.object_key, bytes, mime: 'application/zip', sha256: archiveDigest }],
+        await putCustodyObjects(c, [{ key: upload.object_key, bytes, mime: kind==='campfire'?'application/gzip':'application/zip', sha256: archiveDigest }],
             [c.sql("UPDATE nook_import_uploads SET state='ready' WHERE id=? AND owner=? AND state='reserved'", upload.id, c.uid)],
             "EXISTS(SELECT 1 FROM nook_import_uploads WHERE id=? AND owner=? AND state IN ('reserved','ready'))", [upload.id, c.uid]);
     }
@@ -54,8 +55,8 @@ const FILES_PER_REQUEST = 100, STAGE_STATEMENTS = 20;
 export async function stageFiles(c: Context, upload: string, capture: any, reviewId: string) {
     assertSlackCaptureAdmitted(capture);
     const files = capture.messages.flatMap((message: any) => message.files.map((file: any) => {
-        assertSlackFileSize(file.size);
-        return { ...file, key: fileObjectKey(c.uid, upload, captureJobId(capture, upload), reviewId, nativeId(capture.namespace, 'file', `${message.key}:${file.sourceId}`)) };
+        if(capture.sourceType==='campfire')assertCampfireFileSize(file.size);else assertSlackFileSize(file.size);
+        return { ...file, key: fileObjectKey(c.uid, upload, captureJobId(capture, upload), reviewId, captureNativeId(capture, 'file', `${message.key}:${file.sourceId}`)) };
     }));
     if (!files.length) return { staged: 0, total: 0 };
     const rows = new Map((await c.rows('SELECT k.value AS object_key,o.state,EXISTS(SELECT 1 FROM nook_object_deletes d WHERE d.object_key=k.value) AS queued FROM json_each(?) k LEFT JOIN nook_import_objects o ON o.object_key=k.value AND o.owner=?', [JSON.stringify(files.map((f: any) => f.key)), c.uid])).map(row => [row.object_key, row]));

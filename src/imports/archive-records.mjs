@@ -1,5 +1,4 @@
-import { sourceFileRefs } from './slack-records.mjs';
-import { assertSlackEffect } from './policy.mjs';
+import {sourceMessageFiles,assertImportEffect} from './formats.mjs';
 import { canonicalJson, sha256 } from './kit.ts';
 const check = (ok, code) => { if (!ok) throw Error(code); };
 const equal = (a, b) => canonicalJson(a) === canonicalJson(b);
@@ -34,10 +33,10 @@ export function validateSlackArchiveRecords(proofs, tables) {
             for (const expected of v.files) {
                 const binding = bindings.find(f => f.id === expected.id), file = attachments.get(expected.id);
                 check(binding && file && binding.source_id === expected.sourceId && binding.attachment === file.id && binding.position === expected.position && file.object_key === expected.objectKey && file.size === expected.size && file.sha256 === expected.sha256 && file.mime === expected.mime && file.name === expected.name && file.author === expected.author && file.expires === expected.expires && file.created === expected.created && file.intent === expected.intent, 'slack_file_provenance_changed');
-                const source = sourceFileRefs(v.sourceRecord).find(f => f.id === expected.sourceId);
+                const source = sourceMessageFiles(v.sourceRecord).find(f => f.id === expected.sourceId);
                 check(source && source.name === file.name && source.mimetype === file.mime && (source.size === undefined || source.size === file.size), 'slack_source_file_changed');
             }
-            assertSlackEffect('message', v);
+            assertImportEffect('message', v);
         }
         check(Array.isArray(summary.omissions) && sha256(canonicalJson(summary.omissions)) === summary.omissionDigest, 'slack_omission_digest_changed');
         check(!validated.has(domain), 'duplicate_slack_domain_job');
@@ -45,6 +44,6 @@ export function validateSlackArchiveRecords(proofs, tables) {
     }
     // Slack destinations are stable IDs; removing review/job custody must not
     // downgrade their rows into the older source-capture import path.
-    for (const envelope of envelopes.values()) if (envelope.id.startsWith('slack-')) check(validated.has(envelope.id), 'slack_history_without_completed_job');
+    for (const envelope of envelopes.values()) if (envelope.id.startsWith('slack-')||envelope.id.startsWith('campfire-')) check(validated.has(envelope.id), 'slack_history_without_completed_job');
     return validated;
 }

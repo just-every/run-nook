@@ -130,7 +130,7 @@ export default withDemo({
   if(url.pathname==='/notify/off') return unsubscribeRoute(env,request)
   if(url.pathname==='/auth/owner-claim') return await ownerClaim(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/api/editor/config'||url.pathname==='/api/editor/session') return editorRoute(env,request)
-  if(url.pathname==='/api/slack-imports'||url.pathname.startsWith('/api/slack-imports/'))return (await slackImportRoute(request,env))!
+  if(['/api/slack-imports','/api/campfire-imports'].some(base=>url.pathname===base||url.pathname.startsWith(base+'/')))return (await slackImportRoute(request,env))!
   if(url.pathname==='/api/portability'||url.pathname.startsWith('/api/portability/'))return portabilityRoute(env,request)
   if(url.pathname==='/api/live'){if(request.headers.get('origin')!==url.origin)return new Response('Origin denied',{status:403});try{return await new Repository(env).live(request)}catch(error){return Response.json({error:error instanceof Error?error.message:'Live unavailable'},{status:error instanceof Fault?error.status:500})}}
   if(url.pathname==='/auth/bootstrap' && (await env.DB.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>())?.authority!=='normalized')return Response.json({error:'offline_storage_conversion_required'},{status:503,headers:{'Cache-Control':'no-store'}})

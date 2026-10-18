@@ -1,7 +1,7 @@
 import {retireD1ImportCustody,type D1RelatedErasure,type D1ImportContext} from '../../imports/kit'
 import {importTargets} from '../../imports/target'
 import {redactInSteps} from './redaction-steps'
-import {MAPPING_VERSION} from '../../imports/ids.mjs'
+import {mappingVersion} from '../../imports/formats.mjs'
 import {importDigest} from '../../family/team-chat/import-capture.mjs'
 import {authority,authFence,type Context} from '../../platform/storage/context'
 import {authorizeWork} from './authorization'
@@ -11,20 +11,20 @@ import type {fenceService,Sql} from './portability'
 export async function personValues(c:Context,work:any,actor:any){
  const values=new Set<string>()
  if(work.kind==='member'){const row=await c.one('SELECT email FROM oa_operators WHERE id=?',[work.target]);if(row?.email)values.add(row.email)}
- const email=actor?JSON.parse(actor.source_record)?.profile?.email:undefined
- if(typeof email==='string'&&email)values.add(email)
+ const record=actor?JSON.parse(actor.source_record):null
+ for(const email of [record?.profile?.email,record?.email_address])if(typeof email==='string'&&email)values.add(email)
  return [...values]
 }
 /** Nook review/custody bindings, never an ID prefix, select the import protocol.
  * The kit also proves no import header still equals one of `values`. */
 export async function eraseImportedTarget(c:Context,work:any,kind:'actor'|'message',target:string,job:any,statements:Sql[],values:string[],f:Awaited<ReturnType<typeof fenceService>>,related?:D1RelatedErasure){
  const scope=await authorizeWork(c,work)
- const review=await c.one('SELECT r.kit_job,k.destination,k.namespace FROM nook_import_reviews r JOIN ik_jobs k ON k.operation_key=r.id AND k.principal_id=r.owner AND k.destination=r.owner WHERE r.domain_job=?',[job.id])
+ const review=await c.one('SELECT r.kit_job,r.summary_json,k.destination,k.namespace,k.mapping_version FROM nook_import_reviews r JOIN ik_jobs k ON k.operation_key=r.id AND k.principal_id=r.owner AND k.destination=r.owner WHERE r.domain_job=?',[job.id])
  if(review){
-  if(review.destination!==job.owner||review.namespace!==job.namespace)throw Error('Import custody binding changed')
+  if(review.destination!==job.owner||review.namespace!==job.namespace||review.mapping_version!==mappingVersion(review))throw Error('Import custody binding changed')
   // Native rows, the portability fence, the redaction checkpoint and import custody
   // commit in one batch (with a reaction redaction, in its final step).
-  const ctx:D1ImportContext={destination:job.owner,namespace:job.namespace,mappingVersion:MAPPING_VERSION,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence} AND (${scope.condition})`,params:[...c.credentials,...scope.params]})}}
+  const ctx:D1ImportContext={destination:job.owner,namespace:job.namespace,mappingVersion:review.mapping_version,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence} AND (${scope.condition})`,params:[...c.credentials,...scope.params]})}}
   if(!related?.fields){await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint());return}
   await redactInSteps(c,work,scope,{kind,id:target},values,related,statements,job.owner,ctx,f)
   return
