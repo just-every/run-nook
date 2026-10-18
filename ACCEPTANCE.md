@@ -439,4 +439,4 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**80 clauses: 21 done, 23 partial, 36 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**80 clauses: 23 done, 22 partial, 35 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
