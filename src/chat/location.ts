@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react'
 import type {LocationState,Screen} from './types'
-const views:Screen[]=['drafts','chat','reminders','scheduled','unreads','attention','threads','channels','search','you','team','saved']
+const views:Screen[]=['files','drafts','chat','reminders','scheduled','unreads','attention','threads','channels','search','you','team','saved']
 export function readLocation(search=location.search):LocationState {
  const p=new URLSearchParams(search),view=p.get('view') as Screen
  const selected=views.includes(view)?view:p.has('conversation')?'chat':'channels',conversation=p.get('conversation'),thread=p.get('thread'),focus=p.get('focus'),panel=p.get('panel')==='outcomes'?'outcomes':null,before=p.get('before'),threadBefore=p.get('threadBefore')

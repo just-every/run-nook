@@ -59,3 +59,7 @@ Recurrence keeps the chosen local wall-clock time across daylight saving. A miss
 Open **Drafts & sent** in the sidebar, or under **You** on a phone. **Drafts** lists unsent messages saved in this browser for your account, including thread replies and unconfirmed sends. Continue a draft to reopen its conversation or thread; retrying an unconfirmed send retains its original intent. Browser drafts do not sync to another device.
 
 **Scheduled** contains the same edit, pause, cancel and history controls as Scheduled messages. **Sent** lists messages you sent in the last 30 days, newest first, with pages of older messages and a link back to each message. It shows current revisions and excludes deleted messages and conversations you can no longer read. Imported history is not a sent message.
+
+## Files
+
+Choose **Files** in a conversation’s Messages/Files tabs to browse its shared files, newest first, or open **Files** from the sidebar or **You** to browse all conversations you can read. Filter by person or file type, download the original bytes, preview supported PNG/JPEG images, or open a file’s original message/thread. Native files and published imported files appear together, with their original author and shared time. Staged uploads and deleted files do not appear; losing conversation access removes its files. File contents are not searched.

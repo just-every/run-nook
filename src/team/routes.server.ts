@@ -1,3 +1,4 @@
+import {listFiles} from '../files/server'
 import {sentMessages} from '../personal/sent.server'
 import {reminderPreview,createReminder,listReminders,changeReminder} from '../reminders/service'
 import {listSchedules,createSchedule,changeSchedule,schedulePreview,scheduleOccurrences,scheduleAudience} from '../scheduled/service'
@@ -16,6 +17,8 @@ import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
+ if(url.pathname==='/api/files'&&method==='GET')return Response.json(await listFiles(c,Object.fromEntries(url.searchParams)))
+ if(parts.length===4&&parts[1]==='conversations'&&parts[3]==='files'&&method==='GET')return Response.json(await listFiles(c,{...Object.fromEntries(url.searchParams),conversation:parts[2]}))
  if(url.pathname==='/api/sent'&&method==='GET')return Response.json(await sentMessages(c,url.searchParams.get('after')??''))
  if(parts[1]==='reminders'){
   if(parts.length===3&&parts[2]==='preview'&&method==='POST')return Response.json(await reminderPreview(c,input))

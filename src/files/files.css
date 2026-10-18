@@ -1,0 +1,3 @@
+.nook-app .conversation-files-tabs{display:flex;gap:8px;padding:8px 24px;border-bottom:1px solid var(--line)}
+.nook-app .conversation-files-tabs .soft-button[aria-pressed=true]{background:var(--ink);color:var(--surface-page)}
+@media(max-width:600px){.nook-app .conversation-files-tabs{padding:8px 16px}}
