@@ -1,3 +1,4 @@
+import {migrationHistory} from '../migration-history.mjs';
 import { createPortability, readArchive, makePart } from '../../src/base/modules/portability/index.mjs';
 import { ArchiveVerifier, ContentVerifier } from '../../src/base/modules/portability/format.mjs';
 import { normalizedPortability } from '../../src/platform/storage/portability.mjs';
@@ -10,7 +11,7 @@ export async function roundTrip(f, inspect, mutate) {
     try {
         while ((await exporter.exports.advance(id, { maxParts: 16 })).phase === 'building') {}
         target = await teamFixture({ bootstrap: false });
-        const bucket = testBucket(), importer = await createPortability({ db: target.adapter, buckets: { FILES: bucket }, policy });
+        const bucket = testBucket(), importer = await createPortability({ db: target.adapter, buckets: { FILES: bucket }, policy, migrations:migrationHistory(policy) });
         let input, close;
         const records=[]; for await (const r of readArchive(await exporter.exports.download(id))) records.push(r);
         if(mutate){mutate(records.flatMap(r=>r.items??[]));const verifier=new ContentVerifier(records[0]),archive=new ArchiveVerifier(records[0]);for(let i=0;i<records.length;i++)if(records[i].kind==='part'){records[i]=await makePart(records[i].index,records[i].items);archive.add(records[i]);for(const item of records[i].items)verifier.add(item)}records.at(-1).contentHash=verifier.digest();records.at(-1).archiveHash=archive.digest()}

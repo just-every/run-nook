@@ -1,3 +1,4 @@
+import {migrationHistory} from './migration-history.mjs';
 import {test,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
@@ -5,7 +6,7 @@ import {mkdtemp,rm,readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createPortability,readArchive} from '../src/base/modules/portability/index.mjs';
-import {teamFixture,migrationHistory} from './team-sql-support.mjs';
+import {teamFixture} from './team-sql-support.mjs';
 const require=createRequire(import.meta.url),wranglerRequire=createRequire(require.resolve('wrangler'));
 const {build}=wranglerRequire('esbuild');
 const dir=await mkdtemp(join(tmpdir(),'nook-erasure-'));

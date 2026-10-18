@@ -1,3 +1,4 @@
+import {migrationHistory} from './migration-history.mjs';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -5,7 +6,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {recoverNormalized} from '../scripts/storage/recover-identities.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {teamFixture,migrationHistory} from './team-sql-support.mjs';
+import {teamFixture} from './team-sql-support.mjs';
 import {createPortability,readArchive,makePart} from '../src/base/modules/portability/index.mjs';
 import {ArchiveVerifier,ContentVerifier} from '../src/base/modules/portability/format.mjs';
 import {validateTeamArchive} from '../src/team/portability.mjs';

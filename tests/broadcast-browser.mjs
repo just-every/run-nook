@@ -26,7 +26,7 @@ export async function broadcastBrowser({origin,owner,member,people,destination='
     const committed=sender.waitForResponse(response=>response.url().includes('/messages')&&response.request().method()==='POST')
     await confirmation.getByRole('button',{name:'Send broadcast',exact:true}).click();assert.equal((await committed).status(),200)
     const summary=sender.locator('summary').filter({hasText:'@channel · 6 recipients'})
-    await expect(summary).toBeVisible();await summary.click();await expect(sender.getByText(new RegExp(people[10].name))).toBeVisible()
+    await expect(summary).toBeVisible();await summary.click();await expect(summary.locator('..').getByText(new RegExp(people[10].name))).toBeVisible()
     await sender.screenshot({animations:'disabled',path:resolve(destination,`sent-${width}.png`)})
     await recipient.goto(origin+'/app?view=attention');await expect(recipient.getByText('A channel-wide mention',{exact:true}).last()).toBeVisible();await recipient.screenshot({animations:'disabled',path:resolve(destination,`attention-${width}.png`)})
     await recipient.goto(origin+'/app?view=you');const away=recipient.getByRole('checkbox',{name:'Set yourself away for @here'});await expect(away).toBeEnabled();if(await away.isChecked()){await away.click();await expect(away).not.toBeChecked()}await away.click();await expect(away).toBeChecked();await away.scrollIntoViewIfNeeded();await recipient.screenshot({animations:'disabled',path:resolve(destination,`availability-${width}.png`)})

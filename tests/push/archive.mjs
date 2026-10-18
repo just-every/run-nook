@@ -1,3 +1,4 @@
+import {migrationHistory} from '../migration-history.mjs';
 import assert from 'node:assert/strict';
 import {createPortability,readArchive} from '@runeditrun/rer/modules/portability';
 import {productPolicy} from '../../src/platform/portability-policy.mjs';
@@ -21,7 +22,7 @@ export async function archive(c){
   const allRows=records.flatMap(r=>r.items??[]).filter(r=>r.kind==='row');assert.ok(allRows.some(r=>r.table==='nook_notify_preferences'&&r.row.user===member.user.id&&r.row.push_mentions===1));
   for(const target of c.recipients.values())assert.ok(!new TextDecoder().decode(bytes).includes(target.subscription.endpoint),'no subscription endpoint in exported bytes');
   let outbound=0;restore=await installation(async()=>{outbound++;return new Response(null,{status:201})},{bootstrap:false});
-  const imported=await createPortability({db:restore.db,buckets:{FILES:await restore.mf.getR2Bucket('FILES')},policy:await productPolicy(restore.db)});
+  const imported=await createPortability({db:restore.db,buckets:{FILES:await restore.mf.getR2Bucket('FILES')},policy:await productPolicy(restore.db),migrations:migrationHistory(await productPolicy(restore.db))});
   const id=await imported.imports.create(records[0]);for(const record of records)if(record.kind==='part')await imported.imports.uploadPart(id,record.index,record);
   const closing=records.at(-1);await imported.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash});
   for(const table of excluded)assert.equal((await restore.db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0,'restored '+table+' empty');

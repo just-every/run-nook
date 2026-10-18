@@ -3333,7 +3333,7 @@
       "executable": false
     },
     "src/chat/composition/CompositionTools.tsx": {
-      "sha256": "658f97acb15ba3bf1c08500fb3daabfc3b415fd51d3a2c3dd2633d063c961a78",
+      "sha256": "ff2173cb7e7b762fd08056d267dcc731dbc2ace09fe5d09058b3156c712eda0a",
       "executable": false
     },
     "src/chat/composition/long-message.ts": {
@@ -4789,7 +4789,7 @@
       "executable": false
     },
     "tests/broadcast-browser.mjs": {
-      "sha256": "fbff1c9dd2b8a1f52652870a3fae28a252ab2c3973d5bbde072a01956fb0a97a",
+      "sha256": "c0838b1a0e50839c3c6508f8ddc3541215f2e829a155ce6db0220c677f515120",
       "executable": false
     },
     "tests/broadcast.mjs": {
@@ -4837,7 +4837,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "61e8f26be2bd10a97ff9d0e0f0512b160720836ac6c9f0810d4a55a39f69d26d",
+      "sha256": "db21c1f5ac43edba39fd3446067fd027514e4e5bd304296368b1b1aa426c2496",
       "executable": false
     },
     "tests/exit-export.test.mjs": {
@@ -4922,6 +4922,10 @@
     },
     "tests/media-adversarial.mjs": {
       "sha256": "228ce44a80d85cd8685016700c2066bd51a47067f7eeeb9a83792cb8c9b7facc",
+      "executable": false
+    },
+    "tests/migration-history.mjs": {
+      "sha256": "47d56c976a26a985979696cba737ffe43c446e22e926b350319473a17cce21a6",
       "executable": false
     },
     "tests/notify-journey.mjs": {
@@ -5073,7 +5077,7 @@
       "executable": false
     },
     "tests/push/archive.mjs": {
-      "sha256": "d49094a45b9f176a1ac44abeb1aa743ef7d198463fac4e8e2c9d8aa3efcbd1ff",
+      "sha256": "dee6d64e3af80237f5424c641309860c20fbf55bcf9e03519847fa56d2017b68",
       "executable": false
     },
     "tests/push/broadcast.mjs": {
@@ -5197,7 +5201,7 @@
       "executable": false
     },
     "tests/slack-import/archive-roundtrip.mjs": {
-      "sha256": "854eee46ad5db510ea2928d6f122d24555a64516b0306184de6a8583cb77c524",
+      "sha256": "c3d2181e58845ec378154400053536b5eec7cc2a7c596f906c2bc7c1df1d337e",
       "executable": false
     },
     "tests/slack-import/fixture.mjs": {
@@ -5245,7 +5249,7 @@
       "executable": false
     },
     "tests/storage-migration.mjs": {
-      "sha256": "e9efad445a4d780d827f940ef2ad2612932fece4f7bce8625e493f4e9fe0f0e0",
+      "sha256": "d32e1cc429c0aac9edc8084f7067c1afc804708e33641ae070d4240b27fdf15d",
       "executable": false
     },
     "tests/team-browser.mjs": {
@@ -5261,7 +5265,7 @@
       "executable": false
     },
     "tests/team-portability.test.mjs": {
-      "sha256": "9c924df66f666d175c6874ad26869e4591af2e1ed2ffafff09146e3c76666f11",
+      "sha256": "715a434ff391ca3abfd096222bcfe2075cc197899cf459891be10acdb3c28c60",
       "executable": false
     },
     "tests/team-runtime.mjs": {
@@ -5273,7 +5277,7 @@
       "executable": false
     },
     "tests/team-sql-support.mjs": {
-      "sha256": "27573e606944e30677fb8b82b05055f9eb7077105fb4e44581a9c666ce661827",
+      "sha256": "cecc632d0f2ff06d2f613c82d04cd14bfe55435f7c2ee9fa7ca6916e336575be",
       "executable": false
     },
     "tests/threads.mjs": {
