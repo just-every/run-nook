@@ -1,8 +1,8 @@
 {
-  "version": "0.3.0",
-  "previousVersion": "0.2.0",
-  "date": "2026-10-15",
-  "publicReleaseNotes": "Nook 0.3.0 adds visible decision and request history, live thread reply counts, clearer invitations and channel access wording, and shared Notified names and urgent reasons. Phone composition stays above the tabs. History and Decisions & requests controls reference panels only while mounted; member erasure waits for the refreshed people list before its receipt returns focus to the surviving page.\n\nNook now pins the published rer 0.2.19 command line. A fresh local launch creates a placeholder owner; choosing a real local owner is optional and keeps the owner ID and data. Setup applies pending migrations during local updates. A hosted deploy claims the owner after health succeeds and removes its one-time setup token; rer signin provides single-use owner access with the deployment's own Cloudflare credentials. Local archive restore instructions recover the archived identities before setup.\n\nImported-reaction erasure continues in bounded steps until the erased Slack ID is absent, rather than completing with a retained ID. Migration 0024_import_redaction_steps.sql adds the resumable import/redaction state; 0025_owner_signin.sql adds hashed one-time owner sign-in grants. Both migrations are additive. Export before updating from 0.2.0, keep private settings and all applied migrations unchanged, then run rer setup locally or rer deploy against the existing hosted installation. Never reset populated state to update.\n\nKnown Base issues remain: invitation links expire after 15 minutes (invite the person again); the hosted Lobby can ask for a setup token after owner claim (open /signin); and rer 0.2.19 removal can fail with provider-incomplete-pagination on a nonempty R2 bucket (empty only that deployment's bucket and rerun removal). Reply counts include live replies only; Open thread still reaches erased-reply tombstones. Real-device Web Push receipt and virus scanning are not claimed.",
+  "version": "0.3.1",
+  "previousVersion": "0.3.0",
+  "date": "2026-10-18",
+  "publicReleaseNotes": "Nook 0.3.1 changes only the catalogue description, which is now: Keep team conversations, decisions and commitments together so work stays clear. Description only; no product change. The application, contract, migrations and configuration are identical to 0.3.0.",
   "contractChanges": {
     "NOOK-009": {
       "change": "changed",
@@ -55,5 +55,5 @@
     }
   ],
   "breaking": false,
-  "agentUpdateInstructions": "Updating from 0.2.0 to 0.3.0: preserve the existing owner, data, private settings, resource identities and every applied migration byte. Stop local dev and export a private backup first (rer export locally, or rer export --target remote through the active hosted owner session). Fast-forward the checkout to the 0.3.0 source. rer manages the pinned dependency graph and tooling; run rer setup then rer dev locally, or rer deploy with the existing Cloudflare account and environment for a hosted Nook. The only new migrations are 0024_import_redaction_steps.sql and 0025_owner_signin.sql, both additive; never reset populated state to update. Existing email and push choices stay unchanged. The next hosted deploy claims an unclaimed 0.2.0 owner and removes its unused setup token; an old .rer/deploy/production-secrets.json can then be deleted. Restoring an archive is a separate empty-target operation: follow OPERATIONS.md#restoring-a-local-archive and recover the archived identities offline before setup. Keep the documented Lobby, invitation-lifetime and R2-removal limitations visible until their Base fixes ship."
+  "agentUpdateInstructions": "From 0.3.0: description only; no product change. Update the checkout to v0.3.1; no migration, configuration, data or redeploy step is needed. From an earlier version, first follow the upgrade to 0.3.0 (RELEASE.json at tag v0.3.0)."
 }
