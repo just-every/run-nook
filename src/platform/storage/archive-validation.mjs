@@ -1,3 +1,4 @@
+import {validateSchedules} from '../../scheduled/archive.mjs';
 import {conversionArchive} from '../../team/group-conversion-archive.mjs';
 import { sourceActorId, sourceFileRefs } from '../../imports/slack-records.mjs';
 import {validateRetainedBodies} from '../../team/erasure/retained-archive.mjs';
@@ -40,6 +41,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
  await validateDefaultChannels(readTable,manifest,actors,conv);
  await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});
+ const scheduledFiles=await validateSchedules(readTable,manifest,{actors,conversations:conv,messages:msg,attachments:files});
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
  await validateSavedArchive(readTable,{manifest,actors,conversations:conv,messages:msg,imported,attachments:files});
  const notifyRows=manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_conversation_notify')?[]:await readTable('nook_conversation_notify');
@@ -97,7 +99,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  index(rows('thread_reads'),r=>tuple(r.user,r.message),'duplicate_thread_read');for(const r of rows('thread_reads')){const root=threadRoot(r.message,r.user),mark=positions.get(tuple(root?.conversation,r.seq));check(root&&integer(r.seq)&&(r.seq===0||mark&&(mark.id===r.message||mark.parent===r.message)),'invalid_thread_read');}
  index(rows('settings'),s=>s.user,'duplicate_settings');for(const s of rows('settings'))check(actors.has(s.user)&&(s.dnd_until===null||integer(s.dnd_until)),'invalid_quiet_deadline');
  index(rows('attention'),a=>a.id,'duplicate_attention');index(rows('attention'),a=>tuple(a.user,a.conversation,a.event_seq),'duplicate_attention_source');for(const a of rows('attention')){const source=a.message?msg.get(a.message):out.get(a.outcome),e=events.get(tuple(a.conversation,a.event_seq));check(string(a.id)&&participant(a.conversation,a.user)&&!!a.message!==!!a.outcome&&source?.conversation===a.conversation&&e?.object===(a.message||a.outcome)&&e.kind===(a.message?'message':'outcome')&&['open','done','snoozed'].includes(a.state)&&(a.state==='snoozed'?integer(a.snooze_until):a.snooze_until===null)&&time(a.created),'invalid_attention');check(a.message?['urgent-request','mention','thread-follow','conversation-follow','all-messages'].includes(a.reason):source.kind==='commitment'&&['commitment-proposal','commitment-update'].includes(a.reason),'invalid_attention_reason')}
- const slackReviews=await slackArchiveObjects({read:readTable,manifest},actors,[...files.values()]);
+ const slackReviews=await slackArchiveObjects({read:readTable,manifest},actors,[...files.values(),...scheduledFiles]);
  const slackProofs=await slackArchivePlans(readTable,slackReviews);
  const slackDomains=validateSlackArchiveRecords(slackProofs,tables);
  const slackIntents=new Set(slackReviews.map(review=>review.id));

@@ -4,7 +4,7 @@ import {fail,text} from '../family/team-chat/domain'
 
 // Move the durable history, retaining every object ID and its atomic sequence.
 // The original fixed DM remains an immutable doorway, never a second copy.
-const scopedTables=['nook_messages','nook_erased_messages','nook_attachments','nook_erased_attachments','nook_events','nook_outcomes','nook_erased_outcomes','nook_read_generations','nook_reads','nook_author_counts','nook_attention','nook_notify_queue','nook_preferences','nook_conversation_notify','nook_saved_items','nook_creator_revocations']
+const scopedTables=['nook_messages','nook_erased_messages','nook_attachments','nook_erased_attachments','nook_events','nook_outcomes','nook_erased_outcomes','nook_read_generations','nook_reads','nook_author_counts','nook_attention','nook_notify_queue','nook_preferences','nook_conversation_notify','nook_saved_items','nook_creator_revocations','nook_schedules']
 export async function convertGroup(c:Context,id:string,input:Record<string,any>){
  const name=text(input.name,80)
  if(!Number.isSafeInteger(input.version))fail(400,'Conversation version required')

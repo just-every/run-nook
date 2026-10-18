@@ -1,3 +1,4 @@
+import {eraseScheduleFiles} from '../../scheduled/erasure'
 import {inheritPriorBlobs} from './prior-blobs'
 import {memberMessageBodies,priorDeletionScope} from './policy'
 import {eraseRetainedBody} from './retained-bodies'
@@ -37,9 +38,10 @@ export async function advance(c:Context,id:string,quiet=false){
     if(attachments.length)statements.push(...await files(c,f,id,'id IN (SELECT value FROM json_each(?))',[JSON.stringify(attachments.map(r=>r.id))]))
     else if(await importedStep(c,work,f)){await drainBlobs(c.env,id);if(!quiet)await c.hint();return receipt(c,id)}
     else if(await c.one('SELECT 1 FROM nook_outcomes WHERE author=? LIMIT 1',[work.target]))statements.push(...await outcomes(c,f,work.target))
-    else statements.push(...await identity(c,f,work.target),sql("UPDATE nook_erasure_work SET phase='blobs' WHERE operation=?",id))
+    else{const scheduled=await eraseScheduleFiles(c,f,id,'schedule.user=?',[work.target]);if(scheduled.count)statements.push(...scheduled.statements);else statements.push(...await identity(c,f,work.target),sql("UPDATE nook_erasure_work SET phase='blobs' WHERE operation=?",id))}
    }
   }else{
+   if(work.kind==='attachment')statements.push(...(await eraseScheduleFiles(c,f,id,'file.attachment=?',[work.target])).statements)
    statements.push(...(work.kind==='message'?await messages(c,f,id,[work.target]):await files(c,f,id,'id=?',[work.target])),sql("UPDATE nook_erasure_work SET phase='blobs' WHERE operation=?",id))
   }
   await c.batch(statements.map(s=>c.sql(s.sql,...s.params)),scope.conversation,scope.condition,scope.params)

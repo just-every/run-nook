@@ -16,7 +16,7 @@ import {mailEdge} from './mail-edge.mjs'
 
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
-assert.ok(['all','core','core-api','core-browser','installer','unreads'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
+assert.ok(['all','core','core-api','core-browser','installer','unreads','scheduled'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']
@@ -84,12 +84,13 @@ try {
  const assets=await readdir(resolve(root,'dist/server/assets')); let fnId
  for(const file of assets.filter(x=>x.startsWith('loaders-')&&x.endsWith('.js'))) { const source=await readFile(resolve(root,'dist/server/assets',file),'utf8'); fnId=source.match(/id: "([a-f0-9]{64})",\s*name: "loadWorkspace"/)?.[1] ?? fnId }
  assert.ok(fnId,'private generated transport must exist in emitted artifact')
- if(suite==='unreads'){
+ if(suite==='unreads'||suite==='scheduled'){
  const post=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status});
- await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});
- await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});
+ if(suite==='scheduled'){if(!process.argv.includes('--browser-only'))await (await import('./scheduled.mjs')).scheduledJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});if(!withoutBrowser)await check('NOOK-034 schedule and review messages at both widths',()=>import('./scheduled-browser.mjs').then(m=>m.scheduledBrowser({origin,owner,member,memberOccurrences:!process.argv.includes('--browser-only')})))}
+ else{await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});
+ await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
  }
- if(suite!=='core-browser'&&suite!=='unreads'){
+ if(suite!=='core-browser'&&!['unreads','scheduled'].includes(suite)){
  await check('BASE-ACCESS-002 same-wire missing/expired/revoked/valid session matrix',async()=>{
   for(const [label,cookie,valid] of [['missing','',false],['expired',expired.cookie,false],['revoked',revoked.cookie,false],['valid',owner.cookie,true]]) {
    const before=await facts(),rows=[]
@@ -114,6 +115,7 @@ try {
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
  await(await import('./threads.mjs')).threadJourney(normalizedHarness)
  await(await import('./channel-lifecycle.mjs')).channelLifecycleJourney(normalizedHarness)
+ await(await import('./scheduled.mjs')).scheduledJourney(normalizedHarness)
  await(await import('./unreads.mjs')).unreadsJourney(normalizedHarness)
  await(await import('./posting.mjs')).postingJourney(normalizedHarness)
  await(await import('./saved-reminders.mjs')).savedRemindersJourney(normalizedHarness)
@@ -122,8 +124,9 @@ try {
  await check('actual team invitations, scopes, reactions, preview and revocation',async()=>{await(await import('./team-runtime.mjs')).runTeamSurfaces({origin,ownerCookie:owner.cookie})})
  await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{const checks=await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>restart({transferFaults:null}),sql});evidence.slackImports=checks})
  }
- if(suite!=='core-api'&&suite!=='unreads'){
+ if(suite!=='core-api'&&!['unreads','scheduled'].includes(suite)){
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
+  await check('NOOK-034 schedule and review messages at both widths',async()=>{await(await import('./scheduled-browser.mjs')).scheduledBrowser({origin,owner,member})})
   await check('NOOK-071 All unreads and group conversion at both widths',async()=>{await(await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider})})
   await check('NOOK-020 saved reminders at both widths',async()=>{await(await import('./saved-reminders-browser.mjs')).savedRemindersBrowser({origin,owner,member})})
   await check('NOOK-066 posting settings and restricted composers at both widths',async()=>{await(await import('./posting-browser.mjs')).postingBrowser({origin,owner,member})})
@@ -137,7 +140,7 @@ try {
  }
  }
  await stop()
- if(suite!=='core-browser'&&suite!=='unreads')await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
+ if(suite!=='core-browser'&&!['unreads','scheduled'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  await lossConfig.close();lossConfig=null
  }
  if(suite==='all'||suite==='installer')await(await import('./installer-workflow.mjs')).runInstallerWorkflow({root,states,port,check,evidence,databasePath,stop,start,command,env,getState:()=>state,setState:value=>{state=value},getOrigin:()=>origin})

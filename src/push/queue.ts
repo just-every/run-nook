@@ -5,7 +5,7 @@ import {GATHER_MS,FOLD_MS} from '../notify/queue'
 export const PUSH_GATHER_MS=GATHER_MS,PUSH_FOLD_MS=FOLD_MS
 // Native events alone call these, in their event transaction. A direct message
 // needs no in-app attention row: channel policy is independent of C13 and C14.
-export function enqueuePushMessage(c:Context,message:string,now:number){return c.sql(`INSERT OR IGNORE INTO nook_notify_queue(id,dedupe,user,conversation,actor,message,reason,due,created,updated,channel,device,event_seq,attention)
+export function enqueuePushMessage(c:Pick<Context,'uid'|'sql'>,message:string,now:number){return c.sql(`INSERT OR IGNORE INTO nook_notify_queue(id,dedupe,user,conversation,actor,message,reason,due,created,updated,channel,device,event_seq,attention)
  SELECT 'push:'||s.id||':'||m.user||':'||d.id,'push:'||s.id||':'||m.user||':'||d.id,m.user,m.conversation,s.author,s.id,
  CASE WHEN j.value IS NOT NULL AND json_extract(s.payload,'$.urgent')=1 THEN 'urgent-request' WHEN j.value IS NOT NULL THEN 'mention' WHEN ${effectiveThreadFollow('m.user','m.conversation','s.parent')} AND p.push_threads=1 THEN 'thread-follow' WHEN v.kind='dm' THEN 'direct-message' ELSE 'all-messages' END,
  ?,?,?,'push',d.id,s.sequence,a.id

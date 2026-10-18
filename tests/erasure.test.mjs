@@ -59,6 +59,38 @@ test('member cascade keeps unrelated history and fixed DM roots, clears canaries
   }finally{fresh.close();virgin.close();withJournal.close()}
  }finally{f.close()}
 });
+test('public member erasure removes scheduled templates and their private bytes while another owner can still export their schedule',async()=>{
+ const f=await fixture();try{
+  const member=await f.person('SCHEDULECANARYPERSON'),c=f.context(member),owner=f.context(f.owner);
+  const schedule=async(actor,body,name,bytes,intent)=>{
+   const file=await standard.upload(actor,'launch',{name,mime:'text/plain',bytes:new TextEncoder().encode(bytes),intent:intent+'-file'});
+   const key=f.db.prepare('SELECT object_key FROM nook_attachments WHERE id=?').get(file.id).object_key;
+   const response=await teamRoute(actor,new Request('https://fixture.test/api/conversations/launch/scheduled',{method:'POST',headers:{origin:'https://fixture.test'}}),{body,attachments:[file.id],intent,localAt:new Date(Date.now()+86400000).toISOString().slice(0,16),zone:'UTC',recurrence:'none'});
+   assert.equal(response.status,200);const {id}=await response.json();
+   assert.equal(f.db.prepare('SELECT object_key FROM nook_schedule_files WHERE schedule=?').get(id).object_key,key);
+   assert.equal(f.db.prepare('SELECT object_key FROM nook_attachments WHERE id=?').get(file.id).object_key,null,'the template owns the bytes after staging is consumed');
+   assert.equal(new TextDecoder().decode(f.objects.get(key)),bytes);
+   return {id,key,file:file.id};
+  };
+  const erased=await schedule(c,'SCHEDULECANARYBODY','SCHEDULECANARYFILE.txt','SCHEDULECANARYBYTES','SCHEDULECANARYINTENT');
+  const kept=await schedule(owner,'Keep the owner briefing','briefing.txt','Owner briefing bytes','owner-briefing');
+  assert.match(JSON.stringify(await exported(f)),/SCHEDULECANARY/);
+  f.interrupt(true);
+  const pending=await door(standard,owner,'',{kind:'member',target:member.operatorId,confirmation:'ERASE'});
+  assert.equal(pending.state,'pending');assert.ok(f.objects.has(erased.key),'the receipt must wait for template bytes to be deleted');
+  f.interrupt(false);await finishDoor(standard,owner,pending);
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_schedules WHERE id=?').get(erased.id).n,0);
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_schedule_files WHERE schedule=?').get(erased.id).n,0);
+  assert.equal(f.objects.has(erased.key),false);assert.ok(f.removed.includes(erased.key));
+  assert.deepEqual(scanSql(f,/SCHEDULECANARY/i),[]);
+  for(const bytes of f.objects.values())assert.doesNotMatch(new TextDecoder().decode(bytes),/SCHEDULECANARY/i);
+  const response=await teamRoute(owner,new Request('https://fixture.test/api/scheduled'),{});
+  assert.equal(response.status,200);assert.deepEqual((await response.json()).items.map(row=>row.id),[kept.id]);
+  assert.equal(new TextDecoder().decode(f.objects.get(kept.key)),'Owner briefing bytes');
+  const latest=await exported(f);assert.doesNotMatch(JSON.stringify(latest),/SCHEDULECANARY/i);
+  await assertFenced(f,[['nook_schedules',{id:erased.id}],['nook_schedule_files',{schedule:erased.id,attachment:erased.file}]]);
+ }finally{f.close()}
+});
 test('fresh authority, role hierarchy, DM privacy and confirmation hold; R2 interruption stays pending and resume is idempotent',async()=>{
  const f=await fixture();try{
   const member=await f.person('member'),admin=await f.person('admin',{role:'admin'}),admin2=await f.person('admin2',{role:'admin'}),guest=await f.person('guest',{mode:'guest'}),c=f.context(member),owner=f.context(f.owner),a=f.context(admin);

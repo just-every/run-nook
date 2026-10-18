@@ -256,7 +256,7 @@ The statuses and citations below match CONTRACT.md at main `e1f0ff866196b2818014
 
   Current evidence: `src/family/team-chat/attention.ts`; `src/platform/storage/commands.ts`; `tests/attention.mjs`. Attention snooze supplies a foundation; arbitrary reminders, recurrence, channel scheduling and natural-language `/remind` parsing are missing.
 
-- **NOOK-034 — Scheduled and recurring messages.** **Status: missing.** Schedule a one-off and weekly stand-up, change the time across DST, restart at due time and replay a scheduler claim. See one post per occurrence, then pause/cancel and remove posting access: no new post or hidden failure.
+- **NOOK-034 — Scheduled and recurring messages.** **Status: done.** `tests/scheduled.mjs` proves the emitted Worker/D1 alarm and rule checks; `tests/scheduled-browser.mjs` proves compose with files, pending, edit/resume, cancel and refusal at both widths. `tests/erasure.test.mjs` and `tests/exit-export.test.mjs` prove template custody and paused restore. Schedule a one-off and weekly stand-up, change the time across DST, restart at due time and replay a scheduler claim. See one post per occurrence, then pause/cancel and remove posting access: no new post or hidden failure.
 
   Current evidence: No implementing source/test; journey pending..
 

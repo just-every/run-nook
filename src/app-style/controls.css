@@ -65,3 +65,5 @@
 .nook-app .notice-error { position: relative; z-index: 30; display: flex; flex: none; align-self: center; width: max-content; max-width: min(560px, calc(100% - 32px)); align-items: center; gap: var(--s3); margin: 12px 0 4px; padding: 6px 6px 6px 16px; border-left: 3px solid var(--accent); border-radius: var(--r-surface); background: var(--surface-raised); box-shadow: var(--shadow-pop); font-size: var(--fs-ui); transition: opacity var(--dur) var(--ease); }
 .nook-app .notice-error > span { min-width: 0; }
 @starting-style { .nook-app .notice-error { opacity: 0; } }
+
+.composer .schedule-draft{font-size:12px;white-space:nowrap;padding:6px 8px}
