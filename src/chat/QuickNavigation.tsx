@@ -5,7 +5,7 @@ import {QuickSwitcher} from './QuickSwitcher'
 import {containDialogFocus} from './dialog-focus'
 import {IconClose,IconSearch} from './icons'
 
-type Props={user:Person;users:Person[];conversations:Conversation[];route:LocationState;request:TeamRequest;signal:AbortSignal;modalOpen:boolean;select:(c:Conversation)=>void;nav:(view:Screen)=>void;open:(conversation:string,focus?:string|null,thread?:string|null)=>Promise<void>;search:()=>void;refresh:()=>Promise<void>;error:(e:unknown)=>void}
+type Props={markAll:()=>void;user:Person;users:Person[];conversations:Conversation[];route:LocationState;request:TeamRequest;signal:AbortSignal;modalOpen:boolean;select:(c:Conversation)=>void;nav:(view:Screen)=>void;open:(conversation:string,focus?:string|null,thread?:string|null)=>Promise<void>;search:()=>void;refresh:()=>Promise<void>;error:(e:unknown)=>void}
 export function QuickNavigation(props:Props){
  const {route,conversations,select,nav,request,signal,error}=props,[panel,setPanel]=useState<'switch'|'dm'|'help'|null>(null)
  const [mac,setMac]=useState(false)
@@ -14,13 +14,15 @@ export function QuickNavigation(props:Props){
  function adjacent(direction:number,unread=false){const items=conversations.filter(c=>!unread||c.unread>0),at=items.findIndex(c=>c.id===route.conversation),next=at<0?(direction>0?items[0]:items.at(-1)):items[(at+direction+items.length)%items.length];if(next)select(next);setPanel(null)}
  async function markRead(){const current=conversations.find(c=>c.id===route.conversation);if(route.view!=='chat'||!current)return;try{await request('/api/conversations/'+encodeURIComponent(current.id)+'/read',{method:'POST',body:JSON.stringify({seq:current.seq}),signal});if(!signal.aborted)await props.refresh()}catch(e){if(!signal.aborted)error(e)}}
  const command=mac?'⌘':'Ctrl ',option=mac?'⌥':'Alt '
- const actions=[{label:'Jump to a conversation',keys:command+'K',run:()=>setPanel('switch')},{label:'Threads',keys:command+'Shift T',run:()=>{nav('threads');setPanel(null)}},{label:'Direct messages',keys:command+'Shift K',run:()=>setPanel('dm')},{label:'Previous conversation',keys:option+'↑',run:()=>adjacent(-1)},{label:'Next conversation',keys:option+'↓',run:()=>adjacent(1)},{label:'Previous unread conversation',keys:option+'Shift ↑',run:()=>adjacent(-1,true)},{label:'Next unread conversation',keys:option+'Shift ↓',run:()=>adjacent(1,true)},{label:'Back',keys:command+'[',run:()=>{setPanel(null);history.back()}},{label:'Forward',keys:command+']',run:()=>{setPanel(null);history.forward()}},{label:'Search this conversation',keys:command+'F',run:()=>{setPanel(null);props.search()}},{label:'Mark this conversation read',keys:'Esc',run:()=>{setPanel(null);void markRead()}}]
+ const actions=[{label:'All unreads',keys:command+'Shift A',run:()=>{nav('unreads');setPanel(null)}},{label:'Mark all read (10-second undo)',keys:'Shift Esc',run:()=>{setPanel(null);props.markAll()}},{label:'Jump to a conversation',keys:command+'K',run:()=>setPanel('switch')},{label:'Threads',keys:command+'Shift T',run:()=>{nav('threads');setPanel(null)}},{label:'Direct messages',keys:command+'Shift K',run:()=>setPanel('dm')},{label:'Previous conversation',keys:option+'↑',run:()=>adjacent(-1)},{label:'Next conversation',keys:option+'↓',run:()=>adjacent(1)},{label:'Previous unread conversation',keys:option+'Shift ↑',run:()=>adjacent(-1,true)},{label:'Next unread conversation',keys:option+'Shift ↓',run:()=>adjacent(1,true)},{label:'Back',keys:command+'[',run:()=>{setPanel(null);history.back()}},{label:'Forward',keys:command+']',run:()=>{setPanel(null);history.forward()}},{label:'Search this conversation',keys:command+'F',run:()=>{setPanel(null);props.search()}},{label:'Mark this conversation read',keys:'Esc',run:()=>{setPanel(null);void markRead()}}]
  useEffect(()=>{
   const keydown=(event:KeyboardEvent)=>{
    if(event.isComposing||event.defaultPrevented||props.modalOpen||panel||document.querySelector('dialog[open]'))return
    const modifier=event.metaKey||event.ctrlKey,key=event.key.toLowerCase(),target=event.target as HTMLElement,editing=target.matches('input,textarea,select,[contenteditable=true]')
    if(modifier&&!event.altKey&&key==='k'){event.preventDefault();setPanel(event.shiftKey?'dm':'switch');return}
    if(modifier&&!event.shiftKey&&!event.altKey&&key==='/'){event.preventDefault();setPanel('help');return}
+   if(modifier&&event.shiftKey&&key==='a'){event.preventDefault();nav('unreads');return}
+   if(key==='escape'&&event.shiftKey&&!editing){event.preventDefault();props.markAll();return}
    if(modifier&&event.shiftKey&&key==='t'){event.preventDefault();nav('threads');return}
    if(modifier&&!event.shiftKey&&key==='f'&&route.view==='chat'){event.preventDefault();props.search();return}
    if(modifier&&(key==='['||key===']')){event.preventDefault();history[key==='['?'back':'forward']();return}

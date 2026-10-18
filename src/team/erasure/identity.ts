@@ -19,7 +19,7 @@ export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceServic
  if(await c.one('SELECT 1 FROM nook_default_actions WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_default_actions SET actor=NULL WHERE actor=?',target))
  result.push(sql("UPDATE nook_invite_plans SET state='cancelled' WHERE email=? OR issuer=?",person.email,target),sql('DELETE FROM nook_invite_plans WHERE email=? OR issuer=?',person.email,target),
   sql("INSERT INTO nook_channel_settings(conversation,manager) SELECT c.id,NULL FROM nook_conversations c LEFT JOIN nook_channel_settings s ON s.conversation=c.id WHERE c.kind<>'dm' AND CASE WHEN s.conversation IS NULL THEN c.owner ELSE s.manager END=? ON CONFLICT(conversation) DO UPDATE SET manager=NULL",target),
-  sql('UPDATE nook_channel_actions SET actor=NULL WHERE actor=?',target),sql('UPDATE nook_channel_actions SET subject=NULL WHERE subject=?',target),
+  sql('UPDATE nook_group_conversions SET actor=NULL WHERE actor=?',target),sql('UPDATE nook_channel_actions SET actor=NULL WHERE actor=?',target),sql('UPDATE nook_channel_actions SET subject=NULL WHERE subject=?',target),
   sql('DELETE FROM nook_members WHERE user=?',target),sql('DELETE FROM nook_guest_grants WHERE user=?',target),sql('DELETE FROM nook_creator_revocations WHERE user=?',target),sql('DELETE FROM nook_access WHERE user=?',target),
   sql('DELETE FROM nook_attention WHERE EXISTS(SELECT 1 FROM nook_events e WHERE e.conversation=nook_attention.conversation AND e.seq=nook_attention.event_seq AND e.actor=?)',target),
   sql("UPDATE nook_conversations SET name='Direct conversation' WHERE kind='dm' AND (owner=? OR id IN (SELECT conversation FROM nook_dm_roster WHERE user=?))",target,target),
