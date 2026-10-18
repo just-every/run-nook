@@ -10,7 +10,7 @@ const PAGE_SIZE=20
 async function readPage(c:Context,id:string,cursor:ExportCursor,ordinal:number){
  const dataset=datasets[cursor.dataset]
  if(!dataset)fail(409,'Export cursor is complete')
- const rows=await c.rows(`WITH scope AS (SELECT conversation FROM nook_exit_scopes WHERE job=?) SELECT d.* FROM (${dataset.sql}) d WHERE d._key>? AND EXISTS(SELECT 1 FROM nook_exit_jobs ej WHERE ej.id=? AND ej.owner=? AND ${jobFence}) ORDER BY d._key LIMIT ?`,[id,cursor.after,id,c.uid,PAGE_SIZE])
+ const rows=await c.rows(`WITH job AS (SELECT * FROM nook_exit_jobs WHERE id=?),scope AS (SELECT conversation FROM nook_exit_scopes WHERE job=(SELECT id FROM job)) SELECT d.* FROM (${dataset.sql}) d WHERE d._key>? AND EXISTS(SELECT 1 FROM nook_exit_jobs ej WHERE ej.id=? AND ej.owner=? AND ${jobFence}) ORDER BY d._key LIMIT ?`,[id,cursor.after,id,c.uid,PAGE_SIZE])
  await assertJob(c,id)
  const page:ExportPage={format:FORMAT,version:FORMAT_VERSION,job:id,ordinal,records:rows.map(row=>exportRecord(dataset,row))}
  return {page,rows,dataset}
@@ -32,7 +32,7 @@ export async function stepJob(c:Context,id:string){
  counts[dataset.name]=(counts[dataset.name]??0)+rows.length
  const exhausted=rows.length<PAGE_SIZE
  if(exhausted){
-  const expected=await c.one<{n:number}>(`WITH scope AS (SELECT conversation FROM nook_exit_scopes WHERE job=?) SELECT COUNT(*) AS n FROM (${dataset.sql})`,[id])
+  const expected=await c.one<{n:number}>(`WITH job AS (SELECT * FROM nook_exit_jobs WHERE id=?),scope AS (SELECT conversation FROM nook_exit_scopes WHERE job=(SELECT id FROM job)) SELECT COUNT(*) AS n FROM (${dataset.sql})`,[id])
   if(expected?.n!==counts[dataset.name])fail(409,'Export count mismatch. Start a new export; no complete report was issued.')
  }
  const next:ExportCursor=exhausted?{dataset:cursor.dataset+1,after:''}:{dataset:cursor.dataset,after:rows.at(-1)!._key}

@@ -16,7 +16,7 @@ function validateBundle(bundle){
  for(const file of bundle.files){const bytes=Buffer.from(file.base64,'base64');assert.equal(bytes.length,file.size);assert.equal(hash(bytes),file.sha256)}
  return bundle
 }
-export async function readableExportBrowser({origin,owner,member,destination='evidence/readable-export'}){
+export async function readableExportBrowser({origin,owner,member,outsider,destination='evidence/readable-export'}){
  origin=typeof origin==='function'?origin():origin
  const cookie=actor=>{const at=actor.cookie.indexOf('=');return {name:actor.cookie.slice(0,at),value:actor.cookie.slice(at+1),url:origin}}
  async function api(path,{body,actor=owner,method=body===undefined?'GET':'POST',status=200,zip}={}){
@@ -33,6 +33,10 @@ export async function readableExportBrowser({origin,owner,member,destination='ev
  let imported=await api(`/api/slack-imports/${preview.review}/apply`,{body:{fingerprint:preview.fingerprint}})
  for(let n=0;imported.job.state!=='completed'&&n<30;n++)imported=await api(`/api/slack-imports/${preview.review}/resume`,{body:{}})
  assert.equal(imported.job.state,'completed')
+ const secretRoom=await api('/api/conversations',{actor:member,body:{name:'Leadership compensation review',kind:'dm',participants:[outsider.user.id]}})
+ const privateBytes=Buffer.from('Private workspace file: compensation handoff\n'),privateFile=await api(`/api/conversations/${secretRoom.id}/attachments`,{actor:member,body:{name:'leadership-handoff.txt',mime:'text/plain',data:privateBytes.toString('base64'),intent:crypto.randomUUID()}})
+ await api(`/api/conversations/${secretRoom.id}/messages`,{actor:member,body:{body:'Keep the compensation handoff within this audience.',attachments:[privateFile.id],intent:crypto.randomUUID()}})
+ await api('/api/readable-exports',{body:{scope:'conversation',conversationId:secretRoom.id,custodyAccepted:true},status:403})
  const directory=await mkdtemp(join(tmpdir(),'nook-readable-browser-'))
  const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
  try{
@@ -68,8 +72,17 @@ export async function readableExportBrowser({origin,owner,member,destination='ev
     await page.goto(origin+'/app?view=you')
     const region=page.getByRole('region',{name:'Readable export',exact:true})
     await expect(region.getByRole('heading',{name:'Readable export',exact:true})).toBeVisible()
+    await region.getByText('Owner workspace export policy',{exact:true}).click()
+    const policy=region.getByRole('checkbox',{name:'Allow owners to export the whole workspace, including private conversations',exact:true})
+    if(!await policy.isChecked()){await policy.check();await region.getByRole('button',{name:'Save workspace export policy',exact:true}).click()}
+    await region.getByLabel('Export scope',{exact:true}).selectOption('workspace')
+    await expect(region.getByRole('status').filter({hasText:/Workspace export policy version/})).toBeVisible()
+    await region.getByText('Recent workspace export policy changes',{exact:true}).click()
+    await expect(region.getByText(/announced to \d+ members/).last()).toBeVisible()
+    await region.getByLabel('Export scope',{exact:true}).scrollIntoViewIfNeeded();await page.screenshot({animations:'disabled',path:resolve(destination,`scope-${width}.png`)})
+    await policy.scrollIntoViewIfNeeded();await page.screenshot({animations:'disabled',path:resolve(destination,`policy-${width}.png`)})
     await region.getByRole('checkbox',{name:/I will keep downloaded copies private/}).check()
-    await region.getByRole('button',{name:'Prepare my permitted conversations',exact:true}).click()
+    await region.getByRole('button',{name:'Prepare whole workspace',exact:true}).click()
     await region.getByRole('button',{name:'Cancel preparation',exact:true}).click()
     await expect(region.getByText('Preparation cancelled.',{exact:false})).toBeVisible()
     await page.screenshot({animations:'disabled',path:resolve(destination,`cancelled-${width}.png`)})
@@ -83,6 +96,10 @@ export async function readableExportBrowser({origin,owner,member,destination='ev
     const htmlEvent=page.waitForEvent('download',{timeout:90_000});await region.getByRole('button',{name:'Download offline HTML',exact:true}).click()
     const htmlDownload=await htmlEvent,htmlPath=join(directory,'readable-'+width+'.html');await htmlDownload.saveAs(htmlPath)
     const html=await readFile(htmlPath,'utf8'),bundle=validateBundle(JSON.parse(html.match(/<script type="application\/json" id="nook-export">(.*?)<\/script>/s)[1]))
+    assert.equal(bundle.report.scope,'workspace');assert.ok(Number.isSafeInteger(bundle.report.workspacePolicyVersion))
+    assert.ok(bundle.records.some(r=>r.type==='messages'&&r.conversation===secretRoom.id&&r.data.body==='Keep the compensation handoff within this audience.'))
+    assert.deepEqual(Buffer.from(bundle.files.find(file=>file.id===privateFile.id).base64,'base64'),privateBytes)
+    assert.ok(bundle.records.some(r=>r.type==='workspace_configuration'))
     assert.ok(bundle.records.some(r=>r.type==='messages'&&r.data.id===reply.id&&r.data.parent===root.id))
     assert.ok(bundle.records.some(r=>r.type==='message_versions'&&r.data.message===root.id&&r.data.body.includes('before Thursday')))
     assert.ok(bundle.records.some(r=>r.type==='outcome_versions'&&r.data.outcome===work.id&&r.data.status==='accepted'))
@@ -111,7 +128,7 @@ export async function readableExportBrowser({origin,owner,member,destination='ev
     await region.getByRole('button',{name:'Open report',exact:true}).first().click()
     await expect(region.getByRole('alert')).toContainText(/source changed|scope is no longer available/i)
     await expect(region.getByRole('button',{name:'Download offline HTML',exact:true})).toHaveCount(0)
-    await expect(region.getByText(/Permitted conversations · invalidated/).first()).toBeVisible()
+    await expect(region.getByText(/Whole workspace · invalidated/).first()).toBeVisible()
     await region.getByRole('alert').scrollIntoViewIfNeeded();await page.screenshot({animations:'disabled',path:resolve(destination,`stale-${width}.png`)})
    }finally{await context.close()}
    // An authorized member can prepare a selected conversation, then loses all
@@ -125,6 +142,9 @@ export async function readableExportBrowser({origin,owner,member,destination='ev
    try{
     await limited.addCookies([cookie(member)]);const page=await limited.newPage();await page.goto(origin+'/app?view=you')
     const region=page.getByRole('region',{name:'Readable export',exact:true})
+    await expect(region.getByText(/Current owners may export every published conversation/).last()).toBeVisible()
+    await expect(region.getByText('Owner workspace export policy',{exact:true})).toHaveCount(0)
+    await expect(region.getByLabel('Export scope',{exact:true})).toHaveCount(0)
     await expect(region.getByText(/Conversation · unavailable/).first()).toBeVisible()
     await expect(region.getByText('Start a new export from your current scope.',{exact:true}).first()).toBeVisible()
     await region.getByText(/Conversation · unavailable/).first().scrollIntoViewIfNeeded();await page.screenshot({animations:'disabled',path:resolve(destination,`revoked-${width}.png`)})

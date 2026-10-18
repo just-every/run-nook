@@ -1,7 +1,7 @@
 // Jobs hold only resumable live-read metadata and cannot survive credential
 // recovery as useful downloads. Epochs are derived invalidation bookkeeping;
 // the migration-seeded clock row remains in an empty restore destination.
-export const readableExportExcludedTables=['nook_exit_jobs','nook_exit_scopes','nook_exit_pages','nook_exit_changes','nook_exit_clock']
+export const readableExportExcludedTables=['nook_exit_jobs','nook_exit_scopes','nook_exit_pages','nook_exit_changes','nook_exit_clock','nook_exit_policy','nook_exit_policy_notices']
 const check=value=>{if(!value)throw Error('invalid_readable_export_membership_archive')}
 const fields=(row,names)=>Object.keys(row).sort().join()===names.toSorted().join()
 
@@ -9,6 +9,8 @@ const fields=(row,names)=>Object.keys(row).sort().join()===names.toSorted().join
  * Older archives lack this additive journal; never invent historical joins. */
 export async function validateReadableExportArchive(read,manifest,actors,conversations){
  const load=name=>manifest?.tables&&!manifest.tables.some(table=>table.name===name)?[]:read(name)
+ const actions=await load('nook_exit_policy_actions')
+ for(const action of actions)check(Number.isSafeInteger(action.id)&&action.id>0&&Number.isSafeInteger(action.version)&&action.version>0&&[0,1].includes(action.enabled)&&(action.actor===null||actors.has(action.actor))&&Number.isFinite(Date.parse(action.created))&&Number.isSafeInteger(action.recipients)&&action.recipients>=0)
  const [history,members]=await Promise.all([load('nook_exit_membership'),read('nook_members')])
  const memberSet=new Set(members.map(member=>JSON.stringify([member.conversation,member.user])))
  const seen=new Set(),last=new Map()

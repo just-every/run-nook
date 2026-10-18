@@ -2,6 +2,7 @@ import {useEffect,useId,useRef,useState} from 'react'
 import {usePrivateScope} from '../chat/usePrivateScope'
 import {assembleExport,exportRequest,saveExport,ExportError} from './client'
 import type {ExportReport} from './types'
+import {OwnerExportPolicy,type WorkspaceExportPolicy} from './OwnerExportPolicy'
 import './readable-export.css'
 
 type Props={userId:string;privateSignal:AbortSignal;conversationId?:string}
@@ -10,13 +11,14 @@ export function ReadableExport(props:Props){
  return <ExportPanel key={props.userId+':'+(props.conversationId??'permitted')} {...props}/>
 }
 function ExportPanel({privateSignal,conversationId}:Props){
- const current=usePrivateScope(privateSignal,'readable-export:'+conversationId),title=useId(),ack=useId()
+ const current=usePrivateScope(privateSignal,'readable-export:'+conversationId),title=useId(),ack=useId(),scopeId=useId()
+ const [policy,setPolicy]=useState<WorkspaceExportPolicy|null>(null),[workspace,setWorkspace]=useState(false)
  const [accepted,setAccepted]=useState(false),[jobs,setJobs]=useState<Jobs|null>(null),[job,setJob]=useState<ExportReport|null>(null)
  const [busy,setBusy]=useState<'prepare'|'download'|'request'|null>(null),[progress,setProgress]=useState(''),[error,setError]=useState('')
  const operation=useRef<AbortController|null>(null)
  useEffect(()=>{
   const controller=new AbortController(),signal=AbortSignal.any([privateSignal,controller.signal])
-  void exportRequest<Jobs>('',undefined,signal).then(next=>{if(current())setJobs(next)}).catch(e=>{if(current()&&!signal.aborted)setError(e.message)})
+  void Promise.all([exportRequest<Jobs>('',undefined,signal),exportRequest<WorkspaceExportPolicy>('/policy',undefined,signal)]).then(([next,policy])=>{if(current()){setJobs(next);setPolicy(policy)}}).catch(e=>{if(current()&&!signal.aborted)setError(e.message)})
   return()=>{controller.abort();operation.current?.abort()}
  },[privateSignal,current])
  const publish=(next:ExportReport)=>{
@@ -48,7 +50,7 @@ function ExportPanel({privateSignal,conversationId}:Props){
  }
  const create=()=>void perform('prepare',async signal=>{
   setJob(null)
-  const next=await exportRequest<ExportReport>('',{scope:conversationId?'conversation':'permitted',...(conversationId?{conversationId}:{}),custodyAccepted:accepted},signal)
+  const next=await exportRequest<ExportReport>('',{scope:conversationId?'conversation':workspace?'workspace':'permitted',...(conversationId?{conversationId}:{}),custodyAccepted:accepted},signal)
   if(!signal.aborted&&current())await prepare(next,signal)
  })
  const resume=(selected:ExportReport)=>void perform('prepare',async signal=>{
@@ -66,18 +68,21 @@ function ExportPanel({privateSignal,conversationId}:Props){
  })
  return <section className="readable-export" aria-labelledby={title}>
   <h3 id={title}>Readable export</h3>
+  {policy?.announcement&&<p role="status">Workspace export policy version {policy.announcement.version} was {policy.announcement.enabled?'enabled':'disabled'} at {policy.announcement.created}. {policy.announcement.enabled?'Current owners may export every published conversation, including private channels and DMs.':'Whole-workspace export is disabled.'}</p>}
   <p>{conversationId?'Export this conversation and its complete threads.':'Export all conversations you can currently read, including your DMs.'} Each format includes message history, outcomes, membership records, source mappings and verified file bytes.</p>
-  <p className="muted">Your role does not open anyone else’s DMs. This export uses your current membership. Organization-wide compliance exports require separate authority.</p>
+  <p className="muted">Member exports use current membership. Whole-workspace export requires an owner and explicit workspace policy. Protected compliance copies require separate authority.</p>
+  {!conversationId&&policy&&<OwnerExportPolicy policy={policy} busy={!!busy} onChange={enabled=>void perform('request',async signal=>{const next=await exportRequest<WorkspaceExportPolicy>('/policy',{enabled,version:policy.version},signal);if(current()&&!signal.aborted){setPolicy(next);setWorkspace(false);setJob(null);setJobs(await exportRequest<Jobs>('',undefined,signal))}})}/>}
+  {!conversationId&&policy?.canManage&&policy.enabled&&<div className="readable-export-scope"><label htmlFor={scopeId}>Export scope</label><select id={scopeId} value={workspace?'workspace':'permitted'} disabled={!!busy} onChange={event=>setWorkspace(event.target.value==='workspace')}><option value="permitted">My permitted conversations</option><option value="workspace">Whole workspace, including private conversations</option></select></div>}
   <label className="readable-export-ack" htmlFor={ack}><input id={ack} type="checkbox" checked={accepted} onChange={event=>setAccepted(event.target.checked)} disabled={!!busy}/>I will keep downloaded copies private and manage their retention. Later removal or erasure cannot recall them.</label>
-  <div className="readable-export-actions"><button className="soft-button" disabled={!accepted||!!busy} onClick={create}>Prepare {conversationId?'conversation':'my permitted conversations'}</button><button className="soft-button" disabled={!!busy} onClick={()=>refresh()}>Refresh exports</button></div>
+  <div className="readable-export-actions"><button className="soft-button" disabled={!accepted||!!busy} onClick={create}>Prepare {conversationId?'conversation':workspace?'whole workspace':'my permitted conversations'}</button><button className="soft-button" disabled={!!busy} onClick={()=>refresh()}>Refresh exports</button></div>
   {error&&<p role="alert">{error}</p>}
   {progress&&<p role="status" aria-live="polite">{progress}</p>}
   {busy==='prepare'&&job?.state==='running'&&<button className="soft-button" onClick={cancel}>Cancel preparation</button>}
   {busy==='download'&&<button className="soft-button" onClick={()=>{operation.current?.abort();setProgress('Download stopped. Your completed server job is still available.')}}>Stop download</button>}
-  {job&&<div className="readable-export-report"><h4>Completeness report</h4><p>{job.state} · {job.records.toLocaleString()} records · {job.files.toLocaleString()} files · {job.bytes.toLocaleString()} file bytes · {job.pages.toLocaleString()} verified pages · {job.sourceOmissions.toLocaleString()} source omissions</p>
+  {job&&<div className="readable-export-report"><h4>Completeness report</h4><p>{job.state}{job.workspacePolicyVersion!==undefined?` · workspace policy version ${job.workspacePolicyVersion}`:''} · {job.records.toLocaleString()} records · {job.files.toLocaleString()} files · {job.bytes.toLocaleString()} file bytes · {job.pages.toLocaleString()} verified pages · {job.sourceOmissions.toLocaleString()} source omissions</p>
    {job.complete&&<div className="readable-export-actions"><button className="soft-button" disabled={!!busy} onClick={()=>download('html')}>Download offline HTML</button><button className="soft-button" disabled={!!busy} onClick={()=>download('json')}>Download JSON</button><button className="soft-button" disabled={!!busy} onClick={()=>download('jsonl')}>Download JSONL</button></div>}
    <details><summary>Included counts and named omissions</summary><dl>{Object.entries(job.counts).map(([name,count])=><div key={name}><dt>{name.replaceAll('_',' ')}</dt><dd>{count.toLocaleString()}</dd></div>)}</dl><ul>{job.omissions.map(omission=><li key={omission.code}><strong>{omission.code}:</strong> {omission.reason}</li>)}</ul><p>{job.custody}</p></details>
   </div>}
-  {!jobs?<p className="muted">Loading your export jobs…</p>:<><h4>Your export jobs</h4>{!jobs.items.length&&<p>No exports prepared yet.</p>}<ul className="readable-export-jobs">{jobs.items.map(item=><li key={item.id}><div><time>{new Date(item.created).toLocaleString()}</time><br/>{item.scope==='conversation'?'Conversation':'Permitted conversations'} · {item.state} · {item.records.toLocaleString()} records</div><div className="readable-export-actions">{(item.state==='running'||item.state==='cancelled')&&<button className="soft-button" disabled={!!busy} onClick={()=>resume(item)}>{item.state==='cancelled'?'Resume':'Continue'}</button>}{item.complete&&<button className="soft-button" disabled={!!busy} onClick={()=>void perform('request',async signal=>{const next=await exportRequest<ExportReport>('/'+item.id,undefined,signal);if(!signal.aborted)publish(next)},item.id)}>Open report</button>}{(item.state==='invalidated'||item.state==='unavailable')&&<span className="muted">Start a new export from your current scope.</span>}</div></li>)}</ul>{jobs.hasMore&&<button className="soft-button" disabled={!!busy} onClick={()=>refresh(true)}>Older exports</button>}</>}
+  {!jobs?<p className="muted">Loading your export jobs…</p>:<><h4>Your export jobs</h4>{!jobs.items.length&&<p>No exports prepared yet.</p>}<ul className="readable-export-jobs">{jobs.items.map(item=><li key={item.id}><div><time>{new Date(item.created).toLocaleString()}</time><br/>{item.scope==='conversation'?'Conversation':item.scope==='workspace'?'Whole workspace':'Permitted conversations'} · {item.state} · {item.records.toLocaleString()} records</div><div className="readable-export-actions">{(item.state==='running'||item.state==='cancelled')&&<button className="soft-button" disabled={!!busy} onClick={()=>resume(item)}>{item.state==='cancelled'?'Resume':'Continue'}</button>}{item.complete&&<button className="soft-button" disabled={!!busy} onClick={()=>void perform('request',async signal=>{const next=await exportRequest<ExportReport>('/'+item.id,undefined,signal);if(!signal.aborted)publish(next)},item.id)}>Open report</button>}{(item.state==='invalidated'||item.state==='unavailable')&&<span className="muted">Start a new export from your current scope.</span>}</div></li>)}</ul>{jobs.hasMore&&<button className="soft-button" disabled={!!busy} onClick={()=>refresh(true)}>Older exports</button>}</>}
  </section>
 }

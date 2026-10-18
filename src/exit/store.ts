@@ -1,6 +1,8 @@
 import {fail} from '../family/team-chat/domain'
 import type {Context} from '../platform/storage/context'
 import {custody,jobFence,omissions,permittedScope,scopeFence,revisionFence} from './policy'
+import {currentOwner,exportPolicy} from './authority'
+import {publishedScope} from './policy'
 import {FORMAT,FORMAT_VERSION,type ExportJob,type ExportReport} from './types'
 
 export async function ownJob(c:Context,id:string):Promise<ExportJob>{
@@ -17,22 +19,24 @@ export async function assertJob(c:Context,id:string):Promise<ExportJob>{
 }
 export async function createJob(c:Context,input:Record<string,any>){
  const scope=input.scope
- if(scope!=='permitted'&&scope!=='conversation')fail(400,'Choose permitted conversations or one conversation. This is not an organization-wide export door.')
+ if(!['permitted','conversation','workspace'].includes(scope))fail(400,'Choose permitted conversations, one conversation or an authorized workspace export')
+ const workspace=scope==='workspace',policy=workspace?await exportPolicy(c):null
+ if(workspace&&(!policy!.canManage||!policy!.enabled))fail(403,'Workspace export requires a current owner and the explicitly enabled workspace export policy')
  if(scope==='conversation'&&(typeof input.conversationId!=='string'||!input.conversationId||input.conversationId.length>256))fail(400,'Choose a conversation')
- if(scope==='permitted'&&input.conversationId!==undefined)fail(400,'A conversation ID requires conversation scope')
+ if(scope!=='conversation'&&input.conversationId!==undefined)fail(400,'A conversation ID requires conversation scope')
  if(input.custodyAccepted!==true)fail(400,'Acknowledge custody of the downloaded export')
  if(Object.keys(input).some(k=>!['scope','conversationId','custodyAccepted'].includes(k)))fail(400,'Unknown export option')
  const id=crypto.randomUUID(),created=new Date().toISOString(),conversation=scope==='conversation'?input.conversationId:undefined
  if(conversation)await c.check(conversation)
  await c.batch([
-  c.sql(`INSERT INTO nook_exit_jobs(id,owner,scope,created,state,identity_revision,cursor_json) SELECT ?,?,?,?,'running',revision,? FROM nook_exit_clock WHERE id=1`,id,c.uid,scope,created,JSON.stringify({dataset:0,after:''})),
-  c.sql(`INSERT INTO nook_exit_scopes(job,conversation,source_revision) SELECT ?,m.conversation,COALESCE(ec.revision,0) FROM nook_members m LEFT JOIN nook_exit_changes ec ON ec.conversation=m.conversation WHERE m.user=? AND ${permittedScope('m.conversation','m.user')}${conversation?' AND m.conversation=?':''}`,id,c.uid,...(conversation?[conversation]:[])),
- ],conversation,conversation?`EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=? AND m.user=? AND ${permittedScope('m.conversation','m.user')})`:'1',conversation?[conversation,c.uid]:[])
+  c.sql(`INSERT INTO nook_exit_jobs(id,owner,scope,created,state,identity_revision,cursor_json,workspace_policy_version) SELECT ?,?,?,?,'running',revision,?,? FROM nook_exit_clock WHERE id=1`,id,c.uid,workspace?'permitted':scope,created,JSON.stringify({dataset:0,after:''}),policy?.version??null),
+  workspace?c.sql(`INSERT INTO nook_exit_scopes(job,conversation,source_revision) SELECT ?,c.id,COALESCE(ec.revision,0) FROM nook_conversations c LEFT JOIN nook_exit_changes ec ON ec.conversation=c.id WHERE ${publishedScope('c.id')}`,id):c.sql(`INSERT INTO nook_exit_scopes(job,conversation,source_revision) SELECT ?,m.conversation,COALESCE(ec.revision,0) FROM nook_members m LEFT JOIN nook_exit_changes ec ON ec.conversation=m.conversation WHERE m.user=? AND ${permittedScope('m.conversation','m.user')}${conversation?' AND m.conversation=?':''}`,id,c.uid,...(conversation?[conversation]:[])),
+ ],conversation,workspace?`${currentOwner('?')} AND EXISTS(SELECT 1 FROM nook_exit_policy WHERE id=1 AND enabled=1 AND version=?)`:conversation?`EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=? AND m.user=? AND ${permittedScope('m.conversation','m.user')})`:'1',workspace?[c.uid,policy!.version]:conversation?[conversation,c.uid]:[])
  return report(await assertJob(c,id))
 }
 export function report(job:ExportJob):ExportReport {
- return {format:FORMAT,version:FORMAT_VERSION,id:job.id,scope:job.scope,created:job.created,state:job.state,
-  pages:job.pages,records:job.records,files:job.files,bytes:job.bytes,sourceOmissions:job.omissions,
+ return {format:FORMAT,version:FORMAT_VERSION,id:job.id,scope:job.workspace_policy_version!=null?'workspace':job.scope,created:job.created,state:job.state,
+  ...(job.workspace_policy_version!=null?{workspacePolicyVersion:job.workspace_policy_version}:{}),pages:job.pages,records:job.records,files:job.files,bytes:job.bytes,sourceOmissions:job.omissions,
   counts:JSON.parse(job.counts_json),complete:job.state==='complete',omissions,custody}
 }
 export async function jobReport(c:Context,id:string){return report(await assertJob(c,id))}
