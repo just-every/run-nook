@@ -119,13 +119,26 @@ stopped destination and `--yes`. `reset --yes` removes exactly the inventory it
 lists: local D1 state, `.rer/local`, `.seed/installer` and the generated
 `.dev.vars` files.
 
-`rer export --target remote --origin ORIGIN --session-file FILE` exports a
-deployed Nook: `scripts/local/remote-export.mjs` drives Base's reviewed
-portability door, which the Worker mounts at `/api/portability`
+`rer export` is local-only and refuses a hosted origin. From a checkout with
+its dependencies installed, call Nook's existing helper with the private owner
+session file prepared in [Backups and export](docs/backups.md#export-a-hosted-nook):
+
+```sh
+node --input-type=module -e '
+import {resolve} from "node:path";
+import {remoteExport} from "./scripts/local/remote-export.mjs";
+const [origin, sessionFile, output] = process.argv.slice(1);
+console.log(await remoteExport({root:process.cwd(), path:resolve(output), origin, sessionFile, store:{report:console.error}}));
+' https://YOUR-NOOK exports/owner.session exports/nook-hosted.rer
+```
+
+`scripts/local/remote-export.mjs` drives Base's reviewed portability door,
+which the Worker mounts at `/api/portability`
 (`src/platform/portability.server.ts`) for exports by an active owner's current
-session only; import routes are never authorized there. It writes the same
-verified archive and erasure journal as a local export and removes the hosted
-export job. Remote import is refused; restore into a new local checkout.
+session only; import routes are never authorized there. It downloads authoritative
+D1 records and actual private R2 bytes, writes the same verified archive and
+erasure journal as a local export and removes the hosted export job. Remote
+import is refused; restore into a new local checkout.
 
 Archives are portability version 2: the closing `archiveHash` binds the whole
 manifest and every ordered part, and import verifies it before restoring.

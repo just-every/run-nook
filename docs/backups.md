@@ -30,7 +30,7 @@ rer import --input exports/nook-workspace.rer --yes
 
 Then follow the identity recovery procedure above. Reopen the restored workspace and compare messages, file downloads and search results before stopping the original hosting. The archive's manifest also carries its erasure journal; retain your latest archive when restoring an older one.
 
-You can also export from your checkout through Nook's owner-only export door. The archive and its journal are the same as a local export's, including file bytes:
+You can also call Nook's existing `scripts/local/remote-export.mjs` helper from a checkout with its dependencies installed. It uses the owner-only hosted export door to download authoritative D1 records and private R2 bytes, verifies the archive and saves its erasure journal. `rer export` is local-only and refuses a hosted origin:
 
 1. Sign in to `https://YOUR-NOOK` as an owner. In the browser's developer tools (Application or Storage, then Cookies), copy the value of the `__Host-operator_session` cookie.
 2. Save it in a private file. Run this, paste `__Host-operator_session=VALUE` on one line, press Enter, then Ctrl-D:
@@ -42,7 +42,12 @@ You can also export from your checkout through Nook's owner-only export door. Th
 3. Export:
 
    ```sh
-   rer export --target remote --origin https://YOUR-NOOK --session-file exports/owner.session --output exports/nook-hosted.rer
+   node --input-type=module -e '
+   import {resolve} from "node:path";
+   import {remoteExport} from "./scripts/local/remote-export.mjs";
+   const [origin, sessionFile, output] = process.argv.slice(1);
+   console.log(await remoteExport({root:process.cwd(), path:resolve(output), origin, sessionFile, store:{report:console.error}}));
+   ' https://YOUR-NOOK exports/owner.session exports/nook-hosted.rer
    ```
 
 The file is a working owner sign-in, so delete it when you are done, or sign out in the browser to end that session. Only an active owner's session can export, and the export waits for pending uploads, deletions and imports to finish (it answers `reconcile_pending_object_work_before_export` until they have). A hosted Nook cannot be restored remotely: restore the archive into a new local checkout that has not run setup, with `rer import --input exports/nook-hosted.rer --yes`.
