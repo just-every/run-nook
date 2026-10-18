@@ -1,7 +1,7 @@
 # Nook acceptance
 
 `rer verify` is the complete local command for the implemented evidence described below. It does not establish unimplemented target journeys. Push CI runs contracts,
-unit tests, runtime journeys at both widths, and notifications in ten parallel
+unit tests, runtime journeys at both widths, and notifications in eleven parallel
 jobs with 15-minute limits. The guided installer, full README and realistic pilot fresh-clone
 journeys at 1440 and 390 retain every assertion and run nightly, on release tags,
 and manually. It covers real Workers and local D1: runtime suites use the emitted build,

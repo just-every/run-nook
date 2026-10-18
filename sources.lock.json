@@ -601,7 +601,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "b85162759fd9075f96e8c200649dcecfb092caec852680fb8412246f92a42425",
+      "sha256": "2207e4d4509a3b69babb4eb148d7275854e4c52430ba223f2f37a09f0180f39d",
       "executable": false
     },
     ".gitignore": {
@@ -613,7 +613,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "47bc3dc574c4478304c7c687f9e81a24417ffeb6f69af10027382695108e25d7",
+      "sha256": "a4289826ec27c780ca04288af66e4b0bb2a3cb60854e37b259fabaff43519a4e",
       "executable": false
     },
     "AGENTS.md": {
@@ -5181,7 +5181,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "97b3361bf12713d1deb1cb46684889deeff7f094ac24c31a6c9321246c34910d",
+      "sha256": "ed420f694d39d41593c996f142decbea460b22151dfbadb1488c5df7521ec2b6",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {

@@ -20,9 +20,12 @@ jobs:
             command: pnpm test:base && pnpm build:app && pnpm integration:check && pnpm typecheck && pnpm exec rer build --site && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" .
           - stage: unit
             command: pnpm test
-          - stage: runtime API
-            # Keep public-route and migration journeys together, with their restarts.
-            command: pnpm build:app && pnpm test:runtime --suite=core-api
+          - stage: storage and security API
+            # Keep ordered storage, media and migration fixtures with their restarts.
+            command: pnpm build:app && pnpm test:runtime --suite=core-api-storage
+          - stage: product API
+            # Independent product journeys keep their existing order and assertions.
+            command: pnpm build:app && pnpm test:runtime --suite=core-api-product
           - stage: runtime browser
             # Both widths, Slack import, installed app and homepage remain on every push.
             command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime --suite=core-browser

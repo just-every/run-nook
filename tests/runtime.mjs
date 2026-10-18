@@ -16,7 +16,7 @@ import {mailEdge} from './mail-edge.mjs'
 
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
-assert.ok(['all','core','core-api','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
+assert.ok(['all','core','core-api','core-api-storage','core-api-product','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']
@@ -107,6 +107,7 @@ try {
  if(!withoutBrowser)await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
  }
  if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard'].includes(suite)){
+ if(suite!=='core-api-product'){
  await check('BASE-ACCESS-002 same-wire missing/expired/revoked/valid session matrix',async()=>{
   for(const [label,cookie,valid] of [['missing','',false],['expired',expired.cookie,false],['revoked',revoked.cookie,false],['valid',owner.cookie,true]]) {
    const before=await facts(),rows=[]
@@ -119,15 +120,17 @@ try {
   }
   await request(`/_serverFn/${fnId}`,{cookie:owner.cookie,status:403,extra:{'x-tsr-serverFn':'true',origin:'https://attacker.invalid'}})
  })
+ }
  const post=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status})
  const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status})
  const get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status})
- await (await import('./operator-security.mjs')).runOperatorSecurity({origin,owner,member,setupToken,request,post,get,sql,facts,check})
+ if(suite!=='core-api-product')await (await import('./operator-security.mjs')).runOperatorSecurity({origin,owner,member,setupToken,request,post,get,sql,facts,check})
  const restart=async(options={})=>{await stop();if(Object.hasOwn(options,'transferFaults')){await lossConfig.close();lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root,options.transferFaults)}await start(port)}
  const reconcile=async()=>{await stop();await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/storage/reconcile.mjs','--paused','--persist='+resolve(state,'v3'),'--discard-expired'],{cwd:root,env,stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',value=>text+=value);child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error(text)))});await restart({transferFaults:null})}
- await (await import('./storage-flows.mjs')).storageFlows({check,post,patch,get,request,sql,owner,member,outsider,c,origin:()=>origin,restart,reconcile,facts})
+ if(suite!=='core-api-product')await (await import('./storage-flows.mjs')).storageFlows({check,post,patch,get,request,sql,owner,member,outsider,c,origin:()=>origin,restart,reconcile,facts})
  const normalizedHarness={validateArchive,check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
- await(await import('./storage-guards.mjs')).storageGuards(normalizedHarness)
+ if(suite!=='core-api-product')await(await import('./storage-guards.mjs')).storageGuards(normalizedHarness)
+ if(suite!=='core-api-storage'){
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
  await(await import('./threads.mjs')).threadJourney(normalizedHarness)
  await(await import('./channel-lifecycle.mjs')).channelLifecycleJourney(normalizedHarness)
@@ -140,11 +143,14 @@ try {
  await(await import('./saved-search.mjs')).savedSearchJourney(normalizedHarness)
  await(await import('./personal.mjs')).personalJourney(normalizedHarness)
  await(await import('./files.mjs')).filesJourney(normalizedHarness)
- await(await import('./media-adversarial.mjs')).runMedia(normalizedHarness)
+ }
+ if(suite!=='core-api-product')await(await import('./media-adversarial.mjs')).runMedia(normalizedHarness)
+ if(suite!=='core-api-storage'){
  await check('actual team invitations, scopes, reactions, preview and revocation',async()=>{await(await import('./team-runtime.mjs')).runTeamSurfaces({origin,ownerCookie:owner.cookie})})
  await check('Slack ZIP review, immutable native history, search, resume and guarded undo',async()=>{const checks=await(await import('./slack-import/journey.mjs')).importJourney({origin,owner,restart:async()=>restart({transferFaults:null}),sql});evidence.slackImports=checks})
  }
- if(suite!=='core-api'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard'].includes(suite)){
+ }
+ if(!['core-api','core-api-storage','core-api-product'].includes(suite)&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard'].includes(suite)){
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
   broadcastFixture??=await(await import('./broadcast.mjs')).broadcastJourney({check,post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,sql,origin:()=>origin,restart:async()=>{await stop();await start(port)}})
   await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people:broadcastFixture.people})
@@ -166,15 +172,15 @@ try {
   await check('NOOK-017 composition and personal workspace at both widths',()=>import('./composition-browser.mjs').then(m=>m.compositionBrowser({origin,owner,member,outsider,destination:'evidence/composition'})))
  }
  }
- if(['all','core','core-api','installer'].includes(suite))await(await import('./profiles.mjs')).profilesJourney({post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin})
+ if(['all','core','core-api','core-api-product','installer'].includes(suite))await(await import('./profiles.mjs')).profilesJourney({post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin})
  await stop()
  if(suite==='all'||suite==='core')await new Promise((ok,bad)=>{const child=spawn(process.execPath,['tests/runtime.mjs','--suite=conversion'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Isolated group-conversion journey failed')))})
- if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
+ if(suite!=='core-api-product'&&suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  await lossConfig.close();lossConfig=null
  }
  if(suite==='all'||suite==='installer')await(await import('./installer-workflow.mjs')).runInstallerWorkflow({root,states,port,check,evidence,databasePath,stop,start,command,env,getState:()=>state,setState:value=>{state=value},getOrigin:()=>origin})
  console.log(`${checks} emitted Worker/D1 checks passed; suite=${suite}`)
- evidence.status=withoutBrowser&&suite!=='core-api'?'partial':'passed';evidence.checkCount=checks
+ evidence.status=withoutBrowser&&!['core-api','core-api-storage','core-api-product'].includes(suite)?'partial':'passed';evidence.checkCount=checks
 } catch(error) {evidence.status='failed';evidence.error=error.stack;evidence.workerLog=output.slice(-50000);throw error}
 finally {
  await stop()
