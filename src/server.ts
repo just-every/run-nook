@@ -1,3 +1,7 @@
+import {broadcastRecipients} from './broadcast/recipients'
+import {BroadcastConfirmation,previewBroadcast} from './broadcast/audience'
+import {broadcastPolicy,updateBroadcastPolicy,readIgnore,updateIgnore} from './broadcast/settings'
+import {broadcastPresence} from './broadcast/presence'
 import {unreads,markUnreads} from './platform/storage/unreads'
 import {withDemo} from './base/modules/demo/index.mjs'
 import {seedDemo} from './demo'
@@ -51,6 +55,13 @@ api.all('/api/*', async c => {
  const p = url.pathname.split('/').filter(Boolean), action = p[1], id = p[2] ?? '', sub = p[3]
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),team=await teamRoute(session,req,input);if(team)return team
+ if(action==='messages'&&id&&sub==='broadcast-recipients'&&p.length===4&&req.method==='GET')return c.json(await broadcastRecipients(session,id,url.searchParams.get('after')??''))
+ if(action==='broadcast'&&id==='presence'&&p.length===3&&req.method==='GET')return c.json({away:!!(await session.one('SELECT away FROM nook_broadcast_choices WHERE user=?',[session.uid]))?.away})
+ if(action==='broadcast'&&id==='presence'&&p.length===3&&req.method==='POST')return c.json(await broadcastPresence(session,input))
+ if(action==='broadcast'&&id==='policy'&&p.length===3){if(req.method==='GET')return c.json(await broadcastPolicy(session,''));if(req.method==='PATCH')return c.json(await updateBroadcastPolicy(session,'',input))}
+ if(action==='channels'&&id&&sub==='broadcast'&&p.length===4){if(req.method==='GET')return c.json(await broadcastPolicy(session,id));if(req.method==='PATCH')return c.json(await updateBroadcastPolicy(session,id,input))}
+ if(action==='conversations'&&id&&sub==='broadcast-ignore'&&p.length===4){if(req.method==='GET')return c.json(await readIgnore(session,id));if(req.method==='PATCH')return c.json(await updateIgnore(session,id,input))}
+ if(action==='conversations'&&id&&sub==='broadcast-preview'&&p.length===4&&req.method==='POST'){if(typeof input.body!=='string'||input.body.length>40000)fail(400,'Provide a message body');return c.json(await previewBroadcast(session,id,input.body))}
  if(action==='unreads'&&p.length===2){if(req.method==='GET')return c.json(await unreads(session,Object.fromEntries(url.searchParams)));if(req.method==='POST')return c.json(await markUnreads(session,input))}
  if(action==='notify'&&id==='conversations'&&p.length===3&&req.method==='GET')return c.json(await repository.read(req.headers,'conversationNotifyExceptions'))
  if(action==='conversations'&&id&&sub==='notify'&&p.length===4){if(req.method==='GET')return c.json(await repository.read(req.headers,'conversationNotify',id));if(req.method==='PATCH')return c.json(await repository.write(req.headers,'conversationNotify',id,input))}
@@ -100,7 +111,7 @@ api.all('/api/*', async c => {
  return c.json(out)
 })
 api.all('/api', async c => { await new Repository(c.env).session(c.req.raw.headers); return c.json({error:'Not found'},404) })
-api.onError((error,c) => { const status = error instanceof Fault || error instanceof AuthError ? error.status : 500; if(status === 500) console.error(error); return c.json({error:status === 500 ? 'Internal error' : error.message},status as any) })
+api.onError((error,c) => { const status = error instanceof Fault || error instanceof AuthError ? error.status : 500; if(status === 500) console.error(error); return c.json({error:status === 500 ? 'Internal error' : error.message,...(error instanceof BroadcastConfirmation?{broadcast:error.broadcast}:{})},status as any) })
 export default withDemo({
  async fetch(request,env,execution) {
   // Built files first: a hosted deploy runs this Worker before its assets.

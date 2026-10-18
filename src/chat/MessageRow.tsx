@@ -1,3 +1,4 @@
+import {BroadcastRecipients} from '../broadcast/Recipients'
 import {CollectionActions,SaveFileAction} from './CollectionActions'
 import {SlackHistory} from '../imports/SlackHistory'
 import {useRef,useState} from 'react'
@@ -37,6 +38,7 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
   <div className="message-content"><div className="message-meta"><strong className={continued?'sr-only':undefined}>{m.authorName}</strong><time className={continued?'reveal':undefined} dateTime={m.created} title={time.toLocaleString([],{dateStyle:'full',timeStyle:'short'})}>{time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>{m.adminOverride&&!m.deleted&&<span className="edited">Admin override</span>}{m.immutable&&<span className="edited">{m.retainedSource?'Retained body · read only':'Imported · read only'}</span>}{m.version>1&&!m.deleted&&!m.retainedSource&&<span className="edited">edited</span>}</div>
    <p className="message-body">{m.deleted?'Message deleted':m.slack?.text??m.body}</p>
    {!m.deleted&&<>
+    {m.broadcast&&<BroadcastRecipients message={m.id} broadcast={m.broadcast}/>}
     {(m.urgent||!!m.notified?.length)&&<div className="message-routing">{m.urgent&&<strong>Urgent</strong>}{!!m.notified?.length&&<span>Notified: {m.notified.map(person=>person.name).join(', ')}</span>}{m.urgent&&m.urgentReason&&<span className="message-urgent-reason">{m.urgentReason}</span>}</div>}
     {!thread&&onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}
     {(m.attachments||[]).map(f=><div className="file-row reveal-host" key={f.id}>{f.state==='deleted'?<span className="muted">Attachment removed</span>:<><ImagePreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/><a href={`/api/attachments/${f.id}/download`} download={f.name}><strong>{f.name}</strong><small>{Math.max(1,Math.round(f.size/1024))} KB · Download</small></a><SaveFileAction conversation={m.conversation} attachment={f.id}/>{!m.immutable&&f.author===user.id&&<button type="button" className="text-button reveal" onClick={()=>onRemove(f.id)}>Remove file</button>}</>}</div>)}

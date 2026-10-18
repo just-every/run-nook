@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict'
+export async function broadcastEmail({sam,rowan,room,say,expectOne,expectNone,installation,waitFor}){
+ const channel=await room('Broadcast email transport',rowan)
+ assert.equal((await rowan.get('/api/notify')).broadcasts,true,'broadcasts inherit the existing mention email choice')
+ const message=await say(sam,channel,'@channel PRIVATE-BROADCAST-WORDING')
+ const mail=await expectOne(rowan.email,channel,'one broadcast email through the notification alarm')
+ assert.match(mail.subject,/channel-wide mention/);assert.ok(mail.text.includes('focus='+message.id));assert.doesNotMatch(mail.subject+mail.text,/PRIVATE-BROADCAST-WORDING/)
+ await rowan.patch('/api/notify',{broadcasts:false})
+ const off=await room('Broadcast email opted out',rowan)
+ await say(sam,off,'<!channel> PRIVATE-OPT-OUT')
+ await expectNone(rowan.email,off,'a disabled broadcast choice suppresses mail while mention email stays on')
+ assert.equal((await rowan.get('/api/notify')).mentions,true)
+ await rowan.patch('/api/notify',{broadcasts:true})
+ await rowan.patch('/api/settings',{dndUntil:Date.now()+3600000})
+ const quiet=await room('Broadcast email quiet',rowan)
+ const held=await say(sam,quiet,'@channel PRIVATE-QUIET-BROADCAST')
+ await waitFor(async()=>{const [row]=await installation.read("SELECT state,due FROM nook_notify_queue WHERE channel='email' AND message=?",held.id);return row?.state==='pending'&&row.due>Date.now()+600000},'broadcast quiet deferral')
+ await rowan.patch('/api/settings',{dndUntil:null})
+ await expectOne(rowan.email,quiet,'routine broadcast delivered after quiet time ends')
+}

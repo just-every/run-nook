@@ -1,12 +1,13 @@
+import {broadcastSummary} from '../../broadcast/recipients'
 import {fail} from '../../family/team-chat/domain'
 import {Context} from './context'
 import {threadSeen} from './threads'
 // Every projection uses one indexed page and at most five attachment rows per
 // message. Public sequence is also the exclusive window cursor.
-const projection=`m.id,m.conversation,m.author,m.body,m.parent,m.version,m.deleted,m.created,m.intent,m.sequence,m.retained_body,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE o.name END AS authorName,(SELECT json_group_array(json_object('id',a.id,'conversation',a.conversation,'author',a.author,'message',a.message,'name',a.name,'mime',a.mime,'size',a.size,'sha256',a.sha256,'expires',a.expires,'state',a.state,'created',a.created)) FROM (SELECT * FROM nook_attachment_history WHERE message=m.id ORDER BY position LIMIT 5) a) AS files`
+const projection=`m.id,m.conversation,m.author,m.body,m.parent,m.version,m.deleted,m.created,m.intent,m.sequence,m.retained_body,CASE WHEN m.deleted=0 THEN ${broadcastSummary('m.id')} END AS broadcast_json,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE o.name END AS authorName,(SELECT json_group_array(json_object('id',a.id,'conversation',a.conversation,'author',a.author,'message',a.message,'name',a.name,'mime',a.mime,'size',a.size,'sha256',a.sha256,'expires',a.expires,'state',a.state,'created',a.created)) FROM (SELECT * FROM nook_attachment_history WHERE message=m.id ORDER BY position LIMIT 5) a) AS files`
 export async function historyPage(c:Context,id:string,where:string,values:unknown[],limit:number,descending=false){
  const rows=await c.rows(`SELECT ${projection} FROM nook_message_history m JOIN nook_actor_history o ON o.id=m.author WHERE m.conversation=? AND ${where} ORDER BY m.sequence ${descending?'DESC':'ASC'} LIMIT ?`,[id,...values,limit],id)
- return rows.map(({files,...m})=>({...m,...(m.retained_body?{immutable:true,retainedSource:'native'}:{}),attachments:JSON.parse(files)}))
+ return rows.map(({files,broadcast_json,...m})=>({...m,broadcast:broadcast_json?JSON.parse(broadcast_json):null,...(m.retained_body?{immutable:true,retainedSource:'native'}:{}),attachments:JSON.parse(files)}))
 }
 export async function firstUnreadMessage(c:Context,id:string,readSeq:number){
  return c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND m.sequence>? AND m.author<>? AND m.deleted=0 AND NOT (${threadSeen('?')}) ORDER BY m.sequence LIMIT 1`,[id,readSeq,c.uid,c.uid],id)

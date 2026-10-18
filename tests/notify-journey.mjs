@@ -1,3 +1,4 @@
+import {broadcastEmail} from './notify/broadcast.mjs';
 import assert from 'node:assert/strict';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -47,6 +48,9 @@ try{
  assert.equal((await sam.post(`/api/conversations/${mention}/messages`,payload)).id,sent.id,'an identical retry is the same event');
  const mail=await expectOne(rowan.email,mention,'one email for a mention while away');
  assert.match(mail.subject,/^Sam mentioned you in #Launch plans$/);assert.ok(mail.text.includes(`focus=${sent.id}`),'the email links to the message');
+
+ step('channel-wide broadcasts use the existing email transport and quiet policy');
+ await broadcastEmail({sam,rowan,room,say,expectOne,expectNone,installation,waitFor});
 
  step('routine follow sends nothing');
  const follow=await room('Follow only',rowan),root=await say(sam,follow,'Thread root');await rowan.post(`/api/messages/${root.id}/follow`,{follow:true});

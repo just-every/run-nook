@@ -15,6 +15,6 @@ export async function joinChannel(c:Context,id:string){
   c.sql("UPDATE nook_conversations SET seq=seq+1 WHERE id=? AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user=?)",id,id,c.uid),
   c.sql("INSERT INTO nook_events SELECT id,seq,'membership',?,? FROM nook_conversations WHERE id=? AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user=?)",c.uid,c.uid,id,id,c.uid),
   c.sql('INSERT OR IGNORE INTO nook_members VALUES(?,?)',id,c.uid)
- ],undefined,`${fullMember('?')} AND EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind='channel') AND (EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user=?) OR (SELECT count(*) FROM nook_members WHERE conversation=?)<50)`,[c.uid,id,id,c.uid,id]);
+ ],undefined,`${fullMember('?')} AND EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind='channel') AND (EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user=?) OR (SELECT count(*) FROM nook_members WHERE conversation=?)<1000)`,[c.uid,id,id,c.uid,id]);
  await c.hint();return {id,joined:true,history:'full'}
 }

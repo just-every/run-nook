@@ -1,3 +1,4 @@
+import {broadcasts} from './broadcast.mjs';
 import assert from 'node:assert/strict';
 import {installation,until} from './fixture.mjs';
 import {subscriber,packet} from './packet.mjs';
@@ -36,6 +37,7 @@ export async function contractJourney(t){
   const sync=()=>call('/api/devices/sync','GET',undefined,member.cookie);
   const context={...app,t,member,sender,unrelated,device,register,recipients,received,room,send,rows,delivered,read,sync};
   await routing(context);
+  await broadcasts(context);
   await presence(context);
   await failures(context);
   await setupFailure(context);

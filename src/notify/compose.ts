@@ -5,6 +5,7 @@ import type {Reason} from './queue'
 export type EmailInput={workspace:string;origin:string;actor:string;conversation:{id:string;name:string;kind:string};reason:Reason;message:string|null;count:number;token:string}
 const where=(c:EmailInput['conversation'])=>c.kind==='dm'?'a direct conversation':'#'+c.name
 const subjects:Record<Reason,(actor:string,place:string)=>string>={
+ 'broadcast':(a,p)=>`${a} sent a channel-wide mention in ${p}`,
  'mention':(a,p)=>`${a} mentioned you in ${p}`,
  'urgent-request':(a,p)=>`Urgent request from ${a} in ${p}`,
  'commitment-proposal':(a,p)=>`${a} asked you to take on a commitment in ${p}`,

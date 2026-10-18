@@ -12,7 +12,7 @@ export async function changeChannelMember(c:Context,id:string,input:Record<strin
  const channel=await channelDetails(c,id)
  if(channel.kind==='dm'||!channel.canManage)fail(403,'Only the channel manager or a current member owner or admin may change membership; DMs are fixed')
  const statements=[...c.event(id,'membership',uid),...(input.remove?channelDeparture(c,id,uid):[]),input.remove?c.sql('DELETE FROM nook_members WHERE conversation=? AND user=?',id,uid):c.sql('INSERT OR IGNORE INTO nook_members VALUES(?,?)',id,uid)]
- const condition=`${channelManagement('?','?')} AND EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind<>'dm') AND EXISTS(SELECT 1 FROM oa_operators target WHERE id=? AND status='active' AND ${allowedGrant('target.id','?')}) AND (? OR EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user=?) OR (SELECT count(*) FROM nook_members WHERE conversation=?)<50)`
+ const condition=`${channelManagement('?','?')} AND EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind<>'dm') AND EXISTS(SELECT 1 FROM oa_operators target WHERE id=? AND status='active' AND ${allowedGrant('target.id','?')}) AND (? OR EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user=?) OR (SELECT count(*) FROM nook_members WHERE conversation=?)<1000)`
  const values=[c.uid,id,id,uid,id,input.remove?1:0,id,uid,id]
  if(input.remove)await c.batch(statements,id,condition,values);else await c.writeBatch(statements,id,condition,values)
  await c.hint();return {ok:true}

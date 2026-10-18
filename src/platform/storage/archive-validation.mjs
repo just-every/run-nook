@@ -1,4 +1,5 @@
 import {validateReminders} from '../../reminders/archive.mjs';
+import {validateBroadcastArchive} from '../../broadcast/archive.mjs';
 import {validateSchedules} from '../../scheduled/archive.mjs';
 import {conversionArchive} from '../../team/group-conversion-archive.mjs';
 import { sourceActorId, sourceFileRefs } from '../../imports/slack-records.mjs';
@@ -44,6 +45,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  await validateReminders(readTable,manifest,actors,conv,msg);
  await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});
  const scheduledFiles=await validateSchedules(readTable,manifest,{actors,conversations:conv,messages:msg,attachments:files});
+ await validateBroadcastArchive(readTable,{manifest,actors,conversations:conv,messages:msg});
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
  await validateSavedArchive(readTable,{manifest,actors,conversations:conv,messages:msg,imported,attachments:files});
  const notifyRows=manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_conversation_notify')?[]:await readTable('nook_conversation_notify');
@@ -100,7 +102,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const positions=new Map(rows('messages').map(m=>[tuple(m.conversation,m.sequence),m]));
  index(rows('thread_reads'),r=>tuple(r.user,r.message),'duplicate_thread_read');for(const r of rows('thread_reads')){const root=threadRoot(r.message,r.user),mark=positions.get(tuple(root?.conversation,r.seq));check(root&&integer(r.seq)&&(r.seq===0||mark&&(mark.id===r.message||mark.parent===r.message)),'invalid_thread_read');}
  index(rows('settings'),s=>s.user,'duplicate_settings');for(const s of rows('settings'))check(actors.has(s.user)&&(s.dnd_until===null||integer(s.dnd_until)),'invalid_quiet_deadline');
- index(rows('attention'),a=>a.id,'duplicate_attention');index(rows('attention'),a=>tuple(a.user,a.conversation,a.event_seq),'duplicate_attention_source');for(const a of rows('attention')){const source=a.message?msg.get(a.message):out.get(a.outcome),e=events.get(tuple(a.conversation,a.event_seq));check(string(a.id)&&participant(a.conversation,a.user)&&!!a.message!==!!a.outcome&&source?.conversation===a.conversation&&e?.object===(a.message||a.outcome)&&e.kind===(a.message?'message':'outcome')&&['open','done','snoozed'].includes(a.state)&&(a.state==='snoozed'?integer(a.snooze_until):a.snooze_until===null)&&time(a.created),'invalid_attention');check(a.message?['urgent-request','mention','thread-follow','conversation-follow','all-messages'].includes(a.reason):source.kind==='commitment'&&['commitment-proposal','commitment-update'].includes(a.reason),'invalid_attention_reason')}
+ index(rows('attention'),a=>a.id,'duplicate_attention');index(rows('attention'),a=>tuple(a.user,a.conversation,a.event_seq),'duplicate_attention_source');for(const a of rows('attention')){const source=a.message?msg.get(a.message):out.get(a.outcome),e=events.get(tuple(a.conversation,a.event_seq));check(string(a.id)&&participant(a.conversation,a.user)&&!!a.message!==!!a.outcome&&source?.conversation===a.conversation&&e?.object===(a.message||a.outcome)&&e.kind===(a.message?'message':'outcome')&&['open','done','snoozed'].includes(a.state)&&(a.state==='snoozed'?integer(a.snooze_until):a.snooze_until===null)&&time(a.created),'invalid_attention');check(a.message?['broadcast','urgent-request','mention','thread-follow','conversation-follow','all-messages'].includes(a.reason):source.kind==='commitment'&&['commitment-proposal','commitment-update'].includes(a.reason),'invalid_attention_reason')}
  const slackReviews=await slackArchiveObjects({read:readTable,manifest},actors,[...files.values(),...scheduledFiles]);
  const slackProofs=await slackArchivePlans(readTable,slackReviews);
  const slackDomains=validateSlackArchiveRecords(slackProofs,tables);

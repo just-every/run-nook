@@ -1,4 +1,5 @@
 import {useTeamBindings} from '../team/TeamBindings'
+import {ConfirmBroadcast,type BroadcastPreview} from '../broadcast/ConfirmBroadcast'
 import {useEffect,useId,useRef,useState} from 'react'
 import {api,ApiError} from './api'
 import type {Person} from './types'
@@ -9,7 +10,7 @@ import {blankDraft,clearSentDraft,draftKey,readDraft,recordSendFailure,writeDraf
 import {MESSAGE_LIMIT} from '../family/team-chat/domain'
 export function Composer({restricted=false,user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,sendMessage,onSent,onError,onSchedule}:{onSchedule?:(draft:{body:string;parent:string|null;mentions:string[];urgent:boolean;urgentReason:string|null;files:Draft['files']},saved:()=>void)=>void;restricted?:boolean;user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
  const team=useTeamBindings()
- const [override,setOverride]=useState(false)
+ const [override,setOverride]=useState(false),[confirmation,setConfirmation]=useState<BroadcastPreview|null>(null)
  const fieldId=useId()
  const scope={user:user.id,conversation,parent},key=draftKey(scope)
  const isCurrent=usePrivateScope(privateSignal,key)
@@ -26,10 +27,13 @@ export function Composer({restricted=false,user,conversation,name,parent,members
   return saved
  }
  const upload=useAttachmentUpload({conversation,isCurrent:active,getPending:()=>draftRef.current.upload,getCount:()=>draftRef.current.files.length,onPending:pending=>{if(!save({...draftRef.current,upload:pending},Boolean(pending))&&pending)throw Error('Upload was not started because its retry intent could not be saved in this browser.')},onUploaded:file=>save({...draftRef.current,upload:null,files:[...draftRef.current.files,file]}),onError})
- async function send(){
+ async function send(confirmed=false){
   if(!active()||sending.current||upload.isBusy()||draftRef.current.upload)return
-  if(/^\/remind\b/i.test(draftRef.current.body)){team.onReminderCommand?.(draftRef.current.body,()=>save(blankDraft()));return}
-  const current=draftRef.current,pending=current.pending||{body:current.body,intent:crypto.randomUUID(),parent,attachments:current.files.map(f=>f.id),mentions:current.recipient?[current.recipient]:[],urgent:current.urgent,urgentReason:current.urgent?current.reason:null,...(override?{adminOverride:true as const}:{})}
+  const current=draftRef.current
+  if(!current.pending&&/^\/remind\b/i.test(current.body)){team.onReminderCommand?.(current.body,()=>save(blankDraft()));return}
+  let pending=current.pending||{body:current.body,intent:crypto.randomUUID(),parent,attachments:current.files.map(f=>f.id),mentions:current.recipient?[current.recipient]:[],urgent:current.urgent,urgentReason:current.urgent?current.reason:null,...(override?{adminOverride:true as const}:{})}
+  if(confirmed)pending={...pending,confirmBroadcast:true}
+  setConfirmation(null)
   if(!pending.body.trim()||pending.body.length>MESSAGE_LIMIT)return
   if(!save({...current,pending,delivery:'pending',failure:''},true))return
   sending.current=true;setBusy(true);const end=beginWrite()
@@ -41,6 +45,7 @@ export function Composer({restricted=false,user,conversation,name,parent,members
    draftRef.current=blankDraft();setDraft(draftRef.current)
    try{await onSent();if(active())textarea.current?.focus()}catch(error){if(active())onError(error)}
   }catch(error){
+   if(error instanceof ApiError&&error.broadcast&&active()){save({...draftRef.current,pending,delivery:'unconfirmed',failure:''});setConfirmation(error.broadcast);return}
    const refused=error instanceof ApiError&&[400,403,413,415,422].includes(error.status)
    const failure=error instanceof Error?error.message:'The message could not be sent.'
    if(!active()){if(!privateSignal.aborted)try{recordSendFailure(scope,pending.intent,failure,refused)}catch{};return}
@@ -59,12 +64,14 @@ export function Composer({restricted=false,user,conversation,name,parent,members
  const overlength=draft.body.length>MESSAGE_LIMIT,countId=fieldId+'-count',retry=Boolean(draft.pending)&&!busy
  if(restricted&&!override&&!draft.pending?.adminOverride)return <div className="archived-notice" role="status">Posting is restricted by this channel’s permissions. You can still read, react, save and follow.{(user.role==='owner'||user.role==='admin')&&<button className="text-button" onClick={()=>setOverride(true)}>Post with admin override</button>}</div>
  return <form className="composer" data-urgent={draft.urgent||undefined} onSubmit={e=>{e.preventDefault();void send()}}>
+  {confirmation&&<ConfirmBroadcast preview={confirmation} onConfirm={()=>void send(true)} onCancel={()=>{setConfirmation(null);save({...draftRef.current,pending:null,delivery:'draft',failure:''});textarea.current?.focus()}}/>}
   {(override||draft.pending?.adminOverride)&&<p className="draft-note">This post will be labelled and audited as an admin override. <button type="button" className="text-button" onClick={()=>setOverride(false)}>Cancel override</button></p>}
   <label className="sr-only" htmlFor={'compose-'+(parent||'root')}>{parent?'Reply in thread':'Message '+name}</label>
   <textarea ref={textarea} id={'compose-'+(parent||'root')} rows={1} value={draft.body} readOnly={locked} required placeholder={parent?'Reply in thread…':`Message ${name}…`} aria-invalid={overlength||undefined} aria-describedby={hintId+(draft.body.length>=36000?' '+countId:'')} onChange={e=>save({...draftRef.current,body:e.target.value,delivery:'draft',failure:''})} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(draft.body.trim())void send()}}}/>
   <label className={'attach-button icon-button'+(locked?' disabled':'')} title="Attach file"><IconAttach/><span className="sr-only">Attach file</span><input aria-label="Attach file" type="file" accept=".txt,.png,.jpg,.jpeg,.pdf" disabled={locked||upload.uploading} onChange={e=>{const file=e.target.files?.[0];if(file)void upload.select(file);e.target.value=''}}/></label>
   <details className="composer-options menu" ref={options} onToggle={e=>setRoutingOpen(e.currentTarget.open)}><summary className="icon-button" title="Mention or urgency" aria-controls={showRouting?routingId:undefined}><IconMention/><span className="sr-only">Mention or urgency</span></summary></details>
   {showRouting&&<div className="composer-routing" id={routingId}><div className="field"><label htmlFor={fieldId+'-recipient'}>Notify a person</label><select id={fieldId+'-recipient'} disabled={locked} value={draft.recipient} onChange={e=>save({...draftRef.current,recipient:e.target.value})}><option value="">Choose a person</option>{members.filter(p=>p.id!==user.id).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}{draft.recipient&&!members.some(p=>p.id===draft.recipient)&&<option value={draft.recipient}>Person no longer available</option>}</select></div><div className="field"><label htmlFor={fieldId+'-priority'}>Priority</label><select id={fieldId+'-priority'} disabled={locked} value={draft.urgent?'urgent':'normal'} onChange={e=>save({...draftRef.current,urgent:e.target.value==='urgent'})}><option value="normal">Routine</option><option value="urgent">Urgent</option></select></div>{draft.urgent&&<label className="field">Why is this urgent?<input required maxLength={240} disabled={locked} value={draft.reason} onChange={e=>save({...draftRef.current,reason:e.target.value})}/></label>}</div>}
+  {/@(?:channel|here|everyone)\b|<!(?:channel|here|everyone)>/.test(draft.body)&&<p className="draft-note">Channel-wide mentions follow each recipient’s notification choices and quiet time.</p>}
   {!!draft.files.length&&<div className="staged-files">{draft.files.map(f=><span key={f.id}>{f.name}<button type="button" className="icon-button" disabled={locked} aria-label={'Discard '+f.name} onClick={()=>void remove(f.id)}><IconClose/><span className="sr-only">Remove</span></button></span>)}</div>}
   {onSchedule&&<button type="button" className="schedule-draft text-button" disabled={locked||upload.uploading||Boolean(draft.upload)||!draft.body.trim()||overlength||override} onClick={()=>onSchedule({body:draft.body,parent,mentions:draft.recipient?[draft.recipient]:[],urgent:draft.urgent,urgentReason:draft.urgent?draft.reason:null,files:draft.files},()=>save(blankDraft()))}>Schedule for later</button>}
   <button className="send" disabled={busy||upload.uploading||Boolean(draft.upload)||!draft.body.trim()||overlength}>{busy?'Sending…':retry||draft.delivery==='failed'?'Retry send':'Send'}</button>

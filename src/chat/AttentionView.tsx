@@ -3,7 +3,7 @@ import '../app-style/attention.css'
 import type {Attention,AttentionItem,Conversation,Outcome,Person} from './types'
 import {OutcomeCard} from './OutcomeCard'
 import {NookMark} from '../brand/NookMark'
-const reasonText=(item:AttentionItem)=>item.reason==='urgent-request'?(item.message?.authorName?item.message.authorName+' needs you urgently':'Needs you urgently'):item.reason==='commitment-proposal'?'A request for you':item.reason==='commitment-update'?'An update for you':item.reason==='mention'?'You were mentioned':'A new reply'
+const reasonText=(item:AttentionItem)=>item.reason==='broadcast'?'A channel-wide mention':item.reason==='urgent-request'?(item.message?.authorName?item.message.authorName+' needs you urgently':'Needs you urgently'):item.reason==='commitment-proposal'?'A request for you':item.reason==='commitment-update'?'An update for you':item.reason==='mention'?'You were mentioned':'A new reply'
 export function AttentionView({attention,user,conversations,onOpen,onAction,onDiscuss,onRevise,mutate}:{attention:Attention;user:Person;conversations:Conversation[];onOpen:(conversation:string,message?:string|null,thread?:string|null)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void;onRevise:(o:Outcome)=>void;mutate:(path:string,data:unknown,method?:string)=>Promise<unknown>}) {
  const act=(path:string,input:unknown,method?:string)=>void mutate(path,input,method).catch(()=>{})
  const discuss=(item:AttentionItem)=>onOpen(item.conversation,item.message?.id||item.outcome?.source||item.outcome?.id,item.message?.parent)

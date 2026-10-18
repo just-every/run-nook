@@ -43,7 +43,7 @@ export async function updateDefaultChannels(c:Context,input:Record<string,any>){
 }
 
 const pending=(user:string)=>`EXISTS(SELECT 1 FROM nook_default_admissions a WHERE a.user=${user} AND a.state='pending')`
-const blocked=(user:string)=>`EXISTS(SELECT 1 FROM nook_default_channels d WHERE NOT (${eligible('d.conversation')}) OR (NOT EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=d.conversation AND m.user=${user}) AND (SELECT count(*) FROM nook_members m WHERE m.conversation=d.conversation)>=50))`
+const blocked=(user:string)=>`EXISTS(SELECT 1 FROM nook_default_channels d WHERE NOT (${eligible('d.conversation')}) OR (NOT EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=d.conversation AND m.user=${user}) AND (SELECT count(*) FROM nook_members m WHERE m.conversation=d.conversation)>=1000))`
 // Called only after Context has proved current session AND product admission.
 export async function initializeDefaultChannels(c:Context){
  const admission=await c.one('SELECT state FROM nook_default_admissions WHERE user=?',[c.uid])

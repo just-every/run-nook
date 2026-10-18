@@ -1,4 +1,6 @@
 import {personalReminderAttention} from '../../reminders/service'
+import {broadcastSuppressed} from '../../broadcast/policy'
+import {broadcastSummary} from '../../broadcast/recipients'
 import {reminderAttention} from '../../team/saved-reminders.server'
 import {canPost} from '../../team/posting-policy'
 import {readConversationNotify,conversationNotifyExceptions} from '../../team/conversation-notify.server'
@@ -21,7 +23,7 @@ async function messageMetadata(c:Context,conversation:string,items:any[]){
  const ids=JSON.stringify([...new Set(items.map(m=>m.id))])
  const [rows,reactions]=await Promise.all([c.rows(`WITH requested AS (SELECT value AS id FROM json_each(?)),
  native AS (SELECT m.id,CASE WHEN m.deleted=0 AND json_valid(m.payload) THEN m.payload ELSE '{}' END AS routing FROM nook_message_history m JOIN requested p ON p.id=m.id WHERE m.conversation=?)
- SELECT p.id,
+ SELECT p.id,CASE WHEN n.routing<>'{}' THEN ${broadcastSummary('p.id')} END AS broadcast_json,
  (SELECT COUNT(*) FROM nook_message_history reply WHERE reply.conversation=? AND reply.parent=p.id AND reply.deleted=0)+
  (SELECT COUNT(*) FROM nook_import_history reply JOIN nook_imports j ON j.id=reply.job WHERE reply.conversation=? AND reply.parent=p.id AND (reply.erased=0 OR reply.retained_body=1) AND j.state='complete' AND ${publishedImport}) AS replyCount,
  COALESCE(json_extract(n.routing,'$.adminOverride'),0) AS adminOverride,COALESCE(json_extract(n.routing,'$.urgent'),0) AS urgent,json_extract(n.routing,'$.urgentReason') AS urgentReason,
@@ -29,7 +31,7 @@ async function messageMetadata(c:Context,conversation:string,items:any[]){
  FROM requested p LEFT JOIN native n ON n.id=p.id`,[ids,conversation,conversation,conversation],conversation),
   messageReactions(c,conversation,items.filter(m=>!m.immutable&&!m.deleted).map(m=>m.id)),
  ])
- const metadata=new Map(rows.map(row=>[row.id,{replyCount:row.replyCount,adminOverride:!!row.adminOverride,urgent:!!row.urgent,urgentReason:row.urgentReason,notified:JSON.parse(row.notified)}]))
+ const metadata=new Map(rows.map(row=>[row.id,{broadcast:row.broadcast_json?JSON.parse(row.broadcast_json):null,replyCount:row.replyCount,adminOverride:!!row.adminOverride,urgent:!!row.urgent,urgentReason:row.urgentReason,notified:JSON.parse(row.notified)}]))
  return items.map(m=>({...m,...metadata.get(m.id),reactions:reactions[m.id]??[]}))
 }
 export async function message(c:Context,id:string){const m=await c.one(`SELECT m.*,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE a.name END AS authorName FROM nook_message_history m JOIN nook_actor_history a ON a.id=m.author WHERE m.id=? AND EXISTS(SELECT 1 FROM nook_members WHERE conversation=m.conversation AND user=?)`,[id,c.uid]);if(!m){const source=await c.one(`${importedSelect} WHERE r.id=? AND EXISTS(SELECT 1 FROM nook_members WHERE conversation=r.conversation AND user=?)`,[id,c.uid]);if(!source)fail(404,'Message unavailable');await c.check(source.conversation);return historicalMessage(c,source)}await c.check(m.conversation);const {payload,body_lower,ordinal,author_ordinal,...publicMessage}=m;return {...publicMessage,...(m.retained_body?{immutable:true,retainedSource:'native'}:{}),attachments:await c.rows(`SELECT ${attachmentColumns} FROM nook_attachment_history WHERE message=? ORDER BY position LIMIT 5`,[id],m.conversation)}}
@@ -50,7 +52,7 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
  if(action==='threads')return threads(c,input,async id=>{const m=await message(c,id);return (await messageMetadata(c,m.conversation,[m]))[0]})
  if(action==='search')return mixedSearch(c,input)
  if(action==='attention')return attention(c,input)
- if(action==='members')return c.rows(`SELECT o.id,o.display_name AS name FROM nook_members m JOIN oa_operators o ON o.id=m.user WHERE m.conversation=? AND ${allowedGrant('m.user','m.conversation')} ORDER BY o.id LIMIT 50`,[id],id)
+ if(action==='members')return c.rows(`SELECT o.id,o.display_name AS name FROM nook_members m JOIN oa_operators o ON o.id=m.user WHERE m.conversation=? AND ${allowedGrant('m.user','m.conversation')} ORDER BY o.id LIMIT 1000`,[id],id)
  if(action==='roster')return c.rows(`SELECT a.id,a.name,EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=r.conversation AND m.user=r.user AND ${allowedGrant('m.user','m.conversation')}) AS active FROM nook_dm_roster r JOIN nook_actor_history a ON a.id=r.user WHERE r.conversation=? ORDER BY a.id LIMIT 50`,[id],id)
  if(action==='preferences'){const [p,threadFollows]=await Promise.all([c.one('SELECT muted,followed FROM nook_preferences WHERE user=? AND conversation=?',[c.uid,id],id),threadPreferences(c,id)]);return {muted:!!p?.muted,followed:!!p?.followed,threads:threadFollows.map(f=>f.message),threadFollows}}
  if(action==='replay'){const frontier=(await c.one('SELECT seq FROM nook_conversations WHERE id=?',[id],id)).seq;const after=input.after??0;if(!Number.isSafeInteger(after)||after<0)fail(400,'Invalid cursor');if(after>frontier)fail(400,'Invalid cursor');const events=await c.rows('SELECT conversation,seq,kind,object FROM nook_events WHERE conversation=? AND seq>? ORDER BY seq LIMIT 100',[id,after],id);return {events,cursor:events.at(-1)?.seq??after,frontier,hasMore:(events.at(-1)?.seq??after)<frontier}}
@@ -66,9 +68,9 @@ async function attention(c:Context,input:Record<string,any>){
  // Each authorized conversation contributes at most 100 candidates per state.
  // Old/done/private history cannot make a page scan an unbounded inbox.
  c.rows(`WITH candidates AS (
- SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='open' AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
+ SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='open' AND (a.reason<>'broadcast' OR NOT ${broadcastSuppressed('a.user','a.conversation')}) AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
  UNION ALL
- SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
+ SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND (a.reason<>'broadcast' OR NOT ${broadcastSuppressed('a.user','a.conversation')}) AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
  ) SELECT a.* FROM candidates p JOIN nook_attention a ON a.id=p.id ORDER BY a.id LIMIT 100`,[input.after??'',c.uid,input.after??'',c.uid]),
  c.one(`SELECT MIN(deadline) AS deadline FROM (SELECT (SELECT a.snooze_until FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND a.snooze_until>? ORDER BY a.snooze_until LIMIT 1) AS deadline FROM nook_members m WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')})`,[now,c.uid]),
  input.after?Promise.resolve({items:[],hasMore:false,deferredCount:0,nextWakeAt:null}):reminderAttention(c),

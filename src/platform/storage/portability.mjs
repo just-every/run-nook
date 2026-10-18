@@ -6,7 +6,7 @@ import {validateNormalizedArchive} from './archive-validation.mjs';
 export const normalizedPortability={
  derivedTables:['nook_search'],
  // The notification queue is delivery state: a restored installation sends nothing old.
- excludeTables:['nook_read_undo','nook_read_generations','nook_guard','nook_conversion','nook_erasure_work','nook_erasure_blobs','nook_notify_queue','nook_push_devices','nook_push_presence','nook_push_secrets',...teamExcludedTables],
+ excludeTables:['nook_broadcast_presence','nook_read_undo','nook_read_generations','nook_guard','nook_conversion','nook_erasure_work','nook_erasure_blobs','nook_notify_queue','nook_push_devices','nook_push_presence','nook_push_secrets',...teamExcludedTables],
  buckets:{FILES:{prefix:'private/',objectReferences:{table:'nook_object_inventory',keyColumn:'object_key'}}},
  exportRow(table,row){
   if(table==='nook_erasure_receipts'&&row.state!=='complete')throw Error('finish_pending_erasure_before_export');

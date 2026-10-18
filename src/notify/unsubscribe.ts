@@ -19,11 +19,12 @@ export async function unsubscribeRoute(env:{DB:D1Database},request:Request){
  const token=request.method==='POST'?new URLSearchParams(await request.text()).get('t'):url.searchParams.get('t')
  const row=token&&/^[0-9a-f]{64}$/.test(token)?await env.DB.prepare("SELECT user FROM nook_notify_queue WHERE channel='email' AND token_hash=? LIMIT 1").bind(await tokenHash(token)).first<{user:string}>():null
  if(!row)return page(404,'This link has expired',`<p>It may be older than 30 days.</p>${manage}`)
- if(request.method==='GET')return page(200,'Turn off email notifications?',`<p>You will stop getting email about mentions, commitments and urgent requests. Nook itself is unchanged.</p><form method="post" action="/notify/off"><input type="hidden" name="t" value="${escape(token!)}"><button type="submit">Turn off these emails</button></form>${manage}`)
+ if(request.method==='GET')return page(200,'Turn off email notifications?',`<p>You will stop getting email about mentions, channel-wide broadcasts, commitments and urgent requests. Nook itself is unchanged.</p><form method="post" action="/notify/off"><input type="hidden" name="t" value="${escape(token!)}"><button type="submit">Turn off these emails</button></form>${manage}`)
  const now=Date.now()
  await env.DB.batch([
+  env.DB.prepare('INSERT INTO nook_broadcast_choices(user,email) VALUES(?,0) ON CONFLICT(user) DO UPDATE SET email=0').bind(row.user),
   env.DB.prepare('INSERT INTO nook_notify_preferences(user,mentions,urgent,urgent_quiet,updated) VALUES(?,0,0,0,?) ON CONFLICT(user) DO UPDATE SET mentions=0,urgent=0,urgent_quiet=0,updated=excluded.updated').bind(row.user,now),
   env.DB.prepare("UPDATE nook_notify_queue SET state='cancelled',error='turned-off',updated=? WHERE channel='email' AND user=? AND state IN ('pending','retrying')").bind(now,row.user),
  ])
- return page(200,'Email notifications are off',`<p>Nook will not email you about mentions, commitments or urgent requests. You can turn them on again in your settings.</p>${manage}`)
+ return page(200,'Email notifications are off',`<p>Nook will not email you about mentions, channel-wide broadcasts, commitments or urgent requests. You can turn them on again in your settings.</p>${manage}`)
 }
