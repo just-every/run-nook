@@ -68,6 +68,12 @@ async function registered(name){
 const login=async name=>{const actor=await signIn(origin,name.toLowerCase()+'@example.test');return {response:new Response(null,{headers:{'set-cookie':actor.cookie}}),data:{user:actor.user}}}
 
 async function databasePath(dir) {let found;async function visit(path){for(const item of await readdir(path,{withFileTypes:true})){const child=resolve(path,item.name);if(item.isDirectory())await visit(child);else if(item.name.endsWith('.sqlite')){const db=new DatabaseSync(child,{readOnly:true});try{if(db.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='workspace'").get().n)found=child}finally{db.close()}}}}await visit(dir);assert.ok(found,'real D1 database found');return found}
+async function validateArchive(){
+ const db=new DatabaseSync(await databasePath(state),{readOnly:true});try{
+  const {validateNormalizedArchive}=await import('../src/platform/storage/archive-validation.mjs')
+  await validateNormalizedArchive({read:async table=>db.prepare('SELECT * FROM '+table).all()})
+ }finally{db.close()}
+}
 async function check(name,fn) { try { await fn() } catch (error) { console.error('DIAG wrangler output tail:\n'+output.slice(-12000)); throw error } checks++; evidence.checks.push({name,status:'passed'}); console.log(`PASS ${name}`) }
 try {
  const port=await freePort()
@@ -95,8 +101,8 @@ try {
  else if(suite==='broadcast'){const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status});const {people}=await(await import('./broadcast.mjs')).broadcastJourney({post,get,patch,request,owner,member,outsider,check,origin:()=>origin,restart:async()=>{await stop();await start(port)},sql});if(!withoutBrowser)await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people})}
  else if(suite==='reminders'){if(!process.argv.includes('--browser-only')){const harness={post,get,request,patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin};await(await import('./reminders.mjs')).remindersJourney(harness);await(await import('./saved-reminders.mjs')).savedRemindersJourney(harness);}if(!withoutBrowser)await(await import('./reminders-browser.mjs')).remindersBrowser({origin,owner,member})}
  else if(suite==='scheduled'){if(!process.argv.includes('--browser-only'))await (await import('./scheduled.mjs')).scheduledJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});if(!withoutBrowser)await check('NOOK-034 schedule and review messages at both widths',()=>import('./scheduled-browser.mjs').then(m=>m.scheduledBrowser({origin,owner,member,memberOccurrences:!process.argv.includes('--browser-only')})))}
- else{await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql});
- await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
+ else{if(!process.argv.includes('--browser-only'))await (await import('./unreads.mjs')).unreadsJourney({post,get,request,owner,member,outsider,check,registered,validateArchive,restart:async()=>{await stop();await start(port)},sql});
+ if(!withoutBrowser)await (await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider});}
  }
  if(suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports'].includes(suite)){
  await check('BASE-ACCESS-002 same-wire missing/expired/revoked/valid session matrix',async()=>{
@@ -118,7 +124,7 @@ try {
  const restart=async(options={})=>{await stop();if(Object.hasOwn(options,'transferFaults')){await lossConfig.close();lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root,options.transferFaults)}await start(port)}
  const reconcile=async()=>{await stop();await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/storage/reconcile.mjs','--paused','--persist='+resolve(state,'v3'),'--discard-expired'],{cwd:root,env,stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',value=>text+=value);child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error(text)))});await restart({transferFaults:null})}
  await (await import('./storage-flows.mjs')).storageFlows({check,post,patch,get,request,sql,owner,member,outsider,c,origin:()=>origin,restart,reconcile,facts})
- const normalizedHarness={check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
+ const normalizedHarness={validateArchive,check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
  await(await import('./storage-guards.mjs')).storageGuards(normalizedHarness)
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
  await(await import('./threads.mjs')).threadJourney(normalizedHarness)
