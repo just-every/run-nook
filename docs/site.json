@@ -3,39 +3,129 @@
     {
       "title": "Start here",
       "pages": [
-        { "slug": "", "source": "docs/overview.md", "label": "Overview" },
-        { "slug": "install", "source": "docs/install.md", "label": "Install" },
-        { "slug": "your-team", "source": "docs/your-team.md", "label": "Your team" },
-        { "slug": "conversations", "source": "docs/conversations.md", "label": "Conversations" },
-        { "slug": "decisions-and-commitments", "source": "docs/decisions-and-commitments.md", "label": "Decisions and commitments" }
+        {
+          "slug": "",
+          "source": "docs/overview.md",
+          "label": "Overview"
+        },
+        {
+          "slug": "install",
+          "source": "docs/install.md",
+          "label": "Install"
+        },
+        {
+          "slug": "your-team",
+          "source": "docs/your-team.md",
+          "label": "Your team"
+        },
+        {
+          "slug": "conversations",
+          "source": "docs/conversations.md",
+          "label": "Conversations"
+        },
+        {
+          "slug": "decisions-and-commitments",
+          "source": "docs/decisions-and-commitments.md",
+          "label": "Decisions and commitments"
+        }
       ]
     },
     {
       "title": "Use Nook",
       "pages": [
-        { "slug": "attention", "source": "docs/attention.md", "label": "Attention" },
-        { "slug": "moving-in-from-slack", "source": "docs/moving-in-from-slack.md", "label": "Moving in from Slack" },
-        { "slug": "backups", "source": "docs/backups.md", "label": "Backups and export" },
-        { "slug": "deleting-and-erasing", "source": "docs/deleting-and-erasing.md", "label": "Deleting and erasing" },
-        { "slug": "privacy", "source": "docs/privacy.md", "label": "Privacy and access" },
-        { "slug": "updating", "source": "docs/updating.md", "label": "Updating and deploying" }
+        {
+          "slug": "attention",
+          "source": "docs/attention.md",
+          "label": "Attention"
+        },
+        {
+          "slug": "moving-in-from-slack",
+          "source": "docs/moving-in-from-slack.md",
+          "label": "Moving in from Slack"
+        },
+        {
+          "slug": "backups",
+          "source": "docs/backups.md",
+          "label": "Backups and export"
+        },
+        {
+          "slug": "deleting-and-erasing",
+          "source": "docs/deleting-and-erasing.md",
+          "label": "Deleting and erasing"
+        },
+        {
+          "slug": "privacy",
+          "source": "docs/privacy.md",
+          "label": "Privacy and access"
+        },
+        {
+          "slug": "updating",
+          "source": "docs/updating.md",
+          "label": "Updating and deploying"
+        }
       ]
     }
   ],
   "githubOnly": [
-    { "source": "DEMO.md", "reason": "Maintainer instructions for isolated local and hosted demo operation." },
-    { "source": "ACCEPTANCE.md", "reason": "Maintainer release evidence and verification boundaries, including what has not yet been proven (hosted operation, live mail, mobile push, accessibility audit). Kept out of the owner-facing guides." },
-    { "source": "AGENTS.md", "reason": "Contributor and coding-agent instructions for maintaining Nook." },
-    { "source": "CHANGELOG.md", "reason": "Maintainer release history; user guides describe current behavior." },
-    { "source": "CLAUDE.md", "reason": "A compatibility pointer to AGENTS.md for coding agents." },
-    { "source": "CONTRACT.md", "reason": "Maintainer-facing product guarantees and implementation obligations." },
-    { "source": "IMPORT-APPLY.md", "reason": "Maintainer record of the import apply boundary and evidence." },
-    { "source": "IMPORT-CONTRACT.md", "reason": "Maintainer contract for the import adapter and proof." },
-    { "source": "OPERATIONS.md", "reason": "Detailed operator and recovery procedures; Backups and export summarizes the user steps." },
-    { "source": "README.md", "reason": "Repository and developer orientation; Overview is the public user introduction." },
-    { "source": "RUN-LOCALLY.md", "reason": "Complete local command reference for maintainers; Install gives the first-run path." },
-    { "source": "SEED-COMMAND-CONTRACT.md", "reason": "Shared command lifecycle contract for maintainers of the Nook edition." },
-    { "source": "SLACK-IMPORT.md", "reason": "Detailed importer behavior and limits for operators; Moving in from Slack gives the product overview and links here." },
-    { "source": "TARGET.md", "reason": "Internal product target and maturity framing for maintainers." }
+    {
+      "source": "DEMO.md",
+      "reason": "Maintainer instructions for isolated local and hosted demo operation."
+    },
+    {
+      "source": "ACCEPTANCE.md",
+      "reason": "Maintainer release evidence and verification boundaries, including what has not yet been proven (hosted operation, live mail, mobile push, accessibility audit). Kept out of the owner-facing guides."
+    },
+    {
+      "source": "AGENTS.md",
+      "reason": "Contributor and coding-agent instructions for maintaining Nook."
+    },
+    {
+      "source": "CHANGELOG.md",
+      "reason": "Maintainer release history; user guides describe current behavior."
+    },
+    {
+      "source": "CLAUDE.md",
+      "reason": "A compatibility pointer to AGENTS.md for coding agents."
+    },
+    {
+      "source": "CONTRACT.md",
+      "reason": "Maintainer-facing product guarantees and implementation obligations."
+    },
+    {
+      "source": "IMPORT-APPLY.md",
+      "reason": "Maintainer record of the import apply boundary and evidence."
+    },
+    {
+      "source": "IMPORT-CONTRACT.md",
+      "reason": "Maintainer contract for the import adapter and proof."
+    },
+    {
+      "source": "OPERATIONS.md",
+      "reason": "Detailed operator and recovery procedures; Backups and export summarizes the user steps."
+    },
+    {
+      "source": "README.md",
+      "reason": "Repository and developer orientation; Overview is the public user introduction."
+    },
+    {
+      "source": "RUN-LOCALLY.md",
+      "reason": "Complete local command reference for maintainers; Install gives the first-run path."
+    },
+    {
+      "source": "SEED-COMMAND-CONTRACT.md",
+      "reason": "Shared command lifecycle contract for maintainers of the Nook edition."
+    },
+    {
+      "source": "SLACK-IMPORT.md",
+      "reason": "Detailed importer behavior and limits for operators; Moving in from Slack gives the product overview and links here."
+    },
+    {
+      "source": "TARGET.md",
+      "reason": "Internal product target and maturity framing for maintainers."
+    },
+    {
+      "source": "docs/CLAIMS.md",
+      "reason": "Maintainer implementation claims and bounded verification scope; user instructions are in Attention."
+    }
   ]
 }

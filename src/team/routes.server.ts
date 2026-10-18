@@ -1,3 +1,4 @@
+import {reminderPreview,createReminder,listReminders,changeReminder} from '../reminders/service'
 import {listSchedules,createSchedule,changeSchedule,schedulePreview,scheduleOccurrences,scheduleAudience} from '../scheduled/service'
 import {convertGroup} from './group-conversion.server'
 import {setSavedReminder} from './saved-reminders.server'
@@ -14,6 +15,12 @@ import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
+ if(parts[1]==='reminders'){
+  if(parts.length===3&&parts[2]==='preview'&&method==='POST')return Response.json(await reminderPreview(c,input))
+  if(parts.length===2&&method==='POST')return Response.json(await createReminder(c,input))
+  if(parts.length===2&&method==='GET')return Response.json(await listReminders(c,url.searchParams.get('after')??''))
+  if(parts.length===3&&method==='PATCH')return Response.json(await changeReminder(c,parts[2],input))
+ }
  if(parts[1]==='scheduled'){
   if(parts.length===4&&parts[3]==='occurrences'&&method==='GET')return Response.json(await scheduleOccurrences(c,parts[2],url.searchParams.get('after')??''))
   if(parts.length===2&&method==='GET')return Response.json(await listSchedules(c,url.searchParams.get('after')??''))

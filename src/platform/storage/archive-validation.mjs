@@ -1,3 +1,4 @@
+import {validateReminders} from '../../reminders/archive.mjs';
 import {validateSchedules} from '../../scheduled/archive.mjs';
 import {conversionArchive} from '../../team/group-conversion-archive.mjs';
 import { sourceActorId, sourceFileRefs } from '../../imports/slack-records.mjs';
@@ -40,6 +41,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const actors=index(rows('actors'),a=>a.id,'duplicate_actor'),conv=index(rows('conversations'),c=>c.id,'duplicate_conversation'),msg=index(rows('messages'),m=>m.id,'duplicate_message'),out=index(rows('outcomes'),o=>o.id,'duplicate_outcome'),files=index(rows('attachments'),a=>a.id,'duplicate_attachment');
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
  await validateDefaultChannels(readTable,manifest,actors,conv);
+ await validateReminders(readTable,manifest,actors,conv,msg);
  await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});
  const scheduledFiles=await validateSchedules(readTable,manifest,{actors,conversations:conv,messages:msg,attachments:files});
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');

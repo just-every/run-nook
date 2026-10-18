@@ -13,6 +13,7 @@ export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceServic
  const e=edge as any;return [e.table,[...e.key],e.where??Object.keys(e.on).map(key=>key+'=?').join(' AND '),(e.params??Object.keys(e.on)).map(()=>target)]
  })
  result.push(sql("UPDATE nook_schedules SET state='failed',version=version+1,reason='A mentioned person was erased; review recipients before rescheduling',payload=json_set(payload,'$.mentions',json((SELECT json_group_array(value) FROM json_each(payload,'$.mentions') WHERE value<>?)),'$.urgent',json('false'),'$.urgentReason',NULL),definition=json_set(definition,'$.payload.mentions',json((SELECT json_group_array(value) FROM json_each(definition,'$.payload.mentions') WHERE value<>?)),'$.payload.urgent',json('false'),'$.payload.urgentReason',NULL) WHERE EXISTS(SELECT 1 FROM json_each(payload,'$.mentions') WHERE value=?)",target,target,target))
+ result.push(...await fencedRows(c,f,'nook_reminder_occurrences',['reminder','due'],'reminder IN (SELECT id FROM nook_reminders WHERE user=? OR recipient=?)',[target,target]),sql('DELETE FROM nook_reminder_occurrences WHERE reminder IN (SELECT id FROM nook_reminders WHERE user=? OR recipient=?)',target,target))
  result.push(sql('DELETE FROM nook_schedule_occurrences WHERE schedule IN (SELECT id FROM nook_schedules WHERE user=?)',target))
  for(const [table,keys,where,params] of edges)result.push(...await fencedRows(c,f,table,keys,where,params),sql(`DELETE FROM ${table} WHERE ${where}`,...params))
  // A redacted pin remains portable under its real primary key. Fence the old

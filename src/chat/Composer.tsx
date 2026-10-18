@@ -1,3 +1,4 @@
+import {useTeamBindings} from '../team/TeamBindings'
 import {useEffect,useId,useRef,useState} from 'react'
 import {api,ApiError} from './api'
 import type {Person} from './types'
@@ -7,6 +8,7 @@ import {IconAttach,IconClose,IconMention} from './icons'
 import {blankDraft,clearSentDraft,draftKey,readDraft,recordSendFailure,writeDraft,type Draft} from './drafts'
 import {MESSAGE_LIMIT} from '../family/team-chat/domain'
 export function Composer({restricted=false,user,conversation,name,parent,members,privateSignal,viewCurrent,beginWrite,sendMessage,onSent,onError,onSchedule}:{onSchedule?:(draft:{body:string;parent:string|null;mentions:string[];urgent:boolean;urgentReason:string|null;files:Draft['files']},saved:()=>void)=>void;restricted?:boolean;user:Person;conversation:string;name:string;parent:string|null;members:Person[];privateSignal:AbortSignal;viewCurrent:()=>boolean;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onSent:()=>Promise<void>;onError:(e:unknown)=>void}) {
+ const team=useTeamBindings()
  const [override,setOverride]=useState(false)
  const fieldId=useId()
  const scope={user:user.id,conversation,parent},key=draftKey(scope)
@@ -26,6 +28,7 @@ export function Composer({restricted=false,user,conversation,name,parent,members
  const upload=useAttachmentUpload({conversation,isCurrent:active,getPending:()=>draftRef.current.upload,getCount:()=>draftRef.current.files.length,onPending:pending=>{if(!save({...draftRef.current,upload:pending},Boolean(pending))&&pending)throw Error('Upload was not started because its retry intent could not be saved in this browser.')},onUploaded:file=>save({...draftRef.current,upload:null,files:[...draftRef.current.files,file]}),onError})
  async function send(){
   if(!active()||sending.current||upload.isBusy()||draftRef.current.upload)return
+  if(/^\/remind\b/i.test(draftRef.current.body)){team.onReminderCommand?.(draftRef.current.body,()=>save(blankDraft()));return}
   const current=draftRef.current,pending=current.pending||{body:current.body,intent:crypto.randomUUID(),parent,attachments:current.files.map(f=>f.id),mentions:current.recipient?[current.recipient]:[],urgent:current.urgent,urgentReason:current.urgent?current.reason:null,...(override?{adminOverride:true as const}:{})}
   if(!pending.body.trim()||pending.body.length>MESSAGE_LIMIT)return
   if(!save({...current,pending,delivery:'pending',failure:''},true))return

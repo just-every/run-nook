@@ -16,9 +16,10 @@ export function AttentionView({attention,user,conversations,onOpen,onAction,onDi
   </div>
   {attention.deferredCount>0&&<p className="muted">{attention.deferredCount} saved for later.</p>}
   <ReminderCards items={attention.reminders?.items??[]} hasMore={!!attention.reminders?.hasMore} onOpen={onOpen} mutate={mutate}/>
+  {attention.personalReminders?.map(r=><article className="attention-card" key={r.id} aria-label="Personal reminder"><div className="attention-context">Reminder · {new Date(r.next_due).toLocaleString('en-US',{timeZone:r.zone})} · {r.zone}</div><p className="message-body">{r.text}</p><div className="card-actions"><button className="soft-button" onClick={()=>act('reminders/'+r.id,{version:r.version,action:'complete'},'PATCH')}>Complete reminder</button><button className="soft-button" onClick={()=>act('reminders/'+r.id,{version:r.version,action:'snooze',until:Date.now()+20*60000},'PATCH')}>Snooze 20 minutes</button>{r.conversation&&r.source&&r.source_kind==='message'&&<button className="soft-button" onClick={()=>onOpen(r.conversation!,r.source)}>Open source</button>}</div></article>)}
   {attention.items.map(item=><article key={item.id} id={'attention-'+item.id} className="attention-card reveal-host"><div className="attention-context">{conversations.find(c=>c.id===item.conversation)?.name||'Conversation'} · <span>{reasonText(item)}</span></div>
    {item.outcome?<OutcomeCard outcome={item.outcome} user={user} onAction={onAction} onDiscuss={onDiscuss} onRevise={onRevise}>{triage(item)}</OutcomeCard>:<><p className="message-body">{item.message?.deleted?'Message deleted':item.message?.body||'This message is no longer available.'}</p>{item.message?.urgentReason&&<p className="urgent-reason">{item.message.urgentReason}</p>}<div className="card-actions"><button className="soft-button" onClick={()=>discuss(item)}>Discuss</button>{triage(item)}</div></>}
   </article>)}
-  {!attention.items.length&&!attention.reminders?.items.length&&<div className="empty-state"><NookMark/><h3>You're all caught up</h3><p>New requests and replies will appear here.</p></div>}
+  {!attention.items.length&&!attention.reminders?.items.length&&!attention.personalReminders?.length&&<div className="empty-state"><NookMark/><h3>You're all caught up</h3><p>New requests and replies will appear here.</p></div>}
  </div></section>
 }

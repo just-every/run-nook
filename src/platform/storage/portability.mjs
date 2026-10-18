@@ -14,6 +14,7 @@ export const normalizedPortability={
   if(table==='nook_storage'&&(row.authority!=='normalized'||row.phase!=='ready'))throw Error('storage_not_ready');
   if(table==='nook_attachments'&&row.state==='reserved'||table==='nook_imports'&&row.state!=='complete'||table==='nook_object_deletes'||table==='nook_upload_attempts')throw Error('reconcile_pending_object_work_before_export');
   if(table==='nook_actors'&&(!row.email||!row.role))throw Error('offline_identity_recovery_required');
+  if(table==='nook_reminders'&&row.state==='pending')return {...row,state:'paused',reason:'Restored reminder: review a future time before resuming'};
   if(table==='nook_schedules'&&row.state==='active')return {...row,state:'paused',reason:'Restored schedule: review a future time before resuming'};
   return slackExportRow(table,row);
  },

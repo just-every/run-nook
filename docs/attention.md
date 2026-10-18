@@ -42,3 +42,19 @@ Push waits while a Nook page is visibly active and has a fresh heartbeat. Hidden
 Open **Threads** to see discussions you started, replied to, were mentioned in or explicitly followed. Both people in a one-to-one DM follow its threads automatically. Imported history creates no follows; replying to an imported thread starts following it.
 
 Reply inline or open the full discussion. **Mark thread read** clears that thread’s unread replies on your other sessions without closing Attention or reading another thread. **Unfollow thread** stays in effect after later mentions; replying yourself follows it again. A muted conversation appears here only for threads you explicitly follow. Removing channel access removes its threads at the next refresh.
+
+## Personal and channel reminders
+
+Open **Reminders** in the sidebar or **You → Reminders** on a phone. You can also type `/remind` in a conversation, choose **Remind me** from a message’s menu, or **Remind me about file** beside a file.
+
+Enter a target, text and time, then choose **Preview reminder**. For example:
+
+- `/remind me in 20 minutes to call Ana`
+- `/remind #standup "Post your update" every weekday at 9am`
+- `/remind me tomorrow at 9am to send the deck`
+
+Choose your IANA time zone and confirm the displayed audience, date and recurrence. Date-only phrases use 9am. Unknown phrases save nothing. Recurrence keeps its declared local clock across daylight saving; monthly reminders skip months without their chosen day.
+
+Personal reminders appear in Attention when due; quiet time holds them. Channel reminders post to current members and can be inspected by those members before delivery. Reminding another person requires a current channel-management role and their current membership. Reminders persist without an open page. Removed access, unavailable sources or posting restrictions produce a visible failure. A channel reminder more than 15 minutes late is held for review rather than posted after an outage.
+
+Edit, snooze for 20 minutes, complete or cancel from Reminders. Completing a reminder changes no commitment or message read state. Sources are links, with no captured message body or file bytes. Restored pending reminders are paused; edit and confirm a future time before they resume.
