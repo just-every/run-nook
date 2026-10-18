@@ -244,6 +244,24 @@
       "name": "0039_sent_messages.sql",
       "sha256": "b6469b66037634f7138768e1cf5508bf143075b0a608211a157bec6924ad5844",
       "sql": "-- Personal sent history seeks by author and time without scanning team history.\nCREATE INDEX nook_personal_sent ON nook_messages(author,created DESC,id DESC) WHERE deleted=0;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0040_profiles.sql",
+      "sha256": "08ba62d3fe12d0feafeae5960a88d4f4dfa53384f2638e4a325a6b71add1c1c8",
+      "sql": "CREATE TABLE nook_profiles(\n user TEXT PRIMARY KEY,presence_enabled INTEGER NOT NULL DEFAULT 1 CHECK(presence_enabled IN (0,1)),typing_enabled INTEGER NOT NULL DEFAULT 1 CHECK(typing_enabled IN (0,1)),zone TEXT NOT NULL DEFAULT 'UTC',\n status_emoji TEXT NOT NULL DEFAULT '',status_text TEXT NOT NULL DEFAULT '',status_expires INTEGER,\n version INTEGER NOT NULL DEFAULT 1,updated INTEGER NOT NULL\n);\nCREATE INDEX nook_profile_expiry ON nook_profiles(status_expires) WHERE status_expires IS NOT NULL;\nCREATE TABLE nook_profile_fields(\n id TEXT PRIMARY KEY,label TEXT NOT NULL,type TEXT NOT NULL CHECK(type IN ('text','phone','date')),\n visibility TEXT NOT NULL CHECK(visibility IN ('members','shared-conversation','admins','self')),\n position INTEGER NOT NULL,version INTEGER NOT NULL DEFAULT 1\n);\nCREATE TABLE nook_profile_values(user TEXT NOT NULL,field TEXT NOT NULL REFERENCES nook_profile_fields(id) ON DELETE CASCADE,value TEXT NOT NULL,PRIMARY KEY(user,field));\nCREATE INDEX nook_profile_value_field ON nook_profile_values(field,user);\nCREATE TABLE nook_profile_field_actions(id TEXT PRIMARY KEY,actor TEXT,created INTEGER NOT NULL,fields INTEGER NOT NULL);\nINSERT INTO nook_profile_fields(id,label,type,visibility,position) VALUES\n ('title','Title','text','members',0),('department','Department','text','members',1),\n ('phone','Phone','phone','shared-conversation',2),('manager','Manager','text','members',3),\n ('location','Location','text','members',4),('pronouns','Pronouns','text','members',5),\n ('start-date','Start date','date','self',6);\nCREATE TRIGGER nook_profile_identity_deleted AFTER DELETE ON nook_actors BEGIN\n DELETE FROM nook_profiles WHERE user=OLD.id;\n DELETE FROM nook_profile_values WHERE user=OLD.id;\n UPDATE nook_profile_field_actions SET actor=NULL WHERE actor=OLD.id;\nEND;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0041_personal_workspace.sql",
+      "sha256": "c1875e9389345e95cffd17a9a9dc51d8444d75d2635218bd7ba0efc5d3524693",
+      "sql": "-- Private sidebar arrangement never grants conversation or installation access.\nCREATE TABLE nook_personal_conversations(user TEXT NOT NULL,conversation TEXT NOT NULL,section TEXT NOT NULL,position INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(user,conversation));\nCREATE TABLE nook_personal_installations(user TEXT NOT NULL,origin TEXT NOT NULL,label TEXT NOT NULL,PRIMARY KEY(user,origin));\nCREATE TRIGGER nook_personal_actor_deleted AFTER DELETE ON nook_actors BEGIN\n DELETE FROM nook_personal_conversations WHERE user=OLD.id;\n DELETE FROM nook_personal_installations WHERE user=OLD.id;\nEND;\nCREATE TRIGGER nook_personal_conversation_deleted AFTER DELETE ON nook_conversations BEGIN DELETE FROM nook_personal_conversations WHERE conversation=OLD.id; END;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0042_typing.sql",
+      "sha256": "ac4c96c42fdbd903b6be1cffff8e117b13a0d55a765fa17b2cd5dd322fdb1ae4",
+      "sql": "-- Advisory, session-bound state. This table is intentionally not portable.\nCREATE TABLE nook_typing(\n session TEXT NOT NULL,page TEXT NOT NULL,user TEXT NOT NULL,conversation TEXT NOT NULL,expires INTEGER NOT NULL,\n PRIMARY KEY(session,page)\n);\nCREATE INDEX nook_typing_conversation ON nook_typing(conversation,expires,user);\nCREATE INDEX nook_typing_expiry ON nook_typing(expires);\nCREATE TRIGGER nook_typing_session_deleted AFTER DELETE ON oa_sessions BEGIN\n DELETE FROM nook_typing WHERE session=OLD.id;\nEND;\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

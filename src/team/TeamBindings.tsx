@@ -1,7 +1,7 @@
 import {createContext,useCallback,useContext,useRef} from 'react'
 import {ApiError} from '../chat/api'
 import type {TeamRequest} from './types'
-type Bindings={onReminder?:(source:string,sourceKind:'message'|'attachment')=>void;onReminderCommand?:(phrase:string,onSaved:()=>void)=>void;request:TeamRequest;accessEpoch:number;revision:number;onDenied:()=>void}
+type Bindings={channels:import('../chat/types').Conversation[];onCommand?:(body:string,onSaved:()=>void)=>Promise<boolean>;onReminder?:(source:string,sourceKind:'message'|'attachment')=>void;onReminderCommand?:(phrase:string,onSaved:()=>void)=>void;request:TeamRequest;accessEpoch:number;revision:number;onDenied:()=>void}
 export const TeamBindings=createContext<Bindings|null>(null)
 export function useTeamBindings(){const value=useContext(TeamBindings);if(!value)throw Error('Team bindings unavailable');return value}
 export function useTeamRequest(accessEpoch:number,onError:(error:unknown)=>void):TeamRequest{

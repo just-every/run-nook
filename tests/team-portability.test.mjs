@@ -5,7 +5,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {recoverNormalized} from '../scripts/storage/recover-identities.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {teamFixture} from './team-sql-support.mjs';
+import {teamFixture,migrationHistory} from './team-sql-support.mjs';
 import {createPortability,readArchive,makePart} from '../src/base/modules/portability/index.mjs';
 import {ArchiveVerifier,ContentVerifier} from '../src/base/modules/portability/format.mjs';
 import {validateTeamArchive} from '../src/team/portability.mjs';
@@ -32,6 +32,9 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_posting_policy VALUES('review','selected','same')").run();
   f.db.prepare("INSERT INTO nook_posting_people VALUES('review',?)").run(f.owner.operatorId);
   f.db.prepare("INSERT INTO nook_saved_reminders VALUES('save-live',?,?,'America/New_York','pending',NULL,?)").run(f.owner.operatorId,Date.now()+86400000,Date.now());
+  f.db.prepare("INSERT INTO nook_profiles(user,zone,status_text,status_expires,updated) VALUES(?,'America/Los_Angeles','Customer launch',?,?)").run(guest,Date.now()+1800000,Date.now());
+  f.db.prepare("INSERT INTO nook_profile_values VALUES(?,'department','Customer success')").run(guest);
+  f.db.prepare("INSERT INTO nook_personal_conversations VALUES(?,'review','Customers',2)").run(guest);
   const read=async table=>f.db.prepare('SELECT * FROM '+table).all();
   await validateTeamArchive({read});
   await assert.rejects(validateTeamArchive({read:async table=>table==='nook_guest_grants'?[{user:guest,conversation:'launch'}]:read(table)}),/invalid_guest_scope/);
@@ -64,6 +67,9 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_attachments VALUES('dm-deleted-file','old-dm',?,NULL,'','application/octet-stream',0,NULL,0,'deleted',?,NULL,'dm-upload',NULL)").run(creator,now);
   assert.equal((await f.call('/auth/operator/status',{operatorId:creator,status:'inactive'},f.ownerCookie)).status,200);
   await restoredArchive(await exportedArchive(f),{inspect:target=>{
+   assert.equal(target.db.prepare('SELECT zone FROM nook_profiles WHERE user=?').get(guest).zone,'America/Los_Angeles');
+   assert.equal(target.db.prepare("SELECT value FROM nook_profile_values WHERE user=? AND field='department'").get(guest).value,'Customer success');
+   assert.equal(target.db.prepare("SELECT section FROM nook_personal_conversations WHERE user=? AND conversation='review'").get(guest).section,'Customers');
    assert.deepEqual(target.db.prepare('SELECT id,target FROM nook_saved_items ORDER BY seq').all().map(row=>({...row})),[{id:'save-live',target:'m'},{id:'save-unavailable',target:'erased-source'}]);
    assert.equal(target.db.prepare("SELECT time_zone FROM nook_saved_reminders WHERE saved='save-live'").get().time_zone,'America/New_York');
    assert.equal(target.db.prepare("SELECT level FROM nook_posting_policy WHERE conversation='review'").get().level,'selected');
@@ -176,7 +182,7 @@ async function exportedArchive(f,bucket=emptyBucket){
 }
 async function restoredArchive(records,{inspect,rejection,label,bucket=emptyBucket}={}){
  const target=await teamFixture({bootstrap:false});try{
-  const importer=await createPortability({db:target.adapter,buckets:{FILES:bucket},policy});let importId,closing;
+  const importer=await createPortability({db:target.adapter,buckets:{FILES:bucket},policy,migrations:migrationHistory(policy)});let importId,closing;
   const source=new Blob([records.map(record=>JSON.stringify(record)).join('\n')+'\n']).stream();
   for await(const record of readArchive(source)){if(record.kind==='manifest')importId=await importer.imports.create(record);else if(record.kind==='part')await importer.imports.uploadPart(importId,record.index,record);else closing=record}
   const finalize=()=>importer.imports.finalize(importId,{contentHash:closing.contentHash,archiveHash:closing.archiveHash});

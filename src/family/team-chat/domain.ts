@@ -9,7 +9,7 @@ export const MESSAGE_LIMIT = 40000
 export const messageBody = (value:unknown):string => {
  if(typeof value!=='string'||!value.trim())return fail(400,'Invalid text')
  if(value.length>MESSAGE_LIMIT)return fail(400,'message_too_long')
- return value.trim()
+ return value
 }
 export type User = { id: string; name: string; active: boolean; email?: string; role?: 'owner'|'admin'|'member'; salt?: string; hash?: string; algorithm?: 'pbkdf2'|'scrypt' }
 export type Identity = Pick<User, 'id' | 'name'>

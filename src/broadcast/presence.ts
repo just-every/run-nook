@@ -5,7 +5,7 @@ export async function broadcastPresence(c:Context,input:Record<string,unknown>){
  try{new Intl.DateTimeFormat('en',{timeZone:input.zone as string})}catch{fail(400,'Choose a valid time zone')}
  await c.batch([
   c.sql('DELETE FROM nook_broadcast_presence WHERE session=? AND page=?',c.session.id,input.page),
-  ...(input.visible?[c.sql('INSERT INTO nook_broadcast_presence VALUES(?,?,?,?)',input.page,c.uid,c.session.id,Date.now())]:[]),
+  ...(input.visible?[c.sql('INSERT INTO nook_broadcast_presence SELECT ?,?,?,? WHERE COALESCE((SELECT presence_enabled FROM nook_profiles WHERE user=?),1)=1',input.page,c.uid,c.session.id,Date.now(),c.uid)]:[]),
   c.sql('INSERT INTO nook_broadcast_choices(user,zone,away) VALUES(?,?,COALESCE(?,0)) ON CONFLICT(user) DO UPDATE SET zone=excluded.zone,away=COALESCE(?,away)',c.uid,input.zone,input.away===undefined?null:Number(input.away),input.away===undefined?null:Number(input.away)),
   c.sql('DELETE FROM nook_broadcast_presence WHERE heartbeat<?',Date.now()-600000),
  ])

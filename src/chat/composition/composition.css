@@ -1,0 +1,33 @@
+.nook-app .composer { grid-template-areas: "routing routing routing routing" "mentions mentions mentions mentions" "staged staged staged staged" "tools tools tools tools" "text attach options send" "preview preview preview preview" "commands commands commands commands" "schedule schedule schedule schedule" "notes notes notes notes"; }
+.nook-app .composition-mentions { grid-area: mentions; display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: var(--fs-meta); }
+.nook-app .composition-mentions > span { display: inline-flex; align-items: center; gap: 6px; }
+.nook-app .composition-tools { grid-area: tools; min-width: 0; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .composition-tools > summary { width: fit-content; cursor: pointer; padding: 4px 0; }
+.nook-app .composition-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; padding-bottom: 6px; }
+.nook-app .composition-toolbar .text-button { font-size: var(--fs-meta); }
+.nook-app .composition-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.nook-app .composition-pickers { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.nook-app .composition-pickers input { min-width: 100px; max-width: 100%; }
+.nook-app .composition-pickers > div { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px 12px; max-height: 160px; overflow: auto; }
+.nook-app .composition-emoji { display: flex; flex-wrap: wrap; padding-block: 4px; }
+.nook-app .composition-preview { grid-area: preview; min-width: 0; max-height: 28vh; overflow: auto; border-top: 1px solid var(--line); padding: 6px 8px 6px 0; }
+.nook-app .composition-preview > summary { cursor: pointer; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .formatted-text { overflow-wrap: anywhere; white-space: normal; }
+.nook-app .formatted-text > :first-child { margin-top: 0; }
+.nook-app .formatted-text > :last-child { margin-bottom: 0; }
+.nook-app .formatted-text p { white-space: pre-wrap; margin-block: 6px; }
+.nook-app .formatted-text pre, .nook-app .text-preview pre { white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid var(--line); border-radius: var(--s1); background: var(--wash); padding: 10px; font-size: 13px; }
+.nook-app .formatted-text code { font-family: ui-monospace, monospace; background: var(--wash); padding: 1px 3px; border-radius: 3px; }
+.nook-app .formatted-text pre code { padding: 0; }
+.nook-app .formatted-text blockquote { margin: 6px 0; padding-left: 12px; border-left: 3px solid var(--line); color: var(--ink-soft); }
+.nook-app .formatted-text ul, .nook-app .formatted-text ol { margin-block: 6px; padding-left: 24px; }
+.nook-app .formatted-text a { text-decoration: underline; text-underline-offset: 2px; }
+.nook-app .literal-text { white-space: pre-wrap; }
+.nook-app .text-preview { flex-basis: 100%; min-width: 0; width: 100%; font-size: var(--fs-meta); }
+.nook-app .text-preview summary { cursor: pointer; color: var(--ink-soft); }
+.nook-app .text-preview pre { max-height: 320px; overflow: auto; }
+.nook-app .long-message-actions { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-block: 6px; }
+.nook-app .composer .builtin-suggestions { grid-area: commands; }
+
+.nook-app .composer{max-height:72dvh;overflow-y:auto}.nook-app .composer textarea{max-height:25dvh}.nook-app .composition-pickers input{border:1px solid var(--line-field);border-radius:var(--r-control);padding:8px 10px;background:var(--surface-raised);font:inherit}.nook-app .builtin-suggestions .soft-button{justify-content:flex-start;flex-wrap:wrap;text-align:left}@media(max-width:600px){.nook-app .composer{max-height:65dvh}}
+.nook-app .composer{grid-template-rows:repeat(9,max-content);align-content:start}

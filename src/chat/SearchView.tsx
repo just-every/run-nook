@@ -13,7 +13,7 @@ function highlight(text:string,query:string) {
 }
 type Props={conversations:Conversation[];users:Person[];user:Person;query:string;revision:number;privateSignal:AbortSignal;onQuery:(q:string)=>void;onOpen:(conversation:string,focus:string,thread:string|null)=>void;onError:(e:unknown)=>void}
 export function SearchView({query,revision,privateSignal,conversations,users,user,onQuery,onOpen,onError}:Props) {
- const zone=Intl.DateTimeFormat().resolvedOptions().timeZone,searchUrl='search?timeZone='+encodeURIComponent(zone)+'&q='
+ const zone=user.zone??Intl.DateTimeFormat().resolvedOptions().timeZone,searchUrl='search?timeZone='+encodeURIComponent(zone)+'&q='
  const fieldId=useId(),[input,setInput]=useState(queryParts(query).filter(part=>!isModifier(part)).join(' ')),[filters,setFilters]=useState<SearchFilters>(emptyFilters),[page,setPage]=useState<SearchPage|null>(null),[loading,setLoading]=useState(false)
  const current=usePrivateScope(privateSignal,'search:'+query)
  useEffect(()=>{setInput(queryParts(query).filter(part=>!isModifier(part)).join(' '))},[query])

@@ -1,3 +1,4 @@
+import {visibleIdentity,productAccess} from '../../team/access'
 // Personal choices change no conversation event frontier. Include their values
 // so open sessions refresh Threads, badges and notification settings together.
 export const attentionSignature=`WITH viewer AS (SELECT ? AS user), quiet AS (SELECT ? AS user)
@@ -7,4 +8,4 @@ export const attentionSignature=`WITH viewer AS (SELECT ? AS user), quiet AS (SE
  (SELECT json_group_array(json_array(message,source)) FROM (SELECT * FROM nook_thread_follows WHERE user=(SELECT user FROM viewer) ORDER BY message))||'|'||
  (SELECT json_group_array(message) FROM (SELECT * FROM nook_thread_unfollows WHERE user=(SELECT user FROM viewer) ORDER BY message))||'|'||
  (SELECT json_group_array(json_array(saved,due,state,updated)) FROM (SELECT * FROM nook_saved_reminders WHERE user=(SELECT user FROM viewer) ORDER BY saved))||'|'||
- (SELECT json_group_array(json_array(message,seq)) FROM (SELECT * FROM nook_thread_reads WHERE user=(SELECT user FROM viewer) ORDER BY message)) AS v`
+ (SELECT json_group_array(json_array(message,seq)) FROM (SELECT * FROM nook_thread_reads WHERE user=(SELECT user FROM viewer) ORDER BY message))||'|'||(SELECT json_group_array(json_array(p.user,p.updated,CASE WHEN p.status_expires>CAST(unixepoch('subsec')*1000 AS INTEGER) THEN p.status_expires ELSE NULL END)) FROM nook_profiles p WHERE ${visibleIdentity('(SELECT user FROM viewer)','p.user')} AND ${productAccess('p.user')})||'|'||(SELECT json_group_array(json_array(id,version,visibility)) FROM nook_profile_fields)||'|'||(SELECT json_group_array(json_array(conversation,section,position)) FROM nook_personal_conversations WHERE user=(SELECT user FROM viewer)) AS v`

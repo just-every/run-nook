@@ -1,3 +1,4 @@
+import {builtins} from '../commands/catalog'
 import {useEffect,useRef,useState} from 'react'
 import type {Conversation,LocationState,Person,Screen} from './types'
 import type {TeamRequest} from '../team/types'
@@ -36,5 +37,5 @@ export function QuickNavigation(props:Props){
 function ShortcutSheet({actions,close,command}:{actions:{label:string;keys:string;run:()=>void}[];close:()=>void;command:string}){
  const dialog=useRef<HTMLDialogElement>(null)
  useEffect(()=>{const trigger=document.activeElement as HTMLElement;dialog.current?.showModal();return()=>{if(trigger?.isConnected)trigger.focus({preventScroll:true})}},[])
- return <dialog ref={dialog} className="quick-switcher" aria-labelledby="shortcut-title" onKeyDown={containDialogFocus} onCancel={e=>{e.preventDefault();close()}}><div className="dialog-heading"><h2 id="shortcut-title">Keyboard shortcuts</h2><button className="icon-button" aria-label="Close" onClick={close}><IconClose/></button></div><div className="shortcut-list">{actions.map(action=><button key={action.label} onClick={action.run}><span>{action.label}</span><kbd>{action.keys}</kbd></button>)}</div><p className="dialog-note">{command}/ opens this sheet. Enter sends a message; Shift Enter adds a line. Escape closes a dialog.</p></dialog>
+ return <dialog ref={dialog} className="quick-switcher" aria-labelledby="shortcut-title" onKeyDown={containDialogFocus} onCancel={e=>{e.preventDefault();close()}}><div className="dialog-heading"><h2 id="shortcut-title">Keyboard shortcuts</h2><button className="icon-button" aria-label="Close" onClick={close}><IconClose/></button></div><div className="shortcut-list">{actions.map(action=><button key={action.label} onClick={action.run}><span>{action.label}</span><kbd>{action.keys}</kbd></button>)}</div><h3>Built-in commands</h3><div className="shortcut-list">{builtins.map(([name,args,description])=><p key={name}><strong>/{name} {args}</strong> · {description}</p>)}</div><p className="dialog-note">{command}/ opens this sheet. Enter sends a message; Shift Enter adds a line. Escape closes a dialog.</p></dialog>
 }

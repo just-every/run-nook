@@ -1,3 +1,7 @@
+import {typing,updateTyping} from '../personal/typing.server'
+import {personalWorkspace,updatePersonalWorkspace} from '../personal/workspace.server'
+import {markUnread} from '../personal/mark-unread.server'
+import {readProfile,writeProfile,listPeople,listFields,writeFields} from '../profiles/server'
 import {listFiles} from '../files/server'
 import {sentMessages} from '../personal/sent.server'
 import {reminderPreview,createReminder,listReminders,changeReminder} from '../reminders/service'
@@ -17,6 +21,12 @@ import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
+ if(parts.length===4&&parts[1]==='conversations'&&parts[3]==='typing'){if(method==='GET')return Response.json(await typing(c,parts[2]));if(method==='POST')return Response.json(await updateTyping(c,parts[2],input))}
+ if(url.pathname==='/api/personal/workspace'){if(method==='GET')return Response.json(await personalWorkspace(c));if(method==='POST')return Response.json(await updatePersonalWorkspace(c,input))}
+ if(url.pathname==='/api/profile'){if(method==='GET')return Response.json(await readProfile(c,url.searchParams.get('user')??c.uid));if(method==='POST')return Response.json(await writeProfile(c,input))}
+ if(url.pathname==='/api/people'&&method==='GET')return Response.json(await listPeople(c,url.searchParams))
+ if(url.pathname==='/api/profile/fields'){if(method==='GET')return Response.json(await listFields(c));if(method==='POST')return Response.json(await writeFields(c,input))}
+ if(parts.length===4&&parts[1]==='conversations'&&parts[3]==='mark-unread'&&method==='POST')return Response.json(await markUnread(c,parts[2]))
  if(url.pathname==='/api/files'&&method==='GET')return Response.json(await listFiles(c,Object.fromEntries(url.searchParams)))
  if(parts.length===4&&parts[1]==='conversations'&&parts[3]==='files'&&method==='GET')return Response.json(await listFiles(c,{...Object.fromEntries(url.searchParams),conversation:parts[2]}))
  if(url.pathname==='/api/sent'&&method==='GET')return Response.json(await sentMessages(c,url.searchParams.get('after')??''))

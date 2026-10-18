@@ -1,0 +1,10 @@
+export type FieldVisibility='members'|'shared-conversation'|'admins'|'self'
+export type ProfileField={id:string;label:string;type:'text'|'phone'|'date';visibility:FieldVisibility;position:number;version:number}
+export type ProfileValue=ProfileField & {value:string}
+export type CustomStatus={emoji:string;text:string;expiresAt:number|null}
+export type Profile={presenceEnabled:boolean;typingEnabled:boolean;id:string;name:string;zone:string;version:number;status:CustomStatus|null;fields:ProfileValue[]}
+export type ProfileResult={profile:Profile;nextExpiry:number|null;observedAt:number}
+export type FieldResult={fields:ProfileField[];canManage:boolean}
+export type PeoplePage={items:Profile[];cursor:string|null;hasMore:boolean;nextExpiry:number|null;observedAt:number}
+export type StatusExpiry='never'|'30m'|'1h'|'4h'|'today'|'week'|'date'
+export type StatusInput={emoji:string;text:string;clearAfter:StatusExpiry;localAt?:string}

@@ -5,7 +5,7 @@ import {mkdtemp,rm,readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createPortability,readArchive} from '../src/base/modules/portability/index.mjs';
-import {teamFixture} from './team-sql-support.mjs';
+import {teamFixture,migrationHistory} from './team-sql-support.mjs';
 const require=createRequire(import.meta.url),wranglerRequire=createRequire(require.resolve('wrangler'));
 const {build}=wranglerRequire('esbuild');
 const dir=await mkdtemp(join(tmpdir(),'nook-erasure-'));
@@ -135,7 +135,7 @@ async function exported(f,bucket=f.env.FILES){
  try{while((await service.exports.advance(id,{maxParts:16})).phase==='building'){}const records=[];for await(const r of readArchive(await service.exports.download(id)))records.push(r);return records}finally{await service.exports.abort(id)}
 }
 async function restored(f,records,laterJournal,bucket=f.env.FILES){
- const service=await createPortability({db:f.adapter,buckets:{FILES:bucket},policy:portabilityPolicy}),id=await service.imports.create(records[0]);let complete=false;
+ const service=await createPortability({db:f.adapter,buckets:{FILES:bucket},policy:portabilityPolicy,migrations:migrationHistory(portabilityPolicy)}),id=await service.imports.create(records[0]);let complete=false;
  try{for(const r of records)if(r.kind==='part')await service.imports.uploadPart(id,r.index,r);await service.imports.finalize(id,{contentHash:records.at(-1).contentHash,archiveHash:records.at(-1).archiveHash,laterJournal});complete=true}finally{if(!complete)await service.imports.abort(id)}
 }
 

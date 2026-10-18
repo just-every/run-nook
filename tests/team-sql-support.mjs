@@ -1,3 +1,4 @@
+import {migrationReplay} from '../src/base/modules/portability/migration-history.mjs';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync,readdirSync} from 'node:fs';
 import {createMailSender} from '../src/base/modules/mail/index.mjs';
@@ -33,3 +34,6 @@ export async function teamFixture({bootstrap=true,database=':memory:'}={}){
  async function accept(value){return call('/auth/confirm',{token:value})}
  return {db,adapter,auth,call,request,owner,ownerCookie,plan,stepUp,invite,token,accept,close:()=>db.close()}
 }
+
+// The local restore runner supplies a replay so exact migration seed rows can be replaced.
+export const migrationHistory=policy=>async()=>migrationReplay(readdirSync(new URL('../migrations/',import.meta.url)).filter(name=>name.endsWith('.sql')).sort().map(name=>({name,statements:[readFileSync(new URL('../migrations/'+name,import.meta.url),'utf8')]})),policy);

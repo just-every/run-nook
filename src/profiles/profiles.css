@@ -1,0 +1,11 @@
+.nook-app :is(.profile-editor,.profile-field-settings) { min-width: 0; padding-block: var(--s4); border-top: 1px solid var(--line); }
+.nook-app :is(.profile-editor,.profile-field-settings) h3 { margin: 0 0 var(--s3); font-size: var(--fs-body); }
+.nook-app :is(.profile-editor,.profile-field-settings) fieldset { min-width: 0; margin: var(--s4) 0; padding: 0; border: 0; }
+.nook-app :is(.profile-editor,.profile-field-settings) legend { font-size: var(--fs-ui); font-weight: 600; }
+.nook-app .profile-editor .dialog-note { overflow-wrap: anywhere; }
+.nook-app .people-directory dl { margin: var(--s2) 0 0; }
+.nook-app .people-directory dl > div { display: flex; flex-wrap: wrap; gap: 0 var(--s2); font-size: var(--fs-meta); }
+.nook-app .people-directory dt { color: var(--ink-soft); }
+.nook-app .people-directory dd { min-width: 0; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+
+.nook-app :is(.profile-editor,.profile-field-settings) fieldset{max-height:none;overflow:visible}

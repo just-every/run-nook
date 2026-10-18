@@ -12,6 +12,9 @@ import {Avatar} from './Avatar'
 import {IconAsk,IconDecide,IconMore,IconReply} from './icons'
 import {OutcomeLines} from './OutcomeLine'
 import {useDismiss} from './useDismiss'
+import {SafeMarkdown} from './composition/SafeMarkdown'
+import {TextPreview} from './TextPreview'
+import {useInlinePreviews} from './composition/useInlinePreviews'
 type Props={message:Message;user:Person;canErase?:boolean;thread?:boolean;continued?:boolean;outcomes?:Outcome[];onOutcome?:(o:Outcome)=>void;onThread:(m:Message)=>void;onAsk:(m:Message)=>void;onDecision:(m:Message)=>void;onEdit:(m:Message)=>void;onDelete:(m:Message)=>void;onRemove:(id:string)=>void}
 const tool=(label:string,icon:ReactNode,onClick:()=>void)=><button type="button" className="icon-button" title={label} onClick={onClick}>{icon}<span className="sr-only">{label}</span></button>
 // The less common verbs sit behind one menu. It stays open while Edit or Delete is up so focus can return to the item.
@@ -31,17 +34,18 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
  const team=useTeamBindings(),[erasing,setErasing]=useState(false),eraseTrigger=useRef<HTMLButtonElement|null>(null)
  const reactions=useReactions(m.id,team.request,team.revision,team.accessEpoch,!m.immutable&&!m.deleted,m.reactions)
  const mine=!m.immutable&&m.author===user.id
+ const previews=useInlinePreviews(user.id,m.conversation)
  const time=new Date(m.created)
  return <article className={'message reveal-host'+(continued?' continued':'')+(m.deleted?' deleted':'')} id={(thread?'thread-message-':'message-')+m.id} data-message={m.id} data-immutable={m.immutable?'true':undefined} data-sequence={m.sequence} tabIndex={-1} onClick={focusRow}>
   {erasing&&<ErasureDialog kind={m.retainedSource==='native'?'message':m.immutable?'imported-message':'message'} target={m.id} returnFocus={eraseTrigger.current} request={team.request} onClose={()=>setErasing(false)} onChanged={()=>{}}/>}
   {continued?<span className="avatar-gutter" aria-hidden="true"/>:<Avatar person={{id:m.author??m.id,name:m.authorName}}/>}
   <div className="message-content"><div className="message-meta"><strong className={continued?'sr-only':undefined}>{m.authorName}</strong><time className={continued?'reveal':undefined} dateTime={m.created} title={time.toLocaleString([],{dateStyle:'full',timeStyle:'short'})}>{time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>{m.adminOverride&&!m.deleted&&<span className="edited">Admin override</span>}{m.immutable&&<span className="edited">{m.retainedSource?'Retained body · read only':'Imported · read only'}</span>}{m.version>1&&!m.deleted&&!m.retainedSource&&<span className="edited">edited</span>}</div>
-   <p className="message-body">{m.deleted?'Message deleted':m.slack?.text??m.body}</p>
+   {m.deleted?<p className="message-body">Message deleted</p>:m.immutable?<p className="message-body">{m.slack?.text??m.body}</p>:<div className="message-body"><SafeMarkdown text={m.body}/></div>}
    {!m.deleted&&<>
     {m.broadcast&&<BroadcastRecipients message={m.id} broadcast={m.broadcast}/>}
     {(m.urgent||!!m.notified?.length)&&<div className="message-routing">{m.urgent&&<strong>Urgent</strong>}{!!m.notified?.length&&<span>Notified: {m.notified.map(person=>person.name).join(', ')}</span>}{m.urgent&&m.urgentReason&&<span className="message-urgent-reason">{m.urgentReason}</span>}</div>}
     {!thread&&onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}
-    {(m.attachments||[]).map(f=><div className="file-row reveal-host" key={f.id}>{f.state==='deleted'?<span className="muted">Attachment removed</span>:<><ImagePreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/><a href={`/api/attachments/${f.id}/download`} download={f.name}><strong>{f.name}</strong><small>{Math.max(1,Math.round(f.size/1024))} KB · Download</small></a><SaveFileAction conversation={m.conversation} attachment={f.id}/>{!m.immutable&&f.author===user.id&&<button type="button" className="text-button reveal" onClick={()=>onRemove(f.id)}>Remove file</button>}</>}</div>)}
+    {(m.attachments||[]).map(f=><div className="file-row reveal-host" key={f.id}>{f.state==='deleted'?<span className="muted">Attachment removed</span>:<>{previews&&<><ImagePreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/><TextPreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/></>}<a href={`/api/attachments/${f.id}/download`} download={f.name}><strong>{f.name}</strong><small>{Math.max(1,Math.round(f.size/1024))} KB · Download</small></a><SaveFileAction conversation={m.conversation} attachment={f.id}/>{!m.immutable&&f.author===user.id&&<button type="button" className="text-button reveal" onClick={()=>onRemove(f.id)}>Remove file</button>}</>}</div>)}
     {m.immutable&&<SlackHistory history={m.slack}/>}
     {!m.immutable&&<ReactionChips reactions={reactions}/>}
    </>}

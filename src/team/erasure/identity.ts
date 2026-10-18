@@ -18,6 +18,7 @@ export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceServic
  for(const [table,keys,where,params] of edges)result.push(...await fencedRows(c,f,table,keys,where,params),sql(`DELETE FROM ${table} WHERE ${where}`,...params))
  // A redacted pin remains portable under its real primary key. Fence the old
  // checkpoint, rather than banning the anonymous row from future archives.
+ if(await c.one('SELECT 1 FROM nook_profile_field_actions WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_profile_field_actions SET actor=NULL WHERE actor=?',target))
  if(await c.one('SELECT 1 FROM nook_channel_pins WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_channel_pins SET actor=NULL WHERE actor=?',target))
  if(await c.one('SELECT 1 FROM nook_broadcast_actions WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_broadcast_actions SET actor=NULL WHERE actor=?',target))
  if(await c.one('SELECT 1 FROM nook_default_actions WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_default_actions SET actor=NULL WHERE actor=?',target))

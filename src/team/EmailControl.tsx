@@ -1,4 +1,3 @@
-import {BroadcastAvailability} from '../broadcast/Availability'
 import {useEffect,useState} from 'react'
 import type {TeamRequest} from './types'
 type Problem={error:string;retrying?:boolean;at:number}
@@ -13,7 +12,7 @@ export function EmailControl({request,initial,localDevelopment=false}:{request:T
  async function change(key:'mentions'|'broadcasts'|'urgent'|'urgentQuiet',value:boolean){setNotice('');try{setSettings(await request<Settings>('/api/notify',{method:'PATCH',body:JSON.stringify({[key]:value})}));setNotice('Email settings saved.')}catch{setNotice('Email settings were not saved.')}}
  if(!settings)return null
  const choice=(key:'mentions'|'broadcasts'|'urgent'|'urgentQuiet',label:string,disabled=false,className?:string)=><label className={className}><input type="checkbox" checked={settings[key]} disabled={disabled} onChange={event=>void change(key,event.target.checked)}/>{label}</label>
- return <><BroadcastAvailability/><section className="team-notifications email-notifications" aria-labelledby="email-notifications-title"><strong id="email-notifications-title">Email me when…</strong>
+ return <><section className="team-notifications email-notifications" aria-labelledby="email-notifications-title"><strong id="email-notifications-title">Email me when…</strong>
   {choice('mentions','Someone mentions me or asks me to take on a commitment')}
   {choice('broadcasts','Someone uses @channel, @here or @everyone')}
   {choice('urgent','Someone sends me an urgent request')}

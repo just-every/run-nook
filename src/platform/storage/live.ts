@@ -31,7 +31,7 @@ export class ChatHub extends DurableObject<StorageBindings>{
  async active(info:Subscriber){return !!await this.env.DB.prepare(`SELECT 1 WHERE ${authority} AND ${authFence}`).bind(info.id,info.uid,info.version).first()}
  async deliver(socket:WebSocket,initial=false){
   const info=socket.deserializeAttachment() as Subscriber;
-  try{if(!await this.active(info)){revokeSocket(socket,4001,'Access changed');return}const result=await this.env.DB.prepare(`SELECT c.id,c.seq FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND ${authFence} ORDER BY c.id LIMIT 1000`).bind(info.uid,info.id,info.uid,info.version).all<{id:string;seq:number}>();const current:Record<string,number|string>=Object.fromEntries(result.results.map(c=>[c.id,c.seq])),previous=await this.ctx.storage.get<Record<string,number|string>>(info.key)??{};
+  try{if(!await this.active(info)){revokeSocket(socket,4001,'Access changed');return}const result=await this.env.DB.prepare(`SELECT c.id,c.seq FROM nook_members m JOIN nook_conversations c ON c.id=m.conversation WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND ${authFence} ORDER BY c.id`).bind(info.uid,info.id,info.uid,info.version).all<{id:string;seq:number}>();const current:Record<string,number|string>=Object.fromEntries(result.results.map(c=>[c.id,c.seq])),previous=await this.ctx.storage.get<Record<string,number|string>>(info.key)??{};
    // Triage (snooze, done, quiet time) moves no conversation frontier; a changed
    // signature tells this person's open tabs to refresh their own Attention.
    const triage=await this.env.DB.prepare(attentionSignature).bind(info.uid,info.uid).first<{v:string}>();current[ATTENTION]=triage?.v??'';
