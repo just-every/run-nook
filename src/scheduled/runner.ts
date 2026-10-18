@@ -1,3 +1,5 @@
+import {broadcastKind,broadcastFence} from '../broadcast/audience'
+import {literal} from '../broadcast/policy'
 import {materializeOccurrenceFiles,cleanupOccurrenceFiles} from './files'
 import {type StorageBindings,type MessageWriter,authority} from '../platform/storage/context'
 import {messageStatements} from '../platform/storage/message-statements'
@@ -15,8 +17,9 @@ function writer(env:StorageBindings,uid:string):MessageWriter{
 export async function drainSchedules(env:StorageBindings){
  const now=Date.now(),rows=(await env.DB.prepare("SELECT * FROM nook_schedules WHERE state='active' AND next_due<=? ORDER BY next_due,id LIMIT 10").bind(now).all<Schedule>()).results
  for(const s of rows){
-  const w=writer(env,s.user),payload=JSON.parse(s.payload),id=s.conversation,parent=payload.parent
+  const w=writer(env,s.user),payload=JSON.parse(s.payload),id=s.conversation,parent=payload.parent,kind=broadcastKind(payload.body)
   const rules=[
+   ...(kind?[{sql:broadcastFence(literal(id),literal(s.user),kind,payload.confirmBroadcast===true),values:[],reason:'Broadcast policy or audience changed. Review consent before rescheduling.'}]:[]),
    {sql:`EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access a ON a.user=o.id WHERE o.id=? AND o.version=? AND o.status='active' AND a.generation=? AND ${productAccess('o.id')})`,values:[s.user,s.operator_version,s.access_generation],reason:'Your account changed or was deactivated. Review and save a new time.'},
    {sql:`EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=? AND m.user=? AND ${allowedGrant('m.user','m.conversation')})`,values:[id,s.user],reason:'You no longer have access to this conversation.'},
    {sql:channelWritable('?'),values:[id],reason:'The conversation is archived or has moved. Review its destination before rescheduling.'},
@@ -40,7 +43,7 @@ export async function drainSchedules(env:StorageBindings){
    const fileFence="NOT EXISTS(SELECT 1 FROM json_each(?) j WHERE NOT EXISTS(SELECT 1 FROM nook_attachments f WHERE f.id=j.value AND f.conversation=? AND f.author=? AND f.state='staged' AND f.expires>CAST(unixepoch('subsec')*1000 AS INTEGER)))"
    await env.DB.batch([
     guard(`${fence} AND ${rules.map(r=>'('+r.sql+')').join(' AND ')} AND ${fileFence}`,[...fenceValues,...rules.flatMap(r=>r.values),JSON.stringify(files),id,s.user]),
-    ...messageStatements(w,{id,mid,body:payload.body,parent,ids:files,attention:{mentions:payload.mentions,urgent:payload.urgent,urgentReason:payload.urgentReason},intent,payload:JSON.stringify({...payload,attachments:files}),now:new Date(now).toISOString()}),
+    ...messageStatements(w,{id,mid,confirmBroadcast:payload.confirmBroadcast===true,body:payload.body,parent,ids:files,attention:{mentions:payload.mentions,urgent:payload.urgent,urgentReason:payload.urgentReason},intent,payload:JSON.stringify({...payload,attachments:files}),now:new Date(now).toISOString()}),
     w.sql("INSERT INTO nook_schedule_occurrences VALUES(?,?,?,?,?,?,'sent',NULL,?)",s.id,s.local_at,s.version,s.next_due,s.zone,mid,now),
     ...(!local?[w.sql('INSERT OR IGNORE INTO nook_object_deletes(object_key,created) SELECT object_key,? FROM nook_schedule_files WHERE schedule=?',now,s.id),w.sql('DELETE FROM nook_schedule_files WHERE schedule=?',s.id)]:[]),
     w.sql('UPDATE nook_schedules SET local_at=?,next_due=?,state=?,payload=?,reason=NULL,updated=? WHERE id=?',local??s.local_at,nextDue,local?'active':'complete',local?s.payload:JSON.stringify({...payload,attachments:[]}),now,s.id),w.sql('DELETE FROM nook_guard WHERE id=?',key),

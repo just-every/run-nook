@@ -45,7 +45,7 @@ export function Composer({restricted=false,user,conversation,name,parent,members
    draftRef.current=blankDraft();setDraft(draftRef.current)
    try{await onSent();if(active())textarea.current?.focus()}catch(error){if(active())onError(error)}
   }catch(error){
-   if(error instanceof ApiError&&error.broadcast&&active()){save({...draftRef.current,pending,delivery:'unconfirmed',failure:''});setConfirmation(error.broadcast);return}
+   if(error instanceof ApiError&&error.broadcast&&active()){save({...draftRef.current,pending:null,delivery:'draft',failure:''});setConfirmation(error.broadcast);return}
    const refused=error instanceof ApiError&&[400,403,413,415,422].includes(error.status)
    const failure=error instanceof Error?error.message:'The message could not be sent.'
    if(!active()){if(!privateSignal.aborted)try{recordSendFailure(scope,pending.intent,failure,refused)}catch{};return}
@@ -61,7 +61,7 @@ export function Composer({restricted=false,user,conversation,name,parent,members
  useEffect(()=>{if((draft.urgent||draft.recipient)&&options.current&&!options.current.open)options.current.open=true},[draft.urgent,draft.recipient])
  const showRouting=routingOpen||draft.urgent||Boolean(draft.recipient)
  const note=upload.uploading?'Uploading…':draft.upload?'Finish the file upload to send':''
- const overlength=draft.body.length>MESSAGE_LIMIT,countId=fieldId+'-count',retry=Boolean(draft.pending)&&!busy
+ const overlength=draft.body.length>MESSAGE_LIMIT,countId=fieldId+'-count',retry=Boolean(draft.pending)&&!busy&&!confirmation
  if(restricted&&!override&&!draft.pending?.adminOverride)return <div className="archived-notice" role="status">Posting is restricted by this channel’s permissions. You can still read, react, save and follow.{(user.role==='owner'||user.role==='admin')&&<button className="text-button" onClick={()=>setOverride(true)}>Post with admin override</button>}</div>
  return <form className="composer" data-urgent={draft.urgent||undefined} onSubmit={e=>{e.preventDefault();void send()}}>
   {confirmation&&<ConfirmBroadcast preview={confirmation} onConfirm={()=>void send(true)} onCancel={()=>{setConfirmation(null);save({...draftRef.current,pending:null,delivery:'draft',failure:''});textarea.current?.focus()}}/>}

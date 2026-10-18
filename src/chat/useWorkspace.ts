@@ -32,7 +32,7 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
  const onError=useCallback((e:unknown)=>{
   if(privateSignal.aborted)return
   if(e instanceof ApiError && e.status===401){if(leaving.current)return;leaving.current=true;clearUserDrafts(initial.user.id);clearPrivate();setConversations([]);setUsers([]);sessionStorage.clear();void clearPushNotices().finally(()=>window.location.replace('/signin'));return}
-  if(e instanceof ApiError && e.status===403)clearPrivate()
+  if(e instanceof ApiError && e.status===403&&e.code!=='broadcast_forbidden')clearPrivate()
   setError(e instanceof Error?e.message:'Something went wrong. Please try again.')
  },[clearPrivate,privateSignal])
  const refresh=useCallback(async():Promise<void>=>{

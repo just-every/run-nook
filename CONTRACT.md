@@ -413,13 +413,13 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests at commit `e1f0ff866196b2818014e7d1b6214523a071ebd8` (18 October 2026).
+Judged from the code and tests at commit `f47849ee14d041b0b6e9f5cd97428c56bd98ee1f` (18 October 2026).
 
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Published | 15 | 2 | 0 | 17 |
-| Target and push further | 4 | 22 | 37 | 63 |
-| All | 19 | 24 | 37 | 80 |
+| Target and push further | 4 | 23 | 36 | 63 |
+| All | 19 | 25 | 36 | 80 |
 
 | Clause | Title | Kind | Status | Evidence | Gap |
 | --- | --- | --- | --- | --- | --- |
@@ -483,7 +483,7 @@ Judged from the code and tests at commit `e1f0ff866196b2818014e7d1b6214523a071eb
 | `NOOK-062` | Notification previews and actionable replies | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-063` | Slack-compatible webhooks and Web API | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-064` | Zapier, Make and n8n connectors | target | missing |  | No implementing source/test; acceptance journey above is pending. |
-| `NOOK-065` | Channel-wide mentions: @channel, @here and @everyone | target | missing |  | No implementing source/test; acceptance journey above is pending. |
+| `NOOK-065` | Channel-wide mentions: @channel, @here and @everyone | target | partial | `src/broadcast/audience.ts`; `src/broadcast/settings.ts`; `src/broadcast/presence.ts`; `src/platform/storage/message-statements.ts`; `src/broadcast/ConfirmBroadcast.tsx`; `tests/broadcast.mjs`; `tests/broadcast-browser.mjs`; `tests/push/broadcast.mjs`; `tests/notify/broadcast.mjs` | Web/API @channel, @here and @everyone ship with atomic saved audiences, confirmation, current-session presence/away, mandatory default-channel designation, owner/channel policy, named people, ignore/mute/quiet rules, recipient lists, email/encrypted Web Push choices and scheduled/reminder firing fences. User groups, app/webhook/workflow grants, native clients and real provider/device receipt remain unimplemented or unproven. |
 | `NOOK-066` | Channel posting permissions and announcement channels | target | partial | `src/team/posting.server.ts`; `src/team/posting-policy.ts`; `src/team/PostingSettings.tsx`; `src/platform/storage/messages.ts`; `tests/posting.mjs`; `tests/posting-browser.mjs`; `tests/team-portability.test.mjs` | Web/API announcement permissions ship for everyone, owners/admins, channel manager or named members, with independent replies, atomic send/edit fences, labelled admin override, channel audit, archive validation and erasure of named grants. User groups, broadcast policy and app/webhook/workflow/scheduler/native write-door acceptance remain missing with their underlying features. |
 | `NOOK-067` | Forwarding messages and email into conversations | target | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-068` | Safe link previews and app unfurls | target | missing |  | No implementing source/test; acceptance journey above is pending. |

@@ -1,4 +1,4 @@
-import {BroadcastRecipients} from '../broadcast/Recipients'
+import {BroadcastRecipients} from '../broadcast/BroadcastRecipients'
 import {CollectionActions,SaveFileAction} from './CollectionActions'
 import {SlackHistory} from '../imports/SlackHistory'
 import {useRef,useState} from 'react'

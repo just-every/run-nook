@@ -13,10 +13,11 @@ export async function settingsBrowser({browser,origin,rowan,sam,evidence,axeSour
   try{
    const page=await context.newPage();await page.goto(origin+'/app?view=you');
    const block=page.getByRole('region',{name:'Email me when…'});await expect(block).toBeVisible();
-   const mentions=block.getByRole('checkbox',{name:/mentions me/}),urgent=block.getByRole('checkbox',{name:/sends me an urgent request/}),through=block.getByRole('checkbox',{name:/through quiet time/});
+   const mentions=block.getByRole('checkbox',{name:/mentions me/}),broadcasts=block.getByRole('checkbox',{name:/uses @channel/}),urgent=block.getByRole('checkbox',{name:/sends me an urgent request/}),through=block.getByRole('checkbox',{name:/through quiet time/});
    if(phase==='settings'&&who==='member'&&width===1440){
     await expect(mentions).not.toBeChecked();await expect(through).toBeDisabled();
     await mentions.focus();await page.keyboard.press('Space');await expect(mentions).toBeChecked();
+    await page.keyboard.press('Tab');await expect(broadcasts).toBeFocused();
     await page.keyboard.press('Tab');await expect(urgent).toBeFocused();
     await expect.poll(async()=>(await (await context.request.get(origin+'/api/notify')).json()).mentions).toBe(true);
    }

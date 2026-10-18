@@ -1,3 +1,3 @@
 import type {Recurrence} from './time.mjs'
-export type ScheduledPayload={body:string;parent:string|null;attachments:string[];mentions:string[];urgent:boolean;urgentReason:string|null}
+export type ScheduledPayload={confirmBroadcast?:boolean;body:string;parent:string|null;attachments:string[];mentions:string[];urgent:boolean;urgentReason:string|null}
 export type ScheduledMessage={id:string;user:string;conversation:string;name:string|null;kind:string;payload:ScheduledPayload|null;local_at:string;zone:string;recurrence:Recurrence;end_date:string|null;next_due:number;state:'active'|'paused'|'cancelled'|'complete'|'failed'|'needs-review';version:number;reason:string|null;hasMoreOccurrences:boolean;files:{id:string;name:string;mime:string;size:number}[];occurrences:{local_at:string;version:number;zone:string;due:number;message:string|null;state:string;reason:string|null;completed:number}[]}

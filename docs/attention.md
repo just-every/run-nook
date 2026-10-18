@@ -58,3 +58,13 @@ Choose your IANA time zone and confirm the displayed audience, date and recurren
 Personal reminders appear in Attention when due; quiet time holds them. Channel reminders post to current members and can be inspected by those members before delivery. Reminding another person requires a current channel-management role and their current membership. Reminders persist without an open page. Removed access, unavailable sources or posting restrictions produce a visible failure. A channel reminder more than 15 minutes late is held for review rather than posted after an outage.
 
 Edit, snooze for 20 minutes, complete or cancel from Reminders. Completing a reminder changes no commitment or message read state. Sources are links, with no captured message body or file bytes. Restored pending reminders are paused; edit and confirm a future time before they resume.
+
+## Reach a channel together
+
+Use `@channel` for current channel members, or `@here` for members with a foreground heartbeat in the last ten minutes who have not set themselves away in **You → Availability**. Nook confirms a broadcast reaching six or more people, showing the current count, quiet-time count and time-zone count. The committed message keeps its recipient list; retrying does not choose a new audience.
+
+Owners set workspace broadcast policy in **Team**, and channel managers can choose an override in **Details → Channel broadcasts**. Policies allow everyone, owners/admins or named people. An owner can designate a mandatory public default channel for `@everyone`; saving the designation discloses and grants its full history to all active non-guest members. Later broadcasts never add members, and removing the mandatory default designation stops `@everyone` there.
+
+Mute and **Ignore @channel, @here and @everyone** in a conversation’s notification settings suppress broadcasts. Quiet time defers them, with no urgent bypass. Email and Web Push each have their own broadcast choice in **You**, initially following the corresponding mention choice. A conversation set to Nothing sends no external alert. Ordinary message reads and work acceptance remain independent.
+
+Scheduled messages and channel reminders show broadcast consent before saving. Membership, audience size, broadcast policy and posting permission are checked again at each occurrence. A changed policy produces a visible failed occurrence for review. User groups, app/webhook/workflow transports, native clients and real-device receipt remain outside the current evidence.

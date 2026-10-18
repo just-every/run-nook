@@ -1,3 +1,4 @@
+import {ScheduledBroadcast} from '../broadcast/ScheduledBroadcast'
 import {useEffect,useId,useRef,useState} from 'react'
 import type {FormEvent} from 'react'
 import {api} from '../chat/api'
@@ -32,6 +33,7 @@ function existingPhrase(item:Reminder){
 export function ReminderEditor({conversation,source,sourceKind,initialPhrase,existing,privateSignal,onSaved}:Props){
  const [phrase,setPhrase]=useState(initialPhrase??(existing?existingPhrase(existing):'')),[zone,setZone]=useState(existing?.zone??Intl.DateTimeFormat().resolvedOptions().timeZone)
  const [preview,setPreview]=useState<ReminderPreview|null>(null),[busy,setBusy]=useState<'preview'|'save'|null>(null),[error,setError]=useState('')
+ const [confirmBroadcast,setConfirmBroadcast]=useState(false)
  const [members,setMembers]=useState<{id:string;name:string}[]>([])
  const intent=useRef(crypto.randomUUID()),request=useRef(0),fieldId=useId()
  const current=usePrivateScope(privateSignal,'reminder-editor:'+(existing?.id??source??conversation??'personal'))
@@ -52,7 +54,7 @@ export function ReminderEditor({conversation,source,sourceKind,initialPhrase,exi
   if(!current()||!preview||busy)return
   setBusy('save');setError('')
   try{
-   const definition={phrase,zone,confirmedDue:preview.due,...(conversation?{conversation}:{})}
+   const definition={phrase,zone,confirmedDue:preview.due,confirmBroadcast,...(conversation?{conversation}:{})}
    await api(existing?'reminders/'+encodeURIComponent(existing.id):'reminders',existing
     ?{...definition,action:'edit',version:existing.version}
     :{...definition,intent:intent.current,...(source?{source,sourceKind:sourceKind??'message'}:{})},existing?'PATCH':'POST')
@@ -71,12 +73,13 @@ export function ReminderEditor({conversation,source,sourceKind,initialPhrase,exi
   {preview&&<div className="schedule-preview" aria-label="Reminder preview" role="status">
    <h3>Review reminder</h3>
    <p className="message-body">{preview.text}</p>
-   <p>Target: {preview.target}</p>
+   <p>Target: {preview.target==='me'?'Me':preview.audience}</p>
    <p>Audience: {preview.audience}</p>
    <p>Due: {new Date(preview.due).toLocaleString('en-US',{timeZone:preview.zone,dateStyle:'medium',timeStyle:'short'})} · {preview.zone}</p>
    <p>Local time: {preview.localAt.replace('T',' ')} · {repeats[preview.recurrence]}</p>
    <button className="text-button" type="button" disabled={!!busy} onClick={clearPreview}>Clear preview</button>
   </div>}
+  {preview?.broadcast&&preview.conversation&&<ScheduledBroadcast conversation={preview.conversation} body={'Reminder: '+preview.text} confirmed={confirmBroadcast} onConfirm={setConfirmBroadcast} signal={privateSignal}/>}
   <p className="dialog-note">Nothing is saved until you confirm the preview. Reminder completion is independent of message reads and commitments. The current audience and permission are checked again at delivery.</p>
   {error&&<p role="alert" className="warning">{error}</p>}
   {preview&&<button className="send" type="button" disabled={!!busy} onClick={()=>void save()}>{busy==='save'?'Saving…':existing?'Confirm reminder changes':'Confirm reminder'}</button>}

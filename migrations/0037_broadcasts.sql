@@ -49,3 +49,6 @@ END;
 CREATE TRIGGER nook_push_done AFTER UPDATE OF state ON nook_attention WHEN NEW.state='done' BEGIN
  UPDATE nook_notify_queue SET state='cancelled',error='seen',updated=CAST(unixepoch('subsec')*1000 AS INTEGER) WHERE channel='push' AND attention=NEW.id AND state IN ('pending','retrying');
 END;
+
+ALTER TABLE nook_reminders ADD COLUMN confirm_broadcast INTEGER NOT NULL DEFAULT 0 CHECK(confirm_broadcast IN (0,1));
+UPDATE nook_reminders SET definition=json_set(definition,'$.confirmBroadcast',json('false'));

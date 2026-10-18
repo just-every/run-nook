@@ -360,9 +360,9 @@ The statuses and citations below match CONTRACT.md at main `e1f0ff866196b2818014
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-065 — Channel-wide mentions: @channel, @here and @everyone.** **Status: missing.** In a 120-member channel with mixed choices, @channel creates Attention, push and email for every eligible member per their choices (none for the sender, muted or ignore-broadcast members; deferred for members in quiet time) and the delivered count equals 119 minus those exclusions. @here with 30 members in fresh presence reaches exactly those 30. @everyone in the default channel reaches every active non-guest and is refused in another channel. Send through the API without confirmation and receive 409 with no message; confirm and see one send. A member outside an owners-only broadcast policy, and a webhook `<!channel>` from an app without that permission, are refused with no message.
+- **NOOK-065 — Channel-wide mentions: @channel, @here and @everyone.** **Status: partial.** In a 120-member channel with mixed choices, @channel creates Attention, push and email for every eligible member per their choices (none for the sender, muted or ignore-broadcast members; deferred for members in quiet time) and the delivered count equals 119 minus those exclusions. @here with 30 members in fresh presence reaches exactly those 30. @everyone in the default channel reaches every active non-guest and is refused in another channel. Send through the API without confirmation and receive 409 with no message; confirm and see one send. A member outside an owners-only broadcast policy, and a webhook `<!channel>` from an app without that permission, are refused with no message.
 
-  Current evidence: No implementing source/test; journey pending.
+  Current evidence: `src/broadcast/audience.ts`; `src/broadcast/settings.ts`; `src/broadcast/presence.ts`; `src/platform/storage/message-statements.ts`; `src/broadcast/ConfirmBroadcast.tsx`; `tests/broadcast.mjs`; `tests/broadcast-browser.mjs`; `tests/push/broadcast.mjs`; `tests/notify/broadcast.mjs`. Web/API @channel, @here and @everyone ship with atomic saved audiences, confirmation, current-session presence/away, mandatory default-channel designation, owner/channel policy, named people, ignore/mute/quiet rules, recipient lists, email/encrypted Web Push choices and scheduled/reminder firing fences. User groups, app/webhook/workflow grants, native clients and real provider/device receipt remain unimplemented or unproven.
 
 - **NOOK-066 — Channel posting permissions and announcement channels.** **Status: partial.** Set #announcements to owners-only posting with replies off. A member's post, thread reply, notification reply, Slack-compatible webhook post, Zapier action, workflow post and a scheduled message created before the change are all refused (the scheduled one as a visible failed occurrence), while the member still reads, reacts and saves. An owner posts; an admin override post is labelled and appears in the audit log. Open replies and see the member's thread reply accepted.
 
@@ -441,4 +441,4 @@ The statuses and citations below match CONTRACT.md at main `e1f0ff866196b2818014
 
   Current evidence: No implementing source/test; journey pending..
 
-**80 clauses: 17 done, 25 partial, 38 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**80 clauses: 19 done, 25 partial, 36 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.

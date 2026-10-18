@@ -1,6 +1,7 @@
 import type {Recurrence} from '../scheduled/time.mjs'
 
 export type ReminderPreview = {
+ broadcast?:import('../broadcast/ConfirmBroadcast').BroadcastPreview|null
  target:string
  text:string
  localAt:string

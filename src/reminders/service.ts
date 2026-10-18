@@ -1,3 +1,4 @@
+import {previewBroadcast,BroadcastConfirmation} from '../broadcast/audience'
 import {Context} from '../platform/storage/context'
 import {fail,text} from '../family/team-chat/domain'
 import {allowedGrant} from '../team/access'
@@ -26,13 +27,14 @@ export async function reminderPreview(c:Context,input:Record<string,any>){
   if(!await c.one(`SELECT 1 WHERE ${channelManagement('?','?')}`,[c.uid,conversation],conversation))fail(403,'Only channel managers, owners and admins can remind another person')
   recipient=people[0].id;audience='Only '+people[0].name
  }else if(input.conversation){conversation=text(input.conversation,128);await c.check(conversation)}
- return {...parsed,recipient,conversation,audience}
+ return {...parsed,recipient,conversation,audience,broadcast:target.startsWith('#')?await previewBroadcast(c,conversation!,'Reminder: '+parsed.text):null}
 }
 export async function createReminder(c:Context,input:Record<string,any>){
  const intent=text(input.intent,128),old=await c.one('SELECT * FROM nook_reminders WHERE user=? AND intent=?',[c.uid,intent])
- const definition=JSON.stringify({phrase:input.phrase,zone:input.zone,conversation:input.conversation??null,sourceKind:input.sourceKind??null,source:input.source??null,confirmedDue:input.confirmedDue})
+ const definition=JSON.stringify({phrase:input.phrase,zone:input.zone,conversation:input.conversation??null,sourceKind:input.sourceKind??null,source:input.source??null,confirmedDue:input.confirmedDue,confirmBroadcast:input.confirmBroadcast===true})
  if(old){await c.check(old.conversation??undefined);if(old.definition!==definition)fail(409,'Reminder intent changed');await arm(c);return {id:old.id}}
  const p=await reminderPreview(c,input)
+ if(p.broadcast&&p.broadcast.recipients>=6&&input.confirmBroadcast!==true)throw new BroadcastConfirmation(p.broadcast)
  // Relative phrases are confirmed at their previewed instant, not shifted by
  // time spent reviewing. Absolute/recurring times must match exactly.
  if(!Number.isSafeInteger(input.confirmedDue)||input.confirmedDue<=Date.now())fail(400,'Preview and confirm a future reminder time')
@@ -45,7 +47,7 @@ export async function createReminder(c:Context,input:Record<string,any>){
  if(sourceKind!==null&&!source)fail(400,'Choose a reminder source')
  if(p.target.startsWith('#')&&source)fail(400,'Use a personal reminder for a private message or file source')
  const id=crypto.randomUUID(),schedule=p.target.startsWith('#')?id:null,now=Date.now()
- await c.batch([c.sql("INSERT INTO nook_reminders SELECT ?,?,?,?,?,?,?,?,?,?,?,'pending',1,?,NULL,?,?,?,generation,?,? FROM nook_access WHERE user=?",id,c.uid,p.recipient,p.conversation,sourceKind,source,p.text,p.localAt,p.zone,p.recurrence,p.due,schedule,intent,definition,c.session.operator.version,now,now,c.uid)],p.conversation??undefined,`${fence} ${p.recipient!==c.uid?`AND EXISTS(SELECT 1 FROM (SELECT ? AS user,? AS conversation) creator WHERE ${channelManagement('creator.user','creator.conversation')})`:''} AND (? IS NULL OR EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=? AND m.user=? AND ${allowedGrant('m.user','m.conversation')}))`,[...values,...(p.recipient!==c.uid?[c.uid,p.conversation]:[]),p.conversation,p.conversation,p.recipient])
+ await c.batch([c.sql("INSERT INTO nook_reminders SELECT ?,?,?,?,?,?,?,?,?,?,?,'pending',1,?,NULL,?,?,?,generation,?,?,? FROM nook_access WHERE user=?",id,c.uid,p.recipient,p.conversation,sourceKind,source,p.text,p.localAt,p.zone,p.recurrence,p.due,schedule,intent,definition,c.session.operator.version,now,now,input.confirmBroadcast===true?1:0,c.uid)],p.conversation??undefined,`${fence} ${p.recipient!==c.uid?`AND EXISTS(SELECT 1 FROM (SELECT ? AS user,? AS conversation) creator WHERE ${channelManagement('creator.user','creator.conversation')})`:''} AND (? IS NULL OR EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=? AND m.user=? AND ${allowedGrant('m.user','m.conversation')}))`,[...values,...(p.recipient!==c.uid?[c.uid,p.conversation]:[]),p.conversation,p.conversation,p.recipient])
  await arm(c);await c.hint();return {id}
 }
 export async function listReminders(c:Context,after=''){
@@ -71,10 +73,10 @@ export async function changeReminder(c:Context,id:string,input:Record<string,any
    if(!Number.isSafeInteger(input.until)||input.until<=now||input.until>now+7*86400000)fail(400,'Choose a future snooze within seven days')
    p={text:r.text,zone:r.zone,recurrence:r.recurrence,due:input.until,localAt:new Intl.DateTimeFormat('sv-SE',{timeZone:r.zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(input.until).replace(' ','T')}
   }else{
-   p=await reminderPreview(c,{...input,conversation:r.conversation});if(p.recipient!==r.recipient||p.conversation!==r.conversation)fail(400,'Create a new reminder to change its audience')
+   p=await reminderPreview(c,{...input,conversation:r.conversation});if(p.broadcast&&p.broadcast.recipients>=6&&input.confirmBroadcast!==true)throw new BroadcastConfirmation(p.broadcast);if(p.recipient!==r.recipient||p.conversation!==r.conversation)fail(400,'Create a new reminder to change its audience')
    if(!Number.isSafeInteger(input.confirmedDue)||input.confirmedDue<=now||Math.abs(input.confirmedDue-p.due)>120000)fail(409,'Preview the changed time before saving')
   }
-    await c.batch([c.sql("UPDATE nook_reminders SET text=?,local_at=?,zone=?,recurrence=?,next_due=?,state='pending',version=version+1,operator_version=(SELECT version FROM oa_operators WHERE id=nook_reminders.user),access_generation=(SELECT generation FROM nook_access WHERE user=nook_reminders.user),reason=NULL,updated=? WHERE id=?",p.text,p.localAt,p.zone,p.recurrence,p.due,now,id),c.sql("UPDATE nook_reminder_occurrences SET state='done' WHERE reminder=? AND state='delivered'",id)],r.conversation??undefined,`${guard} AND EXISTS(SELECT 1 FROM nook_reminders r WHERE r.id=? AND ${reminderAvailable()})`,[...values,id])
+    await c.batch([c.sql("UPDATE nook_reminders SET text=?,local_at=?,zone=?,recurrence=?,next_due=?,confirm_broadcast=?,state='pending',version=version+1,operator_version=(SELECT version FROM oa_operators WHERE id=nook_reminders.user),access_generation=(SELECT generation FROM nook_access WHERE user=nook_reminders.user),reason=NULL,updated=? WHERE id=?",p.text,p.localAt,p.zone,p.recurrence,p.due,action==='snooze'?r.confirm_broadcast:input.confirmBroadcast===true?1:0,now,id),c.sql("UPDATE nook_reminder_occurrences SET state='done' WHERE reminder=? AND state='delivered'",id)],r.conversation??undefined,`${guard} AND EXISTS(SELECT 1 FROM nook_reminders r WHERE r.id=? AND ${reminderAvailable()})`,[...values,id])
  }
  await arm(c);await c.hint();return {id}
 }

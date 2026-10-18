@@ -1,12 +1,12 @@
 import type {Attention,FileRecord,LocationState,MessageWindow,Outcome,Page,Projection,WorkspaceSnapshot,Replay} from './types'
-export class ApiError extends Error { constructor(public status:number,message:string,public broadcast?:import('../broadcast/ConfirmBroadcast').BroadcastPreview){super(message)} }
+export class ApiError extends Error { constructor(public status:number,message:string,public broadcast?:import('../broadcast/ConfirmBroadcast').BroadcastPreview,public code?:string){super(message)} }
 export async function api<T>(path:string,data?:unknown,method=data===undefined?'GET':'POST'):Promise<T> {
  const response=await fetch('/api/'+path,{method,headers:data===undefined?undefined:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),cache:'no-store'})
  return responseValue<T>(response)
 }
 async function responseValue<T>(response:Response):Promise<T>{
- const value=await response.json() as T & {error?:string;broadcast?:import('../broadcast/ConfirmBroadcast').BroadcastPreview}
- if(!response.ok)throw new ApiError(response.status,value.error||'The request could not be completed.',value.broadcast)
+ const value=await response.json() as T & {error?:string;code?:string;broadcast?:import('../broadcast/ConfirmBroadcast').BroadcastPreview}
+ if(!response.ok)throw new ApiError(response.status,value.error||'The request could not be completed.',value.broadcast,value.code)
  return value
 }
 export function attachmentMime(file:File){

@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 // Public-route sends and settings against the emitted Worker. Synthetic people
 // and session ages are fixture setup, not an application implementation path.
 export async function broadcastJourney({post,patch,get,request,sql,owner,member,outsider,check,restart}){
- const people=Array.from({length:118},(_,index)=>({id:'broadcast-person-'+index,name:'Broadcast teammate '+index,email:'broadcast-'+index+'@example.test'}))
+ const change=patch??((path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}));patch=change
+ const firstNames=['Ana','Morgan','Jordan','Sam','Riley','Priya','Alex','Taylor','Chris','Jamie','Dana','Casey'],lastNames=['Chen','Rivera','Patel','Lee','Brooks','Alvarez','Kim','Martin','Reed','Nguyen']
+ const people=Array.from({length:118},(_,index)=>({id:'broadcast-person-'+index,name:firstNames[index%firstNames.length]+' '+lastNames[Math.floor(index/firstNames.length)],email:'broadcast-'+index+'@example.test'}))
  const q=value=>"'"+value.replaceAll("'","''")+"'"
  await sql(`INSERT INTO oa_operators(id,email,display_name,role,status,version,created_at) VALUES ${people.map(p=>`(${q(p.id)},${q(p.email)},${q(p.name)},'member','active',1,${Date.now()})`).join(',')}`)
  await sql(`INSERT INTO nook_access(user,mode,active,generation) VALUES ${people.map(p=>`(${q(p.id)},'member',1,1)`).join(',')}`)
@@ -55,7 +57,7 @@ export async function broadcastJourney({post,patch,get,request,sql,owner,member,
   assert.deepEqual((await snapshot(here.id)).map(p=>p.id).sort(),fresh.map(p=>p.id).sort())
   await send({body:'@everyone Briefing for the organization',confirmBroadcast:true},owner.cookie,403)
   const defaults=(await get('/api/team/default-channels')).data
-  await patch('/api/team/default-channels',{version:defaults.version,channels:[...defaults.channels.filter(c=>c.enabled).map(c=>({id:c.id,mandatory:!!c.mandatory})),{id:room.id,mandatory:false}]})
+  await patch('/api/team/default-channels',{version:defaults.version,channels:[...defaults.channels.filter(c=>c.enabled).map(c=>({id:c.id,mandatory:!!c.mandatory})),{id:room.id,mandatory:true}]})
   const policy=(await get('/api/broadcast/policy')).data
   await patch('/api/broadcast/policy',{version:policy.version,level:'admins',people:[],everyoneChannel:room.id})
   const before=(await get(`/api/conversations/${room.id}/replay`)).data.frontier
@@ -71,6 +73,31 @@ export async function broadcastJourney({post,patch,get,request,sql,owner,member,
   await patch('/api/messages/'+allowed.id,{version:1,body:'@channel Changed broadcast type'},member.cookie,400)
   const current=(await get('/api/broadcast/policy')).data
   await patch('/api/broadcast/policy',{version:current.version,level:'everyone',people:[],everyoneChannel:null})
+ })
+ await check('NOOK-065 scheduled messages and channel reminders require consent and recheck broadcast policy at firing',async()=>{
+  const participants=[member.user.id,...people.slice(50,56).map(p=>p.id)]
+  const allowed=(await post('/api/conversations',{name:'Broadcast alarm consent',kind:'private',participants})).data
+  const blocked=(await post('/api/conversations',{name:'Revoked broadcast consent',kind:'private',participants})).data
+  const at=new Date(Date.now()+65000).toISOString().slice(0,16),base={body:'@channel Please post the customer briefing update.',localAt:at,zone:'UTC',intent:crypto.randomUUID()}
+  await post('/api/conversations/'+allowed.id+'/scheduled',base,owner.cookie,409)
+  const scheduled=(await post('/api/conversations/'+allowed.id+'/scheduled',{...base,confirmBroadcast:true})).data
+  const refused=(await post('/api/conversations/'+blocked.id+'/scheduled',{...base,intent:crypto.randomUUID(),confirmBroadcast:true},member.cookie)).data
+  const phrase='#'+allowed.id+' "@channel Review the briefing" in 1 minute',preview=(await post('/api/reminders/preview',{phrase,zone:'UTC'})).data
+  const reminderInput={phrase,zone:'UTC',confirmedDue:preview.due,intent:crypto.randomUUID()}
+  await post('/api/reminders',reminderInput,owner.cookie,409)
+  const reminder=(await post('/api/reminders',{...reminderInput,confirmBroadcast:true})).data
+  const policy=(await get('/api/channels/'+blocked.id+'/broadcast')).data
+  await patch('/api/channels/'+blocked.id+'/broadcast',{version:policy.version,level:'admins',people:[],everyoneChannel:null})
+  await restart()
+  // Repeating the accepted intent arms the actual persisted alarm without a client socket.
+  await post('/api/reminders',{...reminderInput,confirmBroadcast:true})
+  const end=Date.now()+90000;let rows
+  do{rows=(await get('/api/scheduled')).data.items;if(rows.find(r=>r.id===scheduled.id)?.state==='complete'&&(await get('/api/reminders')).data.items.find(r=>r.id===reminder.id)?.delivery==='delivered')break;await new Promise(r=>setTimeout(r,500))}while(Date.now()<end)
+  assert.equal(rows.find(r=>r.id===scheduled.id)?.state,'complete')
+  const failed=(await get('/api/scheduled',member.cookie)).data.items.find(r=>r.id===refused.id);assert.equal(failed.state,'failed');assert.match(failed.reason,/Broadcast policy/)
+  const messages=(await get('/api/conversations/'+allowed.id+'/messages')).data;assert.equal(messages.length,2);assert.ok(messages.every(m=>m.broadcast.recipients===7))
+  assert.equal((await get('/api/conversations/'+blocked.id+'/messages')).data.length,0)
+  await restart();await post('/api/reminders',{...reminderInput,confirmBroadcast:true});assert.equal((await get('/api/conversations/'+allowed.id+'/messages')).data.length,2)
  })
  return {room,people}
 }

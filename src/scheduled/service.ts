@@ -1,3 +1,4 @@
+import {previewBroadcast,BroadcastConfirmation} from '../broadcast/audience'
 import {prepareScheduleFiles} from './files'
 import {Context} from '../platform/storage/context'
 import {fail,text,messageBody} from '../family/team-chat/domain'
@@ -19,13 +20,16 @@ export async function listSchedules(c:Context,after=''){
 }
 async function arm(c:Context){const response=await c.env.CHAT_HUB.get(c.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/reminders',{method:'POST'});if(!response.ok)fail(503,'Message saved; scheduler unavailable. Open Scheduled messages and retry to arm it.')}
 async function definition(c:Context,conversation:string,input:Record<string,any>,allowPast=false){
- if(Object.keys(input).some(k=>!['body','parent','mentions','urgent','urgentReason','attachments','localAt','zone','recurrence','endDate','intent','version','action'].includes(k)))fail(400,'Unsupported schedule field')
+ if(Object.keys(input).some(k=>!['body','confirmBroadcast','parent','mentions','urgent','urgentReason','attachments','localAt','zone','recurrence','endDate','intent','version','action'].includes(k)))fail(400,'Unsupported schedule field')
  const attachments=input.attachments??[];if(!Array.isArray(attachments)||attachments.length>5||attachments.some((id:any)=>typeof id!=='string')||new Set(attachments).size!==attachments.length)fail(400,'Choose up to five ordered attachments')
  const body=messageBody(input.body),time=validateScheduleTime(input),due=occurrenceAt(time.localAt,time.zone)
  if(!allowPast&&(due<=Date.now()||due>Date.now()+366*86400000))fail(400,'Choose a future time within one year')
  if(time.recurrence!=='none'&&!time.endDate)fail(400,'Choose an end date for a recurring prompt')
  const parent=input.parent??null;if(parent!==null&&typeof parent!=='string')fail(400,'Invalid thread')
- const attention=messageAttentionInput(input),payload={body,parent,attachments,...attention}
+ const broadcast=await previewBroadcast(c,conversation,body)
+ if(input.confirmBroadcast!==undefined&&typeof input.confirmBroadcast!=='boolean')fail(400,'confirmBroadcast must be boolean')
+ if(broadcast&&broadcast.recipients>=6&&input.confirmBroadcast!==true)throw new BroadcastConfirmation(broadcast)
+ const attention=messageAttentionInput(input),payload={body,parent,attachments,...attention,...(broadcast?{confirmBroadcast:input.confirmBroadcast===true}:{})}
  const permission=canPost('?','?','?'),values=[conversation,parent,c.uid]
  if(!await c.one(`SELECT 1 WHERE ${permission}`,values,conversation))fail(403,'Posting is restricted in this channel')
  const sources=`(? IS NULL OR EXISTS(SELECT 1 FROM (${liveThreadRoots}) WHERE id=? AND conversation=?)) AND NOT EXISTS(SELECT 1 FROM json_each(?) r WHERE NOT EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=? AND m.user=r.value AND ${allowedGrant('m.user','m.conversation')}))`

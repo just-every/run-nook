@@ -1,3 +1,4 @@
+import {useBroadcastPresence} from './broadcast/usePresence'
 import {RemindersView} from './reminders/RemindersView'
 import {TeamBindings,useTeamRequest} from './team/TeamBindings'
 import {TeamPanel} from './team/TeamPanel'
@@ -53,6 +54,7 @@ export function ChatScreen({initial}:{initial?:InitialWorkspace}) {
 }
 function Workspace({initial}:{initial:InitialWorkspace}) {
  const {route,navigate}=useLocation(initial.route),w=useWorkspace(initial,route,navigate),[dialog,setDialog]=useState<DialogState|null>(null)
+ useBroadcastPresence(w.user.id,w.privateSignal)
  const [showUnreads,setShowUnreads]=useState(true)
  useEffect(()=>{setShowUnreads(localStorage.getItem('nook:unreads:'+w.user.id)!=='hidden')},[w.user.id])
  const c=w.conversations.find(c=>c.id===route.conversation),title=route.view==='chat'&&c?conversationName(c,w.user):({reminders:'Reminders',scheduled:'Scheduled messages',unreads:'All unreads',channels:'Channels',attention:'Attention',threads:'Threads',search:'Search',saved:'Saved',you:'You',team:'Team',chat:'Conversation'}[route.view])
