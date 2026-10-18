@@ -22,7 +22,7 @@ jobs:
             -e MM_SERVICESETTINGS_ENABLELOCALMODE=true \
             -e MM_TEAMSETTINGS_ENABLEOPENSERVER=true \
             -e MM_EMAILSETTINGS_REQUIREEMAILVERIFICATION=false \
-            -e MM_EXPORTSETTINGS_DIRECTORY=/mattermost/data/export \
+            -e MM_EXPORTSETTINGS_DIRECTORY=/mm/mattermost-data/export \
             mattermost/mattermost-preview:12.0.0
           for i in $(seq 1 120); do
             if curl --fail --silent http://127.0.0.1:8065/api/v4/system/ping >/dev/null; then exit 0; fi
@@ -36,18 +36,18 @@ jobs:
           set -euo pipefail
           mkdir -p fixture
           node tests/mattermost-import/fixtures/populate.mjs --output fixture
-          docker exec nook-mattermost-source /mattermost/bin/mmctl export create --local --json > "$RUNNER_TEMP/job.json"
+          docker exec nook-mattermost-source mmctl export create --local --json > "$RUNNER_TEMP/job.json"
           job=$(jq -r 'if type=="array" then .[0].id else .id end' "$RUNNER_TEMP/job.json")
           test -n "$job" && test "$job" != null
           for i in $(seq 1 120); do
-            docker exec nook-mattermost-source /mattermost/bin/mmctl export job show "$job" --local --json > "$RUNNER_TEMP/status.json"
+            docker exec nook-mattermost-source mmctl export job show "$job" --local --json > "$RUNNER_TEMP/status.json"
             status=$(jq -r 'if type=="array" then .[0].status else .status end' "$RUNNER_TEMP/status.json")
             if [ "$status" = success ]; then break; fi
             if [ "$status" = error ]; then exit 1; fi
             sleep 2
           done
           test "$status" = success
-          archive=$(docker exec nook-mattermost-source find /mattermost/data/export -type f -name '*.zip' | head -1)
+          archive=$(docker exec nook-mattermost-source find /mm/mattermost-data/export -type f -name '*.zip' | head -1)
           test -n "$archive"
           docker cp "nook-mattermost-source:$archive" fixture/mattermost-export.zip
           sha256sum fixture/mattermost-export.zip

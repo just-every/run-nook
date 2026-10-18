@@ -121,7 +121,8 @@ async function react(post, username, emoji) {
 await createUser('maya', 'Maya');
 // This is a disposable instance; enable only the features the real API fixture needs.
 await request('/config/patch', {actor: 'maya', method: 'PUT', body: {
-  TeamSettings: {EnableOpenServer: true, EnableCustomEmoji: true},
+  ServiceSettings: {EnableCustomEmoji: true},
+  TeamSettings: {EnableOpenServer: true},
   EmailSettings: {RequireEmailVerification: false},
 }});
 await Promise.all([createUser('leo', 'Leo'), createUser('aisha', 'Aisha'), createUser('sam', 'Sam')]);

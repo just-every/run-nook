@@ -15,11 +15,11 @@ The script creates Maya, Leo, Aisha and Sam; Launch and Support teams; public ch
 Export from the running server after population. With Mattermost v12, attachments and roles/schemes are included by default:
 
 ```sh
-docker exec CONTAINER /mattermost/bin/mmctl export create --local
-docker exec CONTAINER /mattermost/bin/mmctl export job list --local
-docker exec CONTAINER /mattermost/bin/mmctl export job show JOB_ID --local
-docker exec CONTAINER /mattermost/bin/mmctl export list --local
-docker exec CONTAINER /mattermost/bin/mmctl export download EXPORT_NAME /tmp/mattermost-export.zip --local
+docker exec CONTAINER mmctl export create --local
+docker exec CONTAINER mmctl export job list --local
+docker exec CONTAINER mmctl export job show JOB_ID --local
+docker exec CONTAINER mmctl export list --local
+docker exec CONTAINER mmctl export download EXPORT_NAME /tmp/mattermost-export.zip --local
 docker cp CONTAINER:/tmp/mattermost-export.zip /tmp/mattermost-fixture/mattermost-export.zip
 ```
 
