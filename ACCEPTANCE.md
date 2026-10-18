@@ -108,7 +108,7 @@ alerts are the supported web behavior.
 
 The 16 October 2026 contract is the full target for an owned US team-chat product replacing Slack, Microsoft Teams and Google Chat. Each numbered journey below is through a user-facing app, HTTP/API, supported client, authorized provider or documented rer command. Build rounds must implement missing journeys and supply measured acceptance; a planned journey is never a passing test. Provider/network fakes belong only at that edge in automated tests; native-device, real migration, real media and hosted claims require the real environments named. App journeys must be used and inspected at 1440 and 390 with realistic data and the named denied-access/error end states; native/assistive-technology cases also run on their supported devices. Keep every permanent clause ID, including C1–C15 aliases, DOCS-001 and ERASURE-001.
 
-The statuses and citations below match CONTRACT.md at the judged commit `f2b402baeed2dd9827b407f5e55fd81bfd1ba198`. Existing local evidence above remains bounded as stated. The new SSO, hold and compliance clauses define separate authorities; they do not silently grant an ordinary owner/admin DM access or change today’s erasure behavior. Only implementation with its acceptance can change those product paths.
+The statuses and citations below match the Status table in this revision of CONTRACT.md. Each Current evidence line cites that row’s Evidence files; partial clauses also describe the remaining acceptance gap. A missing clause has no implementing source/test. Shipped subsets named in another clause do not complete a broader acceptance journey. Existing local evidence above remains bounded as stated. The new SSO, hold and compliance clauses define separate authorities; they do not silently grant an ordinary owner/admin DM access or change today’s erasure behavior. Only implementation with its acceptance can change those product paths.
 
 - **NOOK-001 — Current identity and conversation membership (C1).** **Status: done.** Through signed-in HTTP, SSR, search, replay and generated loaders, revoke or expire a session and remove a participant; every subsequent private read/write is refused, including a workspace admin attempting another person’s DM.
 
@@ -204,47 +204,47 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-021 — Native clients and dependable device catch-up.** **Status: missing.** Install production-signed apps on real iOS/Android and each desktop OS and sign each in through a NOOK-074 path, never a pre-seeded session. In foreground, background, force-closed and locked states send a mention/DM/call invite, observe alert/badge and tap to context; disable permission and expose the reason. Read on another device, disconnect/reconnect, race a send retry and revoke membership: converge once, purge revoked caches and verify logout isolation. Share a photo and a PDF from the iOS and Android share sheets into a private channel thread and see each post once. **Default alerts:** a freshly invited member installs the iOS app and allows notifications without opening settings; a DM, a mention and a keyword hit each alert once; repeat on Android and on one desktop OS. **Delivery bar:** on a real-device fleet of at least two iOS and two Android phones at the published OS floor plus each desktop OS, send 500 mixed eligible events (mentions, DMs, keyword hits, broadcast mentions and call invites) spread across foreground, background, force-closed and locked states over 24 hours. Record each event's server commit time and device display time from device logs, then compare to the bar: ≥ 99.5% displayed, p95 ≤ 5 s and p99 ≤ 30 s commit-to-display, locked-phone call ring ≤ 5 s at p95, and every badge equal to the authoritative unread plus Attention count within 10 s of reconnect. Every undelivered event appears as `provider-unconfirmed` or `device-unobserved` in the device delivery view and owner report; a single silent miss fails the journey. Install on a device below the floor and see the unsupported notice. A web-Push test alone cannot satisfy this journey. **From a customer installation:** the fleet signs in to an installation on a fresh Cloudflare account that is not the publisher's and is reached only through NOOK-078's push path; a run against a publisher-operated installation does not count. **Automatic follows and active-elsewhere routing:** a reply in a thread the member authored alerts their phone without any explicit follow while they are not active on desktop; while they actively use the macOS app the same reply alerts only the desktop, and their phone alerts after the screen locks unless it was read first. Events held for active-elsewhere in the 500-event run appear as `held-active-elsewhere` or are timed from release, never counted as displayed or silently missing.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-022 — In-context voice, video and screen sharing.** **Status: missing.** From a private channel and DM run a three-person real audio/video call across desktop and phone, share a window, read captions, switch devices, interrupt networking and reconnect. Remove a participant and deny further media access; an outsider cannot join with a copied link. Refused microphone/camera permission and failed relay show actionable states. At 50 participants with 25 cameras on across desktops and phones, measure p95 join time ≤ 3 s, audio continuity (no gap over 500 ms in a 10-minute session on the target network) and screen-share legibility (10-pt text readable at 390 width); a 51st joiner sees the full state.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-023 — Zoom, Google Meet and Teams meetings.** **Status: missing.** For each named provider connect a test tenant, create and join from a channel and DM on phone/desktop, reschedule then cancel, and revoke consent. Observe provider-confirmed links and honest failure; a private recording link never broadens provider access.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-024 — Asynchronous clips, transcripts and call artifacts.** **Status: missing.** Record a clip from phone and desktop, play with captions and seek from transcript; record a consented huddle and inspect its audience. Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-025 — App and bot platform.** **Status: missing.** Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty with secrets redacted. An app with the DM scope opens one app DM with a member; the member mutes, blocks and unblocks it, and posts are refused while blocked. The member adds the app to a private channel and removes it, and the audit log shows both; the app's token cannot list or read any other DM, group DM or private channel. An app without the channel-management scope cannot create a channel.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-026 — Workflow builder and durable scheduled work.** **Status: missing.** Build a recurring stand-up form that posts a channel summary and proposes work only for explicit acceptance. Publish, trigger once, pause during an approval wait and restart; no duplicate post or unauthorized write occurs. Refuse a revoked connector and expose the failed step plus a safe human resume choice. A welcome workflow DMs a person exactly once when they join `#onboarding`; adding :ticket: to a message runs the reaction workflow once for that message even when two people add it; intro pairing over a 9-member channel produces four pairs and one trio with no one left out.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-027 — Engineering and project integrations.** **Status: missing.** Connect each named service, route a selected project/repository event, act from a card and follow a linked issue/PR from open to complete to reopened. Retry its webhook, remove source permission and revoke the grant: exactly one authorized effect and no leaked project context. Vector remains the authoritative work record.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-028 — Support, sales and operational signals.** **Status: missing.** For each named service route a real sandbox case/account/alert event, inspect an authorized preview, approve a supported write and observe source-confirmed state. Deliver duplicate/recovery events, disconnect the source and remove channel access; keep one linked thread, no false completion and a visible failed/uncertain action.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-029 — Connected documents and knowledge.** **Status: missing.** Connect each named provider, share an authorized document into a matching channel, retrieve its card/text as an allowed member and refuse a source-denied member. Revoke provider sharing or disconnect, refresh search/agent context and show unavailability without cached excerpts or broadened access.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-030 — Calendars, availability and meeting reminders.** **Status: missing.** Connect both calendars, create a cross-time-zone meeting from a DM, accept/change/cancel it at the provider and see exactly one current card/reminder. Show free/busy without private title access, cross a daylight-saving transition and revoke the grant before a scheduled action. Turn on calendar-driven status: a private meeting sets "In a meeting" without its title and clears at its end, and a hand-set status is left untouched.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-031 — Shared channels between organizations.** **Status: missing.** Two independently administered organizations approve a channel, exchange messages/files/calls and install one narrowly scoped bot; start and accept an external DM, then block it through one organization's policy. Exercise a single-channel guest, denied directory lookup, conflicting retention/export policy, member removal and full org disconnect. Every client/search/agent/API loses revoked access while permitted historical copies are explicitly accounted for.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-032 — Recurring quiet schedules and notification policy.** **Status: partial.** Set a weekday quiet schedule and channel override, cross midnight/DST and restart without a page open. Send routine/mention/urgent events and a message containing the recipient's keyword "invoice" from another account (one keyword item in a readable channel, none in a muted or unreadable one), read on a second device and compare the activity feed, held items, badges and provider attempts with the recipient’s stated rules. **Per-conversation levels:** a freshly invited member allows notifications without opening settings, and a DM, a mention and a keyword hit each alert once. They set `#incidents` to `all new messages` on mobile only: a colleague's plain message there alerts their phone but not their desktop, while a routine message in a `mentions` channel alerts nothing. Setting `#random` to `nothing` suppresses even an `@here`. During quiet time the `#incidents` alerts are held and released by the schedule. The exception list shows `#incidents` and `#random`, and resetting each returns it to `mentions`. First sign-in tells the member that email is off, and its one-action opt-in produces one 15-minute bundled email for a mention and a DM while away. **All thread replies:** with `#incidents` also set to all thread replies on mobile only, a reply in a thread the member never touched alerts their phone (when they are not active on desktop, NOOK-073) and not their desktop, the exception list shows the setting, and resetting it returns `#incidents` to followed threads only.
 
@@ -262,23 +262,23 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-035 — Channel recaps and catch-up digests.** **Status: missing.** Request a channel/thread recap and daily unread digest over contradictory discussions and inaccessible channels. Check every factual point against a source link, remove access before delivery, correct a claim and cancel the schedule. No private snippet or invented acceptance survives.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-036 — AI search with cited answers.** **Status: missing.** Ask an answerable, contradictory and unanswerable question with private files and a hostile document in the corpus. Follow citations, revoke a source and repeat as a different member: deny cross-scope context, abstain where unsupported and perform no embedded instruction or external write.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-037 — SSO, SAML and lifecycle provisioning.** **Status: missing.** Use test tenants for all three IdPs, enforce SSO, rotate signing keys and reject wrong audience/issuer/replayed/expired assertions. SCIM-create a group/member, map one channel, suspend/delete and replay the event; every client and grant loses access without deleting preserved evidence. Exercise audited owner recovery without a blanket bypass.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-038 — Retention, legal hold and preservation.** **Status: missing.** Apply a short retention policy, hold a selected member/date range, edit/delete held messages and expire their files. Ordinary participants lose deleted content, a custodian preserves exact history, and an unauthorized admin cannot retrieve it. Release the hold and finish the queued erasure with actual byte verification and audited counts.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-039 — Compliance search and controlled exports.** **Status: missing.** Open a case, obtain required approval, export a held DM/file plus revision history and verify manifest completeness and hashes. Try the same through an ordinary admin session and deny it. Revoke the custodian mid-job, expire the download and inspect a durable audit of search, approval and retrieval.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-040 — Information protection and data handling.** **Status: partial.** Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning. Exercise an approved override and revoke it; inspect policy history, secret redaction and deletion of derived content after source erasure.
 
@@ -290,23 +290,23 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-042 — Microsoft Teams migration.** **Status: missing.** Extract a real test tenant containing channels, private/shared channels, 1:1/group/meeting chats and protected files; page every source set, preview, import and verify counts, chronology and visibility. Revoke an export scope, interrupt/resume and undo without deleting later native work; show each omission.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-043 — Google Chat migration.** **Status: missing.** Import a real Workspace test export with spaces, threaded replies, DMs and files plus an externally owned space omitted by source policy. Compare coverage and exact visibility, interrupt/resume and undo after native activity, and confirm no notifications, accepted tasks or outsider access.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-044 — Campfire ONCE migration.** **Status: missing.** Take a consistent real Campfire test-instance backup with open/closed rooms, DMs and uploads, preview and migrate it, then compare messages/files and deny unrelated members. Reject an incomplete/unsupported backup and exercise resume and safe undo.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-045 — Zulip migration and topic continuity.** **Status: missing.** Export a real Zulip test organization with two topics in one channel, private conversations and uploads; import and navigate each topic independently, inspect consent omissions and verify private audiences. Resume once without duplicates and undo while preserving later native work.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-046 — Mattermost migration.** **Status: missing.** Export a real Mattermost test deployment spanning two teams, private channels, DMs, replies, saved/pinned items and attachments. Review/map roles, import and find every declared item while denying outsiders; interrupt/resume and undo without removing subsequent Nook messages.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-047 — Readable portability and controlled exit.** **Status: partial.** Export a populated workspace and a member-scoped conversation, read the HTML offline and enumerate JSON/file hashes against the source. Attempt another person’s DM as an ordinary admin, cancel/resume a large job, and verify all omissions are named. A successful operational backup alone does not prove readable exit.
 
@@ -314,7 +314,7 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-048 — Team administration and reporting.** **Status: missing.** Populate a US 35-person team with guests, a private management channel, missed notifications and overdue linked work. Compare filtered report totals to authorized records, export CSV, remove a viewer’s access and verify both aggregates and drill-through stop exposing that scope; show a failed sync as incomplete data. Repeat totals and drill-through at the NOOK-049 capacity installation (1,000 members, 5,000 channels).
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-049 — Reliability, performance and operating recovery.** **Status: partial.** On the supported hosted configuration, seed 1,000 members, 5,000 channels, 25 million messages over 7 years and 2 TiB of files; drive 1,000 connected clients at 50 messages/s with 200/s bursts and a 1,000-member default channel, and measure sent-to-visible p95/p99, last-recipient fanout, 24-hour reconnect catch-up, complete reconnect count and search latency against the stated objectives. Page the people directory and channel browser past 1,000 and 5,000 entries and find the last entry by search. Interrupt fanout/provider access, restart workers, upgrade without data loss, restore from an owned backup within RTO and compare outcomes to the published objectives and component status.
 
@@ -336,7 +336,7 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-053 — Conversation notes and lightweight lists.** **Status: missing.** Create and revise a private channel note/checklist, link a provider document, propose an item to another person and require their exact acceptance. Remove a member, export history and delete/hold the note; all sources keep their distinct permissions and authority.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-060 — Organization policy and channel lifecycle.** **Status: partial.** As owner create a delegated channel admin and a user group, rename/archive/restore a populated channel, transfer ownership and schedule guest expiry. Preview/refuse a private-to-public conversion that would expose earlier history, exercise group mentions and custom emoji, and deny app/compliance/DM operations outside the delegated grant. Verify expiry/revocation across phone, desktop, search and bot access. Restrict channel creation and guest invitation to admins and set a 15-minute edit window: a member's create, invite and late edit are refused through app and API, and a new member auto-joins both default channels. Turn invitation links off and approve one domain: creating a link is refused and the domain appears in the approved list. Set `#announcements` to `all new messages` and email on for new members: a member who joins afterwards starts with both, and an existing member's settings are unchanged.
 
@@ -366,7 +366,7 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-066 — Channel posting permissions and announcement channels.** **Status: partial.** Set #announcements to owners-only posting with replies off. A member's post, thread reply, notification reply, Slack-compatible webhook post, Zapier action, workflow post and a scheduled message created before the change are all refused (the scheduled one as a visible failed occurrence), while the member still reads, reacts and saves. An owner posts; an admin override post is labelled and appears in the audit log. Open replies and see the member's thread reply accepted.
 
-  Current evidence: `src/team/posting.server.ts`; `src/team/posting-policy.ts`; `src/team/PostingSettings.tsx`; `tests/posting.mjs`; `tests/posting-browser.mjs`; `tests/team-portability.test.mjs`. Web/API sends and edits are atomically fenced; independent thread replies, named members, labelled admin overrides and channel audit are exercised at 1440/390. Scheduled delivery now rechecks posting permission and records refusal under NOOK-034 (`src/scheduled/runner.ts`; `tests/scheduled.mjs`). User groups and their broadcast permissions remain missing; web workspace/channel broadcast policy ships under NOOK-065. The combined app/webhook/workflow/scheduler/native write-door acceptance journey remains incomplete.
+  Current evidence: `src/team/posting.server.ts`; `src/team/posting-policy.ts`; `src/team/PostingSettings.tsx`; `src/platform/storage/messages.ts`; `tests/posting.mjs`; `tests/posting-browser.mjs`; `tests/team-portability.test.mjs`. Web/API sends and edits are atomically fenced; independent thread replies, named members, labelled admin overrides and channel audit are exercised at 1440/390. Scheduled delivery now rechecks posting permission and records refusal under NOOK-034 (`src/scheduled/runner.ts`; `tests/scheduled.mjs`). User groups and their broadcast permissions remain missing; web workspace/channel broadcast policy ships under NOOK-065. The combined app/webhook/workflow/scheduler/native write-door acceptance journey remains incomplete.
 
 - **NOOK-067 — Forwarding messages and email into conversations.** **Status: missing.** Forward a public-channel message with a note into a DM on desktop and phone and see author, source and note. Forward a private-channel message to a public channel as Link only: a public member without private access sees attribution but no body, attachment or thread, and the link refuses them; forward it as Show message and see the disclosure preview and audit entry. Set owner policy to link-only and see Show message refused. Delete the source and see each forwarded copy tombstoned. Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 
@@ -403,11 +403,11 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-075 — External participants without a Nook installation.** **Status: missing.** In our installation, invite `ana@acme.example`, whose organization runs no Nook, to the shared channel `#acme-project` and to an external DM. She confirms her mailbox with a code in the iOS app and sees only `#acme-project` and that DM, with our retention banner; our members see her with the external badge and "Acme (unverified)". She cannot browse channels, find anyone in the directory or people search, open `#vendor-print`, a default channel or any other DM, start a DM with a member she shares nothing with, create a channel or invite anyone, and each attempt is refused by the API as well as hidden in the client. `@channel` in `#acme-project` reaches her; `@here` in `#general` does not. Sharing a file labelled Confidential (NOOK-040) into `#acme-project` is blocked by DLP. She posts, and our members get the reply under their ordinary NOOK-032 levels on phone and desktop. With the policy set to require admin approval, a member's invitation waits for an admin; with it set to guests, the next invitation creates a single-channel guest instead. Remove Ana: her web, iOS and API sessions lose `#acme-project` and the DM at their next request and push stops. Invite two more Acme people, then disconnect Acme: all of them lose access on every client and API, and the audit shows each step. Later Acme runs Nook: after a mutually approved NOOK-031 connection, Ana confirms the same mailbox there and keeps the channel's full history, her authorship and the same audience.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-076 — Slack Connect cutover.** **Status: missing.** Import a Slack Pro workspace with two Slack Connect channels (`#acme-project` with 3 Acme people, `#vendor-print` with 1 vendor person whose email Slack does not supply) and one external DM with a third organization. The preview lists all three organizations, all five external people with their Slack user IDs and the missing vendor email, the external DM and each last-activity date. Choose invite for Acme and the vendor (entering the vendor's address, shown as owner-entered), and leave-in-Slack for the DM with the reason "client prefers Slack"; send at the cutover time with the Slack-side cutover message posted into both channels. An Acme person with no Nook installation confirms their mailbox and sees only `#acme-project`, with its imported history attributed to them through the Slack-user-ID mapping, the external badge on our side and our retention banner; they cannot browse channels, see our directory, or open `#vendor-print` or any DM. They post, and our members get the reply under ordinary NOOK-032 levels on phone and desktop. Removing them, or disconnecting Acme, revokes access on every client and API. The cutover report lists Acme 3 of 3 joined, the vendor 0 of 1 pending with one-action resend, and the DM as left in Slack with its reason, and the checklist closes only once every Slack Connect conversation has a disposition. A second run where a partner runs Nook invites it by installation address, and after both approve, the imported channel becomes a NOOK-031 shared channel with history intact. A message the Acme partner posts in Slack after the first import arrives with the NOOK-077 final pass, attributed through the same Slack-user-ID mapping.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-077 — Final catch-up import at cutover.** **Status: partial.** Import a Friday export of a Slack Pro test workspace, with member grants for its private channels and DMs. Over the weekend in Slack, post a new root message and a reply to an imported thread, edit one imported message, delete another, add a reaction, create a channel, start a new DM between two consenting members, add a member and create a Slack Connect channel with a partner. On Monday morning, before the delta pass, post native Nook replies in one imported thread. Run the final delta pass at the scheduled cutover time: each Slack change appears exactly once; the edit shows as a new imported revision with the earlier one in its history; the deleted message is tombstoned; the reaction, the new channel and the DM are present, and the DM is visible only to its two members; the new member appears in the invitation preview and is invited; the thread interleaves imported and native replies in time order with native ones marked; no one receives an alert, unread, Attention item or follow for imported items; and every native item is unchanged. The new Slack Connect channel appears in the NOOK-076 preview and keeps the checklist open until it has a disposition. Run the same pass again: it adds nothing. Revoke the grant covering one private channel and delete a message there in Slack: the next pass counts that channel as `unverified` with its reason and leaves the imported message intact. Force a Slack error during a scheduled final pass: the invitations wait and the owner sees the failure. The cutover report shows "imported through" the cutover time with per-pass counts, and undoing the last pass removes only its additions and revisions while the native replies remain.
 
@@ -415,11 +415,11 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-078 — Push from owned installations to the store apps.** **Status: missing.** Install Nook on a fresh Cloudflare account that is not the publisher's, run setup and see the gateway registration, key fingerprint and last acknowledgement in doctor. Sign the store-published iOS and Android apps in through NOOK-074 and run NOOK-021's 500-event delivery-bar journey from that installation: it meets the bar. Capture every request the gateway receives during the run: none contains message text, a sender or conversation name, a file name or a badge count. Block the gateway for 10 minutes during the run: the affected events are recorded as `provider-unconfirmed` with reason `gateway`; the owner report, the admin health view and doctor name the gateway outage; when the block lifts, delivery resumes with no event displayed twice; and a call invite whose 30-second TTL lapsed stays `provider-unconfirmed`. Uninstall the app on one phone and see its token retired. Revoke the installation's gateway registration: pushes stop and doctor says why; re-register and they resume. Repeat a reduced 50-event journey in owner-credential mode with apps self-built and signed by the buyer's own Apple and Google accounts: setup rejects a wrong `.p8` key and accepts the right one, and a capture shows no request reaching the gateway. The published subprocessor list names the gateway with its region, availability objective, price and terms.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-054 — Scoped company-context agents and MCP.** **Status: missing.** Provision a channel agent and read-only MCP client, connect a permission-scoped document and request a summary/post. Deny access to a second private channel, an unlisted tool and a malicious source instruction; revoke membership/grants mid-run and verify no cached context or further tool write escapes. Run the official MCP Inspector against Nook's MCP server and pass its tool-listing and tool-call checks; connect two independent standard MCP clients, one authorized as a member and one as an agent, and see each return only its own permitted messages; an agent's call to an MCP server the owner has not approved is refused.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-055 — Accountable commitment assistant.** **Status: partial.** Discuss a vague request, a declined ask and an agreed ask. The assistant proposes only a cited candidate; deny author/agent acceptance on behalf of the assignee. Accept, revise a due date and close linked work: require renewed agreement and assignee completion, then pause the agent and verify no further chase or external write.
 
@@ -435,10 +435,10 @@ The statuses and citations below match CONTRACT.md at the judged commit `f2b402b
 
 - **NOOK-058 — Stale handoffs and proposed resolution.** **Status: missing.** Leave a handoff unaccepted, let an accepted dependency become overdue, then provide late evidence and an alternate suggested assignee. The agent separates those states, proposes a cited resolution to the permitted people, stops after resolution/pause and requires the new assignee’s own acceptance.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-059 — Visible and controllable agent execution.** **Status: missing.** Start a scheduled handoff run, inspect and decline a proposed external write, interrupt the model/provider after a step, restart and revoke the grant. The owner sees a durable failed/uncertain state and exact remaining action; no duplicate write, resumed revoked access or unapproved commitment appears.
 
-  Current evidence: No implementing source/test; journey pending..
+  Current evidence: No implementing source/test; journey pending.
 
 **80 clauses: 19 done, 25 partial, 36 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
