@@ -4797,11 +4797,11 @@
       "executable": false
     },
     "tests/browser-markup.mjs": {
-      "sha256": "f2443ec6be9734c74a4a83dd70a1350cbaf2b0a438823875ecab8ca5149a7b37",
+      "sha256": "dc2a271fc268e0e85a06ab5c5a66c954dfacbee0d38eabeb5e3468e9c76de895",
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "c113be528be45f13cf072764079fe7cad38b43c630739bae58774fd4345cddd8",
+      "sha256": "18db12cac7fd6abbc08adcf6404e5b3514be0b517ae0d6896b3f6ef15b48a540",
       "executable": false
     },
     "tests/channel-lifecycle.mjs": {

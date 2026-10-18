@@ -4,7 +4,7 @@ import {keyed} from './dev-key.mjs'
 import {mkdir,writeFile,readFile} from 'node:fs/promises'
 import {resolve} from 'node:path'
 import {browserSignIn} from './auth-support.mjs'
-import {hostileMessage,assertPlainMessage} from './browser-markup.mjs'
+import {hostileMessage,assertSafeMessage} from './browser-markup.mjs'
 import {auditComposerRouting} from './accessibility.mjs'
 // A destination may carry its unread count in its accessible name, as in "Attention 2".
 const nav=(page,name)=>page.getByRole('navigation',{name:'Workspace',exact:true}).getByRole('button',{name:new RegExp('^'+name+'( \\d+)?$')})
@@ -22,7 +22,7 @@ export async function runBrowser(origin,destination){
    const expectedFailures=new Map()
    for(const p of [alice,bob]){
     p.on('pageerror',e=>errors.push(e.message))
-    p.on('console',message=>{if(message.type()==='error'&&!(intentionalAbort&&/net::ERR_FAILED/.test(message.text()))&&!(revocationExpected&&/status of 403/.test(message.text())))errors.push(message.text().replace(/\?[^\s]+/g,'?[redacted]'))})
+    p.on('console',message=>{if(message.type()==='error'&&!(intentionalAbort&&/net::ERR_FAILED/.test(message.text()))&&!(revocationExpected&&/status of 403/.test(message.text())))errors.push(new URL(message.location().url||origin).pathname+': '+message.text().replace(/\?[^\s]+/g,'?[redacted]'))})
     // Navigation and revocation cancel in-flight reads on purpose; failed writes still count.
     p.on('requestfailed',request=>{if(request.failure()?.errorText==='net::ERR_ABORTED'&&request.method()==='GET')return;const kind=expectedFailures.get(request.url());if(kind){expectedFailures.delete(request.url());if(kind==='upload')abortedUploads++;else abortedMessages++}else failedRequests.push({path:new URL(request.url()).pathname,error:request.failure()?.errorText})})
    }
@@ -205,11 +205,11 @@ export async function runBrowser(origin,destination){
     await alice.getByRole('button',{name:'Retry send',exact:true}).click();await expect(composer).toHaveValue('')
     const all=[];let after='';for(;;){const page=await json(alice,origin,`conversations/${channel.id}/messages?after=${encodeURIComponent(after)}&limit=100`);all.push(...page);if(page.length<100)break;after=page.at(-1).created+page.at(-1).id}
     assert.equal(all.filter(m=>m.body===hostileMessage).length,1,'unknown acknowledgement retry does not duplicate')
-    await assertPlainMessage(alice)
+    await assertSafeMessage(alice)
     assert.equal(abortedUploads,1,'exactly one upload acknowledgement was deliberately lost')
     assert.equal(abortedMessages,1,'exactly one message acknowledgement was deliberately lost')
     const selectedMessage=all.find(m=>m.body===hostileMessage)
-    await bob.goto(origin+`/app?view=chat&conversation=${channel.id}&focus=${selectedMessage.id}`);await assertPlainMessage(bob)
+    await bob.goto(origin+`/app?view=chat&conversation=${channel.id}&focus=${selectedMessage.id}`);await assertSafeMessage(bob)
     const messageFiles=selectedMessage.attachments
     assert.equal(messageFiles.length,1,'only one staged upload binds to the message')
     const file=messageFiles[0];assert.equal(file.id,uploadedFiles[0].id,'message binds the original private reservation')
@@ -217,9 +217,9 @@ export async function runBrowser(origin,destination){
     const downloaded=bob.waitForEvent('download');await bob.getByRole('link',{name:/handover.txt/}).click()
     const browserDownload=await downloaded;assert.ok((await readFile(await browserDownload.path())).equals(handoverBytes),'the actual browser downloads the authorized file without truncation')
     await alice.getByRole('button',{name:'Remove file',exact:true}).click();await alice.getByText('Attachment removed',{exact:true}).waitFor();await bob.getByText('Attachment removed',{exact:true}).waitFor()
-    await bob.reload();await assertPlainMessage(bob)
+    await bob.reload();await assertSafeMessage(bob)
     await alice.goto(origin+`/app?view=chat&conversation=${channel.id}&focus=${selectedMessage.id}`)
-    await alice.reload();await assertPlainMessage(alice)
+    await alice.reload();await assertSafeMessage(alice)
     for(const page of [alice,bob])assert.deepEqual(await page.evaluate(()=>{const ids=[...document.querySelectorAll('[id]')].map(node=>node.id);return ids.filter((id,i)=>ids.indexOf(id)!==i)}),[],'no duplicate DOM IDs')
     checks.push(`${label}: maximum-size binary upload reservation retry after lost acknowledgement and reload, authorized download/remove, literal human markup, exact-intent retry after lost acknowledgement and reload`)
     // Two interactions create a DM, named for the other participant in each session.
