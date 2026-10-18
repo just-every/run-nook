@@ -53,3 +53,9 @@ Open **Scheduled** in the sidebar or **You → Scheduled messages** on a phone. 
 The scheduler runs without an open browser and checks the sender’s current identity, membership, thread, mentions and posting permission again when due. A failed or unconfirmed send is visible with its reason; it is never automatically reposted. **Check scheduler** retries arming the durable scheduler without creating a second occurrence. More than 15 minutes late after an outage is held for review: choose a new future time before resuming. Restored archives pause active schedules for the same review.
 
 Recurrence keeps the chosen local wall-clock time across daylight saving. A missing hour advances by the transition gap; a repeated hour uses its first occurrence once. Monthly prompts skip months without the requested day. End dates include that day in the schedule’s time zone.
+
+## Drafts & sent
+
+Open **Drafts & sent** in the sidebar, or under **You** on a phone. **Drafts** lists unsent messages saved in this browser for your account, including thread replies and unconfirmed sends. Continue a draft to reopen its conversation or thread; retrying an unconfirmed send retains its original intent. Browser drafts do not sync to another device.
+
+**Scheduled** contains the same edit, pause, cancel and history controls as Scheduled messages. **Sent** lists messages you sent in the last 30 days, newest first, with pages of older messages and a link back to each message. It shows current revisions and excludes deleted messages and conversations you can no longer read. Imported history is not a sent message.
