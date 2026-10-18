@@ -9,7 +9,7 @@ import {teamFixture} from './team-sql-support.mjs';
 const require=createRequire(import.meta.url),wranglerRequire=createRequire(require.resolve('wrangler'));
 const {build}=wranglerRequire('esbuild');
 const dir=await mkdtemp(join(tmpdir(),'nook-erasure-'));
-const entry="export {discardExpiredFiles} from './src/team/erasure/expired-files.mjs';export {Context} from './src/platform/storage/context';export {erase,advance,receipt,preview,pending} from './src/team/erasure/service';export {send,edit} from './src/platform/storage/messages';export {remove as removeFile,upload} from './src/platform/storage/files';export {teamRoute} from './src/team/routes.server';export {createOutcome,reviseOutcome} from './src/platform/storage/outcomes';export {historyWindow} from './src/platform/storage/history';export {read} from './src/platform/storage/read';export {imports} from './src/platform/storage/imports';export {rebuildSearch} from './src/platform/storage/portability.mjs';export {portabilityPolicy} from './src/platform/portability-policy.mjs';";
+const entry="export {drainSchedules} from './src/scheduled/runner';export {discardExpiredFiles} from './src/team/erasure/expired-files.mjs';export {Context} from './src/platform/storage/context';export {erase,advance,receipt,preview,pending} from './src/team/erasure/service';export {send,edit} from './src/platform/storage/messages';export {remove as removeFile,upload} from './src/platform/storage/files';export {teamRoute} from './src/team/routes.server';export {createOutcome,reviseOutcome} from './src/platform/storage/outcomes';export {historyWindow} from './src/platform/storage/history';export {read} from './src/platform/storage/read';export {imports} from './src/platform/storage/imports';export {rebuildSearch} from './src/platform/storage/portability.mjs';export {portabilityPolicy} from './src/platform/portability-policy.mjs';";
 async function compiled(name,changes={}){
  const outfile=join(dir,name+'.mjs');
  await build({stdin:{contents:entry,resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',outfile,logLevel:'silent',plugins:[{name:'source-policy-choice',setup(builder){builder.onLoad({filter:/team\/erasure\/policy\.ts$/},async({path})=>{let contents=await readFile(path,'utf8');for(const [from,to] of Object.entries(changes))contents=contents.replace(from,to);return {contents,loader:'ts'}})}}]});
@@ -72,6 +72,16 @@ test('public member erasure removes scheduled templates and their private bytes 
    assert.equal(new TextDecoder().decode(f.objects.get(key)),bytes);
    return {id,key,file:file.id};
   };
+  const racing=await schedule(c,'Private scheduled file','race.txt','Unsent original template bytes','race-template');
+  const get=f.env.FILES.get,put=f.env.FILES.put;let release,started;
+  const blocked=new Promise(resolve=>{release=resolve}),copyStarted=new Promise(resolve=>{started=resolve});
+  f.env.FILES.get=async key=>{const object=await get(key);if(key!==racing.key)return object;const metadata=f.db.prepare('SELECT sha256 FROM nook_schedule_files WHERE object_key=?').get(key);started();await blocked;return {...object,customMetadata:{sha256:metadata.sha256}}};
+  f.env.FILES.put=async(key,body)=>put(key,new Uint8Array(await new Response(body).arrayBuffer()));
+  const local=new Date(Date.now()).toISOString().slice(0,16);f.db.prepare('UPDATE nook_schedules SET local_at=?,next_due=? WHERE id=?').run(local,Date.parse(local+'Z'),racing.id);
+  const sending=standard.drainSchedules(f.env);await copyStarted;
+  let fileReceipt;
+  try{fileReceipt=(await removeFile(c,racing.file)).receipt;assert.equal(fileReceipt.state,'pending','template erasure waits for its in-flight private copy')}finally{release();await sending;f.env.FILES.get=get;f.env.FILES.put=put}
+  await finish(c,fileReceipt);assert.equal(f.objects.size,0);assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_messages').get().n,0,'erased template cannot finish its scheduled send');
   const erased=await schedule(c,'SCHEDULECANARYBODY','SCHEDULECANARYFILE.txt','SCHEDULECANARYBYTES','SCHEDULECANARYINTENT');
   const kept=await schedule(owner,'Keep the owner briefing','briefing.txt','Owner briefing bytes','owner-briefing');
   assert.match(JSON.stringify(await exported(f)),/SCHEDULECANARY/);

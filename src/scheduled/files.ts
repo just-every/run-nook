@@ -63,7 +63,7 @@ export async function materializeOccurrenceFiles(env:StorageBindings,schedule:an
  if(templates.length!==ids.length||templates.some((row,index)=>row.attachment!==ids[index]||row.position!==index))fail(409,'Scheduled attachment bindings changed; review the message')
  const result:string[]=[],copies=await Promise.all(templates.map(async template=>({template,hash:await digest(JSON.stringify([schedule.id,schedule.version,schedule.local_at,template.attachment]))})))
  try{for(const {template,hash} of copies){
-  const id='scheduled-file:'+hash,intent=id,objectPath='private/scheduled/'+hash
+  const id='scheduled-file:'+hash,intent='scheduled-template:'+template.attachment+':'+hash,objectPath='private/scheduled/'+hash
   const sql=(statement:string,...values:any[])=>env.DB.prepare(statement).bind(...values)
   const templateGuard='EXISTS(SELECT 1 FROM nook_schedule_files WHERE schedule=? AND attachment=? AND object_key=? AND sha256=?)'
   const current=`(${guard}) AND ${templateGuard} AND NOT EXISTS(SELECT 1 FROM nook_erased_attachments WHERE intent_digest=?)`,currentValues=[...guardValues,schedule.id,template.attachment,template.object_key,template.sha256,await erasedIntent(schedule.user,intent)]

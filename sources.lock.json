@@ -4133,11 +4133,11 @@
       "executable": false
     },
     "src/scheduled/erasure.ts": {
-      "sha256": "aaf523586c67e0af2ff1fc5394f285f806aa8b4f893d677f0198713fcaefb85c",
+      "sha256": "34fe2fbc3892f7696cedff407fbe30e88affa81dd3129ac17451ca64264df804",
       "executable": false
     },
     "src/scheduled/files.ts": {
-      "sha256": "33b92f449bd165486793214d36e0f98a879c3a483595b4a1bd5712f5262af3e3",
+      "sha256": "c26b1ce31cf0eef92c15bb92d08bfcf1c3997e7e6de4b0620ff99862e6b50a47",
       "executable": false
     },
     "src/scheduled/runner.ts": {
@@ -4529,7 +4529,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "8d1d95545884b19a3e556b24eecaffda1fd250946c0f4d09c87018eb6e1561f9",
+      "sha256": "5fa51933f74febabf7262f8d28759aa0d7e25e2079bba1b5500ad1b2d20a6aac",
       "executable": false
     },
     "tests/exit-export.test.mjs": {
