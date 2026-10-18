@@ -1,3 +1,4 @@
+import {assertMattermostFileSize} from './mattermost-effects.mjs';
 import { fail } from '../family/team-chat/domain';
 import type { Context } from '../platform/storage/context';
 import { owner, ownerBatch } from './owner';
@@ -32,7 +33,7 @@ export async function localUpload(c: Context, request: Request,kind='slack') {
     await inspectSource(bytes,kind,[]);
     let upload = await c.one("SELECT * FROM nook_import_uploads WHERE owner=? AND archive_digest=? AND state<>'discarded'", [c.uid, archiveDigest]);
     if (!upload) {
-        const id = crypto.randomUUID(), key = `private/imports/${c.uid}/${id}/${kind==='campfire'?'archive.campfire.tar.gz':'archive.zip'}`;
+        const id = crypto.randomUUID(), key = `private/imports/${c.uid}/${id}/${kind==='mattermost'?'archive.mattermost.zip':kind==='campfire'?'archive.campfire.tar.gz':'archive.zip'}`;
         await ownerBatch(c, [c.sql("INSERT INTO nook_import_uploads VALUES(?,?,?,?,?,'reserved',?)", id, c.uid, archiveDigest, key, bytes.length, Date.now())]);
         upload = await c.one('SELECT * FROM nook_import_uploads WHERE id=? AND owner=?', [id, c.uid]);
     }
@@ -55,7 +56,7 @@ const FILES_PER_REQUEST = 100, STAGE_STATEMENTS = 20;
 export async function stageFiles(c: Context, upload: string, capture: any, reviewId: string) {
     assertSlackCaptureAdmitted(capture);
     const files = capture.messages.flatMap((message: any) => message.files.map((file: any) => {
-        if(capture.sourceType==='campfire')assertCampfireFileSize(file.size);else assertSlackFileSize(file.size);
+        if(capture.sourceType==='mattermost')assertMattermostFileSize(file.size);else if(capture.sourceType==='campfire')assertCampfireFileSize(file.size);else assertSlackFileSize(file.size);
         return { ...file, key: fileObjectKey(c.uid, upload, captureJobId(capture, upload), reviewId, captureNativeId(capture, 'file', `${message.key}:${file.sourceId}`)) };
     }));
     if (!files.length) return { staged: 0, total: 0 };

@@ -1,3 +1,4 @@
+import {mattermostKitSource} from './mattermost-effects.mjs';
 import {campfireKitSource} from './campfire-effects.mjs';
 import { reviewMetadata, captureArtifactName } from './review-binding.mjs';
 import { canonicalJson, sha256, type SourceBundle, type ImportMapping } from './kit.ts';
@@ -7,6 +8,7 @@ import { assertSlackEffect } from './policy.mjs';
  * ZIP remains separately in owner-only R2 custody; no unselected bodies enter
  * channel effects. This artifact is the exact reviewed normalized capture. */
 export function kitSource(capture: any, owner: string, uploadId: string, reviewId: string) {
+    if(capture.sourceType==='mattermost')return mattermostKitSource(capture,owner,uploadId,reviewId);
     if(capture.sourceType==='campfire')return campfireKitSource(capture,owner,uploadId,reviewId);
     const { domainJob, effects } = effectInputs(capture, owner, uploadId, reviewId);
     const normalized = canonicalJson({ ...reviewMetadata(capture), namespace: capture.namespace, archiveDigest: capture.archiveDigest, digest: capture.digest, omissions: capture.omissions, effects });

@@ -6,7 +6,7 @@ import { Fault, fail } from '../family/team-chat/domain';
 import { metered } from './request-budget.ts';
 export async function slackImportRoute(request: Request, env: StorageBindings): Promise<Response | null> {
     const url = new URL(request.url);
-    const kind=url.pathname.startsWith('/api/campfire-imports')?'campfire':'slack',base='/api/'+kind+'-imports';
+    const kind=url.pathname.startsWith('/api/mattermost-imports')?'mattermost':url.pathname.startsWith('/api/campfire-imports')?'campfire':'slack',base='/api/'+kind+'-imports';
     if (url.pathname !== base && !url.pathname.startsWith(base+'/'))
         return null;
     try {
@@ -72,7 +72,7 @@ export async function slackImportRoute(request: Request, env: StorageBindings): 
         return Response.json(result, { headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
     }
     catch (error) {
-        const message = error instanceof Error ? error.message : 'Import failed', status = error instanceof Fault ? error.status : /^(ZIP_REJECTED|SLACK_INVALID|CAMPFIRE_INVALID)/.test(message) ? 400 : /(IMPORT_|PLAN_|JOB_|REVIEW_|SOURCE_|TARGET_|CONFLICT|constraint)/.test(message) ? 409 : 500;
+        const message = error instanceof Error ? error.message : 'Import failed', status = error instanceof Fault ? error.status : /^(ZIP_REJECTED|SLACK_INVALID|CAMPFIRE_INVALID|MATTERMOST_INVALID)/.test(message) ? 400 : /(IMPORT_|PLAN_|JOB_|REVIEW_|SOURCE_|TARGET_|CONFLICT|constraint)/.test(message) ? 409 : 500;
         return Response.json({ error: status === 500 ? 'Import failed; retry the same reviewed job' : message }, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
     }
 }

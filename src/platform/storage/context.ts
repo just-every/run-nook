@@ -9,7 +9,7 @@ export type StorageBindings=AuthBindings & {FILES:R2Bucket;CHAT_HUB:DurableObjec
 export const authority=`(SELECT authority FROM nook_storage WHERE id=1)='normalized'`
 export const authFence=`EXISTS(SELECT 1 FROM oa_sessions s JOIN oa_operators o ON o.id=s.operator_id WHERE s.id=? AND s.operator_id=? AND s.operator_version=? AND o.version=s.operator_version AND o.status='active' AND ${productAccess('o.id')} AND s.revoked_at IS NULL AND s.expires_at>CAST(unixepoch('subsec')*1000 AS INTEGER))`
 // Unpublished imported history stays hidden, except a source import from the owner applying it.
-export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=? AND mf.user=? AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
+export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=? AND mf.user=? AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
 export class Context {
  constructor(readonly env:StorageBindings,readonly session:Session){}
  get db(){return this.env.DB}

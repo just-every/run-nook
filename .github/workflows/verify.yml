@@ -29,6 +29,8 @@ jobs:
           - stage: runtime browser
             # Both widths, Slack import, installed app and homepage remain on every push.
             command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime --suite=core-browser
+          - stage: mattermost import
+            command: pnpm build:app && pnpm test:runtime --suite=mattermost-imports
           - stage: campfire import
             command: pnpm build:app && pnpm test:runtime --suite=campfire-imports
           - stage: readable exit

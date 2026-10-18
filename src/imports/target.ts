@@ -1,3 +1,4 @@
+import {importDigest} from '../family/team-chat/import-capture.mjs';
 import type { D1TargetAdapter, TargetRow } from './kit.ts';
 import { readTarget, targetMatches, targetMatchParts, sql } from './target-snapshot.ts';
 import { redactionScope } from './target-redaction.ts';
@@ -28,6 +29,12 @@ export function importTargets(): D1TargetAdapter {
                 // peer's existing record with sanitized values: the immutable row is
                 // replaced in the kit's fenced batch, and its files stay as they are.
                 result.push(sql('DELETE FROM nook_import_records WHERE id=?', v.id), sql('INSERT INTO nook_import_records(id,job,key,conversation,source_actor,source_timestamp,source_record,body,body_lower,parent,sequence) VALUES(?,?,?,?,?,?,?,?,?,?,?)', v.id, v.job, v.key, v.conversation, v.sourceActor, v.sourceTimestamp, JSON.stringify(v.sourceRecord), v.body, v.body.toLowerCase(), v.parent, v.sequence), sql("DELETE FROM nook_search WHERE message=? AND source='imported'", v.id), sql("INSERT INTO nook_search(message,conversation,source,scope,body_lower) VALUES(?,?,'imported',?,?)", v.id, v.conversation, '|' + v.conversation + '|', v.body.toLowerCase()));
+                if(v.sourceRecord.nookSource==='mattermost') {
+                    // Source collections are imported without chat activity. Their
+                    // opaque references keep the existing tombstone behavior on undo.
+                    for(const user of v.sourceRecord.mappedSavedUsers) result.push(sql("INSERT OR IGNORE INTO nook_saved_items(id,user,conversation,kind,target,created) SELECT ?,?,?,'message',?,? WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors WHERE id=?)", 'mattermost-save-'+importDigest([v.id,user]).slice(0,40),user,v.conversation,v.id,new Date().toISOString(),user));
+                    if(v.sourceRecord.is_pinned) result.push(sql("INSERT OR IGNORE INTO nook_channel_pins(id,conversation,message,actor,created) SELECT ?,?,?,NULL,? WHERE EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind IN ('channel','private'))", 'mattermost-pin-'+v.id.slice(11),v.conversation,v.id,new Date().toISOString(),v.conversation));
+                }
                 for (const f of v.files)
                     result.push(sql("INSERT INTO nook_attachments(id,conversation,author,message,name,mime,size,sha256,expires,state,created,object_key,intent,position) SELECT ?,?,?, ?,?,?,?,?,0,'attached',?,?,?,? WHERE EXISTS(SELECT 1 FROM nook_import_objects WHERE object_key=? AND sha256=? AND size=? AND mime=? AND state='ready') AND NOT EXISTS(SELECT 1 FROM nook_attachments WHERE id=?)", f.id, v.conversation, f.author, v.id, f.name, f.mime, f.size, f.sha256, f.created, f.objectKey, f.intent, f.position, f.objectKey, f.sha256, f.size, f.mime, f.id), sql('INSERT INTO nook_import_files(id,job,message,source_id,attachment,position) SELECT ?,?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM nook_import_files WHERE id=?)', f.id, v.job, v.id, f.sourceId, f.id, f.position, f.id));
             }

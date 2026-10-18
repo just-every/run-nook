@@ -1,0 +1,341 @@
+{
+  "format": 1,
+  "generator": "Mattermost REST API fixture population",
+  "users": [
+    {
+      "id": "ibgb478mbfdd8qm737xq567snr",
+      "username": "aisha",
+      "email": "aisha@fixture.example",
+      "first_name": "Aisha",
+      "last_name": "Fixture",
+      "roles": "system_user"
+    },
+    {
+      "id": "7rciko1fr7bhxk1z8g5gtgtqho",
+      "username": "leo",
+      "email": "leo@fixture.example",
+      "first_name": "Leo",
+      "last_name": "Fixture",
+      "roles": "system_user"
+    },
+    {
+      "id": "jant99j4figz7chu7z348uz6hc",
+      "username": "maya",
+      "email": "maya@fixture.example",
+      "first_name": "Maya",
+      "last_name": "Fixture",
+      "roles": "system_admin system_user"
+    },
+    {
+      "id": "nyb8rp8fufyw7rjm96tzmygiih",
+      "username": "sam",
+      "email": "sam@fixture.example",
+      "first_name": "Sam",
+      "last_name": "Fixture",
+      "roles": "system_user"
+    }
+  ],
+  "teams": [
+    {
+      "id": "zw86qghwgjnpxefabo6y4mxxie",
+      "name": "launch",
+      "display_name": "Launch",
+      "type": "O",
+      "members": [
+        "maya",
+        "leo",
+        "aisha",
+        "sam"
+      ],
+      "member_roles": {
+        "maya": "team_user team_admin",
+        "leo": "team_user team_admin",
+        "aisha": "team_user",
+        "sam": "team_user"
+      }
+    },
+    {
+      "id": "n1gnfgww43fhtef5o4je665sth",
+      "name": "support",
+      "display_name": "Support",
+      "type": "O",
+      "members": [
+        "maya",
+        "leo",
+        "sam"
+      ]
+    }
+  ],
+  "channels": [
+    {
+      "id": "naq5uuh6riyebr8nre64pry7be",
+      "key": "maya,leo",
+      "type": "D",
+      "members": [
+        "maya",
+        "leo"
+      ]
+    },
+    {
+      "id": "1qrcyiuquibrmkfppzr3e9eenw",
+      "key": "leo,aisha,sam",
+      "type": "G",
+      "members": [
+        "leo",
+        "aisha",
+        "sam"
+      ]
+    },
+    {
+      "id": "ty61sb84yigaxm1dy6oad8twer",
+      "key": "launch/release-room",
+      "team": "launch",
+      "name": "release-room",
+      "type": "O",
+      "members": [
+        "maya",
+        "leo",
+        "aisha",
+        "sam"
+      ],
+      "member_roles": {
+        "maya": "channel_user channel_admin",
+        "leo": "channel_user channel_admin",
+        "aisha": "channel_user",
+        "sam": "channel_user"
+      }
+    },
+    {
+      "id": "z7rjjj5z4iyp988t5eqhbwhudh",
+      "key": "support/customer-care",
+      "team": "support",
+      "name": "customer-care",
+      "type": "O",
+      "members": [
+        "maya",
+        "leo",
+        "sam"
+      ]
+    },
+    {
+      "id": "ktcekerrfifo3gqy7z4ruhfhyc",
+      "key": "launch/private-plans",
+      "team": "launch",
+      "name": "private-plans",
+      "type": "P",
+      "members": [
+        "maya",
+        "aisha"
+      ]
+    }
+  ],
+  "posts": [
+    {
+      "key": "public-root",
+      "id": "z3sbf4tkpjb6fnc491fufh7ahc",
+      "channel": "launch/release-room",
+      "author": "maya",
+      "message": "Launch checklist is ready. @leo please review :launch_spark:",
+      "create_at": 1792360800785,
+      "edit_at": 0,
+      "root": null,
+      "file_ids": [
+        "5iem7hkn1tgnfgsgi33b43c4ke"
+      ],
+      "saved_by": [
+        "aisha",
+        "leo"
+      ],
+      "is_pinned": true,
+      "reactions": [
+        {
+          "user": "aisha",
+          "emoji_name": "launch_spark",
+          "create_at": 1792360800891
+        },
+        {
+          "user": "leo",
+          "emoji_name": "thumbsup",
+          "create_at": 1792360800892
+        }
+      ]
+    },
+    {
+      "key": "public-reply",
+      "id": "3g9hny45ytfe3go6t69za1gu1r",
+      "channel": "launch/release-room",
+      "author": "leo",
+      "message": "Reviewed the checklist; ready for the next step.",
+      "create_at": 1792360800798,
+      "edit_at": 0,
+      "root": "public-root",
+      "file_ids": [],
+      "saved_by": [
+        "maya"
+      ],
+      "is_pinned": true,
+      "reactions": [
+        {
+          "user": "maya",
+          "emoji_name": "eyes",
+          "create_at": 1792360800897
+        }
+      ]
+    },
+    {
+      "key": "public-update",
+      "id": "u9peze3uqjfgpx54k6r53mzqho",
+      "channel": "launch/release-room",
+      "author": "sam",
+      "message": "The release notes include café and 日本語 examples.",
+      "create_at": 1792360800813,
+      "edit_at": 0,
+      "root": null,
+      "file_ids": [],
+      "saved_by": [],
+      "is_pinned": false,
+      "reactions": []
+    },
+    {
+      "key": "private-root",
+      "id": "nmzsje3wkbgj3qeycc7pp8778h",
+      "channel": "launch/private-plans",
+      "author": "aisha",
+      "message": "Private launch budget for Maya and Aisha only.",
+      "create_at": 1792360800824,
+      "edit_at": 0,
+      "root": null,
+      "file_ids": [
+        "bf6ka6a3t3rp5qsnh6b3rhmbko"
+      ],
+      "saved_by": [],
+      "is_pinned": false,
+      "reactions": []
+    },
+    {
+      "key": "private-reply",
+      "id": "9r3bahc43bfhj81cngfd9p3woc",
+      "channel": "launch/private-plans",
+      "author": "maya",
+      "message": "I have reviewed this private budget.",
+      "create_at": 1792360800832,
+      "edit_at": 0,
+      "root": "private-root",
+      "file_ids": [],
+      "saved_by": [],
+      "is_pinned": false,
+      "reactions": []
+    },
+    {
+      "key": "support-root",
+      "id": "xsxuxy4bp7dffd4rktadyi84uy",
+      "channel": "support/customer-care",
+      "author": "sam",
+      "message": "Customer support handover starts at 09:00.",
+      "create_at": 1792360800842,
+      "edit_at": 0,
+      "root": null,
+      "file_ids": [],
+      "saved_by": [],
+      "is_pinned": false,
+      "reactions": []
+    },
+    {
+      "key": "support-update",
+      "id": "pebi16zqx7n5tko9qr88f5hqyy",
+      "channel": "support/customer-care",
+      "author": "leo",
+      "message": "The support queue has a new triage guide.",
+      "create_at": 1792360800848,
+      "edit_at": 0,
+      "root": null,
+      "file_ids": [],
+      "saved_by": [],
+      "is_pinned": false,
+      "reactions": []
+    },
+    {
+      "key": "dm-root",
+      "id": "ahqbipqtkpretfenk7f9puan6y",
+      "channel": "maya,leo",
+      "author": "leo",
+      "message": "Maya, here is the private handover note.",
+      "create_at": 1792360800857,
+      "edit_at": 0,
+      "root": null,
+      "file_ids": [
+        "6dgteogd1iyb78wj86uqrj6rac"
+      ],
+      "saved_by": [
+        "maya"
+      ],
+      "is_pinned": false,
+      "reactions": []
+    },
+    {
+      "key": "dm-reply",
+      "id": "ce5fsmcm1fnjx8b6n15ok95roe",
+      "channel": "maya,leo",
+      "author": "maya",
+      "message": "Received the handover note.",
+      "create_at": 1792360800865,
+      "edit_at": 0,
+      "root": "dm-root",
+      "file_ids": [],
+      "saved_by": [],
+      "is_pinned": false,
+      "reactions": []
+    },
+    {
+      "key": "group-root",
+      "id": "sdp54rbftfgi3d9gb6swqpgqth",
+      "channel": "leo,aisha,sam",
+      "author": "aisha",
+      "message": "Leo, Aisha and Sam group: Maya is not a participant.",
+      "create_at": 1792360800876,
+      "edit_at": 0,
+      "root": null,
+      "file_ids": [],
+      "saved_by": [],
+      "is_pinned": false,
+      "reactions": [
+        {
+          "user": "sam",
+          "emoji_name": "thumbsup",
+          "create_at": 1792360800903
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "id": "5iem7hkn1tgnfgsgi33b43c4ke",
+      "post": "public-root",
+      "name": "launch-checklist.txt",
+      "size": 49,
+      "sha256": "70a8fcb33052c1ea85eded1849ce656eda6e85fb9ff39a83834d845b127c0cd6"
+    },
+    {
+      "id": "bf6ka6a3t3rp5qsnh6b3rhmbko",
+      "post": "private-root",
+      "name": "private-budget.txt",
+      "size": 40,
+      "sha256": "3612eca5d97ac25a16ac25bf09a1a80fd3551a590ef47e7bc388084ab5bee6f0"
+    },
+    {
+      "id": "6dgteogd1iyb78wj86uqrj6rac",
+      "post": "dm-root",
+      "name": "handover.txt",
+      "size": 48,
+      "sha256": "df51725ed71b6634394c124b2f69b627d44499b07a44c5abc11cfa2b71d98dfc"
+    }
+  ],
+  "emoji": [
+    {
+      "id": "xcewns6z8tnd7fgg4dxgjyy8ty",
+      "name": "launch_spark",
+      "size": 70,
+      "sha256": "a3ddde277d24c767cf92bc0c94b6af6a36652e760d3096aea896f111b356aafa"
+    }
+  ]
+}

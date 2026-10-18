@@ -1,3 +1,4 @@
+import {validateMattermostReviewed} from './mattermost-reviewed.mjs';
 import {validateCampfireReviewed} from './campfire-reviewed.mjs';
 import { missingFileInventory } from './slack-records.mjs';
 import { reviewMetadata, captureArtifactName, validateReviewDecisions, actorChoiceMatches } from './review-binding.mjs';
@@ -15,6 +16,7 @@ const equal = (a, b) => canonicalJson(a) === canonicalJson(b);
 // Shared immutable binding validation for offline archives and lost-ack recovery.
 // It never replans with a changed audience or grants forward authority.
 export async function validateReviewedPlan(read, review, job, plan) {
+    if(JSON.parse(review.summary_json).sourceType==='mattermost')return validateMattermostReviewed(read,review,job,plan);
     if(JSON.parse(review.summary_json).sourceType==='campfire')return validateCampfireReviewed(read,review,job,plan);
     check(job.mapping_version === MAPPING_VERSION && job.destination === review.owner && job.principal_id === review.owner && job.operation_key === review.id && job.namespace === review.namespace && (plan.erasure?.reviewedFingerprint??job.fingerprint) === review.fingerprint, 'invalid_slack_job_binding');
     check(plan.version === 1 && plan.fingerprint === job.fingerprint && planFingerprint(plan) === job.fingerprint, 'slack_plan_changed');
