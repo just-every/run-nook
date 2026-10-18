@@ -2,10 +2,25 @@
 
 Use **Readable export** in You to prepare all conversations you can currently
 read, or the conversation control to prepare one conversation. This includes
-your own DMs. Being an owner or admin does not let this control read another
-person’s DM or a private channel you have not joined. Organization-wide and
-protected compliance exports need the separate authority described by NOOK-039;
-this control grants none.
+your own DMs. Ordinary member exports never open another person’s DM or a
+private channel you have not joined, including when you have an admin role.
+
+For a whole-workspace exit, a current owner opens **Owner workspace export
+policy** and explicitly enables **Allow owners to export the whole workspace,
+including private conversations**. This policy is disabled initially. Choose
+**Whole workspace** in **Export scope**, accept custody and prepare the copy.
+This separate owner authority includes every published conversation, its actual
+participants and files, plus non-secret default-channel, broadcast and readable
+export configuration. It does not add the owner as a conversation member or
+allow ordinary private reads. Unpublished import conversations are individually
+named as omissions. Protected held copies and compliance-search authority remain
+outside this door (NOOK-039); no hold inventory is disclosed.
+
+Every workspace request checks the current owner role and the enabled policy
+version. Disabling or changing the policy blocks all older workspace jobs,
+including their files and already prepared pages. Re-enabling requires a fresh
+job. Operational restore discards jobs and resets this authority to disabled;
+an owner must explicitly grant it again in the restored installation.
 
 Accept custody of the downloaded copies, then choose **Prepare**. Preparation
 checks bounded pages and the real SHA-256 of each attached file. Its completeness
@@ -29,8 +44,9 @@ external images, fonts, scripts or tracking links. Attached bytes are embedded;
 the file index names their sizes and SHA-256 checksums. The complete machine
 format is embedded as inert JSON in `script#nook-export` for another importer.
 
-Preparing and downloading check your current session and current membership on
-every page, report and file request. If membership is removed, those requests
+Preparing and downloading check your current session and current scope authority
+on every page, report and file request: membership for ordinary exports, current
+owner role and policy version for workspace exports. If membership is removed, those requests
 stop. A change to selected source content invalidates the job, including a change
 after completion. Start a new job to get one consistent source revision. Writes
 in unrelated conversations do not invalidate a selected conversation export.
@@ -63,7 +79,9 @@ each set’s observed count against its source count.
   status and presence.
 - Raw source archives, integration secrets and installation authentication,
   domain, mail and provider configuration. Conversation topics, archive/manager
-  state, posting policies, pins and recorded channel actions are included.
+  state, posting policies, pins and recorded channel actions are included. Whole
+  workspace exports also include non-secret workspace defaults, broadcast policy
+  and export policy; credential-bearing local configuration stays excluded.
 - Workflow/app definitions and agent run history: this release does not
   implement these artifacts. Their absence is named rather than represented by
   invented records. Future implementations must add a documented dataset and
@@ -116,6 +134,8 @@ attachments contain identical bytes. Consumers can deduplicate storage by SHA.
 
 | Record type | Key data and relationships |
 | --- | --- |
+| `workspace_configuration` | Workspace scope only: non-secret `export_policy`, `default_channels`, `broadcast_policy`, `broadcast_people`. Its conversation is the empty string. |
+| `unpublished_imports` | Workspace scope only: source job/channel ID, state and exact named omission; unpublished content is excluded. Its conversation is the empty string. |
 | `conversations` | `id`, `name`, `kind`, `owner`, native sequence/version; recorded topic/archive/manager settings. |
 | `members`, `dm_roster` | `user`, available display `name` and erasure marker. The DM roster is historical; current members are a separate set. |
 | `membership_history` | Durable `seq`, `user`, `action` (`baseline`, `join`, `leave`) and recorded ISO `at`. |
@@ -134,7 +154,7 @@ attachments contain identical bytes. Consumers can deduplicate storage by SHA.
 | `posting_policy`, `posting_people` | Recorded conversation posting/reply policy and selected participant IDs. |
 | `channel_history` | Action `id`, version/sequence, action/actor/subject/time and any recorded posting-policy change. |
 
-Every record repeats `conversation` inside `data` for easy table import. IDs are
+Each record repeats `conversation` inside `data` for easy table import. IDs are
 opaque, installation-local strings; native and imported messages share the
 message-ID relationship space. A `parent` points to a root message, including
 roots deleted into tombstones. Source import sequences do not advance native
@@ -160,6 +180,9 @@ links. Keep authentication outside the exported documents.
 | Request | Result |
 | --- | --- |
 | `POST /api/readable-exports` with `{scope:"permitted",custodyAccepted:true}` | Create a fixed set of currently readable conversation IDs; no later-added scope is silently included. |
+| `GET /api/readable-exports/policy` | Current workspace export policy and whether the caller can manage it. |
+| `POST /api/readable-exports/policy` with `{enabled,version}` | Current owner changes policy under its exact current version; every earlier workspace job loses authority. |
+| `POST /api/readable-exports` with `{scope:"workspace",custodyAccepted:true}` | Current owner with enabled policy creates a whole-workspace job. |
 | Same request with `{scope:"conversation",conversationId,custodyAccepted:true}` | Create one currently readable conversation job. |
 | `GET /api/readable-exports?after=<cursor>` | Own job metadata, 20 at a time; follow `hasMore`/`cursor`. Revoked/stale jobs show unavailable/invalidated without conversation labels. |
 | `GET /api/readable-exports/:id` | Current report; denied when scope or source changed. |

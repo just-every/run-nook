@@ -1,7 +1,7 @@
 // Jobs hold only resumable live-read metadata and cannot survive credential
 // recovery as useful downloads. Epochs are derived invalidation bookkeeping;
 // the migration-seeded clock row remains in an empty restore destination.
-export const readableExportExcludedTables=['nook_exit_jobs','nook_exit_scopes','nook_exit_pages','nook_exit_changes','nook_exit_clock']
+export const readableExportExcludedTables=['nook_exit_jobs','nook_exit_scopes','nook_exit_pages','nook_exit_changes','nook_exit_clock','nook_exit_policy']
 const check=value=>{if(!value)throw Error('invalid_readable_export_membership_archive')}
 const fields=(row,names)=>Object.keys(row).sort().join()===names.toSorted().join()
 

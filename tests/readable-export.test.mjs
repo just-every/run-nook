@@ -23,6 +23,7 @@ async function fixture(){
  },CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}}
  const context=actor=>new code.Context(env,actor)
  async function person(name,options){const response=await f.accept(await f.invite(name.toLowerCase()+'@example.test',options));const cookie=response.headers.get('set-cookie').split(';')[0];return f.auth.getSession(f.request('/auth/session',null,cookie))}
+ async function signIn(email){await f.call('/auth/magic-link',{email});const response=await f.call('/auth/confirm',{token:f.token()});assert.equal(response.status,303);return f.auth.getSession(f.request('/auth/session',null,response.headers.get('set-cookie').split(';')[0]))}
  const door=(actor,path='',input)=>code.readableExportRoute(context(actor),new Request('https://fixture.test/api/readable-exports'+path,{method:input===undefined?'GET':'POST',headers:{Origin:'https://fixture.test'}}),input??{})
  const json=async(actor,path='',input)=>{const response=await door(actor,path,input);assert.ok(response);return response.json()}
  async function finish(actor,job){for(let n=0;!job.complete&&n<200;n++)job=await json(actor,`/${job.id}/step`,{});assert.ok(job.complete,'every bounded page completes');return job}
@@ -35,7 +36,7 @@ async function fixture(){
   assert.equal(records.length,job.records);assert.equal(files.length,job.files);assert.equal(files.reduce((n,f)=>n+f.size,0),job.bytes)
   return {format:job.format,version:job.version,report:{...job,pageIndex},records,files}
  }
- return {...f,objects,context,person,door,json,finish,bundle}
+ return {...f,objects,context,person,signIn,door,json,finish,bundle}
 }
 const denied=(promise,status)=>assert.rejects(promise,error=>error.status===status)
 async function imported(f){
@@ -50,7 +51,7 @@ async function imported(f){
  return code.imports(c,'apply','',{capture,planDigest:preview.planDigest,intent:'readable-import'})
 }
 
-test('readable exit pages native/imported threads, histories, acceptance, reactions, exact files and offline formats without truncation',async()=>{
+test('NOOK-047 readable exit pages native/imported threads, histories, acceptance, reactions, exact files and offline formats without truncation',async()=>{
  const f=await fixture();try{
   const member=await f.person('ReadableMember'),c=f.context(f.owner),peer=f.context(member),write=(actor,action,id,input)=>code.write(actor,action,id,input)
   const root=await write(c,'messages','launch',{body:'Original body <script>unsafe()</script>',intent:'root'})
@@ -101,11 +102,39 @@ test('readable exit pages native/imported threads, histories, acceptance, reacti
  }finally{f.close()}
 })
 
-test('member scoped exports refuse ordinary admin/owner DM access, other jobs, revocation and stale completed pages',async()=>{
+test('NOOK-047 member scoped exports refuse ordinary admin/owner DM access, other jobs, revocation and stale completed pages',async()=>{
  const f=await fixture();try{
   const member=await f.person('PrivateExporter'),peer=await f.person('PrivatePeer'),admin=await f.person('OrdinaryAdmin',{role:'admin'})
+  await f.person('BackupOwner',{role:'owner'})
   const c=f.context(member),dm=await code.write(c,'conversations','',{name:'Members only DM',kind:'dm',participants:[peer.operatorId]})
-  await code.write(c,'messages',dm.id,{body:'Private scope canary',intent:'dm'})
+  const privateFile=await code.upload(c,dm.id,{name:'private-handoff.txt',mime:'text/plain',bytes:new TextEncoder().encode('Private workspace exact bytes'),intent:'private-file'})
+  await code.write(c,'messages',dm.id,{body:'Private scope canary',attachments:[privateFile.id],intent:'dm'})
+  await denied(f.json(f.owner,'',{scope:'workspace',custodyAccepted:true}),403)
+  const initial=await f.json(f.owner,'/policy');assert.equal(initial.enabled,false)
+  await denied(f.json(admin,'/policy',{enabled:true,version:initial.version}),403)
+  const enabled=await f.json(f.owner,'/policy',{enabled:true,version:initial.version})
+  await denied(f.json(f.owner,'/policy',{enabled:false,version:initial.version}),409)
+  for(const actor of [member,admin])await denied(f.json(actor,'',{scope:'workspace',custodyAccepted:true}),403)
+  let workspace=await f.json(f.owner,'',{scope:'workspace',custodyAccepted:true})
+  workspace=await f.json(f.owner,`/${workspace.id}/step`,{})
+  await f.json(f.owner,`/${workspace.id}/cancel`,{})
+  workspace=await f.finish(f.owner,await f.json(f.owner,`/${workspace.id}/resume`,{}))
+  const whole=await f.bundle(f.owner,workspace)
+  assert.equal(workspace.scope,'workspace')
+  assert.deepEqual(whole.records.filter(r=>r.type==='conversations').map(r=>r.data.id).sort(),f.db.prepare('SELECT id FROM nook_conversations ORDER BY id').all().map(r=>r.id))
+  assert.ok(whole.records.some(r=>r.type==='messages'&&r.data.body==='Private scope canary'))
+  assert.ok(whole.records.some(r=>r.type==='workspace_configuration'&&r.data.export_policy.enabled===1))
+  assert.deepEqual(Buffer.from(whole.files.find(file=>file.id===privateFile.id).base64,'base64'),Buffer.from('Private workspace exact bytes'))
+  f.db.prepare("UPDATE oa_operators SET role='admin' WHERE id=?").run(f.owner.operatorId)
+  const demoted=await f.signIn('owner@example.test')
+  for(const path of ['', '/index','/pages/0','/files/'+privateFile.id])await denied(f.door(demoted,'/'+workspace.id+path),403)
+  f.db.prepare("UPDATE oa_operators SET role='owner' WHERE id=?").run(f.owner.operatorId)
+  f.owner=await f.signIn('owner@example.test')
+  await f.json(f.owner,'/policy',{enabled:false,version:enabled.version})
+  for(const path of ['', '/index','/pages/0','/files/'+privateFile.id])await denied(f.door(f.owner,'/'+workspace.id+path),403)
+  const disabled=await f.json(f.owner,'/policy');await f.json(f.owner,'/policy',{enabled:true,version:disabled.version})
+  await denied(f.json(f.owner,'/'+workspace.id+'/resume',{}),403,'a policy change cannot revive an old workspace job')
+
   for(const actor of [f.owner,admin])await denied(f.json(actor,'',{scope:'conversation',conversationId:dm.id,custodyAccepted:true}),403)
   let job=await f.json(member,'',{scope:'conversation',conversationId:dm.id,custodyAccepted:true});job=await f.finish(member,job)
   await denied(f.json(admin,'/'+job.id),404)
@@ -124,7 +153,7 @@ test('member scoped exports refuse ordinary admin/owner DM access, other jobs, r
  }finally{f.close()}
 })
 
-test('file corruption blocks completeness; erasure invalidates metadata and byte downloads instead of retaining export snapshots',async()=>{
+test('NOOK-047 file corruption blocks completeness; erasure invalidates metadata and byte downloads instead of retaining export snapshots',async()=>{
  const f=await fixture();try{
   const c=f.context(f.owner),attachment=await code.upload(c,'launch',{name:'proof.txt',mime:'text/plain',bytes:new TextEncoder().encode('Expected file bytes'),intent:'file'})
   const message=await code.write(c,'messages','launch',{body:'Erasure-scoped body',attachments:[attachment.id],intent:'file-message'})

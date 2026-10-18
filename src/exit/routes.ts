@@ -2,6 +2,7 @@ import type {Context} from '../platform/storage/context'
 import {fail} from '../family/team-chat/domain'
 import {createJob,jobReport,listJobs,pageIndex,setJobState} from './store'
 import {downloadPage,stepJob} from './pages'
+import {exportPolicy,updateExportPolicy} from './authority'
 import {fileBytes} from './files'
 
 /** Mount inside the ordinary authenticated API boundary, after JSON parsing.
@@ -13,7 +14,9 @@ export async function readableExportRoute(c:Context,request:Request,input:Record
  if(request.method!=='GET'&&request.headers.get('origin')&&request.headers.get('origin')!==url.origin)fail(403,'Origin denied')
  const id=parts[2],action=parts[3],method=request.method
  let value:any
- if(parts.length===2&&method==='GET')value=await listJobs(c,url.searchParams.get('after')??'')
+ if(parts.length===3&&id==='policy'&&method==='GET')value=await exportPolicy(c)
+ else if(parts.length===3&&id==='policy'&&method==='POST')value=await updateExportPolicy(c,input)
+ else if(parts.length===2&&method==='GET')value=await listJobs(c,url.searchParams.get('after')??'')
  else if(parts.length===2&&method==='POST')value=await createJob(c,input)
  else if(parts.length===3&&method==='GET')value=await jobReport(c,id)
  else if(parts.length===4&&method==='POST'&&action==='step')value=await stepJob(c,id)

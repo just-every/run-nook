@@ -21,7 +21,7 @@ async function restore(target,records){
  const service=await createPortability({db:target.adapter,buckets:{FILES:bucket},policy,migrations:migrationHistory(policy)}),id=await service.imports.create(records[0])
  try{for(const record of records)if(record.kind==='part')await service.imports.uploadPart(id,record.index,record);await service.imports.finalize(id,{contentHash:records.at(-1).contentHash,archiveHash:records.at(-1).archiveHash})}catch(error){await service.imports.abort(id);throw error}
 }
-test('operational restore preserves the membership journal exactly, drops live export jobs, and rejects a contradictory membership history',async()=>{
+test('NOOK-047 operational restore preserves the membership journal exactly, drops live export jobs, and rejects a contradictory membership history',async()=>{
  const source=await teamFixture(),target=await teamFixture({bootstrap:false}),badTarget=await teamFixture({bootstrap:false})
  try{
   await source.accept(await source.invite('journal-peer@example.test'))
@@ -30,8 +30,10 @@ test('operational restore preserves the membership journal exactly, drops live e
   source.db.prepare("DELETE FROM nook_members WHERE conversation='review' AND user=?").run(peer)
   source.db.prepare("INSERT INTO nook_exit_jobs(id,owner,scope,created,state,identity_revision,cursor_json) VALUES('live-exit',?,'permitted',?,'running',0,?)").run(source.owner.operatorId,new Date().toISOString(),JSON.stringify({dataset:0,after:''}))
   source.db.prepare("INSERT INTO nook_exit_scopes VALUES('live-exit','launch',0)").run()
+  source.db.prepare('UPDATE nook_exit_policy SET enabled=1,version=version+1 WHERE id=1').run()
   const before=source.db.prepare('SELECT * FROM nook_exit_membership ORDER BY seq').all(),archive=await exported(source)
   await restore(target,archive)
+  assert.equal(target.db.prepare('SELECT enabled FROM nook_exit_policy WHERE id=1').get().enabled,0,'restore requires a fresh explicit export-policy grant')
   assert.deepEqual(target.db.prepare('SELECT * FROM nook_exit_membership ORDER BY seq').all(),before,'restore fires no synthetic join/leave triggers')
   assert.equal(target.db.prepare('SELECT count(*) AS n FROM nook_exit_jobs').get().n,0,'live export job authority does not survive recovery')
   assert.ok(target.db.prepare('SELECT revision FROM nook_exit_clock WHERE id=1').get(),'the migration-seeded clock remains ready for new jobs')

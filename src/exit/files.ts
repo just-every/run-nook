@@ -16,7 +16,8 @@ export async function fileBytes(c:Context,job:string,id:string){
  if(await sha256(bytes)!==row.sha256)fail(503,`Export incomplete: file ${id} failed its SHA-256 checksum. No successful completeness report was issued.`)
  // Recheck membership, erasure and metadata after the object read and hash.
  await assertJob(c,job)
- const live=await c.one("SELECT 1 FROM nook_attachments WHERE id=? AND object_key=? AND sha256=? AND state='attached'",[id,row.object_key,row.sha256],row.conversation)
+ const live=await c.one("SELECT 1 FROM nook_attachments WHERE id=? AND object_key=? AND sha256=? AND state='attached'",[id,row.object_key,row.sha256])
  if(!live)fail(409,'Export file changed')
+ await assertJob(c,job)
  return {metadata:row,bytes}
 }
