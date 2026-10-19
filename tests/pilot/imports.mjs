@@ -77,6 +77,11 @@ export async function importHistory({owner,member,ownerContext,memberContext,ori
  }
  const excluded=await read(memberContext,origin,'/api/search?q='+encodeURIComponent('Update 1:'));assert.equal(excluded.items.some(m=>m.conversation===restricted.id),false,'search applies chosen audience');
  const corpus=await verifyCorpus({context:ownerContext,origin,channels,fixture,stamp,width}),history=corpus.byChannel.get(shared.id);
+ await owner.goto(origin+'/app?view=search&q='+encodeURIComponent('Literal & <script> text'));
+ await expect(owner.locator('.search-result .search-snippet').first()).toContainText('Literal & <script> text.');
+ assert.equal(await owner.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'plain Slack search fits the viewport');
+ await owner.locator('.search-result').first().scrollIntoViewIfNeeded();
+ await owner.screenshot({path:join(destination,`pilot-plain-search-${width}.png`)});
  for(const marker of [fixture.markers.threadRoot,fixture.markers.threadReply,fixture.markers.broadcast,fixture.markers.bot,fixture.markers.app,fixture.markers.edited,fixture.markers.missingFile]){
   const record=history.find(m=>m.provenance?.timestamp===marker.ts);assert.ok(record,`source ${marker.ts} remains in history`);assert.equal(record.body,marker.text);assert.equal(record.immutable,true);
  }

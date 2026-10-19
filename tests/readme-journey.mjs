@@ -9,10 +9,11 @@ import {readmeTeamFlow} from './readme-team-flow.mjs'
 import {copyWorkingTree} from './working-tree-copy.mjs'
 
 // Run README's "Run it on your computer" commands in a fresh clone, in order.
-// Four kinds of line are not executed literally: `verify` (this test is part of it),
+// These lines are not executed literally: `verify` (this test is part of it),
 // the real deploy (it needs an owner account; tests/owner-deploy.test.mjs covers
 // it), the npm global install (the shim below supplies the same launcher) and the clone
-// and cd, which this test has already done. Dev receives a free port so the clone
+// and cd, which this test has already done. Stop signals only this test's own
+// foreground process group. Dev receives a free port so the clone
 // cannot collide with another local app.
 const root=resolve(import.meta.dirname,'..')
 const readme=await readFile(join(root,'README.md'),'utf8')
@@ -31,8 +32,19 @@ const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),b
 await writeFile(join(bin,'rer'),`#!/bin/sh\nexec node ${join(root,'node_modules/@runeditrun/rer/global/rer.mjs')} "$@"\n`,{mode:0o755})
 // The clone is a different checkout: it takes its own local operation, not verify's.
 const {RER_LOCAL_OPERATION:_,...env}={...process.env,PATH:bin+':'+process.env.PATH,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'}
-const run=line=>{try{return execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})}catch{throw Error('README command failed; credential-bearing CLI output withheld')}}
-let dev,browser,ownerEmail
+const run=line=>{try{return execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})}catch(error){
+ const verb=/\brer ([a-z-]+)/.exec(line)?.[1]??'unknown';
+ const output=String(error.stdout??'')+String(error.stderr??'');
+ const code=['missing_input','missing-input','transfer_refused','reconcile_pending_object_work_before_export'].find(code=>output.includes(code));
+ const inputs=['CLOUDFLARE_ACCOUNT_ID','CLOUDFLARE_API_TOKEN'].filter(name=>output.includes(name));
+ throw Error(`README rer ${verb} failed (exit ${error.status??'unknown'}${code?'; '+code:''}${inputs.length?'; inputs '+inputs.join(', '):''}); credential-bearing CLI output withheld`);
+}}
+let dev,devClosed,browser,ownerEmail
+async function stopDev(){
+ if(!dev)return;
+ if(dev.exitCode==null&&!dev.signalCode)process.kill(-dev.pid,'SIGTERM');
+ await devClosed;
+}
 try{
  execFileSync('git',['clone','--quiet','--no-hardlinks',root,clone])
  await copyWorkingTree(root,clone)
@@ -41,7 +53,7 @@ try{
   const line=oneLine.test(original)?'rer dev':original
   if(line==='rer verify'||/^(npm install -g |OWNER_EMAIL=|CLOUDFLARE_ACCOUNT_ID=|git clone |cd )/.test(line))continue
   if(line==='rer dev'){
-   dev=spawn('bash',['-c',line+' --port '+port+' --foreground'],{cwd:clone,env,stdio:['ignore','pipe','pipe'],detached:true});let output=''
+   dev=spawn('bash',['-c',line+' --port '+port+' --foreground'],{cwd:clone,env,stdio:['ignore','pipe','pipe'],detached:true});devClosed=new Promise(ok=>dev.once('close',ok));let output=''
    dev.stdout.on('data',chunk=>output+=chunk);dev.stderr.on('data',chunk=>output+=chunk)
    const ready=await new Promise((ok,bad)=>{const timer=setInterval(()=>{const url=/RER_READY (http:\/\/\S+)/.exec(output)?.[1];if(url){clearInterval(timer);clearTimeout(deadline);ok(url)}else if(dev.exitCode!=null){clearInterval(timer);clearTimeout(deadline);bad(Error('dev exited; credential-bearing CLI output withheld'))}},250);const deadline=setTimeout(()=>{clearInterval(timer);bad(Error('dev never became ready; credential-bearing CLI output withheld'))},10*60_000)})
    assert.equal(ready,`http://127.0.0.1:${port}`,'zero-setup dev uses the selected port')
@@ -50,14 +62,14 @@ try{
    assert.equal(/RER_SIGN_IN /.test(output),false,'dev identity prints no email sign-in line')
    const open=/RER_OPEN (http:\/\/\S+)/.exec(output)?.[1]
    assert.ok(open,'dev prints the link that signs the browser in')
-   browser=await chromium.launch({channel:'chromium'})
+   browser=await chromium.launch({headless:true,channel:'chromium',args:['--use-mock-keychain','--password-store=basic']})
    await firstRun(ready,open)
    continue
   }
+  if(line==='rer dev --stop'){await stopDev();continue}
   const command=line.replace('--owner-email EMAIL','--owner-email '+ownerEmail)
   if(line==='rer export --output exports/nook.rer')assert.equal(dev.exitCode!=null||dev.signalCode!=null,true,'the app is stopped before export')
   const output=run(line==='rer deploy --dry-run'?'OWNER_EMAIL=nativeowner@example.test MAIL_FROM=auth@example.test SENDGRID_API_KEY=test-only-sendgrid-key '+command:command)
-  if(line==='rer dev --stop')await new Promise(ok=>dev.exitCode!=null||dev.signalCode?ok():dev.once('exit',ok))
  }
  assert.equal((await stat(join(clone,'exports/nook.rer'))).mode&0o077,0,'the archive is owner-only')
  // Export again after reset and import: the restored installation holds the same records.
@@ -67,14 +79,14 @@ try{
  console.log('README-JOURNEY passed: fresh clone, zero-setup dev opened signed in, personas, key-gated owner entry, /setup and local teammate replies at 1440 and 390, stop, export, reset, import and deploy dry run.')
 }finally{
  await browser?.close()
- if(dev&&dev.exitCode==null&&!dev.signalCode){try{execFileSync('node',['node_modules/@runeditrun/rer/bin/rer.mjs','dev','--stop'],{cwd:clone,env,stdio:'ignore'})}catch{process.kill(-dev.pid,'SIGTERM')}}
+ await stopDev()
  await rm(clone,{recursive:true,force:true});await rm(bin,{recursive:true,force:true})
 }
 
 // Canonical local entry uses the checkout key and Base's one-click owner page.
 // Native production email-link consumption is covered by operator-auth and runtime.
 async function firstRun(origin,open){
- const desktop=await browser.newPage({viewport:{width:1440,height:1000}})
+ const desktopContext=await browser.newContext({viewport:{width:1440,height:1000}}),desktop=await desktopContext.newPage()
  await openOwner(desktop,origin,open)
  await desktop.getByRole('heading',{name:'Finish setup'}).waitFor()
  assert.ok(await desktop.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal scroll at 1440')
@@ -82,7 +94,7 @@ async function firstRun(origin,open){
  const keyless=await fetch(origin+'/__dev/outbox')
  assert.equal(keyless.status,404,'captured mail route is absent')
  assert.equal((await fetch(origin+'/auth/dev/enter?as=owner',{redirect:'manual'})).status,404,'dev sign-in answers nothing without the dev key')
- const phone=await browser.newPage({viewport:{width:390,height:844}})
+ const phoneContext=await browser.newContext({viewport:{width:390,height:844}}),phone=await phoneContext.newPage()
  await openOwner(phone,origin,open)
  await phone.goto(origin+'/signin')
  await phone.getByRole('link',{name:'Sign in as Owner',exact:true}).click()
@@ -101,7 +113,7 @@ async function firstRun(origin,open){
   assert.deepEqual({name:me.name,role:me.role,mode:me.mode},{name:'Dev '+as,role,mode},`${as} persona is admitted with its own role and mode`)
  }
  await desktop.goto(`${origin}/auth/dev/enter?as=owner&returnTo=/app`);await desktop.waitForURL(origin+'/app')
- await desktop.close();await phone.close()
+ await desktopContext.close();await phoneContext.close()
 }
 
 async function openOwner(page,origin,open){try{await page.goto(open);await page.waitForURL(origin+'/setup')}catch{throw Error('README local owner entry failed; credential-bearing browser diagnostics withheld')}}

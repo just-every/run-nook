@@ -1357,7 +1357,7 @@
       "executable": false
     },
     "scripts/workflow-proof.mjs": {
-      "sha256": "37bf99982b87a44f087b8d3f43c99aa98c69e8259051cae50bc4eed78b4bbc88",
+      "sha256": "8cc46b8ddb530db7f1c40facd7d116d91f348c380e967f5c327a7f02c58f504c",
       "executable": false
     },
     "SEED-COMMAND-CONTRACT.md": {
@@ -4753,7 +4753,7 @@
       "executable": false
     },
     "src/search/server.ts": {
-      "sha256": "03edd7a82b4a825e451f3f5e65ff6d75b9acb3da18fb16a7c675c6ea00c543ad",
+      "sha256": "7a1c83159cb65fff20219c20a1f6cb1c3fd2904ff916db514bedce8824576e3e",
       "executable": false
     },
     "src/search/terms.ts": {
@@ -5401,7 +5401,7 @@
       "executable": false
     },
     "tests/pilot/imports.mjs": {
-      "sha256": "bd7cc152c3cc734cfa1fe89506bde4b6896e71d5c405856636ba532c25be8bda",
+      "sha256": "1c9e2e1c7395abfebd76ade1bdee0607b45d495eae1be52136002ea6c3c2c274",
       "executable": false
     },
     "tests/pilot/progress.mjs": {
@@ -5493,7 +5493,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "ccd6af37889290a1eaaf0917b1b943a81c726800984d8e50a236387c531e22ef",
+      "sha256": "967ab1bc1f8c84d8365d9acd77d86c4b3760185ae220b2bec0619e4552f32e76",
       "executable": false
     },
     "tests/readme-team-flow.mjs": {

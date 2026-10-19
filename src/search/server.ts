@@ -3,6 +3,7 @@ import {allowedGrant,visibleIdentity} from '../team/access'
 import type {Context} from '../platform/storage/context'
 import {publishedImport,sourceCreated} from '../imports/projection'
 import {slackText} from '../imports/presentation'
+import {slackPlainText} from '../imports/slack-text.mjs'
 import {messageAuthorLabel} from '../imports/slack-records.mjs'
 import {parseSearch,searchCursor,type SearchQuery,type SearchSource,type SearchPosition} from './query'
 import {matchesSearch,searchExcerpt} from './terms'
@@ -118,7 +119,8 @@ export async function searchMessages(c:Context,input:Record<string,unknown>,sour
  const fts='(body_lower:'+quote(seed)+' OR (source:"imported" AND body_lower:'+quote(escaped(seed))+'))'
  const aliases:Record<string,string>={'+1':'👍',thumbsup:'👍',heart:'❤️',tada:'🎉',eyes:'👀',white_check_mark:'✅',raised_hands:'🙌'}
  const rows=await c.rows(pageSql(!!seed),[c.uid,query.text,escaped(query.text),position.source,position.id,query.conversation,query.person,query.afterAt,query.beforeAt,+query.hasFile,+query.saved,+query.pinned,source??null,fts,query.conversationType,query.participant,+query.directToMe,+query.thread,+query.hasLink,query.reaction?(aliases[query.reaction]??query.reaction):null,query.reaction])
- const candidates=await candidateMessages(c,rows.filter(row=>row.id!==null)),fileText=await searchFileText(c,candidates.map(row=>row.id)),matched=candidates.filter(row=>matchesSearch([row.source_class===0?row.native_body:row.import_body,...(fileText.get(row.id)??[]).flatMap(file=>[file.name,file.text])],query.terms)),returned=matched.slice(0,pageSize),meta=rows[0]
+ // Stored Slack source keeps its escapes; apply terms to its plain reading.
+ const candidates=await candidateMessages(c,rows.filter(row=>row.id!==null)),fileText=await searchFileText(c,candidates.map(row=>row.id)),matched=candidates.filter(row=>matchesSearch([row.source_class===0?row.native_body:row.import_retained?row.import_body:slackPlainText(row.import_body),...(fileText.get(row.id)??[]).flatMap(file=>[file.name,file.text])],query.terms)),returned=matched.slice(0,pageSize),meta=rows[0]
  const rendered=await Promise.all(returned.map(row=>hydrate(c,row))),current=await currentKeys(c,returned),liveFiles=await currentSearchFiles(c,[...fileText.keys()])
  const items=rendered.flatMap((item,index)=>{
   const row=returned[index];if(!current.has(row.source_class+':'+row.id))return []

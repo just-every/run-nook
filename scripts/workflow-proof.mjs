@@ -17,8 +17,8 @@ export async function verifyWorkflow(base,context,{sessionsExcluded=false,preser
  const [owner,member]=context.actors
  const a=preservedSessions?client(base,owner.cookie):await signIn(base,owner)
  const b=preservedSessions?client(base,member.cookie):await signIn(base,member)
- assert.deepEqual((await a('me')).data,{id:owner.id,name:owner.name,role:'member',mode:'member'})
- assert.deepEqual((await b('me')).data,{id:member.id,name:member.name,role:'member',mode:'member'})
+ assert.deepEqual((await a('me')).data,{id:owner.id,name:owner.name,role:'member',mode:'member',zone:'UTC',presenceEnabled:true,typingEnabled:true,status:null})
+ assert.deepEqual((await b('me')).data,{id:member.id,name:member.name,role:'member',mode:'member',zone:'UTC',presenceEnabled:true,typingEnabled:true,status:null})
  let history=(await b('conversations/'+context.conversation+'/messages?limit=100')).data
  assert.equal(history.length,4);assert.equal(history.find(m=>m.id===context.reply).parent,context.root)
  assert.equal(history.find(m=>m.id===context.message).attachments[0].id,context.attachment)
