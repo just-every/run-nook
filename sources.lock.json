@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "8f76b2022d741aab9a1ed59a52ed794a4767dbad651ebb2c07b30b7c359ce19c",
+      "sha256": "c7364f8b1df367c6bfbe6f7267b3e486f4ca6bc7503b37cc1997de46f7f810d8",
       "executable": false
     },
     "DEMO.md": {
@@ -5200,6 +5200,18 @@
       "sha256": "715cb3f2dcde97b69d3307b082eef116a6959c8fd9ff735e105d8edbae48950a",
       "executable": false
     },
+    "src/workspaces/device-list.ts": {
+      "sha256": "c68ba09ba8a69236b6174319f7962724dd6802cf178b2a1659a2801973f0778f",
+      "executable": false
+    },
+    "src/workspaces/workspaces.css": {
+      "sha256": "72050c18bf8bad124a02602e863d0fbf1cc58c909b318988a335df7bffce4273",
+      "executable": false
+    },
+    "src/workspaces/WorkspacesMenu.tsx": {
+      "sha256": "ba9de0342c4b524ba75953deca5bdbc7ee5297b8ca173e1ea85482b9d2cbf2be",
+      "executable": false
+    },
     "TARGET.md": {
       "sha256": "22d48207514e3ae8ac5f2a62795ef64f37a4c677f22b46b9dcdc877c00bb7e3d",
       "executable": false
@@ -5830,6 +5842,10 @@
     },
     "tests/working-tree-copy.mjs": {
       "sha256": "e5e7570c81af861366134e3dfd28c0ec7e4fa35097d6876797a075807736514b",
+      "executable": false
+    },
+    "tests/workspaces-browser.mjs": {
+      "sha256": "f7ebf682da03a43c75dd981f994031bd6c057cad59537da338af766090c5dd58",
       "executable": false
     },
     "tsconfig.json": {
