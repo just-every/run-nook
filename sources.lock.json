@@ -5289,7 +5289,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "5e1c2aab225744b3904050f9e3082f8eed8f2a097ffa5ff0cca8eb8ee85cb5a3",
+      "sha256": "8c517999d32472a5568cf6b12c6e57cc1c43dff0cea3f44dee0cabf819acb3df",
       "executable": false
     },
     "tests/dev-key.mjs": {

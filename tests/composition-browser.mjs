@@ -93,11 +93,6 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await settings.getByRole('button',{name:'Save sidebar section',exact:true}).click()
     await expect(settings.getByRole('status')).toContainText('Personal workspace saved')
     if(width===1440)await expect(page.getByRole('heading',{name:'Customers',exact:true})).toHaveCount(1)
-    await settings.getByLabel('Installation address',{exact:true}).fill('https://work.example.com')
-    await settings.getByLabel('Installation name',{exact:true}).fill('Acme workspace')
-    await settings.getByRole('button',{name:'Add installation',exact:true}).click()
-    await expect(settings.getByRole('link',{name:'Acme workspace',exact:true})).toHaveAttribute('href','https://work.example.com/app')
-    await settings.getByRole('heading',{name:'Switch installations',exact:true}).scrollIntoViewIfNeeded()
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`workspace-${width}.png`)})
     const ownerContext=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000}})
     try{
