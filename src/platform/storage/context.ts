@@ -15,11 +15,13 @@ export class Context {
  get db(){return this.env.DB}
  get uid(){return this.session.operatorId}
  get credentials(){return [this.session.id,this.uid,this.session.operator.version]}
+ // The caller's authority, bound to `credentials`: a live session here, an integration token in IntegrationContext.
+ get fence(){return authFence}
  sql(sql:string,...values:any[]){return this.db.prepare(sql).bind(...values)}
- async check(conversation?:string){const row=await this.sql(`SELECT 1 AS ok WHERE ${authority} AND ${authFence}${conversation?' AND '+memberFence:''}`,...this.credentials,...(conversation?[conversation,this.uid]:[])).first();if(!row){const state=await this.db.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>();if(state?.authority!=='normalized')fail(503,'Offline normalized storage conversion required');const active=await this.sql(`SELECT 1 WHERE ${authFence}`,...this.credentials).first();fail(active?403:401,active?'Conversation access denied':'Sign in required')}}
+ async check(conversation?:string){const row=await this.sql(`SELECT 1 AS ok WHERE ${authority} AND ${this.fence}${conversation?' AND '+memberFence:''}`,...this.credentials,...(conversation?[conversation,this.uid]:[])).first();if(!row){const state=await this.db.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>();if(state?.authority!=='normalized')fail(503,'Offline normalized storage conversion required');const active=await this.sql(`SELECT 1 WHERE ${this.fence}`,...this.credentials).first();fail(active?403:401,active?'Conversation access denied':'Sign in required')}}
  async rows<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T[]>{
   // Authorization is in the same SQL snapshot as the data, including empty reads.
-  const fence=`${authority} AND ${authFence}${conversation?' AND '+memberFence:''}`,credentials=[...this.credentials,...(conversation?[conversation,this.uid]:[])]
+  const fence=`${authority} AND ${this.fence}${conversation?' AND '+memberFence:''}`,credentials=[...this.credentials,...(conversation?[conversation,this.uid]:[])]
   const [result,guard]=await this.db.batch<T>([
    this.sql(`SELECT * FROM (${sql}) WHERE ${fence}`,...values,...credentials),
    this.sql(`SELECT 1 AS ok WHERE ${fence}`,...credentials),
@@ -32,7 +34,7 @@ export class Context {
  async one<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T|null>{return (await this.rows<T>(sql,values,conversation))[0]??null}
  async batch(statements:D1PreparedStatement[],conversation?:string,condition='1',values:any[]=[]){
   const key=crypto.randomUUID();
-  try{await this.db.batch([this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${authFence}${conversation?' AND '+memberFence:''} AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,...(conversation?[conversation,this.uid]:[]),...values),...statements,this.sql('DELETE FROM nook_guard WHERE id=?',key)])}catch(error){await this.check(conversation);if(String(error).includes('CHECK constraint')||String(error).includes('UNIQUE constraint'))fail(409,'Concurrent change or invalid command; reload and retry the same intent');throw error}
+  try{await this.db.batch([this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${this.fence}${conversation?' AND '+memberFence:''} AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,...(conversation?[conversation,this.uid]:[]),...values),...statements,this.sql('DELETE FROM nook_guard WHERE id=?',key)])}catch(error){await this.check(conversation);if(String(error).includes('CHECK constraint')||String(error).includes('UNIQUE constraint'))fail(409,'Concurrent change or invalid command; reload and retry the same intent');throw error}
  }
  async writable(conversation:string){if(!await this.one(`SELECT 1 WHERE ${channelWritable('?')}`,[conversation],conversation))fail(409,'Conversation is read-only; open its private channel or restore it before posting')}
  async writeBatch(statements:D1PreparedStatement[],conversation:string,condition='1',values:any[]=[]){

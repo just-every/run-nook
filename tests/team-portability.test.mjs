@@ -36,6 +36,10 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_profiles(user,zone,status_text,status_expires,updated) VALUES(?,'America/Los_Angeles','Customer launch',?,?)").run(guest,Date.now()+1800000,Date.now());
   f.db.prepare("INSERT INTO nook_profile_values VALUES(?,'department','Customer success')").run(guest);
   f.db.prepare("INSERT INTO nook_personal_conversations VALUES(?,'review','Customers',2)").run(guest);
+  // NOOK-079: a token's sealed hash and bindings are credentials; its activity record is history.
+  f.db.prepare("INSERT INTO nook_integration_tokens VALUES('token-1','family-1','Vane reports',?,?,?,'active',NULL)").run(f.owner.operatorId,'ab'.repeat(32),Date.now());
+  f.db.prepare("INSERT INTO nook_integration_bindings VALUES('family-1','review')").run();
+  f.db.prepare("INSERT INTO nook_integration_audit VALUES('audit-1','family-1','token-1','Vane reports',?,'post',?,'review','m',NULL,NULL)").run(Date.now(),f.owner.operatorId);
   const read=async table=>f.db.prepare('SELECT * FROM '+table).all();
   await validateTeamArchive({read});
   await assert.rejects(validateTeamArchive({read:async table=>table==='nook_guest_grants'?[{user:guest,conversation:'launch'}]:read(table)}),/invalid_guest_scope/);
@@ -71,6 +75,8 @@ test('recovery validates current guest scope and fixed DM attribution while pres
    assert.equal(target.db.prepare('SELECT zone FROM nook_profiles WHERE user=?').get(guest).zone,'America/Los_Angeles');
    assert.equal(target.db.prepare("SELECT value FROM nook_profile_values WHERE user=? AND field='department'").get(guest).value,'Customer success');
    assert.equal(target.db.prepare("SELECT section FROM nook_personal_conversations WHERE user=? AND conversation='review'").get(guest).section,'Customers');
+   assert.equal(target.db.prepare('SELECT count(*) AS n FROM nook_integration_tokens').get().n+target.db.prepare('SELECT count(*) AS n FROM nook_integration_bindings').get().n,0,'restored installations issue new integration tokens');
+   assert.deepEqual({...target.db.prepare('SELECT name,action,message FROM nook_integration_audit').get()},{name:'Vane reports',action:'post',message:'m'});
    assert.deepEqual(target.db.prepare('SELECT id,target FROM nook_saved_items ORDER BY seq').all().map(row=>({...row})),[{id:'save-live',target:'m'},{id:'save-unavailable',target:'erased-source'}]);
    assert.equal(target.db.prepare("SELECT time_zone FROM nook_saved_reminders WHERE saved='save-live'").get().time_zone,'America/New_York');
    assert.equal(target.db.prepare("SELECT level FROM nook_posting_policy WHERE conversation='review'").get().level,'selected');

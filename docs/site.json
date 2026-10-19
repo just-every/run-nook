@@ -77,6 +77,11 @@
           "slug": "mattermost-import",
           "source": "docs/mattermost-import.md",
           "label": "Move from Mattermost"
+        },
+        {
+          "slug": "integration-tokens",
+          "source": "docs/integration-tokens.md",
+          "label": "Integration tokens"
         }
       ]
     }

@@ -1,0 +1,14 @@
+.nook-app .integration-tokens fieldset { display: grid; gap: 4px; margin: 8px 0; padding: 8px 12px; border: 1px solid var(--line, rgba(0,0,0,.12)); border-radius: 10px; }
+.nook-app .integration-secret { margin: 12px 0; padding: 12px; border-radius: 12px; background: var(--surface-rail); }
+.nook-app .integration-secret code { display: block; margin: 8px 0; overflow-wrap: anywhere; font-size: 13px; }
+.nook-app .integration-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.nook-app .integration-list { display: grid; gap: 10px; margin: 12px 0; padding: 0; list-style: none; }
+.nook-app .integration-list article { padding: 10px 12px; border-radius: 12px; background: var(--surface-raised); }
+.nook-app .integration-list h3 { margin: 0 0 4px; font-size: 15px; }
+.nook-app .integration-list p { margin: 0 0 8px; overflow-wrap: anywhere; }
+.nook-app .integration-state { margin-left: 6px; font-size: 12px; font-weight: 500; }
+.nook-app .integration-state.revoked { color: #b04451; }
+.nook-app .integration-audit { overflow-x: auto; }
+.nook-app .integration-audit table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.nook-app .integration-audit :is(th, td) { padding: 4px 6px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.nook-app .message-via { color: var(--ink-soft); font-size: var(--fs-meta); }

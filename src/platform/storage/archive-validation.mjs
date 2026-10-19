@@ -2,6 +2,7 @@ import {validateMattermostArchiveMessage} from '../../imports/mattermost-archive
 import {sourceMessageFiles} from '../../imports/formats.mjs';
 import {validateReadableExportArchive} from '../../exit/archive.mjs';
 import {validatePersonalWorkspace} from '../../personal/archive.mjs';
+import {validateIntegrationArchive} from '../../integrations/archive.mjs';
 import {validateReminders} from '../../reminders/archive.mjs';
 import {validateBroadcastArchive} from '../../broadcast/archive.mjs';
 import {validateSchedules} from '../../scheduled/archive.mjs';
@@ -49,6 +50,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
  await validatePersonalWorkspace(readTable,manifest,actors,conv);
  await validateDefaultChannels(readTable,manifest,actors,conv);
+ await validateIntegrationArchive(readTable,manifest,actors,conv,msg);
  await validateReminders(readTable,manifest,actors,conv,msg);
  await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});
  const scheduledFiles=await validateSchedules(readTable,manifest,{actors,conversations:conv,messages:msg,attachments:files});
