@@ -1,5 +1,22 @@
 # Portable installation data
 
+To bring existing data into a seed, sign in as the owner and use its import
+screen. First step: open this path on the destination app:
+
+```text
+/app/import
+```
+
+Upload a supported source export, review the plan and its differences, then
+approve that exact plan to apply it. Reconcile the result against native data;
+use Undo from the same history when needed. Base's reference accepts people JSON
+here, not installation `.rer` archives. Editions adopt this same door
+with their own supported readers and native adapters.
+
+Use this module to back up and restore this installation, separately from
+bringing records in through the reviewed import door. Its restore has no door
+plan or Undo, and the door does not accept its `.rer` archives.
+
 This dependency-free source module exports and restores one installation's D1
 tables, R2 objects and optional named byte payloads. It is generalised from the
 Penny and Orbit seeds, with atomic graph restoration from Lamp. Products retain
@@ -24,6 +41,8 @@ schema at construction. Apply the bookkeeping migration first. Policy fields:
 | `derivedTables` | Virtual/FTS tables to regenerate; their shadow tables are excluded. |
 | `secretColumns` | Per-table nullable base columns omitted at export and written as NULL. Primary keys and generated columns cannot be secret. |
 | `exportRow(table,row)` | Pure, synchronous, idempotent transformation of encoded base cells. Restore writes its result verbatim; SQLite recomputes generated cells. |
+| `importSafety` | Per-table, per-column nonempty finite sets of safe encoded cells, paired with `importRow`. Only writable non-key columns may be declared. |
+| `importRow(table,row)` | Pure, synchronous, deterministic, idempotent normalization of staged rows in declared tables, before `validateStaged` and apply. Changes are bounded by `importSafety`. |
 | `replaceableTables` | Bootstrap rows replaced in the atomic restore batch. Rows the destination's own migrations insert need no entry where the runner passes `migrations` (see "Migration-seeded rows"). Populated excluded dependents reachable through modifying FK actions refuse replacement. |
 | `requiredConfiguration` | Setting names returned after restore for the owner to re-enter. |
 | `validateStaged({db,tables,read,manifest})` | Read-only product validation before any object write; false or a thrown error refuses restore. `tables` names the staging tables for bounded SQL queries; `read` is a convenience for small tables. |
@@ -38,7 +57,7 @@ belong to the current runtime or environment and never travel:
 | Tables (exact names or prefixes ending in `%`) | Reason |
 | --- | --- |
 | `sqlite_%`, `_cf_%` | SQLite and Cloudflare internals. |
-| `d1_migrations`, `_rer_deploy_migrations`, `_rer_portability_migrations`, `rer_migrations` | Destination migration history. Current Base uses the D1 and `_rer_` ledgers; `rer_migrations` is excluded for historical compatibility. |
+| `d1_migrations`, `_rer_deploy_migrations`, `_rer_portability_migrations`, `rer_migrations` | Destination migration history. Base uses the D1 and `_rer_` ledgers; RER Platform's runner writes `rer_migrations`. An old archive that still carries its source's ledger is placed by it (see below); its rows are never restored. |
 | `rer_portability_%` | Transfer jobs, snapshots, staging, journals and recovery bookkeeping. |
 | `rer_mail_development_outbox`, `rer_ai_development_outbox` | Local development effect captures. |
 | `rer_dependency_keys`, `rer_dependency_pending`, `rer_dependency_codes` | Provider secrets and transient linking credentials. |
@@ -134,6 +153,49 @@ the bytes. Large objects span parts and restore through multipart upload with at
 most one 5 MiB upload buffer. Extra payload consumers own their own transaction,
 idempotence and recovery; D1 cannot roll back Durable Object or external state.
 
+### Bounded import normalization
+
+Use `importSafety` with `importRow` when restored records must start in a safe
+state, even if an older archive contains active connections or credentials:
+
+```js
+export default {
+  product: 'my-product',
+  importSafety: {connections: {status: ['inactive'], token: [null]}},
+  importRow(table, row) {
+    return {...row, status: 'inactive', token: null};
+  },
+};
+```
+
+The hook is called only for tables declared in `importSafety`, after staging
+and before `validateStaged` or apply. Mandatory development/provider-data refusals
+run first; normalization cannot bypass them. It must return exactly the writable columns
+of its input row, preserve primary keys and every undeclared column, and change
+declared columns only to their listed safe values. Unchanged values need not be
+in the safe set. The hook must be pure, synchronous, deterministic and idempotent;
+keep external effects out of it. Generated columns recompute from the normalized
+base cells. Without this pair, import behavior is unchanged.
+
+Construction refuses an unpaired hook or declaration, unknown table or column
+names, primary keys, generated columns, empty safe sets and malformed encoded
+cells. Safe values use the ordinary cell encoding: null, strings, finite numbers
+or `{blob:base64}`. The destination policy supplies the hook; an archive cannot
+supply executable normalization.
+
+The import job persistently journals the summary in `metadata.safetyChanges`.
+`imports.status(id)` and the `importArchive` receipt expose it as `safetyChanges`,
+an array of `{table,column,value,rows}`. Each entry counts actual changed rows for
+that column and safe replacement value; a row changed in two columns contributes
+to two entries. The summary contains no original values or row records. Durable
+checkpoints keep retries from counting changes twice. Human `rer import` output
+prints these counts too, for example `3 automations imported with status="inactive"`.
+
+Archive integrity checks still verify the original archived contents. This
+summary is separate from the erasure journal: normalization does not bypass its
+fence or change journal adoption. Existing atomic D1 apply, owned-object rollback,
+extra-payload recovery responsibilities and transfer erasure behavior still apply.
+
 ## Archive and durable jobs
 
 The UTF-8 JSON-lines archive has a manifest, indexed checksummed parts and a
@@ -193,16 +255,30 @@ table). This applies to normal v2 import and to backup-only v1 recovery.
 
 The Base CLI runners (local Workers and container) pass `createPortability` a
 `migrations` replayer (`migration-history.mjs`, Node only) built from the
-destination's applied migration ledger and migration files. Import replays them
-into a scratch database to find the archive's place in that history:
+destination's applied migration ledger and migration files, with each file's
+SHA-256. The ledger is `_rer_deploy_migrations`, `d1_migrations` (Wrangler or
+the deploy kit) or, on an installation RER Platform installed, its exact
+`rer_migrations(name, sha256, applied_at)` ledger, read in application order
+(rowid) and refused while it holds a partially applied file. Import replays
+them into a scratch database to find the archive's place in that history:
 
 - Archives record the applied migration names in `manifest.migrations` (since
   additive restore). Every recorded migration must be applied here, and
   replaying exactly those must give the archive's schema identity.
-- Older v2 and all v1 archives do not record them; the latest prefix of the
-  applied migrations that gives the archive's schema identity is used. Migrations
-  that change no archived table (indexes, excluded tables) cannot be told apart
-  there and are reported as later.
+- Older archives that still carry their source's migration ledger as a table
+  (`rer_migrations` and the other ledgers above, from before they became
+  bookkeeping) are placed by it. Every name it records must be applied here,
+  with the same file hash (the destination ledger's, else the replayed file's),
+  or the import is refused with `schema_mismatch:migration_history:<migration>`
+  naming the first that differs; replaying exactly those must give the archive's
+  schema identity. Every other applied migration is later, wherever the
+  destination's history orders it. `importArchive` reads the ledger rows from
+  the verified file and passes them to `imports.create(manifest, actor,
+  {ledgers})`; staging refuses any part whose ledger rows differ from them.
+- Other older v2 and all v1 archives do not record them; the latest prefix of
+  the applied migrations that gives the archive's schema identity is used.
+  Migrations that change no archived table (indexes, excluded tables) cannot be
+  told apart there and are reported as later.
 
 Restored rows never pass through the later migrations, so each of them may
 contain only `CREATE TABLE` (not `AS SELECT`), `CREATE INDEX` and
@@ -210,7 +286,11 @@ contain only `CREATE TABLE` (not `AS SELECT`), `CREATE INDEX` and
 restorable tables. A later migration with any other statement that names a
 restorable table, such as an `INSERT`, `UPDATE` or `DELETE` that purges or
 backfills rows or a trigger, is refused with `schema_mismatch`; statements that
-touch only excluded tables are allowed. For archives without a migration record,
+touch only excluded tables are allowed. An archived table the archive holds no
+rows of restores empty, so an `UPDATE` or `DELETE` of it changes nothing and is
+allowed unless it also names a table the archive holds rows of (which it could
+read into its writes); an `INSERT` into it, or any other statement naming it,
+is still refused. For archives without a migration record,
 every migration after the earliest prefix that gives the archive's schema is
 checked, since the archive may predate any of them.
 
@@ -479,11 +559,13 @@ modules/portability/provider-data.mjs
 modules/portability/generated.mjs
 modules/portability/restore-safety.mjs
 modules/portability/bridge.mjs
+modules/portability/ledgers.mjs
 modules/portability/migration-statements.mjs
 modules/portability/legacy-safety.mjs
 modules/portability/export.mjs
 modules/portability/import.mjs
 modules/portability/import-staging.mjs
+modules/portability/import-safety.mjs
 modules/portability/payloads.mjs
 modules/portability/journal.mjs
 modules/portability/http.mjs
