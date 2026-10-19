@@ -2284,6 +2284,10 @@
       "sha256": "1cc6c400007eb6a08a9698a22d4b6cfd41ace42b04eb59927bd34c776bbe444c",
       "executable": false
     },
+    "src/base/modules/import-kit/src/door/refusals.ts": {
+      "sha256": "1c03c2366bac97733ba30ad9e0f69311191735dcddced839a5e804dc2e4f6d6e",
+      "executable": false
+    },
     "src/base/modules/import-kit/src/door/schema.ts": {
       "sha256": "f5814a590ec4329e2ae77bdb98af6d1d3726a53b4d5939c7513d49c348593c0d",
       "executable": false
@@ -2350,6 +2354,10 @@
     },
     "src/base/modules/import-kit/src/provenance/canonical-stream.ts": {
       "sha256": "94b9bef088d1d907edd4de44b74132ba257fa488a1ca447ad2cceb0f1d049890",
+      "executable": false
+    },
+    "src/base/modules/import-kit/src/provenance/credential-names.ts": {
+      "sha256": "51c836f11d6c8a938c724a9ceb07746dfbbdd8f1474627ece80fbd917634f01f",
       "executable": false
     },
     "src/base/modules/import-kit/src/provenance/credentials.ts": {
@@ -3188,6 +3196,10 @@
       "sha256": "c4dad3b6ea5c2a5384262e391bfebe83365ba3f934f99050cb3efd54171af16d",
       "executable": false
     },
+    "src/base/modules/portability/import-safety.mjs": {
+      "sha256": "7e2ad8cf632526856174747d19892e8702710d8d671f90ade1e05a560b3ebec4",
+      "executable": false
+    },
     "src/base/modules/portability/import-staging.mjs": {
       "sha256": "54e08876ce1eb15f28b60a3101a17129cc75e897b76450d5ae866cd3c6a17987",
       "executable": false
@@ -3206,6 +3218,10 @@
     },
     "src/base/modules/portability/journal.mjs": {
       "sha256": "9b6d17f28ecee050e043bbae7c252872e9651bfe9a675a8cf03d535d49de9fe9",
+      "executable": false
+    },
+    "src/base/modules/portability/ledgers.mjs": {
+      "sha256": "0e61bf0202c4fa87a693fae7548fc6d532f2edc1971c6cd232a71bc0e67209b1",
       "executable": false
     },
     "src/base/modules/portability/legacy-files.mjs": {
