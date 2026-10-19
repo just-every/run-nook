@@ -87,7 +87,7 @@ reviewed import pipeline, original custody, provenance and durable checkpoints a
 its Slack importer. Source history stays hidden until reviewed publication and
 creates no unread activity, notifications, accepted commitments or native events.
 
-Closing the page or losing an acknowledgement does not lose the checkpoint.
+Closing the page or losing an acknowledgment does not lose the checkpoint.
 Reopen this page and use **Resume**; a repeated apply of the same reviewed plan
 cannot create duplicate rooms, messages or files. Current owner authority and
 reviewed participant versions are checked again before forward work.
