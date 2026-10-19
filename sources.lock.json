@@ -584,6 +584,10 @@
       "sha256": "ad079706073bdb2098a2288ab5c689a51e2e37b926cd0f6c1f7209f2b9d89dac",
       "executable": false
     },
+    ".github/assets/release/nook-launch-channel-1600.png": {
+      "sha256": "c84c299401507fa8b4b431041d7998f2705976a15c8d9172d5406c15c9237abf",
+      "executable": false
+    },
     ".github/workflows/mattermost-fixture.yml": {
       "sha256": "d519e0a8e10ab42454eae8d93bd84a75a4c57e004cb200d09fc534b848136475",
       "executable": false
