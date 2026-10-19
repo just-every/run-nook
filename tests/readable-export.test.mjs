@@ -6,12 +6,14 @@ import {mkdtemp,rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {teamFixture} from './team-sql-support.mjs'
+import {attachImportDoor} from './slack-import/sqlite-service.mjs'
+import {zipFixture} from './slack-import/fixture.mjs'
 
 const require=createRequire(import.meta.url),wranglerRequire=createRequire(require.resolve('wrangler'))
 const {build}=wranglerRequire('esbuild'),dir=await mkdtemp(join(tmpdir(),'nook-readable-'))
 after(()=>rm(dir,{recursive:true,force:true}))
 const outfile=join(dir,'export.mjs')
-await build({stdin:{contents:`export {Context} from './src/platform/storage/context';export {readableExportRoute} from './src/exit/routes';export {offlineHtml,jsonDocument,jsonLines} from './src/exit/format';export {write} from './src/platform/storage/commands';export {upload} from './src/platform/storage/files';export {react} from './src/team/reactions.server';export {imports} from './src/platform/storage/imports';`,resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',outfile,logLevel:'silent'})
+await build({stdin:{contents:`export {Context} from './src/platform/storage/context';export {readableExportRoute} from './src/exit/routes';export {offlineHtml,jsonDocument,jsonLines} from './src/exit/format';export {write} from './src/platform/storage/commands';export {upload} from './src/platform/storage/files';export {react} from './src/team/reactions.server';`,resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',outfile,logLevel:'silent'})
 const code=await import(outfile),hash=bytes=>createHash('sha256').update(bytes).digest('hex')
 async function fixture(){
  const f=await teamFixture(),objects=new Map()
@@ -40,15 +42,21 @@ async function fixture(){
 }
 const denied=(promise,status)=>assert.rejects(promise,error=>error.status===status)
 async function imported(f){
- const bytes=Buffer.from('Imported exact bytes\n'),namespace='readable-source',key=ts=>namespace+':C1:'+ts,first='1700000000.000001',reply='1700000001.000002'
- const capture={version:1,mode:'private-source-capture',targetAuthorityVerified:false,sourceNamespace:namespace,previewDigest:hash('review'),sourceReceipts:[],
-  channels:[{sourceId:'C1',destinationName:'Imported launch',audience:[f.owner.operatorId],sourceRecord:{id:'C1',name:'source-launch'}}],
-  actors:[{sourceId:'U1',association:null,sourceRecord:{id:'U1',name:'Source author'}}],
-  records:[{key:key(first),channel:'C1',sourceActor:'U1',sourceTimestamp:first,threadRoot:null,body:'Imported root',sourceRecord:{type:'message',user:'U1',ts:first,text:'Imported root',reactions:[{name:'custom_party',count:1,users:['U1']}],files:[{id:'F1',name:'source.txt',mimetype:'text/plain',size:bytes.length}],file:{id:'external-reference',name:'external.pdf',url_private:'https://never-fetch.invalid/file'}},files:['F1']},
-   {key:key(reply),channel:'C1',sourceActor:'U1',sourceTimestamp:reply,threadRoot:key(first),body:'Imported thread reply',sourceRecord:{type:'message',user:'U1',ts:reply,text:'Imported thread reply',thread_ts:first},files:[]}],
-  files:[{message:key(first),sourceId:'F1',name:'source.txt',mime:'text/plain',size:bytes.length,sha256:hash(bytes),data:bytes.toString('base64')}]}
- const c=f.context(f.owner),preview=await code.imports(c,'preview','',{capture})
- return code.imports(c,'apply','',{capture,planDigest:preview.planDigest,intent:'readable-import'})
+ const bytes=Buffer.from('Imported exact bytes\n'),first='1700000000.000001',reply='1700000001.000002'
+ const {door}=await attachImportDoor(f,f.context(f.owner).env.FILES)
+ const inspection=await door.inspect(zipFixture([
+  ['users.json',[{id:'U1',name:'Source author'}]],
+  ['channels.json',[{id:'C1',name:'source-launch'}]],
+  ['source-launch/2024-01-01.json',[
+   {type:'message',user:'U1',ts:first,text:'Imported root',reactions:[{name:'custom_party',count:1,users:['U1']}],files:[{id:'F1',name:'source.txt',mimetype:'text/plain',size:bytes.length},{id:'FEXTERNAL',name:'external.pdf',mimetype:'application/pdf',size:17,url_private:'https://never-fetch.invalid/file'}]},
+   {type:'message',user:'U1',ts:reply,text:'Imported thread reply',thread_ts:first}
+  ]],
+  ['files/F1/source.txt',bytes]
+ ]))
+ const review={namespace:'readable-source',channels:[{sourceId:'C1',name:'Imported launch',members:[f.owner.operatorId]}],actors:{U1:null},importWithoutMissingFiles:true,acceptedOmissions:[]}
+ const local=await door.prepare(inspection,review)
+ review.acceptedOmissions=[local.summary.omissionDigest]
+ return door.finish(await door.plan(inspection,review))
 }
 
 test('NOOK-047 readable exit pages native/imported threads, histories, acceptance, reactions, exact files and offline formats without truncation',async()=>{

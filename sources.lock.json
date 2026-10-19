@@ -5641,7 +5641,7 @@
       "executable": false
     },
     "tests/readable-export.test.mjs": {
-      "sha256": "bd7acd104b421231962d1fd0d93cd2f5540c943d0ba74004fcd19e4a8e9e8621",
+      "sha256": "ef3972e4c642bfdac22308805e88c0bdf56908e85600d566ebb5203cbb8dc0ca",
       "executable": false
     },
     "tests/readme-journey.mjs": {
