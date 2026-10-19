@@ -4209,7 +4209,7 @@
       "executable": false
     },
     "src/imports/DoorWizard.tsx": {
-      "sha256": "b066a303e9b3eeca32a5feac252f741a21a8eaedc365ccd24a5b728e8ef35d55",
+      "sha256": "d7789698160144e69abe70d609c3dfff7102517907fd4bb7734ddae086f97b1f",
       "executable": false
     },
     "src/imports/formats.d.mts": {
@@ -5377,7 +5377,7 @@
       "executable": false
     },
     "tests/installer-workflow.mjs": {
-      "sha256": "adcd2e3eadb44889279d0419892b554b740445e6bcc4460409704185c139b2d9",
+      "sha256": "3ca90f8055ae3d8f580b607736162778bfac42bc7b2d62b594f06328acf1326d",
       "executable": false
     },
     "tests/keyboard-gaps.mjs": {
@@ -5669,7 +5669,7 @@
       "executable": false
     },
     "tests/runtime-portability.mjs": {
-      "sha256": "ab95fc6bed3bd4127c3238ce5c8a573bb6727327d5a5d60e5bb09cfc265cbe55",
+      "sha256": "0d723be644f5089fe8e91784eac58c3cbb8786884243c96c9728b9de679c85b8",
       "executable": false
     },
     "tests/runtime.mjs": {

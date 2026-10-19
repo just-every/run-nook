@@ -20,7 +20,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
     const [jobs, setJobs] = useState(initial.jobs.filter(job => job.sourceType === kind)), [business, setBusiness] = useState(initial.business);
     const [busy, setBusy] = useState(''), [status, setStatus] = useState(''), [error, setError] = useState<Error | null>(null);
     const [report, setReport] = useState<any>(null), [currentJob, setCurrentJob] = useState<DoorJob | null>(null), [catchup, setCatchup] = useState(false);
-    const [live, setLive] = useState(false), [now, setNow] = useState(Date.now());
+    const [live, setLive] = useState(false), [now, setNow] = useState(Date.now()), [stale, setStale] = useState(false);
     const retained = useRef<{ uploadId: string; planId?: string; namespace: string; started?: boolean } | null>(null);
     useEffect(() => { setLive(true); const timer = setInterval(() => setNow(Date.now()), 15000); return () => clearInterval(timer); }, []);
     useEffect(() => () => { if (source?.handle) releaseLocal(source.handle); }, [source?.handle]);
@@ -31,7 +31,12 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
         finally { setBusy(''); }
     };
     const refresh = async () => { const result = await readHistory(kind); setJobs(result.jobs); setBusiness(result.business); };
-    const change = (next: any) => { setReview(next); setSummary(null); setAccepted(false); setPlan(null); setCurrentJob(null); setReport(null); };
+    const change = (next: any) => { setReview(next); setSummary(null); setStale(false); setAccepted(false); setPlan(null); setCurrentJob(null); setReport(null); };
+    // The missing-files choice lives inside the review, so the review stays on screen with the choice shown and waits for the next preview.
+    const chooseMissingFiles = (choice: boolean) => {
+        setReview({ ...review, importWithoutMissingFiles: choice }); setStale(true); setAccepted(false); setPlan(null); setCurrentJob(null); setReport(null);
+        setStatus('Preview again to bind this file choice to the reviewed plan.');
+    };
     const withdraw = async () => {
         if (retained.current && !retained.current.started) {
             const { namespace, uploadId, planId } = retained.current;
@@ -49,7 +54,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
     });
     const preview = () => work('Checking local historical import', async () => {
         const result = await prepareLocal(source.handle, { ...review, acceptedOmissions: [] }, initial.owner, initial.users);
-        setSummary(result.summary); setPlan(null); setAccepted(false); setCurrentJob(null);
+        setSummary(result.summary); setStale(false); setPlan(null); setAccepted(false); setCurrentJob(null);
         setStatus(result.summary.blocked ? 'Import blocked. Review the source issues below.' : 'Review the historical import and its exact omissions before creating a dry run.');
     });
     const createPlan = () => work('Creating reviewed dry run', async () => {
@@ -110,10 +115,10 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
         {source && <form onSubmit={event => { event.preventDefault(); void preview(); }}><h2>2. {kind === 'slack' ? 'Choose destinations and identities' : 'Map identities and review audiences'}</h2>
             <button type="button" disabled={!!busy} onClick={() => void work('Discarding reviewed export', async () => { await withdraw(); setSource(null); change(emptyReview(kind)); setStatus('Local export and unused dry run discarded.'); })}>Discard local export</button>
             <SourceMapping kind={kind} source={source} review={review} onChange={change} busy={!!busy} />
-            {summary && <fieldset disabled={!!busy}><ReviewPanel kind={kind} preview={summary} accepted={accepted} onAccept={(value: boolean) => { setAccepted(value); setPlan(null); }} withoutMissingFiles={review.importWithoutMissingFiles === true} onMissingFiles={(choice: boolean) => change({ ...review, importWithoutMissingFiles: choice })} /></fieldset>}
+            {summary && <fieldset disabled={!!busy}><ReviewPanel kind={kind} preview={summary} accepted={accepted} onAccept={(value: boolean) => { setAccepted(value); setPlan(null); }} withoutMissingFiles={review.importWithoutMissingFiles === true} onMissingFiles={chooseMissingFiles} /></fieldset>}
             <button type="submit" className={summary ? '' : 'import-primary'} disabled={!!busy || !mappingReady(kind, source, review)}>Preview exact import</button>
             {summary && !summary.blocked && <label className="import-check"><input type="checkbox" checked={catchup} disabled={!!busy} onChange={event => { setCatchup(event.target.checked); setPlan(null); }} />Compare with the previous import in this source namespace</label>}
-            {summary && !summary.blocked && (!plan || expired || currentJob?.state === 'failed') && <button type="button" className="import-primary" disabled={!!busy || hasOmissions && !accepted} onClick={() => void createPlan()}>Create dry run</button>}
+            {summary && !summary.blocked && !stale && (!plan || expired || currentJob?.state === 'failed') && <button type="button" className="import-primary" disabled={!!busy || hasOmissions && !accepted} onClick={() => void createPlan()}>Create dry run</button>}
             {plan && <><DoorPlanPanel plan={plan} expired={expired} /><button type="button" className="import-primary" disabled={!!busy || expired || !!currentJob && ['completed', 'failed', 'undone', 'rolled_back'].includes(currentJob.state)} onClick={() => void apply()}>Apply reviewed plan</button></>}
         </form>}
         {report && <ReconciliationPanel report={report} onClose={() => setReport(null)} />}

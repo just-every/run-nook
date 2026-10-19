@@ -58,7 +58,7 @@ export async function runInstallerWorkflow(h){
    assert.equal(await databasePath(state),persisted,'the second installation uses the populated D1 store')
    assert.ok(workspaceSnapshot(persisted)===beforeRerun,'guided reinstall preserves every workspace row, user, owner, session and private byte without writes')
    await start(port);const restarted=await verifyWorkflow(origin,proof);await stop()
-   const portable=await (await import('./runtime-portability.mjs')).runPortabilityWorkflow({root:app,state,states,proof,databasePath,command:h.command,start,stop,verify:()=>verifyWorkflow(origin,proof,{sessionsExcluded:true})})
+   const portable=await (await import('./runtime-portability.mjs')).runPortabilityWorkflow({root:app,state,states,proof,ownerEmail:input.OWNER_EMAIL,databasePath,command:h.command,start,stop,verify:()=>verifyWorkflow(origin,proof,{sessionsExcluded:true})})
    evidence.guidedWorkflow={...workflowReport(proof),guide,initial,portable,reinstalled:{...reinstalled,secondApproval:true,sameD1:true,completeWorkspacePreserved:true,originalSessionsValid:true},restarted,restored:portable,normalizedStorage:true}
   } finally {await installer?.close();await stop();await rm(app,{recursive:true,force:true})}
  })
