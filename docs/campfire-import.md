@@ -1,5 +1,24 @@
 # Move a Campfire workspace into Nook
 
+Nook reads the archive on your device. Source authentication stays there; only
+the reviewed normalized history and selected files are uploaded. Choose the
+source namespace and mappings, use **Preview exact import**, accept the named
+omissions, then choose **Create dry run**. Review the door's counts, rejections
+and differences before **Apply reviewed plan**. A dry run expires after 30
+minutes. If an audience or source changes, create a fresh dry run. The history
+provides status, reconciliation and guarded Undo, including imports made before
+the shared door. A native edit or later work refuses destructive undo.
+
+For another snapshot of the same workspace, keep its source namespace and select
+**Compare with the previous import in this source namespace**. Unchanged records
+stay in place; source records absent from the new snapshot remain in Nook.
+
+Business imports use the same door. The owner can enable them in Import history
+and permanently revoke signing keys; switching access on again keeps revocations.
+Workspace archives retain import batches and custody; restoring an archive
+leaves Business imports disabled.
+
+
 An active Nook owner opens **Import history → Import Campfire history** at
 `/imports?source=campfire`. Upload the source administrator’s consistent backup,
 map its people to existing Nook accounts, inspect every room’s audience and file

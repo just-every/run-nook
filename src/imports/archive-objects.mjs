@@ -1,3 +1,4 @@
+import {canonicalJson,sha256} from './kit.ts';
 import {assertMattermostFileSize} from './mattermost-effects.mjs';
 import {assertCampfireFileSize} from './campfire-effects.mjs';
 import { assertSlackFileSize } from './policy.mjs';
@@ -11,6 +12,8 @@ export function slackExportRow(table, row) {
  * this inventory grants a participant a raw-object download route. */
 export async function slackArchiveObjects({ read, manifest }, actors, attachments) {
     const uploads = await read('nook_import_uploads'), objects = await read('nook_import_objects'), inventory = await read('nook_object_inventory'), reviews = await read('nook_import_reviews');
+    const doors=await read('nook_door_imports');
+    const doorObjects=new Map(doors.map(d=>['door-'+sha256(canonicalJson([d.source_type,d.namespace])).slice(0,40),d]));
     const uploadById = new Map(uploads.map(u => [u.id, u])), keys = new Map();
     const add = (key, size, sha256, mime) => {
         check(typeof key === 'string' && key.startsWith('private/') && Number.isSafeInteger(size) && size > 0 && digest(sha256), 'invalid_slack_object');
@@ -24,6 +27,14 @@ export async function slackArchiveObjects({ read, manifest }, actors, attachment
         if (upload.state === 'ready') add(upload.object_key, upload.size, upload.archive_digest, upload.object_key.endsWith('.tar.gz')?'application/gzip':'application/zip');
     }
     for (const object of objects) {
+        const door=doorObjects.get(object.upload);
+        if(door){
+            const broad=door.source_type!=='slack';
+            if(broad)assertCampfireFileSize(object.size);else assertSlackFileSize(object.size);
+            check(object.owner===door.owner&&object.object_key.startsWith(`private/imports/${object.owner}/${object.upload}/files/${door.domain_job}/${object.upload}/`)&&['ready','deleted'].includes(object.state)&&digest(object.sha256)&&Number.isSafeInteger(object.size)&&object.size>0&&(broad?/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(object.mime):['text/plain','image/png','image/jpeg','application/pdf'].includes(object.mime)),'invalid_door_file_custody');
+            if(object.state==='ready')add(object.object_key,object.size,object.sha256,object.mime);
+            continue;
+        }
         const upload = uploadById.get(object.upload),campfire=upload?.object_key.endsWith('.tar.gz')||upload?.object_key.endsWith('archive.mattermost.zip');
         if(campfire)assertCampfireFileSize(object.size);else assertSlackFileSize(object.size);
         check(upload && upload.owner === object.owner && object.object_key.startsWith(`private/imports/${object.owner}/${object.upload}/files/`) && ['ready', 'deleted'].includes(object.state) && digest(object.sha256) && Number.isSafeInteger(object.size) && object.size > 0 && (campfire?/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(object.mime):['text/plain','image/png','image/jpeg','application/pdf'].includes(object.mime)), 'invalid_slack_file_custody');

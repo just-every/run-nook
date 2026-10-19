@@ -1,82 +1,98 @@
 import { missingFileRefs } from './slack-records.mjs';
-import { retainedChannelHistory } from './channel-guard.ts';
 import type { D1Database, D1Sql, TargetRow } from './kit.ts';
+import { encodeTargetSet, decodedTargetSetSql } from './target-set-codec.ts';
+import { nativeStateSql, expectedStateSql, statesEqualSql, snapshotTuple, valueState } from './target-state.ts';
 export const sql = (sql: string, ...params: any[]): D1Sql => ({ sql, params });
 export const fileColumns = 'f.message,f.id,f.source_id,a.name,a.mime,a.size,a.sha256,f.position,a.object_key,a.state,a.author,a.expires,a.created,a.intent,a.message AS attachment_message,a.conversation AS attachment_conversation,a.position AS attachment_position,f.attachment';
 /** A message target's value from its record (with its import owner) and files. */
 export function messageValue(r: any, files: any[]): any {
     const value: any = { id: r.id, job: r.job, owner: r.owner, conversation: r.conversation, key: r.key, sourceActor: r.source_actor, sourceTimestamp: r.source_timestamp, sourceRecord: JSON.parse(r.source_record), body: r.body, parent: r.parent, sequence: r.sequence, files: files.map(f => ({ id: f.id, sourceId: f.source_id, name: f.name, mime: f.mime, size: f.size, sha256: f.sha256, position: f.position, objectKey: f.object_key, state: f.state, author: f.author, expires: f.expires, created: f.created, intent: f.intent })) };
     const missing = missingFileRefs(value.sourceRecord, value.files);
-    if (missing.length)
-        value.missingFiles = missing;
+    if (missing.length) value.missingFiles = missing;
     return value;
 }
-export async function readTarget(db: D1Database, destination: string, kind: string, id: string): Promise<TargetRow | undefined> {
-    const rev = await db.prepare('SELECT revision FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?').bind(destination, kind, id).first<{
-        revision: string;
-    }>();
-    if (!rev)
-        return undefined;
-    let value: any;
-    if (kind === 'channel') {
-        const row = await db.prepare(`SELECT c.*,i.job,i.source_id,i.source_record,CASE WHEN ${retainedChannelHistory('c.id')} THEN 0 ELSE (SELECT COUNT(*) FROM nook_events e WHERE e.conversation=c.id AND e.kind='erasure' AND e.actor IS NULL) END AS erasure_events,CASE WHEN ${retainedChannelHistory('c.id')} THEN 1 ELSE 0 END AS retained FROM nook_conversations c JOIN nook_import_channels i ON i.conversation=c.id WHERE c.id=?`).bind(id).first<any>();
-        if (!row)
-            throw new Error('IMPORT_NATIVE_MISSING');
-        const members = (await db.prepare(`SELECT user FROM nook_members WHERE conversation=? UNION SELECT a.value AS user FROM nook_imports j JOIN nook_import_reviews r ON r.id=j.intent,json_each(r.channels_json) ch,json_each(json_extract(ch.value,'$.members')) a JOIN nook_erased_actors e ON e.id=a.value WHERE j.id=? AND json_extract(ch.value,'$.sourceId')=? ORDER BY user`).bind(id,row.job,row.source_id).all<{
-            user: string;
-        }>()).results.map(x => x.user);
-        const guestMembers = (await db.prepare(`SELECT user FROM nook_guest_grants WHERE conversation=? UNION SELECT a.value AS user FROM nook_imports j JOIN nook_import_reviews r ON r.id=j.intent,json_each(r.summary_json,'$.channels') ch,json_each(json_extract(ch.value,'$.guestMembers')) a JOIN nook_erased_actors e ON e.id=a.value WHERE j.id=? AND json_extract(ch.value,'$.sourceId')=? ORDER BY user`).bind(id,row.job,row.source_id).all<{
-            user: string;
-        }>()).results.map(x => x.user);
-        // Import-only erasure notifications do not change the owned state.
-        // Native structural history still matters after its content is erased:
-        // it marks the current state, which never equals an applied value.
-        value = { id: row.id, job: row.job, owner: row.owner, name: row.name, sourceId: row.source_id, sourceRecord: JSON.parse(row.source_record), members, guestMembers, seq: row.seq - row.erasure_events, version: row.version, messageCount: row.message_count, kind: row.kind, ...(row.retained ? { retained: true } : {}) };
+
+const erasedAudience = (field: string, source: string) => `(SELECT json_group_array(user) FROM (
+    SELECT a.value user FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job JOIN nook_import_reviews review ON review.id=j.intent,json_each(${source}) channel,json_each(json_extract(channel.value,'$.${field}')) a JOIN nook_erased_actors erased ON erased.id=a.value WHERE ch.conversation=e.id AND json_extract(channel.value,'$.sourceId')=ch.source_id
+    UNION
+    SELECT a.value user FROM nook_import_channels ch JOIN nook_door_imports door ON door.domain_job=ch.job JOIN ik_door_plans plan ON plan.id=door.plan_id JOIN ik_provenance ownership ON ownership.job_id=plan.job_id AND ownership.destination=e.destination AND ownership.target_kind='channel' AND ownership.target_id=e.id AND ownership.reversed=0,json_each(door.summary_json,'$.channels') channel,json_each(json_extract(channel.value,'$.${field}')) a JOIN nook_erased_actors erased ON erased.id=a.value WHERE ch.conversation=e.id AND json_extract(channel.value,'$.sourceId')=ch.source_id
+    ORDER BY user))`;
+const snapshotSelect = `SELECT e.kind,e.id,e.revision,${nativeStateSql()} state,
+    CASE WHEN e.kind='channel' THEN ${erasedAudience('members','review.channels_json')} ELSE '[]' END erased_members,
+    CASE WHEN e.kind='channel' THEN ${erasedAudience('guestMembers',"review.summary_json,'$.channels'")} ELSE '[]' END erased_guests
+    FROM nook_import_effect_revisions e WHERE e.destination=?`;
+const ordered = (values: string[]) => [...new Set(values)].sort((a,b)=>Buffer.compare(Buffer.from(a),Buffer.from(b)));
+function fromState(r: any, destination: string, erased: Set<string>): TargetRow {
+    if (r.state === null) throw new Error('IMPORT_NATIVE_MISSING');
+    const s = JSON.parse(r.state); let v: any;
+    if (r.kind === 'channel') v = {id:s[0],name:s[1],kind:s[2],owner:s[3],seq:s[4],version:s[5],messageCount:s[6],job:s[7],sourceId:s[8],sourceRecord:JSON.parse(s[9]),members:ordered([...s[10],...JSON.parse(r.erased_members)]),guestMembers:ordered([...s[11],...JSON.parse(r.erased_guests)]),...(s[13]?{retained:true}:{})};
+    else if (r.kind === 'actor') v = {job:s[0],sourceId:s[1],association:s[2],sourceRecord:JSON.parse(s[3])};
+    else if (r.kind === 'message') v = messageValue({id:s[0],job:s[1],key:s[2],conversation:s[3],source_actor:s[4],source_timestamp:s[5],source_record:s[6],body:s[7],parent:s[9],sequence:s[10],owner:s[11]},s[12].filter((f:any[])=>f[6]!==null).map((f:any[])=>({id:f[0],source_id:f[3],position:f[5],name:f[10],mime:f[11],size:f[12],sha256:f[13],expires:f[14],state:f[15],created:f[16],object_key:f[17],intent:f[18],author:f[8]})));
+    else throw new Error('IMPORT_TARGET_KIND');
+    const expected = valueState(r.kind,v);
+    if (r.kind === 'channel') {
+        expected[10] = expected[10].filter((u:string)=>!erased.has(u));
+        expected[11] = expected[11].filter((u:string)=>!erased.has(u));
     }
-    else if (kind === 'actor') {
-        const row = await db.prepare('SELECT * FROM nook_import_actors WHERE job=? AND source_id=?').bind(...id.split(':')).first<any>();
-        if (!row)
-            throw new Error('IMPORT_NATIVE_MISSING');
-        value = { job: row.job, sourceId: row.source_id, association: row.association, sourceRecord: JSON.parse(row.source_record) };
+    // Values with changed search rows, dangling file links, raw provenance text,
+    // unexpected rosters or attachment metadata must never look unchanged to undo.
+    if (JSON.stringify(expected)!==JSON.stringify(s)) {
+        // Source provenance has one privacy address: sourceRecord. Never retain
+        // a second raw copy under diagnostic state that field erasure cannot see.
+        const sourceAt = r.kind==='channel'?9:r.kind==='actor'?3:6;
+        if (s[sourceAt]!==JSON.stringify(v.sourceRecord)) throw new Error('IMPORT_NATIVE_PROVENANCE_ENCODING');
+        s[sourceAt]=null;
+        v.nativeState=s;
     }
-    else if (kind === 'message') {
-        const r = await db.prepare('SELECT r.*,j.owner FROM nook_import_records r JOIN nook_imports j ON j.id=r.job WHERE r.id=?').bind(id).first<any>();
-        if (!r)
-            throw new Error('IMPORT_NATIVE_MISSING');
-        value = messageValue(r, (await db.prepare(`SELECT ${fileColumns} FROM nook_import_files f JOIN nook_attachments a ON a.id=f.attachment WHERE f.message=? ORDER BY f.position`).bind(id).all<any>()).results);
-    }
-    else
-        throw new Error('IMPORT_TARGET_KIND');
-    return { destination, targetKind: kind, targetId: id, revision: rev.revision, value };
+    return {destination,targetKind:r.kind,targetId:r.id,revision:r.revision,value:v};
 }
-function conjunct(parts: D1Sql[]): D1Sql { return sql(parts.map(p => `(${p.sql})`).join(' AND '), ...parts.flatMap(p => p.params ?? [])); }
-export function targetMatches(row: TargetRow | null, destination: string, kind: string, id: string): D1Sql { return conjunct(targetMatchParts(row, destination, kind, id)); }
+async function snapshots(db: D1Database, destination: string, kind?: string, id?: string): Promise<TargetRow[]> {
+    const [rows,erased] = await Promise.all([
+        db.prepare(snapshotSelect+(kind===undefined?' ORDER BY e.kind,e.id':' AND e.kind=? AND e.id=?')).bind(destination,...(kind===undefined?[]:[kind,id])).all<any>(),
+        db.prepare('SELECT id FROM nook_erased_actors').all<{id:string}>()
+    ]);
+    const ids = new Set(erased.results.map(r=>r.id));
+    return rows.results.map(r=>fromState(r,destination,ids));
+}
+/** Two reads for the entire destination, regardless of its target count. */
+export const listTargets = (db: D1Database, destination: string) => snapshots(db,destination);
+export async function readTarget(db: D1Database, destination: string, kind: string, id: string): Promise<TargetRow | undefined> {
+    return (await snapshots(db,destination,kind,id))[0];
+}
+function conjunct(parts: D1Sql[]): D1Sql { return sql(parts.map(p=>`(${p.sql})`).join(' AND '),...parts.flatMap(p=>p.params??[])); }
+export function targetMatches(row: TargetRow | null, destination: string, kind: string, id: string): D1Sql { return conjunct(targetMatchParts(row,destination,kind,id)); }
 export function targetMatchParts(row: TargetRow | null, destination: string, kind: string, id: string): D1Sql[] {
-    const parts = [row ? sql('EXISTS(SELECT 1 FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=? AND revision=?)', destination, kind, id, row.revision) : sql('NOT EXISTS(SELECT 1 FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?)', destination, kind, id)];
-    const v = row?.value as any;
-    if (kind === 'channel') {
-        if (!v)
-            parts.push(sql('NOT EXISTS(SELECT 1 FROM nook_conversations WHERE id=?) AND NOT EXISTS(SELECT 1 FROM nook_import_channels WHERE conversation=?)', id, id));
-        else {
-            // An applied value requires no retained native history; a current read
-            // that found it matches only while it remains (field redaction fences it).
-            const retained = v.retained ? `c.seq=? AND (${retainedChannelHistory('c.id')})` : `c.seq-(SELECT COUNT(*) FROM nook_events e WHERE e.conversation=c.id AND e.kind='erasure' AND e.actor IS NULL)=? AND NOT (${retainedChannelHistory('c.id')})`;
-            parts.push(sql(`EXISTS(SELECT 1 FROM nook_conversations c JOIN nook_import_channels i ON i.conversation=c.id WHERE c.id=? AND c.name=? AND c.kind=? AND c.owner=? AND c.version=? AND c.message_count=? AND i.job=? AND i.source_id=? AND i.source_record=? AND ${retained})`, id, v.name, v.kind, v.owner, v.version, v.messageCount, v.job, v.sourceId, JSON.stringify(v.sourceRecord), v.seq), sql('(SELECT COUNT(*) FROM nook_members WHERE conversation=?)=(SELECT COUNT(*) FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)) AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user NOT IN (SELECT value FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)))', id, JSON.stringify(v.members), id, JSON.stringify(v.members)), sql('(SELECT COUNT(*) FROM nook_guest_grants WHERE conversation=?)=(SELECT COUNT(*) FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)) AND NOT EXISTS(SELECT 1 FROM nook_guest_grants WHERE conversation=? AND user NOT IN (SELECT value FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)))', id, JSON.stringify(v.guestMembers), id, JSON.stringify(v.guestMembers)));
-            if(v.kind==='dm')parts.push(sql('(SELECT COUNT(*) FROM nook_dm_roster WHERE conversation=?)=? AND NOT EXISTS(SELECT 1 FROM nook_dm_roster WHERE conversation=? AND user NOT IN (SELECT value FROM json_each(?)))',id,v.members.length,id,JSON.stringify(v.members)));
-        }
+    if (row) {
+        const state="json_extract(k.value,'$[3]')",keyKind="json_extract(k.value,'$[0]')",raw="json_extract(k.value,'$[4]')";
+        return [sql(`EXISTS(SELECT 1 FROM json_each(?) k JOIN nook_import_effect_revisions e ON e.destination=? AND e.kind=? AND e.id=? WHERE e.kind=${keyKind} AND e.id=json_extract(k.value,'$[1]') AND e.revision=json_extract(k.value,'$[2]') AND ${statesEqualSql(nativeStateSql(),expectedStateSql(state,keyKind,raw))})`,JSON.stringify([snapshotTuple(row)]),destination,kind,id)];
     }
-    else if (kind === 'actor')
-        parts.push(v ? sql('EXISTS(SELECT 1 FROM nook_import_actors WHERE job=? AND source_id=? AND association IS ? AND source_record=?)', v.job, v.sourceId, v.association, JSON.stringify(v.sourceRecord)) : sql("NOT EXISTS(SELECT 1 FROM nook_import_actors WHERE job=? AND source_id=?)", ...id.split(':')));
-    else if (kind === 'message') {
-        if (!v)
-            parts.push(sql('NOT EXISTS(SELECT 1 FROM nook_import_records WHERE id=?) AND NOT EXISTS(SELECT 1 FROM nook_messages WHERE id=?) AND NOT EXISTS(SELECT 1 FROM nook_import_files WHERE message=?) AND NOT EXISTS(SELECT 1 FROM nook_attachments WHERE message=?) AND NOT EXISTS(SELECT 1 FROM nook_search s WHERE message=? AND NOT EXISTS(SELECT 1 FROM nook_retained_import_bodies b JOIN nook_erased_import_messages e ON e.id=b.id WHERE b.id=s.message AND e.conversation=s.conversation AND s.source=\'imported\' AND s.scope=\'|\'||e.conversation||\'|\' AND s.body_lower=b.body_lower))', id, id, id, id, id));
-        else {
-            parts.push(sql('EXISTS(SELECT 1 FROM nook_import_records WHERE id=? AND job=? AND key=? AND conversation=? AND source_actor=? AND source_timestamp=? AND source_record=? AND body=? AND body_lower=? AND parent IS ? AND sequence=?)', id, v.job, v.key, v.conversation, v.sourceActor, v.sourceTimestamp, JSON.stringify(v.sourceRecord), v.body, v.body.toLowerCase(), v.parent, v.sequence), sql('(SELECT COUNT(*) FROM nook_import_files WHERE message=?)=? AND (SELECT COUNT(*) FROM nook_attachments WHERE message=?)=? AND (SELECT COUNT(*) FROM nook_search WHERE message=?)=1', id, v.files.length, id, v.files.length, id), sql("(SELECT COUNT(*) FROM nook_search WHERE message=? AND conversation=? AND source='imported' AND body_lower=? AND scope=?)=1", id, v.conversation, v.body.toLowerCase(), '|'+v.conversation+'|'));
-            for (const f of v.files)
-                parts.push(sql('EXISTS(SELECT 1 FROM nook_import_files f JOIN nook_attachments a ON a.id=f.attachment WHERE f.id=? AND f.job=? AND f.message=? AND f.source_id=? AND f.position=? AND a.id=f.id AND a.message=f.message AND a.conversation=? AND a.name=? AND a.mime=? AND a.size=? AND a.sha256=? AND a.object_key=? AND a.state=? AND a.author=? AND a.expires=? AND a.created=? AND a.intent=? AND a.position=f.position AND f.attachment=f.id)', f.id, v.job, id, f.sourceId, f.position, v.conversation, f.name, f.mime, f.size, f.sha256, f.objectKey, f.state, f.author, f.expires, f.created, f.intent));
-        }
-    }
-    else
-        throw new Error('IMPORT_TARGET_KIND');
+    const parts = [sql('NOT EXISTS(SELECT 1 FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?)',destination,kind,id)];
+    if (kind==='channel') parts.push(sql('NOT EXISTS(SELECT 1 FROM nook_conversations WHERE id=?) AND NOT EXISTS(SELECT 1 FROM nook_import_channels WHERE conversation=?)',id,id));
+    else if (kind==='actor') parts.push(sql("NOT EXISTS(SELECT 1 FROM nook_import_actors WHERE job||':'||source_id=?)",id));
+    else if (kind==='message') parts.push(sql("NOT EXISTS(SELECT 1 FROM nook_import_records WHERE id=?) AND NOT EXISTS(SELECT 1 FROM nook_messages WHERE id=?) AND NOT EXISTS(SELECT 1 FROM nook_import_files WHERE message=?) AND NOT EXISTS(SELECT 1 FROM nook_attachments WHERE message=?) AND NOT EXISTS(SELECT 1 FROM nook_search s WHERE message=? AND NOT EXISTS(SELECT 1 FROM nook_retained_import_bodies b JOIN nook_erased_import_messages e ON e.id=b.id WHERE b.id=s.message AND e.conversation=s.conversation AND s.source='imported' AND s.scope='|'||e.conversation||'|' AND s.body_lower=b.body_lower))",id,id,id,id,id));
+    else throw new Error('IMPORT_TARGET_KIND');
     return parts;
+}
+/** One count plus bounded exact set predicates. Each value is transported once,
+ * without repeating all fields in an EXISTS clause for every owned child. */
+export function targetsMatchMany(rows: TargetRow[], destination: string): D1Sql[] {
+    const parts = [sql('(SELECT COUNT(*) FROM nook_import_effect_revisions WHERE destination=?)=?',destination,rows.length)];
+    let chunk: any[] = [], bytes = 2;
+    const flush = () => {
+        if (!chunk.length) return;
+        const state="json_extract(k.value,'$[3]')",kind="json_extract(k.value,'$[0]')",raw="json_extract(k.value,'$[4]')";
+        const encoded=encodeTargetSet(chunk);
+        parts.push(sql(`(${decodedTargetSetSql} SELECT NOT EXISTS(SELECT 1 FROM expected k WHERE NOT EXISTS(SELECT 1 FROM nook_import_effect_revisions e WHERE e.destination=? AND e.kind=${kind} AND e.id=json_extract(k.value,'$[1]') AND e.revision=json_extract(k.value,'$[2]') AND ${statesEqualSql(nativeStateSql(),expectedStateSql(state,kind,raw))})))`,encoded.dictionary,encoded.maxTokens,encoded.codes,destination));
+        chunk=[];bytes=2;
+    };
+    const keys = new Set<string>();
+    for (const row of rows) {
+        const key=JSON.stringify([row.targetKind,row.targetId]);
+        if(row.destination!==destination||keys.has(key)) throw new Error('IMPORT_NATIVE_SET_MISMATCH');
+        keys.add(key);
+        const tuple=snapshotTuple(row),size=Buffer.byteLength(JSON.stringify(tuple))+1;
+        if(chunk.length&&bytes+size>512*1024) flush();
+        chunk.push(tuple);bytes+=size;
+    }
+    flush();return parts;
 }

@@ -10,7 +10,16 @@ export function validateSlackArchiveRecords(proofs, tables) {
     const channelGroups = groups('import_channels'), actorGroups = groups('import_actors'), messageGroups = groups('import_records');
     const envelopes = new Map(rows('imports').map(j => [j.id, j])), attachments = new Map(rows('attachments').map(f => [f.id, f])), fileGroups = new Map();
     for (const file of rows('import_files')) { if (!fileGroups.has(file.message)) fileGroups.set(file.message, []); fileGroups.get(file.message).push(file); }
-    for (const proof of proofs.values()) {
+    const admitted=[...proofs.values()].filter(p=>!p.door),doorGroups=new Map();
+    for(const proof of proofs.values())if(proof.door){const domain=proof.binding.domain_job;if(!doorGroups.has(domain))doorGroups.set(domain,[]);doorGroups.get(domain).push(proof);}
+    for(const [domain,lineage] of doorGroups){
+        const envelope=envelopes.get(domain),initial=lineage.find(p=>p.review.id===envelope?.intent),effects=new Map();
+        for(const proof of lineage)for(const revision of proof.revisions){const key=revision.kind+':'+revision.id;check(!effects.has(key),'duplicate_door_live_target');check(proof.effects.has(key),'door_live_effect_missing');effects.set(key,proof.effects.get(key));}
+        if(!envelope){check(effects.size===0,'door_history_envelope_missing');continue;}
+        check(initial,'door_envelope_binding_changed');
+        admitted.push({...initial,effects,job:{...initial.job,state:'completed'}});
+    }
+    for (const proof of admitted) {
         const { job, review, effects, summary } = proof, domain = review.domain_job;
         const envelope = envelopes.get(domain);
         if (['undone', 'rolled_back'].includes(job.state)) { check(!envelope || envelope.intent !== review.id, 'undone_slack_history_retained'); continue; }

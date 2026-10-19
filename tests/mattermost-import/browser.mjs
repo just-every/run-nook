@@ -1,3 +1,4 @@
+import {createBrowserPlan,reconcileBrowserJob} from '../import-browser-support.mjs'
 import {chromium,expect} from '@playwright/test'
 import assert from 'node:assert/strict'
 import {mkdir} from 'node:fs/promises'
@@ -20,14 +21,12 @@ export async function mattermostBrowser({origin,owner,journey,destination='evide
     for(const name of ['maya','leo','aisha','sam'])await page.getByRole('combobox',{name:'Map '+name[0].toUpperCase()+name.slice(1)+' Fixture',exact:true}).selectOption(journey.people[name].user.id)
     await page.getByRole('button',{name:'Retain all source roles as historical labels',exact:true}).click()
     await page.getByRole('heading',{name:'2. Map identities and review audiences',exact:true}).scrollIntoViewIfNeeded();await shot('mapping')
-    async function preview(){const response=page.waitForResponse(r=>r.url().endsWith('/api/mattermost-imports/preview')&&r.request().method()==='POST');await page.getByRole('button',{name:'Preview exact import',exact:true}).click();return(await response).json()}
-    let planned=await preview()
-    if(planned.needsOmissionReview){await page.getByRole('checkbox',{name:'I reviewed and accept these exact omissions',exact:true}).check();planned=await preview()}
-    assert.ok(planned.fingerprint)
-    await page.getByRole('heading',{name:'3. Approve the historical import',exact:true}).scrollIntoViewIfNeeded();await shot('preview')
-    await page.getByRole('button',{name:'Apply reviewed plan',exact:true}).first().click();await expect(page.getByRole('status')).toContainText('Import completed:',{timeout:90_000})
+    const planned=await createBrowserPlan(page)
+    await page.getByRole('heading',{name:'3. Review the dry run',exact:true}).scrollIntoViewIfNeeded();await shot('preview')
+    await page.getByRole('button',{name:'Apply reviewed plan',exact:true}).first().click();await expect(page.getByRole('status')).toContainText('Historical import completed.',{timeout:90_000})
     await page.getByRole('heading',{name:'Import jobs',exact:true}).scrollIntoViewIfNeeded();await shot('completed')
-    const state=await journey.call(journey.base+'/'+planned.review),histories=[]
+    await page.reload();const job=page.locator('.import-job').filter({hasText:planned.planId});await reconcileBrowserJob(page,job)
+    const state=await journey.door.status(planned),histories=[]
     for(const channel of state.destinations){const source=journey.upload.channels.find(c=>c.sourceId===channel.sourceId);if(source.sourceMembers.includes('maya'))histories.push(...await journey.call(`/api/conversations/${channel.id}/messages`,{actor:journey.people.maya}))}
     const root=histories.find(m=>m.body===journey.expected.posts.find(p=>p.key==='public-root').message)
     const memberCookie=journey.people.maya.cookie,memberAt=memberCookie.indexOf('=');await context.addCookies([{name:memberCookie.slice(0,memberAt),value:memberCookie.slice(memberAt+1),url:origin}])

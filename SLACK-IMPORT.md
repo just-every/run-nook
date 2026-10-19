@@ -1,5 +1,24 @@
 # Slack export ZIP import
 
+Nook reads the archive on your device. Source authentication stays there; only
+the reviewed normalized history and selected files are uploaded. Choose the
+source namespace and mappings, use **Preview exact import**, accept the named
+omissions, then choose **Create dry run**. Review the door's counts, rejections
+and differences before **Apply reviewed plan**. A dry run expires after 30
+minutes. If an audience or source changes, create a fresh dry run. The history
+provides status, reconciliation and guarded Undo, including imports made before
+the shared door. A native edit or later work refuses destructive undo.
+
+For another snapshot of the same workspace, keep its source namespace and select
+**Compare with the previous import in this source namespace**. Unchanged records
+stay in place; source records absent from the new snapshot remain in Nook.
+
+Business imports use the same door. The owner can enable them in Import history
+and permanently revoke signing keys; switching access on again keeps revocations.
+Workspace archives retain import batches and custody; restoring an archive
+leaves Business imports disabled.
+
+
 The importer runs in the emitted Worker on local D1 and R2.
 
 The automated `tests/pilot-journey.mjs` is part of `rer verify`. At 1440px and 390px it exercises a fresh local RER setup, owner and independent teammate sessions through the local dev entry, a private file, and a six-channel synthetic corpus: 40 directory actors, 5,000 source messages (3,500 content and 1,500 system notices), 499 supplied files and one explicitly missing file. It checks complete history, thread and file censuses, audience access and revocation, zero native unread/attention/mail from import, populated undo and the guard after later live work, then a stopped export/reset/restore/reexport content-hash match. It uses no real Slack export, account or host fetch and makes no source-parity claim.

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { slackFixture, largeSlackFixture, zipFixture } from './fixture.mjs';
+import {importDoorClient,importUsers} from '../import-door-support.mjs';
 import { invite, signIn } from '../auth-support.mjs';
 export async function importJourney({ origin, owner, restart, sql }) {
     const report = [], suffix = crypto.randomUUID().slice(0, 8), member = await invite(origin, owner.cookie, 'ImportReader' + suffix), outsider = await invite(origin, owner.cookie, 'ImportOutsider' + suffix);
@@ -14,28 +15,20 @@ export async function importJourney({ origin, owner, restart, sql }) {
         return signIn(origin,email,{requestLink:false});
     }
     const guest=await scopedActor('ImportGuest','member','guest'),admin=await scopedActor('ImportAdmin','admin','member');
-    report.push(await sourceFidelityJourney({ call, owner, suffix }));
-    const upload = await call('/api/slack-imports/upload', { zip: slackFixture() }), namespace = 'slack-proof-' + suffix;
-    assert.equal(upload.channels.length, 2);
-    assert.ok(upload.actors.some(a => a.sourceId === 'U404'));
-    for(const actor of [member,guest,admin])await call('/api/slack-imports', { actor, status: 403 });
-    const review = { namespace, channels: upload.channels.map((c, i) => ({ sourceId: c.sourceId, name: 'Imported ' + c.name + ' ' + suffix, members: i === 0 ? [owner.user.id, member.user.id, guest.user.id] : [owner.user.id] })), actors: { U1: owner.user.id, U2: null, U404: null }, acceptedOmissions: [] };
-    const omitted = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review } });
-    assert.equal(omitted.needsOmissionReview, true);
-    assert.deepEqual(omitted.counts, { channels: 2, actors: 3, messages: 4, threads: 2, files: 2, bytes: 11, omissions: 1 });
-    review.acceptedOmissions = [omitted.omissionDigest];
-    const preview = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review } });
-    assert.ok(preview.fingerprint);
-    await call(`/api/slack-imports/${preview.review}/apply`, { body: { fingerprint: 'stale-plan' }, status: 409 });
-    await call(`/api/slack-imports/${preview.review}`, { actor: member, status: 403 });
-    // Discard a successful acknowledgement, reopen Worker, then retry the same plan.
-    await call(`/api/slack-imports/${preview.review}/apply`, { body: { fingerprint: preview.fingerprint } });
-    await restart();
-    let result = await call(`/api/slack-imports/${preview.review}/apply`, { body: { fingerprint: preview.fingerprint } });
-    for (let i = 0; result.job.state !== 'completed' && i < 20; i++)
-        result = await call(`/api/slack-imports/${preview.review}/resume`, { body: {} });
-    assert.equal(result.job.state, 'completed');
-    assert.equal(result.job.total, 9);
+    const door=importDoorClient({origin,owner,users:()=>importUsers(sql)});
+    report.push(await sourceFidelityJourney({call,door,owner,suffix}));
+    const upload=await door.inspect(slackFixture()),namespace='slack-proof-'+suffix;
+    assert.equal(upload.channels.length,2);assert.ok(upload.actors.some(a=>a.sourceId==='U404'));
+    for(const actor of [member,guest,admin])await door.history({actor,status:403});
+    const review={namespace,channels:upload.channels.map((c,i)=>({sourceId:c.sourceId,name:'Imported '+c.name+' '+suffix,members:i===0?[owner.user.id,member.user.id,guest.user.id]:[owner.user.id]})),actors:{U1:owner.user.id,U2:null,U404:null},acceptedOmissions:[]};
+    const omitted=(await door.prepare(upload,review)).summary;
+    assert.equal(omitted.needsOmissionReview,true);assert.deepEqual(omitted.counts,{channels:2,actors:3,messages:4,threads:2,files:2,bytes:11,omissions:1});
+    review.acceptedOmissions=[omitted.omissionDigest];const preview=await door.plan(upload,review);
+    assert.ok(preview.fingerprint);await door.apply({...preview,fingerprint:'0'.repeat(64)},{status:409});
+    await door.request('status',{planId:preview.planId},{actor:member,status:403});
+    // Discard the successful acknowledgement, cold restart and retry exactly.
+    await door.apply(preview);await restart();const result=await door.finish(preview);
+    assert.equal(result.job.total,9);
     const channels = await call('/api/conversations'), general = channels.find(c => c.name === review.channels[0].name), engineering = channels.find(c => c.name === review.channels[1].name);
     assert.ok(general && engineering);
     assert.equal(general.unread, 0);
@@ -59,7 +52,7 @@ export async function importJourney({ origin, owner, restart, sql }) {
     await call(`/api/messages/${history[0].id}`,{method:'PATCH',body:{body:'Changed history',version:1},status:403});
     await call(`/api/messages/${history[0].id}/reactions`,{body:{emoji:'👍',add:true},status:404});
     await call(`/api/attachments/${history[0].attachments[0].id}`,{method:'PATCH',body:{delete:true},status:403});
-    await call(`/api/slack-imports/uploads/${upload.upload}`,{body:{},status:409});
+    await door.request('withdraw',{planId:preview.planId,uploadId:preview.uploadId},{status:409});
     const frozen=await call(`/api/conversations/${general.id}/messages/window?before=0`,{actor:member});
     assert.deepEqual(frozen.items.map(m=>m.id),[history[0].id]);
     assert.equal(frozen.readThrough,0);
@@ -98,42 +91,19 @@ export async function importJourney({ origin, owner, restart, sql }) {
     assert.equal((await call('/api/search?q=PRIVATE%20CANARY',{actor:guest})).items.length,0);
     assert.equal((await call('/api/search?q=unknown', { actor: member })).items.some(x => x.conversation === engineering.id), false);
     assert.equal((await call(`/api/conversations/${general.id}/replay`, { actor: member })).frontier, 0);
-    await call(`/api/slack-imports/${preview.review}/apply`, { body: { fingerprint: preview.fingerprint } });
-    assert.equal((await call(`/api/conversations/${general.id}/messages`)).length, 2);
-    const duplicateReview = { ...review, channels: review.channels.map(c => ({ ...c, name: c.name + ' duplicate' })) };
-    const duplicateOmissions = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review: duplicateReview } });
-    duplicateReview.acceptedOmissions = [duplicateOmissions.omissionDigest];
-    const duplicatePlan = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review: duplicateReview } });
-    await call(`/api/slack-imports/${duplicatePlan.review}/apply`, { body: { fingerprint: duplicatePlan.fingerprint }, status: 409 });
-    assert.equal((await call(`/api/conversations/${general.id}/messages`)).length, 2);
-    report.push({ name: 'local ZIP mapping and omission review, actual D1 kit lost-ack cold retry, two normal histories, thread, R2 bytes, normal search and ACL', passed: true, counts: omitted.counts });
-    let undone = await call(`/api/slack-imports/${preview.review}/undo`, { body: {} });
-    for (let i = 0; undone.job.state !== 'undone' && i < 20; i++)
-        undone = await call(`/api/slack-imports/${preview.review}/undo`, { body: {} });
-    assert.equal(undone.job.state, 'undone');
-    assert.equal((await call('/api/search?q=caf%C3%A9')).items.some(x => x.id === history[0].id), false);
-    assert.equal((await call('/api/conversations')).some(x => x.id === general.id), false);
-    const deleted = await fetch(`${origin}/api/attachments/${history[0].attachments[0].id}/download`, { headers: { cookie: owner.cookie } });
-    assert.equal(deleted.status, 404);
-    let reused=await call(`/api/slack-imports/${duplicatePlan.review}/apply`,{body:{fingerprint:duplicatePlan.fingerprint}});
-    for(let i=0;reused.job.state!=='completed'&&i<20;i++)reused=await call(`/api/slack-imports/${duplicatePlan.review}/resume`,{body:{}});
-    assert.equal(reused.job.state,'completed');
+    await door.apply(preview);
     assert.equal((await call(`/api/conversations/${general.id}/messages`)).length,2);
-    let cleared=await call(`/api/slack-imports/${duplicatePlan.review}/undo`,{body:{}});
-    for(let i=0;cleared.job.state!=='undone'&&i<20;i++)cleared=await call(`/api/slack-imports/${duplicatePlan.review}/undo`,{body:{}});
-    assert.equal(cleared.job.state,'undone');
-    report.push({ name: 'owner guarded undo removes owned history, index, channels and attachment reachability', passed: true });
-    // A distinct namespace represents an independently reviewed source. Live work
-    // prevents channel removal, and a member authority change invalidates a plan.
-    const review2 = { ...review, namespace: namespace + '-live' }, p2 = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review: review2 } });
-    review2.acceptedOmissions = [p2.omissionDigest];
-    const ready2 = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review: review2 } });
-    let applied = await call(`/api/slack-imports/${ready2.review}/apply`, { body: { fingerprint: ready2.fingerprint } });
-    for (let i = 0; applied.job.state !== 'completed' && i < 20; i++)
-        applied = await call(`/api/slack-imports/${ready2.review}/resume`, { body: {} });
+    report.push({name:'local review, real shared door lost-ack retry, histories, threads, file bytes, search and ACL',passed:true,counts:omitted.counts});
+    assert.equal((await door.undo(preview)).job.state,'undone');
+    assert.equal((await call('/api/search?q=caf%C3%A9')).items.some(x=>x.id===history[0].id),false);
+    assert.equal((await call('/api/conversations')).some(x=>x.id===general.id),false);
+    assert.equal((await fetch(`${origin}/api/attachments/${history[0].attachments[0].id}/download`,{headers:{cookie:owner.cookie}})).status,404);
+    report.push({name:'guarded undo withdraws owned history, search, channels and file reachability',passed:true});
+    const review2={...review,namespace:namespace+'-live'},local2=(await door.prepare(upload,review2)).summary;
+    review2.acceptedOmissions=[local2.omissionDigest];const ready2=await door.plan(upload,review2);await door.finish(ready2);
     const liveChannel = (await call('/api/conversations')).find(c => c.name === review2.channels[0].name);
     const live = await call(`/api/conversations/${liveChannel.id}/messages`, { body: { body: 'Later live work survives undo', intent: 'live-' + suffix } });
-    await call(`/api/slack-imports/${ready2.review}/undo`, { body: {}, status: 409 });
+    await door.request('undo',{planId:ready2.planId},{status:409});
     assert.ok((await call(`/api/conversations/${liveChannel.id}/messages`)).some(m => m.id === live.id));
     const mixed = await call(`/api/conversations/${liveChannel.id}/messages/window?limit=1`);
     assert.equal(mixed.items[0].id, live.id);
@@ -151,47 +121,29 @@ export async function importJourney({ origin, owner, restart, sql }) {
     const continued=await call(`/api/conversations/${liveChannel.id}/messages/window?thread=${importedRoot.id}`,{actor:member});
     assert.ok(continued.items.some(m=>m.id===nativeReply.id));
     assert.equal(continued.root.body,importedRoot.body,'Native participation does not rewrite the source');
-    await call(`/api/slack-imports/${ready2.review}/undo`,{body:{},status:409});
+    await door.request('undo',{planId:ready2.planId},{status:409});
     report.push({ name: 'undo rejects later live work and preserves it', passed: true });
-    if (sql) {
-        // A job one apply request cannot finish: requests fill the import kit's statement budget.
-        const bigUpload = await call('/api/slack-imports/upload', { zip: largeSlackFixture(200, 5) });
-        const stale = { namespace: namespace + '-stale', channels: bigUpload.channels.map((c, i) => ({ sourceId: c.sourceId, name: 'Stale ' + c.name + ' ' + suffix, members: i === 0 ? [owner.user.id, member.user.id, guest.user.id] : [owner.user.id] })), actors: Object.fromEntries(bigUpload.actors.map(a => [a.sourceId, null])), acceptedOmissions: [] }, p = await call('/api/slack-imports/preview', { body: { upload: bigUpload.upload, review: stale } });
-        if (p.needsOmissionReview) stale.acceptedOmissions = [p.omissionDigest];
-        const ready = await call('/api/slack-imports/preview', { body: { upload: bigUpload.upload, review: stale } });
-        const partial = await call(`/api/slack-imports/${ready.review}/apply`, { body: { fingerprint: ready.fingerprint } });
-        assert.ok(partial.job.checkpoint > 0 && partial.job.checkpoint < partial.job.total);
-        await sql(`UPDATE oa_operators SET role='admin' WHERE id='${member.user.id}'`);
-        const changed = await call(`/api/slack-imports/${ready.review}`);
-        assert.equal(changed.job.checkpoint, partial.job.checkpoint);
-        assert.equal(changed.forwardAuthority, false);
-        assert.equal(changed.reversalSafe, true);
-        assert.ok((await call('/api/slack-imports')).jobs.some(j => j.review === ready.review && !j.forwardAuthority));
-        await call(`/api/slack-imports/${ready.review}/apply`, { body: { fingerprint: ready.fingerprint }, status: 409 });
-        await call(`/api/slack-imports/${ready.review}/resume`, { body: {}, status: 409 });
-        let rollback = await call(`/api/slack-imports/${ready.review}/undo`, { body: {} });
-        for (let n = 0; rollback.job.state !== 'rolled_back' && n < 20; n++) rollback = await call(`/api/slack-imports/${ready.review}/undo`, { body: {} });
-        assert.equal(rollback.job.state, 'rolled_back');
-        const again = await call(`/api/slack-imports/${ready.review}/review`, { body: {} });
-        assert.equal(again.source.upload, bigUpload.upload);
-        const fresh = await call('/api/slack-imports/preview', { body: { upload: again.source.upload, review: again.review } });
-        assert.notEqual(fresh.review, ready.review);
-        let reapproved = await call(`/api/slack-imports/${fresh.review}/apply`, { body: { fingerprint: fresh.fingerprint } });
-        for (let n = 0; reapproved.job.state !== 'completed' && n < 20; n++) reapproved = await call(`/api/slack-imports/${fresh.review}/resume`, { body: {} });
-        assert.equal(reapproved.job.state, 'completed');
-        await call(`/api/slack-imports/${ready.review}/undo`, { body: {} });
-        const recoveredChannel = (await call('/api/conversations')).find(c => c.id !== liveChannel.id && c.name === stale.channels[0].name);
-        assert.ok(recoveredChannel);
-        assert.equal((await call(`/api/conversations/${recoveredChannel.id}/messages?limit=100`)).length, 100);
-        await sql(`UPDATE oa_operators SET status='inactive' WHERE id='${member.user.id}'`);
-        await call(`/api/slack-imports/${fresh.review}/apply`, { body: { fingerprint: fresh.fingerprint }, status: 409 });
-        assert.equal((await call(`/api/slack-imports/${fresh.review}`)).forwardAuthority, false);
-        report.push({ name: 'changed authority retains owner status, blocks forward work, permits guarded rollback and a fresh same-upload approval; stale cleanup cannot remove its replacement', passed: true });
-    }
-    report.push(await largeImportJourney({ call, owner, restart, suffix }));
-    return report;
+    const bigUpload=await door.inspect(largeSlackFixture(200,5));
+    const stale={namespace:namespace+'-stale',channels:bigUpload.channels.map((c,i)=>({sourceId:c.sourceId,name:'Stale '+c.name+' '+suffix,members:i===0?[owner.user.id,member.user.id,guest.user.id]:[owner.user.id]})),actors:Object.fromEntries(bigUpload.actors.map(a=>[a.sourceId,null])),acceptedOmissions:[]};
+    const local=(await door.prepare(bigUpload,stale)).summary;if(local.needsOmissionReview)stale.acceptedOmissions=[local.omissionDigest];
+    const ready=await door.plan(bigUpload,stale),partial=await door.apply(ready);
+    assert.ok(partial.job.checkpoint>0&&partial.job.checkpoint<partial.job.total);
+    await sql(`UPDATE oa_operators SET role='admin',version=version+1 WHERE id='${member.user.id}'`);
+    const changed=await door.status(ready);assert.equal(changed.job.checkpoint,partial.job.checkpoint);
+    assert.ok((await door.history()).jobs.some(j=>j.planId===ready.planId));
+    await door.apply(ready,{status:409});
+    assert.equal((await door.undo(ready)).job.state,'rolled_back');
+    const freshReview={...stale,namespace:stale.namespace+'-fresh'},freshLocal=(await door.prepare(bigUpload,freshReview)).summary;
+    freshReview.acceptedOmissions=[freshLocal.omissionDigest];const fresh=await door.plan(bigUpload,freshReview);await door.finish(fresh);
+    await door.undo(ready);
+    const recoveredChannel=(await call('/api/conversations')).find(c=>c.name===stale.channels[0].name);assert.ok(recoveredChannel);
+    assert.equal((await call(`/api/conversations/${recoveredChannel.id}/messages?limit=100`)).length,100);
+    await sql(`UPDATE oa_operators SET status='inactive',version=version+1 WHERE id='${member.user.id}'`);
+    await door.apply(fresh,{status:409});
+    report.push({name:'changed member authority blocks forward work, preserves owner history and guarded rollback; old reversal cannot remove a new namespace',passed:true});
+    report.push(await largeImportJourney({call,door,owner,restart,suffix}));return report;
 }
-async function sourceFidelityJourney({ call, owner, suffix }) {
+async function sourceFidelityJourney({ call, door, owner, suffix }) {
     const message = { type: 'message', user: 'U1', ts: '1.000001', text: 'bounded selected history' }, file = { id: 'F1', name: 'history.txt', mimetype: 'text/plain' };
     const fixtures = [
         { users: [], rows: [message], reason: 'source-actor-missing-from-export' },
@@ -202,33 +154,32 @@ async function sourceFidelityJourney({ call, owner, suffix }) {
         { rows: [{ ...message, thread_ts: '0.000001' }], reason: 'missing-or-unsupported-thread-parent' },
         { rows: [{ ...message, files: [file] }], files: [['files/F1/history.txt', Buffer.alloc(1024 * 1024 + 1, 65)]], reason: 'slack-file-size-limit' }
     ];
-    const before = await call('/api/slack-imports'), channels = await call('/api/conversations');
+    const before = await door.history(), channels = await call('/api/conversations');
     for (const [index, fixture] of fixtures.entries()) {
-        const upload = await call('/api/slack-imports/upload', { zip: zipFixture([['users.json', fixture.users ?? [{ id: 'U1' }]], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', fixture.rows], ...(fixture.files ?? [])]) });
+        const upload = await door.inspect(zipFixture([['users.json', fixture.users ?? [{ id: 'U1' }]], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', fixture.rows], ...(fixture.files ?? [])]));
         const review = { namespace: `blocked-${suffix}-${index}`, channels: [{ sourceId: 'C1', name: 'Blocked history', members: [owner.user.id] }], actors: Object.fromEntries(upload.actors.map(a => [a.sourceId, null])), acceptedOmissions: [] };
-        const preview = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review } });
-        const retry = await call('/api/slack-imports/preview', { body: { upload: upload.upload, review: { ...review, acceptedOmissions: [preview.omissionDigest] } } });
+        const preview = (await door.prepare(upload,review)).summary;
+        const retry = (await door.prepare(upload,{...review,acceptedOmissions:[preview.omissionDigest]})).summary;
         assert.equal(retry.blocked, true);
         assert.ok(retry.blockers.some(b => b.channel === 'C1' && b.reason === fixture.reason));
-        assert.equal(retry.review, undefined);
+        assert.equal(retry.planId, undefined);
         assert.equal(retry.fingerprint, undefined);
-        await call(`/api/slack-imports/uploads/${upload.upload}`, { body: {} });
     }
-    assert.deepEqual(await call('/api/slack-imports'), before);
+    assert.deepEqual(await door.history(), before);
     assert.deepEqual(await call('/api/conversations'), channels);
     return { name: 'selected history fidelity blockers cannot create a reviewed job or channel even with an accepted exclusion digest', passed: true, cases: fixtures.length };
 }
-async function largeImportJourney({ call, owner, restart, suffix }) {
-    const source = await call('/api/slack-imports/upload', { zip: largeSlackFixture() }), review = { namespace: 'large-runtime-' + suffix, channels: source.channels.map(c => ({ sourceId: c.sourceId, name: 'Large ' + c.name + ' ' + suffix, members: [owner.user.id] })), actors: Object.fromEntries(source.actors.map(a => [a.sourceId, null])), acceptedOmissions: [] };
-    const preview = await call('/api/slack-imports/preview', { body: { upload: source.upload, review } });
+async function largeImportJourney({ call, door, owner, restart, suffix }) {
+    const source = await door.inspect(largeSlackFixture()), review = { namespace: 'large-runtime-' + suffix, channels: source.channels.map(c => ({ sourceId: c.sourceId, name: 'Large ' + c.name + ' ' + suffix, members: [owner.user.id] })), actors: Object.fromEntries(source.actors.map(a => [a.sourceId, null])), acceptedOmissions: [] };
+    const preview = await door.plan(source,review);
     assert.equal(preview.counts.messages, 1205);
     assert.equal(preview.counts.actors, 205);
     assert.equal(preview.needsOmissionReview, false);
-    let result = await call(`/api/slack-imports/${preview.review}/apply`, { body: { fingerprint: preview.fingerprint } }), requests = 1;
+    let result = await door.apply(preview), requests = 1;
     while (result.job.state !== 'completed' && requests < 220) {
         if (requests === 3)
             await restart();
-        result = await call(`/api/slack-imports/${preview.review}/resume`, { body: {} });
+        result = await door.apply(preview);
         requests++;
     }
     assert.equal(result.job.state, 'completed');

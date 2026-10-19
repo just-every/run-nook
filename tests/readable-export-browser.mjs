@@ -6,6 +6,7 @@ import {resolve,join} from 'node:path'
 import {pathToFileURL} from 'node:url'
 import {tmpdir} from 'node:os'
 import {slackFixture} from './slack-import/fixture.mjs'
+import {importDoorClient} from './import-door-support.mjs'
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex')
 function validateBundle(bundle){
@@ -19,20 +20,17 @@ function validateBundle(bundle){
 export async function readableExportBrowser({origin,owner,member,outsider,destination='evidence/readable-export'}){
  origin=typeof origin==='function'?origin():origin
  const cookie=actor=>{const at=actor.cookie.indexOf('=');return {name:actor.cookie.slice(0,at),value:actor.cookie.slice(at+1),url:origin}}
- async function api(path,{body,actor=owner,method=body===undefined?'GET':'POST',status=200,zip}={}){
-  const response=await fetch(origin+path,{method:zip?'POST':method,headers:{origin,cookie:actor.cookie,...(zip?{'content-type':'application/zip'}:body===undefined?{}:{'content-type':'application/json'})},body:zip??(body===undefined?undefined:JSON.stringify(body))})
+ async function api(path,{body,actor=owner,method=body===undefined?'GET':'POST',status=200}={}){
+  const response=await fetch(origin+path,{method,headers:{origin,cookie:actor.cookie,...(body===undefined?{}:{'content-type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)})
   assert.equal(response.status,status,`${method} ${path}: ${response.ok?'':await response.clone().text()}`)
   return response.headers.get('content-type')?.includes('json')?response.json():response
  }
  // Real synthetic Slack ZIP through the ordinary reviewed import doors. Its
  // omitted private channel stays named in import review, never made public.
- const upload=await api('/api/slack-imports/upload',{zip:slackFixture()}),suffix=crypto.randomUUID().slice(0,8)
+ const suffix=crypto.randomUUID().slice(0,8),door=importDoorClient({origin,owner,users:async()=>[owner,member,outsider].map(a=>({...a.user,active:true,mode:'member'}))}),upload=await door.inspect(slackFixture())
  const review={namespace:'exit-browser-'+suffix,channels:upload.channels.map(c=>({sourceId:c.sourceId,name:'Exit source '+c.name+' '+suffix,members:[owner.user.id,member.user.id]})),actors:{U1:owner.user.id,U2:null,U404:null},acceptedOmissions:[]}
- let preview=await api('/api/slack-imports/preview',{body:{upload:upload.upload,review}})
- if(preview.needsOmissionReview){review.acceptedOmissions=[preview.omissionDigest];preview=await api('/api/slack-imports/preview',{body:{upload:upload.upload,review}})}
- let imported=await api(`/api/slack-imports/${preview.review}/apply`,{body:{fingerprint:preview.fingerprint}})
- for(let n=0;imported.job.state!=='completed'&&n<30;n++)imported=await api(`/api/slack-imports/${preview.review}/resume`,{body:{}})
- assert.equal(imported.job.state,'completed')
+ const local=await door.prepare(upload,review);if(local.summary.needsOmissionReview)review.acceptedOmissions=[local.summary.omissionDigest]
+ const preview=await door.plan(upload,review);await door.finish(preview)
  const secretRoom=await api('/api/conversations',{actor:member,body:{name:'Leadership compensation review',kind:'dm',participants:[outsider.user.id]}})
  const privateBytes=Buffer.from('Private workspace file: compensation handoff\n'),privateFile=await api(`/api/conversations/${secretRoom.id}/attachments`,{actor:member,body:{name:'leadership-handoff.txt',mime:'text/plain',data:privateBytes.toString('base64'),intent:crypto.randomUUID()}})
  await api(`/api/conversations/${secretRoom.id}/messages`,{actor:member,body:{body:'Keep the compensation handoff within this audience.',attachments:[privateFile.id],intent:crypto.randomUUID()}})

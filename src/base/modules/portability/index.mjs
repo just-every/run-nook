@@ -17,7 +17,7 @@ export async function createPortability({db,buckets={},policy:input,migrations})
   const context={db,buckets,config,migrations};
   return {
     exports:{create:actor=>createExport(context,actor),advance:(id,options)=>advanceExport(context,id,options),status:id=>exportStatus(context,id),download:id=>downloadExport(context,id),abort:id=>abortExport(context,id)},
-    imports:{create:(manifest,actor)=>createImport(context,manifest,actor),uploadPart:(id,index,part)=>uploadPart(context,id,index,part),finalize:(id,options)=>finalizeImport(context,id,options),status:id=>importStatus(context,id),abort:id=>abortImport(context,id),abortAbandoned:()=>abortAbandonedImport(context)},
+    imports:{create:(manifest,actor,options={})=>createImport(context,manifest,actor,undefined,options.ledgers),uploadPart:(id,index,part)=>uploadPart(context,id,index,part),finalize:(id,options)=>finalizeImport(context,id,options),status:id=>importStatus(context,id),abort:id=>abortImport(context,id),abortAbandoned:()=>abortAbandonedImport(context)},
     status:async id=>(await job(db,id)).kind==='export'?exportStatus(context,id):importStatus(context,id),
     actor:async id=>(await job(db,id)).actor,
     erasureStatements:(table,key)=>erasureStatements(db,table,key),redactionStatements:()=>redactionStatements(db),invalidateTransfersStatements:()=>invalidateTransfersStatements(db),

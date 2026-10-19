@@ -7,8 +7,9 @@ import { retainedChannelHistory } from './channel-guard.ts';
 
 // Reading progress and reversing owned effects do not disclose history to a new
 // audience. They retain current owner/session/Team authority and the immutable
-// review binding. Only forward work requires every reviewed operator version.
+// review binding. Legacy jobs admit only reads and guarded reversal.
 export function importPredicate(c: Context, review: any, action: ImportAction) {
+    if (!['read','undo','rollback'].includes(action)) return {sql:'0',params:[]};
     const parts = [authority, authFence,
         "EXISTS(SELECT 1 FROM oa_operators WHERE id=? AND status='active' AND role='owner')",
         "EXISTS(SELECT 1 FROM nook_import_reviews WHERE id=? AND owner=? AND state<>'discarded' AND fingerprint IS ? AND authority_json=? AND channels_json=?)"];
@@ -21,20 +22,6 @@ export function importPredicate(c: Context, review: any, action: ImportAction) {
         // revision. Product native work or any audience change blocks cleanup.
         parts.push(`NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_conversations cv ON cv.id=ch.conversation WHERE ch.job=? AND (cv.seq<>(SELECT COUNT(*) FROM nook_events e WHERE e.conversation=cv.id AND e.kind='erasure' AND e.actor IS NULL) OR cv.version<>1 OR cv.message_count<>0 OR ${retainedChannelHistory('cv.id')}))`);
         params.push(review.domain_job);
-    } else {
-        parts.push(`NOT EXISTS(SELECT 1 FROM json_each(?) a WHERE NOT EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access access ON access.user=o.id WHERE o.id=json_extract(a.value,'$.id') AND o.status='active' AND o.version=json_extract(a.value,'$.version') AND access.active=1 AND access.mode=json_extract(a.value,'$.mode') AND access.generation=json_extract(a.value,'$.generation')) AND NOT (json_extract(a.value,'$.id') IN (SELECT value FROM json_each(?)) AND EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=json_extract(a.value,'$.id'))))`);
-        params.push(review.authority_json, JSON.stringify(review.erasedAssociations ?? []));
-        if (action !== 'plan') {
-            // Targets may already be gone while the old product envelope and
-            // cleanup are still pending. A new approval cannot publish into it.
-            parts.push(`NOT EXISTS(SELECT 1 FROM nook_import_reviews prior LEFT JOIN ik_jobs old ON old.operation_key=prior.id AND old.principal_id=prior.owner WHERE prior.domain_job=? AND prior.id<>? AND (prior.state NOT IN ('reviewed','discarded','undone') OR old.id IS NOT NULL AND (prior.state<>'undone' OR old.state NOT IN ('undone','rolled_back'))))`);
-            params.push(review.domain_job, review.id);
-            parts.push('NOT EXISTS(SELECT 1 FROM nook_imports WHERE id=? AND (owner<>? OR intent<>? OR plan_digest<>?))');
-            params.push(review.domain_job, c.uid, review.id, review.fingerprint ?? null);
-            parts.push("NOT EXISTS(SELECT 1 FROM nook_import_objects o WHERE o.owner=? AND substr(o.object_key,1,length(?))=? AND (o.state='deleting' OR EXISTS(SELECT 1 FROM nook_object_deletes d WHERE d.object_key=o.object_key)))");
-            const prefix = `private/imports/${c.uid}/${review.upload}/files/${review.domain_job}/${review.id}/`;
-            params.push(c.uid, prefix, prefix);
-        }
     }
     const campfire=['campfire','mattermost'].includes(JSON.parse(review.summary_json).sourceType),shape=campfire?`cv.owner<>(SELECT json_extract(x.value,'$.owner') FROM json_each(?,'$.channels') x WHERE json_extract(x.value,'$.sourceId')=ch.source_id) OR cv.kind<>(SELECT json_extract(x.value,'$.kind') FROM json_each(?,'$.channels') x WHERE json_extract(x.value,'$.sourceId')=ch.source_id)`:`cv.owner<>? OR cv.kind<>'private'`;
     parts.push(`NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_conversations cv ON cv.id=ch.conversation WHERE ch.job=? AND (${shape} OR (SELECT COUNT(*) FROM nook_members m WHERE m.conversation=ch.conversation)<>(SELECT COUNT(*) FROM json_each(?) x,json_each(json_extract(x.value,'$.members')) a WHERE json_extract(x.value,'$.sourceId')=ch.source_id AND NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)) OR EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=ch.conversation AND NOT EXISTS(SELECT 1 FROM json_each(?) x,json_each(json_extract(x.value,'$.members')) a WHERE json_extract(x.value,'$.sourceId')=ch.source_id AND a.value=m.user AND NOT EXISTS(SELECT 1 FROM nook_erased_actors e WHERE e.id=a.value)))))`);

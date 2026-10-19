@@ -1,3 +1,4 @@
+import {createBrowserPlan,reconcileBrowserJob} from './import-browser-support.mjs';
 import {browserEmailSignIn} from './auth-support.mjs';
 // Parent runtime/browser lane: existing local Worker with native owner setup.
 import assert from 'node:assert/strict';
@@ -12,9 +13,12 @@ try {
     for (const width of [1440, 390]) {
         const context = await browser.newContext({ viewport: { width, height: width === 390 ? 844 : 1000 } }), page = await context.newPage();
         try {
+            await page.clock.install({time:new Date()});
             await browserEmailSignIn(page,origin,'nativeowner@example.test');
             await page.goto(origin + '/app?view=you');
             await page.getByRole('link',{name:'Import Slack history',exact:true}).click();
+            const shot=async name=>{assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no import screen overflow');await mkdir('evidence/nook-1',{recursive:true});await page.screenshot({path:`evidence/nook-1/slack-${name}-${width}.png`,fullPage:true,animations:'disabled'})};
+            await shot('entry');
             const incomplete = zipFixture([['users.json', []], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', [{ type: 'message', user: 'Umissing', ts: '1.000001', text: 'Missing source actor' }]]]);
             await expect(page.getByLabel('Slack export ZIP')).toBeEnabled();
             await page.getByLabel('Slack export ZIP').setInputFiles({ name: 'incomplete.zip', mimeType: 'application/zip', buffer: incomplete });
@@ -27,8 +31,8 @@ try {
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, 'blocked preview has no horizontal overflow');
             await mkdir('evidence/nook-1', { recursive: true });
             await page.screenshot({ path: `evidence/nook-1/slack-import-blocked-${width}.png`, fullPage: true });
-            await page.getByRole('button', { name: 'Discard unused raw upload', exact: true }).click();
-            await page.getByRole('status').filter({ hasText: 'Raw upload discarded.' }).waitFor();
+            await page.getByRole('button', { name: 'Discard local export', exact: true }).click();
+            await page.getByRole('status').filter({ hasText: 'Local export and unused dry run discarded.' }).waitFor();
             await page.getByLabel('Slack export ZIP').setInputFiles({ name: 'slack-fixture.zip', mimeType: 'application/zip', buffer: slackFixture() });
             await page.getByLabel('Source workspace namespace').fill('browser-' + width + '-' + Date.now());
             for (const channel of ['general', 'engineering'])
@@ -36,14 +40,17 @@ try {
             for (const [index, name] of ['general', 'engineering'].entries()) await page.getByLabel('New channel name', { exact: true }).nth(index).fill(`Imported ${name} ${width}`);
             for (const select of await page.locator('select').all())
                 await select.selectOption('external');
-            await page.getByRole('button', { name: 'Preview exact import', exact: true }).click();
-            await page.getByLabel('I have reviewed these omissions and accept this exact list.').check();
-            await page.getByRole('button', { name: 'Confirm omissions and preview again', exact: true }).click();
+            await shot('mapping');
+            const planned=await createBrowserPlan(page,{omissions:'I have reviewed these omissions and accept this exact list.'});
+            await shot('dry-run');
+            await page.clock.fastForward(31*60*1000);await expect(page.getByRole('button',{name:'Apply reviewed plan',exact:true}).first()).toBeDisabled();await shot('expired');
+            await page.clock.setFixedTime(new Date());await page.clock.runFor(15000);await expect(page.getByRole('button',{name:'Apply reviewed plan',exact:true}).first()).toBeEnabled();
             await page.getByRole('button', { name: 'Apply reviewed plan', exact: true }).first().click();
-            await page.getByRole('status').filter({ hasText: 'completed' }).waitFor();
+            await page.getByRole('status').filter({ hasText: 'Historical import completed.' }).waitFor();
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, 'wizard has no horizontal overflow');
             await mkdir('evidence/nook-1', { recursive: true });
             await page.screenshot({ path: `evidence/nook-1/slack-import-${width}.png`, fullPage: true });
+            await reconcileBrowserJob(page,page.locator('.import-job').filter({hasText:planned.planId}));
             const channels = await (await context.request.get(origin + '/api/conversations')).json(), channel = channels.find(c => c.name === `Imported general ${width}`);
             assert.ok(channel);
             await page.goto(`${origin}/app?conversation=${channel.id}`);
@@ -65,15 +72,25 @@ try {
             await page.goto(origin + '/imports');
             await page.reload();
             await page.getByRole('heading', { name: 'Import jobs' }).waitFor();
+            await page.getByRole('heading',{name:'Business import access',exact:true}).scrollIntoViewIfNeeded();await shot('business');
             assert.ok(await page.getByRole('button', { name: 'Undo this import', exact: true }).count());
-            const job = page.locator('.import-job').filter({ hasText: `Imported general ${width}` });
+            const job = page.locator('.import-job').filter({ hasText: planned.planId });
             if (width === 390) {
-                // Later native work depends on the import, so undo is refused before any request.
-                assert.equal(await job.getByRole('button', { name: 'Undo this import', exact: true }).isDisabled(), true);
-                await job.getByRole('note').filter({ hasText: 'Undo is unavailable' }).waitFor();
+                await job.getByRole('button', { name: 'Undo this import', exact: true }).click();
+                await expect(page.getByRole('alert')).toBeVisible();
+                const response=await context.request.get(origin+`/api/conversations/${channel.id}/messages`),retained=await response.json();assert.equal(response.status(),200,JSON.stringify(retained));
+                assert.ok(retained.some(m=>m.body==='Later native work survives import undo'));
                 await page.screenshot({ path: 'evidence/nook-1/slack-undo-guard-390.png', fullPage: true });
+                await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'evidence/nook-1/slack-undo-guard-1440.png',fullPage:true,animations:'disabled'});await page.setViewportSize({width:390,height:844});
             } else { await job.getByRole('button', { name: 'Undo this import', exact: true }).click(); await page.getByRole('status').filter({ hasText: 'undone' }).waitFor(); }
 
+            const business=page.locator('section').filter({has:page.getByRole('heading',{name:'Business import access',exact:true})});
+            await business.getByRole('checkbox',{name:'Allow Business imports',exact:true}).click();
+            await expect(business.getByRole('checkbox',{name:'Allow Business imports',exact:true})).toBeChecked();
+            const kid='retired-migration-key-'+width;await business.getByLabel('Revoke a Business signing key',{exact:true}).fill(kid);await business.getByRole('button',{name:'Revoke key',exact:true}).click();
+            await expect(business.getByText(kid,{exact:true})).toBeVisible();await business.screenshot({path:`evidence/nook-1/business-revoked-${width}.png`,animations:'disabled'});
+            await business.getByRole('checkbox',{name:'Allow Business imports',exact:true}).click();await expect(business.getByRole('checkbox',{name:'Allow Business imports',exact:true})).not.toBeChecked();
+            await expect(business.getByText(kid,{exact:true})).toBeVisible();await business.screenshot({path:`evidence/nook-1/business-disabled-${width}.png`,animations:'disabled'});
         }
         finally {
             await context.close();

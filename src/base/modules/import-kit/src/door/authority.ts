@@ -13,7 +13,7 @@ const actions: Record<DoorAction, ImportAction[]> = {
 /** Statements the door runs after a kit call returns (lineage recovery and the
  * final authority check), kept out of the kit's self-sized batches. */
 const DOOR_RETURN_STATEMENTS = 16;
-export function kitContext(request: DoorRequest, snapshot: Pick<DoorSnapshot, 'kitNamespace'|'plan'|'id'>) {
+export function kitContext(request: DoorRequest, snapshot: Pick<DoorSnapshot, 'kitNamespace'|'plan'|'id'>, continuingWithdrawn = false) {
   const {options, access: grant} = request;
   return reserveReturn({
     destination: options.destination, namespace: snapshot.kitNamespace,
@@ -32,7 +32,7 @@ export function kitContext(request: DoorRequest, snapshot: Pick<DoorSnapshot, 'k
           WHERE p.id=? AND p.fingerprint=? AND p.complete=1 AND a.approval_id=? AND a.owner=? AND a.approved_at=? AND a.fingerprint=p.fingerprint
           AND NOT EXISTS(SELECT 1 FROM ik_door_apply_failures f WHERE f.plan_id=p.id))`, snapshot.id, grant.fingerprint, grant.approvalRecordId, grant.email, grant.approvedAt);
         // Writing from the reviewed snapshot needs it still held; reading the job does not.
-        const held = snapshotHeld(snapshot.id), fingerprint = action === 'read' ? approved : sql(`(${approved.sql}) AND (${held.sql})`, ...approved.params ?? [], ...held.params ?? []);
+        const held = continuingWithdrawn ? sql('1') : snapshotHeld(snapshot.id), fingerprint = action === 'read' ? approved : sql(`(${approved.sql}) AND (${held.sql})`, ...approved.params ?? [], ...held.params ?? []);
         return sql(`(${request.authority.sql}) AND (${fingerprint.sql})`, ...request.authority.params ?? [], ...fingerprint.params ?? []);
       },
     },
@@ -46,6 +46,29 @@ export async function writeImportDoorSettings(db: D1Database, installationId: st
     sql('INSERT INTO ik_door_settings(installation_id,enabled) VALUES(?,?) ON CONFLICT(installation_id) DO UPDATE SET enabled=excluded.enabled', installationId, changes.enabled ? 1 : 0),
     ...(changes.revokedKids ?? []).map(kid => sql('INSERT OR IGNORE INTO ik_door_revoked_keys(installation_id,kid) VALUES(?,?)', installationId, kid)),
   ]);
+}
+/** Business-provisioned installs only: the seed calls this when it sees
+ * `RER_IMPORT_DOOR=on`, from the path that completes its first owner claim and
+ * again from every later owner path (the claim's already-initialized answer,
+ * owner sign-in or session start), with a predicate that holds once that owner
+ * exists. One batch checks the predicate before and after, and creates the
+ * installation's settings row enabled only when it has none, so it never
+ * overrides the owner's later choice: a door the owner turned off stays off, and
+ * revoked keys stay revoked. The claim and this batch are separate commits, and
+ * the claim cannot complete twice, so a failure between them is healed by the
+ * next owner path calling this again; a repeat is always safe. Without the
+ * variable, never call it: the door stays off. */
+export async function enableDoorAtFirstClaim(db: D1Database, installationId: string, ownerPredicate: D1Sql): Promise<void> {
+  if (typeof installationId !== 'string' || !installationId.trim()) throw new DoorError('invalid_settings', 400);
+  try {
+    await transact(db, ownerPredicate, [
+      sql('INSERT INTO ik_door_settings(installation_id,enabled) VALUES(?,1) ON CONFLICT(installation_id) DO NOTHING', installationId),
+    ]);
+  } catch (error) {
+    const owner = await statement(db, sql(`SELECT CASE WHEN (${ownerPredicate.sql}) THEN 1 ELSE 0 END AS ok`, ...ownerPredicate.params ?? [])).first();
+    if (owner?.ok !== 1) throw new DoorError('owner_required');
+    throw error;
+  }
 }
 /** Use alongside the seed's existing owner-bound import list and undo route. */
 export async function readImportDoorHistory(db: D1Database, installationId: string, ownerPredicate: D1Sql) {

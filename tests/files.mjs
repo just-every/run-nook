@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict'
-import {mkdtemp,rm} from 'node:fs/promises'
-import {tmpdir} from 'node:os'
-import {resolve} from 'node:path'
-import {source} from './import-fixture.mjs'
-import {captureImport} from '../scripts/import-preview.mjs'
+import {sourceDoor} from './import-fixture.mjs'
 
-export async function filesJourney({owner,registered,post,patch,get,check,restart}){
+export async function filesJourney({owner,registered,post,patch,get,check,restart,origin,sql}){
  const member=await registered('FilesColleague'),outside=await registered('FilesOutside')
  const room=(await post('/api/conversations',{name:'Customer launch files',kind:'private',participants:[member.user.id]})).data
  const upload=async(name,body,person=owner,mime='text/plain')=>(await post(`/api/conversations/${room.id}/attachments`,{name,mime,data:Buffer.from(body).toString('base64'),intent:crypto.randomUUID()},person.cookie)).data
@@ -71,15 +67,10 @@ export async function filesJourney({owner,registered,post,patch,get,check,restar
   await get('/api/files',outside.cookie,401)
  })
  await check('NOOK-019 Files include published imports using source time and source author, and hide erased/revoked sources',async()=>{
-  const directory=await mkdtemp(resolve(tmpdir(),'nook-files-import-'))
-  try{
    // Imported storage custody belongs to owner; the source author maps to member.
-   const fixture=source(directory,member.user.id,owner.user.id)
-   fixture.mapping.sourceNamespace='files-'+crypto.randomUUID()
-   const capture=captureImport(fixture.dir,fixture.mapping,fixture.supplied)
-   const plan=(await post('/api/imports/preview',{capture})).data
-   const receipt=(await post('/api/imports/apply',{capture,intent:crypto.randomUUID(),planDigest:plan.planDigest})).data
-   const conversation=receipt.channels[0].id,base=`/api/conversations/${conversation}/files`
+   const fixture=await sourceDoor({origin,owner,member,sql,namespace:'files-'+crypto.randomUUID(),sourceAuthor:member.user.id})
+   await fixture.door.finish(fixture.plan)
+   const conversation=(await fixture.door.status(fixture.plan)).destinations[0].id,base=`/api/conversations/${conversation}/files`
    const items=(await get(base,member.cookie)).data.items
    assert.equal(items.length,1)
    const file=items[0];assert.equal(file.name,'proof.txt');assert.equal(file.source,'imported')
@@ -87,13 +78,12 @@ export async function filesJourney({owner,registered,post,patch,get,check,restar
    assert.equal(file.created,new Date(1700000000*1000).toISOString())
    assert.deepEqual((await get(base+'?person=me',member.cookie)).data.items.map(f=>f.id),[file.id])
    assert.equal((await get(base+'?person='+owner.user.id)).data.items.length,0)
-   assert.equal((await get(`/api/import-files/${file.id}/download`,member.cookie)).raw,'proof')
+   assert.equal((await get(`/api/attachments/${file.id}/download`,member.cookie)).raw,'proof')
    await post(`/api/conversations/${conversation}/members`,{user:member.user.id,remove:true})
    assert.ok(!(await get('/api/files',member.cookie)).data.items.some(f=>f.id===file.id))
    await get(base,member.cookie,403)
    let erased=(await post('/api/erasures',{kind:'imported-message',target:file.message,confirmation:'ERASE'})).data
    while(erased.state!=='complete')erased=(await post(`/api/erasures/${erased.id}/resume`,{})).data
    assert.ok(!(await get(base)).data.items.some(f=>f.id===file.id))
-  }finally{await rm(directory,{recursive:true,force:true})}
  })
 }

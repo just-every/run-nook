@@ -22,11 +22,11 @@ async function reviewedJob(request: DoorRequest, row: DoorPlanRow, job: Record<s
  * works after an erasure withdrew one; the kit job binds the same plan. An
  * erasure re-fingerprints the job, so reviewedJob, not the kit, binds it to
  * the reviewed fingerprint. */
-async function jobContext(request: DoorRequest, row: DoorPlanRow & {job_id: string}) {
+async function jobContext(request: DoorRequest, row: DoorPlanRow & {job_id: string}, continuingWithdrawn = false) {
   const job = await request.options.database.prepare('SELECT id,namespace,mapping_version,destination,principal_id,operation_key,fingerprint,plan_json FROM ik_jobs WHERE id=?').bind(row.job_id).first();
   if (!job || job.destination !== request.options.destination || job.principal_id !== request.options.ownerPrincipalId
     || job.operation_key !== 'door:' + row.id || !await reviewedJob(request,row,job)) throw new DoorError('plan_custody_mismatch', 409);
-  return {...kitContext(request, {id: row.id, kitNamespace: job.namespace, plan: {mappingVersion: job.mapping_version} as DoorSnapshot['plan']}), reviewedFingerprint: undefined};
+  return {...kitContext(request, {id: row.id, kitNamespace: job.namespace, plan: {mappingVersion: job.mapping_version} as DoorSnapshot['plan']}, continuingWithdrawn), reviewedFingerprint: undefined};
 }
 /** Creation and indexing may be separate commits; the immutable operation key
  * makes a queued job recoverable even if its response or index update was lost. */
@@ -51,11 +51,25 @@ export async function apply(request: DoorRequest, input: Record<string,unknown>)
     if (approval?.approval_id !== request.access.approvalRecordId || approval?.approved_at !== request.access.approvedAt) throw new DoorError('approval_mismatch');
     return {planId:row.id,job:await readD1ImportJob(row.job_id,await jobContext(request,{...row,job_id:row.job_id}))};
   }
+  // Nook's existing erasure continuation: opaque previews are withdrawn, while
+  // the kit keeps the approved job's redacted plan and unaffected records.
+  // This never creates a job or approval. The existing approval, current
+  // authority, reviewed job binding and native custody fence every batch.
+  if (row.job_id && !await request.options.database.prepare('SELECT 1 FROM ik_door_plan_chunks WHERE plan_id=?').bind(row.id).first()
+    && await request.options.database.prepare('SELECT 1 FROM ik_d1_erasure_journal WHERE destination=?').bind(request.options.destination).first()) {
+    const context = await jobContext(request,{...row,job_id:row.job_id},true);
+    const job = await applyD1ImportBatches(row.job_id,context);
+    await lineage(request);
+    return {planId:row.id,job};
+  }
   const snapshot = await loadSnapshot(request,row), context = kitContext(request,snapshot);
   // The kit asserts the snapshot is still held at both ends of every batch.
   const result = await fenced(request,row.id,snapshotHeld(row.id),async()=>{
     await reserveApply(request,snapshot);
-    const job = await createD1ImportJob(snapshot.plan,context);
+    // Only creation selects the policy; a resume, even after a remount with
+    // another policy, continues with the job's durable one.
+    const policy = row.job_id ? undefined : request.options.reversalPolicy;
+    const job = await createD1ImportJob(snapshot.plan,policy ? {...context,reversalPolicy:policy} : context);
     await transact(request.options.database,request.authority,[
       sql('UPDATE ik_door_plans SET job_id=? WHERE id=? AND (job_id IS NULL OR job_id=?)',job.id,row.id,job.id),
       assertion(sql('EXISTS(SELECT 1 FROM ik_door_plans WHERE id=? AND job_id=?)',row.id,job.id)),
@@ -108,7 +122,16 @@ export async function undo(request: DoorRequest, input: Record<string,unknown>) 
     return {planId:id,state:'cancelled'};
   }
   const context = await jobContext(request,{...row,job_id:row.job_id}), job = await readD1ImportJob(row.job_id,context);
-  const result = ['completed','undoing','undone'].includes(job.state)?await undoD1Import(job.id,context):await rollbackD1Import(job.id,context);
+  const result = await (['completed','undoing','undone'].includes(job.state)?undoD1Import(job.id,context):rollbackD1Import(job.id,context)).catch(error=>{throw undoRefusal(error) ?? error;});
   await lineage(request);
   return {planId:id,job:result};
+}
+/** The kit's undo refusals an owner can act on, by name, never a bare conflict. */
+const undoRefusals: Record<string,[string,string]> = {
+  IMPORT_SUPERSEDED: ['import_superseded','A newer import of this source still holds records this import wrote. Undo the newer import first.'],
+  NATIVE_EDIT_CONFLICT: ['native_edit_conflict','Records this import wrote were changed in the seed since, and its undo is strict, so nothing more was undone.'],
+};
+function undoRefusal(error: unknown): DoorError | undefined {
+  const known = error instanceof Error && !(error instanceof DoorError) && Object.hasOwn(undoRefusals,error.message) ? undoRefusals[error.message] : undefined;
+  return known && new DoorError(known[0],409,{reason:known[1]});
 }

@@ -1,3 +1,4 @@
+import {createBrowserPlan,reconcileBrowserJob} from '../import-browser-support.mjs';
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
 import {expect} from '@playwright/test';
@@ -37,27 +38,23 @@ async function reviewedImport({owner,origin,fixture,stamp,name,selected,width,ph
   if(channel.name==='general')await choice.getByLabel(name,{exact:true}).check();
  }
  for(const select of await owner.getByRole('group',{name:'Review every source actor',exact:true}).locator('select').all())await select.selectOption('external');
- const preview=async button=>{
-  const response=owner.waitForResponse(r=>r.url()===origin+'/api/slack-imports/preview'&&r.request().method()==='POST');
-  await owner.getByRole('button',{name:button,exact:true}).click();const result=await response;assert.equal(result.status(),200);const value=await result.json();
-  await expect(owner.getByRole('heading',{name:'Review the historical import',exact:true})).toBeVisible();
-  return value;
- };
- let reviewed=await preview('Preview exact import');
+ await owner.getByRole('button',{name:'Preview exact import',exact:true}).click();
+ await expect(owner.getByRole('heading',{name:'Review the historical import',exact:true})).toBeVisible();
  if(selected.some(c=>c.name==='general')){
-  assert.equal(reviewed.blocked,true,'absent file requires an explicit choice before apply');
+  await expect(owner.getByRole('heading',{name:'Import blocked: selected history is incomplete or unsupported',exact:true})).toBeVisible();
+  await expect(owner.getByRole('button',{name:'Create dry run',exact:true})).toHaveCount(0);
   await owner.getByLabel('Import without these missing files. Keep each message and show “file not supplied” with its source filename.',{exact:true}).check();
-  reviewed=await preview('Preview exact import');
+  await owner.getByRole('button',{name:'Preview exact import',exact:true}).click();
+  await expect(owner.getByRole('heading',{name:'Review the historical import',exact:true})).toBeVisible();
  }
- if(reviewed.needsOmissionReview){await owner.getByLabel('I have reviewed these omissions and accept this exact list.',{exact:true}).check();reviewed=await preview('Confirm omissions and preview again');}
- assert.equal(reviewed.blocked,false);assert.ok(reviewed.fingerprint,'exact reviewed choices are bound before apply');
+ const reviewed=await createBrowserPlan(owner,{preview:false,omissions:'I have reviewed these omissions and accept this exact list.'});
  pilotPhase(`${phase}-review-complete`,{width,channels:selected.length});
  await trackImport({page:owner,origin,phase:`${phase}-apply`,width,channels:selected.length},async()=>{
   await owner.locator('form').getByRole('button',{name:'Apply reviewed plan',exact:true}).click();
-  await failOnImportAlert(owner,'Import completed:',applyTimeout);
-  await expect(owner.getByRole('status').filter({hasText:/Import completed:/})).toBeVisible({timeout:applyTimeout});
+  await failOnImportAlert(owner,'Historical import completed.',applyTimeout);
+  await expect(owner.getByRole('status').filter({hasText:/Historical import completed\./})).toBeVisible({timeout:applyTimeout});
  });
- return owner.locator('.import-job').filter({has:owner.getByRole('heading',{name:selected.map(c=>`${c.name} ${stamp}`).join(', '),exact:true})});
+ const job=owner.locator('.import-job').filter({hasText:reviewed.planId});await reconcileBrowserJob(owner,job);return job;
 }
 
 export async function importHistory({owner,member,ownerContext,memberContext,origin,stamp,name,width,destination}){
@@ -131,9 +128,10 @@ export async function exerciseUndo({owner,ownerContext,origin,stamp,name,importe
  pilotPhase('guarded-undo-start',{width});
  await owner.goto(`${origin}/app?conversation=${imported.shared.id}`);const live=`Live work after import ${stamp}`;await owner.getByLabel('Message '+imported.shared.name,{exact:true}).fill(live);await owner.getByRole('button',{name:'Send',exact:true}).click();await owner.getByText(live,{exact:true}).waitFor();
  await owner.goto(origin+'/imports');const job=owner.locator('.import-job').filter({has:owner.getByRole('heading',{name:new RegExp('^general '+stamp+',')})});
- await expect(job.getByRole('button',{name:'Undo this import',exact:true})).toBeDisabled();await expect(job.getByRole('note').filter({hasText:'Undo is unavailable'})).toBeVisible();
- const jobs=await read(ownerContext,origin,'/api/slack-imports'),saved=jobs.jobs.find(j=>j.summary.channels.some(c=>c.name===imported.shared.name));assert.ok(saved);
- const refused=await ownerContext.request.post(`${origin}/api/slack-imports/${saved.review}/undo`,{headers:{Origin:origin},data:{}});assert.equal(refused.status(),409,'public undo endpoint refuses later live work too');
+ const response=await ownerContext.request.get(origin+'/api/operator/import/history?source=slack',{headers:{'X-Import-Source':'slack'}});assert.equal(response.status(),200);
+ const jobs=await response.json(),saved=jobs.jobs.find(j=>j.summary.channels.some(c=>c.name===imported.shared.name));assert.ok(saved);
+ const refused=await ownerContext.request.post(origin+'/api/operator/import/undo',{headers:{Origin:origin,'X-Import-Source':'slack'},data:{planId:saved.planId}});assert.equal(refused.status(),409,'public undo endpoint refuses later live work too');
+ await job.getByRole('button',{name:'Undo this import',exact:true}).click();await expect(owner.getByRole('alert')).toBeVisible();
  assert.ok((await read(ownerContext,origin,`/api/conversations/${imported.shared.id}/messages/window?limit=50`)).items.some(m=>m.body===live),'refused undo preserves live work');
  await owner.screenshot({path:join(destination,`pilot-undo-guard-${width}.png`),fullPage:true});
  pilotPhase('guarded-undo-complete',{width});

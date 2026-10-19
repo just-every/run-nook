@@ -1,14 +1,8 @@
 // Focused integration harness: production Context/service/Base SQL on SQLite.
 // Only the object-provider edge is in memory; no alternate application paths.
-import { registerHooks } from 'node:module';
-import { readFileSync, existsSync } from 'node:fs';
-import ts from 'typescript';
-import { teamFixture } from '../team-sql-support.mjs';
-import { slackFixture } from './fixture.mjs';
-registerHooks({
-    resolve(specifier, context, next) { try { return next(specifier, context); } catch (error) { if (specifier.startsWith('.') && existsSync(new URL(specifier + '.ts', context.parentURL))) return next(specifier + '.ts', context); throw error; } },
-    load(url, context, next) { if (url.endsWith('.ts')) return { format: 'module', shortCircuit: true, source: ts.transpileModule(readFileSync(new URL(url), 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext } }).outputText }; if (url.endsWith('.json')) return next(url, { ...context, importAttributes: { type: 'json' } }); return next(url, context); }
-});
+import {teamFixture} from '../team-sql-support.mjs';
+import {slackFixture} from './fixture.mjs';
+import {importDoorClient,importUsers} from '../import-door-support.mjs';
 export function testBucket() {
     const objects = new Map();
     return {
@@ -21,20 +15,18 @@ export function testBucket() {
 }
 // The live hub is a Durable Object; undo only wakes it to drain queued object deletes.
 export function testHub() { return { idFromName: () => '', get: () => ({ fetch: async () => new Response() }) }; }
-export async function slackServiceFixture() {
-    const f = await teamFixture(), bucket = testBucket();
-    const { Context } = await import('../../src/platform/storage/context.ts'), service = await import('../../src/imports/service.ts'), list = await import('../../src/imports/list.ts'), custody = await import('../../src/imports/custody.ts');
-    const c = new Context({ DB: f.adapter, SESSION_SECRET:'synthetic-test-secret-at-least-thirty-two-characters', FILES: bucket, CHAT_HUB: testHub() }, f.owner);
-    const upload = () => custody.localUpload(c, new Request('https://fixture.test/upload', { method: 'POST', body: slackFixture() }));
-    async function preview(uploadId, members = [f.owner.operatorId], namespace = 'archive-fixture') {
-        const review = { namespace, channels: [{ sourceId: 'C1', name: 'Imported general', members }, { sourceId: 'C2', name: 'Imported engineering', members: [f.owner.operatorId] }], actors: { U1: f.owner.operatorId, U2: null, U404: null }, acceptedOmissions: [] };
-        const omission = await service.previewImport(c, { upload: uploadId, review }); review.acceptedOmissions = [omission.omissionDigest];
-        return service.previewImport(c, { upload: uploadId, review });
+export async function attachImportDoor(f,bucket=testBucket(),{source='slack',owner=f.owner,ownerCookie=f.ownerCookie,database=f.adapter,onRequest}={}){
+    const {Context}=await import('../../src/platform/storage/context.ts'),{importDoor}=await import('../../src/imports/door.ts');
+    const origin='http://127.0.0.1:15820';
+    const env={DB:database,SESSION_SECRET:'synthetic-test-secret-at-least-thirty-two-characters',FILES:bucket,CHAT_HUB:testHub(),AUTH_ORIGIN:origin,AUTH_LOCAL:'true',OWNER_EMAIL:owner.operator.email,MAIL_PROVIDER:'development',MAIL_FROM:'nook@example.test'};
+    const c=new Context(env,owner),door=importDoorClient({origin,owner:{cookie:ownerCookie,user:{id:owner.operatorId}},source,users:()=>importUsers(async sql=>(await database.prepare(sql).all()).results),transport:async(url,init)=>{const response=await importDoor(new Request(url,init),env);onRequest?.(url,response);return response}});
+    return {...f,bucket,c,door};
+}
+export async function slackServiceFixture(){
+    const f=await attachImportDoor(await teamFixture());
+    async function preview(inspection,members=[f.owner.operatorId],namespace='archive-fixture'){
+        const review={namespace,channels:[{sourceId:'C1',name:'Imported general',members},{sourceId:'C2',name:'Imported engineering',members:[f.owner.operatorId]}],actors:{U1:f.owner.operatorId,U2:null,U404:null},acceptedOmissions:[]};
+        const local=await f.door.prepare(inspection,review);review.acceptedOmissions=[local.summary.omissionDigest];return f.door.plan(inspection,review);
     }
-    async function finish(preview) {
-        let result = await service.applyReviewed(c, preview.review, preview.fingerprint);
-        for (let n = 0; result.job.state !== 'completed' && n < 20; n++) result = await service.resumeReviewed(c, preview.review);
-        if (result.job.state !== 'completed') throw Error('Fixture import did not complete'); return result;
-    }
-    return { ...f, bucket, c, service, list, custody, upload, preview, finish };
+    return {...f,upload:()=>f.door.inspect(slackFixture()),preview,finish:plan=>f.door.finish(plan)};
 }

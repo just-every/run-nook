@@ -1,4 +1,4 @@
-import { canonicalJson, sha256 } from './kit.ts';
+import { canonicalJson, sha256 } from '../base/modules/import-kit/src/provenance/identity.ts';
 import { importDigest } from '../family/team-chat/import-capture.mjs';
 import { compareSourceMessages } from './timestamps.mjs';
 import { fileObjectKey } from './ids.mjs';

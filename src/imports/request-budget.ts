@@ -38,8 +38,9 @@ export function budgeted(c: Context): Context {
 }
 
 /** Statements this request may still run. */
-export function left(c: Context): number {
-    const meter = meters.get(c.db);
+export function available(db: D1Database): number {
+    const meter = meters.get(db);
     if (!meter) throw new Error('Import request budget unavailable');
     return REQUEST_STATEMENTS - meter.used;
 }
+export const left = (c: Context) => available(c.db);

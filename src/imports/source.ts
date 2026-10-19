@@ -4,9 +4,8 @@ import { reviewMetadata, captureArtifactName } from './review-binding.mjs';
 import { canonicalJson, sha256, type SourceBundle, type ImportMapping } from './kit.ts';
 import { effectInputs, MAPPING_VERSION } from './ids.mjs';
 import { assertSlackEffect } from './policy.mjs';
-/** The kit owns resumable source identity and native checkpoints. The original
- * ZIP remains separately in owner-only R2 custody; no unselected bodies enter
- * channel effects. This artifact is the exact reviewed normalized capture. */
+/** Pure source normalization retained by the shared door. It emits the exact
+ * reviewed native effects; unselected bodies never enter channel effects. */
 export function kitSource(capture: any, owner: string, uploadId: string, reviewId: string) {
     if(capture.sourceType==='mattermost')return mattermostKitSource(capture,owner,uploadId,reviewId);
     if(capture.sourceType==='campfire')return campfireKitSource(capture,owner,uploadId,reviewId);

@@ -47,3 +47,4 @@ body:has(.imports-page){margin:0;background:var(--brand-paper)}
 @media(hover:none){.imports-page button{min-height:40px}}
 
 .imports-page nav[aria-label="Other import sources"]{display:flex;flex-wrap:wrap;gap:8px 20px}
+.imports-page .import-json{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12.5px}.imports-page .import-approval{overflow-wrap:anywhere}.imports-page>form>fieldset{margin:24px 0}.imports-page>form>fieldset>section{margin-top:24px;padding-top:24px;border-top:1px solid rgb(42 29 33 / .10)}

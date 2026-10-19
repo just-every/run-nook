@@ -1,4 +1,5 @@
-import { canonicalJson, sha256 } from './kit.ts';
+import { decisionMap } from './role-decisions.ts';
+import { canonicalJson, sha256 } from '../base/modules/import-kit/src/provenance/identity.ts';
 import { importDigest } from '../family/team-chat/import-capture.mjs';
 import { compareSourceMessages } from './timestamps.mjs';
 import { fileObjectKey } from './ids.mjs';
@@ -9,6 +10,7 @@ export const mattermostNativeId=(namespace,kind,key)=>'mattermost-'+importDigest
 export const mattermostCaptureJobId=(capture,upload)=>mattermostNativeId(capture.namespace,'capture',capture.digest+':'+upload);
 const equal=(a,b)=>canonicalJson(a)===canonicalJson(b);
 function historicalRoles(roles) {
+  if (Array.isArray(roles)) { decisionMap(roles); return; }
   check(roles && typeof roles === 'object' && !Array.isArray(roles) && Object.keys(roles).every(mattermostId) && Object.values(roles).every(role => role === 'historical-only'), 'historical source roles');
 }
 export function assertMattermostEffect(kind, value) {

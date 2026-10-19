@@ -1,3 +1,5 @@
+import {cancelDoorPreview} from './door-custody'
+import {authorizeWork} from './authorization'
 import type {Context} from '../../platform/storage/context'
 import {fenceService,type Sql} from './portability'
 import {files,sql,fencedRows} from './statements'
@@ -7,7 +9,7 @@ import {cancelPreview,cancelUnappliedReviews} from './import-preview'
 export async function importedStep(c:Context,work:any,f:Awaited<ReturnType<typeof fenceService>>){
  const selection=await importSelection(c,work),{selected,actor,review}=selection
  if(!actor&&!selected)return false
- if(review&&!review.actual_job){await cancelPreview(c,work,review,f);return true}
+ if(review&&!review.actual_job){if(review.custody==='door')await cancelDoorPreview(c,work,review,f,selectedImportBlobs(work,selection));else await cancelPreview(c,work,review,f);return true}
  const job=await c.one('SELECT * FROM nook_imports WHERE id=?',[selected?.job??actor.job])??(review?{id:review.domain_job,owner:review.owner,namespace:review.namespace,state:review.state}:null),record=selected??await c.one('SELECT * FROM nook_import_records WHERE job=? AND source_actor=? LIMIT 1',[actor.job,actor.source_id]),statements:Sql[]=[...await f.invalidate(),...selectedImportBlobs(work,selection)]
  statements.push(...await fencedRows(c,f,'nook_import_receipts',['job','path','sha256'],'job=?',[job.id]),sql('DELETE FROM nook_import_receipts WHERE job=?',job.id))
  // Legacy source-receipt paths may themselves contain personal filenames.
@@ -25,6 +27,11 @@ export async function importedStep(c:Context,work:any,f:Awaited<ReturnType<typeo
   if(work.kind==='imported-message')statements.push(sql("UPDATE nook_erasure_work SET phase='blobs' WHERE operation=?",work.operation))
   await eraseImportedTarget(c,work,'message',record.id,job,statements,await personValues(c,work,actor),f)
  }else{
+  // Field redaction can withdraw snapshot bodies in bounded steps before its
+  // final native batch. Persist the selected file obligations first so a resume
+  // never has to rediscover keys from an already withdrawn draft snapshot.
+  const queued=selectedImportBlobs(work,selection)
+  if(queued.length){const scope=await authorizeWork(c,work);await c.batch([...await f.invalidate(),...await f.checkpoint(),...queued].map(s=>c.sql(s.sql,...s.params)),scope.conversation,scope.condition,scope.params)}
   // Their Slack id also leaves other people's imported reactions; peers and counts stay.
   statements.push(sql('INSERT INTO nook_guard VALUES(?,CASE WHEN NOT EXISTS(SELECT 1 FROM nook_import_records WHERE job=? AND source_actor=?) THEN 1 ELSE 0 END)','erase-actor:'+actor.job+':'+actor.source_id,actor.job,actor.source_id),sql('DELETE FROM nook_guard WHERE id=?','erase-actor:'+actor.job+':'+actor.source_id),...await f.row('nook_import_actors',{job:actor.job,source_id:actor.source_id}),sql('DELETE FROM nook_import_actors WHERE job=? AND source_id=?',actor.job,actor.source_id),sql("UPDATE nook_erasure_work SET phase='blobs' WHERE kind='imported-author' AND target=?",actor.job+':'+actor.source_id),sql('DELETE FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?',job.owner,'actor',actor.job+':'+actor.source_id))
   await eraseImportedTarget(c,work,'actor',actor.job+':'+actor.source_id,job,statements,await personValues(c,work,actor),f,{source:r=>r.kind==='message'&&(r.payload as any).job===actor.job&&(r.payload as any).sourceActor===actor.source_id,fields:[{path:['sourceRecord','reactions','*','users','*'],value:actor.source_id}]})

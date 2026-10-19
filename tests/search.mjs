@@ -1,9 +1,6 @@
 import assert from 'node:assert/strict'
-import {readFile,mkdtemp,rm} from 'node:fs/promises'
-import {tmpdir} from 'node:os'
-import {join} from 'node:path'
-import {source} from './import-fixture.mjs'
-import {captureImport} from '../scripts/import-preview.mjs'
+import {readFile} from 'node:fs/promises'
+import {sourceDoor} from './import-fixture.mjs'
 
 export function searchPdf(text){
  const stream=`BT /F1 14 Tf 40 750 Td (${text.replace(/[()\\]/g,'\\$&')}) Tj ET`,objects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`]
@@ -13,7 +10,7 @@ export function searchPdf(text){
  return Buffer.from(pdf)
 }
 export async function searchJourney(h){
- const {post,get,patch,owner,member,outsider,check,sql,restart}=h
+ const {post,get,patch,owner,member,outsider,check,sql,restart,origin}=h
  const room=(await post('/api/conversations',{name:'Revenue operations',kind:'private',participants:[member.user.id]})).data
  const dm=(await post('/api/conversations',{name:'Search colleague DM',kind:'dm',participants:[member.user.id]})).data
  const send=async(body,extra={},actor=owner,where=room.id)=>(await post(`/api/conversations/${where}/messages`,{body,intent:crypto.randomUUID(),...extra},actor.cookie)).data
@@ -62,11 +59,9 @@ export async function searchJourney(h){
   assert.ok(!(await get('/api/search?q=staffing',member.cookie)).data.unsearchedFiles.some(f=>f.attachment===png.id))
  })
  await check('NOOK-019 imported replies and private imported file text use the same current-authority search',async()=>{
-  const directory=await mkdtemp(join(tmpdir(),'nook-search-import-'))
-  try{
-   const fixture=source(directory,owner.user.id,member.user.id);fixture.mapping.sourceNamespace='search-'+crypto.randomUUID()
-   const capture=captureImport(fixture.dir,fixture.mapping,fixture.supplied),plan=(await post('/api/imports/preview',{capture})).data
-   const receipt=(await post('/api/imports/apply',{capture,intent:crypto.randomUUID(),planDigest:plan.planDigest})).data,conversation=receipt.channels[0].id
+   const fixture=await sourceDoor({origin,owner,member,sql,namespace:'search-'+crypto.randomUUID()})
+   await fixture.door.finish(fixture.plan)
+   const conversation=(await fixture.door.status(fixture.plan)).destinations[0].id
    const query=text=>'/api/search?q='+encodeURIComponent(text+' in:#'+conversation)
    const file=(await get(query('proof'),member.cookie)).data.items
    assert.equal(file.length,1);assert.equal(file[0].source,'imported');assert.equal(file[0].files[0].name,'proof.txt');assert.equal(file[0].files[0].excerpt,'proof')
@@ -74,7 +69,6 @@ export async function searchJourney(h){
    assert.equal(reply.length,1);assert.ok(reply[0].parent);assert.equal(reply[0].source,'imported')
    await post('/api/conversations/'+conversation+'/members',{user:member.user.id,remove:true})
    assert.ok(!(await get('/api/search?q=proof',member.cookie)).data.items.some(i=>i.conversation===conversation))
-  }finally{await rm(directory,{recursive:true,force:true})}
  })
  await check('NOOK-019 completely page an 80,000-message corpus through authenticated search',async()=>{
   const corpus=(await post('/api/conversations',{name:'Seven years of operations',kind:'private',participants:[member.user.id]})).data

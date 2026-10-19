@@ -26,7 +26,7 @@ export async function reconcileReviewed(c: Context, review: any) {
         }, review, raw, plan);
         // A sibling operation can keep an unchanged, fully owned plan after
         // erasure withdraws their shared ZIP. Only existing validated custody
-        // permits continuation; an unused approval still requires that ZIP.
+        // permits legacy reads and reversal; unused approvals cannot apply.
         review = { ...review, currentFingerprint: raw.fingerprint, savedCustody: true };
         if (plan.erasure) {
             const actors = JSON.parse(review.summary_json).actors;

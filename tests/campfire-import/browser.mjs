@@ -1,3 +1,4 @@
+import {createBrowserPlan,reconcileBrowserJob} from '../import-browser-support.mjs'
 import {chromium,expect} from '@playwright/test'
 import assert from 'node:assert/strict'
 import {mkdir} from 'node:fs/promises'
@@ -26,19 +27,16 @@ export async function campfireBrowser({origin,owner,journey,destination='evidenc
     for(const [index,name]of ['Maya Chen','Leo Martin','Aisha Patel','Sam Rivera'].entries())await page.getByRole('combobox',{name:'Map '+name,exact:true}).selectOption(journey.people[index].user.id)
     await page.getByRole('heading',{name:'2. Map identities and review audiences',exact:true}).scrollIntoViewIfNeeded()
     await page.screenshot({path:resolve(destination,`mapping-${width}.png`),animations:'disabled'})
-    async function preview(){const response=page.waitForResponse(r=>r.url().endsWith('/api/campfire-imports/preview')&&r.request().method()==='POST');await page.getByRole('button',{name:'Preview exact import',exact:true}).click();return(await response).json()}
-    let planned=await preview()
-    if(planned.needsOmissionReview){await page.getByRole('checkbox',{name:'I reviewed and accept these exact omissions',exact:true}).check();planned=await preview()}
-    assert.ok(planned.fingerprint)
-    await page.getByRole('heading',{name:'3. Approve the historical import',exact:true}).scrollIntoViewIfNeeded()
+    const planned=await createBrowserPlan(page)
+    await page.getByRole('heading',{name:'3. Review the dry run',exact:true}).scrollIntoViewIfNeeded()
     await page.screenshot({path:resolve(destination,`preview-${width}.png`),animations:'disabled'})
     await expect(page.getByText('supplier-estimate.csv',{exact:true})).toBeVisible()
     await page.getByRole('button',{name:'Apply reviewed plan',exact:true}).first().click()
-    await expect(page.getByRole('status')).toContainText('Import completed:',{timeout:90_000})
+    await expect(page.getByRole('status')).toContainText('Historical import completed.',{timeout:90_000})
     await page.getByRole('heading',{name:'Import jobs',exact:true}).scrollIntoViewIfNeeded()
     await page.screenshot({path:resolve(destination,`completed-${width}.png`),animations:'disabled'})
-    await page.reload();const entries=planned.counts.channels+planned.counts.actors+planned.counts.messages;await expect(page.getByText(`completed · ${entries} / ${entries} source entries`,{exact:true}).last()).toBeVisible()
-    const status=await journey.call(journey.base+'/'+planned.review),channel=status.destinations.find(d=>d.sourceId==='2')
+    await page.reload();const job=page.locator('.import-job').filter({hasText:planned.planId});await expect(job.getByText(/^completed ·/)).toBeVisible();await reconcileBrowserJob(page,job)
+    const status=await journey.door.status(planned),channel=status.destinations.find(d=>d.sourceId==='2')
     await page.goto(origin+'/app?conversation='+channel.id)
     await expect(page.getByText('Kickoff is Tuesday. Café notes and 日本語 are welcome.',{exact:true}).last()).toBeVisible()
     await page.screenshot({path:resolve(destination,`imported-${width}.png`),animations:'disabled'})

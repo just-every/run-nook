@@ -18,9 +18,10 @@ export async function validateSlackRecoveryGraph(read, proofs) {
         data[table] = await read(table);
         check(data[table].every(row => jobs.has(row.job_id)), 'orphan_slack_recovery_row');
     }
-    for (const table of ['ik_d1_history', 'ik_d1_reversal_reports', 'ik_d1_creation_plans', 'ik_stages', 'ik_targets', 'ik_d1_assertions', 'ik_d1_streams', 'ik_d1_stream_pages', 'ik_d1_stream_origins', 'ik_d1_stream_revisions', 'ik_d1_publication_fences', 'ik_d1_staging', 'ik_d1_staging_pages', 'ik_d1_staging_chunks', 'ik_d1_staging_index', 'ik_d1_staging_originals', 'ik_d1_native_staging', 'ik_d1_native_staging_index', 'ik_d1_native_staging_values', 'ik_d1_preparation_receipts', 'ik_d1_staging_headers']) {
+    for (const table of ['ik_d1_reversal_reports', 'ik_d1_creation_plans', 'ik_stages', 'ik_targets', 'ik_d1_assertions', 'ik_d1_streams', 'ik_d1_stream_pages', 'ik_d1_stream_origins', 'ik_d1_stream_revisions', 'ik_d1_publication_fences', 'ik_d1_staging', 'ik_d1_staging_pages', 'ik_d1_staging_chunks', 'ik_d1_staging_index', 'ik_d1_staging_originals', 'ik_d1_native_staging', 'ik_d1_native_staging_index', 'ik_d1_native_staging_values', 'ik_d1_preparation_receipts', 'ik_d1_staging_headers']) {
         check((await read(table)).length === 0, 'unsupported_slack_recovery_state');
     }
+    check((await read('ik_d1_history')).every(row=>jobs.get(row.job_id)?.door),'unsupported_slack_recovery_state');
     const erasedSources=await read('ik_d1_erased_sources'),erasedTargets=await read('ik_d1_erased_targets');
     check(erasedSources.every(row=>[...jobs.values()].some(({job,plan})=>job.destination===row.destination&&plan.entries.some(e=>e.erased&&e.identity===row.identity)))&&erasedTargets.every(row=>[...jobs.values()].some(({job,plan})=>job.destination===row.destination&&plan.entries.some(e=>e.erased&&e.erasedTargetIdentity===row.identity))),'orphan_slack_erasure_fence');
     for (const { job, plan } of jobs.values()) {

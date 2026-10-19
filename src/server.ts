@@ -18,7 +18,7 @@ import { Repository, type Bindings } from './platform/repository.server'
 
 import {ownerClaim} from './platform/owner-claim.server'
 import {editorRoute,editorDocument} from './platform/editor.server'
-import {slackImportRoute} from './imports/routes'
+import {importDoor} from './imports/door'
 import {portabilityRoute} from './platform/portability.server'
 import {signInRoute} from './platform/signin.server'
 import {teamRoute} from './team/routes.server'
@@ -49,7 +49,7 @@ api.all('/api/*', async c => {
   if(req.method==='POST' && /^\/api\/conversations\/[^/]+\/attachments$/.test(url.pathname) && req.headers.get('content-type')!=='application/json'){await repository.session(req.headers);const upload=await readUpload(req);return c.json(await repository.upload(req.headers,url.pathname.split('/')[3],upload))}
   if(req.headers.get('content-type') !== 'application/json') fail(415,'JSON required')
   const reader = req.body?.getReader(); let size = 0; const chunks: Uint8Array[] = []
-  if(reader) { while(true) { const {done,value} = await reader.read(); if(done) break; size += value.length; if(size > (req.method==='POST' && /^\/api\/conversations\/[^/]+\/attachments$/.test(url.pathname) ? 36*1024*1024 : /^\/api\/imports\/(preview|apply)$/.test(url.pathname) ? 41*1024*1024 : /^(?:\/api\/conversations\/[^/]+\/(?:messages|scheduled)|\/api\/(?:messages|scheduled)\/[^/]+)$/.test(url.pathname) ? 256*1024 : 65536)) { await reader.cancel(); fail(413,'Body too large') }; chunks.push(value) } }
+  if(reader) { while(true) { const {done,value} = await reader.read(); if(done) break; size += value.length; if(size > (req.method==='POST' && /^\/api\/conversations\/[^/]+\/attachments$/.test(url.pathname) ? 36*1024*1024 : /^(?:\/api\/conversations\/[^/]+\/(?:messages|scheduled)|\/api\/(?:messages|scheduled)\/[^/]+)$/.test(url.pathname) ? 256*1024 : 65536)) { await reader.cancel(); fail(413,'Body too large') }; chunks.push(value) } }
   const bytes = new Uint8Array(size); let offset = 0; for(const chunk of chunks) { bytes.set(chunk,offset); offset += chunk.length }
   try { input = JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes)) } catch { fail(400,'Invalid JSON') }
   if(!input || typeof input !== 'object' || Array.isArray(input)) fail(400,'JSON object required')
@@ -84,7 +84,6 @@ api.all('/api/*', async c => {
  }
  if(action==='notify'&&p.length===2&&req.method==='GET')return c.json(await notifySettings(session))
  if(action==='notify'&&p.length===2&&req.method==='PATCH')return c.json(await updateNotifySettings(session,input))
- if(action==='imports'&&p.length===3&&['preview','apply'].includes(id)&&req.method==='POST')return c.json(await repository.imports(req.headers,id,'',input))
  if(action==='imports'&&id==='search'&&p.length===3&&req.method==='GET')return c.json(await repository.imports(req.headers,'search','',Object.fromEntries(url.searchParams)))
  if(action==='conversations'&&sub==='imported-history'&&p.length===4&&req.method==='GET')return c.json(await repository.imports(req.headers,'history',id,{after:url.searchParams.get('after')||'',limit:Number(url.searchParams.get('limit')||100)}))
  if(action==='import-files'&&sub==='download'&&p.length===4&&req.method==='GET'){const file=await repository.imports(req.headers,'file',id);return new Response(file.body,{headers:{'Content-Type':file.metadata.mime,'Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(file.metadata.name)}`,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}})}
@@ -132,7 +131,8 @@ export default withDemo({
   if(url.pathname==='/auth/owner-claim') return await ownerClaim(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/api/editor/config'||url.pathname==='/api/editor/session') return editorRoute(env,request)
   if(url.pathname.startsWith('/api/mattermost-emoji/'))return (await mattermostEmojiRoute(request,env))!
-  if(['/api/slack-imports','/api/campfire-imports','/api/mattermost-imports'].some(base=>url.pathname===base||url.pathname.startsWith(base+'/')))return (await slackImportRoute(request,env))!
+  const imported = await importDoor(request,env)
+  if(imported)return imported
   if(url.pathname==='/api/portability'||url.pathname.startsWith('/api/portability/'))return portabilityRoute(env,request)
   if(url.pathname==='/api/live'){if(request.headers.get('origin')!==url.origin)return new Response('Origin denied',{status:403});try{return await new Repository(env).live(request)}catch(error){return Response.json({error:error instanceof Error?error.message:'Live unavailable'},{status:error instanceof Fault?error.status:500})}}
   if(url.pathname==='/auth/bootstrap' && (await env.DB.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>())?.authority!=='normalized')return Response.json({error:'offline_storage_conversion_required'},{status:503,headers:{'Cache-Control':'no-store'}})

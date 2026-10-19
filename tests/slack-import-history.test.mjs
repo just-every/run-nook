@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { slackServiceFixture, testHub } from './slack-import/sqlite-service.mjs';
+import { slackServiceFixture, attachImportDoor } from './slack-import/sqlite-service.mjs';
 import { zipFixture } from './slack-import/fixture.mjs';
 import { roundTrip } from './slack-import/archive-roundtrip.mjs';
 import { reverseRestored } from './slack-import/restored-reversal.mjs';
+import {teamFixture} from './team-sql-support.mjs';
 function richZip() {
     const ordinary = { type: 'message', user: 'U1', ts: '1700000000.000001', text: 'Current edited text for <@U2>', edited: { user: 'U1', ts: '1700000001.000001' }, reactions: [{ name: 'thumbsup', count: 3, users: ['U2'] }] };
     const rows = [ordinary, { type: 'message', subtype: 'thread_broadcast', user: 'U2', ts: '1700000000.000002', thread_ts: ordinary.ts, root: {ts: ordinary.ts, text: ordinary.text}, text: 'Broadcast reply' }, { type: 'message', subtype: 'bot_message', bot_id: 'B1', username: 'Release robot', ts: '1700000000.000003', text: 'Bot report' }, { type: 'message', user: 'UB', ts: '1700000000.000004', text: 'Directory bot report' }, { type: 'message', subtype: 'file_share', user: 'U1', ts: '1700000000.000005', text: 'Files remain visible', files: [{ id: 'F0', name: 'ABSENT_SECRET.txt', mimetype: 'text/plain', size: 17 }, { id: 'F1', name: 'supplied.txt', mimetype: 'text/plain', size: 5 }] }, {type:'message',subtype:'bot_message',bot_id:'B1',username:'Alias robot',ts:'1700000000.000007',text:'Same bot with a presentation override'}, {type:'message',subtype:'bot_message',user:'U2',ts:'1700000000.000008',text:'Unflagged bot declaration'}, {type:'message',subtype:'file_share',user:'U1',ts:'1700000000.000009',text:'',file:{id:'FS',name:'singular.txt',mimetype:'text/plain',size:8}}, {type:'message',subtype:'file_share',user:'U1',ts:'1700000000.000020',text:'Historical missing file',file:{id:'FM',name:'SINGLE_ABSENT.txt',mimetype:'text/plain',size:9}}, ...['channel_join', 'channel_leave', 'channel_topic', 'channel_purpose', 'channel_name', 'pinned_item', 'reminder_add'].map((subtype, n) => ({ type: 'message', subtype, user: 'U1', ts: `1700000000.00001${n}`, text: 'System event' }))];
@@ -12,23 +13,22 @@ function richZip() {
 test('Slack review admits explicit missing files, source bots, history metadata and empty channels through real apply, restore and undo', async () => {
     const f = await slackServiceFixture();
     try {
-        const upload = await f.custody.localUpload(f.c, new Request('https://fixture.test/upload', { method: 'POST', body: richZip() }));
-        const inspection = await f.service.inspectUpload(f.c, upload);
+        const upload = await f.door.inspect(richZip()),inspection=upload;
         assert.equal(inspection.actors.find(a => a.sourceId === 'B1').label, 'Release robot');
         assert.ok(inspection.actors.find(a => a.sourceId === 'UB').externalOnly);
         const review = { namespace: 'rich-history', channels: inspection.channels.map(c => ({ sourceId: c.sourceId, name: c.name, members: [f.owner.operatorId] })), actors: Object.fromEntries(inspection.actors.map(a => [a.sourceId, f.owner.operatorId])), acceptedOmissions: [] };
-        const blocked = await f.service.previewImport(f.c, { upload, review });
+        const blocked = await f.door.plan(upload,review);
         assert.equal(blocked.blocked, true); assert.equal(blocked.fingerprint, undefined);
         assert.deepEqual(blocked.missingFiles, { count: 2, bytes: 26, unknownSizes: 0, accepted: false });
         assert.deepEqual(blocked.missingFileInventory, [{channel:'C1',key:'rich-history:C1:1700000000.000005',sourceId:'F0',name:'ABSENT_SECRET.txt',size:17},{channel:'C1',key:'rich-history:C1:1700000000.000020',sourceId:'FM',name:'SINGLE_ABSENT.txt',size:9}]);
         assert.equal(Object.values(blocked.skippedKinds).reduce((a, b) => a + b, 0), 6);
         review.importWithoutMissingFiles = true;
-        const approved = await f.service.previewImport(f.c, { upload, review });
-        const changed = await f.service.previewImport(f.c, { upload, review: { ...review, actors: { ...review.actors, UNUSED: null } } });
-        assert.notEqual(changed.fingerprint, approved.fingerprint, 'unused identity decision must bind approval');
+        const approved = await f.door.plan(upload,review);
+        const changedLocal=await f.door.prepare(upload,{...review,actors:{...review.actors,UNUSED:null}});
+        assert.notEqual(changedLocal.summary.captureDigest,approved.captureDigest,'unused identity decision binds exact capture');
         await f.finish(approved);
         const { mixedHistory, mixedSearch } = await import('../src/imports/history.ts');
-        const conversation = f.db.prepare("SELECT conversation FROM nook_import_channels WHERE source_id='C1'").get().conversation;
+        const conversation=(await f.door.status(approved)).destinations.find(d=>d.sourceId==='C1').id;
         const history = await mixedHistory(f.c, conversation, {}, async () => []);
         assert.equal(history.length, 10); assert.equal(history[0].body, 'Current edited text for <@U2>');
         assert.equal(history[0].slack.text, 'Current edited text for @Bee Source'); assert.equal(history[0].slack.edited, true);
@@ -47,8 +47,8 @@ test('Slack review admits explicit missing files, source bots, history metadata 
         assert.deepEqual(singularMissing.attachments, []);
         const search=(await mixedSearch(f.c, { q: 'edited text' })).items[0];assert.equal(search.id,history[0].id);assert.equal(search.body,history[0].body);assert.equal(search.displayBody,history[0].slack.text);
         for (const table of ['nook_events', 'nook_attention', 'nook_outcomes', 'nook_reactions', 'nook_reads']) assert.equal(f.db.prepare(`SELECT count(*) AS n FROM ${table}`).get().n, 0, table);
-        await roundTrip(f, (target, bucket) => reverseRestored(target, bucket, approved.review, f.owner.operatorId));
-        await assert.rejects(roundTrip(f, () => {}, items => { const row=items.find(i=>i.table==='nook_import_reviews'&&i.row.id===approved.review).row;row.review_json=JSON.stringify({...JSON.parse(row.review_json),importWithoutMissingFiles:false}); }), /slack_review_choices_changed/);
+        await roundTrip(f, (target, bucket) => reverseRestored(target, bucket, approved.planId, f.owner.operatorId));
+        await assert.rejects(roundTrip(f,()=>{},items=>{const row=items.find(i=>i.table==='nook_door_imports'&&i.row.plan_id===approved.planId).row;row.capture_digest='0'.repeat(64)}),/door_capture_binding_changed/);
         const { Context } = await import('../src/platform/storage/context.ts');
         const erasure = await import('../src/team/erasure/service.ts');
         const c = new Context({ ...f.c.env, CHAT_HUB: { idFromName: () => '', get: () => ({ fetch: async () => new Response() }) } }, f.owner);
@@ -61,7 +61,7 @@ test('Slack review admits explicit missing files, source bots, history metadata 
         for (const table of f.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all()) {
             assert.ok(!JSON.stringify(f.db.prepare(`SELECT * FROM "${table.name}"`).all()).match(/ABSENT_SECRET|SINGLE_ABSENT/), table.name + ' retained erased filename');
         }
-        assert.equal(f.db.prepare('SELECT state FROM nook_import_reviews WHERE id=?').get(changed.review).state,'discarded');
+
         receipt=await erasure.erase(c,'imported-message',history[0].id,{confirmation:'ERASE'});for(let n=0;receipt.state!=='complete'&&n<20;n++)receipt=await erasure.advance(c,receipt.id);assert.equal(receipt.state,'complete');
         for(const table of f.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all())assert.ok(!JSON.stringify(f.db.prepare(`SELECT * FROM "${table.name}"`).all()).includes('Current edited text for'),table.name+' retained erased broadcast root text');
         const declaration=history.find(m=>m.body==='Unflagged bot declaration');receipt=await erasure.erase(c,'imported-message',declaration.id,{confirmation:'ERASE'});for(let n=0;receipt.state!=='complete'&&n<20;n++)receipt=await erasure.advance(c,receipt.id);assert.equal(receipt.state,'complete');
@@ -69,51 +69,26 @@ test('Slack review admits explicit missing files, source bots, history metadata 
     } finally { f.close(); }
 });
 
-// D1 refuses a Worker invocation's statement after its 1,000th. Count every
-// statement each public import request runs at the binding, batch members
-// included, while an export with more files than one request stages goes
-// through upload, preview, apply and undo.
-test('every Slack import request stays within the D1 statement limit through staged files, apply, the imports list and undo', async () => {
-    const f = await slackServiceFixture(), box = { n: 0 }, counts = [], origin = 'http://127.0.0.1:15820';
-    try {
-        const { slackImportRoute } = await import('../src/imports/routes.ts');
-        const counted = db => { const raw = new WeakMap(), wrap = s => { const w = { bind: (...a) => wrap(s.bind(...a)), first: (...a) => (box.n++, s.first(...a)), all: (...a) => (box.n++, s.all(...a)), run: (...a) => (box.n++, s.run(...a)) }; raw.set(w, s); return w; }; return { prepare: q => wrap(db.prepare(q)), batch: ss => { box.n += ss.length; return db.batch(ss.map(x => raw.get(x) ?? x)); } }; };
-        const env = { DB: counted(f.adapter), FILES: f.bucket, CHAT_HUB: testHub(), AUTH_ORIGIN: origin, AUTH_LOCAL: 'true', OWNER_EMAIL: 'owner@example.test', SESSION_SECRET: 'synthetic-test-secret-at-least-thirty-two-characters', MAIL_PROVIDER: 'development', MAIL_FROM: 'nook@example.test' };
-        async function call(path, body) {
-            box.n = 0;
-            const zip = Buffer.isBuffer(body), response = await slackImportRoute(new Request(origin + '/api/slack-imports' + path, body === undefined ? { headers: { origin, host: new URL(origin).host, cookie: f.ownerCookie } } : { method: 'POST', headers: { origin, host: new URL(origin).host, cookie: f.ownerCookie, 'content-type': zip ? 'application/zip' : 'application/json' }, body: zip ? body : JSON.stringify(body) }), env);
-            const result = await response.json();
-            assert.equal(response.status, 200, `${path}: ${JSON.stringify(result)}`);
-            counts.push({ path, statements: box.n });
-            return result;
-        }
-        const rows = [], files = [];
-        for (let i = 0; i < 400; i++) {
-            const file = i % 3 === 0 ? { id: 'F' + i, name: `note-${i}.txt`, mimetype: 'text/plain', size: Buffer.byteLength(`file ${i}`) } : null;
-            rows.push({ type: 'message', user: 'U1', ts: `1700000000.${String(i + 1).padStart(6, '0')}`, text: `Budget history ${i}`, ...(file ? { files: [file] } : {}) });
-            if (file) files.push([`files/${file.id}/${file.name}`, `file ${i}`]);
-        }
-        const source = await call('/upload', zipFixture([['users.json', [{ id: 'U1', name: 'Ari' }]], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', rows], ...files]));
-        const review = { namespace: 'budget', channels: [{ sourceId: 'C1', name: 'Budget general', members: [f.owner.operatorId] }], actors: { U1: null }, acceptedOmissions: [] };
-        let preview = await call('/preview', { upload: source.upload, review });
-        if (preview.needsOmissionReview) preview = await call('/preview', { upload: source.upload, review: { ...review, acceptedOmissions: [preview.omissionDigest] } });
-        let result = await call(`/${preview.review}/apply`, { fingerprint: preview.fingerprint }), staging = 0;
-        for (; !result.job && staging < 10; staging++) result = await call(`/${preview.review}/apply`, { fingerprint: preview.fingerprint });
-        assert.ok(staging > 0, 'files are staged across more than one request');
-        for (let n = 0; result.job.state !== 'completed' && n < 50; n++) result = await call(`/${preview.review}/resume`, {});
-        assert.equal(result.job.state, 'completed');
-        assert.equal(f.db.prepare("SELECT count(*) AS n FROM nook_import_files f JOIN nook_attachments a ON a.id=f.attachment WHERE a.state='attached'").get().n, files.length);
-        assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n, rows.length);
-        // The list reads job rows; opening the import runs the kit's full guards.
-        assert.deepEqual((await call('')).jobs.map(j => [j.review, j.job.state, j.job.checkpoint, j.reversalSafe]), [[preview.review, 'completed', result.job.total, true]]);
-        assert.equal((await call('/' + preview.review)).job.state, 'completed');
-        result = await call(`/${preview.review}/undo`, {});
-        for (let n = 0; result.job.state !== 'undone' && n < 50; n++) result = await call(`/${preview.review}/undo`, {});
-        assert.equal(result.job.state, 'undone');
-        assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n, 0);
-        // Cleanup takes what the last undo request leaves; the hub drains the rest.
-        assert.equal(f.db.prepare("SELECT count(*) AS n FROM nook_import_objects o WHERE o.state='deleted' OR EXISTS(SELECT 1 FROM nook_object_deletes d WHERE d.object_key=o.object_key)").get().n, files.length);
-        const heaviest = counts.reduce((a, b) => b.statements > a.statements ? b : a);
-        assert.ok(heaviest.statements <= 1000, `${heaviest.path} ran ${heaviest.statements} D1 statements`);
-    } finally { f.close(); }
+// Count actual SQL statements at the binding across each public door request.
+test('shared door staged files, apply, history, status, reconcile and undo fit D1 statement admission',async()=>{
+ const raw=await teamFixture(),box={n:0},counts=[];
+ const wrapped=new WeakMap(),wrap=s=>{const value={bind:(...a)=>wrap(s.bind(...a)),first:(...a)=>(box.n++,s.first(...a)),all:(...a)=>(box.n++,s.all(...a)),run:(...a)=>(box.n++,s.run(...a))};wrapped.set(value,s);return value};
+ const database={prepare:q=>wrap(raw.adapter.prepare(q)),batch:ss=>{box.n+=ss.length;return raw.adapter.batch(ss.map(s=>wrapped.get(s)??s))}};
+ const f=await attachImportDoor(raw,undefined,{database,onRequest:(url)=>{counts.push({action:new URL(url).pathname.split('/').at(-1),statements:box.n});box.n=0}});
+ try{
+  const rows=[],files=[];
+  for(let i=0;i<400;i++){const file=i%3===0?{id:'F'+i,name:`note-${i}.txt`,mimetype:'text/plain',size:Buffer.byteLength(`file ${i}`)}:null;rows.push({type:'message',user:'U1',ts:`1700000000.${String(i+1).padStart(6,'0')}`,text:`Budget history ${i}`,...(file?{files:[file]}:{})});if(file)files.push([`files/${file.id}/${file.name}`,`file ${i}`])}
+  const source=await f.door.inspect(zipFixture([['users.json',[{id:'U1',name:'Ari'}]],['channels.json',[{id:'C1',name:'general'}]],['general/2024-01-01.json',rows],...files]));
+  const review={namespace:'budget',channels:[{sourceId:'C1',name:'Budget general',members:[f.owner.operatorId]}],actors:{U1:null},acceptedOmissions:[]};
+  const local=await f.door.prepare(source,review);if(local.summary.needsOmissionReview)review.acceptedOmissions=[local.summary.omissionDigest];const plan=await f.door.plan(source,review);
+  const first=await f.door.apply(plan);assert.equal(first.job,null);assert.ok(first.files.staged>0&&first.files.staged<first.files.total,'selected file bytes require multiple bounded staging requests');
+  const result=await f.door.finish(plan);assert.equal(result.job.state,'completed');
+  assert.equal(f.db.prepare("SELECT count(*) AS n FROM nook_import_files f JOIN nook_attachments a ON a.id=f.attachment WHERE a.state='attached'").get().n,files.length);
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,rows.length);
+  const history=await f.door.history(),job=history.jobs.find(j=>j.planId===plan.planId);assert.equal(job.state,'completed');assert.equal(job.checkpoint,result.job.total);
+  assert.equal((await f.door.status(plan)).job.state,'completed');assert.equal((await f.door.request('reconcile',{planId:plan.planId})).ok,true);
+  assert.equal((await f.door.undo(plan)).job.state,'undone');assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records').get().n,0);
+  assert.equal(f.db.prepare("SELECT count(*) AS n FROM nook_import_objects o WHERE o.state='deleted' OR EXISTS(SELECT 1 FROM nook_object_deletes d WHERE d.object_key=o.object_key)").get().n,files.length);
+  const heaviest=counts.reduce((a,b)=>b.statements>a.statements?b:a);assert.ok(heaviest.statements<=1000,`${heaviest.action} used ${heaviest.statements} statements`);
+ }finally{f.close()}
 });

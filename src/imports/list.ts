@@ -1,6 +1,6 @@
 import {MATTERMOST_MAPPING_VERSION} from './mattermost-effects.mjs';
 import type { Context } from '../platform/storage/context';
-import { owner } from './custody.ts';
+import { owner } from './owner.ts';
 import { budgeted } from './request-budget.ts';
 import { statusView } from './status.ts';
 import {MAPPING_VERSION} from './ids.mjs';
@@ -11,9 +11,9 @@ import { decode } from '../base/modules/import-kit/src/d1/jobs.ts';
 // The list reads each import's job row and binding without re-verifying its
 // stored plan and custody. Those guards cost about 22 statements per
 // 3,500-entry import, so about 41 imports spent the request's 900. Opening one
-// import (importStatus) and every action still run the kit's full guards.
+// import and every reversal still run the kit's full guards.
 // Erased plans or withdrawn uploads need reconciliation before advertising
-// that their saved custody still allows continuation or reversal.
+// that their saved custody still allows reversal.
 const JOB_COLUMNS = 'id,fingerprint,destination,namespace,mapping_version,principal_id,operation_key,state,checkpoint,total,fence,error';
 export async function listImports(c: Context,kind='slack') {
     c = budgeted(c);
@@ -27,7 +27,7 @@ export async function listImports(c: Context,kind='slack') {
         const candidate = rows.find(j => j.operation_key === review.id);
         if (candidate && (candidate.fingerprint !== review.fingerprint || review.upload_state === 'discarded')) review = await reconcileReviewed(c, review);
         const row = rows.find(j => j.operation_key === review.id && j.namespace === review.namespace && j.fingerprint === (review.currentFingerprint ?? review.fingerprint) && (!review.kit_job || j.id === review.kit_job));
-        jobs.push(await statusView(c, review, row ? decode(row) : null, review.upload_state === 'ready'));
+        jobs.push(await statusView(c, review, row ? decode(row) : null));
     }
     return { jobs };
 }

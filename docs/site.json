@@ -141,6 +141,10 @@
     {
       "source": "docs/CLAIMS.md",
       "reason": "Maintainer implementation claims and bounded verification scope; user instructions are in Attention."
+    },
+    {
+      "source": "IMPORT-DOOR.md",
+      "reason": "Maintainer adoption and exact Base divergence record; source-specific moving-in guides cover the product flow."
     }
   ]
 }

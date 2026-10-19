@@ -34,6 +34,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const tables={};
  const readTable=async name=>{
   if(tables[name])return tables[name];
+  if((name.startsWith('ik_door_')||name==='nook_door_imports')&&manifest?.tables&&!manifest.tables.some(table=>table.name===name))return tables[name]=[];
   return tables[name]=await read(name);
 
  };
@@ -111,9 +112,9 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  index(rows('settings'),s=>s.user,'duplicate_settings');for(const s of rows('settings'))check(actors.has(s.user)&&(s.dnd_until===null||integer(s.dnd_until)),'invalid_quiet_deadline');
  index(rows('attention'),a=>a.id,'duplicate_attention');index(rows('attention'),a=>tuple(a.user,a.conversation,a.event_seq),'duplicate_attention_source');for(const a of rows('attention')){const source=a.message?msg.get(a.message):out.get(a.outcome),e=events.get(tuple(a.conversation,a.event_seq));check(string(a.id)&&participant(a.conversation,a.user)&&!!a.message!==!!a.outcome&&source?.conversation===a.conversation&&e?.object===(a.message||a.outcome)&&e.kind===(a.message?'message':'outcome')&&['open','done','snoozed'].includes(a.state)&&(a.state==='snoozed'?integer(a.snooze_until):a.snooze_until===null)&&time(a.created),'invalid_attention');check(a.message?['broadcast','urgent-request','mention','thread-follow','conversation-follow','all-messages'].includes(a.reason):source.kind==='commitment'&&['commitment-proposal','commitment-update'].includes(a.reason),'invalid_attention_reason')}
  const slackReviews=await slackArchiveObjects({read:readTable,manifest},actors,[...files.values(),...scheduledFiles]);
- const slackProofs=await slackArchivePlans(readTable,slackReviews);
+ const slackProofs=await slackArchivePlans(readTable,slackReviews,db);
  const slackDomains=validateSlackArchiveRecords(slackProofs,tables);
- const slackIntents=new Set(slackReviews.map(review=>review.id));
+ const slackIntents=new Set([...slackReviews.map(review=>review.id),...[...slackProofs.values()].filter(p=>p.door).map(p=>p.review.id)]);
  const jobs=index(rows('imports'),j=>j.id,'duplicate_import'),channels=index(rows('import_channels'),c=>tuple(c.job,c.source_id),'duplicate_import_channel'),importActors=index(rows('import_actors'),a=>tuple(a.job,a.source_id),'duplicate_import_actor');
  index(rows('imports'),j=>tuple(j.owner,j.intent),'duplicate_import_intent');index(rows('import_channels'),c=>c.conversation,'duplicate_import_destination');index(rows('import_records'),r=>r.key,'duplicate_source_key');index(rows('import_records'),r=>tuple(r.conversation,r.sequence),'duplicate_import_sequence');
  for(const j of jobs.values()){

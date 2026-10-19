@@ -1,3 +1,4 @@
+import {doorArchivePlans} from './archive-door.mjs';
 import {mappingVersion} from './formats.mjs';
 import { canonicalJson, sha256 } from './kit.ts';
 import { planFingerprint } from '../base/modules/import-kit/src/plan/index.ts';
@@ -23,7 +24,7 @@ export function decodeSlackPlan(job, chunks) {
 }
 /** Validate this product's immutable plan encoding directly; no alternate D1
  * facade and no writes are involved in offline archive graph admission. */
-export async function slackArchivePlans(read, reviews) {
+export async function slackArchivePlans(read, reviews, db) {
     const names = ['ik_jobs', 'ik_d1_plan_chunks', 'nook_imports'];
     const data = Object.fromEntries(await Promise.all(names.map(async name => [name, await read(name)])));
     const jobs = new Map(data.ik_jobs.map(j => [j.id, j])), result = new Map();
@@ -45,7 +46,9 @@ export async function slackArchivePlans(read, reviews) {
         const revisions = await validateSlackProvenance(read, job, plan);
         result.set(review.id, { review, job, plan, summary, effects, revisions });
     }
-    check(data.ik_jobs.every(j => reviews.some(r => r.kit_job === j.id)), 'orphan_slack_kit_job');
+    const doors=await doorArchivePlans(read,decodeSlackPlan,db);
+    for(const [id,proof] of doors){check(!result.has(id),'duplicate_import_binding');result.set(id,proof);}
+    check(data.ik_jobs.every(j => [...result.values()].some(p=>p.job.id===j.id)), 'orphan_slack_kit_job');
     await validateSlackRecoveryGraph(read, result);
     return result;
 }

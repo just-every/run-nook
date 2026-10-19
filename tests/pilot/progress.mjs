@@ -13,7 +13,7 @@ export async function trackImport({page,origin,phase,width,channels},action){
  };
  const onFinished=request=>{
   const url=new URL(request.url());
-  if(url.origin!==origin||!/^\/api\/slack-imports\/[^/]+\/(apply|resume|undo)$/.test(url.pathname)||request.method()!=='POST')return;
+  if(url.origin!==origin||!/^\/api\/operator\/import\/(apply|undo)$/.test(url.pathname)||request.method()!=='POST')return;
   const task=(async()=>{
    responses++;
    try{

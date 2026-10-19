@@ -1,5 +1,15 @@
 # Nook changes
 
+## Unreleased
+
+Slack, Campfire and Mattermost now use the shared Base import door. Source
+inspection stays on your device and withholds credentials before upload. Review
+a dry run, apply its fingerprint, reconcile the native history, or use guarded
+Undo. Dry runs expire after 30 minutes; changed audiences require a fresh review.
+Existing import history and guarded Undo survive the additive upgrade. Business
+imports share this pipeline and stay off until explicitly enabled.
+
+
 ## 0.4.0 (2026-10-19)
 
 Changes since 0.3.0. Nook keeps team conversations, decisions and commitments

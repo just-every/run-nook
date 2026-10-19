@@ -7,17 +7,18 @@ import {transfer} from '../scripts/local/transfer.mjs';
 import {makePart,ArchiveVerifier,ContentVerifier,readArchive} from '@runeditrun/rer/modules/portability/format';
 import {recoverNormalizedFixture,normalizedFixtureOwner} from './recovery-support.mjs';
 import {signIn} from './auth-support.mjs';
-import {source} from './import-fixture.mjs';
-import {captureImport} from '../scripts/import-preview.mjs';
+import {sourceDoor} from './import-fixture.mjs';
 
 // Actual local bindings and the product policy, invoked only by the native runtime suite.
 export async function runPortabilityWorkflow({root,state,states,proof,databasePath,command,start,stop,verify}){
  const directory=await mkdtemp(resolve(tmpdir(),'nook-portable-'));states.push(directory);
  await start(Number(new URL(proof.base).port));
- const fixture=source(directory,proof.actors[0].id,proof.actors[1].id),capture=captureImport(fixture.dir,fixture.mapping,fixture.supplied);
  const api=async(path,cookie,body,status=200)=>{const response=await fetch(proof.base+path,{method:body?'POST':'GET',headers:{Origin:proof.base,Cookie:cookie,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});assert.equal(response.status,status);return response.headers.get('content-type')?.includes('application/json')?response.json():response.text()};
- const importerActor=await signIn(proof.base,proof.actors[0].email),readerActor=await signIn(proof.base,proof.actors[1].email),plan=await api('/api/imports/preview',importerActor.cookie,{capture}),receipt=await api('/api/imports/apply',importerActor.cookie,{capture,intent:'portable-source',planDigest:plan.planDigest}),cid=receipt.channels[0].id;
- const importedRecords=(await api('/api/conversations/'+cid+'/imported-history',readerActor.cookie)).records;assert.equal(importedRecords.length,2);assert.deepEqual(importedRecords[0].provenance.sourceRecord,capture.records[0].sourceRecord);assert.equal(await api('/api/import-files/'+importedRecords[0].attachments[0].id+'/download',readerActor.cookie),'proof');await stop();
+ const importerActor=await signIn(proof.base,proof.actors[0].email),readerActor=await signIn(proof.base,proof.actors[1].email);
+ const sql=async text=>{const db=new DatabaseSync(await databasePath(state),{readOnly:true});try{return db.prepare(text).all()}finally{db.close()}};
+ const fixture=await sourceDoor({origin:proof.base,owner:importerActor,member:readerActor,sql,namespace:'portable-source'});
+ await fixture.door.finish(fixture.plan);const cid=(await fixture.door.status(fixture.plan)).destinations[0].id;
+ const importedRecords=await api('/api/conversations/'+cid+'/messages',readerActor.cookie);assert.equal(importedRecords.length,2);assert.deepEqual(importedRecords[0].provenance.sourceRecord,fixture.capture.messages[0].sourceRecord);assert.equal(await api('/api/attachments/'+importedRecords[0].attachments[0].id+'/download',readerActor.cookie),'proof');await stop();
  const archive=resolve(directory,'workspace.rer'),exported=await transfer('export',archive,{root});
  const records=(await readFile(archive,'utf8')).trim().split('\n').map(line=>JSON.parse(line));
  assert.ok(exported.tables.some(table=>table.name==='nook_messages'&&table.count>=4));
@@ -48,6 +49,6 @@ export async function runPortabilityWorkflow({root,state,states,proof,databasePa
  await start(Number(new URL(proof.base).port));
  try{const claim=await fetch(proof.base+'/auth/bootstrap',{method:'POST',headers:{Origin:proof.base,'Content-Type':'application/json'},body:JSON.stringify({token:'synthetic-unrelated-owner-claim',displayName:'Unrelated owner'})});assert.equal(claim.status,409);assert.equal((await claim.json()).error,'identity_recovery_required');const denied=await fetch(proof.base+'/api/me',{headers:{cookie:proof.actors[0].cookie}});assert.equal(denied.status,401)}finally{await stop()}
  await recoverNormalizedFixture(target,normalizedFixtureOwner(target));await start(Number(new URL(proof.base).port));
- try{await verify();const reader=await signIn(proof.base,proof.actors[1].email),author=await signIn(proof.base,proof.actors[0].email);assert.deepEqual((await api('/api/conversations/'+cid+'/imported-history',reader.cookie)).records,importedRecords);assert.equal(await api('/api/import-files/'+importedRecords[0].attachments[0].id+'/download',reader.cookie),'proof');assert.equal((await api('/api/imports/search?q=faithful',reader.cookie)).items[0].id,importedRecords[0].id);await api('/api/conversations/'+cid+'/members',author.cookie,{user:proof.actors[1].id,remove:true});await api('/api/conversations/'+cid+'/imported-history',reader.cookie,null,403);await api('/api/import-files/'+importedRecords[0].attachments[0].id+'/download',reader.cookie,null,404);assert.equal((await api('/api/imports/search?q=faithful',reader.cookie)).items.length,0)}finally{await stop()}
+ try{await verify();const reader=await signIn(proof.base,proof.actors[1].email),author=await signIn(proof.base,proof.actors[0].email);assert.deepEqual(await api('/api/conversations/'+cid+'/messages',reader.cookie),importedRecords);assert.equal(await api('/api/attachments/'+importedRecords[0].attachments[0].id+'/download',reader.cookie),'proof');assert.equal((await api('/api/search?q=faithful',reader.cookie)).items[0].id,importedRecords[0].id);await api('/api/conversations/'+cid+'/members',author.cookie,{user:proof.actors[1].id,remove:true});await api('/api/conversations/'+cid+'/messages',reader.cookie,null,403);await api('/api/attachments/'+importedRecords[0].attachments[0].id+'/download',reader.cookie,null,404);assert.equal((await api('/api/search?q=faithful',reader.cookie)).items.length,0)}finally{await stop()}
  return {normalBaseArchive:true,earlierBuildArchiveRecovered:true,privateGraphPreserved:true,credentialsExcluded:true,semanticRejectionAtomic:true,stableIdentityRecovery:true,importedPositiveReadAndPrivateBytesBeforeRevocation:true,importedProvenancePreserved:true};
 }

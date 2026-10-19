@@ -19,8 +19,9 @@ export async function teamFixture({bootstrap=true,database=':memory:'}={}){
  const handle=createAuthHandler(auth);
  const request=(path,body,cookie)=>new Request(origin+path,{method:body?'POST':'GET',headers:{origin,host:new URL(origin).host,...(body?{'content-type':'application/json'}:{}),...(cookie?{cookie}:{})},...(body?{body:JSON.stringify(body)}:{})});
  const call=(path,body,cookie)=>handle(request(path,body,cookie));
- async function signIn(email){const sent=await call('/auth/magic-link',{email});if(sent.status!==202)throw Error('Sign-in request failed');const value=new URL(mail.at(-1).text.trim().split('\n').at(-1)).searchParams.get('token');const confirmed=await call('/auth/confirm',{token:value});if(confirmed.status!==303)throw Error('Sign-in confirmation failed');return auth.getSession(request('/auth/session',null,confirmed.headers.get('set-cookie').split(';')[0]))}
- if(!bootstrap)return {db,adapter,auth,call,request,signIn,close:()=>db.close()};
+ async function authenticate(email){const sent=await call('/auth/magic-link',{email});if(sent.status!==202)throw Error('Sign-in request failed');const value=new URL(mail.at(-1).text.trim().split('\n').at(-1)).searchParams.get('token');const confirmed=await call('/auth/confirm',{token:value});if(confirmed.status!==303)throw Error('Sign-in confirmation failed');const cookie=confirmed.headers.get('set-cookie').split(';')[0];return {session:await auth.getSession(request('/auth/session',null,cookie)),cookie}}
+ async function signIn(email){return (await authenticate(email)).session}
+ if(!bootstrap)return {db,adapter,auth,call,request,signIn,authenticate,close:()=>db.close()};
  const ownerResponse=await call('/auth/bootstrap',{token:'synthetic-test-setup-token-thirty-two-characters',displayName:'Owner'});if(ownerResponse.status!==303)throw new Error('Owner setup failed '+ownerResponse.status);
  const ownerCookie=ownerResponse.headers.get('set-cookie').split(';')[0],owner=await auth.getSession(request('/auth/session',null,ownerCookie));
  db.prepare("INSERT INTO nook_conversations(id,name,kind,owner) VALUES('launch','Launch','channel',?),('review','Review','private',?)").run(owner.operatorId,owner.operatorId);
@@ -31,5 +32,5 @@ export async function teamFixture({bootstrap=true,database=':memory:'}={}){
  async function stepUp(cookie=ownerCookie){if((await call('/auth/step-up',{action:'owner:transfer'},cookie)).status!==202)throw new Error('Step-up request failed');if((await call('/auth/confirm',{token:token()},cookie)).status!==303)throw new Error('Step-up confirmation failed')}
  async function invite(email,options={}){plan(email,options);if(options.role==='owner')await stepUp();const result=await call('/auth/invite',{email,displayName:email.split('@')[0],role:options.role??'member'},ownerCookie);if(result.status!==202)throw new Error('Invitation issuance failed');return token()}
  async function accept(value){return call('/auth/confirm',{token:value})}
- return {db,adapter,auth,call,request,owner,ownerCookie,plan,stepUp,invite,token,accept,close:()=>db.close()}
+ return {db,adapter,auth,call,request,owner,ownerCookie,plan,stepUp,invite,token,accept,authenticate,close:()=>db.close()}
 }

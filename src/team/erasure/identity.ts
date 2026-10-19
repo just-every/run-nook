@@ -6,7 +6,17 @@ import {fenceService,type Sql} from './portability'
 import {sql,fencedRows,audit} from './statements'
 export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceService>>,target:string){
  const affected=await c.rows('SELECT id AS conversation FROM nook_conversations c WHERE EXISTS(SELECT 1 FROM nook_members WHERE conversation=c.id AND user=?) OR EXISTS(SELECT 1 FROM nook_dm_roster WHERE conversation=c.id AND user=?) OR owner=? OR EXISTS(SELECT 1 FROM nook_channel_settings WHERE conversation=c.id AND manager=?) OR EXISTS(SELECT 1 FROM nook_erased_messages WHERE conversation=c.id AND author=?) OR EXISTS(SELECT 1 FROM nook_erased_attachments WHERE conversation=c.id AND author=?) OR EXISTS(SELECT 1 FROM nook_outcomes WHERE conversation=c.id AND assignee=?)',[target,target,target,target,target,target,target])
- const historical=affected.length>0||!!await c.one("SELECT 1 FROM nook_imports WHERE owner=? UNION ALL SELECT 1 FROM nook_import_uploads WHERE owner=? UNION ALL SELECT 1 FROM nook_import_reviews WHERE EXISTS(SELECT 1 FROM json_each(nook_import_reviews.summary_json,'$.actors') a WHERE json_extract(a.value,'$.association')=?) UNION ALL SELECT 1 FROM nook_messages WHERE deleted=0 AND EXISTS(SELECT 1 FROM json_each(nook_messages.payload,'$.mentions') WHERE value=?) LIMIT 1",[target,target,target,target])
+ // Imported custody redaction can already have removed current memberships.
+ // Their real join/leave audit still needs an opaque actor after account erasure.
+ // A lost-ack job may not have published any membership yet; its reviewed
+ // roster also needs the tombstone before unaffected channel effects resume.
+ const historical=affected.length>0||!!await c.one(`SELECT 1 WHERE
+  EXISTS(SELECT 1 FROM nook_imports WHERE owner=?)
+  OR EXISTS(SELECT 1 FROM nook_import_uploads WHERE owner=?)
+  OR EXISTS(SELECT 1 FROM nook_import_reviews WHERE EXISTS(SELECT 1 FROM json_each(nook_import_reviews.summary_json,'$.actors') a WHERE json_extract(a.value,'$.association')=?))
+  OR EXISTS(SELECT 1 FROM nook_messages WHERE deleted=0 AND EXISTS(SELECT 1 FROM json_each(nook_messages.payload,'$.mentions') WHERE value=?))
+  OR EXISTS(SELECT 1 FROM nook_exit_membership WHERE user=?)
+  OR EXISTS(SELECT 1 FROM nook_door_imports n,json_each(n.summary_json,'$.channels') channel,json_each(channel.value,'$.members') member WHERE member.value=?)`,[target,target,target,target,target,target])
  const person=await c.one('SELECT email,display_name FROM oa_operators WHERE id=?',[target]),result:Sql[]=[...audit('SELECT value FROM json_each(?)',[JSON.stringify(affected.map(r=>r.conversation))]),...await detachAssignee(c,f,target),...await fencedRows(c,f,'nook_attention',['id'],'EXISTS(SELECT 1 FROM nook_events e WHERE e.conversation=nook_attention.conversation AND e.seq=nook_attention.event_seq AND e.actor=?)',[target])]
  result.push(...await authIdentity(c,f,target),sql("DELETE FROM oa_dev_credentials WHERE (credential='oa_sessions' AND id IN (SELECT id FROM oa_sessions WHERE operator_id=?)) OR (credential='oa_tokens' AND id IN (SELECT id FROM oa_tokens WHERE operator_id=? OR issuer_id=?))",target,target,target),sql('UPDATE oa_sessions SET source_token_id=NULL WHERE operator_id<>? AND source_token_id IN (SELECT id FROM oa_tokens WHERE issuer_id=?)',target,target))
  const edges:[string,string[],string,any[]][]=graph.member.edges.filter(edge=>'phase' in edge&&edge.phase==='identity').map(edge=>{
