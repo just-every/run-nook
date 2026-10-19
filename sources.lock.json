@@ -661,7 +661,7 @@
       "executable": false
     },
     "docs/attention.md": {
-      "sha256": "8f0daf36e13e7f606c2f0774f986a68d7836aa977fbc5ad04abd3cfb8b9ee149",
+      "sha256": "677fe7b943f3bba51752ae5fce1b457e8e59fee9fd3a2f22ece4f380de8e6547",
       "executable": false
     },
     "docs/backups.md": {
@@ -669,15 +669,15 @@
       "executable": false
     },
     "docs/campfire-import.md": {
-      "sha256": "f8e9a2ac7b80face5d49215dfe10ab67f7bfb477507359fdd671a858fd2a55ac",
+      "sha256": "d656e178c90fe988154aeab7697b049a044c55ce2666a76e1200025d227b3414",
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "72aa7902ab28b81192c2c3bbc4448b1d328d3c04e19d86e5436c27240a84c858",
+      "sha256": "2cc1970edb7d28ca59c66ad4b8f3379392b57ec576bc255c10a4dec0b7adec0d",
       "executable": false
     },
     "docs/conversations.md": {
-      "sha256": "67d8270ef8f35e71f5cf3ec054ec882e9d77d1e05a375ee69373c1e34c488f92",
+      "sha256": "b1d2cd74095b3990996980a310542fd97a9be3b574fbc27949294142eeb3e0cb",
       "executable": false
     },
     "docs/decisions-and-commitments.md": {
@@ -709,7 +709,7 @@
       "executable": false
     },
     "docs/readable-export.md": {
-      "sha256": "6e642d8bb12f284a16a1019ad8ff7f5ea90dddf5ec8e24fb407a65b0bc907f0b",
+      "sha256": "2f9b14000406d56b81c55567d51774fcc71bce4ab285c5fedcf18a1bcaf32724",
       "executable": false
     },
     "docs/site.json": {

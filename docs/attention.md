@@ -23,7 +23,7 @@ On a hosted workspace with mail configured, Nook can email you when you are away
 - **Someone mentions me or asks me to take on a commitment** covers explicit mentions, a commitment proposed to you or changed after you were asked, and a report that a commitment you asked for is complete.
 - **Someone sends me an urgent request** covers urgent requests. Quiet time holds them like everything else unless you also tick **Let urgent requests through quiet time**.
 
-Nothing else is emailed: not followed threads or conversations, reactions, replies that do not mention you, accepted or cancelled commitments, or imported history. Quiet time holds email until it ends. You get at most one email per conversation every ten minutes; later updates are counted in the next one. Nook does not email you about something you already read or dismissed, about a conversation you can no longer open, or after the message was deleted.
+Nothing else is emailed: not followed threads or conversations, reactions, replies that do not mention you, accepted or canceled commitments, or imported history. Quiet time holds email until it ends. You get at most one email per conversation every ten minutes; later updates are counted in the next one. Nook does not email you about something you already read or dismissed, about a conversation you can no longer open, or after the message was deleted.
 
 Email goes to the address you sign in with. It says who did what and where, with a link; it never contains message text or file names. Every email has a **Turn these emails off** link that works without signing in, and a link to your settings.
 

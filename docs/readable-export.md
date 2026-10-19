@@ -54,7 +54,7 @@ stop. A change to selected source content invalidates the job, including a chang
 after completion. Start a new job to get one consistent source revision. Writes
 in unrelated conversations do not invalidate a selected conversation export.
 Shared identity changes or import publication can invalidate jobs that depend
-on those shared identities. A cancelled, unchanged job resumes at its saved
+on those shared identities. A canceled, unchanged job resumes at its saved
 cursor; an invalidated job cannot be resumed into mixed revisions.
 
 If attached bytes are missing or corrupt, preparation stops with the file ID and
@@ -197,7 +197,7 @@ links. Keep authentication outside the exported documents.
 
 `401` means the session is unavailable, `403` means selected conversation access
 was revoked, `404` covers another person’s/unknown job or file, `409` means
-cancelled/concurrent/stale source progress, and `503` means real file integrity
+canceled/concurrent/stale source progress, and `503` means real file integrity
 or normalized storage is unavailable. Continue from the latest durable report
 after an interrupted step; concurrent step requests cannot both append a page.
 Page and file responses are never cached. A complete download verifies each page
