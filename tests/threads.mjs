@@ -85,7 +85,9 @@ export async function threadJourney({post,patch,get,registered,check,restart}){
   assert.equal((await list(a)).find(t=>t.root.id===root.id).unread,1)
   const attention=(await get('/api/attention',a.cookie)).data.items.map(i=>i.id)
   await post(`/api/messages/${root.id}/read`,{seq:otherReply.sequence},a.cookie,400)
-  await post(`/api/messages/${root.id}/read`,{seq:reply.sequence},a.cookie)
+  const separate=(await post('/api/conversations',{name:'Separate thread scope',kind:'private'},a.cookie)).data
+  await post(`/api/messages/${root.id}/read`,{seq:reply.sequence,conversation:separate.id},a.cookie,404)
+  await post(`/api/messages/${root.id}/read`,{seq:reply.sequence,conversation:room.id},a.cookie)
   assert.equal((await list(a)).find(t=>t.root.id===root.id).unread,0)
   assert.equal((await list(a)).find(t=>t.root.id===other.id).unread,1)
   assert.deepEqual((await get('/api/attention',a.cookie)).data.items.map(i=>i.id),attention,'read never closes attention')
@@ -101,6 +103,7 @@ export async function threadJourney({post,patch,get,registered,check,restart}){
   assert.ok((await list(c)).some(t=>t.root.id===root.id&&t.source==='explicit'))
   await post(`/api/conversations/${room.id}/members`,{user:c.user.id,remove:true},a.cookie)
   assert.ok(!(await list(c)).some(t=>t.root.conversation===room.id))
+  await post(`/api/messages/${root.id}/read`,{seq:reply.sequence,conversation:room.id},c.cookie,403)
   await post(`/api/messages/${root.id}/read`,{seq:reply.sequence},c.cookie,404)
  })
 }

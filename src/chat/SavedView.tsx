@@ -16,7 +16,9 @@ export function SavedView({user,conversations,revision,privateSignal,onOpen,onEr
  useEffect(()=>{
   let cancelled=false;const epoch=++generation.current,active=()=>!cancelled&&current()&&epoch===generation.current
   const clear=()=>{setPage(null);setError('');setShowForm(false)}
-  privateSignal.addEventListener('abort',clear,{once:true});setPage(null);setLoading(true);setError('')
+  // Keep keyed reminder editors mounted while focus/live updates refresh the
+  // list. Revocation still clears private content synchronously above.
+  privateSignal.addEventListener('abort',clear,{once:true});setLoading(true);setError('')
   void api<CollectionPage<SavedItem>>('saved').then(next=>{if(active())setPage(next)}).catch(reason=>{if(active()){setError('Saved items could not be loaded.');onError(reason)}}).finally(()=>{if(active())setLoading(false)})
   return()=>{cancelled=true;generation.current++;privateSignal.removeEventListener('abort',clear)}
  },[revision,reload,current,onError,privateSignal])

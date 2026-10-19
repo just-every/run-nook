@@ -31,7 +31,12 @@ export async function savedRemindersBrowser({origin,owner,member,destination='ev
     const scheduled=page.waitForResponse(r=>r.url().includes('/api/saved/')&&r.request().method()==='PATCH')
     await item.getByRole('button',{name:'Save reminder',exact:true}).click();const response=await scheduled;assert.equal(response.status(),200);const saved=(await response.json()).saved
     await expect(item.getByText(/^Reminder:/)).toBeVisible()
-    await item.getByRole('button',{name:'Edit reminder',exact:true}).click();await item.getByLabel('Remind me at').fill(localTime(10))
+    await item.getByRole('button',{name:'Edit reminder',exact:true}).click();const editedTime=localTime(10);await item.getByLabel('Remind me at').fill(editedTime)
+    // Returning to the tab refreshes Saved without discarding an open edit.
+    const refreshed=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/saved'&&r.request().method()==='GET')
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await refreshed
+    await expect(item.getByLabel('Remind me at')).toHaveValue(editedTime)
+    await page.screenshot({path:resolve(destination,`edit-${width}.png`)})
     await item.getByRole('button',{name:'Save reminder',exact:true}).click();await expect(item.getByRole('button',{name:'Edit reminder',exact:true})).toBeVisible()
     await page.reload();await expect(item.getByText(/^Reminder:/)).toBeVisible()
     await page.screenshot({path:resolve(destination,`pending-${width}.png`)})

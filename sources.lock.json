@@ -3557,7 +3557,7 @@
       "executable": false
     },
     "src/chat/SavedView.tsx": {
-      "sha256": "cfb963f4f98fa559fe9f02e283de41b4fcfe9d966390a7a312a699926c04f7e8",
+      "sha256": "5cc5914e5688eee09dca9d783a271307195dceac4f8a2568ced9ea5d21a92053",
       "executable": false
     },
     "src/chat/search-filters.ts": {
@@ -3573,7 +3573,7 @@
       "executable": false
     },
     "src/chat/ThreadsView.tsx": {
-      "sha256": "9fc5e5ea09871b2ce7eb52e7fdd2a457bbb1a59b1a634d57a74e2d900eb3911f",
+      "sha256": "6d4e455ef9c6979bf0090b0db42f3c6b09c5eef2f05c72d3e39a28e9eb3eb050",
       "executable": false
     },
     "src/chat/types.ts": {
@@ -3601,7 +3601,7 @@
       "executable": false
     },
     "src/chat/useReadVisibility.ts": {
-      "sha256": "1d8f20f6e8bcb42d6c3e5506a02f15d45da1022a0c1a1f86c79ced58e53049f6",
+      "sha256": "7d50c58f2330a383278d21c5ce1e2852d031337f9b94c752307580be83460756",
       "executable": false
     },
     "src/chat/useUnreadActions.tsx": {
@@ -4501,7 +4501,7 @@
       "executable": false
     },
     "src/platform/storage/threads.ts": {
-      "sha256": "a824bbfe92d3c15a2b40f34612751a0bed2784d8c59a72148e2af88eff23e7b0",
+      "sha256": "64ba6efd38aec9f6230c44c71daccc6d37c228dd6ee9a616eba28329ea2e05da",
       "executable": false
     },
     "src/platform/storage/unreads.ts": {
@@ -5085,7 +5085,7 @@
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "18db12cac7fd6abbc08adcf6404e5b3514be0b517ae0d6896b3f6ef15b48a540",
+      "sha256": "1eeac4ce3801277fc4a38956d157ea56b803dcefa3c164e8654e5a20521c9cc9",
       "executable": false
     },
     "tests/campfire-import/browser.mjs": {
@@ -5521,7 +5521,7 @@
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
-      "sha256": "1fe3e2a9162e32492a478d114ef74295e1b20ba34c19dc5e616b0b739962084c",
+      "sha256": "19fb13da7bf959f844d88a586763d3e8bbc8f906428db01571a185f14095d273",
       "executable": false
     },
     "tests/saved-reminders.mjs": {
@@ -5653,7 +5653,7 @@
       "executable": false
     },
     "tests/threads.mjs": {
-      "sha256": "1f652ec7eaa90f2f8333a6c19110f19afce8754da2187ec22eb48e5dac491f90",
+      "sha256": "f7eb727cb6dcc1660b2c336278d3667e2a630f49cd5ffa3e6a004d02bdb563cf",
       "executable": false
     },
     "tests/unreads-browser.mjs": {

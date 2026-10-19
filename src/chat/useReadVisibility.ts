@@ -34,7 +34,10 @@ export function useReadVisibility(container:React.RefObject<HTMLElement|null>,co
    // A late response belongs to its original identity/conversation. It may
    // acknowledge that server read, but cannot change a replacement scope.
    const current=()=>isCurrent()&&progress.current===scope&&scope.active
-   void api<ReadAcknowledgement>(threadRead?`messages/${threadRead.thread}/read`:`conversations/${conversation}/read`,{seq:frontier}).then(ack=>{if(current()){scope.sent=Math.max(scope.sent,frontier);return threadRead?threadRead.onRead():onRead(ack)}}).catch(error=>{if(current())onError(error)}).finally(()=>{if(current()){scope.inflight=false;scope.inspect?.()}})
+   // Only a successful acknowledgement can drain the next visible frontier.
+   // A refused write must not schedule another identical request.
+   let acknowledged=false
+   void api<ReadAcknowledgement>(threadRead?`messages/${threadRead.thread}/read`:`conversations/${conversation}/read`,{seq:frontier,...(threadRead?{conversation}:{})}).then(ack=>{if(current()){acknowledged=true;scope.sent=Math.max(scope.sent,frontier);return threadRead?threadRead.onRead():onRead(ack)}}).catch(error=>{if(current())onError(error)}).finally(()=>{if(current()){scope.inflight=false;if(acknowledged)scope.inspect?.()}})
   })}
   // The list can still be laying out on the first check; check again whenever its size settles.
   const resized=new ResizeObserver(inspect);resized.observe(root)

@@ -231,12 +231,24 @@ export async function runBrowser(origin,destination){
     await (await import('./group-dm.mjs')).groupDmFlow({alice,bob,origin,aliceUser,bobUser,bobName})
     checks.push(`${label}: app-created three-person DM, exact fixed roster and shared private history`)
     // Revocation clears active private content and all access-controlled views.
+    await json(alice,origin,`conversations/${channel.id}/messages`,{body:'The final handoff is ready for review.',parent:deep.id,intent:crypto.randomUUID()})
+    let releaseRead
+    const revoked=new Promise(resolve=>{releaseRead=resolve})
+    const threadReadPath=`/api/messages/${deep.id}/read`
+    const readHeld=bob.waitForRequest(request=>new URL(request.url()).pathname===threadReadPath)
+    const readResponse=bob.waitForResponse(response=>new URL(response.url()).pathname===threadReadPath)
+    await bob.route(url=>url.pathname===threadReadPath,async route=>{await revoked;await route.continue()})
     await bob.goto(origin+`/app?view=chat&conversation=${channel.id}&thread=${deep.id}`);await bob.getByText('Detailed planning context',{exact:true}).waitFor()
+    await readHeld
+    await shot(bob,'revocation-pending')
     revocationExpected=true
-    await json(alice,origin,`conversations/${channel.id}/members`,{user:bobUser.id,remove:true})
+    try{await json(alice,origin,`conversations/${channel.id}/members`,{user:bobUser.id,remove:true})}finally{releaseRead()}
+    assert.equal((await readResponse).status(),403,'an in-flight read reports loss of its known conversation scope')
     // Removal reaches an open view through the live hub (its alarm when post-commit hints are dropped).
     await expect(bob.getByText('Detailed planning context',{exact:true})).toHaveCount(0,{timeout:12000})
     await expect(bob.getByText('Deep context reply for the release',{exact:true})).toHaveCount(0)
+    await expect(bob.getByRole('button',{name:'Browse channels',exact:true})).toBeVisible()
+    await shot(bob,'revoked-conversation')
     await nav(bob,'Attention').click();await expect(bob.getByText('Review the revised handover',{exact:true})).toHaveCount(0)
     await nav(bob,'Search').click();await bob.getByLabel('Search conversations',{exact:true}).fill('Deep context reply');await bob.locator('.search-form').getByRole('button',{name:'Search',exact:true}).click();await bob.getByText('No matching messages in your conversations.',{exact:true}).waitFor()
     await shot(bob,'revoked');assert.deepEqual(errors,[],'no page, hydration or unexpected console errors');assert.deepEqual(failedRequests,[],'no unexpected failed network requests')

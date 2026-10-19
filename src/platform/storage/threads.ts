@@ -14,8 +14,11 @@ export const liveThreadRoots=`SELECT id,conversation,created FROM nook_messages 
 const historicalThreadRoots=`SELECT id,conversation FROM nook_message_history WHERE parent IS NULL
  UNION ALL SELECT r.id,r.conversation FROM nook_import_history r JOIN nook_imports j ON j.id=r.job WHERE r.parent IS NULL AND j.state='complete' AND ${publishedImport}`
 
-async function root(c:Context,id:string,live=true){
- const row=await c.one(`SELECT r.conversation FROM (${live?liveThreadRoots:historicalThreadRoots}) r WHERE r.id=? AND EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=r.conversation AND m.user=? AND ${allowedGrant('m.user','m.conversation')})`,[id,c.uid])
+async function root(c:Context,id:string,live=true,conversation?:string){
+ // A mounted conversation supplies its scope. Admit that scope in the same
+ // snapshot as the root lookup so membership loss is an access revocation,
+ // while arbitrary message-only lookups still conceal inaccessible roots.
+ const row=await c.one(`SELECT r.conversation FROM (${live?liveThreadRoots:historicalThreadRoots}) r WHERE r.id=?${conversation?' AND r.conversation=?':''} AND EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=r.conversation AND m.user=? AND ${allowedGrant('m.user','m.conversation')})`,[id,...(conversation?[conversation]:[]),c.uid],conversation)
  if(!row)fail(404,'Thread root unavailable')
  await c.check(row.conversation)
  return row
@@ -71,7 +74,8 @@ export const threadReadCount=(user:string,conversation:string,frontier:string)=>
 
 export async function readThread(c:Context,id:string,input:Record<string,any>){
  if(!Number.isSafeInteger(input.seq)||input.seq<0)fail(400,'Invalid thread read frontier')
- const r=await root(c,id,false)
+ if(input.conversation!==undefined&&(typeof input.conversation!=='string'||!input.conversation))fail(400,'Invalid conversation')
+ const r=await root(c,id,false,input.conversation)
  const valid=`EXISTS(SELECT 1 FROM (${historicalThreadRoots}) r WHERE r.id=? AND r.conversation=?) AND (?=0 OR EXISTS(SELECT 1 FROM nook_message_history m WHERE m.conversation=? AND m.sequence=? AND (m.id=? OR m.parent=?)))`
  const values=[id,r.conversation,input.seq,r.conversation,input.seq,id,id]
  if(!await c.one(`SELECT 1 WHERE ${valid}`,values,r.conversation))fail(400,'Invalid thread read frontier')
