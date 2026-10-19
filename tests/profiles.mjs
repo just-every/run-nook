@@ -80,10 +80,10 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
   await post('/api/personal/workspace',{conversation:c.id,section:'Customers',position:2},member.cookie)
   assert.equal((await get('/api/conversations',member.cookie)).data.find(i=>i.id===c.id).section,'Customers')
   assert.ok(!(await get('/api/personal/workspace')).data.sections.some(i=>i.conversation===c.id))
-  await post('/api/personal/workspace',{origin:'https://work.example.com',label:'Acme workspace'},member.cookie)
-  await post('/api/personal/workspace',{origin:'https://user:password@example.com',label:'Rejected'},member.cookie,400)
+  // Installation links now live on the device (NOOK-017 "Your workspaces"); the account no longer stores new ones.
+  await post('/api/personal/workspace',{origin:'https://work.example.com',label:'Acme workspace'},member.cookie,400)
   await restart()
-  assert.equal((await get('/api/personal/workspace',member.cookie)).data.installations[0].origin,'https://work.example.com')
+  assert.deepEqual((await get('/api/personal/workspace',member.cookie)).data.installations,[])
   await post('/api/conversations/'+c.id+'/members',{user:member.user.id,remove:true})
   assert.ok(!(await get('/api/personal/workspace',member.cookie)).data.sections.some(i=>i.conversation===c.id))
   await post('/api/conversations/'+c.id+'/mark-unread',{},member.cookie,403)

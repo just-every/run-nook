@@ -1,0 +1,18 @@
+.nook-app .workspaces-menu { position: relative; margin: 0 12px 8px; }
+.nook-app .workspaces-menu > summary { width: 100%; justify-content: flex-start; list-style: none; }
+.nook-app .workspaces-menu > summary::-webkit-details-marker { display: none; }
+.nook-app .workspaces-popover { width: 300px; max-width: calc(100vw - 32px); padding: 12px; }
+.nook-app .workspaces-list ul { display: grid; gap: 4px; margin: 8px 0; padding: 0; list-style: none; }
+.nook-app .workspaces-list li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; }
+.nook-app .workspaces-list li.current { background: var(--surface-rail); }
+.nook-app .workspace-entry { display: grid; flex: 1; min-width: 0; color: var(--ink); text-decoration: none; }
+.nook-app .workspace-entry strong, .nook-app .workspace-entry small { overflow-wrap: anywhere; }
+.nook-app .workspace-entry small, .nook-app .workspaces-note { color: var(--ink-soft, inherit); font-size: 12px; }
+.nook-app .workspace-add { display: flex; align-items: end; gap: 8px; }
+.nook-app .workspace-add .field { flex: 1; min-width: 0; }
+.nook-app .workspaces-error:empty { display: none; }
+.nook-app .workspaces-section { margin-bottom: 16px; }
+.nook-app .workspace-handoff { position: fixed; z-index: 30; right: 16px; bottom: 16px; width: 340px; max-width: calc(100vw - 32px); padding: 14px; border-radius: 14px; background: var(--surface-raised); box-shadow: var(--shadow-pop); }
+.nook-app .workspace-handoff ul { margin: 6px 0; padding-left: 18px; }
+.nook-app .workspace-handoff-actions { display: flex; gap: 8px; }
+@media (max-width: 720px) { .nook-app .workspace-handoff { bottom: 76px; } }

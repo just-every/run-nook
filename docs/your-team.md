@@ -34,3 +34,12 @@ or stored, and there is no local mail viewer.
 Choose **Deactivate** beside a teammate to disable their account and remove active workspace access. Reactivating an account does not restore channel access or an old session. To let the person back in, explicitly grant selected channels; on a hosted workspace they must use a fresh sign-in link. Locally, re-enter through the admitted browser's persona route.
 
 Hover over a person under **People** (the actions are always shown on a phone) to deactivate, reactivate or erase them. The Team screen also lets an owner or admin remove a person's access to an individual channel. Channel access determines who can read its history and send messages.
+
+## Switching workspaces
+
+Each Nook installation is its own workspace with its own address. **Your workspaces** (in the sidebar, or under **You** on a phone) lists the installations this browser has signed in to. The list is kept on this device, not on any server.
+
+- Choose a workspace to open it at its own address. Sign-in, drafts, caches and notifications stay separate for each one, so signing out of one leaves the others signed in.
+- **Add a workspace** opens another installation by its address, such as `chat.example.com`.
+- When you open a workspace from the menu, the list goes with you in the link's fragment, which is never sent to a server. A workspace that list has never held is added only after you choose **Add**.
+- **Remove** forgets another workspace on this device. It does not sign you out there.
