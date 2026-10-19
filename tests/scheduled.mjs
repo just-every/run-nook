@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 const until=async(check,label)=>{const end=Date.now()+80000;while(Date.now()<end){if(await check())return;await new Promise(r=>setTimeout(r,300))}throw Error('Timed out: '+label)}
 export async function scheduledJourney({post,get,request,owner,member,outsider,check,restart,sql}){
  const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status})
- await check('NOOK-034 one-off and recurring sends survive restart, commit once, and recheck posting and membership',async()=>{
+ await check('NOOK-034 and NOOK-066 one-off and recurring sends survive restart, commit once, and recheck posting permission and membership at firing',async()=>{
   const room=(await post('/api/conversations',{name:'Thursday launch briefing',kind:'private',participants:[member.user.id]})).data
   const restricted=(await post('/api/conversations',{name:'Scheduled announcements',kind:'channel',participants:[member.user.id]})).data
   const revoked=(await post('/api/conversations',{name:'Private launch plans',kind:'private',participants:[member.user.id]})).data

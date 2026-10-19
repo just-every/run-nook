@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 const until=async(fn,label)=>{const end=Date.now()+30000;while(Date.now()<end){if(await fn())return;await new Promise(r=>setTimeout(r,300))}throw Error('Timed out: '+label)}
 export async function remindersJourney({post,get,patch,request,owner,member,outsider,sql,restart,check}){
  const change=patch??((path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}))
- await check('NOOK-033 durable personal and channel reminders, independent triage and current-authority delivery',async()=>{
+ await check('NOOK-033 and NOOK-066 durable personal and channel reminders, independent triage, and posting permission rechecked at firing',async()=>{
   const room=(await post('/api/conversations',{name:'standup',kind:'private',participants:[member.user.id]})).data
   const message=(await post(`/api/conversations/${room.id}/messages`,{body:'Call Ana about the US customer rollout.',intent:crypto.randomUUID()})).data
   const create=async(phrase,extra={},cookie=owner.cookie)=>{const p=(await post('/api/reminders/preview',{phrase,zone:'UTC',...extra},cookie)).data;const input={phrase,zone:'UTC',...extra,confirmedDue:p.due,intent:crypto.randomUUID()};return {row:(await post('/api/reminders',input,cookie)).data,input,p}}

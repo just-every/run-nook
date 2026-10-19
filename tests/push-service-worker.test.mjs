@@ -53,7 +53,7 @@ test('service worker keeps every push visible and opens its conversation on acti
 
 // NOOK-072: action uses the ordinary session-bound follow door, including a
 // recipient check so a notice left by another account cannot change its state.
-test('notification unfollow checks the recipient and reports a refused action',async()=>{
+test('NOOK-072 notification unfollow checks the recipient and reports a refused action',async()=>{
  const handlers=new Map(),shown=[],requests=[];let current='ana',refused=false
  const self={location:{origin:'https://nook.example.test'},navigator:{},addEventListener:(name,fn)=>handlers.set(name,fn),registration:{showNotification:async(title,data)=>shown.push({title,...data})},clients:{matchAll:async()=>[],openWindow:async()=>{}}}
  const fetch=async(path,options)=>{requests.push({path,options});return path==='/api/me'?{ok:true,json:async()=>({id:current})}:{ok:!refused}}

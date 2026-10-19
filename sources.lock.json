@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "f197ca1ef706fcfbdf3297012801aa1ef31ada3be3a169903562218b7e04a268",
+      "sha256": "98492504be6ebec75673284ad365b83b77fa435fa9494031cf18441cc3d6963e",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "70ec67dd9b4657d946f81114eeff509d98945f4ae3743b0431c44f85dc10a184",
+      "sha256": "36357ab9334b06ff1bc0bd899f0d493438f4bfebe8997a6c208be16d3e8768af",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "4ae14d2a8380c544d811bf8c91688a189d73023d40631cceb8e722f9bb8bcf1f",
+      "sha256": "bcfe02bfcb20c931fcabee5ad35b59fd979017c9bf3821f53516f8b480cb64b8",
       "executable": false
     },
     "docs/conversations.md": {
@@ -5581,7 +5581,7 @@
       "executable": false
     },
     "tests/push-service-worker.test.mjs": {
-      "sha256": "6ca26f5465117935f91e6f00f9b26b202812d5b191ad6fee9afe184ce6da9880",
+      "sha256": "21367f04d5b6d2a4e772d941c9eb4b8422eaeb99cb7a4a36b18ae1a244645bab",
       "executable": false
     },
     "tests/push/archive.mjs": {
@@ -5665,7 +5665,7 @@
       "executable": false
     },
     "tests/reminders.mjs": {
-      "sha256": "52386ad85f16592c384c95441acff977b7bea441f3fecbe70c9fdf0919f5ebad",
+      "sha256": "ec35c480db2576a109b61919f2753821f4f13ef26e8014a26e21e501d843861c",
       "executable": false
     },
     "tests/runtime-portability.mjs": {
@@ -5693,7 +5693,7 @@
       "executable": false
     },
     "tests/scheduled.mjs": {
-      "sha256": "11d52f3b78e17c0e699ad0ef3fcf0a39a6ab1c54fe1497d5ab76512baa03a1a0",
+      "sha256": "a5450829d2e0692e36a7a5bf64905b15c34da6f12ae7802162bbf753e119436e",
       "executable": false
     },
     "tests/search-browser.mjs": {
@@ -5805,7 +5805,7 @@
       "executable": false
     },
     "tests/thread-delivery.mjs": {
-      "sha256": "03dfe8592ac56f7c11575874d65b1511aff0b44ae24419514dea0da709b60a9a",
+      "sha256": "711111721c95279bff8a7908a926ce7c1285315e11851e7749310c21618225c7",
       "executable": false
     },
     "tests/threads.mjs": {
