@@ -419,7 +419,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests at commit `4f41a997` (20 October 2026). That commit adds NOOK-017's device-kept "Your workspaces" menu, the web sentence ct's 19 October 2026 ruling held partial, with its two-installation journey at 1440 and 390. The import door landed at `6aa7ec70`; the posting, broadcast, thread-following and composition acceptance text changed on 20 October 2026. NOOK-071, NOOK-052, NOOK-072, NOOK-047 and NOOK-046 web evidence updated on 19 October 2026 from the journeys cited in their rows. The 0.4.0 release gate (19 October 2026, commit `63ceb678`) changed no status; it narrowed only the NOOK-008 and NOOK-014 gaps to what it proved.
+Judged from the code and tests at commit `7bf73a40` (20 October 2026). That commit and `4f41a997` add NOOK-017's device-kept "Your workspaces" menu, the web sentence ct's 19 October 2026 ruling held partial, with its two-installation journey at 1440 and 390. The import door landed at `6aa7ec70`; the posting, broadcast, thread-following and composition acceptance text changed on 20 October 2026. NOOK-071, NOOK-052, NOOK-072, NOOK-047 and NOOK-046 web evidence updated on 19 October 2026 from the journeys cited in their rows. The 0.4.0 release gate (19 October 2026, commit `63ceb678`) changed no status; it narrowed only the NOOK-008 and NOOK-014 gaps to what it proved.
 
 Current code/test coverage is recorded per clause below and mirrored in ACCEPTANCE.md. Evidence identifies the implemented subset; a partial row’s Gap records the broader acceptance still required, including where a shipped subset is covered by another clause. These statuses do not reduce the requirements above.
 
