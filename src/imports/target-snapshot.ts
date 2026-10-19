@@ -73,26 +73,28 @@ export function targetMatchParts(row: TargetRow | null, destination: string, kin
     else throw new Error('IMPORT_TARGET_KIND');
     return parts;
 }
-/** One count plus bounded exact set predicates. Each value is transported once,
- * without repeating all fields in an EXISTS clause for every owned child. */
+// A D1 statement carries at most 2,000,000 bytes of values; keep each predicate's
+// encoded set under that with room for the destination and token bound.
+const ENCODED_SET_BYTES = 1_900_000;
+/** One count plus as few exact set predicates as fit D1's value limit. A shared
+ * dictionary spans every row it can, so repeated structure travels once across the
+ * whole destination; a set splits in half only when its encoding does not fit. */
 export function targetsMatchMany(rows: TargetRow[], destination: string): D1Sql[] {
     const parts = [sql('(SELECT COUNT(*) FROM nook_import_effect_revisions WHERE destination=?)=?',destination,rows.length)];
-    let chunk: any[] = [], bytes = 2;
-    const flush = () => {
-        if (!chunk.length) return;
-        const state="json_extract(k.value,'$[3]')",kind="json_extract(k.value,'$[0]')",raw="json_extract(k.value,'$[4]')";
-        const encoded=encodeTargetSet(chunk);
+    const state="json_extract(k.value,'$[3]')",kind="json_extract(k.value,'$[0]')",raw="json_extract(k.value,'$[4]')";
+    const emit = (tuples: any[][]) => {
+        const encoded=encodeTargetSet(tuples);
+        if(tuples.length>1&&Buffer.byteLength(encoded.dictionary)+Buffer.byteLength(encoded.codes)>ENCODED_SET_BYTES) {
+            const half=Math.ceil(tuples.length/2);emit(tuples.slice(0,half));emit(tuples.slice(half));return;
+        }
         parts.push(sql(`(${decodedTargetSetSql} SELECT NOT EXISTS(SELECT 1 FROM expected k WHERE NOT EXISTS(SELECT 1 FROM nook_import_effect_revisions e WHERE e.destination=? AND e.kind=${kind} AND e.id=json_extract(k.value,'$[1]') AND e.revision=json_extract(k.value,'$[2]') AND ${statesEqualSql(nativeStateSql(),expectedStateSql(state,kind,raw))})))`,encoded.dictionary,encoded.maxTokens,encoded.codes,destination));
-        chunk=[];bytes=2;
     };
-    const keys = new Set<string>();
+    const keys = new Set<string>(), tuples: any[][] = [];
     for (const row of rows) {
         const key=JSON.stringify([row.targetKind,row.targetId]);
         if(row.destination!==destination||keys.has(key)) throw new Error('IMPORT_NATIVE_SET_MISMATCH');
-        keys.add(key);
-        const tuple=snapshotTuple(row),size=Buffer.byteLength(JSON.stringify(tuple))+1;
-        if(chunk.length&&bytes+size>512*1024) flush();
-        chunk.push(tuple);bytes+=size;
+        keys.add(key);tuples.push(snapshotTuple(row));
     }
-    flush();return parts;
+    if(tuples.length) emit(tuples);
+    return parts;
 }
