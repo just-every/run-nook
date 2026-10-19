@@ -38,13 +38,13 @@ RER Managed sets up sign-in and notification email automatically. You need no ma
 
 ## Check a deploy locally
 
-Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment, then run the dry run before a real deployment. rer 0.2.25 validates production sign-in configuration before building:
+Set `OWNER_EMAIL`, `MAIL_FROM`, `SENDGRID_API_KEY`, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in your environment, then run the dry run before a real deployment. rer validates production sign-in configuration before building:
 
 ```sh
 rer deploy --dry-run
 ```
 
-The dry run builds and validates the Worker, assets, migrations and deployment settings without contacting Cloudflare.
+The dry run builds and validates the Worker, assets, migrations and deployment settings, then uses your Cloudflare credentials to read which secrets the target Worker already holds. It fails without those credentials. It only reads: it creates, uploads and changes nothing on Cloudflare.
 
 ## Deploy to your Cloudflare account
 

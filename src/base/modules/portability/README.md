@@ -132,6 +132,12 @@ that generation and the content hash, while retained domain and identity rows
 remain equal. Re-linking keeps the installation sector and person bindings;
 restored provider sign-in remains off until the owner explicitly enables it.
 
+Included standing policy approvals retain their provenance and run references,
+but export revokes them in the snapshot. The source approval stays unchanged.
+Restore refuses an archive containing a live approval, even with valid archive
+checksums. The destination owner must approve its policies again. Included
+operators retain their durable `last_signin_at` when sessions are scrubbed.
+
 SQLite VIRTUAL and STORED generated columns retain their visible schema metadata
 and original table SQL. Only writable base cells appear in archived rows or
 restore inserts; the destination's migrated schema computes generated values and
@@ -286,13 +292,43 @@ contain only `CREATE TABLE` (not `AS SELECT`), `CREATE INDEX` and
 restorable tables. A later migration with any other statement that names a
 restorable table, such as an `INSERT`, `UPDATE` or `DELETE` that purges or
 backfills rows or a trigger, is refused with `schema_mismatch`; statements that
-touch only excluded tables are allowed. An archived table the archive holds no
+touch only excluded tables are allowed. A data statement (`INSERT`, `REPLACE`,
+`UPDATE` or `DELETE`, including `INSERT ... SELECT` and a leading `WITH`) is
+judged by the table it writes: when that table is outside the restorable
+catalogue (excluded, derived or platform) and no trigger or foreign key action
+(`ON DELETE`/`ON UPDATE CASCADE` or `SET`) carries its writes into a catalogue
+table, it changes no restored row and is allowed whatever it reads. Such a table
+then holds live rows the restore lacks, so a later statement that copies it into
+a catalogue table is refused. A statement this parser cannot bound to one table
+keeps the rule above. An archived table the archive holds no
 rows of restores empty, so an `UPDATE` or `DELETE` of it changes nothing and is
 allowed unless it also names a table the archive holds rows of (which it could
 read into its writes); an `INSERT` into it, or any other statement naming it,
 is still refused. For archives without a migration record,
 every migration after the earliest prefix that gives the archive's schema is
 checked, since the archive may predate any of them.
+
+A backfill of a catalogue table the archive does not carry (one a later
+migration adds, restored empty) is **replayed** instead of refused: an
+`INSERT ... SELECT` (or `INSERT ... VALUES`) into that table. Finalize empties
+the table (resetting its `AUTOINCREMENT` counter, as the live upgrade created
+it) and runs each of its later writes in migration order, exactly as written,
+after every archived row is inserted and while the destination's triggers are
+still dropped, in the same atomic D1 transaction as the rest of the restore. The
+table then holds what the live upgrade gave it. Time functions such as
+`strftime(..., 'now')` take the restore's time, as they took the upgrade's; an
+`INSERT ... SELECT` without `ORDER BY` assigns new keys in the order SQLite
+scans the restored rows. Rows the restore normalizes (import safety) are read
+as restored. The restore is refused with
+`schema_mismatch:migration_data:<migration>` instead when the archive carries
+the table (even with no rows), when a write to it is not a plain `INSERT` or
+`REPLACE`, reads any table other than archived ones and itself, selects `*` or
+a secret column, when a trigger on it or a foreign key action from it reaches a
+catalogue table, when any other later statement writes it (directly or through
+a trigger) or changes its columns other than by `ADD COLUMN` (allowed only when
+every replay names its columns), or when the statement cannot be bounded.
+A failed or interrupted apply leaves no replayed row; finalizing again replays
+from the start.
 
 The same check runs when the archive's schema identity equals the destination's:
 a later migration that only purges or backfills rows leaves the schema unchanged,
@@ -313,9 +349,13 @@ before any staging or audit write. Without a replayer (the HTTP handler, direct
 bindings), only identical schemas and `acceptedSchemas` restore.
 
 The import status and CLI receipt carry `bridged`: `migrations` (the later
-migrations bridged), `tables` (later tables left empty), `columns` (later columns
-per table that took defaults), `fromSchema` and `toSchema`. The import job keeps it
-and v1 recovery adds it to its audit record. `archiveHash`, `contentHash`,
+migrations bridged), `tables` (later tables, left empty unless replayed),
+`columns` (later columns per table that took defaults), `fromSchema` and
+`toSchema`, and with any replay `replayed`: one `{migration, statement, table,
+rows}` per replayed statement in the order run (`statement` is its index, from
+0, in the migration's split statements, `rows` the rows it wrote, recorded in the same
+transaction). The import job keeps it as the restore's journal of replays and
+v1 recovery adds it to its audit record. `archiveHash`, `contentHash`,
 the erasure fence and v1's own checks are unchanged.
 
 ## Backup-only v1 recovery
@@ -434,8 +474,32 @@ bridge). The batch repeats the check. Any other row refuses with
 export, reset and import commands to run. A Worker import has no replay, so a
 hosted restore still needs such tables in `replaceableTables`.
 
-An empty destination must be reserved for restore: pause destination writers and
-serialize finalize/abort calls. Product writes to source tables can continue.
+An empty destination must be reserved for restore: pause destination writers.
+Product writes to source tables can continue. Import upload, finalize and abort
+requests are serialized by a durable request claim.
+
+Imports hold a **five-minute inactivity lease**, created with the job and renewed
+by every upload/finalize request, then every 30 seconds while that request is
+working (including verification, R2 transfers and product callbacks). This is a
+recovery window, not a total restore limit: the measured 20,000-row round trip
+below already takes 171 seconds, and callbacks have no wall-time bound. A fresh
+import returns `409 import_running` with `jobId` and ISO `abortableAt`. The owner
+can find its active job with `GET /api/portability/imports` (`{active:status}`
+or `{active:null}`), and inspect `GET .../imports/:id`: `abortableAt` and `stale` describe
+its lease. The existing authenticated `POST .../imports/:id/abort` (or CLI
+`abort --resume ID`) discards stale staging and owned objects. A live request
+cannot be aborted through that route. An expired upload/finalize returns
+`409 import_lease_expired`; start the restore again.
+
+The next import automatically aborts a stale job through that same cleanup path
+before claiming the destination. Applying jobs use the existing owned-object
+recovery: product rows publish in one fenced D1 transaction, so an interrupted
+pre-commit apply has no product rows to undo; a committed job stays complete,
+including after a lost acknowledgement. Cleanup never deletes foreign objects.
+Lease bookkeeping is created privately on existing destinations without a product
+migration; an older unfinished job receives one five-minute grace period. The
+local CLI's `abortAbandoned` remains restricted to a sole operator holding its
+checkout lock; hosted callers must use the lease-aware create/status/abort paths.
 R2 has no compare-and-swap transaction covering bucket emptiness and writes.
 An interrupted applying job can be finalized again; ownership survives restart.
 Keep job status until the client acknowledges completion. Abort completed exports
@@ -461,7 +525,8 @@ are `{error:code}`. Request bodies are bounded; `maxBodyBytes` can lower the bou
 | `POST imports` | Create with `{confirmed:true,manifest}`. |
 | `PUT imports/:id/parts/:index` | Upload part. |
 | `POST imports/:id/finalize` | Apply with `{archiveHash,contentHash?,laterJournal?}`. |
-| `GET imports/:id` | Status. |
+| `GET imports` | Active import belonging to this actor, or null. |
+| `GET imports/:id` | Status including lease expiry and stale flag. |
 | `POST imports/:id/abort` | Clean up unfinished import. |
 
 ```sh
@@ -556,14 +621,17 @@ modules/portability/storage.mjs
 modules/portability/copies.mjs
 modules/portability/dev-data.mjs
 modules/portability/provider-data.mjs
+modules/portability/policy-data.mjs
 modules/portability/generated.mjs
 modules/portability/restore-safety.mjs
 modules/portability/bridge.mjs
 modules/portability/ledgers.mjs
 modules/portability/migration-statements.mjs
+modules/portability/backfills.mjs
 modules/portability/legacy-safety.mjs
 modules/portability/export.mjs
 modules/portability/import.mjs
+modules/portability/import-lease.mjs
 modules/portability/import-staging.mjs
 modules/portability/import-safety.mjs
 modules/portability/payloads.mjs

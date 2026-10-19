@@ -40,11 +40,13 @@ DMs have fixed participants. Owner and admin roles never open other people's DMs
 
 ## Owner-account deploy
 
-Set the mail inputs before either deployment command: rer 0.2.25 checks production
-sign-in configuration even for a dry run. `deploy --dry-run` builds and validates
-the Worker, assets, every migration and
-`owner-deployment.json` with no provider request. `deploy` needs
-`CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN` in the shell, plus
+Set the mail inputs before either deployment command: rer checks production
+sign-in configuration even for a dry run. Both commands need
+`CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN` in the shell.
+`deploy --dry-run` builds and validates the Worker, assets, every migration and
+`owner-deployment.json`, packages the staged product named by its
+`productDirectory`, then reads the target's secret bindings; it makes no
+provider change. `deploy` needs the same credentials, plus
 `MAIL_FROM` and `SENDGRID_API_KEY` on the first deploy; `OWNER_EMAIL` defaults to
 the setup owner. It stages the build and migrations under `.rer/deploy/product`
 and runs rer's deploy-kit owner controller: find-or-create the D1 database and

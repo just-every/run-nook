@@ -4,6 +4,7 @@ import {mkdtemp,readFile,rm,stat,writeFile} from 'node:fs/promises'
 import {createServer} from 'node:net'
 import {tmpdir} from 'node:os'
 import {join,resolve} from 'node:path'
+import {pathToFileURL} from 'node:url'
 import {chromium} from '@playwright/test'
 import {readmeTeamFlow} from './readme-team-flow.mjs'
 import {copyWorkingTree} from './working-tree-copy.mjs'
@@ -28,11 +29,14 @@ const freePort=()=>new Promise((ok,bad)=>{const server=createServer();server.onc
 const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),bin=await mkdtemp(join(tmpdir(),'nook-readme-bin-'))
 // README says `rer VERB`. The global rer runs the checkout's own pinned
 // launcher, including the foreground override, and installs a fresh clone's
-// dependencies itself, so the journey does exactly that.
-await writeFile(join(bin,'rer'),`#!/bin/sh\nexec node ${join(root,'node_modules/@runeditrun/rer/global/rer.mjs')} "$@"\n`,{mode:0o755})
+// dependencies itself, so the journey does exactly that. The deploy dry run reads
+// the target with Cloudflare credentials: only that command loads the test-only
+// provider edge, which supplies them and records every request.
+await writeFile(join(bin,'rer'),`#!/bin/sh\nexec node \${NOOK_README_PROVIDER:+--import "$NOOK_README_PROVIDER"} ${join(root,'node_modules/@runeditrun/rer/global/rer.mjs')} "$@"\n`,{mode:0o755})
+const provider=join(bin,'provider.json')
 // The clone is a different checkout: it takes its own local operation, not verify's.
 const {RER_LOCAL_OPERATION:_,...env}={...process.env,PATH:bin+':'+process.env.PATH,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'}
-const run=line=>{try{return execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})}catch(error){
+const run=(line,more={})=>{try{return execFileSync('bash',['-e','-c',line],{cwd:clone,env:{...env,...more},encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})}catch(error){
  const verb=/\brer ([a-z-]+)/.exec(line)?.[1]??'unknown';
  const output=String(error.stdout??'')+String(error.stderr??'');
  const code=['missing_input','missing-input','transfer_refused','reconcile_pending_object_work_before_export'].find(code=>output.includes(code));
@@ -69,7 +73,14 @@ try{
   if(line==='rer dev --stop'){await stopDev();continue}
   const command=line.replace('--owner-email EMAIL','--owner-email '+ownerEmail)
   if(line==='rer export --output exports/nook.rer')assert.equal(dev.exitCode!=null||dev.signalCode!=null,true,'the app is stopped before export')
-  const output=run(line==='rer deploy --dry-run'?'OWNER_EMAIL=nativeowner@example.test MAIL_FROM=auth@example.test SENDGRID_API_KEY=test-only-sendgrid-key '+command:command)
+  if(line==='rer deploy --dry-run'){
+   run(command,{OWNER_EMAIL:'nativeowner@example.test',MAIL_FROM:'auth@example.test',SENDGRID_API_KEY:'test-only-sendgrid-key',NOOK_README_PROVIDER:pathToFileURL(join(root,'tests/fake-cloudflare.mjs')).href,NOOK_FAKE_CLOUDFLARE_REPORT:provider})
+   const account=JSON.parse(await readFile(provider,'utf8'))
+   assert.ok(account.requests>0,'the dry run reads the target')
+   assert.deepEqual({writes:account.writes,deployed:account.deployed,databases:account.databases},{writes:0,deployed:false,databases:[]},'the dry run changes nothing on the provider')
+   continue
+  }
+  run(command)
  }
  assert.equal((await stat(join(clone,'exports/nook.rer'))).mode&0o077,0,'the archive is owner-only')
  // Export again after reset and import: the restored installation holds the same records.

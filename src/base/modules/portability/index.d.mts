@@ -34,15 +34,15 @@ export interface ArchivePolicy {
 }
 /** Actual changed rows grouped by table, column and safe replacement value; never original values. */
 export interface SafetyChange {table:string;column:string;value:Cell;rows:number}
-export interface Status {id:string;kind:'export'|'import';phase:'building'|'staging'|'applying'|'complete'|'aborted';completed:number;total:number|null;/** Export only: bytes of the parts built so far. */bytes?:number;contentHash:string|null;requiredConfiguration?:string[];bridged?:Bridge;/** Platform bookkeeping ignored in an older archive. */skippedTables?:string[];/** Durable summary of bounded import normalization. */safetyChanges?:SafetyChange[]}
+export interface Status {id:string;kind:'export'|'import';phase:'building'|'staging'|'applying'|'complete'|'aborted';completed:number;total:number|null;/** Import only: inactivity deadline and whether it has passed. */abortableAt?:string|null;stale?:boolean;/** Export only: bytes of the parts built so far. */bytes?:number;contentHash:string|null;requiredConfiguration?:string[];bridged?:Bridge;/** Platform bookkeeping ignored in an older archive. */skippedTables?:string[];/** Durable summary of bounded import normalization. */safetyChanges?:SafetyChange[]}
 /** Later additive migrations an older archive was restored across. */
-export interface Bridge {fromSchema:string;toSchema:string;migrations:string[];tables:string[];columns:Record<string,string[]>}
+export interface Bridge {fromSchema:string;toSchema:string;migrations:string[];tables:string[];columns:Record<string,string[]>;/** Later backfills of tables the archive lacks, replayed at finalize in this order; rows is null until the apply commits. */replayed?:{migration:string;statement:number;table:string;rows:number|null}[]}
 /** A runner's replay of the destination's applied migrations: the archive schema identity after a chosen set, and each migration's statements. */
 export interface MigrationReplay {names:string[];statements(name:string):string[];/** The migration file's SHA-256 hex, where the runner read the file. */sha256?(name:string):string|undefined;schemaAfter(names:string[]):Promise<string>}
 export interface PortabilityOptions {db:D1Database;buckets?:Record<string,R2Bucket>;policy:ArchivePolicy;migrations?:()=>Promise<MigrationReplay>}
 export interface Portability {
   exports: {create(actor?:string):Promise<string>;advance(id:string,options?:{expectedPart?:number;maxParts?:number}):Promise<Status>;status(id:string):Promise<Status>;download(id:string):Promise<ReadableStream<Uint8Array>>;abort(id:string):Promise<Status>};
-  imports: {/** ledgers: the rows of each migration ledger table an old archive carries, as read from it; they place it in the destination's history and must equal its parts. */create(manifest:Manifest,actor?:string,options?:{ledgers?:Record<string,Row[]>}):Promise<string>;uploadPart(id:string,index:number,part:Part):Promise<Status>;finalize(id:string,options:{archiveHash:string;contentHash?:string;laterJournal?:LaterJournal}):Promise<Status>;status(id:string):Promise<Status>;abort(id:string):Promise<Status>;/** Aborts the import left staged by a crashed restore and returns its id; call only as the destination's sole operator. */abortAbandoned():Promise<string|null>};
+  imports: {active(actor?:string):Promise<Status|null>;/** ledgers: the rows of each migration ledger table an old archive carries, as read from it; they place it in the destination's history and must equal its parts. */create(manifest:Manifest,actor?:string,options?:{ledgers?:Record<string,Row[]>}):Promise<string>;uploadPart(id:string,index:number,part:Part):Promise<Status>;finalize(id:string,options:{archiveHash:string;contentHash?:string;laterJournal?:LaterJournal}):Promise<Status>;status(id:string):Promise<Status>;abort(id:string):Promise<Status>;/** Aborts the import left staged by a crashed restore and returns its id; call only as the destination's sole operator. */abortAbandoned():Promise<string|null>};
   status(id:string):Promise<Status>;actor(id:string):Promise<string>;
   erasureStatements(table:string,primaryKey:Record<string,Cell>):Promise<D1PreparedStatement[]>;
   redactionStatements():Promise<D1PreparedStatement[]>;
@@ -65,4 +65,4 @@ export const excludedTables:readonly string[];
 /** True when no archive under this policy carries `table`. */
 export function excludedTable(table:string,policy?:Pick<ArchivePolicy,'excludeTables'|'includeTables'>):boolean;
 export const MAX_PART_BYTES:number;
-export class PortabilityError extends Error {code:string;status:number;constructor(code:string,status?:number)}
+export class PortabilityError extends Error {code:string;status:number;jobId?:string;abortableAt?:string|null;constructor(code:string,status?:number)}

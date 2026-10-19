@@ -140,8 +140,10 @@ SendGrid or Resend mail options, with your own provider credentials.
 
 ### Deploy to your own Cloudflare account
 
-Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment before
-the dry run. rer 0.2.25 validates production sign-in configuration before building.
+Set `OWNER_EMAIL`, `MAIL_FROM`, `SENDGRID_API_KEY`, `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN` in your environment before the dry run. rer validates
+production sign-in configuration before building, and the dry run reads the
+target's secret bindings with your Cloudflare credentials.
 
 ```sh
 rer deploy --dry-run
@@ -149,8 +151,10 @@ OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… M
   rer deploy
 ```
 
-The dry run builds and validates the Worker, assets and every migration with no
-provider request. A real deploy creates or reuses the D1 database and Worker
+The dry run builds and validates the Worker, assets and every migration, then
+reads which secrets the target Worker already holds. It fails without the
+Cloudflare credentials and makes no provider change: it creates, uploads and
+sets nothing. A real deploy creates or reuses the D1 database and Worker
 named after this project, applies pending migrations, uploads the build, checks
 health and then claims the hosted owner from `OWNER_EMAIL`. Set it to your real
 email address at deploy; the local development identity is for this computer.

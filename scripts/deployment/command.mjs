@@ -36,11 +36,12 @@ export function deployment(lifecycle){return async({root,options,store,signal,op
  await lifecycle.run(root,{},store,()=>{},signal,{verb:'build',operationToken});
  await stageProduct(root);
  if(options.dryRun){
-  // Validate the real build and migrations against a synthetic target; no account lookup.
+  // Validate the real build and migrations against a synthetic target. rer then
+  // packages the declared productDirectory and reads the real target's secret bindings.
   const worker=ownerWorkerName(declaration.project,environment);
   const artifact=await packageBuild({root,source:{sha:'0'.repeat(40),tree:'0'.repeat(40)},runIdentity:{id:'0',attempt:'1'},productDirectory:ownerProduct});
   ownerPlan({project:declaration.project,environment,worker,origin:`https://${worker}.example.invalid`},declaration,artifact);
-  store.report('deploy: dry run complete; no deployment occurred and no provider request was made.');
+  store.report('deploy: build and migrations validated; reading the target secret bindings, with no deployment or provider change.');
   return {dryRun:true,deployed:false,migrations:artifact.migrations.length};
  }
  const account=['CLOUDFLARE_ACCOUNT_ID','CLOUDFLARE_API_TOKEN'];

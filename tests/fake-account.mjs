@@ -14,7 +14,7 @@ export function fakeAccount(){
  };
  const report=()=>{
   const {state}=provider;
-  return {databases:state.databases.map(item=>item.name),tables:state.databases.map(item=>item.db.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all().map(row=>row.name)),secrets:state.secrets.map(item=>item.name),claims:claims.length,writes:state.writes.length,deployed:Boolean(state.version)};
+  return {databases:state.databases.map(item=>item.name),tables:state.databases.map(item=>item.db.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all().map(row=>row.name)),secrets:state.secrets.map(item=>item.name),claims:claims.length,requests:state.calls.length,writes:state.writes.length,deployed:Boolean(state.version)};
  };
  return {accountId:provider.accountId,token:provider.token,fetch,report};
 }

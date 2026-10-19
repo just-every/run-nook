@@ -14,7 +14,7 @@ rer verify
 rer reset --yes
 rer export --output exports/nook.rer
 rer import --input exports/nook.rer --yes
-rer deploy --dry-run
+rer deploy --dry-run   # reads the target with CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN; changes nothing
 ```
 
 `rer describe` lists every other command and flag.
