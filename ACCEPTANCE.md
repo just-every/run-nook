@@ -140,7 +140,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
 - **NOOK-008 — Evidence limits (C8).** **Status: partial.** For a release candidate, reproduce the documented local public-door journeys, then separately record hosted multi-device, provider, migration and capacity results before those target clauses become done. Failed or unmeasured end states remain visible.
 
-  Current evidence: `ACCEPTANCE.md`; `tests/push-journey.mjs`; `tests/pilot-journey.mjs`. Local synthetic journeys exist; hosted, real-device and full-category acceptance remain unproven.
+  Current evidence: `ACCEPTANCE.md`; `tests/push-journey.mjs`; `tests/pilot-journey.mjs`. The 0.4.0 release gate reran the local core journeys at 1440 and 390 and recorded one hosted run on the RunEditRun Cloudflare account: real sign-in, invitation and mention mail, an update from a populated 0.3.0 installation applying every later migration, and hosted export, removal, redeploy and local restore. Hosted multi-device, real-device push, capacity and full-category acceptance remain unproven.
 
 - **NOOK-009 — Backup and export (C9).** **Status: done.** **Local:** Stop the install, export with `rer export`, import into an empty stopped local install, complete explicit identity recovery and re-export; compare equivalent records, private media bytes and erasure journal. **Hosted:** Sign in as an active owner, follow the hosted backup/export path to download D1 records plus R2 bytes into an owner-held archive, import it into an empty stopped local install and complete identity recovery; compare records, file bytes, rebuilt search and erasure journal. Reject non-owner/expired hosted sessions and any remote restore. Inspect both archives for private records and media, with live credentials, devices and pending deliveries excluded.
 
@@ -164,7 +164,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
 - **NOOK-014 — Email notifications (C14).** **Status: done.** Run the emitted-Worker notification journey through sign-in and settings with only the provider network edge substituted: opt in, mention/propose, fold bursts, hold quiet items, cancel read/deleted/revoked items, restart a retry, expose refusal/uncertainty and use the scanner-safe unsubscribe POST. Inspect that mail contains no private body or file name.
 
-  Current evidence: `src/notify/run.ts`; `src/notify/queue.ts`; `src/notify/compose.ts`; `tests/notify-journey.mjs`; `tests/notify.test.mjs`. Done for the specified local/provider-acknowledgement behavior; real inbox receipt is not established.
+  Current evidence: `src/notify/run.ts`; `src/notify/queue.ts`; `src/notify/compose.ts`; `tests/notify-journey.mjs`; `tests/notify.test.mjs`. Done for the specified behavior. In the 0.4.0 release gate one hosted mention email reached a real inbox through the owner deployment’s SendGrid sender, naming sender and channel without message text; that single receipt establishes no general deliverability or inbox-receipt guarantee.
 
 - **DOCS-001 — Public documentation from Markdown.** **Status: done.** Build and open /docs; every declared page renders, links and anchors resolve, raw HTML remains inert, and every root/docs Markdown source is published or has a recorded exclusion reason. The app Lobby and private workspace keep their existing routes.
 

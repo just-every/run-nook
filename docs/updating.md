@@ -10,10 +10,10 @@ For a new checkout, one line installs `rer`, clones the latest source from `main
 npx -y @runeditrun/rer dev just-every/run-nook
 ```
 
-Or clone the fixed **0.3.0 release** instead (the line above installs `rer` if you do not have it yet):
+Or clone the fixed **0.4.0 release** instead (the line above installs `rer` if you do not have it yet):
 
 ```sh
-git clone --branch v0.3.0 https://github.com/just-every/run-nook.git nook && cd nook
+git clone --branch v0.4.0 https://github.com/just-every/run-nook.git nook && cd nook
 rer dev
 ```
 
@@ -63,7 +63,7 @@ A dry run checks the build and settings only. It does not deploy anything, so ru
 
 After the deploy is healthy, `rer deploy` claims the hosted owner from `OWNER_EMAIL` automatically. There is no manual setup-token step. Open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you.
 
-Nook pins `@runeditrun/rer` 0.2.25. The hosted front page shows **Sign in** as soon as the owner is claimed; the separate first-run confirmation follows sign-in.
+Nook 0.4.0 pins `@runeditrun/rer` 0.2.63. The hosted front page shows **Sign in** as soon as the owner is claimed; the separate first-run confirmation follows sign-in.
 
 If the owner already exists, the deploy keeps it. If the claim or the token's removal fails, the deploy says so and what to run; running the same `rer deploy` again finishes it.
 

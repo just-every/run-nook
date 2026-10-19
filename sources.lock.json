@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "ee416ad4324acf0ae21aeb0d8bec507a0a2cc2f52a005c1cf981a9b97b7b0a29",
+      "sha256": "0ff711a5c9752a0500199409a427b2a729619b622eb03bf4ff4c0274204947a0",
       "executable": false
     },
     "AGENTS.md": {
@@ -637,7 +637,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "00cc3e72818d53dfbb53f9a08576f7f92a42057a31e247174fcfbe25fb213b48",
+      "sha256": "9499acfe8dedcfa93d485dee01ec5baf8cc8a493438c40da691cda75c465c3e1",
       "executable": false
     },
     "CLAUDE.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "3f0378b190f1c3319e4bc19f80fa2fbcd28ff982596e22490c5257623753f62d",
+      "sha256": "2f62ce3965ec86659fd3b1f826be8f14258ff4712e65ca49b334685aa884ea0d",
       "executable": false
     },
     "DEMO.md": {
@@ -717,7 +717,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "de987e9b2c12a83b1c2bd24d1607d59425e23d56a119ee893ed94b58655a122b",
+      "sha256": "104956ddbb243cce930e3afed8c8c34108ac6cb3c5ba0342a6778cf215a3cda4",
       "executable": false
     },
     "docs/your-team.md": {
@@ -941,7 +941,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "91db1d4ed8aefe2613ba5b91e3a34fb2780c320eb70ce324aad83e2a856d2b3d",
+      "sha256": "348aea64ff1171cbe3bb23b99bcbad2937fbd51bc11ef10ec4a2bda474047620",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -1005,11 +1005,11 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "5feae800877e6ef0e0d8437a1280b90f0c314b6f8d2bd2487025dd5fcff3a5c6",
+      "sha256": "f02e6dd23bacdd35b3b87f99b599f1f554b1b62b8dd7159538a6b3647d890063",
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "4c9ff0733fa45f6cc256de37b27e96cb5c7e58415ae3b1141e1d24309b45450b",
+      "sha256": "1bf6717a653c67a45c01fe416e8624f02666907931f513752447d4422d10bee1",
       "executable": false
     },
     "rer-project.json": {
@@ -1365,7 +1365,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "b88473df7ef30f58ab908f111adbbf627a0d988ae621a34ba4097ddaf641f618",
+      "sha256": "15c069e8cfe530aaad3583b33190fdc8908edd845ec2750550691deab68af9bb",
       "executable": false
     },
     "SLACK-IMPORT.md": {

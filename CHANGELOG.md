@@ -1,40 +1,99 @@
 # Nook changes
 
-## Unreleased
+## 0.4.0 (2026-10-19)
 
-Nook pins `@runeditrun/rer` 0.2.23 and adopts its unchanged Managed mail
-adapter. Sign-in and invitation mail now sends from Cloudflare Workers, relay
-redirects are refused, rate limits retain the notification retry schedule, and
-retired mail credentials show a plain problem. RER's Open app sign-in email is
-prefilled through Base's `login_hint` support.
+Changes since 0.3.0. Nook keeps team conversations, decisions and commitments
+together so work stays clear.
 
-- Mark credential fixtures and examples explicitly synthetic so hosted source checks accept them.
+### Back up first
 
-Nook now pins `@runeditrun/rer` 0.2.22. RER Managed configures sign-in and
-notification mail automatically, with no
-provider account or key to enter. RER assigns `MAIL_PROVIDER=rer`, `MAIL_FROM`,
-`MAIL_RELAY_URL` and a private `MAIL_API_KEY` for each installation and
-environment. Free and Assisted hosting retain their existing Cloudflare and
-mail provider options.
-Local setup retains Nook's existing migration directory with the new CLI.
+Export before updating and keep the archive private. On a hosted Nook, sign in
+as an owner and use **Download workspace archive** at `/export` (or the
+`scripts/local/remote-export.mjs` command in
+[Backups and export](docs/backups.md#export-a-hosted-nook)); `rer export` is
+local-only and refuses a hosted origin. On a local Nook, stop it and run
+`rer export --output exports/nook.rer`. Keep your private settings, `.rer/`
+folder and every applied migration unchanged, and never reset populated state
+to update.
 
-Nook pins `@runeditrun/rer` 0.2.20. Hosted removal empties uploaded files and
-removes the deployment in one command. The hosted front page reads the durable
-owner claim, so it offers Sign in before the separate first-run confirmation.
-The claim-state reader is refreshed unchanged from Base 8f8bddb; the existing
-Lobby wording and styling stay in place. Nook maps its existing `SENDGRID_API_KEY`
-deploy input to the shared `MAIL_API_KEY` Worker binding required by rer’s
-production sign-in preflight, alongside Nook’s existing provider binding. Existing installations supply their SendGrid inputs once
-on this update; subsequent deploys retain the binding. Local instructions and
-the README journey request email links through Nook’s sign-in page because
-rer 0.2.20 retires `rer outbox` and makes `dev --login` automatic owner entry.
+Then update the source with `git pull --ff-only` (or switch a release checkout
+to `main` or `v0.4.0`) and run `rer deploy` against the same Cloudflare account
+and environment, or `rer setup` then `rer dev` locally. The first hosted deploy
+from 0.3.0 or earlier needs `MAIL_FROM` and `SENDGRID_API_KEY` once, so the
+shared `MAIL_API_KEY` binding is set. See [Updating and deploying](docs/updating.md).
 
-Member erasure accumulates imported-reaction receipt counts across each associated
-Slack actor and clears completed actor progress atomically.
+### What you get
 
-New archives use smaller parts so restoring a full Slack history stays within
-rer 0.2.20's D1 transport limit while staging rows and the archive part together.
-The archive format and content checksum stay unchanged.
+- **Everyday conversations.** Create, browse, join, leave, archive and hand over
+  channels; app-created fixed group DMs; default channels for new members;
+  per-channel posting permissions and announcement channels; @channel, @here and
+  @everyone with an owner policy and confirmation for large audiences.
+- **Threads and catch-up.** Automatic thread following when you post, reply or
+  are mentioned, a Threads view, All unreads with ten-second undo, and
+  conversation alert levels.
+- **Find and keep things.** Search messages and file names (plus plain-text and
+  PDF text) with phrases, prefixes, exclusions and filters; Files views for the
+  workspace and each conversation; private Saved items with reminders; shared
+  channel pins.
+- **Plan ahead.** Personal and channel reminders in natural language, and
+  scheduled or recurring messages with a send-time review.
+- **Write comfortably.** Durable drafts, Drafts & sent, rich Markdown with
+  inert hostile HTML, mentions, emoji, keyboard editing of your last message,
+  quick conversation switching, profiles, statuses and a private sidebar.
+- **Move in and move out.** Reviewed imports from Slack exports, Campfire (ONCE)
+  backups and Mattermost bulk exports, each read-only history with guarded undo.
+  Readable offline HTML, JSON and JSONL exports of the conversations you can
+  read, and an owner-authorized whole-workspace readable exit.
+- **Mail and sign-in.** Local development sends and stores no mail and has no
+  mail viewer; `rer dev` opens signed in and offers a local teammate. Hosted
+  sign-in, invitation and notification mail goes through your deployment's
+  sender, and RER Managed sets mail up for you.
+- Nook 0.4.0 pins `@runeditrun/rer` 0.2.63 in package mode.
+
+### Migrations
+
+22 new migrations, applied in order by `rer deploy` or `rer setup`:
+`0026_retire_captured_mail.sql`, `0026_thread_follows.sql`,
+`0027_channel_lifecycle.sql`, `0028_saved_items.sql`,
+`0029_conversation_notify.sql`, `0030_default_channels.sql`,
+`0031_posting_permissions.sql`, `0032_saved_reminders.sql`,
+`0033_all_unreads.sql`, `0034_group_conversion.sql`,
+`0035_scheduled_messages.sql`, `0036_reminders.sql`, `0037_broadcasts.sql`,
+`0038_channel_invitation_capacity.sql`, `0039_sent_messages.sql`,
+`0040_profiles.sql`, `0041_personal_workspace.sql`, `0042_typing.sql`,
+`0043_thread_delivery.sql`, `0061_readable_exports.sql`,
+`0062_workspace_readable_export.sql` and
+`0063_workspace_export_policy_notices.sql`. They add tables, columns and
+triggers; `0026_retire_captured_mail.sql` drops the old development mail
+capture table (development mail is no longer stored), and existing workspace
+data is kept. Numbers 0044–0060 are unused. Per-migration notes are in
+[RELEASE.json](RELEASE.json).
+
+### Not in this release
+
+The homepage calls Nook an open source alternative to Slack and Microsoft
+Teams. This release is a web workspace; these parts of that promise are not in
+the code yet: Microsoft Teams, Google Chat and Zulip migration; native desktop
+and mobile apps; voice, video and screen sharing; an app and bot platform,
+Slack-compatible webhooks and workflow tools; shared channels with other
+organizations; link previews; SSO and two-factor sign-in; retention, legal hold
+and compliance search; and the accountable agents described in the contract.
+Web Push is bounded to the browser; real-device push receipt and virus scanning
+are not claimed. [CONTRACT.md](CONTRACT.md#status) lists every clause as done,
+partial or missing.
+
+### Known issues
+
+- Invitation lifetime is described two ways: Team says the emailed link expires
+  in 15 minutes, while the acceptance page says 7 days. Invite the person again
+  if their link stops working.
+- Search date filters use UTC.
+- A 0.3.0 checkout's own `rer` (0.2.19) can fail to start `rer dev` on a busy
+  computer (listener check timeout) or to deploy to a Cloudflare account with
+  many resources (`provider-incomplete-pagination`). Update the source first:
+  0.4.0's pinned `rer` runs both.
+- One hosted mention email reached a real inbox in this release's gate; Nook
+  makes no general deliverability claim.
 
 ## 0.3.0 (2026-10-15)
 

@@ -1,59 +1,465 @@
 {
-  "version": "0.3.0",
-  "previousVersion": "0.2.0",
-  "date": "2026-10-15",
-  "publicReleaseNotes": "Nook 0.3.0 adds visible decision and request history, live thread reply counts, clearer invitations and channel access wording, and shared Notified names and urgent reasons. Phone composition stays above the tabs. History and Decisions & requests controls reference panels only while mounted; member erasure waits for the refreshed people list before its receipt returns focus to the surviving page.\n\nNook now pins the published rer 0.2.19 command line. A fresh local launch creates a placeholder owner; choosing a real local owner is optional and keeps the owner ID and data. Setup applies pending migrations during local updates. A hosted deploy claims the owner after health succeeds and removes its one-time setup token; rer signin provides single-use owner access with the deployment's own Cloudflare credentials. Local archive restore instructions recover the archived identities before setup.\n\nImported-reaction erasure continues in bounded steps until the erased Slack ID is absent, rather than completing with a retained ID. Migration 0024_import_redaction_steps.sql adds the resumable import/redaction state; 0025_owner_signin.sql adds hashed one-time owner sign-in grants. Both migrations are additive. Export before updating from 0.2.0, keep private settings and all applied migrations unchanged, then run rer setup locally or rer deploy against the existing hosted installation. Never reset populated state to update.\n\nKnown Base issues remain: invitation links expire after 15 minutes (invite the person again); the hosted Lobby can ask for a setup token after owner claim (open /signin); and rer 0.2.19 removal can fail with provider-incomplete-pagination on a nonempty R2 bucket (empty only that deployment's bucket and rerun removal). Reply counts include live replies only; Open thread still reaches erased-reply tombstones. Real-device Web Push receipt and virus scanning are not claimed.",
+  "version": "0.4.0",
+  "previousVersion": "0.3.0",
+  "date": "2026-10-19",
+  "publicReleaseNotes": "Nook 0.4.0 is a web team workspace where conversations, decisions and commitments stay together. Since 0.3.0 it adds channel lifecycle, default channels, posting permissions and @channel/@here/@everyone; automatic thread following, a Threads view and All unreads with undo; search across messages, file names and plain-text/PDF text; Files views, private Saved items with reminders and channel pins; personal and channel reminders; scheduled and recurring messages; durable drafts, Drafts & sent, rich formatting, profiles and keyboard editing; reviewed Slack, Campfire and Mattermost imports as read-only history; and readable HTML/JSON exports with an owner-controlled whole-workspace exit. Local development sends and stores no mail. Nook pins @runeditrun/rer 0.2.63.\n\nBack up first: on a hosted Nook sign in as an owner and use Download workspace archive at /export (rer export is local-only); locally stop Nook and run rer export. Then git pull --ff-only and rer deploy for the same environment (supply MAIL_FROM and SENDGRID_API_KEY once when updating from 0.3.0), or rer setup and rer dev locally. 22 additive migrations (0026–0043 and 0061–0063) apply in order; 0026_retire_captured_mail.sql drops only the old development mail capture table. Never reset populated state to update.\n\nNot in this release: Microsoft Teams, Google Chat and Zulip migration, native apps, calls and screen sharing, an app/bot platform and webhooks, shared channels, link previews, SSO/2FA, retention and compliance tooling, and the contract's accountable agents. Known issues: invitation lifetime is shown as 15 minutes on Team and 7 days on the acceptance page; search date filters use UTC; a 0.3.0 checkout's rer 0.2.19 may fail to start or deploy on busy machines or large Cloudflare accounts, so update the source first.\n\nProduct screenshot: .github/assets/release/nook-launch-channel-1600.png",
   "contractChanges": {
+    "NOOK-001": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "NOOK-002": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "NOOK-003": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "NOOK-004": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "NOOK-005": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "NOOK-011": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "DOCS-001": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "ERASURE-001": {
+      "change": "changed",
+      "summary": "The requirement is unchanged; the clause now states its acceptance evidence."
+    },
+    "NOOK-006": {
+      "change": "changed",
+      "summary": "Current backups no longer carry password hashes as sign-in authority; acceptance evidence added.",
+      "was": "Backups contained private content and password hashes, never live sessions.",
+      "now": "Current backups no longer carry password hashes as sign-in authority; acceptance evidence added."
+    },
+    "NOOK-007": {
+      "change": "changed",
+      "summary": "Safe rendering covers code execution and credentialed fetching, names NOOK-068 as the only server-side link fetch, requires scoped doors for app/agent/meeting effects and HTTPS in production, and uses invited magic-link sign-in.",
+      "was": "Human text rendered as text; no arbitrary plugin, link fetching or AI/provider effects; bounded bodies, session expiry, password hashing, origin validation and loopback-only binding.",
+      "now": "Safe rendering covers code execution and credentialed fetching, names NOOK-068 as the only server-side link fetch, requires scoped doors for app/agent/meeting effects and HTTPS in production, and uses invited magic-link sign-in."
+    },
+    "NOOK-008": {
+      "change": "changed",
+      "summary": "Evidence limits now apply to the complete target contract and separate provider acceptance, device display, human reading and action.",
+      "was": "Wider TARGET obligations remained unmet until evidence existed; no hosted, enterprise, mobile-push or unlimited reliability claim from local tests.",
+      "now": "Evidence limits now apply to the complete target contract and separate provider acceptance, device display, human reading and action."
+    },
     "NOOK-009": {
       "change": "changed",
-      "summary": "Document both the offline filesystem-operator backup and the active hosted owner-session export, with restore remaining local.",
-      "was": "Full backup was described only as an offline filesystem-operator capability that bypasses app privacy; ordinary app-admin export was excluded.",
-      "now": "Offline local backup and hosted export through an active owner session both write verified archives and the erasure journal. Hosted import is not authorized; restore remains offline into an empty local destination. Sessions, sign-in tokens and outbox mail are excluded."
+      "summary": "Hosted backup is the owner’s /export download or the documented remote-export helper (D1 records plus R2 bytes); rer export is local-only.",
+      "was": "The hosted owner-session export used rer export --target remote through /api/portability.",
+      "now": "Hosted backup is the owner’s /export download or the documented remote-export helper (D1 records plus R2 bytes); rer export is local-only."
+    },
+    "NOOK-010": {
+      "change": "changed",
+      "summary": "Assignee and conversation are fixed; changing the assignee means cancelling and proposing again. Material text/deadline revision still needs renewed acceptance.",
+      "was": "Commitment revision of text, assignee, deadline or scope required renewed assignee acceptance.",
+      "now": "Assignee and conversation are fixed; changing the assignee means cancelling and proposing again. Material text/deadline revision still needs renewed acceptance."
+    },
+    "NOOK-012": {
+      "change": "changed",
+      "summary": "Opt-in plain-text previews up to 64 KiB ship; these limits are the baseline that NOOK-061 widens.",
+      "was": "No inline text or PDF preview.",
+      "now": "Opt-in plain-text previews up to 64 KiB ship; these limits are the baseline that NOOK-061 widens."
     },
     "NOOK-013": {
       "change": "changed",
-      "summary": "Make notified names, the urgent marker and urgent reasons visible to all current channel members.",
-      "was": "The clause specified recipient validation and attention routing but did not state whether members who were not notified could see notification metadata.",
-      "now": "All current channel members can see the message’s Notified names, Urgent marker and urgent reason, including members who were not notified. Attention routing and recipient validation retain their existing rules."
+      "summary": "Automatic thread follows (NOOK-072) write the same followed state, and an unfollow through this door also ends an automatic follow.",
+      "was": "Follows were explicit choices only.",
+      "now": "Automatic thread follows (NOOK-072) write the same followed state, and an unfollow through this door also ends an automatic follow."
+    },
+    "NOOK-014": {
+      "change": "changed",
+      "summary": "Local development sends and stores no email and has no mail viewer; the no-text email form is the sender level an owner policy can force, and message text in email is NOOK-062.",
+      "was": "Development mail was captured in a local outbox under rer dev and rer preview.",
+      "now": "Local development sends and stores no email and has no mail viewer; the no-text email form is the sender level an owner policy can force, and message text in email is NOOK-062."
+    },
+    "NOOK-015": {
+      "change": "changed",
+      "summary": "New members get DM, mention, keyword, call-invite and followed-reply push on once they grant browser permission; push choices add keywords and calls.",
+      "was": "All push choices started off.",
+      "now": "New members get DM, mention, keyword, call-invite and followed-reply push on once they grant browser permission; push choices add keywords and calls."
+    },
+    "NOOK-016": {
+      "change": "added",
+      "summary": "Target clause “Everyday conversations” added to the contract; status at this release: done."
+    },
+    "NOOK-017": {
+      "change": "added",
+      "summary": "Target clause “Composition and personal workspace” added to the contract; status at this release: partial."
+    },
+    "NOOK-018": {
+      "change": "added",
+      "summary": "Target clause “Invitations, roles, guests and offboarding” added to the contract; status at this release: partial."
+    },
+    "NOOK-019": {
+      "change": "added",
+      "summary": "Target clause “Search conversations and files” added to the contract; status at this release: done."
+    },
+    "NOOK-020": {
+      "change": "added",
+      "summary": "Target clause “Saved items and channel pins” added to the contract; status at this release: done."
+    },
+    "NOOK-021": {
+      "change": "added",
+      "summary": "Target clause “Native clients and dependable device catch-up” added to the contract; status at this release: missing."
+    },
+    "NOOK-022": {
+      "change": "added",
+      "summary": "Target clause “In-context voice, video and screen sharing” added to the contract; status at this release: missing."
+    },
+    "NOOK-023": {
+      "change": "added",
+      "summary": "Target clause “Zoom, Google Meet and Teams meetings” added to the contract; status at this release: missing."
+    },
+    "NOOK-024": {
+      "change": "added",
+      "summary": "Target clause “Asynchronous clips, transcripts and call artifacts” added to the contract; status at this release: missing."
+    },
+    "NOOK-025": {
+      "change": "added",
+      "summary": "Target clause “App and bot platform” added to the contract; status at this release: missing."
+    },
+    "NOOK-026": {
+      "change": "added",
+      "summary": "Target clause “Workflow builder and durable scheduled work” added to the contract; status at this release: missing."
+    },
+    "NOOK-027": {
+      "change": "added",
+      "summary": "Target clause “Engineering and project integrations” added to the contract; status at this release: missing."
+    },
+    "NOOK-028": {
+      "change": "added",
+      "summary": "Target clause “Support, sales and operational signals” added to the contract; status at this release: missing."
+    },
+    "NOOK-029": {
+      "change": "added",
+      "summary": "Target clause “Connected documents and knowledge” added to the contract; status at this release: missing."
+    },
+    "NOOK-030": {
+      "change": "added",
+      "summary": "Target clause “Calendars, availability and meeting reminders” added to the contract; status at this release: missing."
+    },
+    "NOOK-031": {
+      "change": "added",
+      "summary": "Target clause “Shared channels between organizations” added to the contract; status at this release: missing."
+    },
+    "NOOK-032": {
+      "change": "added",
+      "summary": "Target clause “Recurring quiet schedules and notification policy” added to the contract; status at this release: partial."
+    },
+    "NOOK-033": {
+      "change": "added",
+      "summary": "Target clause “Personal and channel reminders” added to the contract; status at this release: done."
+    },
+    "NOOK-034": {
+      "change": "added",
+      "summary": "Target clause “Scheduled and recurring messages” added to the contract; status at this release: done."
+    },
+    "NOOK-035": {
+      "change": "added",
+      "summary": "Target clause “Channel recaps and catch-up digests” added to the contract; status at this release: missing."
+    },
+    "NOOK-036": {
+      "change": "added",
+      "summary": "Target clause “AI search with cited answers” added to the contract; status at this release: missing."
+    },
+    "NOOK-037": {
+      "change": "added",
+      "summary": "Target clause “SSO, SAML and lifecycle provisioning” added to the contract; status at this release: missing."
+    },
+    "NOOK-038": {
+      "change": "added",
+      "summary": "Target clause “Retention, legal hold and preservation” added to the contract; status at this release: missing."
+    },
+    "NOOK-039": {
+      "change": "added",
+      "summary": "Target clause “Compliance search and controlled exports” added to the contract; status at this release: missing."
+    },
+    "NOOK-040": {
+      "change": "added",
+      "summary": "Target clause “Information protection and data handling” added to the contract; status at this release: partial."
+    },
+    "NOOK-041": {
+      "change": "added",
+      "summary": "Target clause “Slack migration and cutover” added to the contract; status at this release: partial."
+    },
+    "NOOK-042": {
+      "change": "added",
+      "summary": "Target clause “Microsoft Teams migration” added to the contract; status at this release: missing."
+    },
+    "NOOK-043": {
+      "change": "added",
+      "summary": "Target clause “Google Chat migration” added to the contract; status at this release: missing."
+    },
+    "NOOK-044": {
+      "change": "added",
+      "summary": "Target clause “Campfire ONCE migration” added to the contract; status at this release: done."
+    },
+    "NOOK-045": {
+      "change": "added",
+      "summary": "Target clause “Zulip migration and topic continuity” added to the contract; status at this release: missing."
+    },
+    "NOOK-046": {
+      "change": "added",
+      "summary": "Target clause “Mattermost migration” added to the contract; status at this release: done."
+    },
+    "NOOK-047": {
+      "change": "added",
+      "summary": "Target clause “Readable portability and controlled exit” added to the contract; status at this release: done."
+    },
+    "NOOK-048": {
+      "change": "added",
+      "summary": "Target clause “Team administration and reporting” added to the contract; status at this release: missing."
+    },
+    "NOOK-049": {
+      "change": "added",
+      "summary": "Target clause “Reliability, performance and operating recovery” added to the contract; status at this release: partial."
+    },
+    "NOOK-050": {
+      "change": "added",
+      "summary": "Target clause “Owned installation and Base replacements” added to the contract; status at this release: partial."
+    },
+    "NOOK-051": {
+      "change": "added",
+      "summary": "Target clause “Auditable authority and actions” added to the contract; status at this release: partial."
+    },
+    "NOOK-052": {
+      "change": "added",
+      "summary": "Target clause “Accessible, responsive daily use” added to the contract; status at this release: partial."
+    },
+    "NOOK-053": {
+      "change": "added",
+      "summary": "Target clause “Conversation notes and lightweight lists” added to the contract; status at this release: missing."
+    },
+    "NOOK-060": {
+      "change": "added",
+      "summary": "Target clause “Organization policy and channel lifecycle” added to the contract; status at this release: partial."
+    },
+    "NOOK-061": {
+      "change": "added",
+      "summary": "Target clause “Any office file, large uploads, previews and malware scanning” added to the contract; status at this release: partial."
+    },
+    "NOOK-062": {
+      "change": "added",
+      "summary": "Target clause “Notification previews and actionable replies” added to the contract; status at this release: missing."
+    },
+    "NOOK-063": {
+      "change": "added",
+      "summary": "Target clause “Slack-compatible webhooks and Web API” added to the contract; status at this release: missing."
+    },
+    "NOOK-064": {
+      "change": "added",
+      "summary": "Target clause “Zapier, Make and n8n connectors” added to the contract; status at this release: missing."
+    },
+    "NOOK-065": {
+      "change": "added",
+      "summary": "Target clause “Channel-wide mentions: @channel, @here and @everyone” added to the contract; status at this release: partial."
+    },
+    "NOOK-066": {
+      "change": "added",
+      "summary": "Target clause “Channel posting permissions and announcement channels” added to the contract; status at this release: partial."
+    },
+    "NOOK-067": {
+      "change": "added",
+      "summary": "Target clause “Forwarding messages and email into conversations” added to the contract; status at this release: missing."
+    },
+    "NOOK-068": {
+      "change": "added",
+      "summary": "Target clause “Safe link previews and app unfurls” added to the contract; status at this release: missing."
+    },
+    "NOOK-069": {
+      "change": "added",
+      "summary": "Target clause “Two-factor authentication without SSO” added to the contract; status at this release: missing."
+    },
+    "NOOK-070": {
+      "change": "added",
+      "summary": "Target clause “Polls, GIFs, thread broadcast, bookmarks and translation” added to the contract; status at this release: missing."
+    },
+    "NOOK-071": {
+      "change": "added",
+      "summary": "Target clause “Threads view and group-DM conversion” added to the contract; status at this release: done."
+    },
+    "NOOK-072": {
+      "change": "added",
+      "summary": "Target clause “Automatic thread following and channel-wide thread replies” added to the contract; status at this release: partial."
+    },
+    "NOOK-073": {
+      "change": "added",
+      "summary": "Target clause “Active-elsewhere device routing” added to the contract; status at this release: partial."
+    },
+    "NOOK-074": {
+      "change": "added",
+      "summary": "Target clause “Native sign-in and finding the installation” added to the contract; status at this release: partial."
+    },
+    "NOOK-075": {
+      "change": "added",
+      "summary": "Target clause “External participants without a Nook installation” added to the contract; status at this release: missing."
+    },
+    "NOOK-076": {
+      "change": "added",
+      "summary": "Target clause “Slack Connect cutover” added to the contract; status at this release: missing."
+    },
+    "NOOK-077": {
+      "change": "added",
+      "summary": "Target clause “Final catch-up import at cutover” added to the contract; status at this release: partial."
+    },
+    "NOOK-078": {
+      "change": "added",
+      "summary": "Target clause “Push from owned installations to the store apps” added to the contract; status at this release: missing."
+    },
+    "NOOK-054": {
+      "change": "added",
+      "summary": "Target clause “Scoped company-context agents and MCP” added to the contract; status at this release: missing."
+    },
+    "NOOK-055": {
+      "change": "added",
+      "summary": "Target clause “Accountable commitment assistant” added to the contract; status at this release: partial."
+    },
+    "NOOK-056": {
+      "change": "added",
+      "summary": "Target clause “Decisions that stay current” added to the contract; status at this release: partial."
+    },
+    "NOOK-057": {
+      "change": "added",
+      "summary": "Target clause “Calm follow-through across linked systems” added to the contract; status at this release: partial."
+    },
+    "NOOK-058": {
+      "change": "added",
+      "summary": "Target clause “Stale handoffs and proposed resolution” added to the contract; status at this release: missing."
+    },
+    "NOOK-059": {
+      "change": "added",
+      "summary": "Target clause “Visible and controllable agent execution” added to the contract; status at this release: missing."
     }
   },
   "proseChanges": [
     {
       "document": "README.md",
       "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Describe the 0.3.0 local and hosted owner journeys, safe updates, and offline identity recovery after restore.",
-      "was": "First setup required an explicit local owner, hosted setup described a manual setup-token claim, and archive import did not link the exact offline identity-recovery procedure.",
-      "now": "A fresh local launch creates a placeholder owner and optional setup keeps its ID and data. Hosted deploy claims the owner and removes the setup token; rer signin provides mail-free owner access. Local updates stop dev and apply pending migrations with setup. Restore links to offline identity recovery before setup; the 0.2.0 upgrade lists migrations 0024 and 0025."
+      "date": "2026-10-19",
+      "summary": "Name 0.4.0 as the current release and its tag as the fixed clone.",
+      "was": "The current release and the fixed clone were 0.3.0.",
+      "now": "The current release and the fixed clone are 0.4.0."
     },
     {
-      "document": "AGENTS.md",
+      "document": "docs/updating.md",
       "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Run the exact package-mode rer dependency and treat local owner setup as optional.",
-      "was": "The guide ran the published rer package through a shorter first-run journey without describing the placeholder owner or the checkout-managed Node and pnpm versions.",
-      "now": "rer runs the exact pinned devDependency with the declared Node and pnpm versions; dev prepares a placeholder local owner and optional setup replaces its email while keeping the owner ID and data."
+      "date": "2026-10-19",
+      "summary": "Name the 0.4.0 release clone and the pinned rer 0.2.63.",
+      "was": "The release clone was v0.3.0 and the guide said Nook pins rer 0.2.25.",
+      "now": "The release clone is v0.4.0 and Nook 0.4.0 pins rer 0.2.63."
     },
     {
-      "document": "OPERATIONS.md",
+      "document": "ACCEPTANCE.md",
       "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Specify the proven local restore and hosted owner-claim procedures and bound prior-format recovery claims.",
-      "was": "Restore referred to general identity mapping, hosted owner claim required manual bootstrap, and the legacy recovery wording did not distinguish the supported backup-only portability-v1 path.",
-      "now": "Local restore recovers explicit archived identities offline before setup at the original D1 binding path. Deploy claims the hosted owner and removes the setup token. Backup-only portability-v1 recovery verifies checksums and records the unverified-metadata acknowledgement; older document formats remain separate offline procedures."
+      "date": "2026-10-19",
+      "summary": "Narrow the NOOK-008 and NOOK-014 gaps to what the 0.4.0 release gate proved.",
+      "was": "NOOK-008 named only local synthetic journeys; NOOK-014 said real inbox receipt was not established.",
+      "now": "NOOK-008 records the gate’s hosted run, mail, 0.3.0 update and export/restore; NOOK-014 records one real-inbox mention email without a deliverability guarantee."
     }
   ],
   "extensionPointChanges": [],
   "migrations": [
     {
-      "id": "0024_import_redaction_steps.sql",
-      "buyerSteps": "Apply with rer setup locally or rer deploy against the existing hosted database. Adds import-kit preparation/stream-source tables and resumable reaction-redaction progress for pending member erasure. No manual data conversion or reset is needed."
+      "id": "0026_retire_captured_mail.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Drops the old development mail capture table; development mail is no longer stored. Hosted mail and queued notifications are untouched. No manual conversion or reset is needed."
     },
     {
-      "id": "0025_owner_signin.sql",
-      "buyerSteps": "Apply with rer setup locally or rer deploy against the existing hosted database. Adds hashed, expiring, single-use owner sign-in grants for rer signin. It creates no sign-in grant or notification merely by being applied."
+      "id": "0026_thread_follows.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds the source of each thread follow plus thread unfollows and thread reads for automatic following. Existing follows stay as explicit choices; imported history is not backfilled. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0027_channel_lifecycle.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds channel settings and an audited channel action log for archive, rename and management handover. Existing channels keep their creator as manager. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0028_saved_items.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds private saved items and shared channel pins. Nothing is saved or pinned by applying it. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0029_conversation_notify.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds per-member conversation alert levels and replaces the Web Push device/read triggers. Members without a row keep the default for the conversation kind. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0030_default_channels.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds default channels for new members with an audited policy. Existing people are not treated as new members. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0031_posting_permissions.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds channel posting policy, named posters and their audit history. Every channel keeps open posting until an owner changes it. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0032_saved_reminders.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds reminders on saved items. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0033_all_unreads.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds read generations so All unreads can undo a bulk read without losing later reads. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0034_group_conversion.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds the record of fixed group DMs converted to private channels. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0035_scheduled_messages.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds scheduled and recurring messages with their occurrences and files, and keeps object inventory for files a schedule owns. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0036_reminders.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds personal and channel reminders and their occurrences. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0037_broadcasts.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds @channel/@here/@everyone policy, named people, actions and member choices. Pending deliveries are preserved. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0038_channel_invitation_capacity.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Replaces two invitation triggers so channel invitations and their acceptance use the same capacity as channel membership; current authority checks are kept. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0039_sent_messages.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds an index for personal sent history. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0040_profiles.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds profiles, owner-defined profile fields, their values and field audit history. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0041_personal_workspace.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds private sidebar sections and installation links. They grant no access. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0042_typing.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds session-bound typing state, which is not exported. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0043_thread_delivery.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds mobile alert levels and thread choices per conversation and a device class for push devices; existing choices are kept. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0061_readable_exports.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds readable-export jobs, scopes, pages and change tracking (cursors and checksums only, never message copies). No manual conversion or reset is needed."
+    },
+    {
+      "id": "0062_workspace_readable_export.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds the owner’s whole-workspace readable export policy and links export jobs to it. No manual conversion or reset is needed."
+    },
+    {
+      "id": "0063_workspace_export_policy_notices.sql",
+      "buyerSteps": "Apply with rer deploy against the existing hosted database or rer setup locally. Adds the audit and member notices committed with each workspace export policy change. No manual conversion or reset is needed."
     }
   ],
   "breaking": false,
-  "agentUpdateInstructions": "Updating from 0.2.0 to 0.3.0: preserve the existing owner, data, private settings, resource identities and every applied migration byte. Stop local dev and export a private backup first (rer export locally, or rer export --target remote through the active hosted owner session). Fast-forward the checkout to the 0.3.0 source. rer manages the pinned dependency graph and tooling; run rer setup then rer dev locally, or rer deploy with the existing Cloudflare account and environment for a hosted Nook. The only new migrations are 0024_import_redaction_steps.sql and 0025_owner_signin.sql, both additive; never reset populated state to update. Existing email and push choices stay unchanged. The next hosted deploy claims an unclaimed 0.2.0 owner and removes its unused setup token; an old .rer/deploy/production-secrets.json can then be deleted. Restoring an archive is a separate empty-target operation: follow OPERATIONS.md#restoring-a-local-archive and recover the archived identities offline before setup. Keep the documented Lobby, invitation-lifetime and R2-removal limitations visible until their Base fixes ship."
+  "agentUpdateInstructions": "Updating from 0.3.0 to 0.4.0: preserve the existing owner, data, private settings, resource identities and every applied migration byte. Export first: on a hosted Nook sign in as an owner and download the workspace archive at /export (or use scripts/local/remote-export.mjs as docs/backups.md shows); rer export is local-only and refuses a hosted origin. Locally, stop Nook by its own process and run rer export. Fast-forward the checkout to the 0.4.0 source; rer installs the pinned 0.2.63 package and tools. Hosted: rer deploy with the same Cloudflare account and --environment, supplying MAIL_FROM and SENDGRID_API_KEY once so MAIL_API_KEY is bound. Local: rer setup then rer dev. The 22 new migrations (0026_retire_captured_mail.sql through 0063_workspace_export_policy_notices.sql) are additive except that 0026_retire_captured_mail.sql drops the development mail capture table; never reset populated state to update. Remove any local outbox references; local development sends and stores no mail. Restoring an archive is a separate empty-target local operation: follow OPERATIONS.md#restoring-a-local-archive."
 }
