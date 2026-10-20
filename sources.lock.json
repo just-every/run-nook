@@ -4700,6 +4700,10 @@
       "sha256": "0e61314bf49ccde57aeb9e9e9507da91418674e49432477704939d82691cc13a",
       "executable": false
     },
+    "src/platform/storage/archive-inventory.mjs": {
+      "sha256": "58c1d15ab9055d71eb51c97fe46bc7ee3d69f426b323a5d2d12943198813908a",
+      "executable": false
+    },
     "src/platform/storage/archive-validation.mjs": {
       "sha256": "094e8e25d36474e7cb6b17fac4a9fd36a34d3db4a7797c71c7ce0912aa3f4c11",
       "executable": false
