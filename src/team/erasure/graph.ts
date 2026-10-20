@@ -2,6 +2,9 @@
 const userEdge=(table:string,key:string[],column='user')=>({table,key,from:'nook_actors',on:{[column]:'id'},phase:'identity' as const})
 const messageEdge=(table:string,key:string[])=>({table,key,from:'nook_messages',on:{message:'id'}})
 export const retained = [
+ {table:'nook_notes',reason:'Note erasure retains only blank structural scope/version rows. Member authorship/revision and thread-source deletion redact every snapshot through notes/erasure.ts.'},
+ {table:'nook_note_versions',reason:'Version numbers and times survive with all content, links, checklist items and actor attribution redacted. A portability checkpoint refuses older copies.'},
+ {table:'nook_note_proposals',reason:'Exact note/item/version bindings travel with live commitments. Note erasure or commitment erasure removes the binding before its source is erased.'},
  {table:'nook_profile_fields',reason:'Workspace field definitions contain no member values.'},
  {table:'nook_profile_field_actions',reason:'Body-free field-definition history survives with actor attribution erased.'},
  {table:'nook_broadcast_policy',reason:'Body-free channel/workspace policy remains after people are erased.'},
