@@ -11,6 +11,7 @@ CREATE INDEX nook_audit_actor ON nook_audit(actor,at);
 -- A transaction-local writer identity, cleared before the D1 batch commits.
 CREATE TABLE nook_audit_context(id INTEGER PRIMARY KEY CHECK(id=1),actor TEXT);
 CREATE VIEW nook_audit_history AS
+WITH part0 AS MATERIALIZED (
 SELECT 'channel:'||id AS id,actor AS actor,'nook_channel_actions' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'channel.'||action AS kind,conversation AS scope,version AS version,'Channel lifecycle change' AS reason,'confirmed' AS outcome,1 AS count FROM nook_channel_actions WHERE 1
 UNION ALL
 SELECT 'posting:'||action AS id,(SELECT actor FROM nook_channel_actions WHERE id=nook_posting_changes.action) AS actor,'nook_posting_changes' AS service,(SELECT CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) FROM nook_channel_actions WHERE id=nook_posting_changes.action) AS at,'policy.posting' AS kind,(SELECT conversation FROM nook_channel_actions WHERE id=nook_posting_changes.action) AS scope,(SELECT version FROM nook_channel_actions WHERE id=nook_posting_changes.action) AS version,'Posting permission: '||level||'; replies: '||replies AS reason,'confirmed' AS outcome,people AS count FROM nook_posting_changes WHERE 1
@@ -18,7 +19,8 @@ UNION ALL
 SELECT 'default:'||id AS id,actor AS actor,'nook_default_actions' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'policy.default-channels' AS kind,conversation AS scope,version AS version,CASE enabled WHEN 1 THEN 'Default channel enabled' ELSE 'Default channel disabled' END AS reason,'confirmed' AS outcome,1 AS count FROM nook_default_actions WHERE 1
 UNION ALL
 SELECT 'broadcast:'||id AS id,actor AS actor,'nook_broadcast_actions' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'policy.broadcast' AS kind,scope AS scope,version AS version,'Broadcast level: '||level AS reason,'confirmed' AS outcome,people AS count FROM nook_broadcast_actions WHERE 1
-UNION ALL
+),
+part1 AS MATERIALIZED (
 SELECT 'profile:'||id AS id,actor AS actor,'nook_profile_field_actions' AS service,created AS at,'policy.profile-fields' AS kind,'workspace' AS scope,1 AS version,'Profile field definitions changed' AS reason,'confirmed' AS outcome,fields AS count FROM nook_profile_field_actions WHERE 1
 UNION ALL
 SELECT 'export-policy:'||id AS id,actor AS actor,'nook_exit_policy_actions' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'policy.export' AS kind,'workspace' AS scope,version AS version,CASE enabled WHEN 1 THEN 'Workspace export enabled' ELSE 'Workspace export disabled' END AS reason,'confirmed' AS outcome,recipients AS count FROM nook_exit_policy_actions WHERE 1
@@ -26,7 +28,8 @@ UNION ALL
 SELECT 'integration:'||id AS id,actor AS actor,'nook_integration_audit' AS service,at AS at,'integration.'||action AS kind,COALESCE(conversation,'workspace') AS scope,1 AS version,'Token label: '||name AS reason,CASE action WHEN 'refuse' THEN 'failed' ELSE 'confirmed' END AS outcome,1 AS count FROM nook_integration_audit WHERE 1
 UNION ALL
 SELECT 'erasure:'||id||':'||state AS id,NULL AS actor,'nook_erasure_receipts' AS service,COALESCE(completed,created) AS at,'erasure.'||kind AS kind,'workspace' AS scope,1 AS version,CASE state WHEN 'complete' THEN 'Erasure receipt complete' ELSE 'Erasure pending; completion unconfirmed' END AS reason,CASE state WHEN 'complete' THEN 'confirmed' ELSE 'uncertain' END AS outcome,COALESCE((SELECT sum(CASE WHEN type='integer' THEN value ELSE 0 END) FROM json_each(counts)),0) AS count FROM nook_erasure_receipts WHERE 1
-UNION ALL
+),
+part2 AS MATERIALIZED (
 SELECT 'invitation:'||id||':'||state AS id,issuer AS actor,'nook_invite_plans' AS service,prepared_at AS at,'invitation.'||state AS kind,'workspace' AS scope,generation AS version,'Invitation role: '||role||'; access: '||mode AS reason,'confirmed' AS outcome,json_array_length(scopes) AS count FROM nook_invite_plans WHERE 1
 UNION ALL
 SELECT 'cancellation:'||operator_id||':'||operator_version AS id,NULL AS actor,'oa_invitation_cancellations' AS service,CAST(unixepoch('subsec')*1000 AS INTEGER) AS at,'invitation.cancelled' AS kind,'workspace' AS scope,operator_version AS version,'Invitation cancelled; original event time unavailable for pre-audit records' AS reason,'confirmed' AS outcome,1 AS count FROM oa_invitation_cancellations WHERE 1
@@ -34,7 +37,8 @@ UNION ALL
 SELECT 'auth:'||id AS id,NULLIF(actor_id,'') AS actor,'oa_auth_audit' AS service,created_at AS at,'auth.'||action AS kind,'workspace' AS scope,1 AS version,'Authentication authority change' AS reason,'confirmed' AS outcome,1 AS count FROM oa_auth_audit WHERE 1
 UNION ALL
 SELECT 'session:'||id||':start' AS id,operator_id AS actor,'oa_sessions' AS service,created_at AS at,'session.started' AS kind,'workspace' AS scope,operator_version AS version,'Session method: '||kind AS reason,'confirmed' AS outcome,1 AS count FROM oa_sessions WHERE 1
-UNION ALL
+),
+part3 AS MATERIALIZED (
 SELECT 'session:'||id||':revoked' AS id,operator_id AS actor,'oa_sessions' AS service,revoked_at AS at,'session.revoked' AS kind,'workspace' AS scope,operator_version AS version,'Session revoked' AS reason,'confirmed' AS outcome,1 AS count FROM oa_sessions WHERE revoked_at IS NOT NULL
 UNION ALL
 SELECT 'membership:'||seq AS id,NULL AS actor,'nook_exit_membership' AS service,CAST(round((julianday(at)-2440587.5)*86400000) AS INTEGER) AS at,'membership.'||action AS kind,conversation AS scope,1 AS version,CASE action WHEN 'baseline' THEN 'Membership observed at adoption; original join unknown' WHEN 'join' THEN 'Channel membership granted' ELSE 'Channel membership removed' END AS reason,'confirmed' AS outcome,1 AS count FROM nook_exit_membership WHERE 1
@@ -42,14 +46,17 @@ UNION ALL
 SELECT 'override:'||id AS id,author AS actor,'nook_messages' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'post.admin-override' AS kind,conversation AS scope,version AS version,'Labeled administrative posting override' AS reason,'confirmed' AS outcome,1 AS count FROM nook_messages WHERE json_valid(payload) AND json_extract(payload,'$.adminOverride')=1
 UNION ALL
 SELECT 'export:'||id||':'||state AS id,owner AS actor,'nook_exit_jobs' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'export.'||state AS kind,'workspace' AS scope,revision+1 AS version,CASE state WHEN 'complete' THEN 'Readable export complete' WHEN 'cancelled' THEN 'Readable export interrupted; no complete artifact confirmed' ELSE 'Readable export in progress; completion unconfirmed' END AS reason,CASE state WHEN 'complete' THEN 'confirmed' ELSE 'uncertain' END AS outcome,records AS count FROM nook_exit_jobs WHERE 1
-UNION ALL
+),
+part4 AS MATERIALIZED (
 SELECT 'import:'||id||':'||state AS id,owner AS actor,'nook_imports' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'import.'||state AS kind,'workspace' AS scope,1 AS version,CASE state WHEN 'complete' THEN 'Reviewed import published' ELSE 'Import in progress; publication unconfirmed' END AS reason,CASE state WHEN 'complete' THEN 'confirmed' ELSE 'uncertain' END AS outcome,1 AS count FROM nook_imports WHERE 1
 UNION ALL
 SELECT 'import-approval:'||plan_id AS id,owner AS actor,'ik_door_approvals' AS service,CAST(round((julianday(approved_at)-2440587.5)*86400000) AS INTEGER) AS at,'import.approved' AS kind,'workspace' AS scope,1 AS version,'Human approval for reviewed import' AS reason,'confirmed' AS outcome,1 AS count FROM ik_door_approvals WHERE 1
 UNION ALL
 SELECT 'import-failure:'||plan_id AS id,NULL AS actor,'ik_door_apply_failures' AS service,CAST(unixepoch('subsec')*1000 AS INTEGER) AS at,'import.failed' AS kind,'workspace' AS scope,1 AS version,'Reviewed import failed' AS reason,'failed' AS outcome,1 AS count FROM ik_door_apply_failures WHERE 1
 UNION ALL
-SELECT 'conversion:'||source AS id,actor AS actor,'nook_group_conversions' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'channel.converted' AS kind,destination AS scope,1 AS version,'Group conversation converted without widening its audience' AS reason,'confirmed' AS outcome,1 AS count FROM nook_group_conversions WHERE 1;
+SELECT 'conversion:'||source AS id,actor AS actor,'nook_group_conversions' AS service,CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER) AS at,'channel.converted' AS kind,destination AS scope,1 AS version,'Group conversation converted without widening its audience' AS reason,'confirmed' AS outcome,1 AS count FROM nook_group_conversions WHERE 1
+)
+SELECT * FROM part0 UNION ALL SELECT * FROM part1 UNION ALL SELECT * FROM part2 UNION ALL SELECT * FROM part3 UNION ALL SELECT * FROM part4;
 INSERT OR IGNORE INTO nook_audit SELECT id,CASE WHEN actor IN (SELECT id FROM nook_actors) THEN actor ELSE NULL END,service,at,kind,scope,version,reason,outcome,count FROM nook_audit_history;
 CREATE TRIGGER nook_audit_0_insert AFTER INSERT ON nook_channel_actions BEGIN
  INSERT OR IGNORE INTO nook_audit SELECT 'channel:'||id,COALESCE((SELECT actor FROM nook_audit_context WHERE id=1),actor),'nook_channel_actions',CAST(round((julianday(created)-2440587.5)*86400000) AS INTEGER),'channel.'||action,conversation,version,'Channel lifecycle change','confirmed',1 FROM nook_channel_actions WHERE id=NEW.id AND (1);
@@ -138,13 +145,13 @@ END;
 CREATE TRIGGER nook_audit_channel_created AFTER INSERT ON nook_conversations BEGIN
  INSERT OR IGNORE INTO nook_audit VALUES('conversation:'||NEW.id,COALESCE((SELECT actor FROM nook_audit_context WHERE id=1),NEW.owner),'nook_conversations',CAST(unixepoch('subsec')*1000 AS INTEGER),'channel.created',NEW.id,NEW.version,'Conversation created','confirmed',1);
 END;
-CREATE VIEW nook_audit_log AS SELECT * FROM nook_audit UNION ALL SELECT h.* FROM nook_audit_history h WHERE NOT EXISTS(SELECT 1 FROM nook_audit a WHERE a.id=h.id);
+CREATE VIEW nook_audit_log AS WITH history AS MATERIALIZED (SELECT * FROM nook_audit_history) SELECT * FROM nook_audit UNION ALL SELECT h.* FROM history h WHERE NOT EXISTS(SELECT 1 FROM nook_audit a WHERE a.id=h.id);
 -- Portability is an existing external step: until the job has completed the
 -- outcome is uncertain. A cancelled/interrupted build never becomes confirmed.
-CREATE TRIGGER nook_audit_portability_insert AFTER INSERT ON rer_portability_jobs BEGIN
- INSERT OR IGNORE INTO nook_audit VALUES('archive:'||NEW.id||':'||NEW.phase,NULL,'portability',CAST(unixepoch('subsec')*1000 AS INTEGER),'archive.'||NEW.kind||'.'||NEW.phase,'workspace',1,'Archive operation started; completion unconfirmed','uncertain',1);
+CREATE TRIGGER nook_audit_portability_insert AFTER INSERT ON rer_portability_jobs WHEN NEW.kind='export' BEGIN
+ INSERT OR IGNORE INTO nook_audit VALUES('archive:'||NEW.id||':'||NEW.phase,CASE WHEN NEW.actor IN (SELECT id FROM nook_actors) THEN NEW.actor ELSE NULL END,'portability',CAST(unixepoch('subsec')*1000 AS INTEGER),'archive.'||NEW.kind||'.'||NEW.phase,'workspace',1,'Archive operation started; completion unconfirmed','uncertain',1);
 END;
-CREATE TRIGGER nook_audit_portability_phase AFTER UPDATE OF phase ON rer_portability_jobs WHEN NEW.phase<>OLD.phase BEGIN
+CREATE TRIGGER nook_audit_portability_phase AFTER UPDATE OF phase ON rer_portability_jobs WHEN NEW.phase<>OLD.phase AND (NEW.kind='export' OR NEW.phase='complete') BEGIN
  INSERT OR IGNORE INTO nook_audit VALUES('archive:'||NEW.id||':'||NEW.phase,(SELECT actor FROM nook_audit_context WHERE id=1),'portability',CAST(unixepoch('subsec')*1000 AS INTEGER),'archive.'||NEW.kind||'.'||NEW.phase,'workspace',1,CASE WHEN NEW.phase='complete' THEN 'Archive operation complete' ELSE 'Archive operation interrupted or in progress; completion unconfirmed' END,CASE WHEN NEW.phase='complete' THEN 'confirmed' ELSE 'uncertain' END,1);
 END;
 CREATE TRIGGER nook_audit_import_settings AFTER UPDATE OF enabled ON ik_door_settings WHEN OLD.enabled<>NEW.enabled BEGIN

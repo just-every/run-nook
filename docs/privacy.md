@@ -6,6 +6,10 @@ Nook checks the current sign-in session and current conversation membership for 
 
 People can read a channel only while they are members. Direct conversations have fixed participants, and owner or admin status does not let someone read another person's direct messages. The Team screen shows workspace identities and channel access to authorized owners and admins.
 
+## Administrative audit history
+
+Owners and admins can read, filter and download the audit log in **Team**; the owner alone reads it when there is no admin. Members and guests cannot read or edit it. It records who or which service changed access, policies or other administrative state, when, the scope/version and whether the action is confirmed, failed or uncertain. It never contains message bodies, another person’s DM content, credentials or integration token values. Direct conversations are labeled “a direct conversation”; erasure removes actor attribution while keeping the action facts. An interrupted export remains uncertain until an actual complete job is committed. This is access-control history; [Porthole](https://github.com/just-every/run-porthole) is the RunEditRun product for observability.
+
 ## Where the data goes
 
 Messages and product records are stored in D1; file bytes are stored in the private R2 bucket. A person who can read the installation's local storage or hosted D1 and R2 data can access that stored information. Application roles do not override that storage authority.

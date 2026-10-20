@@ -1,6 +1,6 @@
 /** Supply the initiating identity to SQL audit triggers inside the same D1
  * transaction as the write. This adapter belongs to Nook; Base stays byte-exact. */
-export function auditDatabase(db:D1Database,actor:string|null):D1Database {
+export function auditDatabase(db:D1Database,actor:string|null|(()=>string|null)):D1Database {
  const statements=new WeakMap<object,D1PreparedStatement>()
  const unwrap=(value:D1PreparedStatement)=>statements.get(value)??value
  const wrap=(statement:D1PreparedStatement,sql:string):D1PreparedStatement=>{
@@ -13,7 +13,7 @@ export function auditDatabase(db:D1Database,actor:string|null):D1Database {
   }});statements.set(proxy,statement);return proxy
  }
  const batch=async<T=unknown>(queries:D1PreparedStatement[]):Promise<D1Result<T>[]>=>{
-  const result=await db.batch<T>([db.prepare('INSERT OR REPLACE INTO nook_audit_context VALUES(1,?)').bind(actor),...queries.map(unwrap),db.prepare('DELETE FROM nook_audit_context WHERE id=1')]);return result.slice(1,-1)
+  const result=await db.batch<T>([db.prepare('INSERT OR REPLACE INTO nook_audit_context VALUES(1,?)').bind(typeof actor==='function'?actor():actor),...queries.map(unwrap),db.prepare('DELETE FROM nook_audit_context WHERE id=1')]);return result.slice(1,-1)
  }
  return new Proxy(db,{get(target,key){
   if(key==='prepare')return (sql:string)=>wrap(target.prepare(sql),sql)

@@ -34,19 +34,20 @@ async function inputBody(request: Request) {
 export async function importDoor(request: Request, env: DoorBindings): Promise<Response | null> {
   const path = new URL(request.url).pathname;
   if (!path.startsWith('/api/operator/import/') && !path.startsWith('/api/rer/import/')) return null;
-  env = {...env,DB:metered(env.DB)};
+  let auditActor:string|null=null;
+  env = {...env,DB:metered(auditDatabase(env.DB,()=>auditActor))};
   let vendor = vendors[request.headers.get('X-Import-Source') as keyof typeof vendors] ?? 'Source';
   let cleanup: (() => Promise<void>) | undefined;
   try {
     const input = await inputBody(request), admitted = await access(env, request, input, namespace => {const source=sourceName(namespace);if(source)vendor=vendors[source.kind];}), listed = sourceName(admitted.namespace);
     if (!listed) throw new Fault(400, 'Unknown import source');
     vendor = vendors[listed.kind];
+    auditActor=admitted.c?.uid??null;
     const action = path.split('/').at(-1)!;
     if (admitted.c) {
       const result = await ownerAction(env, admitted.c, action, input, listed.kind);
       if (result !== null) return Response.json(result, {headers});
     }
-    env={...env,DB:auditDatabase(env.DB,admitted.c?.uid??null)};
     const users = await people(env.DB), source = importSource(admitted.namespace, admitted.principal, users)!;
     let predicate = admitted.predicate, link: any, capture;
     if (action === 'plan') {

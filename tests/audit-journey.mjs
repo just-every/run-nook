@@ -35,7 +35,7 @@ export async function auditJourney({post,get,request,owner,member,registered,che
   const deniedBefore=(await sql('SELECT count(*) AS n FROM nook_audit'))[0].n
   await request('/api/channels/'+room.id+'/posting',{method:'PATCH',cookie:member.cookie,body:{version:details.version,level:'everyone',replies:'everyone',people:[]},status:403})
   assert.equal((await sql('SELECT count(*) AS n FROM nook_audit'))[0].n,deniedBefore)
-  const dm=(await post('/api/conversations',{name:'Confidential compensation discussion',kind:'dm',participants:[guest.user.id]},member.cookie)).data
+  const dm=(await post('/api/conversations',{name:'Confidential compensation discussion',kind:'dm',participants:[owner.user.id]},member.cookie)).data
   await post('/api/conversations/'+dm.id+'/messages',{body:'Private compensation marker should never enter audit',intent:crypto.randomUUID()},member.cookie)
   const download=await get('/api/team/audit?format=json',admin.cookie);assert.ok(download.data.items.some(row=>row.kind==='channel.created'&&row.scope==='a direct conversation'));assert.doesNotMatch(download.raw,/Confidential compensation|Private compensation marker|Customer launch approved|token_hash|SESSION_SECRET/)
   const csv=await get('/api/team/audit?format=csv&kind=policy.posting',admin.cookie);assert.match(csv.raw,/policy.posting/)

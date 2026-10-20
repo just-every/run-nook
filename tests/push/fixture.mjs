@@ -24,7 +24,7 @@ export async function installation(edge,{bootstrap=true,origin:configuredOrigin,
  // Miniflare's SQL exec splits multiline triggers incorrectly; use Wrangler's
  // public migration reader to preserve complete SQLite statements.
  const {unstable_splitSqlQuery}=require('wrangler');
- for(const name of (await readdir('migrations')).filter(n=>n.endsWith('.sql')).sort())await db.batch(unstable_splitSqlQuery(await readFile(resolve('migrations',name),'utf8')).map(query=>db.prepare(query)));
+ for(const name of (await readdir('migrations')).filter(n=>n.endsWith('.sql')).sort()){try{await db.batch(unstable_splitSqlQuery(await readFile(resolve('migrations',name),'utf8')).map(query=>db.prepare(query)))}catch(error){throw new Error('Migration '+name+': '+error.message,{cause:error})}}
  const raw=(path,method='GET',body,cookie='',extra={})=>mf.dispatchFetch(origin+path,{method,redirect:'manual',headers:{origin,host:new URL(origin).host,...(cookie?{cookie}:{}),...(body===undefined?{}:{'Content-Type':'application/json'}),...extra},...(body===undefined?{}:{body:JSON.stringify(body)})});
  const call=async(path,method='GET',body,cookie='',status=200,extra={})=>{const response=await raw(path,method,body,cookie,extra);assert.equal(response.status,status,method+' '+path);return response.status===204?null:response.json()};
  if(!bootstrap)return {mf,db,raw,call,origin,close:async()=>{unregister();await mf.dispose()}};
