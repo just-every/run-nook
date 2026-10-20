@@ -12,6 +12,7 @@ import {recoverLegacyArchive} from '@runeditrun/rer/internal/modules/portability
 import {absent,privateFile,promote} from '@runeditrun/rer/modules/portability/cli-options';
 import {rebuildSearch} from '../../src/platform/storage/portability.mjs';
 import {productPolicy} from '../../src/platform/portability-policy.mjs';
+import {auditStatement,settleStatement} from '../../src/audit/record.mjs';
 async function* records(path,reader=readArchive){const file=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);try{yield* reader(Readable.toWeb(file.createReadStream({autoClose:false})))}finally{await file.close()}}
 // The applied migrations, in order, so a restore can place an archive made before later additive migrations.
 async function migrations(root,db){const applied=await destinationLedger(db);return migrationReplay(await Promise.all(applied.map(async ({name})=>{const sql=await readFile(resolve(root,'migrations',name),'utf8');return {name,sha256:await sha256(sql),statements:unstable_splitSqlQuery(sql)}})),await productPolicy(db))}
@@ -26,7 +27,7 @@ export async function transfer(direction,path,{root=process.cwd(),legacyOutput,l
  const archiveLedgers=ledgerReader();
  if(direction==='export'){await absent(path);await absent(path+'.journal.rer')}else for await(const record of records(path))archiveLedgers.add(record);
  const proxy=await getPlatformProxy({configPath:resolve(root,'wrangler.jsonc'),persist:{path:resolve(root,'.wrangler/state/v3')},remoteBindings:false});
- let service,id,complete=false,manifest,closing,created=false,journalCreated=false,journalPromoted=false;const temporary=path+'.partial',journalTemporary=path+'.journal.rer.partial';
+ let service,id,complete=false,manifest,closing,created=false,journalCreated=false,journalPromoted=false,audit;const temporary=path+'.partial',journalTemporary=path+'.journal.rer.partial';
  try{
   // New exports use smaller parts; retain the format's admission limit for
   // archives written before that change.
@@ -34,19 +35,23 @@ export async function transfer(direction,path,{root=process.cwd(),legacyOutput,l
   if(direction==='export'){
    // Dev personas are local-only people and never travel: suspend them through the product's own deactivation (it revokes their sessions and grants) so the archive holds them inactive. The next dev sign-in as a persona reactivates it.
    await proxy.env.DB.prepare("UPDATE oa_operators SET status='inactive' WHERE lower(email) LIKE '%@dev.localhost' AND status='active'").run();
+   // NOOK-051: uncertain until the archive file is promoted; an interrupted export keeps no settlement.
+   audit=crypto.randomUUID();await auditStatement(proxy.env.DB,{id:audit,service:'rer export',kind:'archive.export',reason:'started; completion not confirmed',outcome:'uncertain'}).run();
    await mkdir(dirname(path),{recursive:true,mode:0o700});const file=await privateFile(temporary,false);created=true;
    try{id=await service.exports.create();while((await service.exports.advance(id,{maxParts:16})).phase==='building'){}
     const reader=(await service.exports.download(id)).getReader();try{for(;;){const {done,value}=await reader.read();if(done)break;await file.writeFile(value)}}finally{await reader.cancel();reader.releaseLock()}await file.sync();
    }finally{await file.close()}
    for await(const record of records(temporary)){if(record.kind==='manifest')manifest=record;if(record.kind==='closing')closing=record}
    const journal=await privateFile(journalTemporary,false);journalCreated=true;try{await journal.writeFile(JSON.stringify(journalEnvelope(manifest))+'\n');await journal.sync()}finally{await journal.close()}await promote(journalTemporary,path+'.journal.rer');journalPromoted=true;await promote(temporary,path);complete=true;
+   await settleStatement(proxy.env.DB,audit,{service:'rer export',kind:'archive.export',outcome:'confirmed',reason:'archive written',detail:{tables:manifest.tables.length}}).run();
   }else{
    // Auth exclusions must not allow restoring private identities under a fresh owner.
    if((await proxy.env.DB.prepare('SELECT COUNT(*) AS n FROM oa_operators').first()).n)throw Error('restore_requires_empty_auth');
    for await(const record of records(path)){if(record.kind==='manifest'){manifest=record;id=await service.imports.create(manifest,'direct',{ledgers:archiveLedgers.ledgers()})}else if(record.kind==='part')await service.imports.uploadPart(id,record.index,record);else closing=record}
    await service.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash,...(suppliedJournal?{laterJournal:suppliedJournal}:{})});await rebuildSearch(proxy.env.DB);complete=true;
+   await auditStatement(proxy.env.DB,{service:'rer import',kind:'archive.restore',reason:'archive restored into this installation',detail:{tables:manifest.tables.length,rows:manifest.tables.reduce((n,t)=>n+t.count,0)}}).run();
   }
   return {contentHash:closing.contentHash,tables:manifest.tables.map(({name,count})=>({name,count})),requiredConfiguration:manifest.requiredConfiguration,journal:direction==='export'?path+'.journal.rer':undefined,identityRecovery:direction==='import'?'Follow OPERATIONS.md#restoring-a-local-archive: snapshot the stopped D1 with SQLite backup, recover every actor, and replace the original binding file before rer setup':undefined};
- }finally{try{if(id){if(direction==='export')await service.exports.abort(id);else if(!complete)await service.imports.abort(id)}}finally{try{if(created)await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error});if(journalCreated)await unlink(journalTemporary).catch(error=>{if(error.code!=='ENOENT')throw error});if(journalPromoted&&!complete)await unlink(path+'.journal.rer')}finally{await proxy.dispose()}}}
+ }finally{try{if(audit&&!complete)await settleStatement(proxy.env.DB,audit,{service:'rer export',kind:'archive.export',outcome:'failed',reason:'export stopped before the archive was written'}).run().catch(()=>{});if(id){if(direction==='export')await service.exports.abort(id);else if(!complete)await service.imports.abort(id)}}finally{try{if(created)await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error});if(journalCreated)await unlink(journalTemporary).catch(error=>{if(error.code!=='ENOENT')throw error});if(journalPromoted&&!complete)await unlink(path+'.journal.rer')}finally{await proxy.dispose()}}}
 }
 if(process.argv[1]===new URL(import.meta.url).pathname){try{console.log(JSON.stringify({ok:true,...await transfer(process.argv[2],process.argv[3],Object.fromEntries([['--legacy-output','legacyOutput'],['--later-archive','laterArchive']].map(([flag,key])=>[key,process.argv.includes(flag)?process.argv[process.argv.indexOf(flag)+1]:undefined])))}))}catch(error){console.log(JSON.stringify({ok:false,reason:error instanceof PortabilityError?error.code.split(':')[0]:error.code??'transfer_refused'}));process.exitCode=4}}

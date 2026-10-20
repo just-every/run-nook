@@ -290,7 +290,7 @@ async function door(module,c,path,input){
 }
 async function finishDoor(module,c,r){for(let n=0;r.state!=='complete'&&n<80;n++)r=await door(module,c,'/'+r.id+'/resume',{});assert.equal(r.state,'complete');return r}
 
-test('retained source policy preserves only current bodies through public erasure, ACL reads and latest archive; later operator erasure fences retained content',async()=>{
+test('retained source policy preserves only current bodies through public erasure, ACL reads and latest archive (NOOK-051 audit log restored with the erased attribution cleared); later operator erasure fences retained content',async()=>{
  const f=await fixture();try{
   const member=await f.person('RetiredPerson'),peer=await f.person('reader'),owner=f.context(f.owner),c=f.context(member),reader=f.context(peer);
   f.db.prepare("INSERT INTO nook_conversations(id,name,kind,owner) VALUES('retained-dm','Private','dm',?)").run(member.operatorId);f.db.prepare("INSERT INTO nook_members VALUES('retained-dm',?),('retained-dm',?)").run(member.operatorId,peer.operatorId);f.db.prepare("INSERT INTO nook_dm_roster SELECT conversation,user FROM nook_members WHERE conversation='retained-dm'").run();
@@ -315,7 +315,12 @@ test('retained source policy preserves only current bodies through public erasur
   assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_revisions WHERE message=?').get(channel.id).n,0);
   await send(reader,'launch',{body:'Visible new current body',intent:'after-retention'});assert.equal((await standard.read(reader,'search','',{q:'Visible'})).items.length,3,'new sends cannot replace retained search entries');
   const latest=await exported(f),fresh=await fixture({bootstrap:false}),old=await fixture({bootstrap:false});try{
-   await restored(fresh,latest);await standard.rebuildSearch(fresh.adapter);assert.equal(fresh.db.prepare('SELECT body FROM nook_message_history WHERE id=?').get(channel.id).body,'Visible RetiredPerson current body');assert.equal(fresh.db.prepare('SELECT count(*) AS n FROM nook_retained_message_bodies').get().n,2);
+   await restored(fresh,latest);await standard.rebuildSearch(fresh.adapter);
+   const audit=db=>db.prepare('SELECT id,at,actor,service,kind,scope_kind,scope,version,reason,outcome,subject,detail,settles FROM nook_audit ORDER BY id').all().map(r=>({...r}))
+   const log=audit(f.db),requested=log.find(r=>r.id===accepted.id);assert.deepEqual(audit(fresh.db),log,'every audit row survives the archive unchanged')
+   assert.equal(requested.kind,'erasure.member');assert.equal(requested.actor,f.owner.operatorId);assert.equal(requested.subject,null);assert.equal(requested.scope,null)
+   assert.ok(log.some(r=>r.kind==='account.status'&&r.subject===null),'the deactivation row keeps its facts');assert.ok(!JSON.stringify(log).includes(member.operatorId),'no row still names the erased member')
+   assert.equal(fresh.db.prepare('SELECT body FROM nook_message_history WHERE id=?').get(channel.id).body,'Visible RetiredPerson current body');assert.equal(fresh.db.prepare('SELECT count(*) AS n FROM nook_retained_message_bodies').get().n,2);
    await assert.rejects(restored(old,before,latest[0]),e=>e.code.startsWith('erased_row:'));
   }finally{fresh.close();old.close()}
   await finishDoor(standard,owner,await door(standard,owner,'',{kind:'message',target:channel.id,confirmation:'ERASE'}));

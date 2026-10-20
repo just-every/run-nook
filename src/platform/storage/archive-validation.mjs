@@ -4,6 +4,7 @@ import {sourceMessageFiles} from '../../imports/formats.mjs';
 import {validateReadableExportArchive} from '../../exit/archive.mjs';
 import {validatePersonalWorkspace} from '../../personal/archive.mjs';
 import {validateIntegrationArchive} from '../../integrations/archive.mjs';
+import {validateAuditArchive} from '../../audit/archive.mjs';
 import {validateReminders} from '../../reminders/archive.mjs';
 import {validateBroadcastArchive} from '../../broadcast/archive.mjs';
 import {validateSchedules} from '../../scheduled/archive.mjs';
@@ -53,6 +54,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  await validatePersonalWorkspace(readTable,manifest,actors,conv);
  await validateDefaultChannels(readTable,manifest,actors,conv);
  await validateIntegrationArchive(readTable,manifest,actors,conv,msg);
+ await validateAuditArchive(readTable,manifest,actors);
  await validateReminders(readTable,manifest,actors,conv,msg);
  await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});
  const scheduledFiles=await validateSchedules(readTable,manifest,{actors,conversations:conv,messages:msg,attachments:files});

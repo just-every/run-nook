@@ -138,6 +138,7 @@ attachments contain identical bytes. Consumers can deduplicate storage by SHA.
 | Record type | Key data and relationships |
 | --- | --- |
 | `workspace_configuration` | Workspace scope only: non-secret `export_policy`, `default_channels`, `broadcast_policy`, `broadcast_people`. Its conversation is the empty string. |
+| `audit_log` | Workspace scope only: NOOK-051 administrator audit rows (`id`, time `at`, `actor` or `service`, `kind`, `scope_kind`/`scope`, `version`, `reason`, `outcome`, `subject`, count-only `detail`, `settles`). No message bodies or secrets; a direct conversation's ID is withheld. Its conversation is the empty string. |
 | `unpublished_imports` | Workspace scope only: source job/channel ID, state and exact named omission; unpublished content is excluded. Its conversation is the empty string. |
 | `conversations` | `id`, `name`, `kind`, `owner`, native sequence/version; recorded topic/archive/manager settings. |
 | `members`, `dm_roster` | `user`, available display `name` and erasure marker. The DM roster is historical; current members are a separate set. |

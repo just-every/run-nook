@@ -3,6 +3,7 @@ import type {Context} from '../platform/storage/context'
 import {datasets,exportRecord} from './catalog'
 import {fileBytes,sha256} from './files'
 import {jobFence} from './policy'
+import {settleStatement} from '../audit/record.mjs'
 import {assertJob,report} from './store'
 import {FORMAT,FORMAT_VERSION,type ExportCursor,type ExportPage} from './types'
 
@@ -40,6 +41,7 @@ export async function stepJob(c:Context,id:string){
  await c.batch([
   c.sql('INSERT INTO nook_exit_pages(job,ordinal,cursor_json,sha256,records) VALUES(?,?,?,?,?)',id,job.pages,job.cursor_json,digest,rows.length),
   c.sql('UPDATE nook_exit_jobs SET state=?,cursor_json=?,pages=pages+1,records=records+?,files=files+?,bytes=bytes+?,omissions=omissions+?,counts_json=?,revision=revision+1 WHERE id=?',state,JSON.stringify(next),rows.length,files,bytes,omissions,JSON.stringify(counts),id),
+  ...(state==='complete'?[settleStatement(c.db,id,{actor:c.uid,kind:'export.readable',outcome:'confirmed',reason:'every page assembled',detail:{pages:job.pages+1}})]:[]),
  ],undefined,`EXISTS(SELECT 1 FROM nook_exit_jobs ej WHERE ej.id=? AND ej.owner=? AND ej.state='running' AND ej.revision=? AND ${jobFence})`,[id,c.uid,job.revision])
  return report(await assertJob(c,id))
 }

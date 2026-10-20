@@ -24,6 +24,7 @@ import {portabilityRoute} from './platform/portability.server'
 import {signInRoute} from './platform/signin.server'
 import {teamRoute} from './team/routes.server'
 import {tokenRoute} from './integrations/tokens.server'
+import {auditRoute} from './audit/log'
 import {hasIntegrationToken,integrationPost,integrationRequest} from './integrations/post.server'
 import {outcomeVersions} from './platform/storage/outcome-history'
 import {readUpload} from './platform/storage/files'
@@ -65,6 +66,7 @@ api.all('/api/*', async c => {
  const session=await repository.authenticated(req.headers),exit=await readableExportRoute(session,req,input);if(exit)return exit
  const team=await teamRoute(session,req,input);if(team)return team
  const tokens=await tokenRoute(session,req.method,p,input as Record<string,unknown>);if(tokens)return c.json(tokens)
+ const audit=await auditRoute(session,req);if(audit)return audit
  if(action==='messages'&&id&&sub==='broadcast-recipients'&&p.length===4&&req.method==='GET')return c.json(await broadcastRecipients(session,id,url.searchParams.get('after')??''))
  if(action==='broadcast'&&id==='presence'&&p.length===3&&req.method==='GET')return c.json({away:!!(await session.one('SELECT away FROM nook_broadcast_choices WHERE user=?',[session.uid]))?.away})
  if(action==='broadcast'&&id==='presence'&&p.length===3&&req.method==='POST')return c.json(await broadcastPresence(session,input as Record<string,unknown>))

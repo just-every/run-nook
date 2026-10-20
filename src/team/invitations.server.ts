@@ -5,6 +5,7 @@ import {Context} from '../platform/storage/context'
 // @ts-ignore Base's canonical mailbox normalization, unchanged.
 import {normalizeEmail} from '../base/modules/operator-auth/policy.mjs'
 import {fullMember} from './access'
+import {auditStatement} from '../audit/record.mjs'
 const manager=`EXISTS(SELECT 1 FROM oa_operators WHERE id=? AND status='active' AND role IN ('owner','admin'))`
 function requireManager(c:Context,role='member'){if(c.session.operator.role!=='owner'&&(c.session.operator.role!=='admin'||role!=='member'))fail(403,'Team management is restricted to an authorized owner or admin')}
 async function targetAuthority(c:Context,user:string){requireManager(c);const target=await c.one('SELECT role FROM oa_operators WHERE id=?',[user]);if(!target)fail(404,'Teammate unavailable');if(c.session.operator.role!=='owner'&&target.role!=='member')fail(403,'Only an owner can manage privileged teammates')}
@@ -24,7 +25,7 @@ export async function prepareInvitation(c:Context,input:Record<string,any>){
   return {prepared:true,email,role:cfg.role,generation:current.generation}
  }
  const id=crypto.randomUUID();
- await c.batch([c.sql(`INSERT INTO nook_invite_plans(id,email,role,mode,scopes,generation,issuer,issuer_version,issuer_session,state) SELECT ?,?,?,?,?,COALESCE(max(generation),0)+1,?,?,?,'prepared' FROM nook_invite_plans WHERE email=?`,id,email,cfg.role,cfg.mode,scopes,c.uid,c.session.operator.version,c.session.id,email)],undefined,`${manager} AND ${fullMember('?')} AND NOT EXISTS(SELECT 1 FROM oa_operators WHERE email=? AND (status='active' OR status='inactive' AND NOT EXISTS(SELECT 1 FROM oa_invitation_cancellations WHERE operator_id=oa_operators.id))) AND NOT EXISTS(SELECT 1 FROM json_each(?) j JOIN nook_channel_settings s ON s.conversation=j.value WHERE s.archived=1)`,[c.uid,c.uid,email,scopes]);
+ await c.batch([c.sql(`INSERT INTO nook_invite_plans(id,email,role,mode,scopes,generation,issuer,issuer_version,issuer_session,state) SELECT ?,?,?,?,?,COALESCE(max(generation),0)+1,?,?,?,'prepared' FROM nook_invite_plans WHERE email=?`,id,email,cfg.role,cfg.mode,scopes,c.uid,c.session.operator.version,c.session.id,email),auditStatement(c.db,{id,actor:c.uid,kind:'invitation.prepare',reason:'prepared',detail:{role:cfg.role,mode:cfg.mode,channels:cfg.scopes.length}})],undefined,`${manager} AND ${fullMember('?')} AND NOT EXISTS(SELECT 1 FROM oa_operators WHERE email=? AND (status='active' OR status='inactive' AND NOT EXISTS(SELECT 1 FROM oa_invitation_cancellations WHERE operator_id=oa_operators.id))) AND NOT EXISTS(SELECT 1 FROM json_each(?) j JOIN nook_channel_settings s ON s.conversation=j.value WHERE s.archived=1)`,[c.uid,c.uid,email,scopes]);
  return {prepared:true,email,role:cfg.role,generation:(await c.one('SELECT generation FROM nook_invite_plans WHERE id=?',[id])).generation}
 }
 export async function teamDirectory(c:Context){
@@ -43,15 +44,16 @@ export async function regrant(c:Context,input:Record<string,any>){
   c.sql('INSERT INTO nook_access VALUES(?,?,1,1) ON CONFLICT(user) DO UPDATE SET mode=excluded.mode,active=1,generation=nook_access.generation+1',user,cfg.mode),
   c.sql('UPDATE nook_actors SET active=1 WHERE id=?',user),
   ...(cfg.mode==='guest'?[c.sql('INSERT INTO nook_guest_grants SELECT ?,value FROM json_each(?)',user,scopes)]:[]),
-  c.sql('INSERT INTO nook_members SELECT value,? FROM json_each(?)',user,scopes)
+  c.sql('INSERT INTO nook_members SELECT value,? FROM json_each(?)',user,scopes),
+  auditStatement(c.db,{actor:c.uid,kind:'membership.grant',person:user,subject:user,reason:'workspace access restored',detail:{mode:cfg.mode,channels:cfg.scopes.length}})
  ],undefined,`${manager} AND ${fullMember('?')} AND ?<>? AND EXISTS(SELECT 1 FROM oa_operators target JOIN oa_operators actor ON actor.id=? WHERE target.id=? AND target.status='active' AND NOT EXISTS(SELECT 1 FROM nook_access cur WHERE cur.user=target.id AND cur.active=1) AND (actor.role='owner' OR target.role='member') AND (?='member' OR target.role='member')) AND NOT EXISTS(SELECT 1 FROM json_each(?) j WHERE NOT EXISTS(SELECT 1 FROM nook_conversations ch JOIN nook_members m ON m.conversation=ch.id WHERE ch.id=j.value AND ch.kind<>'dm' AND ${channelWritable('ch.id')} AND m.user=? AND (SELECT count(*) FROM nook_members cap WHERE cap.conversation=ch.id)<1000))`,[c.uid,c.uid,user,c.uid,c.uid,user,cfg.mode,scopes,c.uid]);
  await c.hint();return {ok:true}
 }
 export async function removeAccess(c:Context,input:Record<string,any>){
  const user=text(input.user,128),conversation=text(input.conversation,128);await targetAuthority(c,user)
- await c.batch([...c.event(conversation,'membership',user),...channelDeparture(c,conversation,user),c.sql('DELETE FROM nook_members WHERE user=? AND conversation=?',user,conversation)],conversation,`${manager} AND ?<>? AND EXISTS(SELECT 1 FROM oa_operators t JOIN oa_operators a ON a.id=? WHERE t.id=? AND (a.role='owner' OR t.role='member')) AND EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind<>'dm')`,[c.uid,user,c.uid,c.uid,user,conversation]);await c.hint();return {ok:true}
+ await c.batch([...c.event(conversation,'membership',user),...channelDeparture(c,conversation,user),c.sql('DELETE FROM nook_members WHERE user=? AND conversation=?',user,conversation),auditStatement(c.db,{actor:c.uid,kind:'membership.remove',conversation,subject:user,reason:'channel access removed'})],conversation,`${manager} AND ?<>? AND EXISTS(SELECT 1 FROM oa_operators t JOIN oa_operators a ON a.id=? WHERE t.id=? AND (a.role='owner' OR t.role='member')) AND EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind<>'dm')`,[c.uid,user,c.uid,c.uid,user,conversation]);await c.hint();return {ok:true}
 }
 export async function cancelPreparation(c:Context,input:Record<string,any>){
  const email=normalizeEmail(input.email);requireManager(c)
- await c.batch([c.sql("UPDATE nook_invite_plans SET state='cancelled' WHERE email=? AND state='prepared'",email)],undefined,`${manager} AND ${fullMember('?')} AND NOT EXISTS(SELECT 1 FROM oa_operators WHERE email=?) AND EXISTS(SELECT 1 FROM nook_invite_plans p JOIN oa_operators actor ON actor.id=? WHERE p.email=? AND p.state='prepared' AND (actor.role='owner' OR p.role='member'))`,[c.uid,c.uid,email,c.uid,email]);return {ok:true}
+ await c.batch([c.sql("UPDATE nook_invite_plans SET state='cancelled' WHERE email=? AND state='prepared'",email),auditStatement(c.db,{actor:c.uid,kind:'invitation.cancel',reason:'prepared invitation cancelled'})],undefined,`${manager} AND ${fullMember('?')} AND NOT EXISTS(SELECT 1 FROM oa_operators WHERE email=?) AND EXISTS(SELECT 1 FROM nook_invite_plans p JOIN oa_operators actor ON actor.id=? WHERE p.email=? AND p.state='prepared' AND (actor.role='owner' OR p.role='member'))`,[c.uid,c.uid,email,c.uid,email]);return {ok:true}
 }

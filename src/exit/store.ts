@@ -3,6 +3,7 @@ import type {Context} from '../platform/storage/context'
 import {custody,jobFence,omissions,permittedScope,scopeFence,revisionFence} from './policy'
 import {currentOwner,exportPolicy} from './authority'
 import {publishedScope} from './policy'
+import {auditStatement,settleStatement} from '../audit/record.mjs'
 import {FORMAT,FORMAT_VERSION,type ExportJob,type ExportReport} from './types'
 
 export async function ownJob(c:Context,id:string):Promise<ExportJob>{
@@ -31,6 +32,8 @@ export async function createJob(c:Context,input:Record<string,any>){
  await c.batch([
   c.sql(`INSERT INTO nook_exit_jobs(id,owner,scope,created,state,identity_revision,cursor_json,workspace_policy_version) SELECT ?,?,?,?,'running',revision,?,? FROM nook_exit_clock WHERE id=1`,id,c.uid,workspace?'permitted':scope,created,JSON.stringify({dataset:0,after:''}),policy?.version??null),
   workspace?c.sql(`INSERT INTO nook_exit_scopes(job,conversation,source_revision) SELECT ?,c.id,COALESCE(ec.revision,0) FROM nook_conversations c LEFT JOIN nook_exit_changes ec ON ec.conversation=c.id WHERE ${publishedScope('c.id')}`,id):c.sql(`INSERT INTO nook_exit_scopes(job,conversation,source_revision) SELECT ?,m.conversation,COALESCE(ec.revision,0) FROM nook_members m LEFT JOIN nook_exit_changes ec ON ec.conversation=m.conversation WHERE m.user=? AND ${permittedScope('m.conversation','m.user')}${conversation?' AND m.conversation=?':''}`,id,c.uid,...(conversation?[conversation]:[])),
+  // NOOK-051: an export is uncertain until its last page is assembled or it is cancelled.
+  auditStatement(c.db,{id,actor:c.uid,kind:'export.readable',...(workspace?{version:policy!.version}:conversation?{conversation}:{person:c.uid}),reason:'started; completion not confirmed',outcome:'uncertain',detail:{scope}}),
  ],conversation,workspace?`${currentOwner('?')} AND EXISTS(SELECT 1 FROM nook_exit_policy WHERE id=1 AND enabled=1 AND version=?)`:conversation?`EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=? AND m.user=? AND ${permittedScope('m.conversation','m.user')})`:'1',workspace?[c.uid,policy!.version]:conversation?[conversation,c.uid]:[])
  return report(await assertJob(c,id))
 }
@@ -54,7 +57,7 @@ export async function setJobState(c:Context,id:string,action:'cancel'|'resume'){
  // Cancellation wins against a concurrently finishing bounded step. Its update
  // is not tied to the revision loaded before that step committed. An already
  // completed job stays complete; a later stale step fails its running/CAS guard.
- await c.batch([c.sql("UPDATE nook_exit_jobs SET state=?,revision=revision+1 WHERE id=? AND owner=? AND state<>'complete'",action==='cancel'?'cancelled':'running',id,c.uid)],undefined,
+ await c.batch([c.sql("UPDATE nook_exit_jobs SET state=?,revision=revision+1 WHERE id=? AND owner=? AND state<>'complete'",action==='cancel'?'cancelled':'running',id,c.uid),...(action==='cancel'&&job.state==='running'?[settleStatement(c.db,id,{actor:c.uid,kind:'export.readable',outcome:'failed',reason:'cancelled before completion'})]:[])],undefined,
   `EXISTS(SELECT 1 FROM nook_exit_jobs ej WHERE ej.id=? AND ej.owner=?${action==='resume'?' AND ej.revision=? AND '+jobFence:''})`,[id,c.uid,...(action==='resume'?[job.revision]:[])])
  return report(await ownJob(c,id))
 }
