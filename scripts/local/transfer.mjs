@@ -4,16 +4,17 @@ import {constants} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import {Readable} from 'node:stream';
 import {getPlatformProxy,unstable_splitSqlQuery} from 'wrangler';
-import {createPortability,readArchive,PortabilityError,MAX_PART_BYTES} from '@runeditrun/rer/modules/portability';
+import {createPortability,readArchive,PortabilityError,MAX_PART_BYTES,sha256} from '@runeditrun/rer/modules/portability';
 import {readLegacyArchive} from '@runeditrun/rer/modules/portability/format';
 import {migrationReplay} from '@runeditrun/rer/modules/portability/migration-history';
+import {destinationLedger,ledgerReader} from '@runeditrun/rer/internal/modules/portability/ledgers.mjs';
 import {recoverLegacyArchive} from '@runeditrun/rer/internal/modules/portability/legacy-files.mjs';
 import {absent,privateFile,promote} from '@runeditrun/rer/modules/portability/cli-options';
 import {rebuildSearch} from '../../src/platform/storage/portability.mjs';
 import {productPolicy} from '../../src/platform/portability-policy.mjs';
 async function* records(path,reader=readArchive){const file=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);try{yield* reader(Readable.toWeb(file.createReadStream({autoClose:false})))}finally{await file.close()}}
 // The applied migrations, in order, so a restore can place an archive made before later additive migrations.
-async function migrations(root,db){const names=(await db.prepare('SELECT name FROM d1_migrations ORDER BY id').all()).results.map(row=>row.name);return migrationReplay(await Promise.all(names.map(async name=>({name,statements:unstable_splitSqlQuery(await readFile(resolve(root,'migrations',name),'utf8'))}))),await productPolicy(db))}
+async function migrations(root,db){const applied=await destinationLedger(db);return migrationReplay(await Promise.all(applied.map(async ({name})=>{const sql=await readFile(resolve(root,'migrations',name),'utf8');return {name,sha256:await sha256(sql),statements:unstable_splitSqlQuery(sql)}})),await productPolicy(db))}
 export async function transfer(direction,path,{root=process.cwd(),legacyOutput,laterArchive}={}){
  if(!['export','import'].includes(direction)||(legacyOutput||laterArchive)&&direction!=='import')throw Error('invalid_direction');
  // The public CLI admits legacyOutput only after explicit acknowledgement; Base owns recovery and its exact migration-seed guards.
@@ -22,7 +23,8 @@ export async function transfer(direction,path,{root=process.cwd(),legacyOutput,l
  // rer import --journal names a later archive of the same installation; its manifest carries the latest erasure journal.
  if(laterArchive)for await(const record of records(laterArchive))if(record.kind==='manifest')suppliedJournal=journalEnvelope(record);
  if(journalPath&&direction==='import'&&!suppliedJournal)throw Object.assign(Error('invalid_erasure_journal'),{code:'invalid_erasure_journal'});
- if(direction==='export'){await absent(path);await absent(path+'.journal.rer')}else for await(const record of records(path)){}
+ const archiveLedgers=ledgerReader();
+ if(direction==='export'){await absent(path);await absent(path+'.journal.rer')}else for await(const record of records(path))archiveLedgers.add(record);
  const proxy=await getPlatformProxy({configPath:resolve(root,'wrangler.jsonc'),persist:{path:resolve(root,'.wrangler/state/v3')},remoteBindings:false});
  let service,id,complete=false,manifest,closing,created=false,journalCreated=false,journalPromoted=false;const temporary=path+'.partial',journalTemporary=path+'.journal.rer.partial';
  try{
@@ -41,7 +43,7 @@ export async function transfer(direction,path,{root=process.cwd(),legacyOutput,l
   }else{
    // Auth exclusions must not allow restoring private identities under a fresh owner.
    if((await proxy.env.DB.prepare('SELECT COUNT(*) AS n FROM oa_operators').first()).n)throw Error('restore_requires_empty_auth');
-   for await(const record of records(path)){if(record.kind==='manifest'){manifest=record;id=await service.imports.create(manifest)}else if(record.kind==='part')await service.imports.uploadPart(id,record.index,record);else closing=record}
+   for await(const record of records(path)){if(record.kind==='manifest'){manifest=record;id=await service.imports.create(manifest,'direct',{ledgers:archiveLedgers.ledgers()})}else if(record.kind==='part')await service.imports.uploadPart(id,record.index,record);else closing=record}
    await service.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash,...(suppliedJournal?{laterJournal:suppliedJournal}:{})});await rebuildSearch(proxy.env.DB);complete=true;
   }
   return {contentHash:closing.contentHash,tables:manifest.tables.map(({name,count})=>({name,count})),requiredConfiguration:manifest.requiredConfiguration,journal:direction==='export'?path+'.journal.rer':undefined,identityRecovery:direction==='import'?'Follow OPERATIONS.md#restoring-a-local-archive: snapshot the stopped D1 with SQLite backup, recover every actor, and replace the original binding file before rer setup':undefined};

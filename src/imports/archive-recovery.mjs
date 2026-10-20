@@ -1,6 +1,7 @@
 import { canonicalJson } from './kit.ts';
 import { EMPTY_REVERSAL_HASH, policyHash } from '../base/modules/import-kit/src/d1/undo-state.ts';
 import { planIndex } from '../base/modules/import-kit/src/d1/erasure-index.ts';
+import { archiveTableNames } from '../platform/storage/archive-inventory.mjs';
 const check = (ok, code) => { if (!ok) throw Error(code); };
 const equal = (a, b) => canonicalJson(a) === canonicalJson(b);
 const ordered = rows => [...rows].sort((a, b) => canonicalJson(a).localeCompare(canonicalJson(b)));
@@ -9,7 +10,7 @@ const integer = n => Number.isSafeInteger(n) && n >= 0;
 // Slack uses strictly reversible jobs without reuse, streaming or native staging.
 // Explicit kit erasure states keep their source and target replay fences. Validate the entire retained recovery graph,
 // including rows that are not needed just to display completed history.
-export async function validateSlackRecoveryGraph(read, proofs) {
+export async function validateSlackRecoveryGraph(read, proofs, manifest) {
     const jobs = new Map([...proofs.values()].map(p => [p.job.id, p]));
     check(equal(ordered(await read('nook_import_effect_revisions')), ordered([...jobs.values()].flatMap(p => p.revisions))), 'slack_effect_revision_changed');
     const owned = ['ik_d1_plan_chunks', 'ik_original_sets', 'ik_originals', 'ik_d1_original_chunks', 'ik_provenance', 'ik_sources', 'ik_d1_entries', 'ik_batches', 'ik_d1_plan_index', 'ik_d1_indexed_jobs', 'ik_d1_custody_revisions', 'ik_d1_custody_states'];
@@ -18,7 +19,9 @@ export async function validateSlackRecoveryGraph(read, proofs) {
         data[table] = await read(table);
         check(data[table].every(row => jobs.has(row.job_id)), 'orphan_slack_recovery_row');
     }
-    for (const table of ['ik_d1_reversal_reports', 'ik_d1_creation_plans', 'ik_stages', 'ik_targets', 'ik_d1_assertions', 'ik_d1_streams', 'ik_d1_stream_pages', 'ik_d1_stream_origins', 'ik_d1_stream_revisions', 'ik_d1_publication_fences', 'ik_d1_staging', 'ik_d1_staging_pages', 'ik_d1_staging_chunks', 'ik_d1_staging_index', 'ik_d1_staging_originals', 'ik_d1_native_staging', 'ik_d1_native_staging_index', 'ik_d1_native_staging_values', 'ik_d1_preparation_receipts', 'ik_d1_staging_headers']) {
+    const unsupported = new Set(['ik_d1_reversal_reports', 'ik_d1_creation_plans', 'ik_stages', 'ik_targets', 'ik_d1_streams', 'ik_d1_stream_pages', 'ik_d1_stream_origins', 'ik_d1_stream_revisions', 'ik_d1_publication_fences', 'ik_d1_staging', 'ik_d1_staging_pages', 'ik_d1_staging_chunks', 'ik_d1_staging_index', 'ik_d1_staging_originals', 'ik_d1_native_staging', 'ik_d1_native_staging_index', 'ik_d1_native_staging_values', 'ik_d1_preparation_receipts', 'ik_d1_staging_headers']);
+    for (const table of manifest ? archiveTableNames(manifest) : unsupported) {
+        if (!unsupported.has(table)) continue;
         check((await read(table)).length === 0, 'unsupported_slack_recovery_state');
     }
     check((await read('ik_d1_history')).every(row=>jobs.get(row.job_id)?.door),'unsupported_slack_recovery_state');

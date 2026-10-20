@@ -24,7 +24,7 @@ curl -X POST https://YOUR-NOOK/api/conversations/CONVERSATION_ID/messages \
 
 ## Rotate or revoke
 
-- **Rotate** shows a new token and ends the old one at once (`integration_token_rotated`). The name, channels and idempotency keys carry over.
+- **Rotate** shows a new token and ends the old one at once (`integration_token_rotated`). The name, channels and idempotency keys carry over. Rotating the installation's `SESSION_SECRET` also ends every integration token (their hashes are sealed with it).
 - **Revoke** ends the token (`integration_token_revoked`).
 
 Every create, rotate, revoke, post, repeated post and refusal is listed under **Recent token activity**.

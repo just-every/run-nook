@@ -24,7 +24,7 @@ export function decodeSlackPlan(job, chunks) {
 }
 /** Validate this product's immutable plan encoding directly; no alternate D1
  * facade and no writes are involved in offline archive graph admission. */
-export async function slackArchivePlans(read, reviews, db) {
+export async function slackArchivePlans(read, reviews, db, manifest) {
     const names = ['ik_jobs', 'ik_d1_plan_chunks', 'nook_imports'];
     const data = Object.fromEntries(await Promise.all(names.map(async name => [name, await read(name)])));
     const jobs = new Map(data.ik_jobs.map(j => [j.id, j])), result = new Map();
@@ -49,6 +49,6 @@ export async function slackArchivePlans(read, reviews, db) {
     const doors=await doorArchivePlans(read,decodeSlackPlan,db);
     for(const [id,proof] of doors){check(!result.has(id),'duplicate_import_binding');result.set(id,proof);}
     check(data.ik_jobs.every(j => [...result.values()].some(p=>p.job.id===j.id)), 'orphan_slack_kit_job');
-    await validateSlackRecoveryGraph(read, result);
+    await validateSlackRecoveryGraph(read, result, manifest);
     return result;
 }

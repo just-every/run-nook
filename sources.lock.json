@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "65287d0b4394ccc909c868fc40138c34f4c37a1980a9e6ca2f0d2dfa85f837a9",
+      "sha256": "793c236c79a612ca45d16bd2e3b105651561cdbe99c238b2e1c70aef818ac342",
       "executable": false
     },
     "DEMO.md": {
@@ -693,7 +693,7 @@
       "executable": false
     },
     "docs/integration-tokens.md": {
-      "sha256": "a653bbcc95a920af4fd9bbb77b506ad39c3060a0cc81d9b14f4712a7aae17450",
+      "sha256": "84b5d12cbe38e02168adf10c7e443d79d6ed6fe425a83ea99031e4d591c245f2",
       "executable": false
     },
     "docs/mattermost-import.md": {
@@ -1349,7 +1349,7 @@
       "executable": false
     },
     "scripts/local/transfer.mjs": {
-      "sha256": "b6ca815ae486f0daf5fbaf8a978c4b32e3b1c26ee301cbb9d34a8e1914f2ed3f",
+      "sha256": "f6d8d5e04b2a58d513d5a02b22a7f7cb07bec09d7ff4a6a2018d225e5828dd7e",
       "executable": false
     },
     "scripts/notify-test-mail.mjs": {
@@ -4141,11 +4141,11 @@
       "executable": false
     },
     "src/imports/archive-plan.d.mts": {
-      "sha256": "b5834082742b90315063c65800518106709124880fd7a5c9effedbd19a8c1ae5",
+      "sha256": "6b973216f58761153fe73fdeaddbdd2e5bd68ff2b9689f9e6fa18e8f4fbc0684",
       "executable": false
     },
     "src/imports/archive-plan.mjs": {
-      "sha256": "8b8f9c371279e8c00564cc3bd0e3dc740beb86a25b9e7d32a87b12cf292b4ad5",
+      "sha256": "3d570830738b3f3e0e90c19abc7d4faf3fdd9a618f2765576dadc734c24d6704",
       "executable": false
     },
     "src/imports/archive-provenance.mjs": {
@@ -4157,7 +4157,7 @@
       "executable": false
     },
     "src/imports/archive-recovery.mjs": {
-      "sha256": "d65208d5af0c707d3c4cff365d322eab4ae7afacf02b71c50524b0e2d714b068",
+      "sha256": "40d7229f43b24404d4f96d4ce7148b557b600e661f4fd3936c84cb99bd7eb30a",
       "executable": false
     },
     "src/imports/authorization.ts": {
@@ -4701,7 +4701,7 @@
       "executable": false
     },
     "src/platform/storage/archive-validation.mjs": {
-      "sha256": "fbdd974a204ae3dbfbe65f158aadcddb238ae5f3ad30f673722acbfc7aa60d35",
+      "sha256": "094e8e25d36474e7cb6b17fac4a9fd36a34d3db4a7797c71c7ce0912aa3f4c11",
       "executable": false
     },
     "src/platform/storage/commands.ts": {
