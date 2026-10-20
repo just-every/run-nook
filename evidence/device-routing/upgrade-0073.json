@@ -1,0 +1,52 @@
+{
+ "migrationsBefore": 54,
+ "applied": "0073_device_delivery_records.sql",
+ "queuePreserved": true,
+ "queueRows": 6,
+ "records": [
+  {
+   "id": "held-canceled",
+   "device": "phone-1",
+   "device_name": "Ana phone",
+   "reason": "mention",
+   "state": "cancelled",
+   "error": "held-active-elsewhere",
+   "held": 1,
+   "released": 0
+  },
+  {
+   "id": "held-pending",
+   "device": "removed-device",
+   "device_name": "Removed device",
+   "reason": "mention",
+   "state": "pending",
+   "error": null,
+   "held": 1,
+   "released": 0
+  },
+  {
+   "id": "released-sent",
+   "device": "phone-1",
+   "device_name": "Ana phone",
+   "reason": "mention",
+   "state": "sent",
+   "error": null,
+   "held": 1,
+   "released": 1
+  },
+  {
+   "id": "seen-canceled",
+   "device": "phone-1",
+   "device_name": "Ana phone",
+   "reason": "mention",
+   "state": "cancelled",
+   "error": "seen",
+   "held": 0,
+   "released": 0
+  }
+ ],
+ "afterRead": {
+  "state": "cancelled",
+  "error": "held-active-elsewhere"
+ }
+}
