@@ -47,6 +47,8 @@ try{
    await page.goto(a.origin+'/app?conversation='+a.channel.id)
    await page.getByRole('textbox',{name:'Message acme-launch',exact:true}).fill(draftA)
    let list=await menu()
+   // Account-carried links arrive after mount; composer readiness is unrelated.
+   await expect(list.getByRole('link').filter({hasText:'legacy.example.com'})).toBeVisible()
    assert.deepEqual(await entries(list),[a.host,'legacy.example.com'],'this installation and the carried account link')
    await expect(list.getByText('This workspace · Ana Rivera',{exact:true})).toBeVisible()
    await shot('a-menu')
