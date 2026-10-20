@@ -3565,7 +3565,7 @@
       "executable": false
     },
     "src/chat/AttentionView.tsx": {
-      "sha256": "7ae27ed3bb35e1f01dd9ed7ad05241334ae88a814ee49ca347e504deea9d5114",
+      "sha256": "d7d49d39600afb7dc2653ddc0b241efbb86ff4a66c759227d456d362a97c5693",
       "executable": false
     },
     "src/chat/Avatar.tsx": {
@@ -5685,7 +5685,7 @@
       "executable": false
     },
     "tests/notify-journey.mjs": {
-      "sha256": "94caab5bf186f1cef71dd90c848cfa4b13e34c52e0c41a6186a8021fa39053cd",
+      "sha256": "26cb578f1fcacbd3e79c6afe7381cbc2f2e630e4be7536cd7f65f019fcced443",
       "executable": false
     },
     "tests/notify.test.mjs": {
@@ -5709,7 +5709,7 @@
       "executable": false
     },
     "tests/notify/quiet.mjs": {
-      "sha256": "ff15ce4392064c730752a8e66b2efdd46a00174fe7bb15c43c02603d3f6f8bb8",
+      "sha256": "b4f0b72f4914245fab9eb5e9a1365639dafc151520412516023203e961fab7cb",
       "executable": false
     },
     "tests/operator-auth.test.mjs": {

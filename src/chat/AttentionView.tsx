@@ -23,6 +23,6 @@ export function AttentionView({attention,user,conversations,onOpen,onAction,onDi
    <p className="muted">Explain why: {item.explanation}</p>
    {item.outcome?<OutcomeCard outcome={item.outcome} user={user} onAction={onAction} onDiscuss={onDiscuss} onRevise={onRevise}>{triage(item)}</OutcomeCard>:<><p className="message-body">{item.message?.deleted?'Message deleted':item.message?.body||'This message is no longer available.'}</p>{item.message?.urgentReason&&<p className="urgent-reason">{item.message.urgentReason}</p>}<div className="card-actions"><button className="soft-button" onClick={()=>discuss(item)}>Discuss</button>{triage(item)}</div></>}
   </article>)}
-  {!attention.items.length&&!attention.reminders?.items.length&&!attention.personalReminders?.length&&<div className="empty-state"><NookMark/><h3>You're all caught up</h3><p>New requests and replies will appear here.</p></div>}
+  {!attention.items.length&&!attention.heldItems?.length&&!attention.reminders?.items.length&&!attention.personalReminders?.length&&<div className="empty-state"><NookMark/><h3>You're all caught up</h3><p>New requests and replies will appear here.</p></div>}
  </div></section>
 }
