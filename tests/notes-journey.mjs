@@ -71,6 +71,8 @@ test('NOOK-053 a private channel note and checklist keep versions, propose a com
   for(let n=0;!job.complete&&n<100;n++)job=await call(`/api/readable-exports/${job.id}/step`,'POST',{},lee.cookie);
   const after=[];for(const page of (await call(`/api/readable-exports/${job.id}/index`,'GET',undefined,lee.cookie)).items)after.push(...(await call(`/api/readable-exports/${job.id}/pages/${page.ordinal}`,'GET',undefined,lee.cookie)).records);
   assert.equal(after.find(r=>r.type==='notes'&&r.data.id===shared.id).data.body,shared.body);assert.deepEqual(after.filter(r=>r.type==='note_versions'&&r.data.note===shared.id).map(r=>r.data.actor).sort(),[lee.user.id,null].sort());assert.ok(after.filter(r=>r.type.startsWith('note')).every(r=>![r.data.author,r.data.actor,r.data.pinned_by].includes(ana.user.id)));
+  // Background erasure continuation must finish first; an archive refuses pending erasures.
+  await until(async()=>!(await db.prepare("SELECT 1 FROM nook_erasure_receipts WHERE state<>'complete' UNION ALL SELECT 1 FROM nook_erasure_work").first()),'erasure work settled before the archive',60_000);
   await restore.close();restore=undefined;const latest=await createPortability({db,buckets:{FILES:await app.mf.getR2Bucket('FILES')},policy:await productPolicy(db)}),latestId=await latest.exports.create();
   records=[];try{while((await latest.exports.advance(latestId,{maxParts:16})).phase==='building'){};for await(const record of readArchive(await latest.exports.download(latestId)))records.push(record)}finally{await latest.exports.abort(latestId)}
   restore=await installation(async()=>{assert.fail('restore must emit no external effects')},{bootstrap:false});

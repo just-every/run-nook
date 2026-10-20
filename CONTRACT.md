@@ -431,7 +431,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests on main `19aa597` plus the NOOK-053/NOOK-073 correction (20 October 2026). NOOK-053 member erasure now keeps shared notes, snapshots and pins with anonymous attribution and clears only notes the erased member wrote alone; note deletion and thread-root erasure still clear, and readable export and operational restore carry the result. NOOK-073 keeps its seven-day, latest-100 delivery view as a view limit only: held, released and canceled Web Push records with reasons are retained (`migrations/0073_device_delivery_records.sql`), restored and exported to their owner. Native obligations stay inherited under the named clauses.
+Judged from the code and tests at commit `19aa597` (20 October 2026). This revision applies the NOOK-053/NOOK-073 correction on top of that commit. NOOK-053 member erasure now keeps shared notes, snapshots and pins with anonymous attribution and clears only notes the erased member wrote alone; note deletion and thread-root erasure still clear, and readable export and operational restore carry the result. NOOK-073 keeps its seven-day, latest-100 delivery view as a view limit only: held, released and canceled Web Push records with reasons are retained (`migrations/0073_device_delivery_records.sql`), restored and exported to their owner. Native obligations stay inherited under the named clauses.
 
 Current code/test coverage is recorded per clause below and mirrored in ACCEPTANCE.md. Evidence identifies the implemented subset; a partial row’s Gap records the broader acceptance still required, including where a shipped subset is covered by another clause. These statuses do not reduce the requirements above.
 
