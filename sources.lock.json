@@ -5921,7 +5921,7 @@
       "executable": false
     },
     "tests/workspaces-browser.mjs": {
-      "sha256": "f7ebf682da03a43c75dd981f994031bd6c057cad59537da338af766090c5dd58",
+      "sha256": "c73625fcc2c3923d4aa770ba21904d68bb5f3d04b110e35393e8031720938df4",
       "executable": false
     },
     "tsconfig.json": {
