@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "76991cdb0c01878e97baa28ef115b3c2ec2223a472ad2cbc8ffb32a32ee2d565",
+      "sha256": "34ac871ff668857c307a4016cc6cae9897e7d0b0f26515c3a2e1c41b2e130070",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "185af616fbdc662b8067ed26b04b1d9ccec9bcf4f13c94477a4f0955e2bb8fed",
+      "sha256": "6471ef08380f849ad48bf91eec993567c267759ba5302026c30385139f89457f",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "c3a465aa5f4722da9b67f74a34feb1bd7f10ac774cd24120d9dea5c405b0fd1c",
+      "sha256": "ea662ed88d762b2ee1b019879a8f6f2029613588c3253c2a0bc245f32a7ad973",
       "executable": false
     },
     "docs/conversations.md": {
@@ -805,7 +805,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "b1225b8b521798cb7b093f8357d812a9115b38a42add7260da2d0ec895bd2c90",
+      "sha256": "10b19845732d83be9fa2c753d190f4178805b13c7340e11c1c5331f974f350cb",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
