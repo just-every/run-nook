@@ -1033,11 +1033,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "3c717171a15fd1eaaea5ae7f23c82b38495e168f84170095db1da8a917157133",
+      "sha256": "d70feebba1f92dc1a6564f1f552e90b9dbc39cf47083be26b8ea46165d9e6c3f",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "43e10a1cfc6ace4f1c36507dbce91489654c04fb6701dc40b12a16e49457df62",
+      "sha256": "3cfc4fdcceab6f4b51923d785cd186bf3fc1f4c5bbda703d7da32976b29f9304",
       "executable": false
     },
     "public/brand/band.svg": {
