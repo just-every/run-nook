@@ -51,6 +51,8 @@ jobs:
             command: pnpm build:app && node tests/workspaces-browser.mjs
           - stage: email notifications
             command: pnpm build:app && pnpm test:notify
+          - stage: conversation notes
+            command: pnpm build:app && pnpm test:notes
           - stage: push notifications
             command: pnpm build:app && pnpm test:push
     uses: ./.github/workflows/verify-stage.yml

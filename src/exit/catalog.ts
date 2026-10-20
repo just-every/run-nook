@@ -1,3 +1,4 @@
+import {noteExportDatasets} from '../notes/export'
 import {publicMattermostRecord} from '../imports/mattermost-public'
 import {publishedImport} from '../imports/projection'
 import {messageAuthorLabel,actorLabel} from '../imports/slack-records.mjs'
@@ -9,6 +10,7 @@ const source=`JOIN nook_imports j ON j.id=r.job AND j.state='complete' AND ${pub
 // Keys are injective JSON tuples. Their lexical order is a paging order only;
 // readers sort timestamps/version numbers for display, never infer chronology.
 export const datasets:Dataset[]=[
+ ...noteExportDatasets,
  {name:'workspace_configuration',sql:`SELECT json_array('workspace') AS _key,'' AS conversation,(SELECT json_object('enabled',enabled,'version',version) FROM nook_exit_policy WHERE id=1) AS export_policy,(SELECT json_group_array(json_object('conversation',conversation,'mandatory',mandatory)) FROM nook_default_channels) AS default_channels,(SELECT json_group_array(json_object('scope',scope,'version',version,'level',level,'everyone_channel',everyone_channel)) FROM nook_broadcast_policy) AS broadcast_policy,(SELECT json_group_array(json_object('scope',scope,'user',user)) FROM nook_broadcast_people) AS broadcast_people WHERE EXISTS(SELECT 1 FROM job WHERE workspace_policy_version IS NOT NULL)`,project:row=>Object.fromEntries(Object.entries(row).map(([key,value])=>[key,key==='conversation'?value:JSON.parse(value)]))},
  {name:'unpublished_imports',sql:`SELECT json_array(j.id,ch.source_id) AS _key,'' AS conversation,j.id AS job,ch.source_id,j.state FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE (j.state<>'complete' OR NOT (${publishedImport})) AND EXISTS(SELECT 1 FROM job WHERE workspace_policy_version IS NOT NULL)`,project:row=>({...row,omissions:[{code:'unpublished-source',reason:'This import conversation has not completed reviewed publication; its content and files are excluded.'}]})},
  {name:'conversations',sql:`SELECT json_array(c.id) AS _key,c.id AS conversation,c.id,c.name,c.kind,c.owner,c.seq,c.version,s.topic,s.archived,s.manager FROM nook_conversations c LEFT JOIN nook_channel_settings s ON s.conversation=c.id WHERE c.id IN (SELECT conversation FROM scope)`},

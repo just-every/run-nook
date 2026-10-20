@@ -1,3 +1,4 @@
+import {eraseNoteRows} from '../../notes/erasure'
 import {erasedIntent} from './intent.mjs'
 import {graph} from './graph'
 import type {Context} from '../../platform/storage/context'
@@ -23,6 +24,7 @@ export async function files(c:Context,f:Awaited<ReturnType<typeof fenceService>>
 export async function messages(c:Context,f:Awaited<ReturnType<typeof fenceService>>,operation:string,ids:string[],retain=false){
  if(!ids.length)return []
  const set=JSON.stringify(ids),where='message IN (SELECT value FROM json_each(?))',result:Sql[]=[]
+ result.push(...await eraseNoteRows(c,f,'thread IN (SELECT value FROM json_each(?))',[set]))
  for(const row of await c.rows('SELECT id,author,intent,conversation FROM nook_messages WHERE id IN (SELECT value FROM json_each(?))',[set])){const id=row.id;result.push(...await f.row('nook_messages',{id}));result.push(sql('INSERT INTO nook_erased_messages SELECT id,conversation,author,parent,version+1,created,sequence,ordinal,author_ordinal,? FROM nook_messages WHERE id=?',await erasedIntent(row.author,row.intent,row.conversation),id))}
  if(retain)result.push(sql("INSERT INTO nook_retained_message_bodies SELECT id,body,body_lower FROM nook_messages WHERE deleted=0 AND id IN (SELECT value FROM json_each(?)) AND NOT EXISTS(SELECT 1 FROM nook_erasure_work w WHERE w.kind='message' AND w.target=nook_messages.id)",set))
  for(const {table,key:keys} of graph.message.edges){result.push(...await fencedRows(c,f,table,[...keys],where,[set]),sql(`DELETE FROM ${table} WHERE ${where}`,set))}
@@ -37,6 +39,7 @@ export async function messages(c:Context,f:Awaited<ReturnType<typeof fenceServic
 }
 export async function outcomes(c:Context,f:Awaited<ReturnType<typeof fenceService>>,target:string){
  const result:Sql[]=[];const rows=await c.rows('SELECT id FROM nook_outcomes WHERE author=? LIMIT 30',[target]),ids=JSON.stringify(rows.map(r=>r.id))
+ result.push(...await fencedRows(c,f,'nook_note_proposals',['outcome'],'outcome IN (SELECT value FROM json_each(?))',[ids]),sql('DELETE FROM nook_note_proposals WHERE outcome IN (SELECT value FROM json_each(?))',ids))
  result.push(...await fencedRows(c,f,'nook_outcomes',['id'],'id IN (SELECT value FROM json_each(?))',[ids]),...await fencedRows(c,f,'nook_outcome_versions',['outcome','version'],'outcome IN (SELECT value FROM json_each(?))',[ids]))
  result.push(sql('DELETE FROM nook_erased_assignees WHERE outcome IN (SELECT value FROM json_each(?))',ids),sql('DELETE FROM nook_erased_outcome_actions WHERE outcome IN (SELECT value FROM json_each(?))',ids),sql('DELETE FROM nook_notify_queue WHERE outcome IN (SELECT value FROM json_each(?))',ids),sql('DELETE FROM nook_attention WHERE outcome IN (SELECT value FROM json_each(?))',ids),sql('DELETE FROM nook_outcome_versions WHERE outcome IN (SELECT value FROM json_each(?))',ids),sql('INSERT INTO nook_erased_outcomes SELECT id,conversation,kind,version,status FROM nook_outcomes WHERE id IN (SELECT value FROM json_each(?))',ids),sql('DELETE FROM nook_outcomes WHERE id IN (SELECT value FROM json_each(?))',ids),sql("UPDATE nook_events SET kind='erasure',object=lower(hex(randomblob(16))),actor=NULL WHERE object IN (SELECT value FROM json_each(?))",ids),...audit('SELECT conversation FROM nook_erased_outcomes WHERE id IN (SELECT value FROM json_each(?))',[ids]))
  return result

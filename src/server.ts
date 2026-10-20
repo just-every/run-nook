@@ -1,3 +1,4 @@
+import {noteRoute} from './notes/route'
 import {mattermostEmojiRoute} from './imports/mattermost-emoji'
 import {readableExportRoute} from './exit/routes'
 import {broadcastRecipients} from './broadcast/recipients'
@@ -80,6 +81,7 @@ api.all('/api/*', async c => {
   return c.json({message,workspace:await workspaceSnapshot(session,query)})
  }
  if(action==='conversations'&&id&&sub==='read'&&p.length===4&&req.method==='POST'){await repository.write(req.headers,'read',id,input);return c.json({ok:true,...await readAcknowledgement(session,id)})}
+ if(action==='conversations'&&id&&sub==='notes'&&p.length>=4&&p.length<=6)return c.json(await noteRoute(session,req.method,id,p[4],p[5],url.searchParams,input))
  if(action==='devices'){
   if(req.method!=='GET'&&req.headers.get('origin')!==url.origin)fail(403,'Origin denied')
   if(p.length===2&&req.method==='GET')return c.json(await devices(session))

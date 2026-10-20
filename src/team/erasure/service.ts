@@ -1,3 +1,4 @@
+import {eraseNoteRows} from '../../notes/erasure'
 import {retireDoorIdentity} from './door-custody'
 import {eraseScheduleFiles} from '../../scheduled/erasure'
 import {inheritPriorBlobs} from './prior-blobs'
@@ -28,10 +29,13 @@ export async function erase(c:Context,kind:string,target:string,input:any,author
 export async function advance(c:Context,id:string,quiet=false){
  const work=await c.one('SELECT * FROM nook_erasure_work WHERE operation=?',[id]);if(work){
   const scope=await authorizeWork(c,work);if(!quiet)await c.batch([c.sql('UPDATE nook_erasure_work SET requested_by=?,requested_session=?,requested_version=? WHERE operation=?',c.uid,c.session.id,c.session.operator.version,id)],scope.conversation,scope.condition,scope.params);if(work.phase==='data'){const f=await fenceService(c);let statements=await f.invalidate();if(work.kind==='member')statements.push(inheritPriorBlobs(id,work.target))
+  if(work.kind==='message'&&await c.one('SELECT 1 FROM nook_notes WHERE deleted=0 AND thread=? LIMIT 1',[work.target])){const redaction=await eraseNoteRows(c,f,'thread=?',[work.target]);await c.batch(redaction.map(s=>c.sql(s.sql,...s.params)),scope.conversation,scope.condition,scope.params);if(!quiet)await c.hint();return receipt(c,id)}
   if(['message','imported-message'].includes(work.kind)&&await eraseRetainedBody(c,work,f,statements)){await drainBlobs(c.env,id);if(!quiet)await c.hint();return receipt(c,id)}
   if(work.kind==='imported-message'){if(!await importedStep(c,work,f))throw Error('Imported message changed');await drainBlobs(c.env,id);if(!quiet)await c.hint();return receipt(c,id)}
   if(work.kind==='imported-author'){if(await importedStep(c,work,f)){await drainBlobs(c.env,id);if(!quiet)await c.hint();return receipt(c,id)}statements.push(sql("UPDATE nook_erasure_work SET phase='blobs' WHERE operation=?",id))}
   else if(work.kind==='member'){
+   const notePending=await c.one('SELECT 1 FROM nook_notes n WHERE n.deleted=0 AND (n.author=? OR EXISTS(SELECT 1 FROM nook_note_versions v WHERE v.note=n.id AND v.actor=?) OR n.thread IN (SELECT id FROM nook_messages WHERE author=?)) LIMIT 1',[work.target,work.target,work.target]);
+   if(notePending){statements.push(...await eraseNoteRows(c,f,'author=? OR EXISTS(SELECT 1 FROM nook_note_versions v WHERE v.note=nook_notes.id AND v.actor=?) OR thread IN (SELECT id FROM nook_messages WHERE author=?)',[work.target,work.target,work.target]));await c.batch(statements.map(s=>c.sql(s.sql,...s.params)),scope.conversation,scope.condition,scope.params);if(!quiet)await c.hint();return receipt(c,id)}
    const rows=await c.rows('SELECT id FROM nook_messages WHERE author=? LIMIT 30',[work.target]);
    if(rows.length)statements.push(...await messages(c,f,id,rows.map(r=>r.id),work.member_bodies==='retain'))
    else{

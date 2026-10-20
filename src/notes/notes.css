@@ -1,0 +1,47 @@
+.nook-app .notes-panel { display:flex; flex-direction:column; min-height:0; height:100%; min-width:0; background:var(--paper, #fff); }
+.nook-app .notes-panel .panel-bar { flex-wrap:wrap; gap:8px; }
+.nook-app .notes-panel .panel-bar h2 { flex:1; }
+.nook-app .notes-scroll { overflow-y:auto; min-height:0; padding:16px; }
+.nook-app .notes-intro,.nook-app .notes-meta { color:var(--ink-soft); font-size:13px; line-height:1.5; }
+.nook-app .notes-intro { margin:0 0 8px; }
+.nook-app .notes-notice { margin:0; font-size:13px; }
+.nook-app .notes-notice:empty { display:none; }
+.nook-app .notes-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.nook-app .notes-list,.nook-app .notes-checklist,.nook-app .notes-history ol { list-style:none; margin:0; padding:0; }
+.nook-app .notes-list>li { border-bottom:1px solid var(--line); }
+.nook-app .notes-choice { display:block; width:100%; padding:14px 4px; background:transparent; text-align:left; color:var(--ink); overflow-wrap:anywhere; }
+.nook-app .notes-choice>span:last-child { display:block; margin-top:4px; color:var(--ink-soft); font-size:12px; }
+.nook-app .notes-choice:hover { background:var(--wash-select); }
+.nook-app .notes-pin { color:var(--accent); font-size:12px; }
+.nook-app .notes-detail h3 { font-size:18px; margin:16px 0 4px; overflow-wrap:anywhere; }
+.nook-app .notes-detail h4,.nook-app .notes-editor h4,.nook-app .notes-history h4 { font-size:14px; margin:18px 0 6px; }
+.nook-app .notes-body { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; }
+.nook-app .notes-checklist>li { padding:12px 0; border-bottom:1px solid var(--line); }
+.nook-app .notes-check { display:flex; gap:9px; align-items:flex-start; line-height:1.5; overflow-wrap:anywhere; }
+.nook-app .notes-check input[type=checkbox],.nook-app .notes-edit-row input[type=checkbox] { flex:none; width:17px; height:17px; margin-top:3px; accent-color:var(--accent); }
+.nook-app .notes-propose { display:flex; flex-wrap:wrap; gap:4px 8px; margin:8px 0 0 26px; align-items:center; }
+.nook-app .notes-propose select { min-width:0; max-width:100%; flex:1 1 140px; padding:7px; border:1px solid var(--line-field,var(--line)); border-radius:var(--r-control); background:transparent; color:var(--ink); font:inherit; font-size:13px; }
+.nook-app .notes-links p { margin:6px 0; overflow-wrap:anywhere; }
+.nook-app .notes-links a { text-decoration:underline; text-underline-offset:3px; }
+.nook-app .notes-history { margin-top:16px; padding-top:4px; border-top:1px solid var(--line); }
+.nook-app .notes-history ol>li { padding:8px 0 12px 12px; margin:10px 0; border-left:2px solid var(--line); }
+.nook-app .notes-history summary { cursor:pointer; overflow-wrap:anywhere; }
+.nook-app .notes-editor fieldset { padding:0; border:0; margin:12px 0 0; min-width:0; }
+.nook-app .notes-editor fieldset>label:not(.notes-check) { display:block; margin:12px 0 5px; font-size:13px; font-weight:600; }
+.nook-app .notes-editor input:not([type=checkbox]),.nook-app .notes-editor textarea { box-sizing:border-box; min-width:0; width:100%; padding:9px 10px; border:1px solid var(--line-field,var(--line)); border-radius:var(--r-control); color:var(--ink); background:transparent; font:inherit; font-size:14px; }
+.nook-app .notes-editor textarea { resize:vertical; }
+.nook-app .notes-editor input:focus-visible,.nook-app .notes-editor textarea:focus-visible,.nook-app .notes-propose select:focus-visible,.nook-app .notes-choice:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.nook-app .notes-edit-row { display:flex; align-items:flex-start; gap:6px; margin:8px 0; }
+.nook-app .notes-edit-row input[type=checkbox] { margin-top:10px; }
+.nook-app .notes-edit-row input:not([type=checkbox]) { flex:1; }
+.nook-app .notes-edit-row .text-button { flex:none; }
+.nook-app .notes-edit-link { display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:10px 0; border-bottom:1px solid var(--line); }
+.nook-app .notes-editor fieldset>.notes-check { margin-top:18px; }
+@media(max-width:850px) {
+ .nook-app .notes-scroll { padding:12px 16px 24px; }
+ .nook-app .notes-panel button,.nook-app .notes-propose select { min-height:40px; }
+ .nook-app .notes-editor input:not([type=checkbox]),.nook-app .notes-editor textarea,.nook-app .notes-propose select { font-size:16px; }
+ .nook-app .notes-edit-row { flex-wrap:wrap; }
+ .nook-app .notes-edit-row input:not([type=checkbox]) { flex-basis:calc(100% - 30px); }
+ .nook-app .notes-edit-row .text-button { margin-left:24px; }
+}
