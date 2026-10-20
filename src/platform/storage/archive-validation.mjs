@@ -1,3 +1,4 @@
+import {validateAuditArchive} from '../../audit/archive.mjs';
 import {validateNotesArchive} from '../../notes/archive.mjs';
 import {validateMattermostArchiveMessage} from '../../imports/mattermost-archive.mjs';
 import {sourceMessageFiles} from '../../imports/formats.mjs';
@@ -52,6 +53,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
  await validatePersonalWorkspace(readTable,manifest,actors,conv);
  await validateDefaultChannels(readTable,manifest,actors,conv);
+ await validateAuditArchive(readTable,manifest,actors);
  await validateIntegrationArchive(readTable,manifest,actors,conv,msg);
  await validateReminders(readTable,manifest,actors,conv,msg);
  await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});

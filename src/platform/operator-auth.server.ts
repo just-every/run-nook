@@ -1,3 +1,4 @@
+import {auditDatabase} from '../audit/database'
 import {createAuthHandler,AuthError} from '../base/modules/operator-auth/index.mjs'
 // @ts-ignore Product configuration uses the portable Base JavaScript API.
 import {authBindings,developmentMail,acceptsRequest,createConfiguredAuth} from './operator-auth-runtime.mjs'
@@ -12,6 +13,8 @@ export async function authRoute(env:Bindings,request:Request){
    // Signed admission is permanent. Refuse legacy bootstrap before its rate-limit writes.
    if(await env.DB.prepare('SELECT singleton FROM oc_owner_claims WHERE singleton=1').first())return Response.json({error:'already_initialized'},{status:409,headers:{'Cache-Control':'no-store'}})
   }
-  return fontDocumentResponse(await createAuthHandler(operatorAuth(env))(request))
+  const session=await operatorAuth(env).getSession(request)
+  const audited={...env,DB:auditDatabase(env.DB,session?.operatorId??null)}
+  return fontDocumentResponse(await createAuthHandler(operatorAuth(audited))(request))
  }catch(error){return Response.json({error:error instanceof AuthError?error.code:'auth_unavailable'},{status:error instanceof AuthError?error.status:503,headers:{'Cache-Control':'no-store'}})}
 }

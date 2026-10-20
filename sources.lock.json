@@ -609,7 +609,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "70a1f5da575823c24fb7dc7ad95c6c64f8615705b19c654ce65ddb5c72903e0f",
+      "sha256": "80fa6e8a3288d7119925eaa42c23fcbec9477f57df72a60e3259c8b3e8f4f236",
       "executable": false
     },
     ".gitignore": {
@@ -3889,7 +3889,7 @@
       "executable": false
     },
     "src/exit/catalog.ts": {
-      "sha256": "ab9859edc7e83188db57c878ec0be1f59fac28d33a66d40792d8a6b1d3eeb428",
+      "sha256": "a2ec60e37f1ff6987a6ab766064e99b0cdbca2e58b98075dbf83e1e9dd80e35e",
       "executable": false
     },
     "src/exit/client.ts": {
@@ -3929,7 +3929,7 @@
       "executable": false
     },
     "src/exit/store.ts": {
-      "sha256": "42a08f41a29dc80c34deca00bf3573b64425bd7913c1acd193b17af7f44ff383",
+      "sha256": "09d8b8a631995b51bb813026432a2e51b773e8b4bbdd3d660b9612eb00b80bcc",
       "executable": false
     },
     "src/exit/types.ts": {
@@ -4257,7 +4257,7 @@
       "executable": false
     },
     "src/imports/door.ts": {
-      "sha256": "26d3775ed1faf613cd42541eb7d3531bfd6e90e585278c22970828b3c12b8f44",
+      "sha256": "d85eff14c3c0acc361b1ad1f76ec2c7358c1d52be2b01f7f18f1277fe720843c",
       "executable": false
     },
     "src/imports/DoorPlanPanel.tsx": {
@@ -4673,7 +4673,7 @@
       "executable": false
     },
     "src/platform/operator-auth.server.ts": {
-      "sha256": "29fcb8b65c0fdec2a9c0e33d2779db7babf16a629227acc59e177dd70f4961fe",
+      "sha256": "3dfe879a1d2c0fbda15c34357ebc1652e9ff30643d31333334fb25bbc7dfc4a5",
       "executable": false
     },
     "src/platform/owner-claim.server.ts": {
@@ -4705,7 +4705,7 @@
       "executable": false
     },
     "src/platform/storage/archive-validation.mjs": {
-      "sha256": "094e8e25d36474e7cb6b17fac4a9fd36a34d3db4a7797c71c7ce0912aa3f4c11",
+      "sha256": "122ca6a4ba3a340e654917389149230e5294c6c67e4ddf61fe0d3470785edb61",
       "executable": false
     },
     "src/platform/storage/commands.ts": {
@@ -4713,7 +4713,7 @@
       "executable": false
     },
     "src/platform/storage/context.ts": {
-      "sha256": "dfd5b71a505950c6f9bca429c5f0bff4dea4040c9f441fdc1ae6abbb371beab0",
+      "sha256": "25b8f03b0e1a04e9a4c92c1e7f6b9bdd99bbf11ea98dae39f93a5ccac36a2103",
       "executable": false
     },
     "src/platform/storage/files.ts": {
@@ -4753,7 +4753,7 @@
       "executable": false
     },
     "src/platform/storage/portability.mjs": {
-      "sha256": "1e0147e6be0ca82f67fcd8f036b73d7d9b707f519b7be81ea1cb1e974333b226",
+      "sha256": "0356f203d91d8fafcfdbc061d5e1826bc572ef8a16cbd93754d6d53a1cb5d9d7",
       "executable": false
     },
     "src/platform/storage/read.ts": {
@@ -5153,11 +5153,11 @@
       "executable": false
     },
     "src/team/erasure/graph.ts": {
-      "sha256": "1047a10ef2705c1c4f65776c5b79ddef6b7011e4bb0376750ea841b011c5fdc5",
+      "sha256": "e137a03af9feea25132ee68ba72b48166882722c51f720a15f2cdeec07f97e2b",
       "executable": false
     },
     "src/team/erasure/identity.ts": {
-      "sha256": "3cfb54fbc4547a91b42637193e9ab6d394f598beadef97d33d073c822ad30211",
+      "sha256": "5edee468f14508b0ae5ee444f2a8679617ef2990a2789e02ed5e71ca26c9c8f1",
       "executable": false
     },
     "src/team/erasure/import-commit.ts": {
@@ -5297,7 +5297,7 @@
       "executable": false
     },
     "src/team/routes.server.ts": {
-      "sha256": "89673cb4b5da2d98ec3a615e7aa71ad4ff386ca41a4b2c3d968c882fe054ab87",
+      "sha256": "b2c267aa5216fce87ccec60235deb370f7495cafa22c50cb8ec2a37c6fa470f5",
       "executable": false
     },
     "src/team/saved-archive.mjs": {
@@ -5325,7 +5325,7 @@
       "executable": false
     },
     "src/team/TeamPanel.tsx": {
-      "sha256": "bce5398f6fd523e8f9d713175c838663a2d8439ddec56958c4aa440d0fac1d19",
+      "sha256": "4f9ce7b4d07e56d89a2614767d796d3c6fbfadb579d48b5641c830fec2f47022",
       "executable": false
     },
     "src/team/types.ts": {

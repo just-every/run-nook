@@ -33,6 +33,8 @@ jobs:
             command: pnpm build:app && pnpm test:runtime --suite=mattermost-imports
           - stage: campfire import
             command: pnpm build:app && pnpm test:runtime --suite=campfire-imports
+          - stage: admin audit
+            command: pnpm build:app && node --test tests/audit-runtime.mjs
           - stage: readable exit
             command: pnpm build:app && pnpm test:runtime --suite=readable-export
           - stage: thread delivery

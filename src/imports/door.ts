@@ -1,3 +1,4 @@
+import {auditDatabase} from '../audit/database';
 import { createImportOperatorHandler } from '../base/modules/import-kit/src/door/operator';
 import { admit } from '../base/modules/import-kit/src/door/admission';
 import { createImportDoorHandler } from '../base/modules/import-kit/src/door/index';
@@ -45,6 +46,7 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
       const result = await ownerAction(env, admitted.c, action, input, listed.kind);
       if (result !== null) return Response.json(result, {headers});
     }
+    env={...env,DB:auditDatabase(env.DB,admitted.c?.uid??null)};
     const users = await people(env.DB), source = importSource(admitted.namespace, admitted.principal, users)!;
     let predicate = admitted.predicate, link: any, capture;
     if (action === 'plan') {

@@ -11,7 +11,7 @@ export const normalizedPortability={
  importSafety:{ik_door_settings:{enabled:[0]}},
  importRow(table,row){return table==='ik_door_settings'?{...row,enabled:0}:row;},
  // The notification queue is delivery state: a restored installation sends nothing old.
- excludeTables:[...readableExportExcludedTables,'nook_typing','nook_broadcast_presence','nook_read_undo','nook_read_generations','nook_guard','nook_conversion','nook_erasure_work','nook_erasure_blobs','nook_notify_queue','nook_push_devices','nook_push_presence','nook_push_secrets',...teamExcludedTables,...integrationExcludedTables],
+ excludeTables:['nook_audit_context',...readableExportExcludedTables,'nook_typing','nook_broadcast_presence','nook_read_undo','nook_read_generations','nook_guard','nook_conversion','nook_erasure_work','nook_erasure_blobs','nook_notify_queue','nook_push_devices','nook_push_presence','nook_push_secrets',...teamExcludedTables,...integrationExcludedTables],
  buckets:{FILES:{prefix:'private/',objectReferences:{table:'nook_object_inventory',keyColumn:'object_key'}}},
  exportRow(table,row){
   if(table==='nook_erasure_receipts'&&row.state!=='complete')throw Error('finish_pending_erasure_before_export');
