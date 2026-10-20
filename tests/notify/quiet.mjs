@@ -25,10 +25,10 @@ export async function quietJourney({installation,rowan,sam,room,say,browser,evid
   const sunday=(month,ordinal)=>{const date=new Date(Date.UTC(year,month,1));date.setUTCDate(1+(7-date.getUTCDay())%7+7*(ordinal-1));return date.toISOString().slice(0,10)}
   const spring=sunday(2,2),autumn=sunday(10,1),proof=[]
   const db=installation.database(),env={DB:db,AUTH_ORIGIN:installation.origin,AUTH_LOCAL:'true'}
-  for(const [date,expectedEnd,elapsed] of [[spring,'11:00:00.000Z',8],[autumn,'12:00:00.000Z',10]]){
+  for(const [date,start,expectedEnd,elapsed] of [[spring,'03:00:00Z','11:00:00.000Z',8],[autumn,'02:00:00Z','12:00:00.000Z',10]]){
    const config={...saved.quietSchedule,days};delete config.until;delete config.next
    saved=await rowan.patch('/api/notify',{quietSchedule:config})
-   const at=Date.parse(date+'T05:00:00Z'),before=Date.parse(date+'T03:00:00Z'),end=Date.parse(date+'T'+expectedEnd)
+   const at=Date.parse(date+'T05:00:00Z'),before=Date.parse(date+'T'+start),end=Date.parse(date+'T'+expectedEnd)
    assert.equal(quietAt(config,before).until,end);assert.equal((end-before)/3600000,elapsed)
    const channel=await room('Quiet calendar '+date,rowan),message=await say(sam,channel,'Calendar boundary mention',{mentions:[rowan.user.id]})
    const sent=[];await drainNotifications(env,async mail=>{sent.push(mail);return {ok:true}},at)
@@ -53,9 +53,11 @@ export async function quietJourney({installation,rowan,sam,room,say,browser,evid
   const quietRoom=await room('Quiet explanation',rowan),item=await say(sam,quietRoom,'Explain this held mention',{mentions:[rowan.user.id]})
   await rowan.patch('/api/settings',{dndUntil:Date.now()+3600000})
   const attention=await rowan.get('/api/attention');assert.ok(attention.heldItems.some(r=>r.id===item.id+'.'+rowan.user.id&&r.explanation.includes('quiet')))
+  const quietOff=(await rowan.get('/api/notify')).quietSchedule;delete quietOff.until;delete quietOff.next;saved=await rowan.patch('/api/notify',{quietSchedule:{...quietOff,enabled:false}})
   await rowan.patch('/api/settings',{dndUntil:null})
   await rowan.patch(`/api/conversations/${quietRoom}/notify`,{level:'nothing'})
-  const silent=await rowan.get('/api/attention');assert.ok(silent.items.some(r=>r.message?.id===item.id&&r.explanation.includes('suppressed by your level'))||silent.heldItems.length)
+  const silent=await rowan.get('/api/attention');assert.ok(silent.items.some(r=>r.message?.id===item.id&&r.explanation.includes('suppressed by your level')))
+  const quietOn={...saved.quietSchedule};delete quietOn.until;delete quietOn.next;await rowan.patch('/api/notify',{quietSchedule:{...quietOn,enabled:true}})
   await mkdir(evidence,{recursive:true});await writeFile(join(evidence,'quiet-calendar.json'),JSON.stringify(proof,null,2)+'\n')
   for(const width of [1440,390]){
    const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:900}}),at=rowan.cookie.indexOf('=')

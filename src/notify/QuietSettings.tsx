@@ -2,12 +2,13 @@ import {useEffect,useState} from 'react'
 import type {TeamRequest} from '../team/types'
 import type {QuietSchedule,QuietDay} from './quiet-time'
 import './quiet.css'
+const canonical=(value:QuietSchedule):QuietSchedule=>({enabled:value.enabled,zone:value.zone,days:value.days,version:value.version})
 const names=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 export function QuietSettings({request}:{request:TeamRequest}){
  const [value,setValue]=useState<QuietSchedule|null>(null),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false)
- useEffect(()=>{const controller=new AbortController();request<{quietSchedule:QuietSchedule}>('/api/notify',{signal:controller.signal}).then(data=>setValue(data.quietSchedule)).catch(error=>{if(!controller.signal.aborted)setNotice(error.message)});return()=>controller.abort()},[request])
+ useEffect(()=>{const controller=new AbortController();request<{quietSchedule:QuietSchedule}>('/api/notify',{signal:controller.signal}).then(data=>setValue(canonical(data.quietSchedule))).catch(error=>{if(!controller.signal.aborted)setNotice(error.message)});return()=>controller.abort()},[request])
  const change=(day:number,patch:Partial<QuietDay>)=>setValue(old=>old&&({...old,days:old.days.map(d=>d.day===day?{...d,...patch}:d)}))
- async function save(event:React.FormEvent){event.preventDefault();if(!value)return;setBusy(true);setNotice('');try{const data=await request<{quietSchedule:QuietSchedule}>('/api/notify',{method:'PATCH',body:JSON.stringify({quietSchedule:value})});setValue(data.quietSchedule);setNotice('Quiet schedule saved.')}catch(error){setNotice((error as Error).message)}finally{setBusy(false)}}
+ async function save(event:React.FormEvent){event.preventDefault();if(!value)return;setBusy(true);setNotice('');try{const data=await request<{quietSchedule:QuietSchedule}>('/api/notify',{method:'PATCH',body:JSON.stringify({quietSchedule:value})});setValue(canonical(data.quietSchedule));setNotice('Quiet schedule saved.')}catch(error){setNotice((error as Error).message)}finally{setBusy(false)}}
  async function snooze(minutes:number){try{await request('/api/settings',{method:'PATCH',body:JSON.stringify({dndUntil:minutes?Date.now()+minutes*60000:null})});setNotice(minutes?'Alerts snoozed for '+minutes+' minutes.':'Quiet snooze ended; your recurring schedule still applies.')}catch(error){setNotice((error as Error).message)}}
  return <section className="quiet-settings team-section" aria-labelledby="quiet-title"><h3 id="quiet-title">Your quiet schedule</h3><p>Times stay in the time zone you choose. An overnight rule starts on its named weekday and ends the next morning. Change a weekday for an exception.</p>
  {value&&<form onSubmit={event=>void save(event)}><label className="quiet-enabled"><input type="checkbox" checked={value.enabled} onChange={event=>setValue({...value,enabled:event.target.checked})}/>Use recurring quiet hours</label><label className="field">Quiet time zone<input aria-label="Quiet time zone" value={value.zone} required maxLength={100} onChange={event=>setValue({...value,zone:event.target.value})}/></label>

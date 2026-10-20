@@ -1020,6 +1020,10 @@
       "sha256": "60f465b0e33eee07c8574b17ac88fe2fd9f68acf29b6cdc2e5fae6d1215ae7da",
       "executable": false
     },
+    "migrations/0072_quiet_schedule.sql": {
+      "sha256": "138c773beb1ae5148adc598704ed1281aa8a57e5c6a7a972ab7f1ebc673e1852",
+      "executable": false
+    },
     "OPERATIONS.json": {
       "sha256": "6faa9c4609e691f56f26e2c4c72f95eb49810d4227bb48cc3795c796ac57829f",
       "executable": false
@@ -4640,6 +4644,10 @@
       "sha256": "652cc1cf08e362f0a4d056ec4ab8fe179feeadcf746b9050b271ed3c76b16adf",
       "executable": false
     },
+    "src/notify/explain.ts": {
+      "sha256": "78ddfbac6a65bf04a21c1ded71c801e0a86d24df49c1641596127c3ab5c01c2f",
+      "executable": false
+    },
     "src/notify/policy.ts": {
       "sha256": "5e045ffdaf40eed5fffad41bcb92ac7f2efb8f1b3b763f9da6ad46bb7b2aa91b",
       "executable": false
@@ -4650,6 +4658,26 @@
     },
     "src/notify/queue.ts": {
       "sha256": "c68fc41baa289607b42ab771160fd87a15970b66bca6620d511f2dc378307251",
+      "executable": false
+    },
+    "src/notify/quiet-archive.mjs": {
+      "sha256": "4f92bcf9355ff3c03a53070b00098b58ce83e953924b9edb1e9c7bb4b7ded3c9",
+      "executable": false
+    },
+    "src/notify/quiet-time.ts": {
+      "sha256": "1a0ff4e80c60e7524a6243a852690222192161fa0fed2963eb5a2acc77349619",
+      "executable": false
+    },
+    "src/notify/quiet.css": {
+      "sha256": "7ab77ec215cb1bc51bbedc975873a31e44aa0c0a7f2e4a4395bc7f8469289e85",
+      "executable": false
+    },
+    "src/notify/quiet.ts": {
+      "sha256": "199eef2700b58f3ce08f815abc5f358f2427cd7c1ab11f8cfba3305932808370",
+      "executable": false
+    },
+    "src/notify/QuietSettings.tsx": {
+      "sha256": "5398ec2a70f8b73badefd0d9ab6619878d35002bca86224cb4e301efab08a898",
       "executable": false
     },
     "src/notify/run.ts": {
@@ -5678,6 +5706,10 @@
     },
     "tests/notify/people.mjs": {
       "sha256": "6353620c485dfea5598672659784829c3007fd25fb4a09225ac0c8495e84e466",
+      "executable": false
+    },
+    "tests/notify/quiet.mjs": {
+      "sha256": "ff15ce4392064c730752a8e66b2efdd46a00174fe7bb15c43c02603d3f6f8bb8",
       "executable": false
     },
     "tests/operator-auth.test.mjs": {
