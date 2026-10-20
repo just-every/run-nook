@@ -2,11 +2,11 @@ import {migrationHistory} from '../migration-history.mjs';
 import assert from 'node:assert/strict';
 import {createPortability,readArchive} from '@runeditrun/rer/modules/portability';
 import {productPolicy} from '../../src/platform/portability-policy.mjs';
-import {installation} from './fixture.mjs';
+import {installation,until} from './fixture.mjs';
 export async function archive(c){
  const {call,db,mf,member}=c;
  const quiet=(await call('/api/notify','GET',undefined,member.cookie)).quietSchedule;delete quiet.until;delete quiet.next
- await call('/api/notify','PATCH',{quietSchedule:{...quiet,enabled:true}},member.cookie)
+ const saved=(await call('/api/notify','PATCH',{quietSchedule:{...quiet,enabled:true}},member.cookie)).quietSchedule
  const policyRoom=c.archiveConversation;
  await call(`/api/conversations/${policyRoom.id}/notify`,'PATCH',{level:'nothing',threads:'all'},member.cookie);
  // Use the same public Base export/import service and product policy as rer's
@@ -34,12 +34,10 @@ export async function archive(c){
   assert.equal((await restore.db.prepare('SELECT body FROM nook_messages WHERE id=?').bind(c.preserved.id).first()).body,c.preserved.body,'actual private content restored');
   assert.equal((await restore.db.prepare('SELECT count(*) AS n FROM oa_sessions').first()).n,0,'archive restores no live sessions');
   await restore.call('/api/me','GET',undefined,member.cookie,401);
-  // The live restored alarm may already have recomputed its cache. A fresh
-  // sign-in must expose the restored rules and current boundaries instead.
-  const signedIn=await restore.signIn('recipient@example.test'),schedule=(await restore.call('/api/notify','GET',undefined,signedIn.cookie)).quietSchedule;assert.equal(schedule.enabled,true);assert.equal(schedule.zone,quiet.zone);assert.deepEqual(schedule.days,quiet.days);assert.ok(schedule.until===0||schedule.until>Date.now());assert.ok(schedule.next===null||schedule.next>Date.now());
   // Arm the restored real ChatHub through its normal internal hint, then allow
   // its alarm to drain. No old queue, subscriptions or network effects return.
-  const hub=await restore.mf.getDurableObjectNamespace('CHAT_HUB');await hub.get(hub.idFromName('workspace')).fetch('https://hub/hint');await new Promise(resolve=>setTimeout(resolve,6500));assert.equal(outbound,0);
+  const hub=await restore.mf.getDurableObjectNamespace('CHAT_HUB');await hub.get(hub.idFromName('workspace')).fetch('https://hub/hint');
+  await until(async()=>{const point=await restore.db.prepare('SELECT quiet_until,next_change FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();return point.quiet_until===saved.until&&point.next_change===saved.next},'restored alarm recomputes the saved local calendar boundary');await new Promise(resolve=>setTimeout(resolve,6500));assert.equal(outbound,0);
   c.t.diagnostic('Recovery: actual Base archive bytes from real D1/R2 exclude secrets/devices/presence/all delivery state; restored preferences and private content match, old session denied, real restored ChatHub alarm emits zero pushes.');
  }finally{if(exportId)await service.exports.abort(exportId);await restore?.close()}
 }
