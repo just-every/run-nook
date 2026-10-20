@@ -22,7 +22,7 @@ test('NOOK-053 a private channel note and checklist keep versions, propose a com
   note=await call(base+'/'+note.id,'PATCH',{...content,version:3,pinned:true},ana.cookie);
   const proposed=await call(base+'/'+note.id+'/proposals','POST',{version:note.version,item,assignee:lee.user.id},ana.cookie);assert.equal(proposed.status,'proposed');
   await call('/api/outcomes/'+proposed.id,'PATCH',{version:proposed.version,action:'accept'},ana.cookie,403);
-  const checked=await call(base+'/'+note.id,'PATCH',{...content,version:note.version,pinned:true,items:[{id:item,text:content.items[0].text,checked:true}]},ana.cookie);assert.equal((await call('/api/outcomes/'+proposed.id,'GET',undefined,lee.cookie)).status,'proposed','checked box confers no acceptance');
+  const checked=await call(base+'/'+note.id,'PATCH',{...content,version:note.version,pinned:true,items:[{id:item,text:content.items[0].text,checked:true}]},ana.cookie);assert.equal((await call(`/api/conversations/${room.id}/outcomes`,'GET',undefined,lee.cookie)).find(o=>o.id===proposed.id).status,'proposed','checked box confers no acceptance');
   const revised=await call('/api/outcomes/'+proposed.id,'PATCH',{version:proposed.version,body:'Confirm customer success and escalation coverage'},ana.cookie);
   await call('/api/outcomes/'+proposed.id,'PATCH',{version:proposed.version,action:'accept'},lee.cookie,409);
   const accepted=await call('/api/outcomes/'+proposed.id,'PATCH',{version:revised.version,action:'accept'},lee.cookie);assert.equal(accepted.status,'accepted');
