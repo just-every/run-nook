@@ -64,12 +64,12 @@ async function outcomeHistory(conversation:string,first:Outcome[]):Promise<Outco
  for(;;){const page=await api<Outcome[]>(`conversations/${conversation}/outcomes?after=${encodeURIComponent(after)}`);items.push(...page);if(page.length<1000)return items;const next=page.at(-1)!.id;if(next===after)throw Error('Decision history could not be read.');after=next}
 }
 async function attentionPages(first:Attention & Page<Attention['items'][number]>):Promise<Attention>{
- const items:Attention['items']=[];let after='',deferredCount=0,observedAt=Infinity,dndUntil:number|null=null,nextWakeAt:number|null=null
+ const items:Attention['items']=[],heldItems:NonNullable<Attention['heldItems']>=[];let after='',deferredCount=0,observedAt=Infinity,dndUntil:number|null=null,nextWakeAt:number|null=null
  for(;;){
   const page=after?await api<Attention & Page<Attention['items'][number]>>('attention?after='+encodeURIComponent(after)):first
-  observedAt=Math.min(observedAt,page.observedAt);items.push(...page.items);deferredCount+=page.deferredCount;dndUntil=page.dndUntil
+  observedAt=Math.min(observedAt,page.observedAt);items.push(...page.items);heldItems.push(...page.heldItems??[]);deferredCount+=page.deferredCount;dndUntil=page.dndUntil
   if(page.nextWakeAt!==null)nextWakeAt=nextWakeAt===null?page.nextWakeAt:Math.min(nextWakeAt,page.nextWakeAt)
-  if(!page.hasMore)return {items,reminders:first.reminders,deferredCount,observedAt,dndUntil,nextWakeAt}
+  if(!page.hasMore)return {items,heldItems,reminders:first.reminders,personalReminders:first.personalReminders,scheduleUntil:first.scheduleUntil,manualUntil:first.manualUntil,deferredCount,observedAt,dndUntil,nextWakeAt}
   if(page.cursor===after)throw Error('Attention could not be read.');after=page.cursor
  }
 }

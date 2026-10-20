@@ -3561,7 +3561,7 @@
       "executable": false
     },
     "src/chat/api.ts": {
-      "sha256": "f80e1377498db5165d6a08b7b021c6a5b651d3589c1595b06c86fa99b1cff223",
+      "sha256": "997df7dee0072f767901c5fbda75f8ff9dfa27bca874398d3c43f4b204a27495",
       "executable": false
     },
     "src/chat/AttentionView.tsx": {
