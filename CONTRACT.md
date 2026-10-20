@@ -431,7 +431,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests at commit `2872ebc` (21 October 2026). NOOK-053 adds conversation notes and lightweight lists under current conversation permissions, exact commitment acceptance and readable/operational portability. NOOK-073 web routing remains done, with native obligations inherited under the named clauses.
+Judged from the code and tests at commit `65b8d7e` (21 October 2026). NOOK-053 adds conversation notes and lightweight lists under current conversation permissions, exact commitment acceptance and readable/operational portability. NOOK-073 web routing remains done, with native obligations inherited under the named clauses.
 
 Current code/test coverage is recorded per clause below and mirrored in ACCEPTANCE.md. Evidence identifies the implemented subset; a partial row’s Gap records the broader acceptance still required, including where a shipped subset is covered by another clause. These statuses do not reduce the requirements above.
 
