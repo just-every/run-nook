@@ -7,7 +7,7 @@ export async function presence(c){
  const phone=await register(member,'Ana’s phone',undefined,'mobile'),page=crypto.randomUUID();
  const beat=(visible=true,lastInputAt=Date.now(),cookie=member.cookie,id=device.id)=>call('/api/devices/presence','POST',{id,page,visible,lastInputAt},cookie);
  const phoneRow=async message=>(await rows(message)).find(r=>r.device===phone.id);
- const complete=async message=>until(async()=>(await rows(message)).every(r=>['sent','folded'].includes(r.state)),'both devices delivered');
+ const complete=async message=>{try{return await until(async()=>(await rows(message)).every(r=>['sent','folded'].includes(r.state)),'both devices delivered '+message.id)}catch(error){console.error('Delivery rows',await rows(message));console.error('Presence',(await db.prepare('SELECT * FROM nook_push_presence').all()).results);throw error}};
  const count=message=>received.filter(r=>new URL(r.value.url).searchParams.get('focus')===message.id);
  await beat();
  const dm=await room('Desktop handoff DM','dm'),mentionRoom=await room('Launch handoff');

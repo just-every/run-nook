@@ -35,7 +35,11 @@ An urgent request is a request inside Nook, not a page. Web Push follows your ch
 
 Use **You → Install Nook** when your browser offers it, or install from the browser menu. On iPhone or iPad, use Share → Add to Home Screen, open Nook from there, then enable push. Notifications require a compatible browser and permission. Reopen Nook to reconcile a subscription removed by the browser; a visible error gives you a way to enable again without repeated permission prompts.
 
-Push waits while a Nook page is visibly active and has a fresh heartbeat. Hidden or suspended pages do not suppress delivery indefinitely. Opening Nook synchronizes read notifications and badges. Sleeping devices may keep old notifications until opened; no silent background clear is sent.
+Phone/tablet Web Push waits while you are active on desktop/web. Keyboard, pointer or focus input within ten minutes counts as activity, backed by a heartbeat that expires after 45 seconds. Desktop/web devices still alert, and Attention remains available in the active client. A hidden page releases its activity immediately; suspended pages expire. Web browsers cannot report OS lock state.
+
+In **You → Your device delivery**, choose **Always send to mobile, even when I'm active**, or a delay after becoming inactive: immediately (the default), 1, 2, 5, 10, 15 or 30 minutes. These are account choices. Urgent requests you allow through quiet time bypass this activity hold. Held events fold under the ten-minute conversation rule; reading or dismissing one on any device cancels its held phone alert as `held-active-elsewhere`, without claiming it was displayed or missed.
+
+Only you can see your device delivery view. It shows activity, last input, unavailable web lock state, routing and the latest 100 held/released/canceled records from seven days. Native activity, OS lock state and delivery-bar measurements remain NOOK-021 obligations; call invites follow NOOK-022. Opening Nook synchronizes read notifications and badges. Sleeping devices may keep old notifications until opened; no silent background clear is sent.
 
 ## Keep up with threads
 
@@ -75,4 +79,4 @@ You follow threads you start, reply to, or are mentioned in, including channel-w
 
 **Count thread replies only when they mention me** changes unread and Web Push badge counts for your account, including other open sessions. It leaves ordinary replies in Threads and does not read them or silence their alerts. Newly enabling push turns on supported mentions, DMs and followed-thread replies once; later device registration preserves your explicit choices. Email is independent and stays off until you choose it.
 
-A notification for a single thread offers **Unfollow thread** where browser actions are supported. The action requires the same signed-in recipient and current thread access; a refused action asks you to open Nook. A burst spanning several threads offers **Manage threads** so you can choose which to unfollow. Native apps, real device receipt, recurring quiet schedules and cross-device active-elsewhere routing remain separate acceptance gaps.
+A notification for a single thread offers **Unfollow thread** where browser actions are supported. The action requires the same signed-in recipient and current thread access; a refused action asks you to open Nook. A burst spanning several threads offers **Manage threads** so you can choose which to unfollow. Native apps, real device receipt, recurring quiet schedules remain separate acceptance gaps.

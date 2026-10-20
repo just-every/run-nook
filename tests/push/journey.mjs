@@ -26,7 +26,7 @@ export async function contractJourney(t){
   const seed=await call('/api/conversations','POST',{name:'Push contract',kind:'channel'},ownerCookie);
   const member=await app.invite('recipient',seed.id),sender=await app.invite('sender',seed.id),unrelated=await app.invite('unrelated',seed.id);
   publicKey=(await call('/api/devices','GET',undefined,member.cookie)).publicKey;
-  const register=async(person,name,behavior,deviceClass='desktop')=>{const sub=subscriber(name);sub.behavior=behavior;recipients.set(sub.subscription.endpoint,sub);const device=await call('/api/devices','POST',{transport:'webpush',subscription:sub.subscription,deviceClass,name},person.cookie);return {...device,...sub}};
+  const register=async(person,name,behavior,deviceClass='desktop')=>{const sub=subscriber(crypto.randomUUID());sub.behavior=behavior;recipients.set(sub.subscription.endpoint,sub);const device=await call('/api/devices','POST',{transport:'webpush',subscription:sub.subscription,deviceClass,name},person.cookie);return {...device,...sub}};
   const device=await register(member,'contract');
   await call('/api/notify','PATCH',{push:{mentions:true,direct:true,threads:true,urgent:true}},member.cookie);
   const room=(name,kind='private',people=[member.user.id,sender.user.id])=>call('/api/conversations','POST',{name,kind,participants:people},ownerCookie);
