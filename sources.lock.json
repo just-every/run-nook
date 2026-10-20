@@ -1525,7 +1525,7 @@
       "executable": false
     },
     "src/audit/AuditLog.tsx": {
-      "sha256": "1b6a85b02d944a16b08d76fdf1d26b10b457d1a6c5c4b0814d11470dd239f2e4",
+      "sha256": "372391ba36d88a39735a48e01e3dd32acbf912a0688ce18d63751574bd79944a",
       "executable": false
     },
     "src/audit/database.ts": {
@@ -5181,7 +5181,7 @@
       "executable": false
     },
     "src/team/erasure/identity.ts": {
-      "sha256": "5edee468f14508b0ae5ee444f2a8679617ef2990a2789e02ed5e71ca26c9c8f1",
+      "sha256": "e08f81f55de395fe0cd41fe10397267aa99043dd704237f315a198ad175eb0d6",
       "executable": false
     },
     "src/team/erasure/import-commit.ts": {
@@ -5489,7 +5489,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "fd3f50a8ae9b873f145b69b1223ec55f751e9b36291b1bb6c724bb20921a5765",
+      "sha256": "dad698612dd527fa2bb7af383f2576dde18148001f8e08ed516b4de17b8be941",
       "executable": false
     },
     "tests/exit-export.test.mjs": {

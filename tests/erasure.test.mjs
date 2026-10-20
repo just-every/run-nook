@@ -316,7 +316,7 @@ test('retained source policy preserves only current bodies through public erasur
   await send(reader,'launch',{body:'Visible new current body',intent:'after-retention'});assert.equal((await standard.read(reader,'search','',{q:'Visible'})).items.length,3,'new sends cannot replace retained search entries');
   const latest=await exported(f),fresh=await fixture({bootstrap:false}),old=await fixture({bootstrap:false});try{
    await restored(fresh,latest);await standard.rebuildSearch(fresh.adapter);assert.equal(fresh.db.prepare('SELECT body FROM nook_message_history WHERE id=?').get(channel.id).body,'Visible RetiredPerson current body');assert.equal(fresh.db.prepare('SELECT count(*) AS n FROM nook_retained_message_bodies').get().n,2);
-   await assert.rejects(restored(old,before,latest[0]),e=>e.code.startsWith('erased_row:'));
+   await assert.rejects(restored(old,before,latest[0]),e=>e.code==='erasure_epoch');
   }finally{fresh.close();old.close()}
   await finishDoor(standard,owner,await door(standard,owner,'',{kind:'message',target:channel.id,confirmation:'ERASE'}));
   assert.equal((await standard.read(reader,'message',channel.id)).deleted,1);assert.equal((await standard.read(reader,'search','',{q:'RetiredPerson'})).items.length,0);
