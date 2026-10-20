@@ -5,6 +5,8 @@ import {productPolicy} from '../../src/platform/portability-policy.mjs';
 import {installation} from './fixture.mjs';
 export async function archive(c){
  const {call,db,mf,member}=c;
+ const quiet=(await call('/api/notify','GET',undefined,member.cookie)).quietSchedule;delete quiet.until;delete quiet.next
+ await call('/api/notify','PATCH',{quietSchedule:{...quiet,enabled:true}},member.cookie)
  const policyRoom=c.archiveConversation;
  await call(`/api/conversations/${policyRoom.id}/notify`,'PATCH',{level:'nothing',threads:'all'},member.cookie);
  // Use the same public Base export/import service and product policy as rer's
@@ -26,6 +28,7 @@ export async function archive(c){
   const id=await imported.imports.create(records[0]);for(const record of records)if(record.kind==='part')await imported.imports.uploadPart(id,record.index,record);
   const closing=records.at(-1);await imported.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash});
   for(const table of excluded)assert.equal((await restore.db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0,'restored '+table+' empty');
+  const restoredQuiet=await restore.db.prepare('SELECT * FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();assert.equal(restoredQuiet.enabled,1);assert.equal(restoredQuiet.zone,quiet.zone);assert.deepEqual(JSON.parse(restoredQuiet.days_json),quiet.days);assert.equal(restoredQuiet.quiet_until,0);assert.equal(restoredQuiet.next_change,0)
   assert.equal((await restore.db.prepare('SELECT push_mentions FROM nook_notify_preferences WHERE user=?').bind(member.user.id).first()).push_mentions,1);
   assert.deepEqual(await restore.db.prepare('SELECT level,threads FROM nook_conversation_notify WHERE user=? AND conversation=?').bind(member.user.id,policyRoom.id).first(),{level:'nothing',threads:'all'});
   assert.equal((await restore.db.prepare('SELECT body FROM nook_messages WHERE id=?').bind(c.preserved.id).first()).body,c.preserved.body,'actual private content restored');
