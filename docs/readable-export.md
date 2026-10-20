@@ -203,3 +203,5 @@ after an interrupted step; concurrent step requests cannot both append a page.
 Page and file responses are never cached. A complete download verifies each page
 hash, ordered page identity, record count, each actual file hash and total bytes,
 then rechecks the current complete report before saving.
+
+Conversation notes and lightweight checklists appear as `notes`, `note_versions` and `note_proposals` records. Offline HTML renders their text, check states, pinned state, provider URLs and version history. Document links are not synced content; commitments retain their separate acceptance history. Current conversation permissions apply to every page.

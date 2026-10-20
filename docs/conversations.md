@@ -63,3 +63,13 @@ Open **Drafts & sent** in the sidebar, or under **You** on a phone. **Drafts** l
 ## Files
 
 Choose **Files** in a conversation’s Messages/Files tabs to browse its shared files, newest first, or open **Files** from the sidebar or **You** to browse all conversations you can read. Filter by person or file type, download the original bytes, preview supported PNG/JPEG images, or open a file’s original message/thread. Native files and published imported files appear together, with their original author and shared time. Staged uploads and deleted files do not appear; losing conversation access removes its files. File contents are not searched.
+
+## Notes and lightweight lists
+
+Open **Notes** in a conversation, or **Thread notes** while a root thread is open. Notes share that conversation’s current audience. Any current participant can create or revise a note, check an item, pin it in context or restore an earlier version as a new version. History keeps the actor and time, and a stale save asks you to reload. Owners and admins cannot open another person’s DM notes.
+
+A checklist is a shared list, not a tracker. Choose an assignee and **Propose request** to copy an item into a commitment. Only that assignee can accept its exact current version in Decisions & requests. Checking an item accepts nothing and never verifies completion.
+
+Link Google Drive, OneDrive, Notion, Chest or Vector documents by URL. Every document says **Link, not synced**; Nook fetches no document content and grants no provider access. Connectors remain under NOOK-029.
+
+Notes, versions, checklist items, links, pins and proposal sources travel with the conversation in readable export and operational backup/restore. Deleting a note redacts all its versions and links. Erasing a thread root clears its thread notes; member erasure clears notes that member authored or revised and their attribution. Downloaded exports remain in their holder’s custody. Retention and protected legal holds inherit under NOOK-038, including note history and every export/erasure path.
