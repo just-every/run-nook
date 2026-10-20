@@ -5701,7 +5701,7 @@
       "executable": false
     },
     "tests/keyboard.mjs": {
-      "sha256": "0745b754c6442f1b5f385e5a85b091256e513580c77a49ea40cc8578eb1f28b9",
+      "sha256": "166af51d2632fdb7abe575b337ccec915d37532ac029f70917ed54890ab8e210",
       "executable": false
     },
     "tests/local-d1-migrations.mjs": {

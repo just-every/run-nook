@@ -118,7 +118,7 @@ export async function runKeyboard(origin,destination){
    await expect.poll(async()=>(await json(page,'conversations')).find(c=>c.id===nextRoom.id).unread).toBe(0)
    assert.ok((await json(page,'conversations')).find(c=>c.id===channel.id).readSeq>=oldMessage.sequence,'the completed old read remains valid on the server')
    checks.push('delayed old-room read acknowledgement cannot change the new room cursor or in-flight request; visible new messages still become read')
-  }finally{releaseOld();releaseNew();await page.unroute(readPattern)}
+  }finally{releaseOld();releaseNew();await page.unrouteAll({behavior:'wait'})}
   assert.deepEqual(errors,[],'keyboard journeys have no browser or hydration errors')
   await mkdir(destination,{recursive:true});await writeFile(resolve(destination,'keyboard-results.json'),JSON.stringify({status:'passed',checks},null,2)+'\n');return {checks}
  }finally{await browser.close()}
