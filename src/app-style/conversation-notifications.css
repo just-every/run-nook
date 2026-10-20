@@ -7,3 +7,7 @@
 .nook-app .device-delivery article { border-top: 1px solid var(--line); padding: .75rem 0; overflow-wrap: anywhere; }
 .nook-app .device-delivery label { display: block; margin: .75rem 0; }
 .nook-app .device-delivery select { display: block; max-width: 100%; margin-top: .4rem; }
+
+.nook-app .device-delivery .routing-choice { display:flex; align-items:flex-start; gap:8px; line-height:1.5; }
+.nook-app .device-delivery .routing-choice input { flex:none; margin-top:3px; }
+.nook-app .device-delivery .field select { width:100%; padding:10px 12px; border:1px solid var(--ink-soft); border-radius:10px; background:transparent; color:inherit; font:inherit; min-height:40px; }
