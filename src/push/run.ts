@@ -1,3 +1,4 @@
+import {activeDesktopUntil,mobileRouting,mobileDelay} from './activity'
 import {KEEP_MS,LEASE_MS,MAX_ATTEMPTS,RETRY_MS} from '../notify/queue'
 import {sendPush} from './sender'
 import {PUSH_FOLD_MS,PUSH_GATHER_MS} from './queue'
@@ -10,15 +11,19 @@ export async function drainPush(bindings:any,now=Date.now(),network:typeof fetch
  // Keep the explicit-clock API while advancing it across asynchronous work.
  const started=Date.now(),clock=()=>now+Math.max(0,Date.now()-started)
  const env=authBindings(bindings),db:D1Database=env.DB,sql=(query:string,...args:any[])=>db.prepare(query).bind(...args)
- await db.batch([sql("UPDATE nook_notify_queue SET state='failed',error='uncertain',updated=? WHERE channel='push' AND state='sending' AND due<=?",now,now),sql("DELETE FROM nook_notify_queue WHERE channel='push' AND state IN ('sent','folded','cancelled','failed') AND updated<?",now-KEEP_MS),sql('DELETE FROM nook_push_presence WHERE expires<=?',now)])
- const groups=(await sql("SELECT user,conversation,device FROM nook_notify_queue WHERE channel='push' AND state IN ('pending','retrying') AND due<=? GROUP BY user,conversation,device ORDER BY min(due) LIMIT 20",now).all<any>()).results
+ await db.batch([sql("UPDATE nook_notify_queue SET state='failed',error='uncertain',updated=? WHERE channel='push' AND state='sending' AND due<=?",now,now),sql("DELETE FROM nook_notify_queue WHERE channel='push' AND state IN ('sent','folded','cancelled','failed') AND updated<?",now-KEEP_MS)])
+ const groups=(await sql(`SELECT q.user,q.conversation,q.device FROM nook_notify_queue q WHERE q.channel='push' AND q.state IN ('pending','retrying') AND (q.due<=? OR (${pushCancellation}) IS NOT NULL) GROUP BY q.user,q.conversation,q.device ORDER BY min(q.due) LIMIT 20`,now,now,now).all<any>()).results
  for(const group of groups){
   const at=clock()
+  // Persist both ends of the activity hold before read/done cancellation. This
+  // also makes early hide, sign-out and device removal start the chosen delay.
+  await sql(`UPDATE nook_notify_queue AS q SET held_at=CASE WHEN ${activeDesktopUntil('q.user')}>? THEN COALESCE(held_at,?) ELSE held_at END,active_until=CASE WHEN ${activeDesktopUntil('q.user')}>? THEN ${activeDesktopUntil('q.user')} ELSE min(COALESCE(active_until,0),CASE WHEN ${activeDesktopUntil('q.user')}>=COALESCE(q.held_at,0) THEN ${activeDesktopUntil('q.user')} ELSE ? END) END WHERE q.channel='push' AND q.user=? AND q.device=? AND q.state IN ('pending','retrying') AND (${mobileRouting})`,at,at,at,at,group.user,group.device).run()
+  await sql(`UPDATE nook_notify_queue AS q SET released_at=? WHERE q.channel='push' AND q.user=? AND q.device=? AND q.state IN ('pending','retrying') AND q.held_at IS NOT NULL AND q.released_at IS NULL AND (NOT(${mobileRouting}) OR COALESCE(q.active_until,0)+${mobileDelay}<=?)`,at,group.user,group.device,at).run()
   const selection=(time:number,states="'pending','retrying'")=>(query:string,...args:any[])=>sql(`WITH candidates AS MATERIALIZED (SELECT q.*,${pushCancellation} AS cancel,${pushHeldUntil} AS held FROM nook_notify_queue q WHERE q.channel='push' AND q.user=? AND q.conversation=? AND q.device=? AND q.state IN (${states})) ${query}`,time,time,time,group.user,group.conversation,group.device,...args)
   const candidates=selection(at),eligible="cancel IS NULL AND held<=? AND (due<=? OR state='pending' AND attempts=0 AND created<=? AND due<=created+?)",eligibility=[at,at,at,PUSH_GATHER_MS]
   // Housekeeping is bounded independently of delivery selection. Held or invalid
   // rows cannot occupy the delivery batch and starve eligible work behind them.
-  await candidates("UPDATE nook_notify_queue SET state='cancelled',error=(SELECT cancel FROM candidates WHERE candidates.id=nook_notify_queue.id),updated=? WHERE id IN (SELECT id FROM candidates WHERE cancel IS NOT NULL AND due<=? ORDER BY due,id LIMIT 20)",at,at).run()
+  await candidates("UPDATE nook_notify_queue SET state='cancelled',error=(SELECT cancel FROM candidates WHERE candidates.id=nook_notify_queue.id),updated=? WHERE id IN (SELECT id FROM candidates WHERE cancel IS NOT NULL ORDER BY due,id LIMIT 20)",at).run()
   await candidates('UPDATE nook_notify_queue SET due=max(due,created+?,(SELECT held FROM candidates WHERE candidates.id=nook_notify_queue.id)),updated=? WHERE id IN (SELECT id FROM candidates WHERE cancel IS NULL AND held>? AND due<=? ORDER BY due,id LIMIT 20)',PUSH_GATHER_MS,at,at,at).run()
   if(!await candidates('SELECT 1 FROM candidates WHERE cancel IS NULL AND held<=? AND due<=? LIMIT 1',at,at).first())continue
   const last=await sql("SELECT max(updated) AS at FROM nook_notify_queue WHERE channel='push' AND user=? AND conversation=? AND device=? AND state='sent'",group.user,group.conversation,group.device).first<{at:number|null}>()

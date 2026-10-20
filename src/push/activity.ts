@@ -1,0 +1,6 @@
+// Activity uses authenticated input, never visibility alone. Expiry covers a
+// suspended browser; the web has no OS lock-state signal.
+export const INPUT_ACTIVE_MS=10*60_000
+export const activeDesktopUntil=(user:string)=>`COALESCE((SELECT max(min(p.expires,p.last_input_at+${INPUT_ACTIVE_MS},s.expires_at)) FROM nook_push_presence p LEFT JOIN nook_push_devices d ON d.id=p.device JOIN oa_sessions s ON s.id=p.session JOIN oa_operators o ON o.id=p.user JOIN nook_access a ON a.user=p.user AND a.active=1 WHERE p.user=${user} AND COALESCE(d.device_class,p.device_class)='desktop' AND (d.user=p.user AND d.session=p.session AND d.version=s.operator_version OR d.id IS NULL AND p.device='web-'||p.page) AND s.operator_id=p.user AND s.revoked_at IS NULL AND s.operator_version=o.version AND o.status='active'),0)`
+export const mobileRouting=`(SELECT device_class FROM nook_push_devices WHERE id=q.device)='mobile' AND COALESCE((SELECT mobile_when_active FROM nook_notify_preferences WHERE user=q.user),'inactive')='inactive' AND NOT(q.reason='urgent-request' AND COALESCE((SELECT push_urgent_quiet FROM nook_notify_preferences WHERE user=q.user),0)=1)`
+export const mobileDelay=`COALESCE((SELECT mobile_delay_minutes*60000 FROM nook_notify_preferences WHERE user=q.user),0)`

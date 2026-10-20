@@ -1,3 +1,4 @@
+import {DeviceDelivery} from '../push/DeviceDelivery'
 import {useId} from 'react'
 import type {usePush,Choices} from '../push/client'
 export function PushControl({push}:{push:ReturnType<typeof usePush>}){
@@ -12,5 +13,6 @@ export function PushControl({push}:{push:ReturnType<typeof usePush>}){
  {!!settings?.notDelivered.length&&<p>Push not delivered to {settings.notDelivered[0].recipient}: {settings.notDelivered[0].error}.</p>}
  {!!settings?.workspace?.count&&<p>Workspace: {settings.workspace.count} push deliveries need attention; latest: {settings.workspace.error}{settings.workspace.state==='retrying'?' (retrying)':''}.</p>}
  {!standalone&&(install?<button className="soft-button" onClick={installApp}>Install Nook</button>:<p>Install Nook from your browser menu. On iPhone or iPad, use Share → Add to Home Screen.</p>)}
+ <DeviceDelivery request={push.request} signal={push.privateSignal}/>
  </section>
 }

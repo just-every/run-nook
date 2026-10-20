@@ -20,13 +20,13 @@ export async function contractJourney(t){
    if(target.behavior==='uncertain')await new Promise(resolve=>setTimeout(resolve,21_000));
    return new Response(null,{status:target.behavior==='rate-limited'&&received.filter(r=>r.endpoint===request.url).length===1?429:target.behavior==='server-failure'&&received.filter(r=>r.endpoint===request.url).length===1?503:target.behavior==='expired'?410:target.behavior==='refused'?400:201});
   }catch(error){edgeError=error;throw error}
- });
+ },{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});
  try{
   const {call,db,ownerCookie}=app;
   const seed=await call('/api/conversations','POST',{name:'Push contract',kind:'channel'},ownerCookie);
   const member=await app.invite('recipient',seed.id),sender=await app.invite('sender',seed.id),unrelated=await app.invite('unrelated',seed.id);
   publicKey=(await call('/api/devices','GET',undefined,member.cookie)).publicKey;
-  const register=async(person,name,behavior)=>{const sub=subscriber(name);sub.behavior=behavior;recipients.set(sub.subscription.endpoint,sub);const device=await call('/api/devices','POST',{transport:'webpush',subscription:sub.subscription},person.cookie);return {...device,...sub}};
+  const register=async(person,name,behavior,deviceClass='desktop')=>{const sub=subscriber(name);sub.behavior=behavior;recipients.set(sub.subscription.endpoint,sub);const device=await call('/api/devices','POST',{transport:'webpush',subscription:sub.subscription,deviceClass,name},person.cookie);return {...device,...sub}};
   const device=await register(member,'contract');
   await call('/api/notify','PATCH',{push:{mentions:true,direct:true,threads:true,urgent:true}},member.cookie);
   const room=(name,kind='private',people=[member.user.id,sender.user.id])=>call('/api/conversations','POST',{name,kind,participants:people},ownerCookie);

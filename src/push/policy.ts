@@ -1,9 +1,10 @@
+import {activeDesktopUntil,mobileRouting,mobileDelay} from './activity'
 import {broadcastSuppressed,pushBroadcastChoice} from '../broadcast/policy'
 import {conversationLevel,effectiveThreadFollow} from '../team/conversation-notify.server'
 import {recipientCancellation,attentionCancellation} from '../notify/policy'
 
 export const pushCancellation=`CASE ${recipientCancellation}
- ${attentionCancellation('q.attention','q.event_seq')}
+ ${attentionCancellation('q.attention','q.event_seq').replace("THEN 'seen'","THEN CASE WHEN q.held_at IS NOT NULL THEN 'held-active-elsewhere' ELSE 'seen' END")}
  WHEN ${conversationLevel('q.user','q.conversation',"(SELECT device_class FROM nook_push_devices WHERE id=q.device)")}='nothing' THEN 'conversation-silent'
  WHEN NOT EXISTS(SELECT 1 FROM nook_push_devices d JOIN oa_sessions s ON s.id=d.session JOIN oa_operators o ON o.id=d.user WHERE d.id=q.device AND d.user=q.user AND s.operator_id=d.user AND s.operator_version=d.version AND o.version=d.version AND s.revoked_at IS NULL AND s.expires_at>? AND (json_extract(d.subscription,'$.expirationTime') IS NULL OR json_extract(d.subscription,'$.expirationTime')>?)) THEN 'device-inactive'
  WHEN q.reason='broadcast' AND ${broadcastSuppressed('q.user','q.conversation')} THEN 'broadcast-suppressed'
@@ -14,9 +15,8 @@ export const pushCancellation=`CASE ${recipientCancellation}
  WHEN q.reason IN ('direct-message','all-messages') AND ${conversationLevel('q.user','q.conversation',"(SELECT device_class FROM nook_push_devices WHERE id=q.device)")}<>'all' THEN 'turned-off'
  WHEN q.reason='direct-message' AND EXISTS(SELECT 1 FROM nook_messages m JOIN nook_thread_unfollows u ON u.message=m.parent AND u.user=q.user WHERE m.id=q.message) THEN 'unfollowed' END`
 
-// A third clock binding follows pushCancellation's two expiration bindings.
-// This expression is reused for selection and the final pre-send authority check.
+// The third clock binding follows cancellation's two expiration bindings.
 export const pushHeldUntil=`max(
  COALESCE((SELECT snooze_until FROM nook_attention WHERE id=q.attention AND state='snoozed'),0),
  COALESCE((SELECT CASE WHEN q.reason='urgent-request' AND p.push_urgent_quiet=1 THEN 0 ELSE s.dnd_until END FROM nook_settings s LEFT JOIN nook_notify_preferences p ON p.user=s.user WHERE s.user=q.user),0),
- COALESCE((SELECT max(p.expires) FROM nook_push_presence p JOIN nook_push_devices d ON d.id=p.device JOIN oa_sessions s ON s.id=p.session JOIN oa_operators o ON o.id=p.user WHERE p.user=q.user AND d.user=p.user AND d.session=p.session AND d.version=s.operator_version AND s.operator_id=p.user AND s.revoked_at IS NULL AND s.expires_at>? AND s.operator_version=o.version AND o.status='active'),0))`
+ CASE WHEN ${mobileRouting} THEN CASE WHEN ${activeDesktopUntil('q.user')}>? THEN ${activeDesktopUntil('q.user')}+${mobileDelay} WHEN q.held_at IS NOT NULL AND q.released_at IS NULL THEN COALESCE(q.active_until,0)+${mobileDelay} ELSE 0 END ELSE 0 END)`

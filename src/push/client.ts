@@ -15,6 +15,7 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
  const [deviceClass,setDeviceClass]=useState<'desktop'|'mobile'>('desktop')
  useEffect(()=>setDeviceClass(classification(user)),[user])
  const device=useRef<string|null>(null),registration=useRef<ServiceWorkerRegistration|null>(null),current=useRef(user);current.current=user
+ const lastInputAt=useRef(Date.now())
  const page=useRef(crypto.randomUUID()),inflight=useRef<Promise<void>|null>(null)
  // Delivery status belongs to the account, even without browser push support.
  const settingsVersion=useRef(0)
@@ -54,7 +55,7 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
    if(current.current!==user){await sub.unsubscribe();return}
    const result=await post('/api/devices',{transport:'webpush',subscription:sub.toJSON(),deviceClass:classification(user)})
    device.current=result.id;localStorage.setItem(STORE,JSON.stringify({user,id:result.id}));setEnabled(true)
-   await post('/api/devices/presence',{id:result.id,page:page.current,visible:document.visibilityState==='visible'})
+   await post('/api/devices/presence',{id:result.id,page:page.current,visible:document.visibilityState==='visible',lastInputAt:lastInputAt.current,deviceClass:classification(user)})
    await sync()
   })();inflight.current=job
   try{await job}finally{if(inflight.current===job)inflight.current=null}
@@ -70,15 +71,18 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
   let gone=false
   const heartbeat=async()=>{try{
    if(privateSignal.aborted)return
-   if(supported()&&device.current)await post('/api/devices/presence',{id:device.current,page:page.current,visible:document.visibilityState==='visible'})
+   await post('/api/devices/presence',{id:device.current??'web-'+page.current,page:page.current,visible:document.visibilityState==='visible',lastInputAt:lastInputAt.current,deviceClass:classification(user)})
    if(document.visibilityState==='visible'){
     await Promise.all([loadSettings(),...(supported()?[sync()]:[])])
     if(!gone&&!privateSignal.aborted&&supported())setPermission(Notification.permission)
    }
   }catch(e){if(!gone&&!privateSignal.aborted)setError(e instanceof Error?e.message:'Push unavailable')}}
   const visible=()=>{void heartbeat();if(document.visibilityState==='visible')void reconcile().catch(e=>setError(e.message))}
+  const input=()=>{lastInputAt.current=Date.now()}
+  const focus=()=>{input();void heartbeat()}
+  document.addEventListener('keydown',input);document.addEventListener('pointerdown',input);document.addEventListener('pointermove',input);window.addEventListener('focus',focus);void heartbeat()
   const changed=(event:MessageEvent)=>{if(event.data?.type==='nook-resubscribe')void reconcile().catch(e=>setError(e.message))};if(supported())navigator.serviceWorker.addEventListener('message',changed);document.addEventListener('visibilitychange',visible);const timer=setInterval(()=>{void heartbeat()},15_000)
-  return()=>{gone=true;clearInterval(timer);document.removeEventListener('visibilitychange',visible);if(supported())navigator.serviceWorker.removeEventListener('message',changed);if(device.current)void post('/api/devices/presence',{id:device.current,page:page.current,visible:false}).catch(()=>{})}
+  return()=>{gone=true;clearInterval(timer);document.removeEventListener('keydown',input);document.removeEventListener('pointerdown',input);document.removeEventListener('pointermove',input);window.removeEventListener('focus',focus);document.removeEventListener('visibilitychange',visible);if(supported())navigator.serviceWorker.removeEventListener('message',changed);void post('/api/devices/presence',{id:device.current??'web-'+page.current,page:page.current,visible:false,lastInputAt:lastInputAt.current,deviceClass:classification(user)}).catch(()=>{})}
  },[post,sync,reconcile,loadSettings,privateSignal])
  useEffect(()=>{
   if(!snapshot||privateSignal.aborted)return
@@ -102,5 +106,5 @@ export function usePush(user:string,request:TeamRequest,snapshot:WorkspaceSnapsh
   }catch(e){setError(e instanceof Error?e.message:'Push unavailable');throw e}finally{setBusy(false)}
  },[post,user])
  const changeDeviceClass=async(value:'desktop'|'mobile')=>{localStorage.setItem('nook.push.class.'+user,value);setDeviceClass(value);setBusy(true);try{if(enabled)await reconcile()}catch(e){setError(e instanceof Error?e.message:'Device settings unavailable')}finally{setBusy(false)}}
- return {deviceClass,changeDeviceClass,settings,permission,enabled,error,busy,change,enable,disable,install,standalone,installApp:()=>{void install?.prompt();setInstall(null)}}
+ return {request,privateSignal,deviceClass,changeDeviceClass,settings,permission,enabled,error,busy,change,enable,disable,install,standalone,installApp:()=>{void install?.prompt();setInstall(null)}}
 }
