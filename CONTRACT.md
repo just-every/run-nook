@@ -6,7 +6,7 @@ Target approved 16 October 2026: **an owned Slack replacement for a US small or 
 
 The contract describes the product being built toward. `done`, `partial` and `missing` at the end describe current code/test coverage, not a reduced product or a shipped-service claim. US English, USD operating costs, US time zones/daylight saving and US business identity/privacy/records norms are the first-buyer defaults. Native clients, provider agreements, media transport, compliance custody and app approvals are engineering obligations, never exclusions.
 
-Nook remains its own product. [Envelope](https://github.com/just-every/run-envelope) is the RunEditRun product for small-business payroll; [Pegboard](https://github.com/just-every/run-pegboard) for work and project management; [Porthole](https://github.com/just-every/run-porthole) for observability (metrics, logs, traces and alerts). Nook’s audit log records access-control history. [Vector](https://github.com/just-every/run-vector) owns project work, [HappyToHelp](https://github.com/just-every/run-happytohelp) support, [Uptime](https://github.com/just-every/run-uptime) and [Lamp](https://github.com/just-every/run-lamp) their alerts/operational signals, and [Chest](https://github.com/just-every/run-chest) file ownership. Nook connects their records to conversations; no sibling, market gap or office-suite product is absorbed. Sharing implementation is welcome; merging the products is not.
+Nook remains its own product. [Envelope](https://github.com/just-every/run-envelope) is the RunEditRun product for small-business payroll; [Pegboard](https://github.com/just-every/run-pegboard) for work and project management; [Porthole](https://github.com/just-every/run-porthole) for observability (metrics, logs, traces and alerts). Nook’s audit log is access-control history, not observability. [Vector](https://github.com/just-every/run-vector) owns project work, [HappyToHelp](https://github.com/just-every/run-happytohelp) support, [Uptime](https://github.com/just-every/run-uptime) and [Lamp](https://github.com/just-every/run-lamp) their alerts/operational signals, and [Chest](https://github.com/just-every/run-chest) file ownership. Nook connects their records to conversations; no sibling, market gap or office-suite product is absorbed. Sharing implementation is welcome; merging the products is not.
 
 ## Product target
 
@@ -429,7 +429,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests at commit `8fe63ea` (21 October 2026). NOOK-053 adds conversation notes and lightweight lists under current conversation permissions, exact commitment acceptance and readable/operational portability. NOOK-073 web routing remains done, with native obligations inherited under the named clauses.
+Judged from the code and tests at commit `4a96d94` (21 October 2026). NOOK-053 adds conversation notes and lightweight lists under current conversation permissions, exact commitment acceptance and readable/operational portability. NOOK-073 web routing remains done, with native obligations inherited under the named clauses.
 
 Current code/test coverage is recorded per clause below and mirrored in ACCEPTANCE.md. Evidence identifies the implemented subset; a partial row’s Gap records the broader acceptance still required, including where a shipped subset is covered by another clause. These statuses do not reduce the requirements above.
 
