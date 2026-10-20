@@ -20,7 +20,7 @@ export async function erasure(c){
  assert.equal((await db.prepare("SELECT count(*) AS n FROM nook_notify_queue WHERE channel='push' AND outcome=?").bind(outcome.id).first()).n,1);
  assert.equal((await rows(incoming)).length,1);assert.equal((await rows(outgoing)).length,1);
  await erase('member',sender.user.id);
- for(const table of ['nook_push_devices','nook_push_presence','nook_notify_preferences','nook_quiet_schedules'])assert.equal((await db.prepare(`SELECT count(*) AS n FROM ${table} WHERE user=?`).bind(sender.user.id).first()).n,0);
+ for(const table of ['nook_push_devices','nook_push_presence','nook_notify_preferences','nook_quiet_schedules','nook_push_delivery_records'])assert.equal((await db.prepare(`SELECT count(*) AS n FROM ${table} WHERE user=?`).bind(sender.user.id).first()).n,0);
  assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_notify_queue WHERE user=? OR actor=? OR outcome=?').bind(sender.user.id,sender.user.id,outcome.id).first()).n,0,'member and authored-outcome delivery state is erased');
  assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_erased_outcomes WHERE id=?').bind(outcome.id).first()).n,1,'authored outcome follows public member erasure');
  assert.equal((await rows(preserved)).length,1);assert.equal((await call('/api/devices','GET',undefined,member.cookie)).devices.length,1);assert.equal((await call('/api/notify','GET',undefined,member.cookie)).push.mentions,true);

@@ -39,7 +39,7 @@ Phone/tablet Web Push waits while you are active on desktop/web. Keyboard, point
 
 In **You → Your device delivery**, choose **Always send to mobile, even when I'm active**, or a delay after becoming inactive: immediately (the default), 1, 2, 5, 10, 15 or 30 minutes. These are account choices. Urgent requests you allow through quiet time bypass this activity hold. Held events fold under the ten-minute conversation rule; reading or dismissing one on any device cancels its held phone alert as `held-active-elsewhere`, without claiming it was displayed or missed.
 
-Only you can see your device delivery view. It shows activity, last input, unavailable web lock state, routing and the latest 100 held/released/canceled records from seven days. Native activity, OS lock state and delivery-bar measurements remain NOOK-021 obligations; call invites follow NOOK-022. Opening Nook synchronizes read notifications and badges. Sleeping devices may keep old notifications until opened; no silent background clear is sent.
+Only you can see your device delivery view. It shows activity, last input, unavailable web lock state, routing and, from the last seven days, up to the latest 100 alerts. Every held, released and canceled record, with its reason, is kept and included in your own readable export (`device_deliveries`) and in backups, so older records remain available there. Native activity, OS lock state and delivery-bar measurements remain NOOK-021 obligations; call invites follow NOOK-022. Opening Nook synchronizes read notifications and badges. Sleeping devices may keep old notifications until opened; no silent background clear is sent.
 
 ## Keep up with threads
 

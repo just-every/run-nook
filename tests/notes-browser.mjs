@@ -11,3 +11,15 @@ export async function notesBrowser({origin,ana,room,note,root,threadNote}){
   }finally{await context.close()}
  }}finally{await browser.close()}
 }
+// After the original author is erased, a remaining member still sees the shared content and history.
+export async function erasedNotesBrowser({origin,lee,room,shared}){
+ const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
+ try{for(const width of [1440,390]){
+  const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000}});
+  try{const [name,...v]=lee.cookie.split('=');await context.addCookies([{name,value:v.join('='),url:origin}]);const page=await context.newPage();await page.goto(origin+`/app?conversation=${room.id}&panel=notes`);
+   const panel=page.getByRole('region',{name:'Conversation notes'});await panel.getByRole('button',{name:new RegExp(shared.title)}).click();await expect(panel.getByText(shared.body,{exact:true})).toBeVisible();await expect(panel.getByText(/^Pinned by a former member/)).toBeVisible();
+   await panel.getByRole('button',{name:'Version history',exact:true}).click();const history=panel.getByRole('region',{name:'Note version history'});await expect(history.getByText(/^Version 1 · Former member/)).toBeVisible();await expect(history.getByText(/^Version 2 · Lee-Chen/)).toBeVisible();await page.screenshot({animations:'disabled',path:`evidence/notes/erased-author-${width}.png`});
+   if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth))throw Error('Notes overflow viewport');
+  }finally{await context.close()}
+ }}finally{await browser.close()}
+}

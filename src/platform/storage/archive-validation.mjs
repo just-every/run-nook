@@ -1,5 +1,6 @@
 import {validateQuietArchive} from '../../notify/quiet-archive.mjs';
 import {validateAuditArchive} from '../../audit/archive.mjs';
+import {validateDeliveryArchive} from '../../push/archive.mjs';
 import {validateNotesArchive} from '../../notes/archive.mjs';
 import {validateMattermostArchiveMessage} from '../../imports/mattermost-archive.mjs';
 import {sourceMessageFiles} from '../../imports/formats.mjs';
@@ -56,6 +57,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  await validateDefaultChannels(readTable,manifest,actors,conv);
  await validateAuditArchive(readTable,manifest,actors);
  await validateQuietArchive(readTable,manifest,actors);
+ await validateDeliveryArchive(readTable,manifest,actors,conv);
  await validateIntegrationArchive(readTable,manifest,actors,conv,msg);
  await validateReminders(readTable,manifest,actors,conv,msg);
  await validatePostingArchive(readTable,{manifest,actors,conversations:conv,actions:channelActions});

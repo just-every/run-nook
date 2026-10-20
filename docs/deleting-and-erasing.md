@@ -8,7 +8,7 @@ In **You → Team**, choose **Erase member**. Owners can erase other eligible ac
 
 The preview shows counts without repeating the person's details. Type **ERASE** to confirm. The receipt reports progress and elapsed time. You can close the dialog while accepted work continues. **Pending erasures** lets an eligible operator resume work with their current authority.
 
-Member erasure removes the person's profile and sign-in credentials, invitations, preferences, reads, follows, reactions and attention. It erases their authored messages and files, including those in direct messages. Decisions and commitments they authored retain only their conversation, kind, version count and state. Erasure does not accept or complete work. Other people's messages and work remain, including already accepted commitments; erased assignee and action attribution is removed.
+Member erasure removes the person's profile and sign-in credentials, invitations, preferences, reads, follows, reactions and attention. It erases their authored messages and files, including those in direct messages. Decisions and commitments they authored retain only their conversation, kind, version count and state. Notes only they wrote are cleared with every version; notes someone else also wrote or revised keep their text, pins and history, with the erased person shown as a former member. Erasure does not accept or complete work. Other people's messages and work remain, including already accepted commitments; erased assignee and action attribution is removed.
 
 ## What remains
 

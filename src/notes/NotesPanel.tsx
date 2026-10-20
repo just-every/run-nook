@@ -73,7 +73,7 @@ function NotesScope({conversation,thread,request,people,onClose}:Props){
    {selected&&editing&&<NoteEditor key={selected.id+':'+selected.version} initial={selected} busy={busy} onCancel={()=>setEditing(false)} onSave={draft=>void mutate(notePath,'PATCH',{...draft,version:selected.version},'New note version saved.')}/>}
    {selected&&!editing&&<>
     <article className="notes-detail"><h3>{selected.title||'Deleted note'}</h3><p className="notes-meta">Version {selected.version} · {when(selected.updated)}</p>
-     {selected.pinned&&<p className="notes-pin">Pinned{selected.pinnedBy?' by '+(people.find(p=>p.id===selected.pinnedBy)?.name??'a former member'):''}{selected.pinnedAt?' · '+when(selected.pinnedAt):''}</p>}
+     {selected.pinned&&<p className="notes-pin">Pinned by {people.find(p=>p.id===selected.pinnedBy)?.name??'a former member'}{selected.pinnedAt?' · '+when(selected.pinnedAt):''}</p>}
      {selected.deleted?<p>Note content was deleted.</p>:<>
       <p className="notes-body">{selected.body}</p>
       {!!selected.items.length&&<p className="notes-meta">Checking an item records checklist progress. Requests require separate acceptance and completion reports.</p>}

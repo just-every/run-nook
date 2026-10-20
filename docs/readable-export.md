@@ -205,3 +205,5 @@ hash, ordered page identity, record count, each actual file hash and total bytes
 then rechecks the current complete report before saving.
 
 Conversation notes and lightweight checklists appear as `notes`, `note_versions` and `note_proposals` records. Offline HTML renders their text, check states, pinned state, provider URLs and version history. Document links are not synced content; commitments retain their separate acceptance history. Current conversation permissions apply to every page.
+
+Your own Web Push routing history appears as `device_deliveries` records: each held, released or canceled alert with its device, reason (such as `mention`), routing outcome, cancellation reason (such as `held-active-elsewhere`) and times. It is never included in anyone else's export, including an owner's whole-workspace export. A conversation ID is shown only for conversations in the export's scope.

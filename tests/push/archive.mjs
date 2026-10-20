@@ -28,6 +28,7 @@ export async function archive(c){
   const id=await imported.imports.create(records[0]);for(const record of records)if(record.kind==='part')await imported.imports.uploadPart(id,record.index,record);
   const closing=records.at(-1);await imported.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash});
   for(const table of excluded)assert.equal((await restore.db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0,'restored '+table+' empty');
+  const kept='SELECT count(*) AS n FROM nook_push_delivery_records WHERE user=?';assert.equal((await restore.db.prepare(kept).bind(member.user.id).first()).n,(await db.prepare(kept).bind(member.user.id).first()).n,'retained routing records restore');assert.ok((await restore.db.prepare(kept).bind(member.user.id).first()).n>105);
   const restoredQuiet=await restore.db.prepare('SELECT * FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();assert.equal(restoredQuiet.enabled,1);assert.equal(restoredQuiet.zone,quiet.zone);assert.deepEqual(JSON.parse(restoredQuiet.days_json),quiet.days)
   assert.equal((await restore.db.prepare('SELECT push_mentions FROM nook_notify_preferences WHERE user=?').bind(member.user.id).first()).push_mentions,1);
   assert.deepEqual(await restore.db.prepare('SELECT level,threads FROM nook_conversation_notify WHERE user=? AND conversation=?').bind(member.user.id,policyRoom.id).first(),{level:'nothing',threads:'all'});
@@ -38,6 +39,6 @@ export async function archive(c){
   // its alarm to drain. No old queue, subscriptions or network effects return.
   const hub=await restore.mf.getDurableObjectNamespace('CHAT_HUB');await hub.get(hub.idFromName('workspace')).fetch('https://hub/hint');
   await until(async()=>{const point=await restore.db.prepare('SELECT quiet_until,next_change FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();return point.quiet_until===saved.until&&point.next_change===saved.next},'restored alarm recomputes the saved local calendar boundary');await new Promise(resolve=>setTimeout(resolve,6500));assert.equal(outbound,0);
-  c.t.diagnostic('Recovery: actual Base archive bytes from real D1/R2 exclude secrets/devices/presence/all delivery state; restored preferences and private content match, old session denied, real restored ChatHub alarm emits zero pushes.');
+  c.t.diagnostic('Recovery: actual Base archive bytes from real D1/R2 exclude secrets/devices/presence/live delivery queue and keep retained routing records; restored preferences and private content match, old session denied, real restored ChatHub alarm emits zero pushes.');
  }finally{if(exportId)await service.exports.abort(exportId);await restore?.close()}
 }

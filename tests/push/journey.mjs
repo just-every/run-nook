@@ -9,6 +9,7 @@ import {failures} from './failures.mjs';
 import {erasure} from './erasure.mjs';
 import {setupFailure} from './setup-failure.mjs';
 import {archive} from './archive.mjs';
+import {retention,retentionClock} from './retention.mjs';
 
 export async function contractJourney(t){
  const recipients=new Map(),received=[];let publicKey,edgeError;
@@ -44,7 +45,9 @@ export async function contractJourney(t){
   await failures(context);
   await setupFailure(context);
   await erasure(context);
+  await retention(context);
   await archive(context);
+  await retentionClock(context);
   if(edgeError)throw edgeError;
   assert.equal((await db.prepare("SELECT count(*) AS n FROM nook_notify_queue WHERE channel='email'").first()).n,0,'push choices never opt into email');
  }finally{await app.close()}

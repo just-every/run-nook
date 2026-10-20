@@ -56,4 +56,4 @@ test('push security: authentication, current device ownership, endpoint allowlis
 
 // One responsibility-split public journey extends the original two checks.
 import {contractJourney} from './push/journey.mjs';
-test('NOOK-073 an active desktop holds phone-class Web Push, releases it on idle or delay, cancels on read and records held-active-elsewhere',{timeout:650_000},contractJourney);
+test('NOOK-073 an active desktop holds phone-class Web Push, releases it on idle or delay, cancels on read and records held-active-elsewhere',{timeout:780_000},contractJourney);

@@ -35,7 +35,8 @@ export async function drainPush(bindings:any,now=Date.now(),network:typeof fetch
   // Future retries and explicitly deferred rows never join an initial gather.
   const claim=crypto.randomUUID()
   const claimed=await candidates(`UPDATE nook_notify_queue SET state='sending',email=?,attempts=attempts+1,due=?,updated=? WHERE id IN (SELECT id FROM candidates WHERE ${eligible}) AND EXISTS(SELECT 1 FROM candidates WHERE cancel IS NULL AND held<=? AND due<=?)`,claim,at+LEASE_MS,at,...eligibility,at,at).run()
-  const count=claimed.meta.changes;if(!count)continue
+  // D1 change counts include trigger writes such as retained routing records.
+  const count=claimed.meta.changes&&(await sql("SELECT count(*) AS n FROM nook_notify_queue WHERE channel='push' AND email=? AND state='sending'",claim).first<{n:number}>())!.n;if(!count)continue
   const lead=await sql("SELECT id,actor,message,reason FROM nook_notify_queue WHERE channel='push' AND email=? AND state='sending' ORDER BY created,id LIMIT 1",claim).first<Row>();if(!lead)continue
   const device=await sql('SELECT subscription FROM nook_push_devices WHERE id=? AND user=?',group.device,group.user).first<{subscription:string}>()
   const release=async()=>{

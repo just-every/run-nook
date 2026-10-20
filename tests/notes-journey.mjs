@@ -1,12 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {installation,until} from './push/fixture.mjs';
-import {notesBrowser} from './notes-browser.mjs';
+import {notesBrowser,erasedNotesBrowser} from './notes-browser.mjs';
 import {createPortability,readArchive} from '@runeditrun/rer/modules/portability';
 import {productPolicy} from '../src/platform/portability-policy.mjs';
 import {migrationHistory} from './migration-history.mjs';
 
-test('NOOK-053 a private channel note and checklist keep versions, propose a commitment only its assignee accepts, and export, erase and restore with the channel',{timeout:180000},async()=>{
+test('NOOK-053 a private channel note and checklist keep versions, propose a commitment only its assignee accepts, keep shared work anonymously through member erasure, and export, erase and restore with the channel',{timeout:180000},async()=>{
  const app=await installation(async()=>new Response(null,{status:201}),{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});let restore;
  try{
   const {call,db,ownerCookie,origin}=app;
@@ -52,10 +52,31 @@ test('NOOK-053 a private channel note and checklist keep versions, propose a com
   await until(async()=>(await call(base+'/'+threadNote.id,'GET',undefined,ana.cookie)).deleted,'thread note source erased');assert.ok((await call(base+'/'+threadNote.id+'/history','GET',undefined,ana.cookie)).items.every(v=>v.body===''&&v.items.length===0&&v.links.length===0));
   // Explicit shared-note deletion redacts historical bodies and linked URLs.
   await call(base+'/'+note.id,'DELETE',{version:checked.version},ana.cookie);const erased=await call(base+'/'+note.id,'GET',undefined,ana.cookie);assert.equal(erased.body,'');assert.equal(erased.title,'');assert.equal(erased.deleted,true);assert.ok((await call(base+'/'+note.id+'/history','GET',undefined,ana.cookie)).items.every(v=>v.deleted&&v.body===''&&v.links.length===0));
-  // Member erasure also covers notes and every revision authored by that member.
-  const authorNote=await call(base,'POST',{...content,title:'Ana’s support notes'},ana.cookie);
+  // Member erasure keeps shared work: Ana starts and pins a rota Lee revises; only Ana's attribution goes.
+  const rota={...content,title:'Weekend support rota',body:'Ana covers Saturday; Lee covers Sunday.',pinned:true};
+  let shared=await call(base,'POST',rota,ana.cookie);shared=await call(base+'/'+shared.id,'PATCH',{...rota,version:1,body:'Ana covers Saturday; Lee covers Sunday and the Monday handoff.'},lee.cookie);assert.equal(shared.pinnedBy,ana.user.id);
+  let authorNote=await call(base,'POST',{...content,title:'Ana’s support notes'},ana.cookie);authorNote=await call(base+'/'+authorNote.id,'PATCH',{...content,title:'Ana’s support notes',version:1,body:'Ana’s private call prep.'},ana.cookie);
+  const anaRoot=await call(`/api/conversations/${room.id}/messages`,'POST',{body:'Ana’s escalation thread',intent:crypto.randomUUID()},ana.cookie),rootNote=await call(base,'POST',{...content,title:'Escalation thread checklist',thread:anaRoot.id},lee.cookie);
   let receipt=await call('/api/erasures','POST',{kind:'member',target:ana.user.id,confirmation:'ERASE'},ownerCookie);
   for(let n=0;receipt.state!=='complete'&&n<60;n++)receipt=await call(`/api/erasures/${receipt.id}/resume`,'POST',{},ownerCookie);
-  assert.equal(receipt.state,'complete');assert.equal((await call(base+'/'+authorNote.id,'GET',undefined,lee.cookie)).deleted,true);assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_note_versions WHERE actor=?').bind(ana.user.id).first()).n,0);
+  assert.equal(receipt.state,'complete');
+  const kept=await call(base+'/'+shared.id,'GET',undefined,lee.cookie);assert.equal(kept.deleted,false);assert.equal(kept.body,shared.body);assert.equal(kept.author,null);assert.equal(kept.pinned,true);assert.equal(kept.pinnedBy,null);
+  const keptHistory=(await call(base+'/'+shared.id+'/history','GET',undefined,lee.cookie)).items;assert.deepEqual(keptHistory.map(v=>[v.version,v.actor,v.body]),[[2,lee.user.id,shared.body],[1,null,rota.body]],'Lee’s revision and Ana’s anonymous original survive');
+  for(const gone of [authorNote,rootNote]){assert.equal((await call(base+'/'+gone.id,'GET',undefined,lee.cookie)).deleted,true,gone.title+' cleared');assert.ok((await db.prepare('SELECT body,title FROM nook_note_versions WHERE note=?').bind(gone.id).all()).results.every(v=>v.body===''&&v.title===''))}
+  for(const width of [1440,390])assert.equal((await call(base,'GET',undefined,lee.cookie)).items.some(n=>n.title==='Customer contacts '+width),false,'Ana-only browser notes cleared');
+  assert.equal((await db.prepare('SELECT (SELECT count(*) FROM nook_notes WHERE author=?1 OR pinned_by=?1)+(SELECT count(*) FROM nook_note_versions WHERE actor=?1 OR pinned_by=?1) AS n').bind(ana.user.id).first()).n,0);
+  await erasedNotesBrowser({origin,lee,room,shared:kept});
+  // Readable export and the operational archive carry the anonymized shared note.
+  job=await call('/api/readable-exports','POST',{scope:'conversation',conversationId:room.id,custodyAccepted:true},lee.cookie);
+  for(let n=0;!job.complete&&n<100;n++)job=await call(`/api/readable-exports/${job.id}/step`,'POST',{},lee.cookie);
+  const after=[];for(const page of (await call(`/api/readable-exports/${job.id}/index`,'GET',undefined,lee.cookie)).items)after.push(...(await call(`/api/readable-exports/${job.id}/pages/${page.ordinal}`,'GET',undefined,lee.cookie)).records);
+  assert.equal(after.find(r=>r.type==='notes'&&r.data.id===shared.id).data.body,shared.body);assert.deepEqual(after.filter(r=>r.type==='note_versions'&&r.data.note===shared.id).map(r=>r.data.actor).sort(),[lee.user.id,null].sort());assert.ok(after.filter(r=>r.type.startsWith('note')).every(r=>![r.data.author,r.data.actor,r.data.pinned_by].includes(ana.user.id)));
+  await restore.close();restore=undefined;const latest=await createPortability({db,buckets:{FILES:await app.mf.getR2Bucket('FILES')},policy:await productPolicy(db)}),latestId=await latest.exports.create();
+  records=[];try{while((await latest.exports.advance(latestId,{maxParts:16})).phase==='building'){};for await(const record of readArchive(await latest.exports.download(latestId)))records.push(record)}finally{await latest.exports.abort(latestId)}
+  restore=await installation(async()=>{assert.fail('restore must emit no external effects')},{bootstrap:false});
+  const second=await createPortability({db:restore.db,buckets:{FILES:await restore.mf.getR2Bucket('FILES')},policy:await productPolicy(restore.db),migrations:migrationHistory(await productPolicy(restore.db))}),secondId=await second.imports.create(records[0]);for(const record of records)if(record.kind==='part')await second.imports.uploadPart(secondId,record.index,record);await second.imports.finalize(secondId,{contentHash:records.at(-1).contentHash,archiveHash:records.at(-1).archiveHash});
+  assert.deepEqual(await restore.db.prepare('SELECT body,author,pinned,pinned_by AS pinnedBy,deleted FROM nook_notes WHERE id=?').bind(shared.id).first(),{body:shared.body,author:null,pinned:1,pinnedBy:null,deleted:0});
+  assert.deepEqual((await restore.db.prepare('SELECT version,actor,body FROM nook_note_versions WHERE note=? ORDER BY version').bind(shared.id).all()).results,[{version:1,actor:null,body:rota.body},{version:2,actor:lee.user.id,body:shared.body}]);
+  assert.equal((await restore.db.prepare('SELECT deleted FROM nook_notes WHERE id=?').bind(authorNote.id).first()).deleted,1);
  }finally{await restore?.close();await app.close()}
 });
