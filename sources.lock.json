@@ -1017,7 +1017,7 @@
       "executable": false
     },
     "migrations/0071_admin_audit.sql": {
-      "sha256": "6dfa6ed17a5e8448d130896ce1be4262b6e671ac803cd08c53c41aa741c972c8",
+      "sha256": "60f465b0e33eee07c8574b17ac88fe2fd9f68acf29b6cdc2e5fae6d1215ae7da",
       "executable": false
     },
     "OPERATIONS.json": {

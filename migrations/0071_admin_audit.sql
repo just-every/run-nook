@@ -165,3 +165,13 @@ CREATE TRIGGER nook_audit_actor_erased AFTER DELETE ON nook_actors BEGIN
  UPDATE nook_audit SET actor=NULL WHERE actor=OLD.id;
 END;
 ALTER TABLE nook_exit_jobs ADD COLUMN audit_max INTEGER NOT NULL DEFAULT 0;
+-- First-time enable and destructive import doors have no older action journal.
+CREATE TRIGGER nook_audit_import_settings_created AFTER INSERT ON ik_door_settings WHEN NEW.enabled=1 BEGIN
+ INSERT INTO nook_audit VALUES(lower(hex(randomblob(16))),(SELECT actor FROM nook_audit_context WHERE id=1),'import-door',CAST(unixepoch('subsec')*1000 AS INTEGER),'policy.import-door','workspace',1,'Signed import door enabled','confirmed',1);
+END;
+CREATE TRIGGER nook_audit_import_withdrawn AFTER DELETE ON ik_door_plans BEGIN
+ INSERT INTO nook_audit VALUES(lower(hex(randomblob(16))),(SELECT actor FROM nook_audit_context WHERE id=1),'import-door',CAST(unixepoch('subsec')*1000 AS INTEGER),'import.withdrawn','workspace',1,'Reviewed import plan withdrawn','confirmed',1);
+END;
+CREATE TRIGGER nook_audit_import_reversed AFTER UPDATE OF state ON ik_jobs WHEN NEW.state<>OLD.state AND NEW.state IN ('undone','rolled_back','failed') BEGIN
+ INSERT INTO nook_audit VALUES(lower(hex(randomblob(16))),(SELECT actor FROM nook_audit_context WHERE id=1),'import-kit',CAST(unixepoch('subsec')*1000 AS INTEGER),'import.'||NEW.state,'workspace',1,'Reviewed import run ended: '||NEW.state,CASE WHEN NEW.state='failed' THEN 'failed' ELSE 'confirmed' END,1);
+END;
