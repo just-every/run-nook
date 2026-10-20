@@ -5761,7 +5761,7 @@
       "executable": false
     },
     "tests/notify-journey.mjs": {
-      "sha256": "26cb578f1fcacbd3e79c6afe7381cbc2f2e630e4be7536cd7f65f019fcced443",
+      "sha256": "a7cc6eaac1a5309ffbdb4bab159331b9265d16be758526ca756426330ccc93c3",
       "executable": false
     },
     "tests/notify.test.mjs": {

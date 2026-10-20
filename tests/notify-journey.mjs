@@ -45,7 +45,6 @@ try{
  step('NOOK-032 a weekday quiet schedule holds and releases across midnight and DST and explains each item');
  await quietJourney({installation,rowan,sam,room,say,browser,evidence});
 
- if(!process.argv.includes('--quiet-only')){
  step('mention while away, with a file and canaries');
  const mention=await room('Launch plans',rowan),file=await sam.post(`/api/conversations/${mention}/attachments`,{name:FILE_CANARY,mime:'text/plain',data:Buffer.from('canary bytes').toString('base64')});
  const intent=crypto.randomUUID(),payload={body:`Rowan please review ${CANARY}`,intent,mentions:[rowan.user.id],attachments:[file.id]};
@@ -150,6 +149,5 @@ try{
  step('no message text or file names in any email');
  const all=installation.messages().filter(m=>m.text.includes('/notify/off?t='));assert.ok(all.length>=7);
  for(const m of all)assert.ok(!(m.subject+m.text).includes(CANARY)&&!(m.subject+m.text).includes(FILE_CANARY)&&!(m.subject+m.text).includes('notify-canary'),'email carries no message text, file name or urgent reason');
- }
  console.log(`NOTIFY-JOURNEY passed: ${installation.messages().filter(m=>m.text.includes('/notify/off?t=')).length} notification emails through the fake network provider; screenshots in ${evidence}`);
 }finally{await browser?.close();await installation.close();if(!flag('--evidence'))await rm(evidence,{recursive:true,force:true});}
