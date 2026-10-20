@@ -43,3 +43,9 @@ Each Nook installation is its own workspace with its own address. **Your workspa
 - **Add a workspace** opens another installation by its address, such as `chat.example.com`.
 - When you open a workspace from the menu, the list goes with you in the link's fragment, which is never sent to a server. A workspace that list has never held is added only after you choose **Add**.
 - **Remove** forgets another workspace on this device. It does not sign you out there.
+
+## Your quiet schedule
+
+In **You → Your quiet schedule**, choose your time zone and enable quiet hours. Monday–Friday start at 22:00 and finish at 07:00 by default; change a day’s times or switch it off for an exception. An overnight rule starts on its named weekday, so Thursday’s quiet hours still run into Friday morning when Friday is switched off. Times stay at the declared local clock time across daylight saving changes. Your browser’s travel or time-zone setting does not silently move the schedule.
+
+Email and Web Push wait in the existing delivery queue until quiet hours end, including after a restart. Urgent requests bypass quiet hours only under your separate email or push choice. **Snooze alerts for one hour** adds a temporary hold; ending that snooze keeps the recurring schedule. Quiet and item snoozes are limited to seven days. Attention and **Your device delivery** include an **Explain why** line; delivery to a provider is distinct from a notification observed on your device.

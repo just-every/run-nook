@@ -1,3 +1,4 @@
+import {quietPush} from './quiet.mjs';
 import {broadcasts} from './broadcast.mjs';
 import assert from 'node:assert/strict';
 import {installation,until} from './fixture.mjs';
@@ -36,6 +37,7 @@ export async function contractJourney(t){
   const read=async(conversation,person=member)=>{const rooms=await call('/api/conversations','GET',undefined,person.cookie);await call(`/api/conversations/${conversation.id}/read`,'POST',{seq:rooms.find(r=>r.id===conversation.id).seq},person.cookie)};
   const sync=()=>call('/api/devices/sync','GET',undefined,member.cookie);
   const context={...app,t,member,sender,unrelated,device,register,recipients,received,room,send,rows,delivered,read,sync};
+  await quietPush(context);
   await routing(context);
   await broadcasts(context);
   await presence(context);
