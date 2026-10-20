@@ -732,6 +732,22 @@
       "sha256": "fcb950cf9872731e0bd5f92af329a537133fdcd67b51105311052305caed2aab",
       "executable": false
     },
+    "evidence/audit/audit-1440.png": {
+      "sha256": "3886326e91ef3199771d9da070f80d1f1eb7dcb5739d260b42a3a5ea92cb8ff6",
+      "executable": false
+    },
+    "evidence/audit/audit-390.png": {
+      "sha256": "ed7344941a874a7ff0f54d96bbd1043ac7d1a1f878820af8621bcc48bb9bc761",
+      "executable": false
+    },
+    "evidence/audit/audit-items-1440.png": {
+      "sha256": "d5457a369d64f57e3ab0d81eb400aa8bc288e3bfc8087af5a7fffd72ad5f5139",
+      "executable": false
+    },
+    "evidence/audit/audit-items-390.png": {
+      "sha256": "3e12e74ebde9ec804ad71f07a7b766fea8ec283d15bfee280a11cc0f1d00f50f",
+      "executable": false
+    },
     "evidence/device-routing/alerts-1440.png": {
       "sha256": "a25a8b3e435fb24cb3c7143bbbfd50e6c2a479cb2dc813b34199bcb178e9e9fc",
       "executable": false
