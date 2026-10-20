@@ -28,12 +28,15 @@ export async function archive(c){
   const id=await imported.imports.create(records[0]);for(const record of records)if(record.kind==='part')await imported.imports.uploadPart(id,record.index,record);
   const closing=records.at(-1);await imported.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash});
   for(const table of excluded)assert.equal((await restore.db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0,'restored '+table+' empty');
-  const restoredQuiet=await restore.db.prepare('SELECT * FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();assert.equal(restoredQuiet.enabled,1);assert.equal(restoredQuiet.zone,quiet.zone);assert.deepEqual(JSON.parse(restoredQuiet.days_json),quiet.days);assert.equal(restoredQuiet.quiet_until,0);assert.equal(restoredQuiet.next_change,0)
+  const restoredQuiet=await restore.db.prepare('SELECT * FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();assert.equal(restoredQuiet.enabled,1);assert.equal(restoredQuiet.zone,quiet.zone);assert.deepEqual(JSON.parse(restoredQuiet.days_json),quiet.days)
   assert.equal((await restore.db.prepare('SELECT push_mentions FROM nook_notify_preferences WHERE user=?').bind(member.user.id).first()).push_mentions,1);
   assert.deepEqual(await restore.db.prepare('SELECT level,threads FROM nook_conversation_notify WHERE user=? AND conversation=?').bind(member.user.id,policyRoom.id).first(),{level:'nothing',threads:'all'});
   assert.equal((await restore.db.prepare('SELECT body FROM nook_messages WHERE id=?').bind(c.preserved.id).first()).body,c.preserved.body,'actual private content restored');
   assert.equal((await restore.db.prepare('SELECT count(*) AS n FROM oa_sessions').first()).n,0,'archive restores no live sessions');
   await restore.call('/api/me','GET',undefined,member.cookie,401);
+  // The live restored alarm may already have recomputed its cache. A fresh
+  // sign-in must expose the restored rules and current boundaries instead.
+  const signedIn=await restore.signIn('recipient@example.test'),schedule=(await restore.call('/api/notify','GET',undefined,signedIn.cookie)).quietSchedule;assert.equal(schedule.enabled,true);assert.equal(schedule.zone,quiet.zone);assert.deepEqual(schedule.days,quiet.days);assert.ok(schedule.until===0||schedule.until>Date.now());assert.ok(schedule.next===null||schedule.next>Date.now());
   // Arm the restored real ChatHub through its normal internal hint, then allow
   // its alarm to drain. No old queue, subscriptions or network effects return.
   const hub=await restore.mf.getDurableObjectNamespace('CHAT_HUB');await hub.get(hub.idFromName('workspace')).fetch('https://hub/hint');await new Promise(resolve=>setTimeout(resolve,6500));assert.equal(outbound,0);

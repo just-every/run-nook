@@ -5913,7 +5913,7 @@
       "executable": false
     },
     "tests/push/archive.mjs": {
-      "sha256": "98a280b49937e98bdce716b1fb2c9e85ce8f71eeb628055b48d3103e0a231a44",
+      "sha256": "df7b6418aaeb11700ac4f530f77f3f08edefafdf1f6a6708af0b34564fa3fdfd",
       "executable": false
     },
     "tests/push/broadcast.mjs": {
@@ -5933,7 +5933,7 @@
       "executable": false
     },
     "tests/push/fixture.mjs": {
-      "sha256": "00119ffc0a39bfb7da447f791ebcd7aebef1525c7fa5000795492f09753bf23b",
+      "sha256": "3cb5c34d1cd2326db077d5f329d16509f68adbd80a932fb9dc30fbd54b474c7d",
       "executable": false
     },
     "tests/push/journey.mjs": {
