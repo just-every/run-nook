@@ -1,3 +1,4 @@
+import {syncQuiet} from '../notify/quiet'
 import {activeDesktopUntil,mobileRouting,mobileDelay} from './activity'
 import {KEEP_MS,LEASE_MS,MAX_ATTEMPTS,RETRY_MS} from '../notify/queue'
 import {sendPush} from './sender'
@@ -12,6 +13,7 @@ export async function drainPush(bindings:any,now=Date.now(),network:typeof fetch
  const started=Date.now(),clock=()=>now+Math.max(0,Date.now()-started)
  const env=authBindings(bindings),db:D1Database=env.DB,sql=(query:string,...args:any[])=>db.prepare(query).bind(...args)
  await db.batch([sql("UPDATE nook_notify_queue SET state='failed',error='uncertain',updated=? WHERE channel='push' AND state='sending' AND due<=?",now,now),sql("DELETE FROM nook_notify_queue WHERE channel='push' AND state IN ('sent','folded','cancelled','failed') AND updated<?",now-KEEP_MS)])
+ await syncQuiet(db,now)
  const groups=(await sql(`SELECT q.user,q.conversation,q.device FROM nook_notify_queue q WHERE q.channel='push' AND q.state IN ('pending','retrying') AND (q.due<=? OR (${pushCancellation}) IS NOT NULL) GROUP BY q.user,q.conversation,q.device ORDER BY min(q.due) LIMIT 20`,now,now,now).all<any>()).results
  for(const group of groups){
   const at=clock()
@@ -52,6 +54,7 @@ export async function drainPush(bindings:any,now=Date.now(),network:typeof fetch
   const payload={thread:thread?.id??null,title:'Nook',body:wording[lead.reason]+(count>1?` (+${count-1} more)`:''),url:open.href,tag:'nook:'+group.user+':'+group.conversation,ids:[claim],user:group.user,badge:snapshot.badge}
   const authorize=async()=>{
    const current=clock()
+   await syncQuiet(db,current,group.user)
    const valid=await selection(current,"'sending'")('SELECT count(*) AS n,(SELECT s.expires_at FROM nook_push_devices d JOIN oa_sessions s ON s.id=d.session WHERE d.id=?) AS expires FROM candidates WHERE email=? AND cancel IS NULL AND held<=? AND EXISTS(SELECT 1 FROM nook_push_devices WHERE id=? AND user=? AND subscription=?)',group.device,claim,current,group.device,group.user,device.subscription).first<{n:number;expires:number}>()
    return valid?.n===count?valid.expires:null
   }

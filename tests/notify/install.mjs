@@ -22,7 +22,7 @@ export async function notifyInstallation(root){
   }
   const boot=await fetch(origin+'/auth/bootstrap',{method:'POST',redirect:'manual',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({token:bindings.SETUP_TOKEN,displayName:'Sam'})});
   if(boot.status!==303)throw Error('Notification fixture owner bootstrap failed');
-  return {origin,directory,start,stop,messages:()=>edge.messages,setMailStatus:value=>edge.setStatus(value),
+  return {origin,directory,start,stop,database:()=>runtime.db,messages:()=>edge.messages,setMailStatus:value=>edge.setStatus(value),
    async read(statement,...values){return (await runtime.db.prepare(statement).bind(...values).all()).results},
    close:async()=>{await stop();await rm(directory,{recursive:true,force:true})}};
  }catch(error){await stop();await rm(directory,{recursive:true,force:true});throw error}

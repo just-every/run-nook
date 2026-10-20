@@ -1,3 +1,4 @@
+import {quietJourney} from './notify/quiet.mjs';
 import {broadcastEmail} from './notify/broadcast.mjs';
 import assert from 'node:assert/strict';
 import {mkdtemp,rm} from 'node:fs/promises';
@@ -40,6 +41,9 @@ try{
  step('settings block, keyboard opt-in and owner line');
  await settingsBrowser({browser,origin:installation.origin,rowan,sam,evidence,axeSource,phase:'settings'});
  assert.equal((await rowan.get('/api/notify')).mentions,true,'the keyboard opt-in reached the server');
+
+ step('NOOK-032 a weekday quiet schedule holds and releases across midnight and DST and explains each item');
+ await quietJourney({installation,rowan,sam,room,say,browser,evidence});
 
  step('mention while away, with a file and canaries');
  const mention=await room('Launch plans',rowan),file=await sam.post(`/api/conversations/${mention}/attachments`,{name:FILE_CANARY,mime:'text/plain',data:Buffer.from('canary bytes').toString('base64')});

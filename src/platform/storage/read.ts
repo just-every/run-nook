@@ -1,3 +1,5 @@
+import {syncQuiet} from '../../notify/quiet'
+import {attentionLevel} from '../../notify/explain'
 import {countedMessage,threadBadgeChoice} from './thread-badge'
 import {threadSeen} from './threads'
 import {latestEditable} from './latest-edit'
@@ -66,22 +68,22 @@ export async function read(c:Context,action:string,id='',input:Record<string,any
 }
 export async function search(c:Context,input:Record<string,any>,source:'native'|'imported'='native'){return mixedSearch(c,input,source)}
 async function attention(c:Context,input:Record<string,any>){
- const now=Date.now();
+ const now=Date.now();await syncQuiet(c.db,now,c.uid)
  const [settings,rows,wake,reminders,personal]=await Promise.all([
- c.one('SELECT dnd_until FROM nook_settings WHERE user=?',[c.uid]),
+ c.one('SELECT (SELECT dnd_until FROM nook_settings WHERE user=?) AS dnd_until,(SELECT quiet_until FROM nook_quiet_schedules WHERE user=?) AS schedule_until,(SELECT next_change FROM nook_quiet_schedules WHERE user=?) AS next_change',[c.uid,c.uid,c.uid]),
  // Each authorized conversation contributes at most 100 candidates per state.
  // Old/done/private history cannot make a page scan an unbounded inbox.
  c.rows(`WITH candidates AS (
  SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='open' AND (a.reason<>'broadcast' OR NOT ${broadcastSuppressed('a.user','a.conversation')}) AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
  UNION ALL
  SELECT j.value AS id FROM nook_members m JOIN json_each((SELECT json_group_array(id) FROM (SELECT a.id FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND (a.reason<>'broadcast' OR NOT ${broadcastSuppressed('a.user','a.conversation')}) AND a.id>? ORDER BY a.id LIMIT 100))) j WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}
- ) SELECT a.* FROM candidates p JOIN nook_attention a ON a.id=p.id ORDER BY a.id LIMIT 100`,[input.after??'',c.uid,input.after??'',c.uid]),
+ ) SELECT a.*,${attentionLevel('a.user','a.conversation')} AS notificationLevel FROM candidates p JOIN nook_attention a ON a.id=p.id ORDER BY a.id LIMIT 100`,[input.after??'',c.uid,input.after??'',c.uid]),
  c.one(`SELECT MIN(deadline) AS deadline FROM (SELECT (SELECT a.snooze_until FROM nook_attention a WHERE a.user=m.user AND a.conversation=m.conversation AND a.state='snoozed' AND a.snooze_until>? ORDER BY a.snooze_until LIMIT 1) AS deadline FROM nook_members m WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')})`,[now,c.uid]),
  input.after?Promise.resolve({items:[],hasMore:false,deferredCount:0,nextWakeAt:null}):reminderAttention(c),
  input.after?Promise.resolve([]):personalReminderAttention(c),
  ])
- const dndUntil=settings?.dnd_until??null;let deferredCount=0;const items=[];
- const visible=rows.filter(a=>!(a.state==='snoozed'&&a.snooze_until>now||dndUntil>now&&a.reason!=='urgent-request'))
+ const scheduleUntil=settings?.schedule_until??0,manualUntil=settings?.dnd_until??0,dndUntil=Math.max(scheduleUntil,manualUntil)||null;let deferredCount=0;const items=[];
+ const visible=rows.filter(a=>!(a.state==='snoozed'&&a.snooze_until>now||(dndUntil??0)>now&&a.reason!=='urgent-request'))
  deferredCount=rows.length-visible.length
  const messages=new Map<string,any>(),outcomes=new Map<string,any>()
  await Promise.all([...new Set<string>(visible.map(a=>a.conversation))].map(async conversation=>{
@@ -93,8 +95,9 @@ async function attention(c:Context,input:Record<string,any>){
   for(const {payload,...m} of messageRows)messages.set(m.id,{...m,urgentReason:m.deleted?null:JSON.parse(payload).urgentReason??null})
   for(const o of outcomeRows)outcomes.set(o.id,o)
  }))
- for(const a of visible){if(a.outcome&&!outcomes.has(a.outcome))fail(404,'Outcome unavailable');items.push({...a,message:messages.get(a.message)??null,outcome:outcomes.get(a.outcome)??null})}
+ for(const a of visible){if(a.outcome&&!outcomes.has(a.outcome))fail(404,'Outcome unavailable');items.push({...a,explanation:a.notificationLevel==='nothing'?'Device and email alerts suppressed by your level':'Delivered to Attention; device and email alerts follow your choices',message:messages.get(a.message)??null,outcome:outcomes.get(a.outcome)??null})}
 
- const deadlines=[wake?.deadline,dndUntil,reminders.nextWakeAt].filter((value):value is number=>typeof value==='number'&&value>now);
- return {items,personalReminders:dndUntil>now?[]:personal,reminders:{items:reminders.items,hasMore:reminders.hasMore},deferredCount:deferredCount+reminders.deferredCount+(dndUntil>now?personal.length:0),dndUntil,observedAt:now,nextWakeAt:deadlines.length?Math.min(...deadlines):null,cursor:rows.at(-1)?.id??input.after??'',hasMore:rows.length===100,deferredCountScope:'this page'}
+ const heldItems=rows.filter(a=>!visible.includes(a)).map(a=>({id:a.id,conversation:a.conversation,explanation:scheduleUntil>now&&a.reason!=='urgent-request'?'Held until '+new Date(scheduleUntil).toISOString()+' by your quiet schedule':a.state==='snoozed'&&a.snooze_until>now?'Held until '+new Date(a.snooze_until).toISOString()+' by your item snooze':'Held until '+new Date(manualUntil).toISOString()+' by your quiet snooze'}))
+ const deadlines=[settings?.next_change,wake?.deadline,dndUntil,reminders.nextWakeAt].filter((value):value is number=>typeof value==='number'&&value>now);
+ return {items,heldItems,scheduleUntil,manualUntil,personalReminders:(dndUntil??0)>now?[]:personal,reminders:{items:reminders.items,hasMore:reminders.hasMore},deferredCount:deferredCount+reminders.deferredCount+((dndUntil??0)>now?personal.length:0),dndUntil,observedAt:now,nextWakeAt:deadlines.length?Math.min(...deadlines):null,cursor:rows.at(-1)?.id??input.after??'',hasMore:rows.length===100,deferredCountScope:'this page'}
 }

@@ -17,6 +17,7 @@ export const pushCancellation=`CASE ${recipientCancellation}
 
 // The third clock binding follows cancellation's two expiration bindings.
 export const pushHeldUntil=`max(
+ COALESCE((SELECT CASE WHEN q.reason='urgent-request' AND EXISTS(SELECT 1 FROM nook_notify_preferences p WHERE p.user=q.user AND p.push_urgent_quiet=1) THEN 0 ELSE quiet_until END FROM nook_quiet_schedules WHERE user=q.user),0),
  COALESCE((SELECT snooze_until FROM nook_attention WHERE id=q.attention AND state='snoozed'),0),
  COALESCE((SELECT CASE WHEN q.reason='urgent-request' AND p.push_urgent_quiet=1 THEN 0 ELSE s.dnd_until END FROM nook_settings s LEFT JOIN nook_notify_preferences p ON p.user=s.user WHERE s.user=q.user),0),
  CASE WHEN ${mobileRouting} THEN CASE WHEN ${activeDesktopUntil('q.user')}>? THEN ${activeDesktopUntil('q.user')}+${mobileDelay} WHEN q.held_at IS NOT NULL AND q.released_at IS NULL THEN COALESCE(q.active_until,0)+${mobileDelay} ELSE 0 END ELSE 0 END)`
