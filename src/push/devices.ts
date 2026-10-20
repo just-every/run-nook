@@ -28,7 +28,7 @@ export async function register(c:Context,input:Record<string,any>){
 }
 export async function remove(c:Context,input:Record<string,any>){
  if(Object.keys(input).some(k=>k!=='id'))fail(400,'Unsupported device field')
- const device=id(input.id);await c.batch([c.sql('DELETE FROM nook_push_devices WHERE id=? AND user=?',device,c.uid)]);await c.hint();return {ok:true}
+ const device=id(input.id);await c.batch([c.sql('DELETE FROM nook_push_devices WHERE id=? AND user=?',device,c.uid),c.sql("UPDATE nook_notify_queue SET due=max(created+?,min(due,?)) WHERE channel='push' AND user=? AND state='pending'",PUSH_GATHER_MS,Date.now(),c.uid)]);await c.hint();return {ok:true}
 }
 export async function presence(c:Context,input:Record<string,any>){
  if(Object.keys(input).some(k=>!['id','page','visible','lastInputAt','deviceClass'].includes(k))||typeof input.visible!=='boolean')fail(400,'Invalid presence')
@@ -38,4 +38,4 @@ export async function presence(c:Context,input:Record<string,any>){
  await c.batch([c.sql('DELETE FROM nook_push_presence WHERE page=? AND user=?',page,c.uid),c.sql('INSERT INTO nook_push_presence(page,device,user,session,expires,last_input_at,device_class) VALUES(?,?,?,?,?,?,?)',page,device,c.uid,c.session.id,input.visible?now+PRESENCE_MS:now,lastInputAt,deviceClass),c.sql("UPDATE nook_notify_queue SET due=max(created+?,min(due,?)) WHERE channel='push' AND user=? AND state='pending'",PUSH_GATHER_MS,Date.now(),c.uid)],undefined,'(EXISTS(SELECT 1 FROM nook_push_devices WHERE id=? AND user=? AND session=?) OR ?=?)',[device,c.uid,c.session.id,device,'web-'+page])
  await c.hint();return {ok:true}
 }
-export async function revokeSession(c:Context){await c.batch([c.sql('DELETE FROM nook_push_devices WHERE user=? AND session=?',c.uid,c.session.id)])}
+export async function revokeSession(c:Context){await c.batch([c.sql('DELETE FROM nook_push_devices WHERE user=? AND session=?',c.uid,c.session.id),c.sql("UPDATE nook_notify_queue SET due=max(created+?,min(due,?)) WHERE channel='push' AND user=? AND state='pending'",PUSH_GATHER_MS,Date.now(),c.uid)]);await c.hint()}
