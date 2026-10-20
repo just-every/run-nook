@@ -16,6 +16,9 @@ export async function auditJourney({post,get,request,owner,member,registered,che
   const details=(await get('/api/channels/'+room.id+'/details')).data
   await request('/api/channels/'+room.id+'/posting',{method:'PATCH',cookie:owner.cookie,body:{version:details.version,level:'managers',replies:'same',people:[]}})
   await post('/api/conversations/'+room.id+'/messages',{body:'Customer launch approved; keep the audit free of this message body.',intent:crypto.randomUUID(),adminOverride:true},admin.cookie)
+  const token=(await post('/api/integrations/tokens',{name:'Release handoff',conversations:[room.id]})).data
+  const family=token.tokens.find(row=>row.name==='Release handoff').id
+  const rotated=(await post('/api/integrations/tokens/'+family+'/rotate',{})).data;await post('/api/integrations/tokens/'+family+'/revoke',{})
   const started=(await post('/api/readable-exports',{scope:'conversation',conversationId:room.id,custodyAccepted:true})).data
   await post('/api/readable-exports/'+started.id+'/step',{})
   // The accepted bounded job is interrupted before completion, and survives a
@@ -37,7 +40,8 @@ export async function auditJourney({post,get,request,owner,member,registered,che
   assert.equal((await sql('SELECT count(*) AS n FROM nook_audit'))[0].n,deniedBefore)
   const dm=(await post('/api/conversations',{name:'Confidential compensation discussion',kind:'dm',participants:[owner.user.id]},member.cookie)).data
   await post('/api/conversations/'+dm.id+'/messages',{body:'Private compensation marker should never enter audit',intent:crypto.randomUUID()},member.cookie)
-  const download=await get('/api/team/audit?format=json',admin.cookie);assert.ok(download.data.items.some(row=>row.kind==='channel.created'&&row.scope==='a direct conversation'));assert.doesNotMatch(download.raw,/Confidential compensation|Private compensation marker|Customer launch approved|token_hash|SESSION_SECRET/)
+  const download=await get('/api/team/audit?format=json',admin.cookie);assert.ok(download.data.items.some(row=>row.kind==='channel.created'&&row.scope==='a direct conversation'));assert.ok(download.data.items.some(row=>row.kind==='integration.rotate'&&row.reason==='Token label: Release handoff'));assert.ok(!download.raw.includes(token.secret)&&!download.raw.includes(rotated.secret));assert.doesNotMatch(download.raw,/Confidential compensation|Private compensation marker|Customer launch approved|token_hash|SESSION_SECRET/)
+  const empty=await get('/api/team/audit?format=csv&kind=not-a-real-action',admin.cookie);assert.equal(empty.raw.trim().split('\n').length,1)
   const csv=await get('/api/team/audit?format=csv&kind=policy.posting',admin.cookie);assert.match(csv.raw,/policy.posting/)
   await request('/api/team/audit',{method:'PATCH',body:{},cookie:admin.cookie,status:405})
   await validateArchive()

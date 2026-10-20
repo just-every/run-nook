@@ -39,14 +39,13 @@ export async function auditRoute(c:Context,request:Request):Promise<Response|nul
  const encoder=new TextEncoder(),fields=['id','actor','actorName','service','at','kind','scope','version','reason','outcome','count']
  // Formula-looking labels remain literal when opened in spreadsheet software.
  const csv=(value:any)=>'"'+String(value??'').replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"'
- let current=first,started=false,ended=false,wrote=false
+ let current=first,started=false,wrote=false
  const stream=new ReadableStream<Uint8Array>({async pull(controller){try{
   if(!started){started=true;controller.enqueue(encoder.encode(format==='json'?'{"format":"nook-admin-audit","version":1,"items":[':fields.join(',')+'\r\n'));return}
-  if(ended){controller.close();return}
   const output=current.items.map((row:any)=>format==='json'?JSON.stringify(row):fields.map(key=>csv(row[key])).join(',')).join(format==='json'?',':'\r\n')
   if(output){controller.enqueue(encoder.encode((format==='json'&&wrote?',':'')+output+(format==='csv'?'\r\n':'')));wrote=true}
   if(current.cursor){const next=new URLSearchParams(url.searchParams);next.set('cursor',current.cursor);current=await page(c,next)}
-  else {ended=true;if(format==='json')controller.enqueue(encoder.encode(']}'))}
+  else {if(format==='json')controller.enqueue(encoder.encode(']}'));controller.close()}
  }catch(error){controller.error(error)}}})
  return new Response(stream,{headers:{...headers,'Content-Type':format==='json'?'application/json; charset=utf-8':'text/csv; charset=utf-8','Content-Disposition':`attachment; filename="nook-audit.${format}"`}})
 }

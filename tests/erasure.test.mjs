@@ -321,7 +321,7 @@ test('retained source policy preserves only current bodies through public erasur
   await finishDoor(standard,owner,await door(standard,owner,'',{kind:'message',target:channel.id,confirmation:'ERASE'}));
   assert.equal((await standard.read(reader,'message',channel.id)).deleted,1);assert.equal((await standard.read(reader,'search','',{q:'RetiredPerson'})).items.length,0);
   await assertFenced(f,[['nook_retained_message_bodies',{id:channel.id}]]);assert.equal(scanSql(f,/RetiredPerson/).length,0);
-  const newer=await exported(f),empty=await fixture({bootstrap:false});try{await assert.rejects(restored(empty,latest,newer[0]),e=>e.code.startsWith('erased_row:'))}finally{empty.close()}
+  const newer=await exported(f),empty=await fixture({bootstrap:false});try{await assert.rejects(restored(empty,latest,newer[0]),e=>e.code==='erasure_epoch')}finally{empty.close()}
  }finally{f.close()}
 });
 

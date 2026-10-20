@@ -1001,7 +1001,7 @@
       "executable": false
     },
     "migrations/0071_admin_audit.sql": {
-      "sha256": "f0e86854294676eeebf2ed607905bfd63b210561ac641bfd06a0b65a061c4293",
+      "sha256": "6dfa6ed17a5e8448d130896ce1be4262b6e671ac803cd08c53c41aa741c972c8",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -1521,11 +1521,11 @@
       "executable": false
     },
     "src/audit/audit.css": {
-      "sha256": "9ba00b34df1b795f00cd619a13e82de50523625b42241a87d310dafd365a4806",
+      "sha256": "ae47ad323ffac295a123490d73ee92172f4a77e8a726daf5999d5597a22172c5",
       "executable": false
     },
     "src/audit/AuditLog.tsx": {
-      "sha256": "372391ba36d88a39735a48e01e3dd32acbf912a0688ce18d63751574bd79944a",
+      "sha256": "254e055f8166a70cdc31ce39097e30a907d687a7e9dd12b8b79c99af34f661c8",
       "executable": false
     },
     "src/audit/database.ts": {
@@ -1533,7 +1533,7 @@
       "executable": false
     },
     "src/audit/server.ts": {
-      "sha256": "773e808e1d551a3cb2ea8f20004728967a19164f7d824afa5f67cae9f340bc09",
+      "sha256": "e6896bec49c8f5831b81fc3a8d9bd8bea97ef5efe76d9eb6087e451ab778a43e",
       "executable": false
     },
     "src/base/contract-filter.ts": {
@@ -5389,11 +5389,11 @@
       "executable": false
     },
     "tests/audit-browser.mjs": {
-      "sha256": "421d89d46c7233f97cd50da51993c5214f49c125ec748b6b5c614feb50e78799",
+      "sha256": "268eded2dafb622ee3c2293afbf9f8761a7d1a6cb8e898ce7b4852bd378135af",
       "executable": false
     },
     "tests/audit-journey.mjs": {
-      "sha256": "13d00e08b6b370053318a3cc76680c0ded181a8a3098fa7c89aa80152d678775",
+      "sha256": "7d0cc28210bbd81282bf5f33a956a1747ea26f8c1c4892d55e4ddd495f64e3ca",
       "executable": false
     },
     "tests/audit-runtime.mjs": {
@@ -5489,7 +5489,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "dad698612dd527fa2bb7af383f2576dde18148001f8e08ed516b4de17b8be941",
+      "sha256": "76bf12fe54349a8df7279f477b52560984ec64df3340cf061da7cc296d049494",
       "executable": false
     },
     "tests/exit-export.test.mjs": {
