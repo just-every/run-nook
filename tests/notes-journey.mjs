@@ -78,9 +78,21 @@ test('NOOK-053 a private channel note and checklist keep versions, propose a com
   let authorNote=await call(base,'POST',{...content,title:'Ana’s support notes'},ana.cookie);authorNote=await call(base+'/'+authorNote.id,'PATCH',{...content,title:'Ana’s support notes',version:1,body:'Ana’s private call prep.'},ana.cookie);
   const anaRoot=await call(`/api/conversations/${room.id}/messages`,'POST',{body:'Ana’s escalation thread',intent:crypto.randomUUID()},ana.cookie),rootNote=await call(base,'POST',{...content,title:'Escalation thread checklist',thread:anaRoot.id},lee.cookie);
   await memberErasurePreview({origin,ownerCookie});
-  let receipt=await call('/api/erasures','POST',{kind:'member',target:ana.user.id,confirmation:'ERASE'},ownerCookie);
+  const racingNote=await call(base,'POST',{...content,title:'Last-minute shared handoff'},ana.cookie);
+  const [erasureResponse,revisionResponse]=await Promise.all([
+   app.raw('/api/erasures','POST',{kind:'member',target:ana.user.id,confirmation:'ERASE'},ownerCookie),
+   app.raw(base+'/'+racingNote.id,'PATCH',{...content,title:racingNote.title,version:1,body:'Lee accepted the final handoff.'},lee.cookie),
+  ]);
+  assert.ok([200,409].includes(erasureResponse.status),'member erasure succeeds or reports a concurrent version conflict');
+  assert.ok([200,409].includes(revisionResponse.status),'the concurrent revision commits or sees the cleared note');
+  // Admission is durable even if a later erasure batch meets a changed note.
+  const admitted=await db.prepare("SELECT id FROM nook_erasure_receipts WHERE kind='member' ORDER BY created DESC LIMIT 1").first();assert.ok(admitted);
+  let receipt=await call('/api/erasures/'+admitted.id,'GET',undefined,ownerCookie);
+
   for(let n=0;receipt.state!=='complete'&&n<60;n++)receipt=await call(`/api/erasures/${receipt.id}/resume`,'POST',{},ownerCookie);
   assert.equal(receipt.state,'complete');
+  const raced=await call(base+'/'+racingNote.id,'GET',undefined,lee.cookie);
+  if(revisionResponse.status===200){assert.equal(raced.deleted,false,'a committed concurrent revision must survive');assert.equal(raced.body,'Lee accepted the final handoff.');assert.deepEqual((await call(base+'/'+racingNote.id+'/history','GET',undefined,lee.cookie)).items.map(v=>v.actor),[lee.user.id,null])}else assert.equal(raced.deleted,true,'a revision refused after erasure changes nothing');
   const colleagueKept=await call(base+'/'+colleagueNote.id,'GET',undefined,lee.cookie);assert.equal(colleagueKept.body,colleagueNote.body);assert.equal(colleagueKept.author,lee.user.id);assert.equal(colleagueKept.pinnedBy,null);assert.deepEqual((await call(base+'/'+colleagueNote.id+'/history','GET',undefined,lee.cookie)).items.map(v=>v.actor),[null,lee.user.id],'erasing a reviser also preserves the other author’s work');
   const kept=await call(base+'/'+shared.id,'GET',undefined,lee.cookie);assert.equal(kept.deleted,false);assert.equal(kept.body,shared.body);assert.equal(kept.author,null);assert.equal(kept.pinned,true);assert.equal(kept.pinnedBy,null);
   const keptHistory=(await call(base+'/'+shared.id+'/history','GET',undefined,lee.cookie)).items;assert.deepEqual(keptHistory.map(v=>[v.version,v.actor,v.body]),[[2,lee.user.id,shared.body],[1,null,rota.body]],'Lee’s revision and Ana’s anonymous original survive');
