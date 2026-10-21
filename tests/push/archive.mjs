@@ -12,8 +12,11 @@ export async function archive(c){
  const saved=(await call('/api/notify','PATCH',{quietSchedule:{...quiet,enabled:true}},member.cookie)).quietSchedule
  // A terminal quiet-held record must follow its group DM without replaying
  // routing triggers. Its exact row is also compared after the real restore.
+ const otherQuiet=(await call('/api/notify','GET',undefined,c.unrelated.cookie)).quietSchedule;
+ await call('/api/notify','PATCH',{quietSchedule:{...quiet,enabled:true,version:otherQuiet.version}},c.unrelated.cookie);
  const group=await c.room('Routing history conversion','dm',[member.user.id,c.unrelated.user.id]);
- const source=await c.send(group,{mentions:[member.user.id]},c.ownerCookie);await c.read(group);
+ const source=await c.send(group,{mentions:[member.user.id]},c.ownerCookie);await c.read(group);await c.read(group,c.unrelated);
+ await until(async()=>{const rows=await c.rows(source);return rows.length>0&&rows.every(r=>r.state==='cancelled')},'all group-DM recipients cancel their quiet-held alerts before conversion');
  const before=(await db.prepare('SELECT * FROM nook_push_delivery_records WHERE message=? ORDER BY id').bind(source.id).all()).results;
  assert.ok(before.length>0,'conversion begins with positively witnessed routing records');
  for(const record of before){assert.equal(record.conversation,group.id);assert.equal(record.state,'cancelled');assert.ok(JSON.parse(record.holds).some(h=>h.kind==='quiet-schedule'&&h.release>=h.start),'conversion has a completed quiet hold')}
