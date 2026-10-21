@@ -609,7 +609,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "80fa6e8a3288d7119925eaa42c23fcbec9477f57df72a60e3259c8b3e8f4f236",
+      "sha256": "5be6beaedac29ab295b2b1a4a961d3c840a9239f11d47f430724625ecdf19f2b",
       "executable": false
     },
     ".gitignore": {
@@ -1113,7 +1113,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "aedbd70c6b21b1497b922f9fb812d7c587b5e77e02da02b9c6a029c13ee5fef4",
+      "sha256": "bd4d8774364fd13186de5c06939a56285020a76f3216a9463a36368fad7a796e",
       "executable": false
     },
     "owner-deployment.json": {
@@ -1121,7 +1121,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "d70feebba1f92dc1a6564f1f552e90b9dbc39cf47083be26b8ea46165d9e6c3f",
+      "sha256": "05612f586d718f947f491e6e91b7e480479d9c211199aba473d372ff6de5d0c7",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -5949,7 +5949,7 @@
       "executable": false
     },
     "tests/push/journey.mjs": {
-      "sha256": "af80f3c86406315beffab1944aab612698aafbf48af07b0b2dc628bc2e7d0042",
+      "sha256": "2d29bfd7bb65f0669953f2ffb6edcdd31422225731952284f29e2fa3a7503551",
       "executable": false
     },
     "tests/push/packet.mjs": {
@@ -5957,7 +5957,7 @@
       "executable": false
     },
     "tests/push/presence.mjs": {
-      "sha256": "edef36fb4b626ff13f85613d7d91a8a98539dd392950d82d709699d289ca7d71",
+      "sha256": "1f9c51c239385902864a47e7e6712726d33eefb410aa75f36c40a2166e716e4d",
       "executable": false
     },
     "tests/push/quiet.mjs": {

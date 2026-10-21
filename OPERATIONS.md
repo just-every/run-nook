@@ -505,7 +505,7 @@ The alarm drains channels independently even with no sockets. Recent authenticat
 
 Every Web Push must show a visible alert. Nook updates supported badges with that alert and synchronizes displayed notifications/badges after foreground authenticated reads. It never sends silent clear-only or badge-only pushes. WebKit explicitly revokes silent subscriptions ([official explanation](https://webkit.org/blog/16535/meet-declarative-web-push/)). Android web launchers may derive a dot from visible notifications rather than exposing an app badge counter. The proposed iOS background badge clears and Android native normal-priority clears require a future native transport; they are not a web delivery guarantee.
 
-For the targeted local proof after `pnpm build:app`, run `pnpm test:push`. Its synthetic HTTPS push endpoint exists only at the network edge inside Miniflare; it creates no provider subscription and makes no vendor request. A real-device push acceptance run is a separate operational gate. See ACCEPTANCE.md before making delivery claims.
+For the targeted local proof after `pnpm build:app`, run `pnpm test:push`: the ordered journey in `tests/push-journey.mjs`, then the real-clock shard in `tests/push-clock.mjs`, which CI runs as two parallel jobs. Its synthetic HTTPS push endpoint exists only at the network edge inside Miniflare; it creates no provider subscription and makes no vendor request. A real-device push acceptance run is a separate operational gate. See ACCEPTANCE.md before making delivery claims.
 
 ### Retained routing history upgrade
 

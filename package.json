@@ -38,7 +38,7 @@
     "test:pilot": "node tests/pilot-journey.mjs",
     "test:base": "node scripts/edition-authoring/cli.mjs check && node scripts/edition-authoring/cli.mjs verify-base --offline && rer check --profile first-party",
     "test:notify": "node tests/notify-journey.mjs",
-    "test:push": "node --test --test-concurrency=1 tests/push-journey.mjs",
+    "test:push": "node --test --test-concurrency=1 tests/push-journey.mjs tests/push-clock.mjs",
     "integration:generate": "node scripts/delivery/integration.mjs",
     "integration:check": "node scripts/delivery/integration.mjs --check",
     "test:notes": "node --test tests/notes-journey.mjs"

@@ -56,7 +56,11 @@ jobs:
           - stage: conversation notes
             command: pnpm build:app && pnpm test:notes
           - stage: push notifications
-            command: pnpm build:app && pnpm test:push
+            # The ordered record chain; pnpm test:push runs it and the real-clock shard in turn.
+            command: pnpm build:app && node --test --test-concurrency=1 tests/push-journey.mjs
+          - stage: push real clocks
+            # Real 45-second expiry and five-minute delay waits, alone on a fresh installation.
+            command: pnpm build:app && node --test --test-concurrency=1 tests/push-clock.mjs
     uses: ./.github/workflows/verify-stage.yml
     with:
       command: ${{ matrix.command }}
