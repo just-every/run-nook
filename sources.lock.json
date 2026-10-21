@@ -4677,7 +4677,7 @@
       "executable": false
     },
     "src/notes/erasure.ts": {
-      "sha256": "4a107fb8a990f4d2b207ee379a1b8d219c4333cf2ae68c126bed125dfe917fcc",
+      "sha256": "3a050faaa02ab1d696dcd29585be373e168081f801401f5c475a5ea3855e4c65",
       "executable": false
     },
     "src/notes/export.ts": {

@@ -6,14 +6,19 @@ import {exact,version} from './input'
 /** Redact all snapshots rather than leaving erased text in version history.
  * A checkpoint invalidates archives and staged copies predating this redaction. */
 export async function eraseNoteRows(c:Context,f:Awaited<ReturnType<typeof fenceService>>,where:string,params:any[]):Promise<Sql[]>{
- const notes=await c.rows(`SELECT id,conversation FROM nook_notes WHERE deleted=0 AND (${where}) LIMIT 30`,params)
+ const notes=await c.rows(`SELECT id,conversation,version FROM nook_notes WHERE deleted=0 AND (${where}) LIMIT 30`,params)
  if(!notes.length)return []
- const ids=JSON.stringify(notes.map(n=>n.id)),inSet='IN (SELECT value FROM json_each(?))'
- return [...await f.invalidate(),...await f.checkpoint(),...await fencedRows(c,f,'nook_note_proposals',['outcome'],`note ${inSet}`,[ids]),
+ const ids=JSON.stringify(notes.map(n=>n.id)),inSet='IN (SELECT value FROM json_each(?))',guard=crypto.randomUUID()
+ // Selection happens before the D1 batch. Refuse it if another participant has
+ // revised a selected note: the next erasure step must judge shared authorship
+ // again instead of clearing a version that was never selected.
+ const selected=JSON.stringify(notes.map(n=>({id:n.id,version:n.version})))
+ return [sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN NOT EXISTS(SELECT 1 FROM json_each(?) picked WHERE NOT EXISTS(SELECT 1 FROM nook_notes n WHERE n.id=json_extract(picked.value,'$.id') AND n.version=json_extract(picked.value,'$.version') AND n.deleted=0)) THEN 1 ELSE 0 END)`,guard,selected),
+ ...await f.invalidate(),...await f.checkpoint(),...await fencedRows(c,f,'nook_note_proposals',['outcome'],`note ${inSet}`,[ids]),
  sql(`DELETE FROM nook_note_proposals WHERE note ${inSet}`,ids),
  sql(`UPDATE nook_note_versions SET title='',body='',items_json='[]',links_json='[]',pinned=0,pinned_by=NULL,pinned_at=NULL,deleted=1,actor=NULL WHERE note ${inSet}`,ids),
  sql(`UPDATE nook_notes SET title='',body='',items_json='[]',links_json='[]',pinned=0,pinned_by=NULL,pinned_at=NULL,deleted=1,author=NULL WHERE id ${inSet}`,ids),
- ...audit(`SELECT DISTINCT conversation FROM nook_notes WHERE id ${inSet}`,[ids])]
+ ...audit(`SELECT DISTINCT conversation FROM nook_notes WHERE id ${inSet}`,[ids]),sql('DELETE FROM nook_guard WHERE id=?',guard)]
 }
 /** Member erasure clears a note only when that member wrote every version, or its
  * thread root is their erased message. Erasing a thread root clears its notes. */
