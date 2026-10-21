@@ -101,13 +101,15 @@ test('NOOK-053 a private channel note and checklist keep versions, propose a com
   for(const width of [1440,390])assert.equal((await call(base,'GET',undefined,lee.cookie)).items.some(n=>n.title==='Customer contacts '+width),false,'Ana-only browser notes cleared');
   assert.equal((await db.prepare('SELECT (SELECT count(*) FROM nook_notes WHERE author=?1 OR pinned_by=?1)+(SELECT count(*) FROM nook_note_versions WHERE actor=?1 OR pinned_by=?1) AS n').bind(ana.user.id).first()).n,0);
   await erasedNotesBrowser({origin,lee,room,shared:kept});
+  // Earlier message erasures continue independently of the member receipt.
+  // Settle all accepted work before either export snapshots the source revision.
+  await until(async()=>!(await db.prepare("SELECT 1 FROM nook_erasure_receipts WHERE state<>'complete' UNION ALL SELECT 1 FROM nook_erasure_work").first()),'all erasure work settled before readable and operational export',60_000);
   // Readable export and the operational archive carry the anonymized shared note.
   job=await call('/api/readable-exports','POST',{scope:'conversation',conversationId:room.id,custodyAccepted:true},lee.cookie);
   for(let n=0;!job.complete&&n<100;n++)job=await call(`/api/readable-exports/${job.id}/step`,'POST',{},lee.cookie);
+  assert.ok(job.complete,'post-erasure readable export completes');
   const after=[];for(const page of (await call(`/api/readable-exports/${job.id}/index`,'GET',undefined,lee.cookie)).items){const response=await app.raw(`/api/readable-exports/${job.id}/pages/${page.ordinal}`,'GET',undefined,lee.cookie),value=await response.json();assert.equal(response.status,200,'readable export page '+page.ordinal+': '+(value.error??'available'));after.push(...value.records)}
   assert.equal(after.find(r=>r.type==='notes'&&r.data.id===shared.id).data.body,shared.body);assert.deepEqual(after.filter(r=>r.type==='note_versions'&&r.data.note===shared.id).map(r=>r.data.actor).sort(),[lee.user.id,null].sort());assert.ok(after.filter(r=>r.type.startsWith('note')).every(r=>![r.data.author,r.data.actor,r.data.pinned_by].includes(ana.user.id)));
-  // Background erasure continuation must finish first; an archive refuses pending erasures.
-  await until(async()=>!(await db.prepare("SELECT 1 FROM nook_erasure_receipts WHERE state<>'complete' UNION ALL SELECT 1 FROM nook_erasure_work").first()),'erasure work settled before the archive',60_000);
   await restore?.close();restore=undefined;const latest=await createPortability({db,buckets:{FILES:await app.mf.getR2Bucket('FILES')},policy:await productPolicy(db)}),latestId=await latest.exports.create();
   records=[];try{while((await latest.exports.advance(latestId,{maxParts:16})).phase==='building'){};for await(const record of readArchive(await latest.exports.download(latestId)))records.push(record)}finally{await latest.exports.abort(latestId)}
   restore=await installation(async()=>{assert.fail('restore must emit no external effects')},{bootstrap:false});
