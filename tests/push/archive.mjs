@@ -71,6 +71,8 @@ export async function archive(c){
   const hub=await restore.mf.getDurableObjectNamespace('CHAT_HUB');await hub.get(hub.idFromName('workspace')).fetch('https://hub/hint');
   await until(async()=>{const point=await restore.db.prepare('SELECT quiet_until,next_change FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();return point.quiet_until===saved.until&&point.next_change===saved.next},'restored alarm recomputes the saved local calendar boundary');await new Promise(resolve=>setTimeout(resolve,6500));assert.equal(outbound,0);
   await legacyArchive(c,records);
+  // Erasure invalidates completed exports, so release this job first.
+  await service.exports.abort(exportId);exportId=undefined;
   await c.erase('message',source.id);
   assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records WHERE message=?').bind(source.id).first()).n,0,'conversion probe is erased after restore proof; retention baseline remains unchanged');
   c.t.diagnostic('Recovery: actual Base archive bytes from real D1/R2 exclude secrets/devices/presence/live delivery queue and keep retained routing records; restored preferences and private content match, old session denied, real restored ChatHub alarm emits zero pushes.');
