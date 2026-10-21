@@ -525,7 +525,7 @@ be restored directly. Current archives retain valid history, exclude live
 queue/device/key/presence state, and refuse erased or unresolved record sources.
 
 The pinned `@runeditrun/rer@0.2.68` runner applies each migration file in one
-transaction: local setup (`cli/portability.mjs`) calls Wrangler's `d1 migrations apply`.
+transaction: local portability (`cli/portability.mjs`) calls Wrangler's `d1 migrations apply`.
 In pinned `wrangler@4.142.0`, the migration loop calls `executeSql` once
 per file and `executeLocally` uses `db.batch` for its statements. Hosted deployment's
 `modules/deploy-kit/migrations.mjs` sends the complete file and its applied-ledger
