@@ -30,6 +30,10 @@ export async function retention(c){
  await until(async()=>(await db.prepare("SELECT count(*) AS n FROM nook_notify_queue WHERE channel='push' AND device=? AND state='cancelled' AND error='held-active-elsewhere'").bind(phone.id).first()).n===105,'read cancels every held phone alert');
  await call('/api/devices/presence','POST',{id:device.id,page,visible:false,lastInputAt:Date.now()},member.cookie);
  const view=await call('/api/devices','GET',undefined,member.cookie);assert.equal(view.alerts.length,100,'the delivery view shows at most the latest 100');
+ // Earlier journey work can still reach a terminal cancellation while the
+ // archive runs. Take the exact retention baseline only after that real work
+ // settles, so later clock checks compare the same completed delivery set.
+ await until(async()=>!(await db.prepare("SELECT 1 FROM nook_notify_queue WHERE channel='push' AND state IN ('pending','sending','retrying') LIMIT 1").first()),'all push work settles before the retained export baseline');
  const exported=await deliveries(c,channel),phoneRecords=exported.filter(r=>r.device===phone.id);
  assert.equal(phoneRecords.length,105,'export carries every record beyond the view limit');
  assert.ok(phoneRecords.every(r=>r.routing==='canceled'&&r.error==='held-active-elsewhere'&&r.reason==='mention'&&r.held_at>0&&r.device_name==='Retention phone'&&r.source_conversation===channel.id));
