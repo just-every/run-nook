@@ -104,7 +104,7 @@ test('NOOK-053 a private channel note and checklist keep versions, propose a com
   // Readable export and the operational archive carry the anonymized shared note.
   job=await call('/api/readable-exports','POST',{scope:'conversation',conversationId:room.id,custodyAccepted:true},lee.cookie);
   for(let n=0;!job.complete&&n<100;n++)job=await call(`/api/readable-exports/${job.id}/step`,'POST',{},lee.cookie);
-  const after=[];for(const page of (await call(`/api/readable-exports/${job.id}/index`,'GET',undefined,lee.cookie)).items)after.push(...(await call(`/api/readable-exports/${job.id}/pages/${page.ordinal}`,'GET',undefined,lee.cookie)).records);
+  const after=[];for(const page of (await call(`/api/readable-exports/${job.id}/index`,'GET',undefined,lee.cookie)).items){const response=await app.raw(`/api/readable-exports/${job.id}/pages/${page.ordinal}`,'GET',undefined,lee.cookie),value=await response.json();assert.equal(response.status,200,'readable export page '+page.ordinal+': '+(value.error??'available'));after.push(...value.records)}
   assert.equal(after.find(r=>r.type==='notes'&&r.data.id===shared.id).data.body,shared.body);assert.deepEqual(after.filter(r=>r.type==='note_versions'&&r.data.note===shared.id).map(r=>r.data.actor).sort(),[lee.user.id,null].sort());assert.ok(after.filter(r=>r.type.startsWith('note')).every(r=>![r.data.author,r.data.actor,r.data.pinned_by].includes(ana.user.id)));
   // Background erasure continuation must finish first; an archive refuses pending erasures.
   await until(async()=>!(await db.prepare("SELECT 1 FROM nook_erasure_receipts WHERE state<>'complete' UNION ALL SELECT 1 FROM nook_erasure_work").first()),'erasure work settled before the archive',60_000);

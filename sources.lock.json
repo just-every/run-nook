@@ -5765,7 +5765,7 @@
       "executable": false
     },
     "tests/notes-journey.mjs": {
-      "sha256": "ea7604926d35f1fe0766d92c6b07008a06ba7a1de363cb1439b0e8c04ad9cee2",
+      "sha256": "2fa777bca0c391d168b3676819f475ac35300164918a4736601e3ebf75174c21",
       "executable": false
     },
     "tests/notify-journey.mjs": {
