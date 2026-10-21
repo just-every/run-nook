@@ -4,6 +4,7 @@ import {sql,audit,fencedRows} from '../team/erasure/statements'
 import {getNote} from './read'
 import {exact,version} from './input'
 /** Redact all snapshots rather than leaving erased text in version history.
+ * The enclosing operation invalidates transfers once in its atomic batch.
  * A checkpoint invalidates archives and staged copies predating this redaction. */
 export async function eraseNoteRows(c:Context,f:Awaited<ReturnType<typeof fenceService>>,where:string,params:any[]):Promise<Sql[]>{
  const notes=await c.rows(`SELECT id,conversation,version FROM nook_notes WHERE deleted=0 AND (${where}) LIMIT 30`,params)
@@ -13,8 +14,8 @@ export async function eraseNoteRows(c:Context,f:Awaited<ReturnType<typeof fenceS
  // revised a selected note: the next erasure step must judge shared authorship
  // again instead of clearing a version that was never selected.
  const selected=JSON.stringify(notes.map(n=>({id:n.id,version:n.version})))
- return [sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN NOT EXISTS(SELECT 1 FROM json_each(?) picked WHERE NOT EXISTS(SELECT 1 FROM nook_notes n WHERE n.id=json_extract(picked.value,'$.id') AND n.version=json_extract(picked.value,'$.version') AND n.deleted=0)) THEN 1 ELSE 0 END)`,guard,selected),
- ...await f.invalidate(),...await f.checkpoint(),...await fencedRows(c,f,'nook_note_proposals',['outcome'],`note ${inSet}`,[ids]),
+ return [sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN NOT EXISTS(SELECT 1 FROM json_each(?) picked WHERE NOT EXISTS(SELECT 1 FROM nook_notes n WHERE n.id=json_extract(picked.value,'$.id') AND n.version=json_extract(picked.value,'$.version'))) THEN 1 ELSE 0 END)`,guard,selected),
+ ...await f.checkpoint(),...await fencedRows(c,f,'nook_note_proposals',['outcome'],`note ${inSet}`,[ids]),
  sql(`DELETE FROM nook_note_proposals WHERE note ${inSet}`,ids),
  sql(`UPDATE nook_note_versions SET title='',body='',items_json='[]',links_json='[]',pinned=0,pinned_by=NULL,pinned_at=NULL,deleted=1,actor=NULL WHERE note ${inSet}`,ids),
  sql(`UPDATE nook_notes SET title='',body='',items_json='[]',links_json='[]',pinned=0,pinned_by=NULL,pinned_at=NULL,deleted=1,author=NULL WHERE id ${inSet}`,ids),
@@ -34,7 +35,7 @@ export async function anonymizeMemberNotes(c:Context,f:Awaited<ReturnType<typeof
 }
 export async function deleteNote(c:Context,conversation:string,id:string,value:unknown){
  const input=exact(value,['version']),expected=version(input.version);await getNote(c,conversation,id)
- const f=await fenceService(c),statements=await eraseNoteRows(c,f,'id=? AND conversation=?',[id,conversation])
+ const f=await fenceService(c),statements=[...await f.invalidate(),...await eraseNoteRows(c,f,'id=? AND conversation=?',[id,conversation])]
  await c.writeBatch(statements.map(s=>c.sql(s.sql,...s.params)),conversation,'EXISTS(SELECT 1 FROM nook_notes WHERE id=? AND conversation=? AND version=? AND deleted=0)',[id,conversation,expected])
  await c.hint();return {ok:true}
 }

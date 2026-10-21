@@ -4677,7 +4677,7 @@
       "executable": false
     },
     "src/notes/erasure.ts": {
-      "sha256": "3a050faaa02ab1d696dcd29585be373e168081f801401f5c475a5ea3855e4c65",
+      "sha256": "3e33e31d71207c8c8ea12fe659c7f0e6098953140ddac7484d3648701271b3f2",
       "executable": false
     },
     "src/notes/export.ts": {
@@ -5329,7 +5329,7 @@
       "executable": false
     },
     "src/team/erasure/imported.ts": {
-      "sha256": "2f9cb6f2b8e6baaef0b2919782b49526380d5e22c59d3428d55ee1c498c43594",
+      "sha256": "3aff76a90e8f7efa5cefb853ec40e86630a9a90e194bee08868e80983f4a4024",
       "executable": false
     },
     "src/team/erasure/ImportedAuthors.tsx": {
@@ -5377,7 +5377,7 @@
       "executable": false
     },
     "src/team/erasure/service.ts": {
-      "sha256": "6e1a344262d406b428b358ca6f1c9100da1a72923338dd24d16f6b2c0f8268c5",
+      "sha256": "994ca70db8909bf25cdf1777b45b5d2793e06b571c5d59c34eefcdf1cbdc42cf",
       "executable": false
     },
     "src/team/erasure/statements.ts": {
