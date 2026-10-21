@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {deliveries} from './retention.mjs';
 import {until} from './fixture.mjs';
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 export async function routing(c){
@@ -39,7 +40,12 @@ export async function routing(c){
  const claims=(await Promise.all(items.map(rows))).flat();assert.equal(new Set(claims.map(r=>r.email)).size,1);assert.equal(claims[0].email,packets[0].value.ids[0]);for(const item of items)assert.ok(!JSON.stringify(packets[0].value).includes(item.body));
  assert.equal((await sync()).badge,3);await call('/api/attention/'+claims[0].attention,'POST',{action:'done'},member.cookie);assert.equal((await sync()).badge,2);assert.ok((await sync()).active.includes(packets[0].value.ids[0]),'folded notice remains while another event is active');await read(burst);assert.ok(!(await sync()).active.includes(packets[0].value.ids[0]));
  const quiet=await room('Quiet hold'),deadline=Date.now()+11_000;
- await call('/api/settings','PATCH',{dndUntil:deadline},member.cookie);const held=await send(quiet,{mentions:[member.user.id]}),heldUrgent=await send(quiet,{mentions:[member.user.id],urgent:true,urgentReason:'PRIVATE-HELD-URGENT'});await pause(6000);assert.equal(received.filter(r=>new URL(r.value.url).searchParams.get('focus')===held.id).length,0);await delivered(held);await until(async()=>(await rows(heldUrgent))[0]?.state==='folded','urgent without override is released with quiet burst');assert.ok(received.find(r=>new URL(r.value.url).searchParams.get('focus')===held.id).at>=deadline);await read(quiet);
+ await call('/api/settings','PATCH',{dndUntil:deadline},member.cookie);const held=await send(quiet,{mentions:[member.user.id]},c.ownerCookie),heldUrgent=await send(quiet,{mentions:[member.user.id],urgent:true,urgentReason:'PRIVATE-HELD-URGENT'});await pause(6000);assert.equal(received.filter(r=>new URL(r.value.url).searchParams.get('focus')===held.id).length,0);await delivered(held);await until(async()=>(await rows(heldUrgent))[0]?.state==='folded','urgent without override is released with quiet burst');assert.ok(received.find(r=>new URL(r.value.url).searchParams.get('focus')===held.id).at>=deadline);await read(quiet);
+ const retained=(await deliveries(c,quiet)).find(r=>r.id.startsWith('push:'+held.id+':'));assert.equal(retained.state,'sent');assert.ok(retained.holds.some(h=>h.kind==='quiet-snooze'&&h.start>0&&h.release>=h.start));c.holdWitnesses.push(retained);
+ const snoozeRoom=await room('Item snooze history'),snoozed=await send(snoozeRoom,{mentions:[member.user.id]},c.ownerCookie),snoozeRow=(await rows(snoozed))[0],untilAt=Date.now()+7000;
+ await call('/api/attention/'+snoozeRow.attention,'POST',{action:'snooze',until:untilAt},member.cookie);
+ await until(async()=>(await rows(snoozed))[0].due>=untilAt,'item snooze defers push');await delivered(snoozed);await read(snoozeRoom);
+ const itemRecord=(await deliveries(c,snoozeRoom)).find(r=>r.id===snoozeRow.id);assert.equal(itemRecord.state,'sent');assert.ok(itemRecord.holds.some(h=>h.kind==='item-snooze'&&h.start>0&&h.release>=h.start));c.holdWitnesses.push(itemRecord);
  await call('/api/settings','PATCH',{dndUntil:Date.now()+60_000},member.cookie);await call('/api/notify','PATCH',{push:{urgentQuiet:true}},member.cookie);
  const urgentRoom=await room('Urgent through quiet'),urgent=await send(urgentRoom,{mentions:[member.user.id],urgent:true,urgentReason:'PRIVATE-URGENT-REASON'});const [urgentNotice]=await delivered(urgent);assert.match(urgentNotice.value.body,/Urgent request/);assert.ok(!JSON.stringify(urgentNotice.value).includes('PRIVATE-URGENT-REASON'));await read(urgentRoom);await call('/api/settings','PATCH',{dndUntil:null},member.cookie);
  const extra=[];for(let i=0;i<9;i++)extra.push(await register(member,'device-'+i));

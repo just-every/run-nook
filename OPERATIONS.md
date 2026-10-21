@@ -501,8 +501,23 @@ The first authenticated device-settings read generates the instance VAPID key pa
 
 Changing SESSION_SECRET makes the sealed VAPID key unreadable. To deliberately rotate after loss or compromise: stop the installation, preserve an owner-only operational backup, delete only `nook_push_devices`, `nook_push_presence` and `nook_push_secrets` in the authoritative database, cancel remaining pending/retrying push rows, then restart. The first device read generates a new pair; members reopen Nook and enable again. Do not copy subscriptions to a restored installation. Nook compares the subscription's application-server key with its current public key and re-subscribes when allowed. A browser that removes a subscription is reconciled on a foreground launch while permission remains granted; otherwise the member sees the Enable control or a browser-permission explanation. Permission is never requested automatically.
 
-The alarm drains channels independently even with no sockets. Fresh visible-page heartbeat state is the only foreground holdback and expires automatically. Provider acceptance records sent; HTTP 404/410 retires that device. Rate limits and definite server failures retry on C14's schedule; refused requests and redirects stop, and thrown/timeout failures are uncertain and never repeated. Failed/retrying sends appear in **You** to the recipient, sender and owner. No endpoint, subscription key, encrypted packet or Authorization header is logged. A successful device does not repeat when another retries. A queue row marked sending at a stopped Worker is treated as uncertain after its lease.
+The alarm drains channels independently even with no sockets. Recent authenticated desktop/web input holds phone and tablet alerts under NOOK-073; visibility alone holds nothing. Activity expiry starts the chosen mobile delay. Quiet schedules, quiet snoozes and item snoozes also defer alerts. Provider acceptance records sent; HTTP 404/410 retires that device. Rate limits and definite server failures retry on C14's schedule; refused requests and redirects stop, and thrown/timeout failures are uncertain and never repeated. Failed/retrying sends appear in **You** to the recipient, sender and owner. No endpoint, subscription key, encrypted packet or Authorization header is logged. A successful device does not repeat when another retries. A queue row marked sending at a stopped Worker is treated as uncertain after its lease.
 
 Every Web Push must show a visible alert. Nook updates supported badges with that alert and synchronizes displayed notifications/badges after foreground authenticated reads. It never sends silent clear-only or badge-only pushes. WebKit explicitly revokes silent subscriptions ([official explanation](https://webkit.org/blog/16535/meet-declarative-web-push/)). Android web launchers may derive a dot from visible notifications rather than exposing an app badge counter. The proposed iOS background badge clears and Android native normal-priority clears require a future native transport; they are not a web delivery guarantee.
 
 For the targeted local proof after `pnpm build:app`, run `pnpm test:push`. Its synthetic HTTPS push endpoint exists only at the network edge inside Miniflare; it creates no provider subscription and makes no vendor request. A real-device push acceptance run is a separate operational gate. See ACCEPTANCE.md before making delivery claims.
+
+### Retained routing history upgrade
+
+Migration 0074 adds body-free message/outcome/attention/actor source keys and
+hold intervals to retained Web Push history. It recovers source identity from
+live queues or exact message/outcome-version IDs, removes already-erased source
+history, and preserves unrelated records including removed-device history.
+Earlier activity fields did not distinguish activity from the following delay;
+those intervals are explicitly marked legacy, and missing past quiet/snooze
+history is not invented. An ambiguous source fails the upgrade atomically with
+`ambiguous_delivery_source`; preserve the original database and resolve the
+source evidence before retrying, never discard records to force an upgrade.
+Archives containing older routing rows must be exported again from the upgraded
+original installation. Current archives retain valid history, exclude live
+queue/device/key/presence state, and refuse erased or unresolved record sources.

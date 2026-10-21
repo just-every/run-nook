@@ -9,7 +9,7 @@ const require=createRequire(import.meta.url),{build}=createRequire(require.resol
 const DAY=86400_000;
 // The person's own readable export through the app's job/page doors. Routing records
 // do not depend on conversation scope, so one conversation keeps the export small.
-async function deliveries({call,member},conversation){
+export async function deliveries({call,member},conversation){
  let job=await call('/api/readable-exports','POST',{scope:'conversation',conversationId:conversation.id,custodyAccepted:true},member.cookie);
  for(let n=0;!job.complete&&n<1000;n++)job=await call(`/api/readable-exports/${job.id}/step`,'POST',{},member.cookie);
  assert.ok(job.complete,'readable export completes');const records=[];
@@ -56,6 +56,12 @@ export async function retentionClock(c){
   }
   const view=await call('/api/devices','GET',undefined,member.cookie);assert.ok(!view.alerts.some(a=>a.device===phone.id),'the bounded view no longer lists them');
   const records=await deliveries(c,channel);assert.equal(records.length,exported,'export still holds every record');assert.equal(records.filter(r=>r.device===phone.id&&r.error==='held-active-elsewhere').length,105);
+  const caused=(await db.prepare('SELECT id FROM nook_push_delivery_records WHERE actor=?').bind(c.unrelated.user.id).all()).results.map(r=>r.id);assert.ok(caused.length>=105);
+  await c.erase('member',c.unrelated.user.id);
+  const after=await deliveries(c,channel);assert.equal(after.filter(r=>r.device===phone.id).length,0,'all 105 source-linked records leave the readable export');assert.equal(after.length,exported-caused.length,'unrelated records survive source erasure');
+  assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records WHERE device=?').bind(phone.id).first()).n,0,'all 105 source-linked storage records removed');
+  c.removedRecords.push(...caused);
+  for(const witness of c.holdWitnesses)assert.deepEqual(after.find(r=>r.id===witness.id).holds,witness.holds,'quiet and snooze history survives pruning and unrelated actor erasure');
   c.t.diagnostic(`NOOK-073 retention: 105 held phone alerts canceled by a read; view 100, export ${exported}; after a 31-day push-run clock the queue and view drop them and the export keeps all with reasons.`);
  }finally{await rm(temp,{recursive:true,force:true})}
 }

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {deliveries} from './retention.mjs';
 import {until} from './fixture.mjs';
 import {deliveryBrowser} from './delivery-browser.mjs';
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -34,11 +35,14 @@ export async function presence(c){
  const other=await c.signIn((await call('/api/notify','GET',undefined,member.cookie)).address),revoked=await register(other,'Revoked desktop');await beat(true,Date.now(),other.cookie,revoked.id);await call('/api/logout','POST',{},other.cookie);await call('/api/devices/presence','POST',{id:revoked.id,page,visible:true,lastInputAt:Date.now()},other.cookie,401);await beat(false);
  const revokedRoom=await room('Revoked heartbeat holds nothing'),replayed=await send(revokedRoom,{mentions:[member.user.id]});await complete(replayed);assert.equal((await phoneRow(replayed)).held_at,null);await read(revokedRoom);
  // Chosen delay runs on the real clock, through the real Durable Object alarm.
- await call('/api/notify','PATCH',{mobileDelayMinutes:5},member.cookie);await beat();const delayRoom=await room('Five minute mobile handoff'),delayed=await send(delayRoom,{mentions:[member.user.id]});
+ await call('/api/notify','PATCH',{mobileDelayMinutes:5},member.cookie);await beat();const delayRoom=await room('Five minute mobile handoff'),delayed=await send(delayRoom,{mentions:[member.user.id]},c.ownerCookie);
  await until(async()=>(await phoneRow(delayed))?.held_at,'delayed mobile hold');const hiddenAt=Date.now();await beat(false);
  await deliveryBrowser(c);
  await pause(Math.max(0,hiddenAt+299000-Date.now()));assert.equal((await phoneRow(delayed)).state,'pending','five-minute choice holds through 299 seconds');
  await until(async()=>(await phoneRow(delayed))?.state==='sent','five-minute delay releases on real alarm',15000);const delayedAlert=count(delayed).find(r=>r.endpoint===phone.subscription.endpoint);assert.ok(delayedAlert.at-hiddenAt>=300000);await read(delayRoom);
+ const delayRecord=(await deliveries(c,delayRoom)).find(r=>r.id===`push:${delayed.id}:${member.user.id}:${phone.id}`);assert.ok(delayRecord);for(const kind of ['activity','mobile-delay'])assert.ok(delayRecord.holds.some(h=>h.kind===kind&&h.start>0&&h.release>=h.start),kind+' retains its own interval');c.holdWitnesses.push(delayRecord);
  await call('/api/notify','PATCH',{mobileDelayMinutes:0},member.cookie);await call('/api/devices','DELETE',{id:phone.id},member.cookie);
+ c.presenceSources=[direct.id,mention.id];
+ // P8 deliberately uses the non-erased owner for the released delay record.
  c.t.diagnostic('NOOK-073: desktop+in-app DM/mention, mobile hold/read cancellation, idle, real expiry, real five-minute delay, always-mobile, urgent bypass, revoked heartbeat and delivery UI at both widths.');
 }

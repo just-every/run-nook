@@ -8,7 +8,7 @@ import {presence} from './presence.mjs';
 import {failures} from './failures.mjs';
 import {erasure} from './erasure.mjs';
 import {setupFailure} from './setup-failure.mjs';
-import {archive} from './archive.mjs';
+import {archive,erasedArchive} from './archive.mjs';
 import {retention,retentionClock} from './retention.mjs';
 
 export async function contractJourney(t){
@@ -38,16 +38,18 @@ export async function contractJourney(t){
   const read=async(conversation,person=member)=>{const rooms=await call('/api/conversations','GET',undefined,person.cookie);await call(`/api/conversations/${conversation.id}/read`,'POST',{seq:rooms.find(r=>r.id===conversation.id).seq},person.cookie)};
   const sync=()=>call('/api/devices/sync','GET',undefined,member.cookie);
   const context={...app,t,member,sender,unrelated,device,register,recipients,received,room,send,rows,delivered,read,sync};
-  await quietPush(context);
-  await routing(context);
-  await broadcasts(context);
-  await presence(context);
-  await failures(context);
-  await setupFailure(context);
-  await erasure(context);
-  await retention(context);
-  await archive(context);
-  await retentionClock(context);
+  const stage=async run=>{const started=Date.now();await run(context);t.diagnostic(`${run.name}: ${((Date.now()-started)/1000).toFixed(1)} s`)};
+  await stage(quietPush);
+  await stage(routing);
+  await stage(broadcasts);
+  await stage(presence);
+  await stage(failures);
+  await stage(setupFailure);
+  await stage(erasure);
+  await stage(retention);
+  await stage(archive);
+  await stage(retentionClock);
+  await stage(erasedArchive);
   if(edgeError)throw edgeError;
   assert.equal((await db.prepare("SELECT count(*) AS n FROM nook_notify_queue WHERE channel='email'").first()).n,0,'push choices never opt into email');
  }finally{await app.close()}
