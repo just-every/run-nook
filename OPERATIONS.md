@@ -518,6 +518,20 @@ those intervals are explicitly marked legacy, and missing past quiet/snooze
 history is not invented. An ambiguous source fails the upgrade atomically with
 `ambiguous_delivery_source`; preserve the original database and resolve the
 source evidence before retrying, never discard records to force an upgrade.
-Archives containing older routing rows must be exported again from the upgraded
-original installation. Current archives retain valid history, exclude live
+Every archive exported before migration 0074 is refused with
+`schema_mismatch:migration_data:0074`, even if it contains no routing rows.
+Upgrade the original installation and export again; a pre-0074 archive cannot
+be restored directly. Current archives retain valid history, exclude live
 queue/device/key/presence state, and refuse erased or unresolved record sources.
+
+The pinned `@runeditrun/rer@0.2.68` runner applies each migration file in one
+transaction: local setup (`cli/portability.mjs`) calls Wrangler's `d1 migrations apply`.
+In pinned `wrangler@4.142.0`, the migration loop calls `executeSql` once
+per file and `executeLocally` uses `db.batch` for its statements. Hosted deployment's
+`modules/deploy-kit/migrations.mjs` sends the complete file and its applied-ledger
+update together through `api.importSql` to D1's transactional import.
+The container runner's `modules/container/migrations.mjs` likewise uses one
+`db.batch` for the file and completion update. A failed guard therefore rolls
+back 0074's schema and data changes. A separately committed deployment claim
+can remain `applying`; the runner refuses uncertain history instead of
+silently marking the migration applied.

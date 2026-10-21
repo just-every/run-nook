@@ -14,8 +14,9 @@ export async function erasure(c){
  };
  c.erase=erase;c.removedRecords=[];
  await c.read(conversation);
- const beforeMessage=(await deliveries(c,conversation)).filter(r=>r.id.startsWith('push:'+message.id+':'));assert.ok(beforeMessage.length>0,'message erasure has positive retained records before');
- const control=(await deliveries(c,conversation)).filter(r=>r.id.startsWith('push:'+preserved.id+':'));assert.ok(control.length>0,'unaffected owner source has positive records');
+ const beforeExport=await deliveries(c,conversation);
+ const beforeMessage=beforeExport.filter(r=>r.id.startsWith('push:'+message.id+':'));assert.ok(beforeMessage.length>0,'message erasure has positive retained records before');
+ const control=beforeExport.filter(r=>r.id.startsWith('push:'+preserved.id+':'));assert.ok(control.length>0,'unaffected owner source has positive records');
  c.erasedSourceRecord=await db.prepare('SELECT * FROM nook_push_delivery_records WHERE message=?').bind(message.id).first();
  await erase('message',message.id);
  assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records WHERE message=?').bind(message.id).first()).n,0);

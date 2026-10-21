@@ -8,9 +8,23 @@ import {productPolicy} from '../../src/platform/portability-policy.mjs';
 import {installation,until} from './fixture.mjs';
 export async function archive(c){
  const {call,db,mf,member}=c;
- await upgradeHistory(c);
  const quiet=(await call('/api/notify','GET',undefined,member.cookie)).quietSchedule;delete quiet.until;delete quiet.next
  const saved=(await call('/api/notify','PATCH',{quietSchedule:{...quiet,enabled:true}},member.cookie)).quietSchedule
+ // A terminal quiet-held record must follow its group DM without replaying
+ // routing triggers. Its exact row is also compared after the real restore.
+ const group=await c.room('Routing history conversion','dm',[member.user.id,c.unrelated.user.id]);
+ const source=await c.send(group,{mentions:[member.user.id]},c.ownerCookie);await c.read(group);
+ const before=(await db.prepare('SELECT * FROM nook_push_delivery_records WHERE message=? ORDER BY id').bind(source.id).all()).results;
+ assert.ok(before.length>0,'conversion begins with positively witnessed routing records');
+ for(const record of before){assert.equal(record.conversation,group.id);assert.equal(record.state,'cancelled');assert.ok(JSON.parse(record.holds).some(h=>h.kind==='quiet-schedule'&&h.release>=h.start),'conversion has a completed quiet hold')}
+ const version=(await call('/api/conversations','GET',undefined,c.ownerCookie)).find(r=>r.id===group.id).version;
+ const converted=await call('/api/conversations/'+group.id+'/convert','POST',{name:'Routing history channel',version},c.ownerCookie);
+ const after=(await db.prepare('SELECT * FROM nook_push_delivery_records WHERE message=? ORDER BY id').bind(source.id).all()).results;
+ assert.deepEqual(after,before.map(r=>({...r,conversation:converted.id})),'conversion moves every record and changes no hold, reason or timestamp');
+ assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records WHERE conversation=?').bind(group.id).first()).n,0);
+ c.conversion={source:group.id,destination:converted.id,records:after};
+ c.t.diagnostic('Group DM conversion: '+before.length+' positive canceled records moved; every hold interval and other field unchanged.');
+ await upgradeHistory(c);
  const policyRoom=c.archiveConversation;
  await call(`/api/conversations/${policyRoom.id}/notify`,'PATCH',{level:'nothing',threads:'all'},member.cookie);
  // Use the same public Base export/import service and product policy as rer's
@@ -54,6 +68,8 @@ export async function archive(c){
   const hub=await restore.mf.getDurableObjectNamespace('CHAT_HUB');await hub.get(hub.idFromName('workspace')).fetch('https://hub/hint');
   await until(async()=>{const point=await restore.db.prepare('SELECT quiet_until,next_change FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();return point.quiet_until===saved.until&&point.next_change===saved.next},'restored alarm recomputes the saved local calendar boundary');await new Promise(resolve=>setTimeout(resolve,6500));assert.equal(outbound,0);
   await legacyArchive(c,records);
+  await c.erase('message',source.id);
+  assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records WHERE message=?').bind(source.id).first()).n,0,'conversion probe is erased after restore proof; retention baseline remains unchanged');
   c.t.diagnostic('Recovery: actual Base archive bytes from real D1/R2 exclude secrets/devices/presence/live delivery queue and keep retained routing records; restored preferences and private content match, old session denied, real restored ChatHub alarm emits zero pushes.');
  }finally{if(exportId)await service.exports.abort(exportId);await restore?.close()}
 }
@@ -71,12 +87,13 @@ async function upgradeHistory(c){
  try{
   const latest='0074_push_record_sources.sql',migrations=(await readdir('migrations')).filter(n=>n.endsWith('.sql')&&n<latest).sort();
   for(const name of migrations)db.exec(await readFile('migrations/'+name,'utf8'));
-  for(const table of ['nook_actors','oa_operators','nook_access','nook_conversations','nook_messages','nook_erased_messages','nook_erased_actors','nook_outcomes','nook_outcome_versions','nook_erased_outcomes','nook_erased_outcome_actions']){
+  for(const table of ['nook_actors','oa_operators','nook_access','nook_conversations','nook_group_conversions','nook_messages','nook_erased_messages','nook_erased_actors','nook_outcomes','nook_outcome_versions','nook_erased_outcomes','nook_erased_outcome_actions']){
    const rows=(await c.db.prepare('SELECT * FROM '+table).all()).results;for(const row of rows){const keys=Object.keys(row);db.prepare(`INSERT INTO ${table}(${keys.join(',')}) VALUES(${keys.map(()=>'?').join(',')})`).run(...Object.values(row))}
   }
   const columns=db.prepare('PRAGMA table_info(nook_push_delivery_records)').all().map(c=>c.name),insert=db.prepare(`INSERT INTO nook_push_delivery_records VALUES(${columns.map(()=>'?').join(',')})`);
   const records=(await c.db.prepare("SELECT * FROM nook_push_delivery_records WHERE held_at IS NOT NULL OR state='cancelled' ORDER BY id").all()).results;assert.ok(records.length>=105);
-  for(const record of [...records,c.erasedSourceRecord])insert.run(...columns.map(k=>record[k]));
+  for(const record of [...records,c.erasedSourceRecord])insert.run(...columns.map(k=>k==='conversation'&&c.conversion.records.some(r=>r.id===record.id)?c.conversion.source:record[k]));
+  for(const record of c.conversion.records)assert.equal(db.prepare('SELECT conversation FROM nook_push_delivery_records WHERE id=?').get(record.id).conversation,c.conversion.source,'pre-0074 conversion left a positive record on the old DM');
   const queued=await c.db.prepare("SELECT * FROM nook_notify_queue WHERE channel='push' AND held_at IS NOT NULL LIMIT 1").first();assert.ok(queued);const queueKeys=Object.keys(queued);db.prepare(`INSERT INTO nook_notify_queue(${queueKeys.join(',')}) VALUES(${queueKeys.map(()=>'?').join(',')})`).run(...Object.values(queued));
   assert.ok(db.prepare('SELECT 1 FROM nook_push_delivery_records WHERE id=?').get(c.erasedSourceRecord.id),'upgrade begins with an erased-source historical record');
   const ambiguous={...records[0],id:'unresolvable-prior-source'};insert.run(...columns.map(k=>ambiguous[k]));
@@ -84,9 +101,9 @@ async function upgradeHistory(c){
   assert.equal(db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records').get().n,records.length+2,'refused upgrade preserves every original row');db.prepare('DELETE FROM nook_push_delivery_records WHERE id=?').run(ambiguous.id);
   db.exec('BEGIN');db.exec(migration);db.exec('COMMIT');
   assert.equal(db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records').get().n,records.length);assert.equal(db.prepare('SELECT 1 FROM nook_push_delivery_records WHERE id=?').get(c.erasedSourceRecord.id),undefined,'upgrade removes erased source');
-  for(const record of records){const upgraded=db.prepare('SELECT * FROM nook_push_delivery_records WHERE id=?').get(record.id);assert.ok(upgraded);for(const key of ['message','outcome','actor','source_version'])assert.equal(upgraded[key],record[key],key+' is recovered from source identity and exact source version');assert.equal(upgraded.legacy,1);assert.deepEqual(JSON.parse(upgraded.holds),record.held_at===null?[]:[{kind:'legacy-activity-or-mobile-delay',start:record.held_at,release:record.released_at}],'unknown legacy holds are never invented')}
+  for(const record of records){const upgraded=db.prepare('SELECT * FROM nook_push_delivery_records WHERE id=?').get(record.id);assert.ok(upgraded);for(const key of ['conversation','message','outcome','actor','source_version'])assert.equal(upgraded[key],record[key],key+' is recovered from source identity and exact source version');assert.equal(upgraded.legacy,1);assert.deepEqual(JSON.parse(upgraded.holds),record.held_at===null?[]:[{kind:'legacy-activity-or-mobile-delay',start:record.held_at,release:record.released_at}],'unknown legacy holds are never invented')}
   c.upgradedRecords=db.prepare('SELECT * FROM nook_push_delivery_records ORDER BY id').all().map(row=>({...row}));
-  c.t.diagnostic(`Populated prior-data upgrade: ${records.length} valid records classified from a live queue and pruned IDs/source versions without devices; erased source removed; ambiguous source refused atomically with all prior rows preserved.`);
+  c.t.diagnostic(`Populated prior-data upgrade: ${records.length} valid records including ${c.conversion.records.length} converted-DM records remapped to their destination and classified from a live queue and pruned IDs/source versions without devices; erased source removed; ambiguous source refused atomically with all prior rows preserved.`);
  }finally{db.close()}
 }
 
