@@ -170,9 +170,11 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: `src/docs/build/site.ts`; `src/docs/build/render.ts`; `docs/site.json`; `tests/docs-site.test.mjs`.
 
-- **ERASURE-001 — Member, message and imported-author erasure.** **Status: done.** Through Team and message erasure doors, preview counts, confirm and resume a pending job. Try an unrelated DM, an insufficient role, self and last owner; deny each. Remove native/imported content and verified R2 bytes, preserve only declared structural tombstones, anonymize audit, and refuse an older archive when the latest erasure journal is supplied.
+- **ERASURE-001 — Member, message and imported-author erasure.** **Status: partial.** Through Team and message erasure doors, preview counts, confirm and resume a pending job. Try an unrelated DM, an insufficient role, self and last owner; deny each. Remove native/imported content and verified R2 bytes, preserve only declared structural tombstones, anonymize audit, and refuse an older archive when the latest erasure journal is supplied.
 
   Current evidence: `src/team/erasure/service.ts`; `src/team/erasure/graph.ts`; `src/team/erasure/auth-identity.ts`; `src/team/erasure/identity.ts`; `tests/erasure.test.mjs`; `tests/erasure-browser.mjs`; `tests/notes-journey.mjs`; `tests/push/erasure.mjs`. Native/imported cascade, verified blob absence, credential/grant/provider-session removal, independently anonymized auth audit and journal refusal are covered. Logical erasure retains the clause’s stated external-copy and physical-storage limits. Shared-note attribution erasure is proven in `tests/notes-journey.mjs` (NOOK-053); removal of each recipient’s Web Push routing records with an erased member, message or outcome in `tests/push/erasure.mjs` (NOOK-015, NOOK-073).
+
+  Remaining: The group-DM convert/export/import probe in `tests/push/archive.mjs` covers the sentence "Latest archives carry the journal and restore normally." Exact-head green Verify is still required before this clause is done.
 
 - **NOOK-015 — Web Push (C15).** **Status: partial.** Run pnpm test:push through subscription, preferences, emitted Worker and real alarm; independently decrypt the RFC 8291 packet and verify VAPID, revocation, quiet/read cancellation, per-device folding and visible failure. Separately demonstrate foreground/background/locked-device visible notification, tap authentication and badge reconciliation on supported Safari, Chromium and Firefox devices. **Defaults:** a newly invited member grants browser permission in a fresh profile without opening settings, and a DM, a mention and a keyword hit each show exactly one notification; a channel set to `all new messages` notifies on a colleague's plain message and a channel left at `mentions` does not. **Defaults include automatic follows:** a reply in a thread the member started in a `mentions` channel shows one notification without any explicit follow. **Cross-device routing:** with the member's Chrome page focused and in use, a DM shows on that page and no Web Push reaches their phone's installed PWA; after the page is idle 10 minutes the phone notifies (NOOK-073).
 
@@ -441,4 +443,4 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**81 clauses: 31 done, 17 partial, 33 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**81 clauses: 30 done, 18 partial, 33 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
