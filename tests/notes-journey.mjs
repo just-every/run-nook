@@ -1,3 +1,4 @@
+import {DatabaseSync} from 'node:sqlite';
 import {mkdtemp,readdir,rm} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -48,15 +49,15 @@ test('NOOK-053 a private channel note and checklist keep versions, propose a com
   // Full archive service is the operational export/restore public door.
   const service=await createPortability({db,buckets:{FILES:await app.mf.getR2Bucket('FILES')},policy:await productPolicy(db)});const exportId=await service.exports.create();
   let records=[];try{while((await service.exports.advance(exportId,{maxParts:16})).phase==='building'){};for await(const record of readArchive(await service.exports.download(exportId)))records.push(record)}finally{await service.exports.abort(exportId)}
-  restore=await installation(async()=>{assert.fail('restore must emit no external effects')},{bootstrap:false,workerOptions:{d1Persist:recoveryDirectory}});
+  restore=await installation(async()=>{assert.fail('restore must emit no external effects')},{bootstrap:false,workerOptions:{resourcePersistencePath:recoveryDirectory}});
   const importer=await createPortability({db:restore.db,buckets:{FILES:await restore.mf.getR2Bucket('FILES')},policy:await productPolicy(restore.db),migrations:migrationHistory(await productPolicy(restore.db))});const id=await importer.imports.create(records[0]);for(const record of records)if(record.kind==='part')await importer.imports.uploadPart(id,record.index,record);const end=records.at(-1);await importer.imports.finalize(id,{contentHash:end.contentHash,archiveHash:end.archiveHash});
   assert.equal((await restore.db.prepare('SELECT title FROM nook_notes WHERE id=?').bind(note.id).first()).title,content.title);assert.equal((await restore.db.prepare('SELECT count(*) AS n FROM nook_note_versions WHERE note=?').bind(note.id).first()).n,5);assert.equal((await restore.db.prepare('SELECT status FROM nook_outcomes WHERE id=?').bind(proposed.id).first()).status,'accepted');assert.equal((await restore.db.prepare('SELECT count(*) AS n FROM oa_sessions').first()).n,0);
   // Recover identities offline through the shipped recovery command, then erase
   // through a fresh signed-in HTTP session on the restored installation.
   await restore.close();restore=undefined;
-  const databases=(await readdir(recoveryDirectory,{recursive:true})).filter(name=>name.endsWith('.sqlite'));assert.equal(databases.length,1);
+  const databases=[];for(const name of (await readdir(recoveryDirectory,{recursive:true})).filter(name=>name.endsWith('.sqlite'))){const file=new DatabaseSync(join(recoveryDirectory,name),{readOnly:true});try{if(file.prepare("SELECT name FROM sqlite_master WHERE name='nook_storage'").get())databases.push(name)}finally{file.close()}}assert.equal(databases.length,1);
   await recoverNormalizedFixture(join(recoveryDirectory,databases[0]),app.owner.id);
-  restore=await installation(async()=>assert.fail('restored notes create no outbound delivery'),{bootstrap:false,migrate:false,workerOptions:{d1Persist:recoveryDirectory}});
+  restore=await installation(async()=>assert.fail('restored notes create no outbound delivery'),{bootstrap:false,migrate:false,workerOptions:{resourcePersistencePath:recoveryDirectory}});
   const recoveredOwner=await restore.signIn('owner@example.test'),recoveredLee=await restore.signIn('lee-chen@example.test');
   const recoveredSolo=(await restore.call(dmBase,'GET',undefined,recoveredLee.cookie)).items[0];
   let recoveredReceipt=await restore.call('/api/erasures','POST',{kind:'member',target:ana.user.id,confirmation:'ERASE'},recoveredOwner.cookie);
