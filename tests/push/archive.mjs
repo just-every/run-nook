@@ -28,6 +28,7 @@ export async function archive(c){
   const id=await imported.imports.create(records[0]);for(const record of records)if(record.kind==='part')await imported.imports.uploadPart(id,record.index,record);
   const closing=records.at(-1);await imported.imports.finalize(id,{contentHash:closing.contentHash,archiveHash:closing.archiveHash});
   for(const table of excluded)assert.equal((await restore.db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0,'restored '+table+' empty');
+  assert.deepEqual((await restore.db.prepare('SELECT * FROM nook_push_delivery_records ORDER BY id').all()).results,(await db.prepare('SELECT * FROM nook_push_delivery_records ORDER BY id').all()).results,'every retained routing field, reason and time restores exactly');
   const kept='SELECT count(*) AS n FROM nook_push_delivery_records WHERE user=?';assert.equal((await restore.db.prepare(kept).bind(member.user.id).first()).n,(await db.prepare(kept).bind(member.user.id).first()).n,'retained routing records restore');assert.ok((await restore.db.prepare(kept).bind(member.user.id).first()).n>105);
   const restoredQuiet=await restore.db.prepare('SELECT * FROM nook_quiet_schedules WHERE user=?').bind(member.user.id).first();assert.equal(restoredQuiet.enabled,1);assert.equal(restoredQuiet.zone,quiet.zone);assert.deepEqual(JSON.parse(restoredQuiet.days_json),quiet.days)
   assert.equal((await restore.db.prepare('SELECT push_mentions FROM nook_notify_preferences WHERE user=?').bind(member.user.id).first()).push_mentions,1);
