@@ -1041,55 +1041,55 @@
       "executable": false
     },
     "evidence/recaps/ask-1440.png": {
-      "sha256": "024ec82898e2e0fb5a056e19afbd3dbf05987402c550dad7d61d4cc04d49e784",
+      "sha256": "4bf4f18b8639754a98d787ae6134df2ec1d47868021f048de64096a402aac118",
       "executable": false
     },
     "evidence/recaps/ask-390.png": {
-      "sha256": "8dc7ee522d2ccb3a8a7bbd882082331227993f1b5b99cd5023424f9aceb4a7eb",
+      "sha256": "7d60ab923c2aa7879b2fda7d52c7945b42e76042c2ca23e896db8633946e503f",
       "executable": false
     },
     "evidence/recaps/cited-1440.png": {
-      "sha256": "c28ba5b8b61c975e9060e104f000923d7c14d854899cae128ac4d88622a37a7f",
+      "sha256": "7d54ca974e5fd8954f8b40a1de4ea43911f41d971f4c3aa516710a498f52513c",
       "executable": false
     },
     "evidence/recaps/cited-390.png": {
-      "sha256": "073abdf94dee906a97d2a36931b355104c474e1d39735ba9eb9d2f35ea4249c8",
+      "sha256": "c8e5ad9e0e4457d44c5a145d8da9dc94cf282f849b244960ab75c1ea9f145ca5",
       "executable": false
     },
     "evidence/recaps/correction-1440.png": {
-      "sha256": "625d47dbcd22d30ea0fa880e3350e00c1c1df9450dbc25df18787d200208a086",
+      "sha256": "e442455b1c0c9ae0726d263913587c58db588730d5a6b5a2cedd49b800ef5945",
       "executable": false
     },
     "evidence/recaps/correction-390.png": {
-      "sha256": "087c026a55822d36b68a2711c3c0ffd475f6272e7bc59c6e3df8cd01fbfcd37d",
+      "sha256": "93a599cc8370276be3b230f793afac29a2a5754f0e931555577d925f1b6592d6",
       "executable": false
     },
     "evidence/recaps/digest-settings-1440.png": {
-      "sha256": "98d56214d3698949661e2537eeed32975f6db84e35646b7cea4c90bdf1ec0c5b",
+      "sha256": "a4bbda02a95ef57f0e4b8bebb81eb8a6445e74ca0314133743a45e8f32ef28b2",
       "executable": false
     },
     "evidence/recaps/digest-settings-390.png": {
-      "sha256": "b607c7d060b473652c3c7ec456f445fdcae42030168c4acb763a3a62903b2da2",
+      "sha256": "3fd5c30ff39702380c6be7bd1441c514bf01fd090fed6fd1c6c756bc24c1558f",
       "executable": false
     },
     "evidence/recaps/omissions-1440.png": {
-      "sha256": "774b0d1e1fd45c3776d8747398dcbc22cc1aa744245fade09bb6ccb805cb7ae5",
+      "sha256": "039f07e001e4f1dedf30a2488ed3f8c9cdccfe37123abc5e997cdf4722e4bb91",
       "executable": false
     },
     "evidence/recaps/omissions-390.png": {
-      "sha256": "7168f6015f307187994f7c8d27bd4a9551562c2d2f70ae3f5dc8c1e6654703f8",
+      "sha256": "b25f984eb382b72e384f95191ba4ff01fd23d634f10935093926033066fc7f42",
       "executable": false
     },
     "evidence/recaps/received-digest-1440.png": {
-      "sha256": "305e8543a640dfdf77c7701ee4ef7609c71861ee2e7708973f61fba3dcb82567",
+      "sha256": "00ac19ffdd151d3f64f62d0b63d1ab66c35844db29335f679aa6cff4351be716",
       "executable": false
     },
     "evidence/recaps/received-digest-390.png": {
-      "sha256": "9083d6b07c2973e453d33b4e40a089cc19407bced68923c5d278349d55603dcd",
+      "sha256": "051f7d24a461b2516571b176b528f33c35a20aa431e43b485f53e3e4d9304de7",
       "executable": false
     },
     "evidence/recaps/refused-1440.png": {
-      "sha256": "5050fe67eed949ba84e50e4b0846d4ee6becd9ce95fcdeb1262ead495597e4c2",
+      "sha256": "b5b36dbbfa32971c53c90f6b47fa0f33dcc67fb318b9ce022fd62b1182e8f770",
       "executable": false
     },
     "evidence/recaps/refused-390.png": {
@@ -1097,11 +1097,11 @@
       "executable": false
     },
     "evidence/recaps/thread-door-1440.png": {
-      "sha256": "a21e2f06947428253e783ef861f748710dd5a87b86eca7d824ae127f098dc833",
+      "sha256": "d4b1de35c30b3aae5398e48d96431a4e1b594ca51933af944bb4a9f4f93f28b9",
       "executable": false
     },
     "evidence/recaps/thread-door-390.png": {
-      "sha256": "15d995e372a966bf0376ec489a50b90fd99662643126f0e93fa9943f9288ae57",
+      "sha256": "667c83bb807ce5768edb384f0daf97cc3bb433edf59fa1dc3961f2439690975a",
       "executable": false
     },
     "evidence/slack-delta/preview-1440.png": {
@@ -6189,7 +6189,7 @@
       "executable": false
     },
     "tests/digests.mjs": {
-      "sha256": "ceb316c7d3c3f0ce130d021a652c93dbd9a875703e138b8540d26d85e5e908fe",
+      "sha256": "dec475b22e4d5efe40b86b1ac784c41d440ddc509c8ef25f3cb5a8b166166a35",
       "executable": false
     },
     "tests/docs-site.test.mjs": {
