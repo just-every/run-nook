@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "065359423dc6d7bda70e0b63cb1f36996967834d65f975b67ea579022c6770fa",
+      "sha256": "3bee22685d16f021b627597c5557596271a65d69927fec6010135199c5a82822",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "e2ec11d96f4b17b71e188ef2fd799066f4cc254c026109d80aab59302cc14760",
+      "sha256": "a0879b6f10070135ed96203ff6cd1261dc064536ea543846a55a1698c37b54dc",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "284bded10546539c8da84b970e8ba03650e7fe31c99e775571d89231dbe420e0",
+      "sha256": "4c73a429d6fe2a6eed8a20a649a8d9679f2981a8dafd42f6156d4afb939e4954",
       "executable": false
     },
     "docs/conversations.md": {
@@ -5161,7 +5161,7 @@
       "executable": false
     },
     "src/notification-apps/context.ts": {
-      "sha256": "ab94276291937f8f3617605df7316ad102d29a0ada094b6314c26b1d91db4084",
+      "sha256": "2eac730cad2f0eb67132693044c864afea25716d59e76b1fbe76918598a328a0",
       "executable": false
     },
     "src/notification-apps/door.ts": {
@@ -5349,7 +5349,7 @@
       "executable": false
     },
     "src/platform/storage/messages.ts": {
-      "sha256": "617e703447ceb6d691a88aa0510918e116178fc1fcfa2207627716b126469f30",
+      "sha256": "a98613fc888e9f983919b9a33bb8080f933867b6021a15c22499763b4e1e8bc4",
       "executable": false
     },
     "src/platform/storage/outcome-history.ts": {
