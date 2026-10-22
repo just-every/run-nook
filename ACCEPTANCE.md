@@ -449,7 +449,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**90 clauses: 31 done, 22 partial, 37 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**91 clauses: 31 done, 22 partial, 38 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
 
 - **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 
@@ -480,6 +480,10 @@ The statuses and citations below match the Status table in this revision of CONT
   Current evidence: No implementing source/test; journey pending.
 
 - **NOOK-088 — Slack grant and app delta reads.** **Status: missing.** Import a Friday export of a Slack Pro test workspace, with member grants for its private channels and DMs. Over the weekend in Slack, post a new root message and a reply to an imported thread, edit one imported message, delete another, add a reaction, create a channel, start a new DM between two consenting members, add a member and create a Slack Connect channel with a partner. On Monday morning, before the delta pass, post native Nook replies in one imported thread. Run the final delta pass at the scheduled cutover time: each Slack change appears exactly once; the edit shows as a new imported revision with the earlier one in its history; the deleted message is tombstoned; the reaction, the new channel and the DM are present, and the DM is visible only to its two members; the new member appears in the invitation preview and is invited; the thread interleaves imported and native replies in time order with native ones marked; no one receives an alert, unread, Attention item or follow for imported items; and every native item is unchanged. The new Slack Connect channel appears in the NOOK-076 preview and keeps the checklist open until it has a disposition. Run the same pass again: it adds nothing. Revoke the grant covering one private channel and delete a message there in Slack: the next pass counts that channel as `unverified` with its reason and leaves the imported message intact. Force a Slack error during a scheduled final pass: the invitations wait and the owner sees the failure. The cutover report shows "imported through" the cutover time with per-pass counts, and undoing the last pass removes only its additions and revisions while the native replies remain.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-089 — Notification destination door extension.** **Status: missing.** Approve a notifying app for one private channel, post into that channel’s thread by naming the thread, lose the reply and look up the client key: one accepted receipt is returned and no second post is created. Reapprove the same app name and channel, then use the replacement approval to edit that app’s earlier post; another app is refused.
 
   Current evidence: No implementing source/test; journey pending.
 
