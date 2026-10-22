@@ -498,8 +498,8 @@ Current code/test coverage is recorded per clause below and mirrored in ACCEPTAN
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Published | 15 | 2 | 0 | 17 |
-| Target and push further | 18 | 20 | 36 | 74 |
-| All | 33 | 22 | 36 | 91 |
+| Target and push further | 18 | 21 | 35 | 74 |
+| All | 33 | 23 | 35 | 91 |
 
 | Clause | Title | Kind | Status | Evidence | Gap |
 | --- | --- | --- | --- | --- | --- |
