@@ -64,6 +64,8 @@ jobs:
     uses: ./.github/workflows/verify-stage.yml
     with:
       command: ${{ matrix.command }}
+      # These suites never launch Chromium; apt setup consumed 10+ minutes.
+      browser: ${{ matrix.stage != 'storage and security API' && matrix.stage != 'product API' }}
 
   slow:
     name: verify (${{ matrix.stage }})

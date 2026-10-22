@@ -5,6 +5,9 @@ on:
       command:
         required: true
         type: string
+      browser:
+        type: boolean
+        default: true
       timeout:
         type: number
         default: 15
@@ -38,7 +41,8 @@ jobs:
           node-version: 22.20.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - if: inputs.browser
+        run: pnpm exec playwright install --with-deps chromium
       - name: Prepare canonical temporary directory
         run: |
           mkdir -p ../scratch/tmp
