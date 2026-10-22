@@ -1,0 +1,9 @@
+export type ClipCue={start:number;end:number;text:string}
+export const MAX_CUES:number
+export const MAX_TRANSCRIPT_CHARS:number
+export const MAX_CLIP_SECONDS:number
+export function validateCues(value:unknown):ClipCue[]
+export function timestamp(seconds:number):string
+export function parseWebVTT(value:unknown,options?:{header?:boolean}):ClipCue[]
+export function cuesWebVTT(cues:ClipCue[]):string
+export function cuesEditorText(cues:ClipCue[]):string

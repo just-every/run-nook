@@ -87,3 +87,11 @@ API: `POST /api/recaps` accepts `{conversation,thread?,from?,through?,unread?}`;
 ### Forward a message
 
 Use a message’s More actions → Forward. Select one or more local conversations and an optional note. A thread link can direct a single destination into its thread. Link only reveals attribution and a source link; opening the source still requires current source access. Show message previews everyone gaining access to the copy and requires confirmation before posting its body and private attachment copies. Owners choose Allow, Link only or Block in Forwarding policy. Source edits update copies; source deletion or author erasure tombstones every descendant. There are no custodian holds yet. Shared/external channels are excluded, and organization labels inherit NOOK-040 when it ships.
+
+### Record and share a clip
+
+Choose Record or upload clip in a conversation you can post to. Start audio, video or screen capture explicitly; stop or cancel with the visible recording controls. You can also select a WebM, MP4/M4A, Ogg audio, MP3 or WAV file up to 25 MiB. Attach the clip, then send its message. Upload failures keep a Retry upload action for the same file.
+
+Recipients load private playback and add timestamped transcript cues or upload a plain UTF-8 WebVTT caption file. Cue buttons seek the player. Correct transcript appends a version; Transcript history keeps earlier text. Cues allow 500 entries, 100,000 text characters and times within 24 hours; WebVTT files allow 560,000 bytes. Transcript saves check the version opened and leave a conflicting correction available to revise.
+
+The source message’s current audience governs media, captions and every transcript version. Readable exports and operational archives carry them and source-inherited policy. Source deletion or author erasure removes the clip and its transcript history. There are no holds yet; erasure proceeds. No transcription provider, AI summary or call recording is used. Real phone-device capture has not been run.

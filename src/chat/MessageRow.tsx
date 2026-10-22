@@ -1,3 +1,4 @@
+import {ClipPlayer} from '../clips/ClipPlayer'
 import {ForwardDialog} from '../forwards/ForwardDialog'
 import {ForwardCard} from '../forwards/ForwardCard'
 import '../forwards/forwards.css'
@@ -50,7 +51,7 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
     {m.broadcast&&<BroadcastRecipients message={m.id} broadcast={m.broadcast}/>}
     {(m.urgent||!!m.notified?.length)&&<div className="message-routing">{m.urgent&&<strong>Urgent</strong>}{!!m.notified?.length&&<span>Notified: {m.notified.map(person=>person.name).join(', ')}</span>}{m.urgent&&m.urgentReason&&<span className="message-urgent-reason">{m.urgentReason}</span>}</div>}
     {!thread&&onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}
-    {(m.attachments||[]).map(f=><div className="file-row reveal-host" key={f.id}>{f.state==='deleted'?<span className="muted">Attachment removed</span>:<>{previews&&<><ImagePreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/><TextPreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/></>}<a href={`/api/attachments/${f.id}/download`} download={f.name}><strong>{f.name}</strong><small>{Math.max(1,Math.round(f.size/1024))} KB · Download</small></a><SaveFileAction conversation={m.conversation} attachment={f.id}/>{!m.immutable&&f.author===user.id&&<button type="button" className="text-button reveal" onClick={()=>onRemove(f.id)}>Remove file</button>}</>}</div>)}
+    {(m.attachments||[]).map(f=><div className="file-row reveal-host" key={f.id}>{f.state==='deleted'?<span className="muted">Attachment removed</span>:<>{previews&&<><ImagePreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/><TextPreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/></>}<a href={`/api/attachments/${f.id}/download`} download={f.name}><strong>{f.name}</strong><small>{Math.max(1,Math.round(f.size/1024))} KB · Download</small></a><SaveFileAction conversation={m.conversation} attachment={f.id}/>{!m.immutable&&<ClipPlayer file={f} request={team.request} accessEpoch={team.accessEpoch} revision={team.revision} onDenied={team.onDenied}/>}{!m.immutable&&f.author===user.id&&<button type="button" className="text-button reveal" onClick={()=>onRemove(f.id)}>Remove file</button>}</>}</div>)}
     {m.immutable&&<SlackHistory history={m.slack}/>}
     {!m.immutable&&<ReactionChips reactions={reactions}/>}
    </>}

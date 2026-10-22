@@ -1,3 +1,4 @@
+import {hasClipAttribution} from '../../clips/erasure'
 import {detachAssignee} from './audit'
 import {authIdentity} from './auth-identity'
 import {graph} from './graph'
@@ -18,6 +19,7 @@ export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceServic
   OR EXISTS(SELECT 1 FROM nook_exit_membership WHERE user=?)
   OR EXISTS(SELECT 1 FROM nook_door_imports n,json_each(n.summary_json,'$.channels') channel,json_each(channel.value,'$.members') member WHERE member.value=?)`,[target,target,target,target,target,target])
  const person=await c.one('SELECT email,display_name FROM oa_operators WHERE id=?',[target]),result:Sql[]=[...audit('SELECT value FROM json_each(?)',[JSON.stringify(affected.map(r=>r.conversation))]),...await detachAssignee(c,f,target),...await fencedRows(c,f,'nook_attention',['id'],'EXISTS(SELECT 1 FROM nook_events e WHERE e.conversation=nook_attention.conversation AND e.seq=nook_attention.event_seq AND e.actor=?)',[target])]
+ if(await hasClipAttribution(c,target))result.push(...await f.checkpoint(),sql('UPDATE nook_clip_transcripts SET actor=NULL WHERE actor=?',target))
  if(await c.one('SELECT 1 FROM nook_notification_apps WHERE creator=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_notification_apps SET creator=NULL WHERE creator=?',target))
  if(await c.one('SELECT 1 FROM nook_audit WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_audit SET actor=NULL WHERE actor=?',target))
  result.push(...await authIdentity(c,f,target),sql("DELETE FROM oa_dev_credentials WHERE (credential='oa_sessions' AND id IN (SELECT id FROM oa_sessions WHERE operator_id=?)) OR (credential='oa_tokens' AND id IN (SELECT id FROM oa_tokens WHERE operator_id=? OR issuer_id=?))",target,target,target),sql('UPDATE oa_sessions SET source_token_id=NULL WHERE operator_id<>? AND source_token_id IN (SELECT id FROM oa_tokens WHERE issuer_id=?)',target,target))

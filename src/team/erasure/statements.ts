@@ -1,3 +1,4 @@
+import {clipErasurePlan} from '../../clips/erasure'
 import {eraseNoteRows} from '../../notes/erasure'
 import {erasedIntent} from './intent.mjs'
 import {graph} from './graph'
@@ -10,13 +11,15 @@ export async function fencedRows(c:Context,f:Awaited<ReturnType<typeof fenceServ
 }
 export function audit(scope:string,params:any[]){return [sql(`UPDATE nook_conversations SET seq=seq+1 WHERE id IN (${scope})`,...params),sql(`INSERT INTO nook_events SELECT id,seq,'erasure',lower(hex(randomblob(16))),NULL FROM nook_conversations WHERE id IN (${scope})`,...params)]}
 export async function files(c:Context,f:Awaited<ReturnType<typeof fenceService>>,operation:string,where:string,params:any[]){
- let rows=await c.rows(`SELECT * FROM nook_attachments WHERE ${where}`,params);const result:Sql[]=[]
+ let rows=await c.rows(`SELECT * FROM nook_attachments WHERE ${where}`,params);const result:Sql[]=[];if(!rows.length)return result
  if(rows.length){const copies=await c.rows(`WITH RECURSIVE copies(id) AS (SELECT value FROM json_each(?) UNION SELECT f.attachment FROM nook_forward_files f JOIN copies p ON f.source_attachment=p.id) SELECT a.* FROM nook_attachments a JOIN copies p ON p.id=a.id`,[JSON.stringify(rows.map(r=>r.id))]);rows=copies;const all=JSON.stringify(rows.map(r=>r.id));result.push(...await fencedRows(c,f,'nook_forward_files',['attachment'],'attachment IN (SELECT value FROM json_each(?)) OR source_attachment IN (SELECT value FROM json_each(?))',[all,all]),sql('DELETE FROM nook_forward_files WHERE attachment IN (SELECT value FROM json_each(?)) OR source_attachment IN (SELECT value FROM json_each(?))',all,all))}
+ const clips=await clipErasurePlan(c,rows.map(row=>row.id));result.push(clips.before);for(const key of clips.keys)result.push(...await f.row(key.table,key.key));const clipIds=JSON.stringify(rows.map(row=>row.id));result.push(sql('DELETE FROM nook_clip_transcripts WHERE attachment IN (SELECT value FROM json_each(?))',clipIds),sql('DELETE FROM nook_clips WHERE attachment IN (SELECT value FROM json_each(?))',clipIds));
  for(const row of rows){
   result.push(...await f.row('nook_attachments',{id:row.id}))
   if(row.object_key)result.push(sql('INSERT OR IGNORE INTO nook_erasure_blobs VALUES(?,?)',operation,row.object_key),sql('INSERT OR IGNORE INTO nook_object_deletes(object_key,created) VALUES(?,?)',row.object_key,Date.now()),sql("INSERT OR IGNORE INTO nook_erasure_blobs SELECT operation,? FROM nook_erasure_work WHERE (kind='attachment' AND target=?) OR (kind IN ('message','imported-message') AND target=?) OR (kind='imported-author' AND target IN (SELECT job||':'||source_actor FROM nook_import_records WHERE id=?))",row.object_key,row.id,row.message,row.message))
   result.push(sql('INSERT INTO nook_erased_attachments SELECT id,conversation,author,message,created,position,? FROM nook_attachments WHERE id=?',await erasedIntent(row.author,row.intent),row.id),sql('DELETE FROM nook_attachments WHERE id=?',row.id),sql("UPDATE nook_erasure_work SET phase='blobs' WHERE kind='attachment' AND target=?",row.id))
  }
+ result.push(clips.after)
  // Unbound uploads are private staging; only message bindings invalidate readers.
  const conversations=[...new Set(rows.filter(r=>r.message!==null).map(r=>r.conversation))]
  if(conversations.length)result.push(...audit('SELECT value FROM json_each(?)',[JSON.stringify(conversations)]))
@@ -29,7 +32,7 @@ export async function messages(c:Context,f:Awaited<ReturnType<typeof fenceServic
  result.push(...await eraseNoteRows(c,f,'thread IN (SELECT value FROM json_each(?))',[set]))
  for(const row of await c.rows('SELECT id,author,intent,conversation FROM nook_messages WHERE id IN (SELECT value FROM json_each(?))',[set])){const id=row.id;result.push(...await f.row('nook_messages',{id}));result.push(sql('INSERT INTO nook_erased_messages SELECT id,conversation,author,parent,version+1,created,sequence,ordinal,author_ordinal,? FROM nook_messages WHERE id=?',await erasedIntent(row.author,row.intent,row.conversation),id))}
  if(retain)result.push(sql("INSERT INTO nook_retained_message_bodies SELECT id,body,body_lower FROM nook_messages WHERE deleted=0 AND id IN (SELECT value FROM json_each(?)) AND NOT EXISTS(SELECT 1 FROM nook_erasure_work w WHERE w.kind='message' AND w.target=nook_messages.id)",retainedIds))
- for(const {table,key:keys} of graph.message.edges){result.push(...await fencedRows(c,f,table,[...keys],where,[set]),sql(`DELETE FROM ${table} WHERE ${where}`,set))}
+ for(const edge of graph.message.edges){if('hook' in edge&&edge.hook==='files')continue;const {table,key:keys}=edge;result.push(...await fencedRows(c,f,table,[...keys],where,[set]),sql(`DELETE FROM ${table} WHERE ${where}`,set))}
  result.push(...await files(c,f,operation,where,[set]),
   sql('UPDATE nook_outcomes SET source=NULL WHERE source IN (SELECT value FROM json_each(?))',set),
   sql("UPDATE nook_events SET kind='erasure',object=lower(hex(randomblob(16))),actor=NULL WHERE object IN (SELECT value FROM json_each(?))",set),

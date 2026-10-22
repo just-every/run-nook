@@ -1,0 +1,28 @@
+.clip-recorder,.clip-player{box-sizing:border-box;min-width:0;max-width:100%;padding:12px;border:1px solid var(--line,#d7dcd6);border-radius:var(--r-control,8px);background:var(--paper,#fff);color:var(--ink,inherit)}
+.clip-recorder{grid-column:1/-1;width:100%}
+.clip-player{flex-basis:100%;width:min(100%,560px);margin:8px 0}
+.clip-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.clip-meta{font-size:.8rem;line-height:1.5;color:var(--ink-soft,#626b64);margin:6px 0;overflow-wrap:anywhere}
+.clip-recorder video,.clip-player video{display:block;width:100%;max-height:360px;background:#111;border-radius:6px;margin:8px 0}
+.clip-recorder audio,.clip-player audio{display:block;width:100%;max-width:100%;margin:8px 0}
+.clip-upload{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:.85rem;max-width:100%}
+.clip-upload input{max-width:100%;font:inherit}
+.clip-recording{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0;padding:10px;border:1px solid #bd4a3d;border-radius:6px}
+.clip-recording-dot{display:inline-block;flex:none;width:12px;height:12px;border-radius:50%;background:#bd4a3d}
+.clip-preview>p{overflow-wrap:anywhere;font-size:.8rem}
+.clip-cues{list-style:none;padding:0;margin:10px 0;max-height:360px;overflow:auto}
+.clip-cues li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;padding:6px 0;border-bottom:1px solid var(--line,#d7dcd6)}
+.clip-cues p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;line-height:1.5}
+.clip-cues .text-button{align-self:start;font-variant-numeric:tabular-nums;font-size:.8rem}
+.clip-editor fieldset{display:grid;gap:8px;min-width:0;border:0;padding:8px 0;margin:0}
+.clip-editor label{font-size:.85rem;font-weight:600}
+.clip-editor textarea,.clip-editor input{box-sizing:border-box;max-width:100%;min-width:0;font:inherit;color:var(--ink,inherit);background:transparent;border:1px solid var(--line-field,var(--line,#d7dcd6));border-radius:var(--r-control,6px);padding:8px}
+.clip-editor textarea{width:100%;resize:vertical;font-size:.85rem;line-height:1.5}
+.clip-history h4{margin:12px 0 6px}.clip-history>ol{padding-left:20px}
+.clip-history>ol>li{padding:6px 0;font-size:.8rem;overflow-wrap:anywhere}
+.clip-history .clip-cues li{grid-template-columns:1fr}
+@media(max-width:500px){.clip-recorder,.clip-player{padding:10px}.clip-toolbar{gap:6px}.clip-cues li{grid-template-columns:1fr;gap:3px}}
+
+.nook-app .clip-editor fieldset{max-height:none;overflow:visible}.clip-door{grid-column:1/-1;justify-self:start;font-size:12px}.file-row:has(.clip-player){flex-wrap:wrap}
+.clip-recorder{max-height:48dvh;overflow:auto}.nook-app .clip-recorder .clip-toolbar button{min-height:36px}@media(max-width:500px){.clip-recorder video{max-height:180px}}
+.clip-player video{max-height:220px;object-fit:contain}@media(max-width:500px){.clip-player video{max-height:150px}}

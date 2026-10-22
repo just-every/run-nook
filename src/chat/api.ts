@@ -1,3 +1,4 @@
+import {isClipMime,clipFile} from '../clips/media'
 import type {Attention,FileRecord,LocationState,MessageWindow,Outcome,Page,Projection,WorkspaceSnapshot,Replay} from './types'
 export class ApiError extends Error { constructor(public status:number,message:string,public broadcast?:import('../broadcast/ConfirmBroadcast').BroadcastPreview,public code?:string){super(message)} }
 export async function api<T>(path:string,data?:unknown,method=data===undefined?'GET':'POST'):Promise<T> {
@@ -10,8 +11,8 @@ async function responseValue<T>(response:Response):Promise<T>{
  return value
 }
 export function attachmentMime(file:File){
- const mime=file.type||({txt:'text/plain',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',pdf:'application/pdf'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()]
- if(!['text/plain','image/png','image/jpeg','application/pdf'].includes(mime))throw new ApiError(415,'Unsupported file type')
+ const mime=(/^audio\/|^video\//.test(file.type)||/\.(webm|mp4|m4a|ogg|mp3|wav)$/i.test(file.name))?clipFile(file).type:file.type||({txt:'text/plain',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',pdf:'application/pdf'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()]
+ if(!['text/plain','image/png','image/jpeg','application/pdf'].includes(mime)&&!isClipMime(mime))throw new ApiError(415,'Unsupported file type')
  return mime
 }
 export async function uploadAttachment(conversation:string,file:File,intent:string):Promise<FileRecord>{
