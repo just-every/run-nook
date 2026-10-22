@@ -605,11 +605,11 @@
       "executable": false
     },
     ".github/workflows/verify-stage.yml": {
-      "sha256": "faa93736612adbc6a84cc2307ace8725f58c56037245ea7a625337f123ee73ce",
+      "sha256": "6d910e74ec8068d4d1b961b66f4e13b1c46b42a17ca90a15c8ffe54ee774e0c8",
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "a893db46a848db20a591bd7349f3f02705716f7eccce24a5bc88e4b7ca7e5217",
+      "sha256": "6fb67afa7e224ad3ef063345088c3999c19b7140aa2e36ff45bcc7595cc05584",
       "executable": false
     },
     ".gitignore": {

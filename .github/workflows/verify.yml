@@ -65,7 +65,7 @@ jobs:
     with:
       command: ${{ matrix.command }}
       # These suites never launch Chromium.
-      browser: ${{ matrix.stage != 'storage and security API' && matrix.stage != 'product API' && matrix.stage != 'push real clocks' }}
+      browser: ${{ matrix.stage != 'storage and security API' && matrix.stage != 'product API' }}
 
   slow:
     name: verify (${{ matrix.stage }})
