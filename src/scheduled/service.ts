@@ -17,7 +17,7 @@ export async function listSchedules(c:Context,after=''){
  const page=rows.slice(0,50),ids=JSON.stringify(page.map(r=>r.id))
  const files=await c.rows('SELECT schedule,attachment AS id,name,mime,size,position FROM nook_schedule_files WHERE schedule IN (SELECT value FROM json_each(?)) ORDER BY position',[ids])
  const names=await c.rows<{id:string;name:string}>(`SELECT v.id,v.name FROM nook_conversations v JOIN nook_members m ON m.conversation=v.id WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')}`,[c.uid])
- const occurrences=await c.rows(`SELECT * FROM (SELECT *,ROW_NUMBER() OVER(PARTITION BY schedule ORDER BY completed DESC,version DESC,local_at DESC) AS position FROM nook_schedule_occurrences WHERE schedule IN (SELECT value FROM json_each(?))) WHERE position<=6`,[ids])
+ const occurrences=await c.rows(`SELECT * FROM (SELECT *,(SELECT conversation FROM nook_message_history WHERE id=nook_schedule_occurrences.message) AS message_conversation,ROW_NUMBER() OVER(PARTITION BY schedule ORDER BY completed DESC,version DESC,local_at DESC) AS position FROM nook_schedule_occurrences WHERE schedule IN (SELECT value FROM json_each(?))) WHERE position<=6`,[ids])
  return {items:page.map(({payload,definition,visiblePayload,operator_version,access_generation,intent,...row})=>({...row,payload:visiblePayload?publicPayload(visiblePayload,names):null,files:visiblePayload?files.filter(f=>f.schedule===row.id):[],hasMoreOccurrences:occurrences.filter(o=>o.schedule===row.id).length>5,occurrences:occurrences.filter(o=>o.schedule===row.id).slice(0,5)})),cursor:page.at(-1)?.id??after,hasMore:rows.length>50}
 }
 function publicPayload(value:string,names:{id:string;name:string}[]){const payload=JSON.parse(value);if(payload.forward){payload.forward=publicForward(payload.forward);payload.forward.destinations=payload.forward.destinations.map((d:any)=>({...d,name:names.find(n=>n.id===d.conversation)?.name??'Conversation unavailable'}))}return payload}
@@ -76,7 +76,7 @@ export async function scheduleOccurrences(c:Context,id:string,after:string){
  if(!await c.one('SELECT 1 FROM nook_schedules WHERE id=? AND user=?',[id,c.uid]))fail(404,'Scheduled message unavailable')
  let cursor:{completed:number;version:number;local:string}|null=null
  if(after){try{cursor=JSON.parse(atob(after))}catch{fail(400,'Invalid occurrence cursor')};if(!cursor||!Number.isSafeInteger(cursor.completed)||!Number.isSafeInteger(cursor.version)||typeof cursor.local!=='string')fail(400,'Invalid occurrence cursor')}
- const rows=await c.rows(`SELECT * FROM nook_schedule_occurrences WHERE schedule=? ${cursor?'AND (completed,version,local_at)<(?,?,?)':''} ORDER BY completed DESC,version DESC,local_at DESC LIMIT 51`,[id,...(cursor?[cursor.completed,cursor.version,cursor.local]:[])])
+ const rows=await c.rows(`SELECT *,(SELECT conversation FROM nook_message_history WHERE id=nook_schedule_occurrences.message) AS message_conversation FROM nook_schedule_occurrences WHERE schedule=? ${cursor?'AND (completed,version,local_at)<(?,?,?)':''} ORDER BY completed DESC,version DESC,local_at DESC LIMIT 51`,[id,...(cursor?[cursor.completed,cursor.version,cursor.local]:[])])
  const items=rows.slice(0,50),last=items.at(-1);return {items,hasMore:rows.length>50,cursor:last?btoa(JSON.stringify({completed:last.completed,version:last.version,local:last.local_at})):after}
 }
 
