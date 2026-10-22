@@ -56,8 +56,7 @@ export async function appRequest(bindings:StorageBindings,request:Request){
    const body=await input(request)
    if(Object.keys(body).some(k=>!['body','version'].includes(k)))fail(400,'Unsupported message field')
    // Resolve inside this channel before calling the ordinary versioned editor.
-   const old=await c.one<{author:string;parent:string|null}>(`SELECT author,parent FROM nook_messages WHERE id=? AND conversation=? AND author IN (${appAuthors})`,[p[4],app.conversation,...identityValues(app)])
-   if(!old)fail(404,'Destination unavailable')
+   const old=await c.one<{author:string;parent:string|null}>(`SELECT author,parent FROM nook_messages WHERE id=? AND conversation=? AND author IN (${appAuthors})`,[p[4],app.conversation,...identityValues(app)])??fail(404,'Destination unavailable')
    const writer=new AppContext(env,app,old.author);writer.source=p[4];writer.parent=old.parent
    return Response.json(await edit(writer,p[4],{...body,delete:request.method==='DELETE'}),{headers})
   }
