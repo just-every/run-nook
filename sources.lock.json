@@ -725,7 +725,7 @@
       "executable": false
     },
     "docs/your-team.md": {
-      "sha256": "0650fdf201f5f82a27cbbe0bd34b2e7b1dcfd834a10c1f3ec2bd51f581c0f1c5",
+      "sha256": "48bb9de4bc42f48039a899b49e13d8fa48c1a8ce30ede631114569e1ca64c660",
       "executable": false
     },
     "edition.json": {
@@ -5161,11 +5161,11 @@
       "executable": false
     },
     "src/notification-apps/context.ts": {
-      "sha256": "262d279c527de548a5b349393ffbcea928600b504db8da3fc0497bbbd7a08a52",
+      "sha256": "ab94276291937f8f3617605df7316ad102d29a0ada094b6314c26b1d91db4084",
       "executable": false
     },
     "src/notification-apps/door.ts": {
-      "sha256": "d4c95689415e5d0c27d87d1339b50078e2089811a4ab0922c2598fee9c1b5aa9",
+      "sha256": "7bc16d1e76d2e8196b7e8347cede5a1c22dda3c4114e9a19c5ee33f803af1118",
       "executable": false
     },
     "src/notification-apps/manage.ts": {
@@ -5174,6 +5174,10 @@
     },
     "src/notification-apps/NotificationApps.tsx": {
       "sha256": "f399fe3c443606734020b064a3ef1e4c497bbfe671738ddcb9ca4fd8cdc2a49b",
+      "executable": false
+    },
+    "src/notification-apps/receipts.ts": {
+      "sha256": "4597c018b39f75c3f91d81d614c85e99d7edd51924e5634815d00181eb671b22",
       "executable": false
     },
     "src/notify/compose.ts": {
@@ -5345,7 +5349,7 @@
       "executable": false
     },
     "src/platform/storage/messages.ts": {
-      "sha256": "a98613fc888e9f983919b9a33bb8080f933867b6021a15c22499763b4e1e8bc4",
+      "sha256": "617e703447ceb6d691a88aa0510918e116178fc1fcfa2207627716b126469f30",
       "executable": false
     },
     "src/platform/storage/outcome-history.ts": {
@@ -5361,7 +5365,7 @@
       "executable": false
     },
     "src/platform/storage/read.ts": {
-      "sha256": "156ba11cb8bc2391d40154e9bc9dcb351f7ce509123071e514dea120e067e255",
+      "sha256": "4ccd94c795b64115a3d61bfb821c524e271ae7e8897f6b09ef636a7d26c2ad95",
       "executable": false
     },
     "src/platform/storage/thread-badge.ts": {
@@ -6249,7 +6253,11 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "4dda2b8ed48f9c547f070d699c5db5d536f69d5873a86e80dc6cf5c58d176f98",
+      "sha256": "e11f51c4befeef710da20ceff6ab52f616f513f6a2bf6fccff74c537103044f4",
+      "executable": false
+    },
+    "tests/notification-extension.mjs": {
+      "sha256": "2b4f449a0f13a08159ee2db8962da7191e3c21b09cbb9236b847604bacd89c85",
       "executable": false
     },
     "tests/notify-journey.mjs": {
