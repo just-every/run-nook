@@ -1,3 +1,4 @@
+import {validateNotificationApps} from '../../notification-apps/archive.mjs';
 import {validateQuietArchive} from '../../notify/quiet-archive.mjs';
 import {validateAuditArchive} from '../../audit/archive.mjs';
 import {validateDeliveryArchive} from '../../push/archive.mjs';
@@ -52,7 +53,8 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  check(!rows('upload_attempts').length&&!rows('object_deletes').length,'reconcile_pending_object_work_before_export');
  const actors=index(rows('actors'),a=>a.id,'duplicate_actor'),conv=index(rows('conversations'),c=>c.id,'duplicate_conversation'),msg=index(rows('messages'),m=>m.id,'duplicate_message'),out=index(rows('outcomes'),o=>o.id,'duplicate_outcome'),files=index(rows('attachments'),a=>a.id,'duplicate_attachment');
  await validateReadableExportArchive(readTable,manifest,actors,conv);
- index(rows('actors').filter(a=>!a.erased),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
+ index(rows('actors').filter(a=>!a.erased&&a.role!=='app'),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : a.role==='app' ? string(a.id)&&string(a.name)&&a.email===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
+ await validateNotificationApps(readTable,manifest,actors,conv);
  await validatePersonalWorkspace(readTable,manifest,actors,conv);
  await validateDefaultChannels(readTable,manifest,actors,conv);
  await validateAuditArchive(readTable,manifest,actors);

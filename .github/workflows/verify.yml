@@ -48,7 +48,7 @@ jobs:
           - stage: search
             command: pnpm build:app && pnpm test:runtime --suite=search
           - stage: integration tokens
-            command: pnpm build:app && pnpm test:runtime --suite=integrations
+            command: pnpm build:app && pnpm test:runtime --suite=integrations && node --test tests/notification-apps.mjs
           - stage: workspaces menu
             command: pnpm build:app && node tests/workspaces-browser.mjs
           - stage: email notifications

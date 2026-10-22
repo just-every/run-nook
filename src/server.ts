@@ -1,3 +1,5 @@
+import {isAppRequest,appRequest} from './notification-apps/door'
+import {manageApps} from './notification-apps/manage'
 import {noteRoute} from './notes/route'
 import {mattermostEmojiRoute} from './imports/mattermost-emoji'
 import {readableExportRoute} from './exit/routes'
@@ -46,6 +48,7 @@ api.use('*', async (c,next) => { c.header('Cache-Control','no-store'); c.header(
 api.get('/health', async c => { operatorAuth(c.env); await c.env.DB.prepare('SELECT singleton FROM oa_bootstrap LIMIT 1').all();return c.json({status:'ok',...deploymentHealth(c.env)}) })
 api.all('/api/*', async c => {
  const req = c.req.raw, url = new URL(req.url), repository = new Repository(c.env)
+ if(isAppRequest(req))return appRequest(c.env,req)
  let input: Record<string,any> = {}
  // NOOK-079: a request with an integration token is answered only by the token door.
  if(hasIntegrationToken(req)&&!integrationPost(req.method,url))return (await integrationRequest(c.env,req,{}))!
@@ -64,6 +67,7 @@ api.all('/api/*', async c => {
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),exit=await readableExportRoute(session,req,input);if(exit)return exit
  const team=await teamRoute(session,req,input);if(team)return team
+ const apps=await manageApps(session,req.method,p,input as Record<string,unknown>);if(apps)return c.json(apps)
  const tokens=await tokenRoute(session,req.method,p,input as Record<string,unknown>);if(tokens)return c.json(tokens)
  if(action==='messages'&&id&&sub==='broadcast-recipients'&&p.length===4&&req.method==='GET')return c.json(await broadcastRecipients(session,id,url.searchParams.get('after')??''))
  if(action==='broadcast'&&id==='presence'&&p.length===3&&req.method==='GET')return c.json({away:!!(await session.one('SELECT away FROM nook_broadcast_choices WHERE user=?',[session.uid]))?.away})

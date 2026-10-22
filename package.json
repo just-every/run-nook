@@ -29,7 +29,7 @@
     "onboard": "node scripts/install.mjs",
     "build:app": "vite build",
     "verify:app": "pnpm verify:core && pnpm test:pilot",
-    "verify:core": "pnpm test:base && pnpm test && pnpm run build:app && pnpm integration:check && pnpm typecheck && rer build --site && pnpm test:runtime && pnpm test:readme && pnpm test:notify && pnpm test:push && pnpm test:notes",
+    "verify:core": "pnpm test:base && pnpm test && pnpm run build:app && pnpm integration:check && pnpm typecheck && rer build --site && pnpm test:runtime && pnpm test:readme && pnpm test:notify && pnpm test:push && pnpm test:notes && pnpm test:notification-apps",
     "typecheck": "tsc --noEmit",
     "test": "node --test --test-concurrency=2 tests/*.test.mjs",
     "test:runtime": "node tests/runtime.mjs",
@@ -41,7 +41,8 @@
     "test:push": "node --test --test-concurrency=1 tests/push-journey.mjs tests/push-clock.mjs",
     "integration:generate": "node scripts/delivery/integration.mjs",
     "integration:check": "node scripts/delivery/integration.mjs --check",
-    "test:notes": "node --test tests/notes-journey.mjs"
+    "test:notes": "node --test tests/notes-journey.mjs",
+    "test:notification-apps": "node --test tests/notification-apps.mjs"
   },
   "dependencies": {
     "@noble/hashes": "2.0.1",

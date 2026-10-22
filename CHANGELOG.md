@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Notification apps now have explicit channel approvals, one-time hashed tokens, app identity, audience facts, idempotent writes and a channel rate limit. Restored approvals need new tokens. NOOK-080 remains partial because federation and its share acceptance step are unavailable.
+
 Slack, Campfire and Mattermost now use the shared Base import door. Source
 inspection stays on your device and withholds credentials before upload. Review
 a dry run, apply its fingerprint, reconcile the native history, or use guarded
@@ -35,6 +37,12 @@ imports share this pipeline and stay off until explicitly enabled.
   Was: `Other authors retain work and state without erased assignee/action attribution.`
 
   Now: `Other authors retain work and state without erased assignee/action attribution. Shared conversation notes are such work: member erasure removes only the member's author, reviser and pin attribution, and a note another member authored or revised keeps its title, text, checklist items, links, pin state and every snapshot for the other participants; notes the member wrote alone, and notes on the member's erased thread roots, are cleared (NOOK-053). Web Push routing records are removed with the member they belong to and with the message, outcome or member that caused them (NOOK-015, NOOK-073); none is a structural tombstone.`
+
+- **NOOK-080 added.**
+
+  **NOOK-080 — Notification destination door.** An owner or admin approves a notifying app (a sibling such as Slate, or any `NOOK-025` app) for named channels only, issuing a channel-scoped token shown once, stored hashed, revocable by owner, admin or channel manager. Posts are authenticated, idempotent on a client key, limited to 1 per second per channel (burst 20) with `429` and `Retry-After`, and editable only by the posting app. For approved channels only, the token reads: privacy, sharing (`NOOK-031`), and members with verified email, guest flag and bot flag. After revocation, archive, sharing or removal, posts write nothing. Messages show the app identity and badge, and are audited (`NOOK-051`) and exported (`NOOK-047`).
+
+  **Acceptance evidence:** Approve an app for one private channel. Post, edit and delete; replay a key; exceed the rate; read every audience fact. Then add a guest, share, archive and revoke: facts change and later posts write nothing. Channel A's token cannot reach channel B.
 
 ### Prose changes since 0.4.0
 
