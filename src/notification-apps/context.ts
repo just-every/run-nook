@@ -37,8 +37,8 @@ export class AppContext extends Context{
  rate=false
  override async writeBatch(statements:D1PreparedStatement[],conversation:string,condition='1',values:any[]=[]){
   await this.writable(conversation)
-  const posting=canPost('?','?','?');if(!await this.one(`SELECT 1 WHERE ${posting}`,[conversation,this.uid,this.parent]))fail(403,'Posting is restricted in this channel')
-  condition=`(${posting}) AND (${condition})`;values=[conversation,this.uid,this.parent,...values]
+  const posting=canPost('?','?','?');if(!await this.one(`SELECT 1 WHERE ${posting}`,[conversation,this.parent,this.uid]))fail(403,'Posting is restricted in this channel')
+  condition=`(${posting}) AND (${condition})`;values=[conversation,this.parent,this.uid,...values]
   if(!this.rate)return this.batch(statements,conversation,condition,values)
   const now=Date.now(),balance=`min(20000,balance+max(0,?-updated))`
   const row=await this.one<{balance:number}>(`SELECT ${balance} AS balance FROM nook_notification_rates WHERE conversation=?`,[now,conversation])
