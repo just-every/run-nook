@@ -12,6 +12,7 @@ export const authFence=`EXISTS(SELECT 1 FROM oa_sessions s JOIN oa_operators o O
 export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=? AND mf.user=? AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
 export class Context {
  constructor(readonly env:StorageBindings,readonly session:Session){}
+ get memberBroadcasts(){return true}
  get db(){return this.env.DB}
  get uid(){return this.session.operatorId}
  get credentials(){return [this.session.id,this.uid,this.session.operator.version]}

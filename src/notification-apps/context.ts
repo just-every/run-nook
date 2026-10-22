@@ -13,6 +13,7 @@ export function audit(c:Pick<Context,'sql'>,app:string,channel:string,actor:stri
 // Deliberately no person session and no arbitrary conversation access. All SQL
 // snapshots use the exact approval and installation-keyed token hash.
 export class AppContext extends Context{
+ override get memberBroadcasts(){return false}
  source=''
  override event(conversation:string,kind:string,object:string){this.source=object;return super.event(conversation,kind,object)}
  override async writable(conversation:string){this.scope(conversation);await super.writable(conversation);if(await this.one("SELECT 1 FROM nook_notification_sharing WHERE conversation=? AND state<>'local'",[conversation]))fail(409,'Destination is not local')}

@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {installation} from './push/fixture.mjs';
+import {installation,until} from './push/fixture.mjs';
+import {subscriber,packet} from './push/packet.mjs';
 import {signIn} from './auth-support.mjs';
 import {createPortability,readArchive} from '@runeditrun/rer/modules/portability';
 import {productPolicy} from '../src/platform/portability-policy.mjs';
@@ -8,7 +9,8 @@ import {migrationHistory} from './migration-history.mjs';
 import {notificationAppsBrowser} from './integration-tokens-browser.mjs';
 
 test('NOOK-080 channel-scoped notification approvals, audience, writes, rate, withdrawal, audit and credential-free restore',{timeout:240000},async t=>{
- const app=await installation(async()=>new Response(null,{status:201}),{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});let restore;
+ const recipients=new Map(),received=[];let publicKey,edgeError;
+ const app=await installation(async request=>{try{const recipient=recipients.get(request.url);assert.ok(recipient);received.push({endpoint:request.url,value:await packet(request,recipient,publicKey)});return new Response(null,{status:201})}catch(error){edgeError=error;throw error}},{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});let restore;
  const {call,db,ownerCookie,origin}=app;
  const tokens=[];
  const send=async(token,channel,method='POST',body={body:'Daily report'},key=crypto.randomUUID(),suffix='messages')=>fetch(origin+`/api/notification-destinations/${channel}/${suffix}`,{method,headers:{authorization:'Bearer '+token,'content-type':'application/json','idempotency-key':key},...(method==='GET'?{}:{body:JSON.stringify(body)})});
@@ -24,6 +26,40 @@ test('NOOK-080 channel-scoped notification approvals, audience, writes, rate, wi
   await call('/api/notification-apps','POST',{name:'Unapproved',channels:[room.id]},member.cookie,403);
   await call('/api/notification-apps','POST',{name:'All',channels:[]},ownerCookie,400);
   const primary=await approve('Slate',room),other=await approve('Uptime',room,admin.cookie);
+  // The same approved destination grows from a small audience to confirmation size.
+  const devices=[];
+  for(const [index,person] of [member,admin].entries()){
+   const recipient=subscriber('synthetic-nook-'+(10+index));recipients.set(recipient.subscription.endpoint,recipient);
+   publicKey=(await call('/api/devices','GET',undefined,person.cookie)).publicKey;
+   devices.push({person,id:(await call('/api/devices','POST',{transport:'webpush',subscription:recipient.subscription,deviceClass:'desktop'},person.cookie)).id});
+   await call('/api/notify','PATCH',{push:{mentions:true,broadcasts:true}},person.cookie);
+   await call('/api/broadcast/presence','POST',{page:'synthetic-nook-12',visible:true,zone:'UTC'},person.cookie);
+  }
+  await call(`/api/conversations/${room.id}/notify`,'PATCH',{level:'all'},admin.cookie);
+  const literalWrite=async(body,editBody,deliverNow)=>{
+   const previous=new Set((await call('/api/devices','GET',undefined,admin.cookie)).alerts.map(a=>a.id));
+   const response=await send(primary.token,room.id,'POST',{body});assert.equal(response.status,200);const posted=await response.json();
+   assert.equal((await call('/api/messages/'+posted.id,'GET',undefined,member.cookie)).body,body);
+   const changed=await send(primary.token,room.id,'PATCH',{body:editBody,version:1},crypto.randomUUID(),'messages/'+posted.id);assert.equal(changed.status,200);
+   assert.equal((await call('/api/messages/'+posted.id,'GET',undefined,member.cookie)).body,editBody);
+   const attention=await call('/api/attention','GET',undefined,member.cookie);assert.ok(!attention.items.some(i=>i.message?.id===posted.id));
+   const ordinary=await call('/api/attention','GET',undefined,admin.cookie);assert.equal(ordinary.items.find(i=>i.message?.id===posted.id)?.reason,'all-messages');
+   const alerts=(await call('/api/devices','GET',undefined,admin.cookie)).alerts.filter(a=>!previous.has(a.id));assert.equal(alerts.length,1);assert.equal(alerts[0].reason,'all-messages');
+   if(deliverNow)await until(()=>{if(edgeError)throw edgeError;return received.some(r=>new URL(r.value.url).searchParams.get('focus')===posted.id)},'ordinary channel choice delivers app message');
+   else assert.equal(alerts[0].state,'pending','ordinary later message waits under the existing delivery folding policy');
+   assert.deepEqual((await call('/api/devices','GET',undefined,member.cookie)).alerts,[]);
+   assert.ok(received.every(r=>r.endpoint!==[...recipients.keys()][0]),'mentions-only member receives no app broadcast');
+   assert.deepEqual((await call('/api/devices/sync','GET',undefined,member.cookie)).active,[]);
+   const rooms=await call('/api/conversations','GET',undefined,admin.cookie);await call(`/api/conversations/${room.id}/read`,'POST',{seq:rooms.find(r=>r.id===room.id).seq},admin.cookie);
+  };
+  assert.ok((await call(`/api/conversations/${room.id}/members`,'GET',undefined,ownerCookie)).length<6);
+  await literalWrite('@here Release checklist ready.','@channel Release checklist updated.',true);
+  for(let n=0;n<4;n++){const person=await app.invite('synthetic-nook-'+(20+n),room.id);await call('/api/broadcast/presence','POST',{page:'synthetic-nook-24',visible:true,zone:'UTC'},person.cookie)}
+  assert.ok((await call(`/api/conversations/${room.id}/members`,'GET',undefined,ownerCookie)).length>=6);
+  await literalWrite('@channel Release review ready.','@here Release review updated.',false);
+  await call(`/api/conversations/${room.id}/notify`,'PATCH',{level:'mentions'},admin.cookie);
+  for(const {person,id} of devices)await call('/api/devices','DELETE',{id},person.cookie);
+  if(edgeError)throw edgeError;
   const denied=await fetch(origin+'/api/notification-apps',{method:'POST',headers:{authorization:'Bearer '+primary.token,'content-type':'application/json'},body:JSON.stringify({name:'Self',channels:[room.id]})});assert.equal(denied.status,404);
   noSecrets(await call('/api/notification-apps','GET',undefined,ownerCookie));
   const hashed=await db.prepare('SELECT hash FROM nook_notification_secrets WHERE app=?').bind(primary.id).first();assert.ok(hashed.hash&&!hashed.hash.includes(primary.token));
@@ -98,10 +134,10 @@ test('NOOK-080 channel-scoped notification approvals, audience, writes, rate, wi
 
 test('NOOK-036 cited AI search uses one bounded provider call and survives hostile output, revocation and credential-free restore',{timeout:240000},async t=>{
  const edge={calls:[],mode:'normal',during:null,lastKey:''};let restore;
- const app=await installation(async request=>{assert.equal(request.url,'https://model.example.test/v1/messages');edge.lastKey=request.headers.get('x-api-key');const body=await request.json();edge.calls.push({url:request.url,body});const data=JSON.parse(body.messages[0].content),passages=data.quotedPassages;if(edge.during){const run=edge.during;edge.during=null;await run()}const claims=passages.map(p=>({passageId:p.id,quote:p.text}));if(edge.mode==='unsupported')return Response.json({content:[{type:'text',text:JSON.stringify({claims:[{passageId:'fabricated-citation',quote:'unsupported model assertion'}],conflicts:[],abstain:false})}]});const conflicts=edge.mode==='conflicts'&&passages.length>1?[{left:passages[0].id,right:passages[1].id}]:[];if(edge.mode==='hostile')claims.push({passageId:'fabricated-citation',quote:'injected-tool'});return Response.json({content:[{type:'text',text:JSON.stringify({claims,conflicts,abstain:false})},...(edge.mode==='hostile'?[{type:'tool_use',name:'injected-tool',input:{url:'https://attacker.example.test'}}]:[])]})},{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});
+ const app=await installation(async request=>{assert.equal(request.url,'https://model.example.test/v1/messages');edge.lastKey=request.headers.get('x-api-key');const body=await request.json();edge.calls.push({url:request.url,body});const data=JSON.parse(body.messages[0].content),passages=data.quotedPassages;if(edge.during){const run=edge.during;edge.during=null;await run()}if(edge.mode==='unavailable')return new Response(null,{status:503});const claims=passages.map(p=>({passageId:p.id,quote:p.text}));if(edge.mode==='unsupported')return Response.json({content:[{type:'text',text:JSON.stringify({claims:[{passageId:'fabricated-citation',quote:'unsupported model assertion'}],conflicts:[],abstain:false})}]});const conflicts=edge.mode==='conflicts'&&passages.length>1?[{left:passages[0].id,right:passages[1].id}]:[];if(edge.mode==='hostile')claims.push({passageId:'fabricated-citation',quote:'injected-tool'});return Response.json({content:[{type:'text',text:JSON.stringify({claims,conflicts,abstain:false})},...(edge.mode==='hostile'?[{type:'tool_use',name:'injected-tool',input:{url:'https://attacker.example.test'}}]:[])]})},{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});
  try{
   const proof=await(await import('./search.mjs')).aiSearchJourney(app,edge,t);
-  if(!process.env.NOOK_SKIP_BROWSER){await fetch(app.origin+'/setup',{method:'POST',redirect:'manual',headers:{cookie:app.ownerCookie,origin:app.origin,'content-type':'application/x-www-form-urlencoded'},body:'confirm=yes'});await(await import('./search-browser.mjs')).aiSearchBrowser({origin:app.origin,...proof,destination:process.env.NOOK_AI_EVIDENCE_DIR??'evidence/ai-search'});}
+  if(!process.env.NOOK_SKIP_BROWSER){await fetch(app.origin+'/setup',{method:'POST',redirect:'manual',headers:{cookie:app.ownerCookie,origin:app.origin,'content-type':'application/x-www-form-urlencoded'},body:'confirm=yes'});await(await import('./search-browser.mjs')).aiSearchBrowser({origin:app.origin,...proof,app,edge,destination:process.env.NOOK_AI_EVIDENCE_DIR??'evidence/ai-search'});}
   const service=await createPortability({db:app.db,buckets:{FILES:await app.mf.getR2Bucket('FILES')},policy:await productPolicy(app.db)}),exportId=await service.exports.create();let records=[];try{while((await service.exports.advance(exportId,{maxParts:16})).phase==='building'){}for await(const record of readArchive(await service.exports.download(exportId)))records.push(record)}finally{await service.exports.abort(exportId)}for(const secret of proof.secrets)assert.ok(!JSON.stringify(records).includes(secret));assert.ok(!records[0].tables.some(t=>t.name==='nook_ai_secrets'));assert.ok(records[0].tables.some(t=>t.name==='nook_ai_feedback'));
   restore=await installation(async()=>assert.fail('restore emits nothing'),{bootstrap:false});const importer=await createPortability({db:restore.db,buckets:{FILES:await restore.mf.getR2Bucket('FILES')},policy:await productPolicy(restore.db),migrations:migrationHistory(await productPolicy(restore.db))});const id=await importer.imports.create(records[0]);for(const record of records)if(record.kind==='part')await importer.imports.uploadPart(id,record.index,record);const end=records.at(-1);await importer.imports.finalize(id,{contentHash:end.contentHash,archiveHash:end.archiveHash});assert.equal((await restore.db.prepare('SELECT enabled FROM nook_ai_settings').first()).enabled,0);assert.equal((await restore.db.prepare('SELECT count(*) AS n FROM nook_ai_secrets').first()).n,0);assert.ok((await restore.db.prepare('SELECT count(*) AS n FROM nook_ai_feedback').first()).n>0);
   let erased=await app.call('/api/erasures','POST',{kind:'member',target:proof.member.user.id,confirmation:'ERASE'},app.ownerCookie);for(let n=0;erased.state!=='complete'&&n<50;n++)erased=await app.call('/api/erasures/'+erased.id+'/resume','POST',{},app.ownerCookie);assert.equal(erased.state,'complete');assert.equal((await app.db.prepare('SELECT count(*) AS n FROM nook_ai_feedback WHERE user=?').bind(proof.member.user.id).first()).n,0);
