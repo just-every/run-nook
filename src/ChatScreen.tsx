@@ -1,4 +1,4 @@
-import {AiSettings} from './ai-search/Settings'
+import {AiSettings} from './ai-search/AiSettings'
 import {NotificationApps} from './notification-apps/NotificationApps'
 import './notes/notes.css'
 import {ReadableExport} from './exit/ReadableExport'

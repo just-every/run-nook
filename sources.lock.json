@@ -1568,6 +1568,10 @@
       "sha256": "c1e5a9056d23a655fd5e0703200b868969d277accd83d554424c8821e386415e",
       "executable": false
     },
+    "src/ai-search/AiSettings.tsx": {
+      "sha256": "a77c74a9f0ee04037f8072865951e8d4bf968d8d5026a07ea73569b63b44efb4",
+      "executable": false
+    },
     "src/ai-search/archive.mjs": {
       "sha256": "a6f85ca3010a63a094786852c0bb00f7d7c5fe2e096fc3eddea01a74769e500b",
       "executable": false
@@ -1586,10 +1590,6 @@
     },
     "src/ai-search/settings.ts": {
       "sha256": "7a1459cf41477d0f7e7eb3774c1d18d54a8918ee87ab5136e69a1cb6c2b176bd",
-      "executable": false
-    },
-    "src/ai-search/Settings.tsx": {
-      "sha256": "a77c74a9f0ee04037f8072865951e8d4bf968d8d5026a07ea73569b63b44efb4",
       "executable": false
     },
     "src/app-style/attention.css": {
@@ -3877,7 +3877,7 @@
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "f6e2ffd9be30011a939f66e539cbabfcbfb1c347007aa24086225062dc866746",
+      "sha256": "611a2a242d2323937aa1651c126e1ab7a10c97e94c24672140ab4fe163ceae94",
       "executable": false
     },
     "src/client.tsx": {
