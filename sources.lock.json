@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "31785237cbcd276888e468202d83354e501d2946243788ec6730f274fa53d429",
+      "sha256": "1b5740fd9b89f1ec1e63baa0613c1623e7fe2cf1581a0fe8a7c846e4cd8b4d45",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "df1ca11c44fbf6ae9e07eb355985094059397e217c7402b59f94a74bf798847e",
+      "sha256": "74906ec27be6c80368043ebdd7b409046bb94d9d8523a55687e75af6c2ea0c9b",
       "executable": false
     },
     "DEMO.md": {
@@ -6129,7 +6129,7 @@
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
-      "sha256": "a902f5430f103fa480d2f8921d329896ec9b1a23e90920cdb466133209756a94",
+      "sha256": "04442660fbd8f3bc90872089f5b91a31a71c5439f53f06f0b74a12861c099313",
       "executable": false
     },
     "tests/integration-tokens.mjs": {
@@ -6201,7 +6201,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "df1805a59d95a362f74c90c717f15f36c6170f51483c4fd65f848dc2939b8d5f",
+      "sha256": "09685d83e8a40079bfa9d55245d3e3e39984e1439e4f98cbe2a5acd97f8317a7",
       "executable": false
     },
     "tests/notify-journey.mjs": {
@@ -6489,11 +6489,11 @@
       "executable": false
     },
     "tests/search-browser.mjs": {
-      "sha256": "df9f0005af826db07b99447e73f72705721e51829365701035a1d132f2fa8a2c",
+      "sha256": "ed452c53b31d32c53cdd197b215ddd016196392886d92b2a046333e71a978500",
       "executable": false
     },
     "tests/search.mjs": {
-      "sha256": "03bede085cd0e34b87a4912268725611e76f61fb140f7a79f3a6cf3d469f9c52",
+      "sha256": "16207c5da9da7116ee0abfe7d8113307516f1202633dc093f402a77cf1a91deb",
       "executable": false
     },
     "tests/slack-delta-browser.mjs": {
