@@ -451,15 +451,19 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**91 clauses: 33 done, 21 partial, 37 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**91 clauses: 33 done, 22 partial, 36 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
 
 - **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-082 — Scheduled forwarding.** **Status: missing.** Forward with optional scheduled time; forwarding needs posting permission in each destination at delivery.
+- **NOOK-082 — Scheduled forwarding.** **Status: partial.** Forward with optional scheduled time; forwarding needs posting permission in each destination at delivery.
 
-  Current evidence: No implementing source/test; journey pending.
+  Receiving duty (verbatim): From any message on every client, a member forwards to one or more channels, DMs, group DMs or a thread, with an optional note and optional scheduled time (NOOK-034).
+
+  Current evidence: `tests/notification-apps.mjs` — “NOOK-067 [NOOK-082] immediate and scheduled forwards protect source audiences, delivery permissions, disclosures and descendants” (Verify, verify (integration tokens)); `tests/scheduled-forwards.mjs` — scheduledForwardJourney: channel/DM delivery once, original source/note/time, independent posting refusal with reason, source deletion, stricter policy refusal, edit/cancel, paused credential-free restore and sender/source erasure; `tests/integration-tokens-browser.mjs` — forwardBrowser (1440/390 schedule control, Scheduled entry, edit/cancel, no horizontal overflow or serious axe findings); `evidence/forwards/`.
+
+  Gap: Default ADOPTED: delivery rechecks the original approving session, current membership/posting/thread/source and the exact reviewed audience/policy proof; changed or stricter disclosure refuses that destination visibly and never downgrades Show message. Authorized remaining destinations commit atomically through the existing forward door. ASK NOOK-082 pending ct acceptance. Native desktop, iOS and Android clients remain unproven (NOOK-021); responsive web is proven. External shared forwarding remains NOOK-083/031.
 
 - **NOOK-083 — External shared-channel forwarding.** **Status: missing.** Forwarding into an external shared channel needs both organizations' policies.
 

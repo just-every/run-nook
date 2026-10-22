@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "ed940ccb3784d2a2c14e1ac403176cc6613a115e5c024b33b139a50ccef8faf7",
+      "sha256": "f239579332c65b5b5ee7618f20889b72dae46640335a451e22cffca89c57f0bd",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "3ce94728e4f9cbadf9b573966e3f3b3e8005fe1ae7a8e7244771fc600abd670c",
+      "sha256": "4814461f9eb9650a0178c430b7dc9a6bab20966c0674bf5dacdb84d400fdbd49",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "930f794ea0a58308a28bf1100bec2d58feb4d2a4cd38c6b742dde1432843ddaa",
+      "sha256": "c0af30fb284f3817985232ea3851f81abbec4f888617340bc87a70a18df12277",
       "executable": false
     },
     "docs/conversations.md": {
@@ -813,99 +813,123 @@
       "executable": false
     },
     "evidence/forwards/blocked-policy-1440.png": {
-      "sha256": "3ad9c8cad6d9e25a4476c535d25b35f8d6802a64c63971daddd6059f670e16cf",
+      "sha256": "f9cf34195aaa3e4cb0faa386e135a9af628f40153413260f90fd8b706698286c",
       "executable": false
     },
     "evidence/forwards/blocked-policy-390.png": {
-      "sha256": "0568aa6fc3d91c8d3da960e7e9eb526dfeda55dbebdc516803b2215383c9cd6c",
+      "sha256": "223599c4bfcbbcbf076490e90d5e8138b1bcf9256af269d0288e81fc3b31401d",
       "executable": false
     },
     "evidence/forwards/dialog-1440.png": {
-      "sha256": "9e43ba611ebc71a32d9d72ee8a523c2866d37a2e8e48730691a2b4b54522cce9",
+      "sha256": "1278245d628af2176d40589e5b5e4392a9f82d0ff3f2680be04288a230af460a",
       "executable": false
     },
     "evidence/forwards/dialog-390.png": {
-      "sha256": "79e742013a6103fcc4e060a88f03e9c74da9fa3020c9e3742f6cba51a0f54f4d",
+      "sha256": "6cdcccbf699c4c63c8c88f5bd6bb4943fb5814074c8301b9915024e26b2dba31",
       "executable": false
     },
     "evidence/forwards/disclosure-preview-1440.png": {
-      "sha256": "72f4adaee784bf0e0c94a764bf463972f183aa29db292e04ed89548dc22cf07f",
+      "sha256": "16acae165845cbde4708749a57f200170a7dcf60770ac1b958674b3e74726d0d",
       "executable": false
     },
     "evidence/forwards/disclosure-preview-390.png": {
-      "sha256": "3eed6747da99f19f3c1c88e3a1a9f7e8ad24587808365d2790fb32eec062a853",
+      "sha256": "df203386db6af7b8158143affe6fa9172c9b4a293e0a8576a6f56e4f08a9eef4",
       "executable": false
     },
     "evidence/forwards/dm-blocked-policy-1440.png": {
-      "sha256": "e2c6dffd011842a1656a63309d1edb4b273472e381deec65fc249f2b7f832e68",
+      "sha256": "485435e4a55a89058a8dd2ff47f16121168461ea7374c462616db023ef4fed7b",
       "executable": false
     },
     "evidence/forwards/dm-blocked-policy-390.png": {
-      "sha256": "2e577d2e30de67fea75d27d19bd4118e75fdf9e5adae2639cd64e837b96cc660",
+      "sha256": "0acac1c302bc698a5f7845b72b1e6d98e923ece584e27937e2cdefce8538cab0",
       "executable": false
     },
     "evidence/forwards/dm-link-only-policy-1440.png": {
-      "sha256": "2b925ab32fbd9a0e4618ce5587a8efcda427f3106a26cdcc65e621c30444e9ec",
+      "sha256": "ee619d08984b755831ef18c54b3493c6e76b6d96c31b69bf4d4122249b7cf2d1",
       "executable": false
     },
     "evidence/forwards/dm-link-only-policy-390.png": {
-      "sha256": "1df0e1efedfcd5bfb4cd760bedb0529e164a54e7232162c51e1dd047547c44c9",
+      "sha256": "6f1dec43ce2f476904420bec491da15fcc8e607fa257ea1527cb0c80f8cd24d6",
       "executable": false
     },
     "evidence/forwards/dm-to-group-1440.png": {
-      "sha256": "19d369277c1fd0454d95f552ade563a33e8e4586ed883d71526c52b44cce8af2",
+      "sha256": "eb3a59bb3b2052fb41c9c1b3d237bd0884c746555a4a1d10b8e9260c388774a2",
       "executable": false
     },
     "evidence/forwards/dm-to-group-390.png": {
-      "sha256": "63ede88732189011ed4fd866f76e3b1109e24962c32ea7527197b6436ded7e5b",
+      "sha256": "22c4891303fd81f9071ac53299e9af8b5f667879989bd44dae40cb47de37c090",
       "executable": false
     },
     "evidence/forwards/forwarded-copy-1440.png": {
-      "sha256": "fcf3c438870ce9ae47c1a8e7ad418b7c40edd9b70a3d9d0abafc370c2f5eeedd",
+      "sha256": "eb50897b5e88b654ee01a7d22ba0b01b0a2585dc1bf79308eb8a57c68a48ebf4",
       "executable": false
     },
     "evidence/forwards/forwarded-copy-390.png": {
-      "sha256": "0b47765c1c1addbb1391c20866d147a03a66629757d344f3e292f0ba85878305",
+      "sha256": "04e05c4311ef925a73dbbe27528fd81c61c202f3aac72bd7bc3229da7615a0f3",
       "executable": false
     },
     "evidence/forwards/link-only-policy-1440.png": {
-      "sha256": "4484e9c0f89c5b77122c6e5482b8460fa473f4ce812521b29b0970ce7cc2f104",
+      "sha256": "52488bb4c0025484ffa355b664e24691b2e5f3ffe64fba1c39cf185a9d94969a",
       "executable": false
     },
     "evidence/forwards/link-only-policy-390.png": {
-      "sha256": "29c9eb4e20edff0b5d861fac6f3971eac6064ec8afa4f84ea40c6e4e8afe3bb2",
+      "sha256": "48a3a0809622957eaa4e13ba33631fa2708003418cd46fed65f67d551a8ede42",
       "executable": false
     },
     "evidence/forwards/link-only-refused-1440.png": {
-      "sha256": "7873928b50e19790830aac53c793de9d71ba43c11fdc676ebdde96edf63836e4",
+      "sha256": "227ea0326cc67796f11caa268e33edc63ea6235d3e3aaff17134e1eee321d1cd",
       "executable": false
     },
     "evidence/forwards/link-only-refused-390.png": {
-      "sha256": "c338da10c3e04b4305bd38b806b7e24030f2d176f00351cc8ff0a4e636f47650",
+      "sha256": "dbcf8538656a3c09e3209fe7dca8a9fb5f0ddd860a6d6253090c5446a2a5676d",
+      "executable": false
+    },
+    "evidence/forwards/scheduled-dialog-1440.png": {
+      "sha256": "981bd3b798c330d61eb05b6c08979435f2763e24eaa1f8915effab175addbd34",
+      "executable": false
+    },
+    "evidence/forwards/scheduled-dialog-390.png": {
+      "sha256": "9fd731e194e4b8f9f340b7a486f34e7af61df5d180b949eeee55fb7249458059",
+      "executable": false
+    },
+    "evidence/forwards/scheduled-edit-1440.png": {
+      "sha256": "1784b8a6b580941737722e712c162150bdba7933648394348cadf040f7ae693a",
+      "executable": false
+    },
+    "evidence/forwards/scheduled-edit-390.png": {
+      "sha256": "5730b680a648318faa987ebba993bb36ed8656899edce11ae59818f30b79c916",
+      "executable": false
+    },
+    "evidence/forwards/scheduled-list-1440.png": {
+      "sha256": "850d1e74f782ea53fe52eff1b57cd6a9042cbf9c23e0d7ca49f6e36258652010",
+      "executable": false
+    },
+    "evidence/forwards/scheduled-list-390.png": {
+      "sha256": "a3b51402457c4f484feb1d2c9f5328e616bbb21ecac39fc3f9783bfd1db8bea0",
       "executable": false
     },
     "evidence/forwards/shown-copy-1440.png": {
-      "sha256": "9b0496fabf92f3165bd5d5a86fa13ce59aabee4b3505b64de60c47c7a4c5357a",
+      "sha256": "16dac5b0e2e62ffa310f8f18df6bfd9fdfed96691efbc2e028f8db1e163bcbef",
       "executable": false
     },
     "evidence/forwards/shown-copy-390.png": {
-      "sha256": "0f2ca448f6b779a500c2c18c25f7c97ccbb6223745b6dca21fb1da615cf5699d",
+      "sha256": "9d47d7ab9f9d310bc9dfd8a3a8f140541e08bb2a2fa6fb4e09d2db60ea2dfd9c",
       "executable": false
     },
     "evidence/forwards/thread-copy-1440.png": {
-      "sha256": "64ac336e059539bcc1a979b945442dc8c83f0559b2e452c15d6e06de331e3075",
+      "sha256": "15603f757e91ce9f2cf16d6649c36492e8c287b6e64125608fbffb24373ca983",
       "executable": false
     },
     "evidence/forwards/thread-copy-390.png": {
-      "sha256": "8b3daf1027a00b6aa76d5ee49ad00f298db33bca76feb413195f949543d2e4c8",
+      "sha256": "162ad96d782e18859bd5a386107f88eb769a00635ab11f3c014b9d313cb72d80",
       "executable": false
     },
     "evidence/forwards/tombstoned-copy-1440.png": {
-      "sha256": "51185386ec7c62f7d2b936cf1d5925b3b868700ccc9876b85990f6044ed82cdb",
+      "sha256": "c39fe7fc61166d56271fa66fc89f428b78b329cd8c220495e2f6b0954df04230",
       "executable": false
     },
     "evidence/forwards/tombstoned-copy-390.png": {
-      "sha256": "0cd46c007175d25acb88c57b2b3171b59a8b105e24417ff20a6271536e83f450",
+      "sha256": "69346d630270f48a1926df156a202efd65b078727101207c7709718bd4338f06",
       "executable": false
     },
     "evidence/notes/channel-1440.png": {
@@ -1113,7 +1137,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "2e06b2efc48e7ccfed3963dd1f0ff9fd69390ed047266960ea1d1f7e8d65068c",
+      "sha256": "b475f3e8729e07d12eb719043860e306324d08be5621bb325a138e125979d990",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -5637,7 +5661,7 @@
       "executable": false
     },
     "src/scheduled/ScheduleEditor.tsx": {
-      "sha256": "a2c92b8aa40242dc1b9b6c8aaf2985144ba828bb2412191c9f38ce0bddb29818",
+      "sha256": "80203c86e1e9681511ef289c5eead9447f0cfdc3705335b512a2bf9d57ea39b9",
       "executable": false
     },
     "src/scheduled/service.ts": {
