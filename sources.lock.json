@@ -813,7 +813,7 @@
       "executable": false
     },
     "evidence/forwards/dialog-1440.png": {
-      "sha256": "636d0787e502daa51253bf9aacf131caf20d9141c07d980f4f3f0b6141a06e2a",
+      "sha256": "e9fef3b2dc4697ccab54ff8b2a88920bb7dff7f23d31b850485c249a49231a17",
       "executable": false
     },
     "evidence/forwards/dialog-390.png": {
@@ -829,7 +829,7 @@
       "executable": false
     },
     "evidence/forwards/forwarded-copy-1440.png": {
-      "sha256": "ec324d5192f3280f561fbe7515a82bf06f1422221386a6d63a16bd2bb6c572a3",
+      "sha256": "faa375e3d47985c2c729411d7ccfbe0c26f09c809e899257c85f17b1faf72ab7",
       "executable": false
     },
     "evidence/forwards/forwarded-copy-390.png": {
@@ -6129,7 +6129,7 @@
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
-      "sha256": "f99be1f9f1885fa7859a4d5ebe4a91071295dcad031d03c4b30c1244a01ac5c5",
+      "sha256": "7808e4b021ef6a272bdcb0ccd5ef3149069782ef06d101517b8ed13902dc2c05",
       "executable": false
     },
     "tests/integration-tokens.mjs": {
@@ -6493,7 +6493,7 @@
       "executable": false
     },
     "tests/search.mjs": {
-      "sha256": "b5655f28068c8e6c1b30c8797ad49df4411e1428b8368ee78e612fb54a8108e3",
+      "sha256": "bac610931bbb94cbc73cab2c5877b8ee4d047c6ccd1e719ab0f3ad16673a9ea3",
       "executable": false
     },
     "tests/slack-delta-browser.mjs": {
