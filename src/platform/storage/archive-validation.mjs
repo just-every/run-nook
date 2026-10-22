@@ -1,3 +1,4 @@
+import {validateDigests} from '../../digests/archive.mjs';
 import {validateClipsArchive} from '../../clips/archive.mjs';
 import {validateForwards} from '../../forwards/archive.mjs';
 import {validateRecaps} from '../../recaps/archive.mjs';
@@ -59,6 +60,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  await validateReadableExportArchive(readTable,manifest,actors,conv);
  index(rows('actors').filter(a=>!a.erased&&a.role!=='app'),a=>a.email,'duplicate_actor_email');for(const a of actors.values())check(a.erased ? string(a.id)&&a.email===null&&a.role===null&&a.active===0 : a.role==='app' ? string(a.id)&&string(a.name)&&a.email===null&&a.active===0 : string(a.id)&&string(a.name)&&a.name.trim()===a.name&&typeof a.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)&&a.email===a.email.toLowerCase()&&['owner','admin','member'].includes(a.role)&&[0,1].includes(a.active),'invalid_product_actor');
  await validateNotificationApps(readTable,manifest,actors,conv);
+ await validateDigests(readTable,manifest,actors,conv,msg,files);
  await validatePersonalWorkspace(readTable,manifest,actors,conv);
  await validateDefaultChannels(readTable,manifest,actors,conv);
  await validateAuditArchive(readTable,manifest,actors);
