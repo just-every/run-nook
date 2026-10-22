@@ -6325,7 +6325,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "a5c7db387375f2e83eaa53d3dbe949e4587cde6cf578beb0a8ecf96837adf335",
+      "sha256": "f631ea69ddc854965a966ce3eaedccc24d73ee036a787c0f8bcdde918584f288",
       "executable": false
     },
     "tests/notification-extension.mjs": {
