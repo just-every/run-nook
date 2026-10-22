@@ -212,7 +212,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-024 — Asynchronous clips, transcripts and call artifacts.** **Status: missing.** Record a clip from phone and desktop, play with captions and seek from transcript; record a consented huddle and inspect its audience. Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
+- **NOOK-024 — Asynchronous clips, transcripts and call artifacts.** **Status: missing.** Record a clip on a phone and a desktop viewport (browser fake media device), play it, seek from transcript cues, add and correct a transcript with history; an outsider is refused; simulate a failed upload and see retry; export, delete and hold without losing policy state.
 
   Current evidence: No implementing source/test; journey pending.
 
@@ -256,7 +256,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: `src/scheduled/service.ts`; `src/scheduled/runner.ts`; `src/scheduled/files.ts`; `src/scheduled/time.mjs`; `src/scheduled/ScheduleEditor.tsx`; `src/scheduled/ScheduledView.tsx`; `tests/scheduled.mjs`; `tests/scheduled-browser.mjs`; `tests/erasure.test.mjs`; `tests/exit-export.test.mjs`. Web/API one-off and recurring sends, DST previews, attachment custody, pause/edit/resume/cancel, restart and exactly-once occurrence commits ship. Delivery rechecks current membership and posting permission; a refusal is visible. Restore pauses schedules for review. Native clients remain NOOK-021’s separate missing implementation.
 
-- **NOOK-035 — Channel recaps and catch-up digests.** **Status: missing.** Request a channel/thread recap and daily unread digest over contradictory discussions and inaccessible channels. Check every factual point against a source link, remove access before delivery, correct a claim and cancel the schedule. No private snippet or invented acceptance survives.
+- **NOOK-035 — Channel recaps and catch-up digests.** **Status: missing.** Request a channel and a thread recap over contradictory discussions and a channel the requester cannot read; check every factual point against its source link; remove the requester's access before showing and see the recap refuse; correct a claim and dismiss a recap, leaving source messages unchanged; no private snippet or invented acceptance survives. Network-edge fake for the provider, as NOOK-036.
 
   Current evidence: No implementing source/test; journey pending.
 
@@ -365,7 +365,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: `src/team/posting.server.ts`; `src/team/posting-policy.ts`; `src/team/PostingSettings.tsx`; `src/platform/storage/messages.ts`; `tests/posting.mjs`; `tests/posting-browser.mjs`; `tests/team-portability.test.mjs`. Web/API sends and edits are atomically fenced; independent thread replies, named members, labeled admin overrides and channel audit are exercised at 1440/390. Scheduled delivery now rechecks posting permission and records refusal under NOOK-034 (`src/scheduled/runner.ts`; `tests/scheduled.mjs`). User groups and their broadcast permissions remain missing; web workspace/channel broadcast policy ships under NOOK-065. NOOK-051 now records labeled overrides and posting-permission changes in the unified admin log. Future app/webhook/workflow/native write doors inherit the fence as named above.
 
-- **NOOK-067 — Forwarding messages and email into conversations.** **Status: missing.** Forward a public-channel message with a note into a DM on desktop and phone and see author, source and note. Forward a private-channel message to a public channel as Link only: a public member without private access sees attribution but no body, attachment or thread, and the link refuses them; forward it as Show message and see the disclosure preview and audit entry. Set owner policy to link-only and see Show message refused. Delete the source and see each forwarded copy tombstoned. Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
+- **NOOK-067 — Forwarding messages and email into conversations.** **Status: missing.** Forward a public message with a note into a DM on desktop and phone and see author, source and note; forward a private message into a public channel as Link only (public member sees attribution, no body, attachment, excerpt or thread, and the link refuses them) and as Show message (disclosure preview and audit entry); owner policy link-only refuses Show message; delete the source and see each forwarded copy tombstoned.
 
   Current evidence: No implementing source/test; journey pending.
 
@@ -407,9 +407,9 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-077 — Final catch-up import at cutover.** **Status: partial.** Import a Friday export of a Slack Pro test workspace, with member grants for its private channels and DMs. Over the weekend in Slack, post a new root message and a reply to an imported thread, edit one imported message, delete another, add a reaction, create a channel, start a new DM between two consenting members, add a member and create a Slack Connect channel with a partner. On Monday morning, before the delta pass, post native Nook replies in one imported thread. Run the final delta pass at the scheduled cutover time: each Slack change appears exactly once; the edit shows as a new imported revision with the earlier one in its history; the deleted message is tombstoned; the reaction, the new channel and the DM are present, and the DM is visible only to its two members; the new member appears in the invitation preview and is invited; the thread interleaves imported and native replies in time order with native ones marked; no one receives an alert, unread, Attention item or follow for imported items; and every native item is unchanged. The new Slack Connect channel appears in the NOOK-076 preview and keeps the checklist open until it has a disposition. Run the same pass again: it adds nothing. Revoke the grant covering one private channel and delete a message there in Slack: the next pass counts that channel as `unverified` with its reason and leaves the imported message intact. Force a Slack error during a scheduled final pass: the invitations wait and the owner sees the failure. The cutover report shows "imported through" the cutover time with per-pass counts, and undoing the last pass removes only its additions and revisions while the native replies remain.
+- **NOOK-077 — Final catch-up import at cutover.** **Status: partial.** Friday export imported; Monday export holds a new root, a reply to an imported thread, an edited and a deleted message, a reaction, a new channel, a new DM and a new member; native replies posted in between; run the pass: each change once, edit as new revision, deleted tombstoned only for a proven-complete range, DM only to its two members, no alerts/unread/follows, native items unchanged; rerun adds nothing; a range the export does not cover is `unverified`; undo removes only the pass's additions.
 
-  Current evidence: `src/imports/ids.mjs`; `src/imports/door.ts`; `tests/slack-import/journey.mjs`. Imported records get deterministic IDs from their Slack source identity, an interrupted import resumes, a second apply of the same upload is refused and guarded undo preserves native activity; delta passes from a later export or grants, Slack-side edits as revisions, deletion tombstones with `unverified` accounting, imported/native thread interleaving, the "imported through" report and the scheduled one-action switch are missing.
+  Current evidence: `src/imports/ids.mjs`; `src/imports/door.ts`; `tests/slack-import/journey.mjs`. Existing deterministic source identities, resumable import, unchanged-record comparison and guarded undo; export-ZIP delta revisions, completeness tombstones, verification accounting, interleaving and imported-through report remain unproved.
 
 - **NOOK-078 — Push from owned installations to the store apps.** **Status: missing.** Install Nook on a fresh Cloudflare account that is not the publisher's, run setup and see the gateway registration, key fingerprint and last acknowledgment in doctor. Sign the store-published iOS and Android apps in through NOOK-074 and run NOOK-021's 500-event delivery-bar journey from that installation: it meets the bar. Capture every request the gateway receives during the run: none contains message text, a sender or conversation name, a file name or a badge count. Block the gateway for 10 minutes during the run: the affected events are recorded as `provider-unconfirmed` with reason `gateway`; the owner report, the admin health view and doctor name the gateway outage; when the block lifts, delivery resumes with no event displayed twice; and a call invite whose 30-second TTL lapsed stays `provider-unconfirmed`. Uninstall the app on one phone and see its token retired. Revoke the installation's gateway registration: pushes stop and doctor says why; re-register and they resume. Repeat a reduced 50-event journey in owner-credential mode with apps self-built and signed by the buyer's own Apple and Google accounts: setup rejects a wrong `.p8` key and accepts the right one, and a capture shows no request reaching the gateway. The published subprocessor list names the gateway with its region, availability objective, price and terms. Inherited: NOOK-072's native alerts and badges are counted here.
 
@@ -450,3 +450,35 @@ The statuses and citations below match the Status table in this revision of CONT
   Current evidence: No implementing source/test; journey pending.
 
 **82 clauses: 31 done, 19 partial, 32 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+
+- **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-082 — Scheduled forwarding.** **Status: missing.** Forward with optional scheduled time; forwarding needs posting permission in each destination at delivery.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-083 — External shared-channel forwarding.** **Status: missing.** Forwarding into an external shared channel needs both organizations' policies.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-084 — Scheduled catch-up digests.** **Status: missing.** Request a daily unread digest over contradictory discussions and inaccessible channels. Check every factual point against a source link, remove access before delivery, correct a claim and cancel the schedule. No private snippet or invented acceptance survives. Approve, cancel, quiet-time deferral, access removed before delivery sends nothing.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-085 — Call recordings and consent artifacts.** **Status: missing.** Record a consented huddle and inspect its audience. Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-086 — Suggested AI clip summaries.** **Status: missing.** AI summaries cite timestamps and remain suggestions.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-087 — Provider-generated transcripts.** **Status: missing.** Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
+
+  Current evidence: No implementing source/test; journey pending.
+
+- **NOOK-088 — Slack grant and app delta reads.** **Status: missing.** Import a Friday export of a Slack Pro test workspace, with member grants for its private channels and DMs. Over the weekend in Slack, post a new root message and a reply to an imported thread, edit one imported message, delete another, add a reaction, create a channel, start a new DM between two consenting members, add a member and create a Slack Connect channel with a partner. On Monday morning, before the delta pass, post native Nook replies in one imported thread. Run the final delta pass at the scheduled cutover time: each Slack change appears exactly once; the edit shows as a new imported revision with the earlier one in its history; the deleted message is tombstoned; the reaction, the new channel and the DM are present, and the DM is visible only to its two members; the new member appears in the invitation preview and is invited; the thread interleaves imported and native replies in time order with native ones marked; no one receives an alert, unread, Attention item or follow for imported items; and every native item is unchanged. The new Slack Connect channel appears in the NOOK-076 preview and keeps the checklist open until it has a disposition. Run the same pass again: it adds nothing. Revoke the grant covering one private channel and delete a message there in Slack: the next pass counts that channel as `unverified` with its reason and leaves the imported message intact. Force a Slack error during a scheduled final pass: the invitations wait and the owner sees the failure. The cutover report shows "imported through" the cutover time with per-pass counts, and undoing the last pass removes only its additions and revisions while the native replies remain.
+
+  Current evidence: No implementing source/test; journey pending.
