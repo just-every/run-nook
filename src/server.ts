@@ -1,3 +1,4 @@
+import {forwardingRoute} from './forwards/server'
 import {recapRoute} from './recaps/server'
 import {aiRoute} from './ai-search/server'
 import {isAppRequest,appRequest} from './notification-apps/door'
@@ -70,6 +71,7 @@ api.all('/api/*', async c => {
  const session=await repository.authenticated(req.headers),exit=await readableExportRoute(session,req,input);if(exit)return exit
  const team=await teamRoute(session,req,input);if(team)return team
  if(['ai-search','recaps'].includes(action)&&req.headers.has('signature-agent'))fail(403,'AI search is not available to agents')
+ const forwarded=await forwardingRoute(session,req.method,p,input as Record<string,unknown>);if(forwarded)return c.json(forwarded)
  const recap=await recapRoute(session,req.method,p,input as Record<string,unknown>);if(recap)return c.json(recap)
  const ai=await aiRoute(session,req.method,p,input as Record<string,unknown>);if(ai)return c.json(ai)
  const apps=await manageApps(session,req.method,p,input as Record<string,unknown>);if(apps)return c.json(apps)

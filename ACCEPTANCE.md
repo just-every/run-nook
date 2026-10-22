@@ -365,9 +365,11 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: `src/team/posting.server.ts`; `src/team/posting-policy.ts`; `src/team/PostingSettings.tsx`; `src/platform/storage/messages.ts`; `tests/posting.mjs`; `tests/posting-browser.mjs`; `tests/team-portability.test.mjs`. Web/API sends and edits are atomically fenced; independent thread replies, named members, labeled admin overrides and channel audit are exercised at 1440/390. Scheduled delivery now rechecks posting permission and records refusal under NOOK-034 (`src/scheduled/runner.ts`; `tests/scheduled.mjs`). User groups and their broadcast permissions remain missing; web workspace/channel broadcast policy ships under NOOK-065. NOOK-051 now records labeled overrides and posting-permission changes in the unified admin log. Future app/webhook/workflow/native write doors inherit the fence as named above.
 
-- **NOOK-067 — Forwarding messages and email into conversations.** **Status: missing.** Forward a public message with a note into a DM on desktop and phone and see author, source and note; forward a private message into a public channel as Link only (public member sees attribution, no body, attachment, excerpt or thread, and the link refuses them) and as Show message (disclosure preview and audit entry); owner policy link-only refuses Show message; delete the source and see each forwarded copy tombstoned.
+- **NOOK-067 — Forwarding messages and email into conversations.** **Status: done.** Forward a public message with a note into a DM on desktop and phone and see author, source and note; forward a private message into a public channel as Link only (public member sees attribution, no body, attachment, excerpt or thread, and the link refuses them) and as Show message (disclosure preview and audit entry); owner policy link-only refuses Show message; delete the source and see each forwarded copy tombstoned.
 
   Current evidence: No implementing source/test; journey pending.
+
+  Current evidence: `tests/notification-apps.mjs` — “NOOK-067 forwards protect source audiences, disclose copies and tombstone every descendant” (push Verify, verify (integration tokens)): public-to-DM author/source/note, private Link-only body/file/thread refusal and source-link denial, Show disclosure/audit, owner policy and posting fence, source edits and recursive source/author tombstones, multiple destinations/thread, private copied bytes and export/restore; `tests/integration-tokens-browser.mjs` (forwardBrowser, 1440/390 dialog, DM copy, private Link refusal, disclosure, shown copy, link-only policy and tombstone); `evidence/forwards/`. No holds exist; erasure proceeds for every copy. Labels inherit NOOK-040.
 
 - **NOOK-068 — Safe link previews and app unfurls.** **Status: missing.** Paste a public article URL and see title, description and image preview with the image served from Nook; paste a YouTube and a Loom link and see their oEmbed previews. Paste links resolving to 127.0.0.1, 10.0.0.5 and 169.254.169.254 and a public URL that redirects to an internal address, and confirm through the fetch log and a listening internal server that nothing internal is contacted. An installed app with a claimed domain unfurls its own link once the author approves. The author removes a preview and it stays removed after reload on another device; an admin denies a domain and its links get no preview.
 
@@ -449,7 +451,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**82 clauses: 31 done, 19 partial, 32 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**90 clauses: 33 done, 19 partial, 38 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
 
 - **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 

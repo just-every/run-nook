@@ -1,3 +1,6 @@
+import {ForwardDialog} from '../forwards/ForwardDialog'
+import {ForwardCard} from '../forwards/ForwardCard'
+import '../forwards/forwards.css'
 import {BroadcastRecipients} from '../broadcast/BroadcastRecipients'
 import {CollectionActions,SaveFileAction} from './CollectionActions'
 import {SlackHistory} from '../imports/SlackHistory'
@@ -19,10 +22,10 @@ type Props={message:Message;user:Person;canErase?:boolean;thread?:boolean;contin
 const tool=(label:string,icon:ReactNode,onClick:()=>void)=><button type="button" className="icon-button" title={label} onClick={onClick}>{icon}<span className="sr-only">{label}</span></button>
 // The less common verbs sit behind one menu. It stays open while Edit or Delete is up so focus can return to the item.
 // The menu stays within the viewport, including a narrow thread pane or phone.
-function MoreMenu({message,canEdit,canErase,eraseTrigger,onEdit,onDelete,onErase}:{message:Message;canEdit:boolean;canErase:boolean;eraseTrigger:React.RefObject<HTMLButtonElement|null>;onEdit:()=>void;onDelete:()=>void;onErase:()=>void}) {
+function MoreMenu({message,canEdit,canErase,eraseTrigger,onEdit,onDelete,onErase,onForward}:{message:Message;canEdit:boolean;canErase:boolean;eraseTrigger:React.RefObject<HTMLButtonElement|null>;onEdit:()=>void;onDelete:()=>void;onErase:()=>void;onForward:()=>void}) {
  const menu=useRef<HTMLDetailsElement>(null),[open,setOpen]=useState(false),[position,setPosition]=useState({top:64,right:16})
  useDismiss(menu)
- return <details className="message-more menu" ref={menu} onToggle={e=>{setOpen(e.currentTarget.open);if(e.currentTarget.open){const box=e.currentTarget.getBoundingClientRect();setPosition({top:Math.max(64,Math.min(box.bottom+6,window.innerHeight-320)),right:Math.max(16,Math.min(window.innerWidth-box.right,window.innerWidth-236))})}}}><summary className="icon-button" title="More" aria-label={'More actions for message by '+message.authorName}><IconMore/></summary><div className="popover inline" style={{'--more-top':position.top+'px','--more-right':position.right+'px'} as React.CSSProperties}>{open&&<CollectionActions message={message}/>} {canEdit&&<><button type="button" onClick={onEdit}>Edit</button><button type="button" onClick={onDelete}>Delete</button></>}{canErase&&<button type="button" className="erase-item" ref={eraseTrigger} onClick={onErase}>Erase message</button>}</div></details>
+ return <details className="message-more menu" ref={menu} onToggle={e=>{setOpen(e.currentTarget.open);if(e.currentTarget.open){const box=e.currentTarget.getBoundingClientRect();setPosition({top:Math.max(64,Math.min(box.bottom+6,window.innerHeight-320)),right:Math.max(16,Math.min(window.innerWidth-box.right,window.innerWidth-236))})}}}><summary className="icon-button" title="More" aria-label={'More actions for message by '+message.authorName}><IconMore/></summary><div className="popover inline" style={{'--more-top':position.top+'px','--more-right':position.right+'px'} as React.CSSProperties}>{open&&<CollectionActions message={message}/>} <button type="button" onClick={onForward}>Forward</button>{canEdit&&<><button type="button" onClick={onEdit}>Edit</button><button type="button" onClick={onDelete}>Delete</button></>}{canErase&&<button type="button" className="erase-item" ref={eraseTrigger} onClick={onErase}>Erase message</button>}</div></details>
 }
 // A tap on the message itself (not a control, not a text selection) focuses it, which opens the tray on touch screens.
 const focusRow=(event:MouseEvent<HTMLElement>)=>{
@@ -31,17 +34,19 @@ const focusRow=(event:MouseEvent<HTMLElement>)=>{
  event.currentTarget.focus({preventScroll:true})
 }
 export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDelete,onRemove,thread=false,canErase=false,continued=false,outcomes=[],onOutcome}:Props) {
- const team=useTeamBindings(),[erasing,setErasing]=useState(false),eraseTrigger=useRef<HTMLButtonElement|null>(null)
+ const team=useTeamBindings(),[erasing,setErasing]=useState(false),[forwarding,setForwarding]=useState(false),eraseTrigger=useRef<HTMLButtonElement|null>(null)
  const reactions=useReactions(m.id,team.request,team.revision,team.accessEpoch,!m.immutable&&!m.deleted,m.reactions)
  const mine=!m.immutable&&m.author===user.id
  const previews=useInlinePreviews(user.id,m.conversation)
  const time=new Date(m.created)
  return <article className={'message reveal-host'+(continued?' continued':'')+(m.deleted?' deleted':'')} id={(thread?'thread-message-':'message-')+m.id} data-message={m.id} data-immutable={m.immutable?'true':undefined} data-sequence={m.sequence} tabIndex={-1} onClick={focusRow}>
+  {forwarding&&<ForwardDialog message={m} onClose={()=>setForwarding(false)}/>}
   {erasing&&<ErasureDialog kind={m.retainedSource==='native'?'message':m.immutable?'imported-message':'message'} target={m.id} returnFocus={eraseTrigger.current} request={team.request} onClose={()=>setErasing(false)} onChanged={()=>{}}/>}
   {continued?<span className="avatar-gutter" aria-hidden="true"/>:<Avatar person={{id:m.author??m.id,name:m.authorName}}/>}
   <div className="message-content"><div className="message-meta"><strong className={continued?'sr-only':undefined}>{m.authorName}</strong>{m.app&&<span className="message-via">App</span>}{m.via&&<span className="message-via">via {m.via}</span>}<time className={continued?'reveal':undefined} dateTime={m.created} title={time.toLocaleString([],{dateStyle:'full',timeStyle:'short'})}>{time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>{m.adminOverride&&!m.deleted&&<span className="edited">Admin override</span>}{m.immutable&&<span className="edited">{m.retainedSource?'Retained body · read only':'Imported · read only'}</span>}{m.version>1&&!m.deleted&&!m.retainedSource&&<span className="edited">edited</span>}</div>
    {m.deleted?<p className="message-body">Message deleted</p>:m.immutable?<p className="message-body">{m.slack?.text??m.body}</p>:<div className="message-body"><SafeMarkdown text={m.body}/></div>}
    {!m.deleted&&<>
+    <ForwardCard message={m}/>
     {m.broadcast&&<BroadcastRecipients message={m.id} broadcast={m.broadcast}/>}
     {(m.urgent||!!m.notified?.length)&&<div className="message-routing">{m.urgent&&<strong>Urgent</strong>}{!!m.notified?.length&&<span>Notified: {m.notified.map(person=>person.name).join(', ')}</span>}{m.urgent&&m.urgentReason&&<span className="message-urgent-reason">{m.urgentReason}</span>}</div>}
     {!thread&&onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}
@@ -55,7 +60,7 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
    {!m.immutable&&<ReactionPicker reactions={reactions}/>}
    {!m.parent&&!thread&&tool('Open thread',<IconReply/>,()=>onThread(m))}
    {!m.immutable&&<>{tool('Ask someone',<IconAsk/>,()=>onAsk(m))}{tool('Record decision',<IconDecide/>,()=>onDecision(m))}</>}
-   <MoreMenu message={m} canEdit={mine} canErase={canErase} eraseTrigger={eraseTrigger} onEdit={()=>onEdit(m)} onDelete={()=>onDelete(m)} onErase={()=>setErasing(true)}/>
+   <MoreMenu message={m} canEdit={mine} canErase={canErase} eraseTrigger={eraseTrigger} onEdit={()=>onEdit(m)} onDelete={()=>onDelete(m)} onErase={()=>setErasing(true)} onForward={()=>setForwarding(true)}/>
   </div>}
  </article>
 }

@@ -1,0 +1,3 @@
+.forward-card{border-left:3px solid var(--line);margin:12px 0;padding:0 14px;overflow-wrap:anywhere;min-width:0}.forward-card>p{font-size:.9rem;color:var(--muted)}.forward-destination{display:flex;align-items:center;gap:10px;margin:8px 0;overflow-wrap:anywhere}.forward-destination input{width:auto;flex:none}dialog .dialog-members{max-height:220px;overflow:auto}dialog fieldset{min-width:0;border:0;padding:0}dialog [aria-label="Disclosure preview"]{overflow-wrap:anywhere}
+
+.nook-app dialog.forward-dialog fieldset{max-height:none;overflow:visible}.nook-app dialog.forward-dialog .dialog-members{max-height:140px;margin:0;overflow:auto}.forward-destination{flex:none;min-height:32px}

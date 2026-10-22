@@ -3,7 +3,7 @@ import {cancelDoorPreview} from './door-custody'
 import {authorizeWork} from './authorization'
 import type {Context} from '../../platform/storage/context'
 import {fenceService,type Sql} from './portability'
-import {files,sql,fencedRows} from './statements'
+import {files,messages,sql,fencedRows} from './statements'
 import {eraseImportedTarget,personValues} from './import-commit'
 import {importSelection,selectedImportBlobs} from './import-selection'
 import {cancelPreview,cancelUnappliedReviews} from './import-preview'
@@ -22,6 +22,7 @@ export async function importedStep(c:Context,work:any,f:Awaited<ReturnType<typeo
  for(const upload of uploads)statements.push(sql('INSERT OR IGNORE INTO nook_erasure_blobs VALUES(?,?)',work.operation,upload.object_key),sql('INSERT OR IGNORE INTO nook_object_deletes(object_key,created) VALUES(?,?)',upload.object_key,Date.now()),sql("INSERT OR IGNORE INTO nook_erasure_blobs SELECT operation,? FROM nook_erasure_work WHERE (kind='imported-author' AND target=?) OR (kind='imported-message' AND target=?)",upload.object_key,actor?actor.job+':'+actor.source_id:null,record?.id??null),sql("UPDATE nook_import_uploads SET state='discarded' WHERE id=?",upload.id))
  if(record&&await c.one('SELECT 1 FROM nook_notes WHERE deleted=0 AND thread=? LIMIT 1',[record.id])){const scope=await authorizeWork(c,work),redaction=[...await f.invalidate(),...await eraseNoteRows(c,f,'thread=?',[record.id])];await c.batch(redaction.map(s=>c.sql(s.sql,...s.params)),scope.conversation,scope.condition,scope.params);return true}
  if(record){
+  const copies=await c.rows<{message:string}>('SELECT message FROM nook_forwards WHERE source=?',[record.id]);statements.push(...await messages(c,f,work.operation,copies.map(r=>r.message)))
   statements.push(...await eraseNoteRows(c,f,'thread=?',[record.id]))
   for(const table of ['nook_thread_follows','nook_thread_unfollows','nook_thread_reads'])statements.push(...await fencedRows(c,f,table,['user','message'],'message=?',[record.id]),sql(`DELETE FROM ${table} WHERE message=?`,record.id))
   statements.push(...await f.row('nook_import_records',{id:record.id}),sql('INSERT INTO nook_guard VALUES(?,1)','undo:'+record.id),sql("UPDATE nook_import_objects SET state='deleted' WHERE object_key IN (SELECT object_key FROM nook_attachments WHERE message=?)",record.id),sql('DELETE FROM nook_import_files WHERE message=?',record.id),...await files(c,f,work.operation,'message=?',[record.id]),sql('DELETE FROM nook_guard WHERE id=?','undo:'+record.id),sql("DELETE FROM nook_search WHERE message=? AND source='imported'",record.id),sql('INSERT INTO nook_erased_import_messages VALUES(?,?,?,?,?,?)',record.id,record.job,record.conversation,record.parent,record.sequence,record.source_timestamp),sql('DELETE FROM nook_import_records WHERE id=?',record.id),sql("UPDATE nook_erasure_work SET phase='blobs' WHERE kind='imported-message' AND target=?",record.id),sql('DELETE FROM nook_import_effect_revisions WHERE destination=? AND kind=? AND id=?',job.owner,'message',record.id),sql("INSERT INTO nook_search(nook_search) VALUES('optimize')"))

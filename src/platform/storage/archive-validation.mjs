@@ -1,3 +1,4 @@
+import {validateForwards} from '../../forwards/archive.mjs';
 import {validateRecaps} from '../../recaps/archive.mjs';
 import {validateAiSearch} from '../../ai-search/archive.mjs';
 import {validateNotificationApps} from '../../notification-apps/archive.mjs';
@@ -70,6 +71,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
  await validateAiSearch(readTable,manifest,actors,conv,msg,imported);
  await validateRecaps(readTable,manifest,actors,conv,msg,imported);
+ await validateForwards(readTable,manifest,actors,conv,msg,imported,files);
  await validateSavedArchive(readTable,{manifest,actors,conversations:conv,messages:msg,imported,attachments:files});
  const deliveryPreferences=await readTable('nook_notify_preferences');for(const p of deliveryPreferences){check((p.thread_badge===undefined||['all','mentions'].includes(p.thread_badge))&&(p.push_initialized===undefined||[0,1].includes(p.push_initialized))&&(p.mobile_when_active===undefined||['inactive','always'].includes(p.mobile_when_active))&&(p.mobile_delay_minutes===undefined||[0,1,2,5,10,15,30].includes(p.mobile_delay_minutes)),'invalid_thread_delivery_preferences')}
  const notifyRows=manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_conversation_notify')?[]:await readTable('nook_conversation_notify');
@@ -153,7 +155,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
   check((!a.erased||/^[a-f0-9]{64}$/.test(a.intent_digest))&&string(a.id)&&participant(a.conversation,a.author)&&['staged','attached','deleted'].includes(a.state)&&integer(a.size)&&integer(a.expires)&&time(a.created)&&string(a.intent),'invalid_attachment');
   const m=msg.get(a.message),r=imported.get(a.message);if(a.message)check(m?.conversation===a.conversation||r?.conversation===a.conversation,'invalid_attachment_binding');if(m)check(m.author===a.author&&(m.deleted?a.state==='deleted':JSON.parse(m.payload).attachments[a.position]===a.id),'invalid_reverse_attachment');if(r&&!r.erased)check(sourceBindings.has(a.id)&&(['campfire','mattermost'].includes(sourceObject(r.source_record).nookSource)?slackDomains.has(r.job):jobs.get(r.job).owner===a.author)&&a.state==='attached','invalid_import_attachment');
   check(a.state==='attached'?!!a.message:a.state==='staged'?a.message===null:true,'invalid_attachment_state');
-  if(a.state==='deleted')check(a.object_key===null&&a.name===''&&a.mime==='application/octet-stream'&&a.size===0&&a.sha256===null,'deleted_attachment_retained');else check(a.size>=1&&a.size<=25*1024*1024&&string(a.name)&&a.name.length<=120&&a.name.trim()===a.name&&!/[\x00-\x1f\x7f/\\<>:"|?*]/.test(a.name)&&(['text/plain','image/png','image/jpeg','application/pdf'].includes(a.mime)||imported.get(a.message)&&['campfire','mattermost'].includes(sourceObject(imported.get(a.message).source_record).nookSource)&&slackDomains.has(imported.get(a.message).job)&&/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(a.mime))&&typeof a.object_key==='string'&&a.object_key.startsWith('private/')&&/^[a-f0-9]{64}$/.test(a.sha256),'invalid_object_metadata');
+  if(a.state==='deleted')check(a.object_key===null&&a.name===''&&a.mime==='application/octet-stream'&&a.size===0&&a.sha256===null,'deleted_attachment_retained');else check(a.size>=1&&a.size<=25*1024*1024&&string(a.name)&&a.name.length<=120&&a.name.trim()===a.name&&!/[\x00-\x1f\x7f/\\<>:"|?*]/.test(a.name)&&(['text/plain','image/png','image/jpeg','application/pdf'].includes(a.mime)||(await readTable('nook_forward_files')).some(f=>f.attachment===a.id)&&/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(a.mime)||imported.get(a.message)&&['campfire','mattermost'].includes(sourceObject(imported.get(a.message).source_record).nookSource)&&slackDomains.has(imported.get(a.message).job)&&/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(a.mime))&&typeof a.object_key==='string'&&a.object_key.startsWith('private/')&&/^[a-f0-9]{64}$/.test(a.sha256),'invalid_object_metadata');
  }
 }
 async function validateDefaultChannels(read,manifest,actors,conversations){

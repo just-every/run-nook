@@ -1,3 +1,4 @@
+import {forwardExport} from '../forwards/export'
 import {noteExportDatasets} from '../notes/export'
 import {publicMattermostRecord} from '../imports/mattermost-public'
 import {publishedImport} from '../imports/projection'
@@ -11,6 +12,8 @@ const source=`JOIN nook_imports j ON j.id=r.job AND j.state='complete' AND ${pub
 // readers sort timestamps/version numbers for display, never infer chronology.
 export const datasets:Dataset[]=[
  ...noteExportDatasets,
+ forwardExport,
+ {name:'forward_files',sql:`SELECT json_array(f.conversation,f.attachment) AS _key,f.* FROM nook_forward_files f WHERE ${scoped('f')}`},
  {name:'recap_feedback',sql:`SELECT json_array(f.conversation,f.id) AS _key,f.* FROM nook_recap_feedback f WHERE ${scoped('f')} AND f.user=(SELECT owner FROM job)`},
  {name:'ai_search_feedback',sql:`SELECT json_array(f.conversation,f.id) AS _key,f.* FROM nook_ai_feedback f WHERE ${scoped('f')} AND f.user=(SELECT owner FROM job)`},
  {name:'notification_apps',sql:`SELECT json_array(app.conversation,app.id) AS _key,app.conversation,app.id,app.name,app.creator,app.created,app.state,app.ended FROM nook_notification_apps app WHERE ${scoped('app')}`},
