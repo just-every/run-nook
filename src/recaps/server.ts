@@ -3,10 +3,10 @@ import {fail,text} from '../family/team-chat/domain'
 import {fullMember} from '../team/access'
 import {configuration,state} from '../ai-search/settings'
 import {unseal} from '../ai-search/secret'
-import {authorize,rangeInput,retrieve} from './range'
+import {authorize,rangeInput,retrieve,type Range} from './range'
 import {digest,selection,sign,verify,type Receipt,type Selection} from './receipt'
 async function bounded(response:Response){const reader=response.body?.getReader();let bytes=0,body='';const decoder=new TextDecoder();if(reader)for(;;){const {value,done}=await reader.read();if(done)break;bytes+=value.length;if(bytes>131072){await reader.cancel();throw Error('oversize')}body+=decoder.decode(value,{stream:true})}return JSON.parse(body+decoder.decode())}
-async function show(c:Context,receipt:Receipt,token:string){
+export async function showRecap(c:Context,receipt:Receipt,token:string){
  const current=await retrieve(c,receipt.range),cfg=await configuration(c)
  if(!cfg.enabled||cfg.version!==receipt.version)return {state:'off',claims:[],outcomes:[]}
  const recap=await digest(token)
@@ -20,12 +20,12 @@ async function show(c:Context,receipt:Receipt,token:string){
  await authorize(c,receipt.range.conversation)
  return {state:claims.length?'answered':'abstain',receipt:token,range:receipt.range,created:receipt.created,claims,outcomes:current.outcomes,corrections,omissions:current.omissions,omitted:current.omitted+receipt.points.length-claims.length,more:current.more,notice:'Quoted source reports may conflict or be incomplete. Only recorded decisions and accepted obligations below describe outcomes. Shared and external conversations are excluded, including omission counts. No recap cache or embeddings.'}
 }
-async function request(c:Context,input:Record<string,unknown>){
- const range=await rangeInput(c,input),cfg=await configuration(c),credential=await c.one<{sealed:string}>('SELECT sealed FROM nook_ai_secrets WHERE id=1')
+export async function requestRecap(c:Context,input:Record<string,unknown>,authorizedRange?:Range,now=Date.now()){
+ const range=authorizedRange??await rangeInput(c,input),cfg=await configuration(c),credential=await c.one<{sealed:string}>('SELECT sealed FROM nook_ai_secrets WHERE id=1')
  if(!cfg.enabled||!credential)return {state:'off',claims:[],outcomes:[]}
  const before=await retrieve(c,range)
  if(!before.passages.length)return {state:'abstain',range,claims:[],outcomes:before.outcomes,omissions:before.omissions,omitted:before.omitted,notice:'No supporting passages in this range; no provider call made.'}
- const day=new Date().toISOString().slice(0,10)
+ const day=new Date(now).toISOString().slice(0,10)
  try{await c.batch([c.sql('INSERT INTO nook_ai_calls VALUES(?,1) ON CONFLICT(day) DO UPDATE SET calls=calls+1',day)],range.conversation,`${fullMember('?')} AND EXISTS(SELECT 1 FROM nook_ai_settings WHERE id=1 AND enabled=1 AND version=?) AND COALESCE((SELECT calls FROM nook_ai_calls WHERE day=?),0)<? AND NOT EXISTS(SELECT 1 FROM nook_notification_sharing WHERE conversation=? AND state<>'local')`,[c.uid,cfg.version,day,cfg.daily_cap,range.conversation])}catch{await authorize(c,range.conversation);return {state:'capped',claims:[],outcomes:[]}}
  let output:any
  try{
@@ -41,17 +41,17 @@ async function request(c:Context,input:Record<string,unknown>){
    const point=await selection(now,claim.quote,claim.question===true);if(!points.some(p=>p.id===point.id&&p.start===point.start&&p.length===point.length))points.push(point)
   }
  }
- const receipt={range,points,version:cfg.version,created:Date.now()},token=await sign(c,receipt)
- return show(c,receipt,token)
+ const receipt={range,points,version:cfg.version,created:now},token=await sign(c,receipt)
+ return showRecap(c,receipt,token)
 }
 export async function recapRoute(c:Context,method:string,p:string[],input:Record<string,unknown>){
  if(p[1]!=='recaps')return null
  if(!await c.one(`SELECT 1 WHERE ${fullMember('?')}`,[c.uid]))fail(403,'Recaps are for signed-in members')
  if(p.length===2&&method==='GET'){const s=await state(c);return {state:s.state,provider:s.provider,passageLimit:8,byteLimit:32768}}
- if(p.length===2&&method==='POST')return request(c,input)
+ if(p.length===2&&method==='POST')return requestRecap(c,input)
  if(method!=='POST'||p.length!==3||!['show','feedback'].includes(p[2]))fail(404,'Not found')
  const receipt=await verify(c,input.receipt),token=input.receipt as string
- const shown=await show(c,receipt,token)
+ const shown=await showRecap(c,receipt,token)
  if(p[2]==='show')return shown
  if(shown.state!=='answered')fail(404,'Recap unavailable')
  const kind=input.kind;if(!['correction','dismissal'].includes(String(kind)))fail(400,'Choose correction or dismissal')

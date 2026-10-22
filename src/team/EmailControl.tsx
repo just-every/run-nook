@@ -1,3 +1,4 @@
+import {DigestSettings} from '../digests/DigestSettings'
 import {QuietSettings} from '../notify/QuietSettings'
 import {useEffect,useState} from 'react'
 import type {TeamRequest} from './types'
@@ -24,5 +25,5 @@ export function EmailControl({request,initial,localDevelopment=false}:{request:T
   {settings.workspace?.sending==='not-set-up'&&<p className="email-setup">Email sending is not set up. <a href="/docs/updating#deploy-from-the-owners-cloudflare-account">Set up mail</a></p>}
   {settings.workspace?.notDelivered&&<p className="email-problem">Workspace: {settings.workspace.notDelivered.count} {settings.workspace.notDelivered.count===1?'email':'emails'} not delivered in the last 7 days; latest: {why(settings.workspace.notDelivered)}.</p>}
   <p className="email-notice" role="status">{notice}</p>
- </section><QuietSettings request={request}/></>
+ </section><QuietSettings request={request}/><DigestSettings request={request}/></>
 }

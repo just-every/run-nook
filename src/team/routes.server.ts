@@ -1,3 +1,4 @@
+import {digestRoute} from '../digests/server'
 import {auditRoute} from '../audit/server'
 import {revisions as importedRevisions} from '../imports/revisions'
 import {read} from '../platform/storage/read'
@@ -42,6 +43,7 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
   if(parts.length===2&&method==='GET')return Response.json(await listReminders(c,url.searchParams.get('after')??''))
   if(parts.length===3&&method==='PATCH')return Response.json(await changeReminder(c,parts[2],input))
  }
+ if(parts[1]==='digests'){return Response.json(await digestRoute(c,method,parts,input))}
  if(parts[1]==='scheduled'){
   if(parts.length===4&&parts[3]==='occurrences'&&method==='GET')return Response.json(await scheduleOccurrences(c,parts[2],url.searchParams.get('after')??''))
   if(parts.length===2&&method==='GET')return Response.json(await listSchedules(c,url.searchParams.get('after')??''))

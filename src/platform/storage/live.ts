@@ -1,3 +1,4 @@
+import {drainDigests} from '../../digests/runner'
 import {drainReminders} from '../../reminders/runner'
 import {drainSchedules} from '../../scheduled/runner'
 import {drainSavedReminders} from '../../team/saved-reminders.server'
@@ -55,6 +56,7 @@ export class ChatHub extends DurableObject<StorageBindings>{
   let personalNext:number|null=null;try{personalNext=await drainReminders(this.env)}catch{console.error('Reminder scheduling failed');personalNext=Date.now()+60_000}
   let scheduleNext:number|null=null;try{scheduleNext=await drainSchedules(this.env)}catch{console.error('Scheduled message pass failed');scheduleNext=Date.now()+60_000}
   let reminderNext:number|null=null;try{reminderNext=await drainSavedReminders(this.env)}catch{console.error('Saved reminder scheduling failed');reminderNext=Date.now()+60_000}
+  let digestNext:number|null=null;try{digestNext=await drainDigests(this.env)}catch{console.error('Digest scheduling failed');digestNext=Date.now()+60000}
   await this.broadcast();await recoverDeletes(this.env);await drainBlobs(this.env);await continueErasures(this.env);
   // C14 email: an away member has no socket, so pending queue rows keep the alarm
   // armed until they are sent, cancelled or given up. The queue lives in D1, so a
@@ -62,7 +64,7 @@ export class ChatHub extends DurableObject<StorageBindings>{
   let next:number|null=null;try{next=await drainNotifications(this.env,mailSend(this.env))}catch(error){console.error('Notification delivery pass failed',error instanceof Error?error.message:'');next=Date.now()+60_000}
   let pushNext:number|null=null;try{pushNext=await drainPush(this.env)}catch{console.error('Push delivery pass failed');pushNext=Date.now()+60_000}
   const live=this.ctx.getWebSockets().length||(await this.env.DB.prepare('SELECT object_key FROM nook_object_deletes UNION ALL SELECT operation FROM nook_erasure_work LIMIT 1').first())?Date.now()+5000:null
-  const at=[live,next,pushNext,reminderNext,scheduleNext,personalNext].filter((value):value is number=>value!==null);if(at.length)await this.soon(Math.max(Math.min(...at)-Date.now(),1000))
+  const at=[live,next,pushNext,reminderNext,scheduleNext,personalNext,digestNext].filter((value):value is number=>value!==null);if(at.length)await this.soon(Math.max(Math.min(...at)-Date.now(),1000))
  }
  async webSocketMessage(socket:WebSocket){await this.deliver(socket,true)}
  // The configured compatibility date lets the runtime complete the close handshake.

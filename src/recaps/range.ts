@@ -1,10 +1,11 @@
+import {retrieveCollection} from './collection'
 import type {Context} from '../platform/storage/context'
 import {fail,text} from '../family/team-chat/domain'
 import {fullMember} from '../team/access'
 import {message,outcomeSelect} from '../platform/storage/read'
 import {publishedImport} from '../imports/projection'
 import {searchFileText} from '../search/files'
-export type Range={conversation:string;thread:string|null;from:string;through:string;unreadAfter:number|null}
+export type Range={conversation:string;thread:string|null;from:string;through:string;unreadAfter:number|null;collection?:Range[]}
 export type Passage={id:string;message:string;conversation:string;parent:string|null;text:string;author:string;at:string;kind:string;name:string;edited:boolean;stale:boolean}
 export async function authorize(c:Context,conversation:string){
  if(!await c.one(`SELECT 1 FROM nook_conversations v WHERE v.id=? AND ${fullMember('?')} AND NOT EXISTS(SELECT 1 FROM nook_notification_sharing s WHERE s.conversation=v.id AND s.state<>'local')`,[conversation,c.uid]))fail(404,'Recap unavailable')
@@ -21,7 +22,8 @@ export async function rangeInput(c:Context,input:Record<string,unknown>):Promise
  const unreadAfter=input.unread?(await c.one<{seq:number}>('SELECT seq FROM nook_reads WHERE conversation=? AND user=?',[conversation,c.uid],conversation))?.seq??0:null
  return {conversation,thread,from,through,unreadAfter}
 }
-export async function retrieve(c:Context,range:Range){
+export async function retrieve(c:Context,range:Range):Promise<{passages:Passage[];outcomes:any[];omissions:{name:string;status:string}[];omitted:number;more:boolean;bytes:number}>{
+ if(range.collection)return retrieveCollection(c,range.collection)
  await authorize(c,range.conversation)
  // The candidate query is scoped by the same current membership and imported
  // publication fence as message(). Every selected source is then read there.
