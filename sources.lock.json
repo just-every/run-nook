@@ -6105,7 +6105,7 @@
       "executable": false
     },
     "tests/exit-export.test.mjs": {
-      "sha256": "645600a66cb9e3c3763384bdb58840fd19293e1001bae046c5209f625e8ca31b",
+      "sha256": "b21c74b37aa94dd19e9d4e9a8a2a454783d5b65ba57d3a7b1a89fbc1ce301142",
       "executable": false
     },
     "tests/fake-account.mjs": {
