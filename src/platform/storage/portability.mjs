@@ -1,3 +1,4 @@
+import {portableSchedule} from '../../scheduled/archive.mjs';
 import {notificationExcludedTables} from '../../notification-apps/archive.mjs';
 import {readableExportExcludedTables} from '../../exit/archive.mjs';
 import {slackExportRow} from '../../imports/archive-objects.mjs';
@@ -10,7 +11,7 @@ export const normalizedPortability={
  derivedTables:['nook_search'],
  // Door history is portable; restored bytes never opt a destination into signed grants.
  importSafety:{nook_ai_settings:{enabled:[0]},ik_door_settings:{enabled:[0]},nook_notification_apps:{state:['reissue'],ended:[null]}},
- importRow(table,row){if(table==='nook_ai_settings')return {...row,enabled:0};if(table==='nook_notification_apps')return {...row,state:'reissue',ended:null};if(table==='nook_quiet_schedules')return {...row,quiet_until:0,next_change:0};return table==='ik_door_settings'?{...row,enabled:0}:row;},
+ importRow(table,row){if(table==='nook_schedules')return portableSchedule(row);if(table==='nook_ai_settings')return {...row,enabled:0};if(table==='nook_notification_apps')return {...row,state:'reissue',ended:null};if(table==='nook_quiet_schedules')return {...row,quiet_until:0,next_change:0};return table==='ik_door_settings'?{...row,enabled:0}:row;},
  // The notification queue is delivery state: a restored installation sends nothing old.
  excludeTables:['nook_ai_secrets','nook_ai_calls',...notificationExcludedTables,'nook_audit_context',...readableExportExcludedTables,'nook_typing','nook_broadcast_presence','nook_read_undo','nook_read_generations','nook_guard','nook_conversion','nook_erasure_work','nook_erasure_blobs','nook_notify_queue','nook_push_devices','nook_push_presence','nook_push_secrets',...teamExcludedTables,...integrationExcludedTables],
  buckets:{FILES:{prefix:'private/',objectReferences:{table:'nook_object_inventory',keyColumn:'object_key'}}},
@@ -23,7 +24,7 @@ export const normalizedPortability={
   if(table==='nook_attachments'&&row.state==='reserved'||table==='nook_imports'&&row.state!=='complete'||table==='nook_object_deletes'||table==='nook_upload_attempts')throw Error('reconcile_pending_object_work_before_export');
   if(table==='nook_actors'&&row.role!=='app'&&(!row.email||!row.role))throw Error('offline_identity_recovery_required');
   if(table==='nook_reminders'&&row.state==='pending')return {...row,state:'paused',reason:'Restored reminder: review a future time before resuming'};
-  if(table==='nook_schedules'&&row.state==='active')return {...row,state:'paused',reason:'Restored schedule: review a future time before resuming'};
+  if(table==='nook_schedules')return portableSchedule(row);
   return slackExportRow(table,row);
  },
  validateStaged:validateNormalizedArchive,

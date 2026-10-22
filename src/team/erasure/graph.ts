@@ -18,7 +18,7 @@ export const retained = [
  {table:'nook_profile_field_actions',reason:'Body-free field-definition history survives with actor attribution erased.'},
  {table:'nook_broadcast_policy',reason:'Body-free channel/workspace policy remains after people are erased.'},
  {table:'nook_broadcast_actions',reason:'Body-free broadcast policy history retains versions and counts; actor attribution is erased.'},
- {table:'nook_schedule_occurrences',reason:'Body-free occurrence identity and current message references survive source deletion to prevent replay. Erasing the schedule owner deletes them.'},
+ {table:'nook_schedule_occurrences',reason:'Body-free occurrence identity and current message references survive source deletion to prevent replay. Scheduled-forward source references and held approval authority in the existing schedule payload are removed and the schedule cancelled by source-deletion triggers; sender erasure removes the schedule. Erasing the schedule owner deletes them.'},
  {table:'nook_schedule_files',reason:'Private template bytes belong only to their schedule owner and follow bounded verified blob erasure; sent copies are independent native files.'},
  {table:'nook_group_conversions',reason:'Body-free source/destination links preserve the original fixed audience; erased actor attribution is removed.'},
  {table:'nook_integration_audit',reason:'Body-free integration token use records keep the token name, time, conversation, message ID and outcome; erased people lose attribution.'},

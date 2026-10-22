@@ -1,3 +1,4 @@
+import {deliverForward} from './forward'
 import {broadcastKind,broadcastFence} from '../broadcast/audience'
 import {literal} from '../broadcast/policy'
 import {materializeOccurrenceFiles,cleanupOccurrenceFiles} from './files'
@@ -14,10 +15,11 @@ function writer(env:StorageBindings,uid:string):MessageWriter{
  const sql=(statement:string,...values:any[])=>env.DB.prepare(statement).bind(...values)
  return {uid,sql,event:(id,kind,object)=>[sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',id),sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,uid,id)]}
 }
-export async function drainSchedules(env:StorageBindings){
- const now=Date.now(),rows=(await env.DB.prepare("SELECT * FROM nook_schedules WHERE state='active' AND next_due<=? ORDER BY next_due,id LIMIT 10").bind(now).all<Schedule>()).results
+export async function drainSchedules(env:StorageBindings,now=Date.now()){
+ const rows=(await env.DB.prepare("SELECT * FROM nook_schedules WHERE state='active' AND next_due<=? ORDER BY next_due,id LIMIT 10").bind(now).all<Schedule>()).results
  for(const s of rows){
   const w=writer(env,s.user),payload=JSON.parse(s.payload),id=s.conversation,parent=payload.parent,kind=broadcastKind(payload.body)
+  if(payload.forward&&now-s.next_due<=15*60_000){await deliverForward(env,s,payload.forward,now);continue}
   const rules=[
    ...(kind?[{sql:broadcastFence(literal(id),literal(s.user),kind,payload.confirmBroadcast===true),values:[],reason:'Broadcast policy or audience changed. Review consent before rescheduling.'}]:[]),
    {sql:`EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access a ON a.user=o.id WHERE o.id=? AND o.version=? AND o.status='active' AND a.generation=? AND ${productAccess('o.id')})`,values:[s.user,s.operator_version,s.access_generation],reason:'Your account changed or was deactivated. Review and save a new time.'},
