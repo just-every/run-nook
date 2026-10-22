@@ -43,6 +43,7 @@ export async function appRequest(bindings:StorageBindings,request:Request){
    const body=await input(request),key=request.headers.get('idempotency-key')??''
    if(Object.keys(body).some(k=>!['body','thread'].includes(k)))fail(400,'Send a body, optional thread and an Idempotency-Key')
    const intent=clientKey(key),previous=await acceptedMessage(c,intent)
+   if(!previous&&(await lookup(c,intent)).state==='tombstone')fail(409,'Message intent was erased')
    const identity=previous?.author??(await c.one<{id:string}>(`${appAuthors} ORDER BY created,id LIMIT 1`,identityValues(app)))!.id
    const writer=new AppContext(env,app,identity);writer.rate=true
    writer.parent=typeof body.thread==='string'?body.thread:null

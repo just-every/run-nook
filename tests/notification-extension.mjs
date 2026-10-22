@@ -17,7 +17,9 @@ export async function notificationExtension(app){
  assert.ok((await call('/api/attention','GET',undefined,person.cookie)).items.some(item=>item.message?.id===reply.id&&item.reason==='thread-follow'));
  const before=await db.prepare('SELECT count(*) AS n FROM nook_messages').first();
  assert.deepEqual(await post(first,{body:'The support checklist needs review.',thread:root.id},'reply'),reply);
+ const rateBefore=await db.prepare('SELECT balance,updated FROM nook_notification_rates WHERE conversation=?').bind(room.id).first();
  assert.deepEqual(await lookup(first,'reply'),{accepted:true,receipt:reply.receipt});
+ assert.deepEqual(await db.prepare('SELECT balance,updated FROM nook_notification_rates WHERE conversation=?').bind(room.id).first(),rateBefore);
  assert.equal(reply.receipt.id,reply.id);assert.equal(reply.receipt.version,1);assert.equal(reply.receipt.acceptedAt,reply.created);
  assert.deepEqual(await db.prepare('SELECT count(*) AS n FROM nook_messages').first(),before);
  assert.deepEqual(await lookup(other,'reply'),await lookup(first,'never-accepted'));
@@ -48,6 +50,7 @@ export async function notificationExtension(app){
  await call('/api/channels/'+room.id+'/posting','PATCH',{version:details.version,level:'everyone',replies:'same',people:[]},ownerCookie);
  await call('/api/erasures','POST',{kind:'message',target:reply.id,confirmation:'ERASE'},ownerCookie);
  assert.deepEqual(await lookup(replacement,'reply'),{accepted:false,state:'tombstone'});
+ assert.equal((await request(replacement,'POST','messages',{body:'The support checklist needs review.',thread:root.id},'reply')).status,409);
  await call('/api/erasures','POST',{kind:'message',target:root.id,confirmation:'ERASE'},ownerCookie);
  const deleted=await request(replacement,'POST','messages',{body:'No deleted root',thread:root.id},'deleted-root');assert.equal(deleted.status,400);assert.deepEqual(await deleted.json(),await (await request(replacement,'POST','messages',{body:'No root',thread:'synthetic-nook-missing'},'missing-again')).json());
  details=await call('/api/channels/'+room.id+'/details','GET',undefined,ownerCookie);
