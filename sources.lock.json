@@ -1361,7 +1361,7 @@
       "executable": false
     },
     "migrations/0080_scheduled_forwards.sql": {
-      "sha256": "15cb9f9ec0392f669e50b059b52eb028642b640383fc4431fec29b549bfc26fe",
+      "sha256": "f06397140d147e2eb23d3baadbbcc916ab95e565e5b29735260fcef1fa2d6883",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -5613,7 +5613,7 @@
       "executable": false
     },
     "src/scheduled/archive.mjs": {
-      "sha256": "fd323a2b5e288782a431926370e74bc0c955765be81a97e9613d10d144a0bd02",
+      "sha256": "e92591969aeea1a423a9fcfa617fc1c3bf2195d7d37810b2920e2b6fc09f107f",
       "executable": false
     },
     "src/scheduled/erasure.ts": {
