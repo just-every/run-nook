@@ -11,7 +11,7 @@ export function SourceMapping({ kind, source, review, onChange, busy }: {
         <p>Source: {source.source.implementation} {source.source.version} · format {source.source.format}. {mattermost
             ? 'Every exported channel is included with its team name. Private channels, DMs and groups keep their mapped participant sets; the importing owner receives no extra membership.'
             : 'Every room is included. Closed rooms and DMs keep their mapped participant sets; the importing owner receives no extra membership.'}</p>
-        <label>Source namespace<input required pattern="[A-Za-z0-9_.-]{1,128}" value={review.namespace} onChange={event => onChange({ ...review, namespace: event.target.value })} placeholder={`${kind}-team`} /></label>
+        <label>Source namespace<input required pattern={'[A-Za-z0-9_.\\-]{1,128}'} value={review.namespace} onChange={event => onChange({ ...review, namespace: event.target.value })} placeholder={`${kind}-team`} /></label>
         {source.actors.map((actor: any) => <label key={actor.sourceId}>{actor.label} · {mattermost ? actor.required ? 'participant or saved-item owner' : 'historical author' : actor.participant ? 'room participant' : 'historical author'}
             <select aria-label={`Map ${actor.label}`} required={actor.required || actor.participant} value={review.actors[actor.sourceId] ?? ''} onChange={event => onChange({ ...review, actors: { ...review.actors, [actor.sourceId]: event.target.value || null } })}>
                 <option value="">{actor.required || actor.participant ? 'Choose an existing full member' : 'Keep as an external historical author'}</option>

@@ -15,6 +15,7 @@ export const datasets:Dataset[]=[
  ...noteExportDatasets,
  ...clipExportDatasets,
  forwardExport,
+ {name:'imported_revisions',sql:`SELECT json_array(r.conversation,r.id,p.id) AS _key,r.conversation,r.id AS message,p.job_id AS pass,json_extract(p.record_json,'$.before.value.body') AS body,json_extract(p.record_json,'$.before.value.sourceTimestamp') AS source_timestamp,json_extract(p.record_json,'$.before.value.sourceRecord.edited.ts') AS edited_at,j.namespace FROM (SELECT id,job_id,target_id,destination,record_json FROM ik_provenance WHERE target_kind='message' AND reversed=0 UNION ALL SELECT id,job_id,target_id,destination,record_json FROM ik_d1_history WHERE target_kind='message' AND reversed=0) p JOIN nook_import_history r ON r.id=p.target_id ${source} WHERE ${scoped('r')} AND r.erased=0 AND p.destination=j.owner AND json_extract(p.record_json,'$.before.value.id')=r.id AND json_extract(p.record_json,'$.before.value.conversation')=r.conversation AND json_type(p.record_json,'$.before.value.body')='text'`},
  {name:'forward_files',sql:`SELECT json_array(f.conversation,f.attachment) AS _key,f.* FROM nook_forward_files f WHERE ${scoped('f')}`},
  {name:'recap_feedback',sql:`SELECT json_array(f.conversation,f.id) AS _key,f.* FROM nook_recap_feedback f WHERE ${scoped('f')} AND f.user=(SELECT owner FROM job)`},
  {name:'ai_search_feedback',sql:`SELECT json_array(f.conversation,f.id) AS _key,f.* FROM nook_ai_feedback f WHERE ${scoped('f')} AND f.user=(SELECT owner FROM job)`},

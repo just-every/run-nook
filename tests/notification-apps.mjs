@@ -207,3 +207,7 @@ test('NOOK-024 browser clips keep private bytes, seekable human captions and imm
   t.diagnostic('Browser fake-device capture at 1440/390, playback/seek, typed/WebVTT captions and correction history, upload failure/retry, private refusal, export/restore and source/file/author erasure passed. Real phone capture NOT RUN. No holds exist; no provider is used.');
  }finally{await restore?.close();await app.close()}
 });
+
+test('NOOK-077 later export ZIP delta preserves native work, revisions, audiences, inert history, idempotence and undo',{timeout:240000},async()=>{
+ const {deltaJourney}=await import('./slack-import/delta-journey.mjs');await deltaJourney();
+});

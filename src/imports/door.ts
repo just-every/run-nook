@@ -14,6 +14,7 @@ import { bindPlan, currentLink, guardApply, prepareEnvelope, prepareFiles, publi
 import { importTargets } from './target';
 import { ownerAction } from './door-history';
 import { guardUndo } from './door-undo';
+import {validateDeltaBaseline} from './delta-state';
 import type { D1Sql, D1TargetAdapter } from './kit';
 
 const headers = {'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'};
@@ -53,6 +54,7 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
     if (action === 'plan') {
       cleanup = () => withdrawUnplanned(env, predicate, admitted.namespace, input.uploadId);
       capture = await uploadedCapture(env, admitted.namespace, input.uploadId, admitted.principal, users);
+      if(capture.capture.delta){if(!admitted.c||input.catchup!==true)throw new Fault(403,'An owner-reviewed delta pass is required');await validateDeltaBaseline(admitted.c,capture.capture);}
       await refuseLegacyDuplicate(env, capture);
     }
     if (['apply','status','reconcile','undo'].includes(action)) {

@@ -94,5 +94,23 @@ export function queueOrphanedDoorFiles(link: any): D1Sql {
 }
 export async function publishResult(env: DoorBindings, predicate: D1Sql, link: any, result: any) {
   if (result.job?.state === 'completed') await fencedBatch(env, predicate, [sql("UPDATE nook_imports SET state='complete' WHERE id=? AND owner=?", link.domain_job, link.owner)]);
+  if(result.job?.state==='completed'&&JSON.parse(link.summary_json).delta){
+    const changed=`SELECT DISTINCT r.conversation FROM ik_provenance p JOIN nook_import_records r ON r.id=p.target_id WHERE p.job_id=? AND p.target_kind='message' AND p.reversed=0`;
+    const pending="EXISTS(SELECT 1 FROM nook_door_imports WHERE plan_id=? AND COALESCE(json_extract(summary_json,'$.delta.published'),0)=0)";
+    await fencedBatch(env,predicate,[
+      sql(`UPDATE nook_conversations SET seq=seq+1 WHERE id IN (${changed}) AND ${pending}`,result.job.id,link.plan_id),
+      sql(`INSERT INTO nook_events SELECT id,seq,'import-history',?,? FROM nook_conversations WHERE id IN (${changed}) AND ${pending}`,link.plan_id,link.owner,result.job.id,link.plan_id),
+      sql("UPDATE nook_door_imports SET summary_json=json_set(summary_json,'$.delta.published',1) WHERE plan_id=?",link.plan_id),
+    ]);
+  }
   if (result.state === 'cancelled' || ['undone','rolled_back'].includes(result.job?.state)) await fencedBatch(env, predicate, [sql('DELETE FROM nook_imports WHERE id=? AND NOT EXISTS(SELECT 1 FROM nook_import_channels WHERE job=?) AND NOT EXISTS(SELECT 1 FROM nook_import_records WHERE job=?)', link.domain_job, link.domain_job, link.domain_job),queueOrphanedDoorFiles(link)]);
+  if(['undone','rolled_back'].includes(result.job?.state)&&JSON.parse(link.summary_json).delta){
+    const affected="SELECT ch.conversation FROM nook_import_channels ch JOIN json_each(?,'$.channels') source ON json_extract(source.value,'$.sourceId')=ch.source_id WHERE ch.job=?";
+    const pending="EXISTS(SELECT 1 FROM nook_door_imports WHERE plan_id=? AND COALESCE(json_extract(summary_json,'$.delta.undonePublished'),0)=0)";
+    await fencedBatch(env,predicate,[
+      sql(`UPDATE nook_conversations SET seq=seq+1 WHERE id IN (${affected}) AND ${pending}`,link.summary_json,link.domain_job,link.plan_id),
+      sql(`INSERT INTO nook_events SELECT id,seq,'import-history',?,? FROM nook_conversations WHERE id IN (${affected}) AND ${pending}`,link.plan_id,link.owner,link.summary_json,link.domain_job,link.plan_id),
+      sql("UPDATE nook_door_imports SET summary_json=json_set(summary_json,'$.delta.undonePublished',1) WHERE plan_id=?",link.plan_id),
+    ]);
+  }
 }

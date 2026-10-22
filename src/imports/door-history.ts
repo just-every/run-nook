@@ -8,6 +8,7 @@ import { undoLegacy } from './legacy';
 import { cleanupImportObjects } from './object-store';
 import type { Context } from '../platform/storage/context';
 import { fail } from '../family/team-chat/domain';
+import {deltaState} from './delta-state';
 
 export async function history(c: Context, kind?: string) {
   const approvals = await readImportDoorHistory(c.db as any, doorKey, ownerPredicate(c));
@@ -22,6 +23,7 @@ export async function history(c: Context, kind?: string) {
 export async function ownerAction(env: DoorBindings, c: Context, action: string, input: any, kind: string) {
   const predicate = ownerPredicate(c);
   if (action === 'history') return history(c, kind);
+  if(action==='delta-state') {if(kind!=='slack')fail(400,'Delta export passes require a Slack ZIP');return deltaState(c,input);}
   if (action === 'settings' || action === 'revocations') {
     const current = await businessSettings(c.db);
     if (action === 'settings' && typeof input.enabled !== 'boolean') fail(400, 'Choose whether Business imports are enabled');

@@ -1,4 +1,5 @@
 import {auditRoute} from '../audit/server'
+import {revisions as importedRevisions} from '../imports/revisions'
 import {read} from '../platform/storage/read'
 import {typing,updateTyping} from '../personal/typing.server'
 import {personalWorkspace,updatePersonalWorkspace} from '../personal/workspace.server'
@@ -24,6 +25,7 @@ import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from '
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const audit=await auditRoute(c,request);if(audit)return audit
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
+ if(parts.length===4&&parts[1]==='messages'&&parts[3]==='imported-revisions'&&method==='GET')return Response.json(await importedRevisions(c,parts[2]))
  if(parts.length===5&&parts[1]==='conversations'&&parts[3]==='messages'&&parts[4]==='latest-editable'&&method==='GET')return Response.json(await read(c,'latestEditable',parts[2],{thread:url.searchParams.get('thread')}))
  if(parts.length===4&&parts[1]==='conversations'&&parts[3]==='typing'){if(method==='GET')return Response.json(await typing(c,parts[2]));if(method==='POST')return Response.json(await updateTyping(c,parts[2],input))}
  if(url.pathname==='/api/personal/workspace'){if(method==='GET')return Response.json(await personalWorkspace(c));if(method==='POST')return Response.json(await updatePersonalWorkspace(c,input))}

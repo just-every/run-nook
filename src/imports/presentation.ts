@@ -17,5 +17,5 @@ const displayText = async (c: Context, row: any, names: Map<string,string>) => s
 export async function slackText(c: Context, row: any, source: any) { return displayText(c, row, await sourceNames(c, row, source)); }
 export async function slackPresentation(c: Context, row: any, source: any, files: any[]): Promise<SlackPresentation> {
     const names = await sourceNames(c, row, source);
-    return { text: await displayText(c, row, names), edited: !!source.edited, missingFiles: missingFileRefs(source, files), reactions: (Array.isArray(source.reactions) ? source.reactions : []).filter((r: any) => typeof r?.name === 'string' && Number.isSafeInteger(r.count) && Array.isArray(r.users)).map((r: any) => ({ name: r.name, count: r.count, people: r.users.map((id: string) => names.get(id) ?? id) })) };
+    return { pinned:Array.isArray(source.pinned_to)&&source.pinned_to.includes(row.key.split(':')[1]), text: await displayText(c, row, names), edited: !!source.edited, missingFiles: missingFileRefs(source, files), reactions: (Array.isArray(source.reactions) ? source.reactions : []).filter((r: any) => typeof r?.name === 'string' && Number.isSafeInteger(r.count) && Array.isArray(r.users)).map((r: any) => ({ name: r.name, count: r.count, people: r.users.map((id: string) => names.get(id) ?? id) })) };
 }

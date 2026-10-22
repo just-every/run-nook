@@ -35,8 +35,26 @@ export async function mixedWindow(c: Context, id: string, input: Record<string, 
     const nativeFilter = effectiveThread ? 'm.parent=?' : 'm.parent IS NULL';
     const sourceFilter = effectiveThread ? 'r.parent=?' : 'r.parent IS NULL';
     const params = effectiveThread ? [effectiveThread] : [];
+    // Delta history may be newer than live replies. Display cursors are ranks
+    // in source/native chronology; native event sequences remain read barriers.
+    const chronological=!!await c.one("SELECT 1 FROM nook_door_imports d WHERE d.domain_job=? AND json_type(d.summary_json,'$.delta')='object' LIMIT 1",[last.job],id);
+    const ranked=`WITH entries AS (SELECT m.id,CAST(unixepoch(m.created,'subsec')*1000 AS INTEGER)*1000 AS sort_time,'native' AS source FROM nook_message_history m WHERE m.conversation=? AND ${nativeFilter}
+      UNION ALL SELECT r.id,CAST(replace(r.source_timestamp,'.','') AS INTEGER) AS sort_time,'imported' AS source FROM (${importedSelect}) r WHERE r.conversation=? AND ${sourceFilter}),
+      ranked AS (SELECT id,source,ROW_NUMBER() OVER(ORDER BY sort_time,id) AS position FROM entries) SELECT * FROM ranked`;
+    const rankParams=[id,...params,id,...params];
+    const positions=new Map<string,number>();
+    async function position(message:any){if(!chronological)return message.sequence;const row=await c.one(ranked+' WHERE id=?',[...rankParams,message.id],id);return row?.position??0;}
     async function page(bound: number | null, comparison: '<' | '>=' | '>', count: number, descending = false) {
         if (!count) return [];
+        if(chronological){
+          const selected=await c.rows(ranked+(bound===null?'':` WHERE position${comparison}?`)+` ORDER BY position ${descending?'DESC':'ASC'} LIMIT ?`,[...rankParams,...(bound===null?[]:[bound]),count],id);
+          const nativeIds=selected.filter(row=>row.source==='native').map(row=>row.id),sourceIds=selected.filter(row=>row.source==='imported').map(row=>row.id);
+          const native= nativeIds.length?await historyPage(c,id,'m.id IN (SELECT value FROM json_each(?))',[JSON.stringify(nativeIds)],count):[];
+          const source=sourceIds.length?await c.rows(`${importedSelect} WHERE r.conversation=? AND r.id IN (SELECT value FROM json_each(?))`,[id,JSON.stringify(sourceIds)],id):[];
+          const messages=new Map<string,any>(native.map(message=>[message.id,{...message,nativeContinuation:!!message.parent}]));
+          for(const row of source)messages.set(row.id,await historicalMessage(c,{...row,display_sequence:row.sequence-offset}));
+          return selected.map(row=>{positions.set(row.id,row.position);return messages.get(row.id)}).filter(Boolean);
+        }
         const natives = await historyPage(c, id, nativeFilter + (bound === null ? '' : ` AND m.sequence${comparison}?`), bound === null ? params : [...params, bound], count, descending);
         const rows = await c.rows(`${importedSelect} WHERE r.conversation=? AND ${sourceFilter}${bound === null ? '' : ` AND r.sequence${comparison}?`} ORDER BY r.sequence ${descending ? 'DESC' : 'ASC'} LIMIT ?`, [id, ...params, ...(bound === null ? [] : [bound + offset]), count], id);
         const sources = [];
@@ -45,16 +63,17 @@ export async function mixedWindow(c: Context, id: string, input: Record<string, 
     }
     let items: any[];
     if (target && (!effectiveThread || target.id !== effectiveThread)) {
-        const prior = await page(target.sequence, '<', Math.floor(limit / 2), true);
-        items = [...prior.reverse(), ...await page(target.sequence, '>=', limit - prior.length)];
+        const targetPosition=await position(target),prior = await page(targetPosition, '<', Math.floor(limit / 2), true);
+        items = [...prior.reverse(), ...await page(targetPosition, '>=', limit - prior.length)];
     } else items = (await page(before, '<', limit, true)).reverse();
-    const cursor = items[0]?.sequence ?? before;
+    const cursor = (chronological?positions.get(items[0]?.id):items[0]?.sequence) ?? before;
     const earlier = cursor == null ? [] : await page(cursor, '<', 1, true);
-    const later = items.length ? await page(items.at(-1).sequence, '>', 1) : [];
+    const lastPosition=items.length?(chronological?positions.get(items.at(-1).id)!:items.at(-1).sequence):null;
+    const later = lastPosition!==null ? await page(lastPosition, '>', 1) : [];
     const visible = [...items, ...(root ? [root] : [])].filter(m => !m.immutable||m.retainedSource==='native');
     const barrier = await c.one(`SELECT MIN(sequence) AS sequence FROM (SELECT (SELECT m.sequence FROM nook_message_history m WHERE m.conversation=a.conversation AND m.author=a.user AND m.deleted=0 AND m.sequence>? AND NOT (${threadSeen('?')}) AND m.id NOT IN (SELECT value FROM json_each(?)) ORDER BY m.sequence LIMIT 1) AS sequence FROM nook_author_counts a WHERE a.conversation=? AND a.user<>?)`, [snapshot.readSeq, c.uid, JSON.stringify(visible.map(m => m.id)), id, c.uid], id);
     const renderedThrough = Math.max(snapshot.readSeq, ...visible.map(m => m.sequence));
     const readBarrierSeq = barrier?.sequence ?? null;
     const readThrough = Math.max(snapshot.readSeq, Math.min(renderedThrough, readBarrierSeq === null ? renderedThrough : readBarrierSeq - 1));
-    return { items, root, target: target ? { id: target.id, parent: target.parent, root: rootId } : null, cursor: cursor == null ? null : String(cursor), freezeCursor: items.length ? String(items.at(-1).sequence + 1) : null, hasMore: !!earlier.length, hasNewer: !!later.length, frontier: snapshot.frontier, readSeq: snapshot.readSeq, readBarrierSeq, readThrough };
+    return { items, root, target: target ? { id: target.id, parent: target.parent, root: rootId } : null, cursor: cursor == null ? null : String(cursor), freezeCursor: lastPosition===null?null:String(lastPosition+1), hasMore: !!earlier.length, hasNewer: !!later.length, frontier: snapshot.frontier, readSeq: snapshot.readSeq, readBarrierSeq, readThrough };
 }

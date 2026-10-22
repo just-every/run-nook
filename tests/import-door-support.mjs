@@ -26,7 +26,7 @@ export function importDoorClient({origin,owner,source='slack',users,transport=fe
  async function plan(inspection,review,options={}){
   const prepared=await prepare(inspection,review);
   if(prepared.summary.blocked||prepared.summary.needsOmissionReview)return prepared.summary;
-  const uploadId=await upload(prepared.packet),dryRun=await request('plan',{uploadId},{namespace:review.namespace,...options});
+  const uploadId=await upload(prepared.packet),dryRun=await request('plan',{uploadId,...(review.delta?{catchup:true}:{})},{namespace:review.namespace,...options});
   return {...prepared.summary,...dryRun,counts:prepared.summary.counts,uploadId};
  }
  const apply=(plan,options={})=>request('apply',{planId:plan.planId,reviewedFingerprint:plan.fingerprint},options);

@@ -24,6 +24,14 @@ export function publicLocalSummary(capture: any) {
       actors: capture.actors.map(({ sourceRecord, ...actor }: any) => actor),
       archiveDigest: capture.archiveDigest, captureDigest: capture.digest,
       completeness: 'unknown', sourceAuthenticityVerified: false,
+      ...(capture.delta ? { delta: {
+        overlapDays: capture.delta.overlapDays, baselineDigest: capture.delta.baselineDigest,
+        counts: capture.delta.counts, coverage: capture.delta.coverage,
+        conversations: capture.delta.conversations, sequences: capture.delta.sequences,
+        retainedSequences: capture.delta.retainedSequences,
+        baselineRoots: capture.delta.baselineRoots, explicitDeletions: capture.delta.explicitDeletions,
+        skipped: capture.delta.skipped, memberPreview: capture.delta.memberPreview,
+      } } : {}),
     };
   return {
     ...result,

@@ -3,6 +3,7 @@ import { readSlackZip, jsonEntry, sha256, canonicalPath } from './zip.mjs';
 import { importDigest } from '../family/team-chat/import-capture.mjs';
 import { sourceFiles } from './slack-files.mjs';
 import { systemSubtypes, contentSubtypes, isAutomation, actorLabel, sourceActorId, referencedActors, validateMessageMetadata, missingFileInventory } from './slack-records.mjs';
+import { captureSlackDeltaArchive } from './slack-delta/capture.mjs';
 const bad = reason => { throw new Error(`SLACK_INVALID: ${reason}`); };
 const object = x => x !== null && typeof x === 'object' && !Array.isArray(x);
 const id = x => typeof x === 'string' && /^[A-Za-z0-9_.-]{1,128}$/.test(x);
@@ -77,6 +78,7 @@ export function inspectSlackArchive(bytes, localUsers = []) {
     return { archive, users, automationIds, channels: candidates, actors, omissions, completeness: 'unknown', sourceAuthenticityVerified: false };
 }
 export function captureSlackArchive(inspected, review, ownerId, localUsers) {
+    if (review?.delta !== undefined) return captureSlackDeltaArchive(inspected, review, ownerId, localUsers);
     if (!object(review) || Object.keys(review).filter(k => k !== 'importWithoutMissingFiles').sort().join() !== 'acceptedOmissions,actors,channels,namespace' || review.importWithoutMissingFiles !== undefined && typeof review.importWithoutMissingFiles !== 'boolean' || !id(review.namespace) || !Array.isArray(review.channels) || review.channels.length > 50 || !object(review.actors) || Object.entries(review.actors).some(([key, value]) => !id(key) || value !== null && (!id(value) || !localUsers.some(u => u.id === value && u.active))) || !Array.isArray(review.acceptedOmissions) || review.acceptedOmissions.length > 1 || review.acceptedOmissions.some(v => typeof v !== 'string' || !/^[a-f0-9]{64}$/.test(v)))
         bad('review required');
     const { archive, users } = inspected, userById = new Map(users.map(u => [u.id, u])), omissions = [...inspected.omissions], blockers = [], channels = [], messages = [], actors = new Map(), seen = new Set(), selected = new Set(), usedFiles = new Set(), missingFiles = [], skippedKinds = {};
