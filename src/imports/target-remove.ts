@@ -1,4 +1,4 @@
-import {tombstoneForwardSql} from '../forwards/undo'
+import {tombstoneForwardSql} from '../forwards/undo.ts'
 import type { D1Sql } from './kit.ts';
 import { sql } from './target-snapshot.ts';
 import { importedAttachment, retainedChannelHistory } from './channel-guard.ts';

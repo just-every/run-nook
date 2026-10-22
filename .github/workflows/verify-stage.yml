@@ -26,13 +26,14 @@ jobs:
         run: |
           set -euo pipefail
           test "$RUNNER_ENVIRONMENT" = github-hosted
-          echo 'Disk capacity before removing unused preinstalled toolchains'
           df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
-          # runner-images installs these Android, .NET and Haskell toolchains.
-          # This Node/Playwright verification job does not use them.
-          sudo rm -rf --one-file-system -- /usr/local/lib/android/sdk /usr/share/dotnet /usr/local/.ghcup
-          echo 'Disk capacity after removing unused preinstalled toolchains'
-          df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
+          nook_available_kib=$(df -Pk "$GITHUB_WORKSPACE" | awk 'NR==2 {print $4}')
+          # Keep fixture headroom; deleting toolchains took 3–5 minutes even
+          # on hosted runners with 86 GiB already free.
+          if (( nook_available_kib < 15 * 1024 * 1024 )); then
+            sudo rm -rf --one-file-system -- /usr/local/lib/android/sdk /usr/share/dotnet /usr/local/.ghcup
+            df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
+          fi
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
@@ -42,7 +43,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - if: inputs.browser
-        run: pnpm exec playwright install --with-deps chromium
+        # ubuntu-latest already supplies Chrome's shared libraries. Avoid the
+        # redundant apt/font upgrades that consumed 10+ minutes of a job cap.
+        run: |
+          pnpm exec playwright install --only-shell chromium
+          node --input-type=module -e 'import {chromium} from "@playwright/test"; const browser=await chromium.launch({headless:true,args:["--use-mock-keychain","--password-store=basic"]}); await browser.close()'
       - name: Prepare canonical temporary directory
         run: |
           mkdir -p ../scratch/tmp
