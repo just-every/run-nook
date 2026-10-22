@@ -1,3 +1,4 @@
+import {recapRoute} from './recaps/server'
 import {aiRoute} from './ai-search/server'
 import {isAppRequest,appRequest} from './notification-apps/door'
 import {manageApps} from './notification-apps/manage'
@@ -68,7 +69,8 @@ api.all('/api/*', async c => {
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),exit=await readableExportRoute(session,req,input);if(exit)return exit
  const team=await teamRoute(session,req,input);if(team)return team
- if(action==='ai-search'&&req.headers.has('signature-agent'))fail(403,'AI search is not available to agents')
+ if(['ai-search','recaps'].includes(action)&&req.headers.has('signature-agent'))fail(403,'AI search is not available to agents')
+ const recap=await recapRoute(session,req.method,p,input as Record<string,unknown>);if(recap)return c.json(recap)
  const ai=await aiRoute(session,req.method,p,input as Record<string,unknown>);if(ai)return c.json(ai)
  const apps=await manageApps(session,req.method,p,input as Record<string,unknown>);if(apps)return c.json(apps)
  const tokens=await tokenRoute(session,req.method,p,input as Record<string,unknown>);if(tokens)return c.json(tokens)

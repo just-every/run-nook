@@ -1,3 +1,4 @@
+import {RecapPanel} from '../recaps/RecapPanel'
 import {NotesPanel} from '../notes/NotesPanel'
 import type {TeamRequest} from '../team/types'
 import {canEraseChannelMessage} from '../team/erasure/policy'
@@ -124,8 +125,10 @@ export function ConversationView({request,user,conversation:c,data,route,private
  const followed=data.preferences.threads.includes(root?.id||'')
  const showLatest=Boolean(data.rootWindow.hasNewer||route.before||route.focus&&route.focus!==route.thread&&!data.outcomes.some(o=>o.id===route.focus)||route.landing&&data.rootWindow.target)
  const showLatestReplies=Boolean(data.threadWindow?.hasNewer||route.threadBefore||route.landing&&data.rootWindow.target?.parent)
+ const recap=<RecapPanel conversation={c.id} thread={route.thread} revision={c.seq} privateSignal={privateSignal} onOpen={(focus,thread)=>navigate({view:'chat',conversation:c.id,focus,thread:thread??focus,panel:null,before:null,threadBefore:null})}/>
  return <div className={'body-grid'+(route.thread?' has-thread':'')+(showOutcomes||showNotes?' showing-outcomes':'')}>
   <section className="chat" aria-label={name}>
+   {!route.thread&&recap}
    <div className="log-frame">
     <div className="message-log" ref={log} aria-label="Conversation messages" role="region" tabIndex={0}>
      <div className="history-controls">{data.rootWindow.hasMore&&data.rootWindow.cursor&&<button className="text-button" onClick={()=>navigate({before:data.rootWindow.cursor,focus:null})}>Load earlier messages</button>}</div>
@@ -137,6 +140,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
    {c.convertedTo?<p className="archived-notice">This group DM moved to a private channel and is read-only. <button className="text-button" onClick={()=>navigate({view:'chat',conversation:c.convertedTo!,thread:null,focus:null,before:null,threadBefore:null,panel:null})}>Open private channel</button></p>:c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<Composer onEditLast={message=>openDialog({kind:'edit',message})} onSchedule={(draft,onScheduled)=>openDialog({kind:'schedule',draft,onScheduled})} restricted={c.canPost===false||c.canPost===0} key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/>}
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
+   {route.thread&&recap}
    {showNotes?<NotesPanel conversation={c.id} thread={route.thread} request={request} people={data.members} onClose={()=>navigate({panel:null})}/>:route.thread&&root&&!showOutcomes?<>
     <div className="panel-bar thread-bar"><button className="icon-button" title="Back" onClick={back}><IconBack/><span className="sr-only">Back</span></button><h2>Thread</h2>{(!root.immutable||Boolean(root.provenance))&&<button className="soft-button" onClick={()=>void mutate(`messages/${root.id}/follow`,{follow:!followed}).catch(()=>{})}><IconBell/>{followed?'Unfollow thread':'Follow thread'}</button>}</div>
     <div className="log-frame">
