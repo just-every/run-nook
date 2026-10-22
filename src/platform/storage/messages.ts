@@ -27,7 +27,7 @@ export async function send(c:Context,id:string,input:Record<string,any>){
  const broadcast=c.memberBroadcasts?await previewBroadcast(c,id,body):null
  if(broadcast&&broadcast.recipients>=6&&input.confirmBroadcast!==true)throw new BroadcastConfirmation(broadcast)
  const broadcastCondition=broadcast?broadcastFence(literal(id),literal(c.uid),broadcast.kind,input.confirmBroadcast===true):'1'
- const permission=`(${canPost('?','?','?')} OR (?=1 AND ${adminPoster('?')}))`,permissionValues=[id,parent,c.uid,input.adminOverride?1:0,c.uid]
+ const permission=`(${canPost('?','?','?')} OR (?=1 AND ${adminPoster('?')}))`,permissionValues=[id,c.uid,parent,input.adminOverride?1:0,c.uid]
  if(!await c.one(`SELECT 1 WHERE ${permission}`,permissionValues,id))fail(403,'Posting is restricted in this channel; ask a channel manager')
  if(input.adminOverride&&!await c.one(`SELECT 1 WHERE ${adminPoster('?')}`,[c.uid],id))fail(403,'Only owners and admins may use a labelled override')
  if(parent&&!await c.one(`SELECT id FROM (${liveThreadRoots}) WHERE id=? AND conversation=?`,[parent,id],id))fail(400,'Thread root unavailable');for(const uid of attention.mentions)if(!await c.one(`SELECT user FROM nook_members m WHERE conversation=? AND user=? AND ${allowedGrant('m.user','m.conversation')}`,[id,uid],id))fail(400,'Mention recipient must be a current member');for(const aid of ids)if(!await c.one("SELECT id FROM nook_attachments WHERE id=? AND author=? AND conversation=? AND state='staged' AND expires>?",[aid,c.uid,id,Date.now()],id))fail(400,'Attachment must be uploader-owned staged file in this conversation');

@@ -6,6 +6,7 @@ import {send,edit} from '../platform/storage/messages'
 import {AppContext,RateLimit,audit,type Approval} from './context'
 import {allowedGrant} from '../team/access'
 import {fail,messageBody} from '../family/team-chat/domain'
+import {appAuthors,identityValues,clientKey,receipt,acceptedMessage,lookup} from './receipts'
 const headers={'cache-control':'no-store','x-content-type-options':'nosniff'}
 export const isAppRequest=(request:Request)=>request.headers.get('authorization')?.startsWith('Bearer nookapp_')===true||new URL(request.url).pathname.startsWith('/api/notification-destinations/')
 async function input(request:Request){
@@ -35,22 +36,29 @@ export async function appRequest(bindings:StorageBindings,request:Request){
    return Response.json({channel:app.conversation,private:result.privacy==='private',archived:!!result.archived,sharing:{state:result.sharing,federationAvailable:false},members:[...result.members,...result.apps].map(m=>({...m,guest:m.guest===null?'unknown':!!m.guest,bot:!!m.bot,emailVerified:m.verifiedEmail?true:'unknown'}))},{headers})
   }
   await c.writable(app.conversation)
+  if(p.length===5&&p[3]==='client-keys'&&request.method==='GET'){
+   return Response.json(await lookup(c,clientKey(p[4])),{headers})
+  }
   if(p.length===4&&p[3]==='messages'&&request.method==='POST'){
    const body=await input(request),key=request.headers.get('idempotency-key')??''
-   if(!/^[A-Za-z0-9._:-]{1,64}$/.test(key)||Object.keys(body).some(k=>k!=='body'))fail(400,'Send a body and an Idempotency-Key')
-   c.rate=true
-   const posted=await send(c,app.conversation,{body:body.body,intent:'notification:'+key})
+   if(Object.keys(body).some(k=>!['body','thread'].includes(k)))fail(400,'Send a body, optional thread and an Idempotency-Key')
+   const intent=clientKey(key),previous=await acceptedMessage(c,intent)
+   const identity=previous?.author??(await c.one<{id:string}>(`${appAuthors} ORDER BY created,id LIMIT 1`,identityValues(app)))!.id
+   const writer=new AppContext(env,app,identity);writer.rate=true
+   writer.parent=typeof body.thread==='string'?body.thread:null
+   const posted=await send(writer,app.conversation,{body:body.body,parent:body.thread,intent})
    // A post receipt stays identical after edits. Ordinary erasure still refuses
    // the removed intent rather than returning or resurrecting erased content.
-   return Response.json({id:posted.id,conversation:app.conversation,author:app.id,authorName:app.name,app:1,body:messageBody(body.body),created:posted.created,version:1},{headers})
+   return Response.json({id:posted.id,conversation:app.conversation,author:posted.author,authorName:app.name,app:1,body:messageBody(body.body),created:posted.created,version:1,receipt:receipt(posted)},{headers})
   }
   if(p.length===5&&p[3]==='messages'&&['PATCH','DELETE'].includes(request.method)){
    const body=await input(request)
    if(Object.keys(body).some(k=>!['body','version'].includes(k)))fail(400,'Unsupported message field')
    // Resolve inside this channel before calling the ordinary versioned editor.
-   if(!await c.one('SELECT 1 FROM nook_messages WHERE id=? AND conversation=? AND author=?',[p[4],app.conversation,app.id]))fail(404,'Destination unavailable')
-   c.source=p[4]
-   return Response.json(await edit(c,p[4],{...body,delete:request.method==='DELETE'}),{headers})
+   const old=await c.one<{author:string;parent:string|null}>(`SELECT author,parent FROM nook_messages WHERE id=? AND conversation=? AND author IN (${appAuthors})`,[p[4],app.conversation,...identityValues(app)])
+   if(!old)fail(404,'Destination unavailable')
+   const writer=new AppContext(env,app,old.author);writer.source=p[4];writer.parent=old.parent
+   return Response.json(await edit(writer,p[4],{...body,delete:request.method==='DELETE'}),{headers})
   }
   fail(404,'Destination unavailable')
  }catch(error){

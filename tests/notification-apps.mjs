@@ -8,7 +8,7 @@ import {productPolicy} from '../src/platform/portability-policy.mjs';
 import {migrationHistory} from './migration-history.mjs';
 import {notificationAppsBrowser} from './integration-tokens-browser.mjs';
 
-test('NOOK-080 channel-scoped notification approvals, audience, writes, rate, withdrawal, audit and credential-free restore',{timeout:240000},async t=>{
+test('NOOK-080 [NOOK-089] channel-scoped notification approvals, threads, receipt lookup, replacement edits, audience, rate, withdrawal and custody',{timeout:240000},async t=>{
  const recipients=new Map(),received=[];let publicKey,edgeError;
  const app=await installation(async request=>{try{const recipient=recipients.get(request.url);assert.ok(recipient);received.push({endpoint:request.url,value:await packet(request,recipient,publicKey)});return new Response(null,{status:201})}catch(error){edgeError=error;throw error}},{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});let restore;
  const {call,db,ownerCookie,origin}=app;
@@ -19,6 +19,7 @@ test('NOOK-080 channel-scoped notification approvals, audience, writes, rate, wi
  const count=async()=>await db.prepare('SELECT (SELECT count(*) FROM nook_messages) AS messages,(SELECT sum(version) FROM nook_messages) AS versions,(SELECT count(*) FROM nook_events) AS events').first();
  const refusedWrite=async(fn)=>{const before=await count(),response=await fn();assert.ok(response.status>=400);assert.deepEqual(await count(),before);return response};
  try{
+  await (await import('./notification-extension.mjs')).notificationExtension(app);
   const room=await call('/api/conversations','POST',{name:'Release coordination',kind:'private'},ownerCookie);
   const member=await app.invite('Ana',room.id);
   const inviteRole=async(name,role,mode)=>{const email=name.toLowerCase()+'@example.test';await call('/api/team/invitations','POST',{email,role,mode,scopes:[room.id]},ownerCookie);await call('/auth/invite','POST',{email,role,displayName:name},ownerCookie,202);return signIn(origin,email,{requestLink:false})};

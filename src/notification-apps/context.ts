@@ -18,7 +18,8 @@ export class AppContext extends Context{
  override event(conversation:string,kind:string,object:string){this.source=object;return super.event(conversation,kind,object)}
  override async writable(conversation:string){this.scope(conversation);await super.writable(conversation);if(await this.one("SELECT 1 FROM nook_notification_sharing WHERE conversation=? AND state<>'local'",[conversation]))fail(409,'Destination is not local')}
 
- constructor(env:StorageBindings,readonly approval:Approval){super(env,{id:approval.id,operatorId:approval.id,operator:{version:1}} as unknown as Session)}
+ parent:string|null=null
+ constructor(env:StorageBindings,readonly approval:Approval,actor=approval.id){super(env,{id:approval.id,operatorId:actor,operator:{version:1}} as unknown as Session)}
  override get credentials(){return [this.approval.id,this.approval.hash]}
  override get fence(){return available}
  private scope(conversation?:string){if(conversation&&conversation!==this.approval.conversation)fail(404,'Destination unavailable')}
@@ -36,8 +37,8 @@ export class AppContext extends Context{
  rate=false
  override async writeBatch(statements:D1PreparedStatement[],conversation:string,condition='1',values:any[]=[]){
   await this.writable(conversation)
-  const posting=canPost('?','?','NULL');if(!await this.one(`SELECT 1 WHERE ${posting}`,[conversation,this.uid]))fail(403,'Posting is restricted in this channel')
-  condition=`(${posting}) AND (${condition})`;values=[conversation,this.uid,...values]
+  const posting=canPost('?','?','?');if(!await this.one(`SELECT 1 WHERE ${posting}`,[conversation,this.uid,this.parent]))fail(403,'Posting is restricted in this channel')
+  condition=`(${posting}) AND (${condition})`;values=[conversation,this.uid,this.parent,...values]
   if(!this.rate)return this.batch(statements,conversation,condition,values)
   const now=Date.now(),balance=`min(20000,balance+max(0,?-updated))`
   const row=await this.one<{balance:number}>(`SELECT ${balance} AS balance FROM nook_notification_rates WHERE conversation=?`,[now,conversation])
