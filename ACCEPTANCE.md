@@ -451,7 +451,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**91 clauses: 33 done, 22 partial, 36 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**91 clauses: 33 done, 23 partial, 35 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
 
 - **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 
@@ -469,9 +469,13 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-084 — Scheduled catch-up digests.** **Status: missing.** Request a daily unread digest over contradictory discussions and inaccessible channels. Check every factual point against a source link, remove access before delivery, correct a claim and cancel the schedule. No private snippet or invented acceptance survives. Approve, cancel, quiet-time deferral, access removed before delivery sends nothing.
+- **NOOK-084 — Scheduled catch-up digests.** **Status: partial.** Request a daily unread digest over contradictory discussions and inaccessible channels. Check every factual point against a source link, remove access before delivery, correct a claim and cancel the schedule. No private snippet or invented acceptance survives. Approve, cancel, quiet-time deferral, access removed before delivery sends nothing.
 
-  Current evidence: No implementing source/test; journey pending.
+  Receiving duty (verbatim): A recipient sees only their current source intersection, including in shared channels; digest schedules respect quiet time, opt-out and cost controls. Member-approved daily or weekly unread digest, email or in-app by the member's NOOK-014/NOOK-072 settings, authorization recomputed at delivery, cancel and opt-out take effect on the next run, counts toward the NOOK-036 cap.
+
+  Current evidence: `tests/notification-apps.mjs` — “NOOK-035 [NOOK-084] on-request and scheduled unread recaps recheck sources, quiet time, caps, feedback and custody” (Verify, verify (integration tokens)); `tests/digests.mjs` — digestJourney: member approval, contradictory verified source quotes without inaccessible names, quiet deferral, access removal, correction/cancel, visible spent-cap skip, provider failure/rejection, own verified email mail-edge delivery, in-flight cancellation, disabled restore and recipient/source-author erasure; `tests/search-browser.mjs` — recapBrowser (1440/390 digest setting and received cited digest, no horizontal overflow or serious axe findings); `evidence/recaps/`.
+
+  Gap: Default ADOPTED: member-only opt-in, current unread/source access at delivery, shared daily cap with visible skipped occurrence instead of delayed queue, and body-free member enable/disable audit. ASK NOOK-084 pending ct acceptance of these defaults. Shared/external channels remain unavailable until NOOK-031; connected context and label/AI-policy rechecks inherit NOOK-029/040 through NOOK-036. Live provider NOT RUN; no real provider call, live Slack call or consent was used.
 
 - **NOOK-085 — Call recordings and consent artifacts.** **Status: missing.** Record a consented huddle and inspect its audience. Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
 
