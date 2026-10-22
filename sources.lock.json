@@ -812,6 +812,14 @@
       "sha256": "91b712fac32f077dce595778447c95fa0ee1a3a63e0fe4f3fa8ffa84635fca4b",
       "executable": false
     },
+    "evidence/forwards/blocked-policy-1440.png": {
+      "sha256": "3ad9c8cad6d9e25a4476c535d25b35f8d6802a64c63971daddd6059f670e16cf",
+      "executable": false
+    },
+    "evidence/forwards/blocked-policy-390.png": {
+      "sha256": "0568aa6fc3d91c8d3da960e7e9eb526dfeda55dbebdc516803b2215383c9cd6c",
+      "executable": false
+    },
     "evidence/forwards/dialog-1440.png": {
       "sha256": "9e43ba611ebc71a32d9d72ee8a523c2866d37a2e8e48730691a2b4b54522cce9",
       "executable": false
@@ -826,6 +834,30 @@
     },
     "evidence/forwards/disclosure-preview-390.png": {
       "sha256": "3eed6747da99f19f3c1c88e3a1a9f7e8ad24587808365d2790fb32eec062a853",
+      "executable": false
+    },
+    "evidence/forwards/dm-blocked-policy-1440.png": {
+      "sha256": "e2c6dffd011842a1656a63309d1edb4b273472e381deec65fc249f2b7f832e68",
+      "executable": false
+    },
+    "evidence/forwards/dm-blocked-policy-390.png": {
+      "sha256": "2e577d2e30de67fea75d27d19bd4118e75fdf9e5adae2639cd64e837b96cc660",
+      "executable": false
+    },
+    "evidence/forwards/dm-link-only-policy-1440.png": {
+      "sha256": "2b925ab32fbd9a0e4618ce5587a8efcda427f3106a26cdcc65e621c30444e9ec",
+      "executable": false
+    },
+    "evidence/forwards/dm-link-only-policy-390.png": {
+      "sha256": "1df0e1efedfcd5bfb4cd760bedb0529e164a54e7232162c51e1dd047547c44c9",
+      "executable": false
+    },
+    "evidence/forwards/dm-to-group-1440.png": {
+      "sha256": "19d369277c1fd0454d95f552ade563a33e8e4586ed883d71526c52b44cce8af2",
+      "executable": false
+    },
+    "evidence/forwards/dm-to-group-390.png": {
+      "sha256": "63ede88732189011ed4fd866f76e3b1109e24962c32ea7527197b6436ded7e5b",
       "executable": false
     },
     "evidence/forwards/forwarded-copy-1440.png": {
@@ -858,6 +890,14 @@
     },
     "evidence/forwards/shown-copy-390.png": {
       "sha256": "0f2ca448f6b779a500c2c18c25f7c97ccbb6223745b6dca21fb1da615cf5699d",
+      "executable": false
+    },
+    "evidence/forwards/thread-copy-1440.png": {
+      "sha256": "64ac336e059539bcc1a979b945442dc8c83f0559b2e452c15d6e06de331e3075",
+      "executable": false
+    },
+    "evidence/forwards/thread-copy-390.png": {
+      "sha256": "8b3daf1027a00b6aa76d5ee49ad00f298db33bca76feb413195f949543d2e4c8",
       "executable": false
     },
     "evidence/forwards/tombstoned-copy-1440.png": {
@@ -990,6 +1030,14 @@
     },
     "evidence/recaps/correction-390.png": {
       "sha256": "b1f96083f9564a415eccabce2c1a0f320c5017e18828c771b9585dd5db0f6123",
+      "executable": false
+    },
+    "evidence/recaps/omissions-1440.png": {
+      "sha256": "1ceb93e917b63d5811ea9db9139189f487b798e9ec68c5851b54a92561dad484",
+      "executable": false
+    },
+    "evidence/recaps/omissions-390.png": {
+      "sha256": "1806d756f4ac99d2dca1aa9e5ff396ed9fb5722537b9becfa0df59b62afa6e93",
       "executable": false
     },
     "evidence/recaps/refused-1440.png": {
