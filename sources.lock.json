@@ -4285,7 +4285,7 @@
       "executable": false
     },
     "src/digests/DigestSettings.tsx": {
-      "sha256": "ab0caa5539483b36be6ebcde11582d614a3f757065af77a806b70c0b2afebed4",
+      "sha256": "b56382e8e7db5dedd8fb5cf3741cfc4f1f6996bd6e21bc79f35cf50a3b599116",
       "executable": false
     },
     "src/digests/runner.ts": {
@@ -6637,7 +6637,7 @@
       "executable": false
     },
     "tests/search-browser.mjs": {
-      "sha256": "98978113876ee6f4a0b5fde53ef8cc2ebbf44e7c5afb1191409bfe9cd3f14d7a",
+      "sha256": "2bcdabdfe7f29b4658881b67f1bf3bc901585ba70146e1d28c92b003f1e50e70",
       "executable": false
     },
     "tests/search.mjs": {
