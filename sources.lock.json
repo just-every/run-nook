@@ -1008,6 +1008,46 @@
       "sha256": "ea94c91b8fe5cbdb859142495a8fdb655b116ae844f085278e5a56b15ec640a1",
       "executable": false
     },
+    "evidence/slack-delta/preview-1440.png": {
+      "sha256": "c8ad40b7953fe8dcd0af116ec3840e5ac3a37eabdc078414561a69cee9413338",
+      "executable": false
+    },
+    "evidence/slack-delta/preview-390.png": {
+      "sha256": "2df2292672015d34bd0d163f83209c6b63a2ff252b2c33125f30e52b7fc141df",
+      "executable": false
+    },
+    "evidence/slack-delta/result-1440.png": {
+      "sha256": "b236fb23c40a7a904baab7f072d3d07e3e49055f3235cae92d0c2d1c502205f2",
+      "executable": false
+    },
+    "evidence/slack-delta/result-390.png": {
+      "sha256": "2be194e90f8082f17fbd5a38de82026080644530782ac1840b2fb93f55354643",
+      "executable": false
+    },
+    "evidence/slack-delta/revisions-1440.png": {
+      "sha256": "f940ec3ffdf7972945a2827c04d485861a82d4ce313aeec5618dede22ccec72b",
+      "executable": false
+    },
+    "evidence/slack-delta/revisions-390.png": {
+      "sha256": "3b78970d8c4964aed8782bcd326a314be9458f9d69c55900b57e5b302333f654",
+      "executable": false
+    },
+    "evidence/slack-delta/thread-1440.png": {
+      "sha256": "9fcfaada47f392d0894310587b6b2c830408cffcae3f6a8c59e9739e95e2c9f4",
+      "executable": false
+    },
+    "evidence/slack-delta/thread-390.png": {
+      "sha256": "b37f908407eefbbce13dd59bfca7e9f8ddd6e8e14101fdb841807a9847991ba3",
+      "executable": false
+    },
+    "evidence/slack-delta/undo-1440.png": {
+      "sha256": "ad8989dfb29b32e2bc51dc29714c575d1e39b8a51c87c67c08f6d617bb930ece",
+      "executable": false
+    },
+    "evidence/slack-delta/undo-390.png": {
+      "sha256": "fc2451b905d83c3cb15770b7cb8032f2cde7feb26bfb8e4de9e81b8fc72c94db",
+      "executable": false
+    },
     "IMPORT-APPLY.md": {
       "sha256": "507109bce996e3849d7dd81188461208f8daa23d0f6a077c8261f796103851b2",
       "executable": false
