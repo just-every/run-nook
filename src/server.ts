@@ -1,3 +1,4 @@
+import {aiRoute} from './ai-search/server'
 import {isAppRequest,appRequest} from './notification-apps/door'
 import {manageApps} from './notification-apps/manage'
 import {noteRoute} from './notes/route'
@@ -67,6 +68,8 @@ api.all('/api/*', async c => {
  // Authentication precedes route matching, including unknown protected paths.
  const session=await repository.authenticated(req.headers),exit=await readableExportRoute(session,req,input);if(exit)return exit
  const team=await teamRoute(session,req,input);if(team)return team
+ if(action==='ai-search'&&req.headers.has('signature-agent'))fail(403,'AI search is not available to agents')
+ const ai=await aiRoute(session,req.method,p,input as Record<string,unknown>);if(ai)return c.json(ai)
  const apps=await manageApps(session,req.method,p,input as Record<string,unknown>);if(apps)return c.json(apps)
  const tokens=await tokenRoute(session,req.method,p,input as Record<string,unknown>);if(tokens)return c.json(tokens)
  if(action==='messages'&&id&&sub==='broadcast-recipients'&&p.length===4&&req.method==='GET')return c.json(await broadcastRecipients(session,id,url.searchParams.get('after')??''))

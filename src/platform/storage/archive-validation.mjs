@@ -1,3 +1,4 @@
+import {validateAiSearch} from '../../ai-search/archive.mjs';
 import {validateNotificationApps} from '../../notification-apps/archive.mjs';
 import {validateQuietArchive} from '../../notify/quiet-archive.mjs';
 import {validateAuditArchive} from '../../audit/archive.mjs';
@@ -66,6 +67,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
  const scheduledFiles=await validateSchedules(readTable,manifest,{actors,conversations:conv,messages:msg,attachments:files});
  await validateBroadcastArchive(readTable,{manifest,actors,conversations:conv,messages:msg});
  const imported=index(rows('import_records'),r=>r.id,'duplicate_import_record');
+ await validateAiSearch(readTable,manifest,actors,conv,msg,imported);
  await validateSavedArchive(readTable,{manifest,actors,conversations:conv,messages:msg,imported,attachments:files});
  const deliveryPreferences=await readTable('nook_notify_preferences');for(const p of deliveryPreferences){check((p.thread_badge===undefined||['all','mentions'].includes(p.thread_badge))&&(p.push_initialized===undefined||[0,1].includes(p.push_initialized))&&(p.mobile_when_active===undefined||['inactive','always'].includes(p.mobile_when_active))&&(p.mobile_delay_minutes===undefined||[0,1,2,5,10,15,30].includes(p.mobile_delay_minutes)),'invalid_thread_delivery_preferences')}
  const notifyRows=manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_conversation_notify')?[]:await readTable('nook_conversation_notify');

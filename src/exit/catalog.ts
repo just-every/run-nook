@@ -11,6 +11,7 @@ const source=`JOIN nook_imports j ON j.id=r.job AND j.state='complete' AND ${pub
 // readers sort timestamps/version numbers for display, never infer chronology.
 export const datasets:Dataset[]=[
  ...noteExportDatasets,
+ {name:'ai_search_feedback',sql:`SELECT json_array(f.conversation,f.id) AS _key,f.* FROM nook_ai_feedback f WHERE ${scoped('f')} AND f.user=(SELECT owner FROM job)`},
  {name:'notification_apps',sql:`SELECT json_array(app.conversation,app.id) AS _key,app.conversation,app.id,app.name,app.creator,app.created,app.state,app.ended FROM nook_notification_apps app WHERE ${scoped('app')}`},
  {name:'administrative_audit',sql:`SELECT json_array(a.id) AS _key,'' AS conversation,a.id,a.actor,a.service,a.at,a.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name ELSE 'workspace' END AS scope,a.version,a.reason,a.outcome,a.count FROM nook_audit a LEFT JOIN nook_conversations c ON c.id=a.scope WHERE a.rowid<=(SELECT audit_max FROM job) AND EXISTS(SELECT 1 FROM job WHERE workspace_policy_version IS NOT NULL)`},
  // The exporting person's own routing records; owner/admin roles never read another person's.

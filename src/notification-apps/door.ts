@@ -5,7 +5,7 @@ import {sameHash,sealToken} from '../integrations/secret'
 import {send,edit} from '../platform/storage/messages'
 import {AppContext,RateLimit,audit,type Approval} from './context'
 import {allowedGrant} from '../team/access'
-import {fail} from '../family/team-chat/domain'
+import {fail,messageBody} from '../family/team-chat/domain'
 const headers={'cache-control':'no-store','x-content-type-options':'nosniff'}
 export const isAppRequest=(request:Request)=>request.headers.get('authorization')?.startsWith('Bearer nookapp_')===true||new URL(request.url).pathname.startsWith('/api/notification-destinations/')
 async function input(request:Request){
@@ -39,7 +39,10 @@ export async function appRequest(bindings:StorageBindings,request:Request){
    const body=await input(request),key=request.headers.get('idempotency-key')??''
    if(!/^[A-Za-z0-9._:-]{1,64}$/.test(key)||Object.keys(body).some(k=>k!=='body'))fail(400,'Send a body and an Idempotency-Key')
    c.rate=true
-   return Response.json(await send(c,app.conversation,{body:body.body,intent:'notification:'+key}),{headers})
+   const posted=await send(c,app.conversation,{body:body.body,intent:'notification:'+key})
+   // A post receipt stays identical after edits. Ordinary erasure still refuses
+   // the removed intent rather than returning or resurrecting erased content.
+   return Response.json({id:posted.id,conversation:app.conversation,author:app.id,authorName:app.name,app:1,body:messageBody(body.body),created:posted.created,version:1},{headers})
   }
   if(p.length===5&&p[3]==='messages'&&['PATCH','DELETE'].includes(request.method)){
    const body=await input(request)
