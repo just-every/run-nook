@@ -176,6 +176,7 @@ export async function recapJourney(app,edge){
  const counts=await db.prepare('SELECT (SELECT count(*) FROM nook_messages) AS messages,(SELECT count(*) FROM nook_events) AS events').first();
  assert.ok(edge.calls.every(r=>!r.tools&&!r.tool_choice));for(const r of edge.calls){const p=JSON.parse(r.messages[0].content).quotedPassages;assert.ok(p.length<=bounds.passageLimit);assert.ok(p.reduce((n,p)=>n+Buffer.byteLength(p.text),0)<=bounds.byteLimit);assert.ok(p.every(p=>p.id!=='message:'+privateMessage.id))}
  assert.deepEqual(await db.prepare('SELECT (SELECT count(*) FROM nook_messages) AS messages,(SELECT count(*) FROM nook_events) AS events').first(),counts);
+ const dated=await recap({from:first.created,through:reply.created});assert.equal(dated.range.from,first.created);assert.equal(dated.range.through,reply.created);assert.ok(dated.claims.some(p=>p.source.message===reply.id));assert.ok(dated.claims.every(p=>p.source.at>=first.created&&p.source.at<=reply.created));
  let thread=await recap({thread:first.id});assert.equal(thread.state,'answered');assert.ok(thread.claims.every(p=>[first.id,reply.id].includes(p.source.message)));assert.ok(!JSON.stringify(thread).includes(unrelated.body));
  let calls=edge.calls.length;await recap({conversation:other.id},member.cookie,404);await recap({},outsider.cookie,404);assert.equal(edge.calls.length,calls);
  const empty=await recap({from:'2099-01-01',through:'2099-01-02'});assert.equal(empty.state,'abstain');assert.equal(edge.calls.length,calls);
