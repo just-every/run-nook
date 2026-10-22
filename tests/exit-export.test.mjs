@@ -29,7 +29,9 @@ test('an owner can export a hosted workspace and restore messages, files, search
    await execute(process.execPath,[resolve('node_modules/wrangler/bin/wrangler.js'),'d1','migrations','apply','DB','--local','--config',join(path,'wrangler.jsonc'),'--persist-to',join(path,'.wrangler/state')],{env:{...process.env,CI:'true',WRANGLER_SEND_METRICS:'false'},maxBuffer:4*1024*1024});return path;
   }
   async function open(path){return getPlatformProxy({configPath:join(path,'wrangler.jsonc'),persist:{path:join(path,'.wrangler/state/v3')},remoteBindings:false})}
-  const source=await installation('source');proxy=await open(source);
+  // Both empty installations use the real migration CLI. Prepare them together
+  // so fixture setup does not consume the hosted export/restore deadline twice.
+  const [source,fresh]=await Promise.all([installation('source'),installation('fresh')]);proxy=await open(source);
   // The remote hint transport carries no product data; the restored replay is checked below.
   const hub={idFromName:()=> 'workspace',get:()=>({fetch:async()=>new Response(null,{status:204})})};
   let env;
@@ -58,7 +60,7 @@ test('an owner can export a hosted workspace and restore messages, files, search
   assert.ok(exported.tables.some(t=>t.name==='nook_messages'&&t.count===2));
   assert.equal((await env.DB.prepare('SELECT count(*) AS n FROM rer_portability_segments').first()).n,0);
   await proxy.dispose();proxy=null;
-  const fresh=await installation('fresh'),imported=await transfer('import',archive,{root:fresh});assert.equal(imported.contentHash,exported.contentHash);
+  const imported=await transfer('import',archive,{root:fresh});assert.equal(imported.contentHash,exported.contentHash);
   const folder=join(fresh,'.wrangler/state/v3/d1/miniflare-D1DatabaseObject'),database=join(folder,(await readdir(folder)).find(n=>n.endsWith('.sqlite')&&!n.startsWith('metadata')));
   await recoverNormalizedFixture(database,owner);proxy=await open(fresh);env={...proxy.env,...settings,CHAT_HUB:hub};
   // Use the real one-time owner confirmation door after offline identity recovery.
