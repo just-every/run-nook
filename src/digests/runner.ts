@@ -27,7 +27,9 @@ export async function drainDigests(env:StorageBindings,now=Date.now(),send:Send=
   try{
    const rows=await c.rows<{conversation:string;unreadAfter:number}>(`SELECT m.conversation,COALESCE(r.seq,0) AS unreadAfter FROM nook_members m LEFT JOIN nook_reads r ON r.user=m.user AND r.conversation=m.conversation WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_notification_sharing share WHERE share.conversation=m.conversation AND share.state<>'local') AND EXISTS(SELECT 1 FROM nook_messages source WHERE source.conversation=m.conversation AND source.deleted=0 AND source.sequence>COALESCE(r.seq,0) AND source.author<>m.user) ORDER BY m.conversation LIMIT 100`,[s.user])
    const ranges:Range[]=rows.map(r=>({conversation:r.conversation,thread:null,from:'1970-01-01T00:00:00.000Z',through:new Date(now).toISOString(),unreadAfter:r.unreadAfter}))
-   if(ranges.length){
+   const emailAllowed=s.delivery!=='email'||!!await c.one('SELECT 1 FROM nook_notify_preferences p JOIN oa_operators o ON o.id=p.user JOIN nook_notification_email_facts proof ON proof.user=o.id AND proof.email=o.email WHERE p.user=? AND p.mentions=1',[s.user])
+   if(!emailAllowed){state='skipped';reason='Your email notifications are off or your address needs verification; no provider call was made'}
+   else if(ranges.length){
     const answer=await requestRecap(c,{}, {...ranges[0],collection:ranges},now)
     if(answer.state==='answered'&&'receipt' in answer){receipt={...await verify(c,answer.receipt),delivery:id};state='delivered';reason=null}
     else if(answer.state==='capped'){state='skipped';reason='The installation daily AI cap is spent; this digest is skipped, not queued'}
@@ -35,7 +37,7 @@ export async function drainDigests(env:StorageBindings,now=Date.now(),send:Send=
     else {state='failed';reason=answer.state==='unavailable'?'The provider failed or its answer was rejected':'No verified points were returned; nothing was sent'}
    }
    if(receipt&&s.delivery==='email'){
-    const shown=await showRecap(c,receipt,await sign(c,receipt)),member=await c.one<{email:string}>('SELECT o.email FROM oa_operators o JOIN nook_notify_preferences p ON p.user=o.id WHERE o.id=? AND o.status=\'active\' AND p.mentions=1',[s.user])
+    const shown=await showRecap(c,receipt,await sign(c,receipt)),member=await c.one<{email:string}>('SELECT o.email FROM oa_operators o JOIN nook_notify_preferences p ON p.user=o.id JOIN nook_notification_email_facts proof ON proof.user=o.id AND proof.email=o.email WHERE o.id=? AND o.status=\'active\' AND p.mentions=1',[s.user])
     if(shown.state!=='answered'){receipt=null;state='empty';reason='No current authorized sources remain'}
     else if(!member){receipt=null;state='skipped';reason='Your email notifications are off; no digest email was sent'}
     else {const sent=await send({deliveryId:'digest:'+id,to:member.email,subject:'Your unread Nook digest',text:'Open your cited unread digest in Nook:\n'+env.AUTH_ORIGIN+'/app?view=you#digest-'+id});if(!sent.ok){receipt=null;state='failed';reason='Digest email was not confirmed: '+sent.error}}
