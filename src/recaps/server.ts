@@ -8,7 +8,7 @@ import {digest,selection,sign,verify,type Receipt,type Selection} from './receip
 async function bounded(response:Response){const reader=response.body?.getReader();let bytes=0,body='';const decoder=new TextDecoder();if(reader)for(;;){const {value,done}=await reader.read();if(done)break;bytes+=value.length;if(bytes>131072){await reader.cancel();throw Error('oversize')}body+=decoder.decode(value,{stream:true})}return JSON.parse(body+decoder.decode())}
 export async function showRecap(c:Context,receipt:Receipt,token:string){
  const current=await retrieve(c,receipt.range),cfg=await configuration(c)
- if(!cfg.enabled||cfg.version!==receipt.version)return {state:'off',claims:[],outcomes:[]}
+ if(!cfg.enabled||cfg.version!==receipt.version&&!receipt.delivery)return {state:'off',claims:[],outcomes:[]}
  const recap=await digest(token)
  const dismissed=await c.one("SELECT 1 FROM nook_recap_feedback WHERE user=? AND recap=? AND kind='dismissal'",[c.uid,recap],receipt.range.conversation)
  if(dismissed)return {state:'dismissed',claims:[],outcomes:[]}
