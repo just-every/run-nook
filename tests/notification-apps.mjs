@@ -133,6 +133,18 @@ test('NOOK-080 [NOOK-089] channel-scoped notification approvals, threads, receip
  }finally{await restore?.close();await app.close()}
 });
 
+test('unauthenticated notification destination requests leave no audit records',{timeout:240000},async()=>{
+ const app=await installation(async()=>assert.fail('no provider request'));
+ try{
+  const audits=async()=>(await app.db.prepare('SELECT count(*) AS n FROM nook_audit').first()).n,before=await audits();
+  for(const authorization of [null,'Bearer nookapp_'+crypto.randomUUID()+'.'+'0'.repeat(43)]){
+   const response=await fetch(app.origin+'/api/notification-destinations/x',{headers:authorization?{authorization}:{}});
+   assert.equal(response.status,404);assert.deepEqual(await response.json(),{error:'Destination unavailable'});
+  }
+  assert.equal(await audits(),before);
+ }finally{await app.close()}
+});
+
 test('NOOK-036 cited AI search uses one bounded provider call and survives hostile output, revocation and credential-free restore',{timeout:240000},async t=>{
  const edge={calls:[],mode:'normal',during:null,lastKey:''};let restore;
  const app=await installation(async request=>{assert.equal(request.url,'https://model.example.test/v1/messages');edge.lastKey=request.headers.get('x-api-key');const body=await request.json();edge.calls.push({url:request.url,body});const data=JSON.parse(body.messages[0].content),passages=data.quotedPassages;if(edge.during){const run=edge.during;edge.during=null;await run()}if(edge.mode==='unavailable')return new Response(null,{status:503});const claims=passages.map(p=>({passageId:p.id,quote:p.text}));if(edge.mode==='unsupported')return Response.json({content:[{type:'text',text:JSON.stringify({claims:[{passageId:'fabricated-citation',quote:'unsupported model assertion'}],conflicts:[],abstain:false})}]});const conflicts=edge.mode==='conflicts'&&passages.length>1?[{left:passages[0].id,right:passages[1].id}]:[];if(edge.mode==='hostile')claims.push({passageId:'fabricated-citation',quote:'injected-tool'});return Response.json({content:[{type:'text',text:JSON.stringify({claims,conflicts,abstain:false})},...(edge.mode==='hostile'?[{type:'tool_use',name:'injected-tool',input:{url:'https://attacker.example.test'}}]:[])]})},{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});

@@ -5305,7 +5305,7 @@
       "executable": false
     },
     "src/notification-apps/door.ts": {
-      "sha256": "e7842f5c07c4a50395d681a5aff9c681e498ee178b2395a71f1396af66afb1a9",
+      "sha256": "5d2f7524205eaba7c7cdbb4a3c8b855bf92af788de4443ed37715dbed38bedcb",
       "executable": false
     },
     "src/notification-apps/manage.ts": {
@@ -6409,7 +6409,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "1e4ce62dde03e8501d47f038a99aa138c07390de535b2f4657d01eba7f03f85b",
+      "sha256": "c4f4b2d8c40f509f5a08627be1ee67f323a9a81772e42ff817d6518873ead543",
       "executable": false
     },
     "tests/notification-extension.mjs": {

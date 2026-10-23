@@ -63,9 +63,9 @@ export async function appRequest(bindings:StorageBindings,request:Request){
   fail(404,'Destination unavailable')
  }catch(error){
   const status=error instanceof RateLimit?429:typeof (error as any).status==='number'?(error as any).status:500
-  // No request bodies, tokens, hashes or untrusted URLs enter the audit.
-  const writer={sql:(sql:string,...values:any[])=>env.DB.prepare(sql).bind(...values)}
-  await audit(writer,app?.id??'unknown',app?.conversation??'workspace',null,'refuse','failed').run()
+  // Only a request that proved an approval records its refusal; an unauthenticated
+  // one writes nothing. No request bodies, tokens, hashes or untrusted URLs enter the audit.
+  if(app){const writer={sql:(sql:string,...values:any[])=>env.DB.prepare(sql).bind(...values)};await audit(writer,app.id,app.conversation,null,'refuse','failed').run()}
   return Response.json({error:status===404?'Destination unavailable':status===500?'Notification request failed':(error as Error).message},{status,headers:{...headers,...(error instanceof RateLimit?{'retry-after':String(error.seconds)}:{})}})
  }
 }
