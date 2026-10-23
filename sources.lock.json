@@ -4752,6 +4752,22 @@
       "sha256": "40d7229f43b24404d4f96d4ce7148b557b600e661f4fd3936c84cb99bd7eb30a",
       "executable": false
     },
+    "src/imports/attestation-custody.ts": {
+      "sha256": "425075afe9ec2f85d0758bd2415d811e340c52ce0ba6ff941ccc091400979424",
+      "executable": false
+    },
+    "src/imports/attestation-export.ts": {
+      "sha256": "7f9dbbe6ec06badf752af3d3a41954b0fdecacc77a816191b103e6d71824c15e",
+      "executable": false
+    },
+    "src/imports/attestation.mjs": {
+      "sha256": "fa0ef9e58b1c82db3a07a6223a1fc983eb94ccba21cbc696768631bb9e02afb6",
+      "executable": false
+    },
+    "src/imports/AttestationReport.tsx": {
+      "sha256": "9f039a6b1cf63fc35605150e77822aeb994d3827d0925462b16093043ac073e1",
+      "executable": false
+    },
     "src/imports/authorization.ts": {
       "sha256": "748d5b18253efda9f9c9170d67c8f3728e64fa6f981ab4e7fc5df7c0e4a140fa",
       "executable": false
