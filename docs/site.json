@@ -33,6 +33,7 @@
     {
       "title": "Use Nook",
       "pages": [
+        {"slug":"channel-policy","source":"docs/channel-policy.md","label":"Channel policy and history"},
         {"slug":"reports","source":"docs/reports.md","label":"Workspace reports"},
         {
           "slug": "attention",

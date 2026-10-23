@@ -10,3 +10,5 @@
 /* Channel settings keep a visible Close label in the shared dialog header. */
 dialog:has(.channel-settings) .dialog-heading .icon-button{width:auto;gap:6px;padding-inline:10px}
 dialog:has(.channel-settings) .dialog-heading .icon-button .sr-only{position:static;width:auto;height:auto;margin:0;overflow:visible;clip:auto;clip-path:none;white-space:normal}
+
+.channel-public-confirm{display:flex;align-items:flex-start;gap:8px;margin:12px 0}.channel-public-confirm input{flex-shrink:0;margin-top:3px}
