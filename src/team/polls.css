@@ -15,3 +15,5 @@
 .poll-form-option input{flex:1;min-width:0}
 .poll-form-choices{display:flex;flex-wrap:wrap;gap:1rem}
 .poll-form-actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.nook-app .poll-form fieldset{border:0;border-radius:0;overflow:visible;max-height:none;min-width:0}
+.nook-app .poll-form legend{font-size:max(13px,var(--fs-meta))}
