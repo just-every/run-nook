@@ -206,7 +206,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-94df5c04-f602-49f3-a805-1f79deb65fb4 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-81c06706-e3ce-4efe-85f1-c0e4e56fff40 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -258,7 +258,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-585855b8-0469-4c10-a7bf-c01a2c686ab4 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-d7034ac5-ad5d-4c43-9ede-f88a7d68e33d > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         }
