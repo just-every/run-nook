@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "3f403446462d8be2cfa53b62c68adcd81560d6ab3e65dec11eee35ebe4a80510",
+      "sha256": "d3abaeadeea8c73c34a0c2d18343a29dca9ef5e2f32d21fe416909fde1a90c42",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "ca4a2a35651ab9ed81e9f74ace02082e1fccb4f7e5a33717a4068203daf0b75c",
+      "sha256": "14fd23146fead54842d9d7f19c4f2ca26cc63e6235d7e0d58fe9a9135a563d17",
       "executable": false
     },
     "DEMO.md": {
@@ -725,7 +725,7 @@
       "executable": false
     },
     "docs/your-team.md": {
-      "sha256": "51689596b18bbaf4b7882a2a5cef3174ace2f6133e3a71bd5f9ec09bd16e448e",
+      "sha256": "e06febbc531f800e1f71b234259e43563a38a1244e85ea6817bab9f4bee1fa9b",
       "executable": false
     },
     "edition.json": {
@@ -5905,7 +5905,7 @@
       "executable": false
     },
     "src/team/bulk-invitations.server.ts": {
-      "sha256": "af837592fc4db0a99c4a34f8b0a23e86d14cc102d7a3a5ebf44205db7efa9635",
+      "sha256": "1156e1121d28fdb7f7962dbe041607b8d741b7f864e6ac0272e188b323000f6b",
       "executable": false
     },
     "src/team/BulkInvitations.tsx": {
@@ -6885,7 +6885,7 @@
       "executable": false
     },
     "tests/team-bulk.mjs": {
-      "sha256": "7f3b321184603ae7205bcdad23bf98dadcaae35611a2f34fb2ce92ac29cc0846",
+      "sha256": "c7934b8aa90016d796b6ff1d8a998286e11d17da657702271f9562abbc7b3e00",
       "executable": false
     },
     "tests/team-image.test.mjs": {

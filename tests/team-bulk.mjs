@@ -4,7 +4,7 @@ import {signIn} from './auth-support.mjs';
 // Bulk invitations through the real Worker: preview flags, one invitation per remaining address through the ordinary one-use door,
 // resend and revoke, acceptance into the named and default channels. Mail goes only to the harness's fake provider.
 export async function runBulkInvitations({origin,ownerCookie,call,json,launch,review,publicOther,member,guest,stamp}){
- const post=(path,body,options={})=>call(path,{method:'POST',body,...options}),head='email,name,role,channels',people=async()=>json('/api/team');
+ const post=(path,body,options={})=>call(path,{method:'POST',body,headers:{Connection:'close'},...options}),head='email,name,role,channels',people=async()=>json('/api/team');
  const email=i=>`bulk-${i}-${stamp}@example.test`;
  // 50 pasted rows: 48 distinct addresses (6 guests of the private channel), one repeated address and one invalid address.
  const lines=Array.from({length:48},(_,i)=>i<6?`${email(i)},Guest ${i},guest,${review.name}`:`${email(i)},Person ${i},member,${launch.name}`);
@@ -23,7 +23,7 @@ export async function runBulkInvitations({origin,ownerCookie,call,json,launch,re
  await post('/api/team/invitations/bulk',{csv},{status:400});
  // One action: a bounded chunk per call until nothing remains sendable.
  let sent=0,remaining=48,calls=0;
- while(remaining&&calls++<10){const result=await (await post('/api/team/invitations/bulk',{csv,confirm:true})).json();assert.deepEqual(result.failed,[]);sent+=result.sent;remaining=result.remaining}
+ while(remaining&&calls++<20){const result=await (await post('/api/team/invitations/bulk',{csv,confirm:true})).json();assert.deepEqual(result.failed,[]);sent+=result.sent;remaining=result.remaining}
  assert.equal(sent,48);assert.equal(remaining,0);
  const again=await (await post('/api/team/invitations/preview',{csv})).json();assert.equal(again.counts.sendable,0);assert.equal(again.counts['already-pending'],48,'a second send issues nothing');
  const pending=(await people()).filter(p=>p.email.startsWith('bulk-')&&p.status==='invited');assert.equal(pending.length,48);

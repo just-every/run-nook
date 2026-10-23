@@ -5,7 +5,7 @@ import {authRoute} from '../platform/operator-auth.server'
 import {normalizeEmail} from '../base/modules/operator-auth/policy.mjs'
 import {prepareInvitation,cancelPreparation} from './invitations.server'
 
-export const BULK_ROWS=1000,BULK_BYTES=262_144,SEND_CHUNK=10
+export const BULK_ROWS=1000,BULK_BYTES=262_144,SEND_CHUNK=5
 const address=/^[^\s@<>"',;]{1,64}@[^\s@<>"',;]{1,255}\.[^\s@<>"',;]{1,63}$/
 type Row={line:number;email:string;name:string;role:string;channels:string[];expiry:string}
 export type Flag='invalid-address'|'duplicate-in-batch'|'existing-account'|'already-pending'|'role-not-allowed'|'name-missing'|'unknown-channel'|'guest-needs-channel'|'no-default-channel'|'guest-expiry-not-built'
