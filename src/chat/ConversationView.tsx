@@ -1,7 +1,6 @@
 import {RecapPanel} from '../recaps/RecapPanel'
 import {NotesPanel} from '../notes/NotesPanel'
 import {BookmarksBar} from '../team/BookmarksBar'
-import {PollForm} from '../team/PollForm'
 import type {TeamRequest} from '../team/types'
 import {canEraseChannelMessage} from '../team/erasure/policy'
 import {NookMark} from '../brand/NookMark'
@@ -16,7 +15,6 @@ import {IconBack,IconBell,IconClose,IconPlus} from './icons'
 type Props={request:TeamRequest;user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
 export function ConversationView({request,user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,sendMessage,onRead,mutate,onError,onAction,onDiscuss}:Props) {
  const log=useRef<HTMLDivElement>(null),threadLog=useRef<HTMLDivElement>(null)
- const [pollOpen,setPollOpen]=useState(false)
  const showNotes=route.panel==='notes',showOutcomes=route.panel==='outcomes',[peek,setPeek]=useState<string|null>(null)
  useEffect(()=>{if(!showOutcomes)setPeek(null)},[showOutcomes])
  useEffect(()=>{if(!peek||!showOutcomes)return;const frame=requestAnimationFrame(()=>{const card=document.getElementById('outcome-'+peek);card?.scrollIntoView({block:'start'});card?.focus({preventScroll:true})});return()=>cancelAnimationFrame(frame)},[peek,showOutcomes])
@@ -141,7 +139,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
     </div>
     {showLatest&&<button className="jump-latest soft-button" onClick={()=>latest()}>Latest messages</button>}
    </div>
-   {c.convertedTo?<p className="archived-notice">This group DM moved to a private channel and is read-only. <button className="text-button" onClick={()=>navigate({view:'chat',conversation:c.convertedTo!,thread:null,focus:null,before:null,threadBefore:null,panel:null})}>Open private channel</button></p>:c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<>{pollOpen&&<PollForm onPost={async input=>{await mutate(`conversations/${c.id}/polls`,input);sent()}} onClose={()=>setPollOpen(false)}/>}{!pollOpen&&c.canPost!==false&&c.canPost!==0&&<div className="poll-launch"><button type="button" className="text-button" onClick={()=>setPollOpen(true)}>Create poll</button></div>}<Composer onEditLast={message=>openDialog({kind:'edit',message})} onSchedule={(draft,onScheduled)=>openDialog({kind:'schedule',draft,onScheduled})} restricted={c.canPost===false||c.canPost===0} key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/></>}
+   {c.convertedTo?<p className="archived-notice">This group DM moved to a private channel and is read-only. <button className="text-button" onClick={()=>navigate({view:'chat',conversation:c.convertedTo!,thread:null,focus:null,before:null,threadBefore:null,panel:null})}>Open private channel</button></p>:c.archived?<p className="archived-notice">This channel is archived. Its history is available; a manager can restore it from Details.</p>:<><Composer onEditLast={message=>openDialog({kind:'edit',message})} onSchedule={(draft,onScheduled)=>openDialog({kind:'schedule',draft,onScheduled})} restricted={c.canPost===false||c.canPost===0} key={user.id+':'+c.id+':root'} user={user} conversation={c.id} name={name} parent={null} members={data.members} privateSignal={privateSignal} viewCurrent={conversationCurrent} beginWrite={beginWrite} sendMessage={sendMessage} onSent={sent} onError={onError}/></>}
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&recap}

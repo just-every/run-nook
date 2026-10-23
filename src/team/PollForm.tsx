@@ -12,7 +12,7 @@ export function PollForm({onPost,onClose}:{onPost:(input:unknown)=>Promise<void>
   catch(e){setError(e instanceof Error?e.message:'The poll was not posted.')}finally{setBusy(false)}
  }
  return <form className="poll-form" onSubmit={e=>void submit(e)} aria-label="Create a poll">
-  <div className="field"><label htmlFor={id+'-q'}>Question</label><input id={id+'-q'} value={question} maxLength={500} required onChange={e=>{touch();setQuestion(e.target.value)}}/></div>
+  <div className="field"><label htmlFor={id+'-q'}>Question</label><input id={id+'-q'} autoFocus value={question} maxLength={500} required onChange={e=>{touch();setQuestion(e.target.value)}}/></div>
   <fieldset className="field"><legend>Options (2 to {POLL_OPTIONS_MAX})</legend>{options.map((value,index)=><div className="poll-form-option" key={index}>
    <input aria-label={'Option '+(index+1)} value={value} maxLength={120} required onChange={e=>{touch();setOptions(options.map((o,i)=>i===index?e.target.value:o))}}/>
    {options.length>2&&<button type="button" className="text-button" aria-label={'Remove option '+(index+1)} onClick={()=>{touch();setOptions(options.filter((_,i)=>i!==index))}}>Remove</button>}

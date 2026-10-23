@@ -2,7 +2,7 @@
 .clip-recorder{grid-column:1/-1;width:100%}
 .clip-player{flex-basis:100%;width:min(100%,560px);margin:8px 0}
 .clip-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-.clip-meta{font-size:.8rem;line-height:1.5;color:var(--ink-soft,#626b64);margin:6px 0;overflow-wrap:anywhere}
+.clip-meta{font-size:13px;line-height:1.5;color:var(--ink-soft,#626b64);margin:6px 0;overflow-wrap:anywhere}
 .clip-recorder video,.clip-player video{display:block;width:100%;max-height:360px;background:#111;border-radius:6px;margin:8px 0}
 .clip-recorder audio,.clip-player audio{display:block;width:100%;max-width:100%;margin:8px 0}
 .clip-upload{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:.85rem;max-width:100%}

@@ -7,3 +7,5 @@
 .nook-app .file-inert-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;background:var(--surface-page);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px}
 
 .file-policy input,.file-policy textarea{max-width:100%;width:100%;font:inherit;box-sizing:border-box}.file-policy p,.file-policy label{font-size:max(13px,var(--fs-body,14px))}
+
+.nook-app .file-inert-preview .dialog-note{font-size:13px}

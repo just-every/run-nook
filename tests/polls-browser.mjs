@@ -8,7 +8,8 @@ export async function pollsBrowser({origin,owner,member,room,destination=evidenc
   const errors=[],manager=await open({cookie:owner.cookie,origin},{errors}),reader=await open({cookie:member.cookie,origin}),url=origin+'/app?conversation='+room.id
   try{
    const {page}=manager,mine=reader.page,named='Which day for the launch review? '+width,anonymous='Which rooms should we book? '+width
-   await page.goto(url);await page.getByRole('button',{name:'Create poll',exact:true}).click()
+   const openPoll=async()=>{await page.getByTitle('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Create poll',exact:true}).click()};
+   await page.goto(url);await openPoll()
    const form=page.getByRole('form',{name:'Create a poll'});await form.getByLabel('Question',{exact:true}).fill(named);await form.getByLabel('Option 1',{exact:true}).fill('Tuesday');await form.getByLabel('Option 2',{exact:true}).fill('Wednesday')
    await form.getByRole('button',{name:'Add option',exact:true}).click();await form.getByLabel('Option 3',{exact:true}).fill('Thursday');await form.getByRole('button',{name:'Remove option 3',exact:true}).click()
    await expect(form.getByLabel('Option 3',{exact:true})).toHaveCount(0)
@@ -23,7 +24,7 @@ export async function pollsBrowser({origin,owner,member,room,destination=evidenc
    await card.getByRole('button',{name:'Close poll',exact:true}).click();await expect(card.getByText('closed · final count',{exact:false})).toBeVisible();await expect(card.getByRole('button',{name:'Vote'})).toHaveCount(0)
    await mine.reload();await expect(mine.getByRole('region',{name:'Poll: '+named,exact:true}).getByRole('button',{name:/Vote/})).toHaveCount(0)
 
-   await page.getByRole('button',{name:'Create poll',exact:true}).click()
+   await openPoll()
    const second=page.getByRole('form',{name:'Create a poll'});await second.getByLabel('Question',{exact:true}).fill(anonymous);await second.getByLabel('Option 1',{exact:true}).fill('Atrium');await second.getByLabel('Option 2',{exact:true}).fill('Studio')
    await second.getByLabel('Allow several choices').check();await second.getByRole('button',{name:'Post poll',exact:true}).click()
    await mine.reload();const secret=mine.getByRole('region',{name:'Poll: '+anonymous,exact:true});await secret.getByLabel(/^Atrium/).check();await secret.getByLabel(/^Studio/).check();await secret.getByRole('button',{name:'Vote',exact:true}).click()

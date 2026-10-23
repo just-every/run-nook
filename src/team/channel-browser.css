@@ -4,3 +4,5 @@
 .nook-app .team-channels form{display:flex;align-items:end;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s4)}
 .nook-app .team-channels form label{display:grid;gap:var(--s1);flex:1;min-width:180px}
 .nook-app .team-channels form input{width:100%;min-width:0}
+
+.nook-app .channel-browser-description{font-size:13px}
