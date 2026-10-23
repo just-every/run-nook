@@ -85,7 +85,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
             retained.current = { uploadId: id, namespace };
             setBusy(`Uploading reviewed history: ${done} of ${total} chunks`);
         }, namespace);
-        const next = await doorRequest(kind, 'plan', { uploadId, ...(catchup ? { catchup: true } : {}), ...(stated ? {attestation: stated} : {}) }, namespace);
+        const next = await doorRequest(kind, 'plan', { uploadId, ...(catchup ? { catchup: true } : {}), ...(stated ? {attestation: stated} : {}), ...(result.summary.cutover ? {cutover: result.summary.cutover} : {}) }, namespace);
         retained.current = { uploadId, namespace, planId: next.planId };
         setPlan(next); setCurrentJob(null); setNow(Date.now());
         setStatus('Dry run ready. Review its counts, rejections and differences before applying.');

@@ -16,6 +16,7 @@ import { ownerAction } from './door-history';
 import { guardUndo } from './door-undo';
 import {validateDeltaBaseline} from './delta-state';
 import { attestedRange } from './attestation.mjs';
+import { validateCutover } from './slack-cutover.mjs';
 import type { D1Sql, D1TargetAdapter } from './kit';
 
 const headers = {'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'};
@@ -28,7 +29,7 @@ async function inputBody(request: Request) {
   if (request.method === 'GET') return {};
   if (request.headers.get('Content-Type')?.split(';')[0] !== 'application/json') throw new Fault(415, 'JSON required');
   const body = await request.clone().text();
-  if (new TextEncoder().encode(body).length > 100_000) throw new Fault(413, 'Import request too large');
+  if (new TextEncoder().encode(body).length > 400_000) throw new Fault(413, 'Import request too large');
   const value = JSON.parse(body);
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Fault(400, 'JSON object required');
   return value;
@@ -51,12 +52,17 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
       if (result !== null) return Response.json(result, {headers});
     }
     const users = await people(env.DB), source = importSource(admitted.namespace, admitted.principal, users)!;
-    let predicate = admitted.predicate, link: any, capture, attestation;
+    let predicate = admitted.predicate, link: any, capture, attestation, cutover;
     if (action === 'plan') {
       cleanup = () => withdrawUnplanned(env, predicate, admitted.namespace, input.uploadId);
       if (Object.hasOwn(input, 'attestation')) {
         if (!admitted.c || listed.kind !== 'slack') throw new Fault(403, 'Only the workspace owner can attest a Slack ZIP date range');
         try { attestation = attestedRange(input.attestation); } catch (error) { throw new Fault(400, (error as Error).message); }
+      }
+      if (Object.hasOwn(input, 'cutover')) {
+        if (!admitted.c || listed.kind !== 'slack') throw new Fault(403, 'Only the workspace owner can prepare Slack cutover invitations');
+        try { validateCutover(input.cutover); } catch (error) { throw new Fault(400, (error as Error).message); }
+        cutover = input.cutover;
       }
       capture = await uploadedCapture(env, admitted.namespace, input.uploadId, admitted.principal, users);
       if(capture.capture.delta){if(!admitted.c||input.catchup!==true)throw new Fault(403,'An owner-reviewed delta pass is required');await validateDeltaBaseline(admitted.c,capture.capture);}
@@ -91,8 +97,8 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
     // Attestation is Nook-owned pass metadata. Base still receives its exact
     // plan schema; every other unknown request field remains a refusal.
     let handledRequest = request;
-    if (action === 'plan' && Object.hasOwn(input, 'attestation')) {
-      const { attestation: _range, ...planInput } = input, planHeaders = new Headers(request.headers);
+    if (action === 'plan' && (Object.hasOwn(input, 'attestation') || Object.hasOwn(input, 'cutover'))) {
+      const { attestation: _range, cutover: _cutover, ...planInput } = input, planHeaders = new Headers(request.headers);
       planHeaders.delete('content-length');
       handledRequest = new Request(request, { headers: planHeaders, body: JSON.stringify(planInput) });
     }
@@ -104,7 +110,7 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
       cleanup = () => withdrawUnplanned(env, predicate, admitted.namespace, result.uploadId);
       await uploadedCapture(env, admitted.namespace, result.uploadId, admitted.principal, users);
     }
-    if (action === 'plan') result = await bindPlan(env, predicate, capture!, result, input.uploadId, admitted.principal, attestation);
+    if (action === 'plan') result = await bindPlan(env, predicate, capture!, result, input.uploadId, admitted.principal, attestation, cutover);
     if (link && ['apply','undo'].includes(action)) await publishResult(env, predicate, link, result);
     if (admitted.c && (result.state === 'cancelled' || ['undone','rolled_back'].includes(result.job?.state))) {await cleanupImportObjects(admitted.c);await admitted.c.hint();}
     if (link && ['status','apply'].includes(action)) result.destinations = (await env.DB.prepare('SELECT source_id AS sourceId,conversation AS id FROM nook_import_channels WHERE job=? ORDER BY source_id').bind(link.domain_job).all()).results;
