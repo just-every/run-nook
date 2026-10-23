@@ -13,6 +13,7 @@ export async function pollsBrowser({origin,owner,member,room,destination=evidenc
    const form=page.getByRole('form',{name:'Create a poll'});await form.getByLabel('Question',{exact:true}).fill(named);await form.getByLabel('Option 1',{exact:true}).fill('Tuesday');await form.getByLabel('Option 2',{exact:true}).fill('Wednesday')
    await form.getByRole('button',{name:'Add option',exact:true}).click();await form.getByLabel('Option 3',{exact:true}).fill('Thursday');await form.getByRole('button',{name:'Remove option 3',exact:true}).click()
    await expect(form.getByLabel('Option 3',{exact:true})).toHaveCount(0)
+   await checkScreen(page,destination,'poll-create-'+width,errors)
    await form.getByRole('button',{name:'Post poll',exact:true}).click()
    const card=page.getByRole('region',{name:'Poll: '+named,exact:true});await expect(card).toBeVisible()
    await mine.goto(url);const theirs=mine.getByRole('region',{name:'Poll: '+named,exact:true});await expect(theirs).toBeVisible();await expect(theirs.getByText('Anonymous poll · counts only',{exact:false})).toBeVisible()
