@@ -485,7 +485,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests at commit `aa6719e64cb4ac80b6ade0cc2c1d765a2c1e566d` (23 October 2026).
+Judged from the code and tests at commit `c2486fd2314520076e24990e30549d09085b08ad` (23 October 2026).
 
 Coverage is 34 done, 21 partial and 36 missing of 91 (Published 15/2/0 of 17; Target and push further 19/19/36 of 74). NOOK-035 and NOOK-067 are done for their proved web remainders, including every formerly unasserted clause-sentence part. NOOK-024 and NOOK-077 remain partial with their stated Gaps; NOOK-081 and NOOK-083 through NOOK-088 remain missing. NOOK-082 implements responsive-web scheduled forwarding and remains partial for its native-client Gap. NOOK-089 implements its three public-door parts and is done under the ruled app-identity default. NOOK-073 remains partial for per-device web choice and the email-entry export sentence; NOOK-015 remains partial for real provider/device acceptance.
 
@@ -496,8 +496,8 @@ Current code/test coverage is recorded per clause below and mirrored in ACCEPTAN
 | Clauses | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Published | 15 | 2 | 0 | 17 |
-| Target and push further | 18 | 20 | 36 | 74 |
-| All | 33 | 22 | 36 | 91 |
+| Target and push further | 19 | 19 | 36 | 74 |
+| All | 34 | 21 | 36 | 91 |
 
 | Clause | Title | Kind | Status | Evidence | Gap |
 | --- | --- | --- | --- | --- | --- |
@@ -584,7 +584,7 @@ Current code/test coverage is recorded per clause below and mirrored in ACCEPTAN
 | `NOOK-058` | Stale handoffs and proposed resolution | push-further | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-059` | Visible and controllable agent execution | push-further | missing |  | No implementing source/test; acceptance journey above is pending. |
 | `NOOK-081` | Inbound email into conversations | target | missing |  | Depends on NOOK-061. No implementing source/test; acceptance journey above is pending. |
-| `NOOK-082` | Scheduled forwarding | target | partial | `tests/notification-apps.mjs` — “NOOK-067 [NOOK-082] immediate and scheduled forwards protect source audiences, delivery permissions, disclosures and descendants” (Verify, verify (integration tokens)); `tests/scheduled-forwards.mjs` — scheduledForwardJourney: channel/DM delivery once, original source/note/time, independent posting refusal with reason, access-generation refusal without a copy, source deletion, stricter policy refusal, edit/cancel, paused credential-free restore and sender/source erasure; `tests/integration-tokens-browser.mjs` — forwardBrowser (1440/390 schedule control, Scheduled entry, edit/cancel and matching hover/focus/touch tooltip, no horizontal overflow or serious axe findings); `evidence/forwards/`. | Ruled default APPROVED by ct, 22 October 2026 22:10Z: recheck the approving session, access generation, source, owner policy and each destination at delivery; a refused destination sends nothing and the member sees which destination was refused and why; the still-authorized subset commits atomically through NOOK-067 inside NOOK-034's occurrence transaction; never silently downgrade Show message; restores pause schedules and discard approving-session authority; no second scheduler. Native desktop, iOS and Android clients remain unproven (NOOK-021); responsive web is proven. External shared forwarding remains NOOK-083/031. |
+| `NOOK-082` | Scheduled forwarding | target | partial | `tests/notification-apps.mjs` — “NOOK-067 [NOOK-082] immediate and scheduled forwards protect source audiences, delivery permissions, disclosures and descendants” (Verify, verify (integration tokens)); `tests/scheduled-forwards.mjs` — scheduledForwardJourney: channel/DM/group-DM/thread delivery once, original source/note/time, revoked approving-session refusal, independent posting refusal with reason, access-generation refusal without a copy, source deletion, stricter policy refusal, edit/cancel, paused credential-free restore and sender/source erasure; `tests/integration-tokens-browser.mjs` — forwardBrowser (1440/390 schedule control, Scheduled entry, edit/cancel and matching hover/focus/touch tooltip, no horizontal overflow or serious axe findings); `evidence/forwards/`. | Ruled default APPROVED by ct, 22 October 2026 22:10Z: recheck the approving session, access generation, source, owner policy and each destination at delivery; a refused destination sends nothing and the member sees which destination was refused and why; the still-authorized subset commits atomically through NOOK-067 inside NOOK-034's occurrence transaction; never silently downgrade Show message; restores pause schedules and discard approving-session authority; no second scheduler. Native desktop, iOS and Android clients remain unproven (NOOK-021); responsive web is proven. External shared forwarding remains NOOK-083/031. |
 | `NOOK-083` | External shared-channel forwarding | target | missing |  | Depends on NOOK-031. No implementing source/test; acceptance journey above is pending. |
 | `NOOK-084` | Scheduled catch-up digests | target | missing |  | Depends on NOOK-035. No implementing source/test; acceptance journey above is pending. |
 | `NOOK-085` | Call recordings and consent artifacts | target | missing |  | Depends on NOOK-022. No implementing source/test; acceptance journey above is pending. |
