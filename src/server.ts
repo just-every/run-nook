@@ -14,7 +14,7 @@ import {broadcastPresence} from './broadcast/presence'
 import {unreads,markUnreads} from './platform/storage/unreads'
 import {withDemo} from './base/modules/demo/index.mjs'
 import {seedDemo} from './demo'
-import {devices,register,remove,presence,revokeSession} from './push/devices'
+import {devices,register,remove,presence,revokeSession,setMobile} from './push/devices'
 import {authorizedPushSnapshot} from './push/snapshot'
 import start from '@tanstack/react-start/server-entry'
 import { Hono } from 'hono'
@@ -100,6 +100,7 @@ api.all('/api/*', async c => {
   if(p.length===2&&req.method==='GET')return c.json(await devices(session))
   if(p.length===2&&req.method==='POST')return c.json(await register(session,input))
   if(p.length===2&&req.method==='DELETE')return c.json(await remove(session,input))
+  if(p.length===2&&req.method==='PATCH')return c.json(await setMobile(session,input))
   if(p.length===3&&id==='presence'&&req.method==='POST')return c.json(await presence(session,input))
   if(p.length===3&&id==='sync'&&req.method==='GET'){return c.json(await authorizedPushSnapshot(session))}
  }
