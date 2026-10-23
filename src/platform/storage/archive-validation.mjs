@@ -51,6 +51,7 @@ export async function validateNormalizedArchive({read,manifest,db,tables:stagedT
 
  };
  for(const name of names)await readTable(name);
+ if(manifest?.tables?.some(table=>table.name==='nook_file_policy')){const policies=await readTable('nook_file_policy'),p=policies[0];check(policies.length===1&&p.id===1&&Number.isSafeInteger(p.version)&&p.version>=0&&Number.isSafeInteger(p.max_bytes)&&p.max_bytes>=1&&p.max_bytes<=26214400,'invalid_file_policy');let blocked;try{blocked=JSON.parse(p.blocked_json)}catch{throw Error('invalid_file_policy')}check(Array.isArray(blocked)&&blocked.length<=50&&new Set(blocked).size===blocked.length&&blocked.every(x=>typeof x==='string'&&/^[a-z0-9][a-z0-9._+-]{0,31}$/.test(x)),'invalid_file_policy')}
  const channelActions=await validateChannelArchive(readTable,{conversations:tables.nook_conversations,actors:tables.nook_actors,events:tables.nook_events});
  const conversions=await conversionArchive(readTable,manifest,tables.nook_conversations,tables.nook_actors,tables.nook_events);
  const rows=name=>tables['nook_'+name];

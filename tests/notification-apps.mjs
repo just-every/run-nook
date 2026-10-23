@@ -1,3 +1,4 @@
+import './file-policy-journey.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {installation,until} from './push/fixture.mjs';
@@ -259,7 +260,7 @@ test('NOOK-024 browser clips keep private bytes, seekable human captions and imm
   const memberFile=await upload(member.cookie),memberSource=await post(memberFile,member.cookie);await call('/api/clips/'+memberFile.id,'PATCH',{version:0,cues},ownerCookie);let erased=await call('/api/erasures','POST',{kind:'member',target:member.user.id,confirmation:'ERASE'},ownerCookie);for(let n=0;erased.state!=='complete'&&n<50;n++)erased=await call('/api/erasures/'+erased.id+'/resume','POST',{},ownerCookie);assert.equal(erased.state,'complete');assert.equal((await call(path+'/history','GET',undefined,ownerCookie)).items.at(-1).actor,null);assert.deepEqual((await call(path+'/history','GET',undefined,ownerCookie)).items.at(-1).cues,cues);await call('/api/clips/'+memberFile.id,'GET',undefined,ownerCookie,404);assert.equal((await call('/api/messages/'+memberSource.id,'GET',undefined,ownerCookie)).deleted,1);
   await call('/api/messages/'+source.id,'PATCH',{delete:true,version:source.version},ownerCookie);await call(path,'GET',undefined,ownerCookie,404);assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_clip_transcripts WHERE attachment=?').bind(file.id).first()).n,0);assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_clips WHERE attachment=?').bind(file.id).first()).n,0);assert.equal((await app.raw('/api/attachments/'+file.id+'/download','GET',undefined,ownerCookie)).status,404);
   const removed=await upload(),removedMessage=await post(removed);await call('/api/clips/'+removed.id,'PATCH',{version:0,cues},ownerCookie);await call('/api/attachments/'+removed.id,'PATCH',{delete:true},ownerCookie);await call('/api/clips/'+removed.id,'GET',undefined,ownerCookie,404);assert.equal((await call('/api/messages/'+removedMessage.id,'GET',undefined,ownerCookie)).deleted,0);
-  t.diagnostic('Browser fake-device capture at 1440/390, playback/seek, typed/WebVTT captions and correction history, upload failure/retry, private refusal, export/restore and source/file/author erasure passed. Real phone capture NOT RUN. No holds exist; no provider is used.');
+  t.diagnostic('Browser fake-device capture at 1440/390, playback/seek, typed/WebVTT captions and correction history, upload failure/retry, private refusal, export/restore and source/file/author erasure passed. Real phone capture NOT RUN. Holds remain unavailable; provider transcripts use only a network-edge fake.');
  }finally{await restore?.close();await app.close()}
 });
 

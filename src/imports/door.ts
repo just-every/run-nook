@@ -1,3 +1,4 @@
+import {readFilePolicy,filePolicyVersion,DEFAULT_FILE_LIMIT} from '../files/policy.server'
 import {auditDatabase} from '../audit/database';
 import { createImportOperatorHandler } from '../base/modules/import-kit/src/door/operator';
 import { admit } from '../base/modules/import-kit/src/door/admission';
@@ -47,12 +48,15 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
     vendor = vendors[listed.kind];
     auditActor=admitted.c?.uid??null;
     const action = path.split('/').at(-1)!;
+    const filePolicy=action==='uploads'?await readFilePolicy(env.DB):null;
+    // Captures may embed file bytes across chunks; without a verified metadata-first door, refuse restricted captures before their first stored byte.
+    if(filePolicy&&(filePolicy.max_bytes<DEFAULT_FILE_LIMIT||JSON.parse(filePolicy.blocked_json).length))throw new Fault(409,'Workspace file policy: history-import uploads are unavailable while size or extension restrictions are set');
     if (admitted.c) {
       const result = await ownerAction(env, admitted.c, action, input, listed.kind);
       if (result !== null) return Response.json(result, {headers});
     }
     const users = await people(env.DB), source = importSource(admitted.namespace, admitted.principal, users)!;
-    let predicate = admitted.predicate, link: any, capture, attestation, cutover;
+    let predicate = filePolicy?sql(`(${admitted.predicate.sql}) AND ${filePolicyVersion}=?`,...admitted.predicate.params??[],filePolicy.version):admitted.predicate, link: any, capture, attestation, cutover;
     if (action === 'plan') {
       cleanup = () => withdrawUnplanned(env, predicate, admitted.namespace, input.uploadId);
       if (Object.hasOwn(input, 'attestation')) {

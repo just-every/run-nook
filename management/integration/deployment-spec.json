@@ -430,6 +430,12 @@
       "name": "0091_provider_transcripts.sql",
       "sha256": "7a10a7a33133fa120826f1410700e3f2876dcbc0355c4680c146681546df2e38",
       "sql": "-- Additive upgrade: provider-generated clip transcripts, off by default. The owner's settings, the sealed provider key and the\n-- daily call counter live in their own tables; a provider revision is a new transcript revision labelled by its source.\n-- Every existing transcript revision stays human.\nCREATE TABLE nook_transcript_settings(\n id INTEGER PRIMARY KEY CHECK(id=1),enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),\n base_url TEXT NOT NULL,model TEXT NOT NULL,daily_cap INTEGER NOT NULL CHECK(daily_cap BETWEEN 1 AND 1000),version INTEGER NOT NULL\n);\nCREATE TABLE nook_transcript_secrets(id INTEGER PRIMARY KEY CHECK(id=1),sealed TEXT NOT NULL);\nCREATE TABLE nook_transcript_calls(day TEXT PRIMARY KEY,calls INTEGER NOT NULL);\nALTER TABLE nook_clip_transcripts ADD COLUMN source TEXT NOT NULL DEFAULT 'human' CHECK(source IN ('human','provider'));\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0092_file_policy.sql",
+      "sha256": "82376e81311d4054eaa1402abb0f699767115e4c03225c7ddc8c234cb6753a76",
+      "sql": "CREATE TABLE nook_file_policy(\n id INTEGER PRIMARY KEY CHECK(id=1),version INTEGER NOT NULL CHECK(version>=0),\n max_bytes INTEGER NOT NULL CHECK(max_bytes BETWEEN 1 AND 26214400),\n blocked_json TEXT NOT NULL CHECK(json_valid(blocked_json) AND json_type(blocked_json)='array')\n);\nINSERT INTO nook_file_policy VALUES(1,0,26214400,'[]');\nCREATE TRIGGER nook_exit_file_policy_update AFTER UPDATE ON nook_file_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\nCREATE TRIGGER nook_exit_file_policy_delete AFTER DELETE ON nook_file_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

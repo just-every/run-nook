@@ -1,3 +1,4 @@
+import {filePolicy,updateFilePolicy} from '../files/policy.server'
 import {directoryRoute} from './directory-route.server'
 import {publicChannelPreview,makeChannelPublic} from './channel-public.server'
 import {workspacePolicy,updateWorkspacePolicy} from './workspace-policy.server'
@@ -31,6 +32,7 @@ import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from '
 import {createPoll,readPoll,vote,closePoll} from './polls.server'
 import {bookmarks,addBookmark,reorderBookmarks,removeBookmark} from './bookmarks.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
+ if(new URL(request.url).pathname==='/api/team/file-policy'){if(request.method==='GET')return Response.json(await filePolicy(c));if(request.method==='PATCH')return Response.json(await updateFilePolicy(c,input))}
  const directory=await directoryRoute(c,request);if(directory)return directory
  const reports=await reportsRoute(c,request);if(reports)return reports
  const audit=await auditRoute(c,request);if(audit)return audit

@@ -1,3 +1,4 @@
+import {readFilePolicy,enforceFilePolicy,filePolicyVersion} from '../files/policy.server'
 import {fail} from '../family/team-chat/domain'
 import {authority,type Context,type StorageBindings} from '../platform/storage/context'
 import {erasedIntent} from '../team/erasure/intent.mjs'
@@ -63,10 +64,11 @@ export async function materializeOccurrenceFiles(env:StorageBindings,schedule:an
  if(templates.length!==ids.length||templates.some((row,index)=>row.attachment!==ids[index]||row.position!==index))fail(409,'Scheduled attachment bindings changed; review the message')
  const result:string[]=[],copies=await Promise.all(templates.map(async template=>({template,hash:await digest(JSON.stringify([schedule.id,schedule.version,schedule.local_at,template.attachment]))})))
  try{for(const {template,hash} of copies){
+  const policy=await readFilePolicy(env.DB);enforceFilePolicy(policy,template.name,template.size)
   const id='scheduled-file:'+hash,intent='scheduled-template:'+template.attachment+':'+hash,objectPath='private/scheduled/'+hash
   const sql=(statement:string,...values:any[])=>env.DB.prepare(statement).bind(...values)
   const templateGuard='EXISTS(SELECT 1 FROM nook_schedule_files WHERE schedule=? AND attachment=? AND object_key=? AND sha256=?)'
-  const current=`(${guard}) AND ${templateGuard} AND NOT EXISTS(SELECT 1 FROM nook_erased_attachments WHERE intent_digest=?)`,currentValues=[...guardValues,schedule.id,template.attachment,template.object_key,template.sha256,await erasedIntent(schedule.user,intent)]
+  const current=`(${guard}) AND ${filePolicyVersion}=? AND ${templateGuard} AND NOT EXISTS(SELECT 1 FROM nook_erased_attachments WHERE intent_digest=?)`,currentValues=[...guardValues,policy.version,schedule.id,template.attachment,template.object_key,template.sha256,await erasedIntent(schedule.user,intent)]
   await guarded(env,`${current} AND (EXISTS(SELECT 1 FROM nook_attachments WHERE id=?) OR (SELECT count(*) FROM nook_attachments WHERE author=? AND state IN ('reserved','staged'))<50)`,[...currentValues,id,schedule.user],[sql("INSERT INTO nook_attachments(id,conversation,author,message,name,mime,size,sha256,expires,state,created,object_key,intent) VALUES(?,?,?,NULL,?,?,?,?,?,'reserved',?,?,?) ON CONFLICT(id) DO NOTHING",id,schedule.conversation,schedule.user,template.name,template.mime,template.size,template.sha256,Date.now()+86_400_000,new Date().toISOString(),objectPath,intent)])
   const row=await sql('SELECT * FROM nook_attachments WHERE id=?',id).first<FileRow>()
   if(!row||!matches(row,template,schedule,intent,objectPath)||!['reserved','staged'].includes(row.state)||row.expires<=Date.now())fail(409,'Scheduled attachment copy is unavailable; review the message')

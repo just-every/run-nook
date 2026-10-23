@@ -16,6 +16,7 @@ const source=`JOIN nook_imports j ON j.id=r.job AND j.state='complete' AND ${pub
 // Keys are injective JSON tuples. Their lexical order is a paging order only;
 // readers sort timestamps/version numbers for display, never infer chronology.
 export const datasets:Dataset[]=[
+ {name:'file_policy',sql:`SELECT json_array(id) AS _key,'' AS conversation,version,max_bytes,blocked_json FROM nook_file_policy`,project:row=>{const {blocked_json,...rest}=row;return {...rest,blocked_extensions:JSON.parse(blocked_json)}}},
  ...noteExportDatasets,
  ...clipExportDatasets,
  ...pollExportDatasets,

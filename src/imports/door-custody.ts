@@ -1,3 +1,4 @@
+import {readFilePolicy,enforceFilePolicy,filePolicyVersion} from '../files/policy.server'
 import type { DoorBindings } from './door-access';
 import { fencedBatch } from './door-access';
 import { doorKey, decodeDoorPacket, sourceName, type DoorCapture } from './door-source';
@@ -69,6 +70,8 @@ export async function prepareFiles(env: DoorBindings, predicate: D1Sql, value: D
     return message.files.map((f: any) => ({...f, bytes: value.capture.messages.find((m: any) => m.key === message.key).files.find((x: any) => x.sourceId === f.sourceId).bytes}));
   });
   if (!files.length) return {staged: 0, total: 0};
+  const policy=await readFilePolicy(env.DB);for(const file of files)enforceFilePolicy(policy,file.name,file.size);
+  predicate=sql(`(${predicate.sql}) AND ${filePolicyVersion}=?`,...predicate.params??[],policy.version);
   const rows = (await env.DB.prepare('SELECT * FROM nook_import_objects WHERE object_key IN (SELECT value FROM json_each(?))').bind(JSON.stringify(files.map(f => f.objectKey))).all<any>()).results;
   if (rows.some(row => ['deleting','deleted'].includes(row.state))) fail(409, 'Imported file was removed');
   const pending = files.filter(f => !rows.some(r => r.object_key === f.objectKey && r.state === 'ready'));
