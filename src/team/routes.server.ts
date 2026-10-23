@@ -1,3 +1,4 @@
+import {directoryRoute} from './directory-route.server'
 import {publicChannelPreview,makeChannelPublic} from './channel-public.server'
 import {workspacePolicy,updateWorkspacePolicy} from './workspace-policy.server'
 import {reportsRoute} from '../reports/server'
@@ -28,6 +29,7 @@ import {previewBulk,sendBulk,resendInvitation} from './bulk-invitations.server'
 import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
+ const directory=await directoryRoute(c,request);if(directory)return directory
  const reports=await reportsRoute(c,request);if(reports)return reports
  const audit=await auditRoute(c,request);if(audit)return audit
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
@@ -90,7 +92,7 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
  if(url.pathname==='/api/team/invitations/cancel-preparation'&&method==='POST')return Response.json(await cancelPreparation(c,input))
  if(url.pathname==='/api/team/access'&&method==='POST')return Response.json(await regrant(c,input))
  if(url.pathname==='/api/team/remove'&&method==='POST')return Response.json(await removeAccess(c,input))
- if(url.pathname==='/api/channels'&&method==='GET')return Response.json(await browseChannels(c,url.searchParams.get('after')??''))
+ if(url.pathname==='/api/channels'&&method==='GET')return Response.json(await browseChannels(c,url.searchParams.get('after')??'',url.searchParams.get('q')??'',Number(url.searchParams.get('limit')??50)))
  if(parts[1]==='channels'&&parts.length===3&&method==='PATCH')return Response.json(await updateChannel(c,parts[2],input))
  if(parts[1]==='channels'&&parts.length===4){
   if(parts[3]==='posting'&&method==='GET')return Response.json(await postingPermissions(c,parts[2]))

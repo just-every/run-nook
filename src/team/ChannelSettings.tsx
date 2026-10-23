@@ -22,6 +22,7 @@ export function ChannelSettings({conversation,members,user,refresh,onLeft}:Props
   {error&&<p className="warning" role="alert">{error}</p>}
   {!details?<p className="muted">Loading channel settings…</p>:<>
    <p className="dialog-note">{details.archived?'Archived · History stays available. Restore this channel to post again.':details.kind==='private'?'Private channel · Only members can read its full history.':'Public channel · Teammates may join and read the full history.'}</p>
+   {members.length>=900&&<p className="warning" role="status">Channel membership: {members.length} of 1,000 members. This channel is approaching its membership limit.</p>}
    <p className="dialog-note">Managed by {members.find(p=>p.id===details.manager)?.name??(details.manager?'a former member':'no one')}{details.manager===user.id?' (you)':''}.</p>
    {details.canManage?<>
     <form onSubmit={e=>{e.preventDefault();void change('',{version:details.version,name,topic,...(details.manager===user.id?{description}:{})},'PATCH')}}>
