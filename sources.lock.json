@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "3315757378aa9e6fb41c3455a589ce521172cadaa73ff9dadfd69824afb3111c",
+      "sha256": "39dffbd714644bd2e6153a97b87c902d18e7378eab63b53377212439f0a9a318",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "1675965a28e43fc7e3042d8c54f473606cb090cf2917aab4a916163d893ba71f",
+      "sha256": "ba3713d07b4e408bc6b02ff535209b5c49ad38ab396c5371dcb274a6c0e65b52",
       "executable": false
     },
     "DEMO.md": {
@@ -1104,44 +1104,76 @@
       "sha256": "b9abdf9bd1adef48ec55030d764ba3a726c54d64e4c29a49bbdf413e91a01810",
       "executable": false
     },
+    "evidence/slack-delta/attestation-preview-1440.png": {
+      "sha256": "de0fa3a60e3df52ebcf828f55a960f01f0f8322ebecdd88caf0f4aa83e0d6451",
+      "executable": false
+    },
+    "evidence/slack-delta/attestation-preview-390.png": {
+      "sha256": "9ddeb43e637a1f2cc09ce3825023578906e342ab7a41bd7f07b1c99bb66db65d",
+      "executable": false
+    },
+    "evidence/slack-delta/attestation-range-1440.png": {
+      "sha256": "c3d2114f45e59d0399e781f140d68b05eacd2813a04ecf4d7b79138ecc933782",
+      "executable": false
+    },
+    "evidence/slack-delta/attestation-range-390.png": {
+      "sha256": "f751dc46c2a3beb9e3c3258dfee6f82f27560ab6564c4d85b95dad259d353bc9",
+      "executable": false
+    },
+    "evidence/slack-delta/attestation-refused-1440.png": {
+      "sha256": "7171bc02ae8461fc65c884190a0af56d67442a0695c5e6a27622e43679ef3141",
+      "executable": false
+    },
+    "evidence/slack-delta/attestation-refused-390.png": {
+      "sha256": "e94220976892dff835e2f903ef5b6b53755f6d72f4c2a0783f7e2f01710a2e5d",
+      "executable": false
+    },
+    "evidence/slack-delta/attestation-result-1440.png": {
+      "sha256": "22911071a18869c5ed5a95e3896f27a4ddc2625b372cd59bc9bae0a5d1873e78",
+      "executable": false
+    },
+    "evidence/slack-delta/attestation-result-390.png": {
+      "sha256": "1868a5ac979d8cff4d129303caf777eadce1878ba1a7ca33958d1ed6b8bfe833",
+      "executable": false
+    },
     "evidence/slack-delta/preview-1440.png": {
-      "sha256": "5298b3d87235157c3d9a06ec9448cb1e41c73e8514f41fc50277080f8b74f822",
+      "sha256": "de0fa3a60e3df52ebcf828f55a960f01f0f8322ebecdd88caf0f4aa83e0d6451",
       "executable": false
     },
     "evidence/slack-delta/preview-390.png": {
-      "sha256": "1286cb8eec1fbf0ed678fbf60183a66f14ad46b7e423316f66b6d6683f4f4975",
+      "sha256": "9ddeb43e637a1f2cc09ce3825023578906e342ab7a41bd7f07b1c99bb66db65d",
       "executable": false
     },
     "evidence/slack-delta/result-1440.png": {
-      "sha256": "019c9f198bcd982db0a7a0e679980fc981569954de7430e876c63d70b4626ec2",
+      "sha256": "22911071a18869c5ed5a95e3896f27a4ddc2625b372cd59bc9bae0a5d1873e78",
       "executable": false
     },
     "evidence/slack-delta/result-390.png": {
-      "sha256": "f574a69a7bce2a891c3528780cab452038e34e149a028497f9dcce73075fc1b7",
+      "sha256": "1868a5ac979d8cff4d129303caf777eadce1878ba1a7ca33958d1ed6b8bfe833",
       "executable": false
     },
     "evidence/slack-delta/revisions-1440.png": {
-      "sha256": "3f08426393ee87b1b03e895b9b9d4c8323b6d7afd6d4297af42c863ec8f378bc",
+      "sha256": "2613db841243e8448911b2c006e1e3307b7e2828dac221329b28d3b05aa2aa14",
       "executable": false
     },
     "evidence/slack-delta/revisions-390.png": {
-      "sha256": "6555c3ab1989f550a6a49487a542530399bf9bad8ed1dda82976d7eeb1ca5d39",
+      "sha256": "6f5d7301403f02f479d708d94ba0693d4068782666a19d743075dc559200ef74",
       "executable": false
     },
     "evidence/slack-delta/thread-1440.png": {
-      "sha256": "884799d42155bdbf5d198737fec19e74209042585929110bad26dc98cf45c2c7",
+      "sha256": "d0469d5bc7c58dccf5833ec08ddf474d09a766f1f8a328d2f5e0dadc46ff22a6",
       "executable": false
     },
     "evidence/slack-delta/thread-390.png": {
-      "sha256": "d1382642940f9e54aef48c2f39ec78f383ee7ceb23bf6943bc4bb69095bf2885",
+      "sha256": "09712e12f8d2520ab1d81e8d41a7bd80b47b50d26398ed42bfbe84afdc30dce5",
       "executable": false
     },
     "evidence/slack-delta/undo-1440.png": {
-      "sha256": "5c7ff7cf7e4b09fa29630b2e3f890e0aa5f3ef696921540320ad3e31dc737e37",
+      "sha256": "f72defd8d662673213e4edcea75edfd6bdf84bd646f2b45b09a177563220f45d",
       "executable": false
     },
     "evidence/slack-delta/undo-390.png": {
-      "sha256": "459fe3dbd04218ff993cd9735290076a1e5148983a3838af940260ed46de01ed",
+      "sha256": "fc5d0ceb1955d9ad02977c749178a14817511e532e1c0aa314cc1d551b2bd67b",
       "executable": false
     },
     "IMPORT-APPLY.md": {
@@ -6709,7 +6741,7 @@
       "executable": false
     },
     "tests/slack-import/delta-custody.mjs": {
-      "sha256": "a01c986a9c7b2a69eebf5b38610dca1db01faf24616b850b44291413010c6e9e",
+      "sha256": "f427472a01b2d3a7da5cf5f8cdd6dd91bf74f67dd7b79152097189d4fa09806c",
       "executable": false
     },
     "tests/slack-import/delta-journey.mjs": {
