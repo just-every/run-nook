@@ -453,19 +453,21 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**91 clauses: 34 done, 22 partial, 35 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**91 clauses: 35 done, 21 partial, 35 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
 
 - **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-082 — Scheduled forwarding.** **Status: partial.** Forward with optional scheduled time; forwarding needs posting permission in each destination at delivery.
+- **NOOK-082 — Scheduled forwarding.** **Status: done.** Forward with optional scheduled time; forwarding needs posting permission in each destination at delivery.
 
   Receiving duty (verbatim): From any message on every client, a member forwards to one or more channels, DMs, group DMs or a thread, with an optional note and optional scheduled time (NOOK-034).
 
-  Current evidence: `tests/notification-apps.mjs` — “NOOK-067 [NOOK-082] immediate and scheduled forwards protect source audiences, delivery permissions, disclosures and descendants” (Verify, verify (integration tokens)); `tests/scheduled-forwards.mjs` — scheduledForwardJourney: channel/DM/group-DM/thread delivery once, original source/note/time, revoked approving-session refusal, independent posting refusal with every destination reason retained, changed audience/source refusal, access-generation refusal without a copy, source deletion, stricter policy refusal, edit/cancel, paused credential-free restore and sender/source erasure; `tests/integration-tokens-browser.mjs` — forwardBrowser (1440/390 schedule control, Scheduled entry, edit/cancel and matching hover/focus/touch tooltip, no horizontal overflow or serious axe findings); `evidence/forwards/`.
+  Current evidence: `tests/notification-apps.mjs` — “NOOK-067 [NOOK-082] immediate and scheduled forwards protect source audiences, delivery permissions, disclosures and descendants” (Verify, verify (integration tokens)); `tests/scheduled-forwards.mjs` — scheduledForwardJourney: own and other-member public/private channel, DM, thread-reply and group-DM sources reviewed, never early, delivered once and refused after a source edit; note absent and present; channel/DM/group-DM/thread delivery once, original source/note/time, revoked approving-session refusal, independent posting refusal with every destination reason retained, changed audience/source refusal, access-generation refusal without a copy, source deletion, stricter policy refusal, edit/cancel, paused credential-free restore and sender/source erasure; `tests/integration-tokens-browser.mjs` — forwardBrowser (1440/390 schedule control, Scheduled entry, edit/cancel and matching hover/focus/touch tooltip, no horizontal overflow or serious axe findings); `evidence/forwards/`.
 
-  Gap: Ruled default APPROVED by ct, 22 October 2026 22:10Z: recheck the approving session, access generation, source, owner policy and each destination at delivery; a refused destination sends nothing and the member sees which destination was refused and why; the still-authorized subset commits atomically through NOOK-067 inside NOOK-034's occurrence transaction; never silently downgrade Show message; restores pause schedules and discard approving-session authority; no second scheduler. Native desktop, iOS and Android clients remain unproven (NOOK-021); responsive web is proven. External shared forwarding remains NOOK-083/031.
+  **Web semantics:** Forwarding is local to this installation, to NOOK-067 channels, fixed-audience DMs, group DMs, multiple destinations or a destination thread. The optional scheduled time uses NOOK-034’s schedule and occurrence ledger; a reviewed forward sends once at its due time, with or without a note, and pending times can be edited or cancelled. Under ct’s 22 October 2026 22:10Z ruling, delivery rechecks the approving session, access generation, source, owner policy and posting permission independently for each destination; every refused destination sends nothing with its reason visible, and the still-authorized subset commits atomically with occurrence completion. External shared-channel forwarding belongs to NOOK-083/NOOK-031.
+
+  Inheritance: Native clients inherit the same forward door under NOOK-021; holds and labels inherit NOOK-038/NOOK-040 through NOOK-067. External shared forwarding is the separate NOOK-083/NOOK-031 clause. Responsive web at 1440 and 390 is the acceptance, as ruled by ct on 23 October 2026 at 00:50Z, 01:31Z and 02:16Z. Native desktop, iOS and Android clients inherit the forward action through the same door when NOOK-021 ships.
 
 - **NOOK-083 — External shared-channel forwarding.** **Status: missing.** Forwarding into an external shared channel needs both organizations' policies.
 
