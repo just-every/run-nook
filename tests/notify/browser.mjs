@@ -21,6 +21,12 @@ export async function settingsBrowser({browser,origin,rowan,sam,evidence,axeSour
     await page.keyboard.press('Tab');await expect(urgent).toBeFocused();
     await expect.poll(async()=>(await (await context.request.get(origin+'/api/notify')).json()).mentions).toBe(true);
    }
+   if(phase==='settings'&&who==='member'){
+    const keywords=page.getByRole('region',{name:'Keywords',exact:true}),word='invoice '+width;await expect(keywords).toBeVisible();
+    await keywords.getByLabel('New keyword',{exact:true}).fill(word);await keywords.getByRole('button',{name:'Add keyword',exact:true}).click();await expect(keywords.getByRole('list',{name:'Your keywords'})).toContainText(word);
+    await keywords.scrollIntoViewIfNeeded();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.screenshot({path:join(evidence,`keywords-${width}.png`),animations:'disabled'});
+    await keywords.getByRole('button',{name:'Remove '+word,exact:true}).click();await expect(keywords.getByRole('list',{name:'Your keywords'})).toHaveCount(0);
+   }
    if(phase==='not-delivered'&&who==='member')await expect(block.getByRole('list')).toContainText('Casey');
    if(who==='owner'){
     const settings=await (await context.request.get(origin+'/api/notify')).json();assert.equal(settings.workspace.sending,'provider');
