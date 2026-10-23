@@ -451,7 +451,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**91 clauses: 33 done, 22 partial, 36 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**91 clauses: 34 done, 21 partial, 36 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
 
 - **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 
@@ -489,10 +489,10 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-089 — Notification destination door extension.** **Status: partial.** Approve a notifying app for one private channel, post into that channel’s thread by naming the thread, lose the reply and look up the client key: one accepted receipt is returned and no second post is created. Reapprove the same app name and channel, then use the replacement approval to edit that app’s earlier post; another app is refused.
+- **NOOK-089 — Notification destination door extension.** **Status: done.** Approve a notifying app for one private channel, post into that channel’s thread by naming the thread, lose the reply and look up the client key: one accepted receipt is returned and no second post is created. Reapprove the same app name and channel, then use the replacement approval to edit that app’s earlier post; another app is refused.
 
-  Current evidence: `tests/notification-apps.mjs` — “NOOK-080 [NOOK-089] channel-scoped notification approvals, threads, receipt lookup, replacement edits, audience, rate, withdrawal and custody” (Verify, verify (integration tokens)); `tests/notification-extension.mjs` — notificationExtension: live same-channel thread/app badge and ordinary follows, same receipt and one message, key isolation/tombstones/no quota charge, replacement edit/CAS/history/audit, revoked and other-app refusal, current posting/archive/removal fences; existing export/credential-free restore case. API-only; approval screen unchanged.
+  Current evidence: `tests/notification-apps.mjs` — “NOOK-080 [NOOK-089] channel-scoped notification approvals, threads, receipt lookup, replacement edits, audience, rate, withdrawal and custody” (Verify, verify (integration tokens)); `tests/notification-extension.mjs` — notificationExtension (Verify 39871524529, integration job 120146845861; repeated by this landing's exact-head Verify, verify (integration tokens)): live same-channel thread/app badge and ordinary follows, same receipt and one message, key isolation/tombstones/no quota charge, replacement edit/CAS/history/audit, revoked and other-app refusal, current posting/archive/removal fences; existing export/credential-free restore case. API-only; approval screen unchanged.
 
-  Gap: Default ADOPTED: app identity is the owner/admin-approved exact app-name/channel pair in existing approval records, never token text or a client claim; replacement revokes the older token and carries identity. ASK NOOK-089 pending ct acceptance of this identity default. No new durable category, migration, answer cache or credential export.
+  Ruled identity: Ruled default APPROVED by ct, 22 October 2026 21:55Z: app identity is the exact owner/admin-approved (app name, channel) pair read from immutable approval rows, never token text or a client claim; after replacement approval the replacement token may edit earlier posts of that same pair under current authority; no other pair and no revoked token can; a post into a channel the pair can no longer reach is refused; each edit is attributed to the app identity in the existing audit; no new identity table. No new durable category, migration, answer cache or credential export.
 
 One-off populated v0.4.0-shaped upgrade proof (23 October 2026): migrations 0077, 0078 and 0079 applied over the populated schema through 0076 preserved all rows of 204 pre-existing tables, including two native messages, private file bytes, two members, a read marker and a recorded decision; foreign-key checks and the public read/forward doors passed. This is not a permanent test registration.
