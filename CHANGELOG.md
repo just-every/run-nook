@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+A checkout set up on one port now opens its app when `rer dev` or `rer demo` serves it on another: `/setup` and `/app` admit the origin the local run serves instead of answering `invalid_host`.
+
 AI search adds bounded, permission-filtered cited evidence and separate feedback with owner-controlled provider settings. NOOK-036 remains partial.
 
 Notification apps now have explicit channel approvals, one-time hashed tokens, app identity, audience facts, idempotent writes and a channel rate limit. Restored approvals need new tokens. NOOK-080 remains partial because federation and its share acceptance step are unavailable.

@@ -166,7 +166,8 @@ export default withDemo({
   const authentication=application?repository.authenticated(request.headers).then(()=>null,error=>error):null
   if(url.pathname === '/setup' || application) {
    // An owner who has not confirmed first-run setup is sent to /setup from every app route.
-   const setup = await firstRunResponse(request,env,{getSession:()=>repository.nativeSession(request.headers)},{theme})
+   // Like the lobby, it admits the origin a local run serves, not only the saved one.
+   const setup = await firstRunResponse(request,publicEnv,{getSession:()=>repository.nativeSession(request.headers)},{theme})
    if(setup) return setup
   }
   if(application) {
