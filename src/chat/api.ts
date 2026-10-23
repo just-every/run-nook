@@ -1,3 +1,4 @@
+import type {TeamRequest} from '../team/types'
 import {isClipMime,clipFile} from '../clips/media'
 import type {Attention,FileRecord,LocationState,MessageWindow,Outcome,Page,Projection,WorkspaceSnapshot,Replay} from './types'
 export class ApiError extends Error { constructor(public status:number,message:string,public broadcast?:import('../broadcast/ConfirmBroadcast').BroadcastPreview,public code?:string){super(message)} }
@@ -56,8 +57,8 @@ export async function sendWorkspace(route:LocationState,input:unknown){
  return completeSnapshot({...next,data:next.data?{...next.data,key:windowKey(route)}:null})
 }
 export async function completeSnapshot(next:WorkspaceSnapshot){
- const [attention,outcomes]=await Promise.all([attentionPages(next.attention as Attention & Page<Attention['items'][number]>),next.data?outcomeHistory(next.data.conversation,next.data.outcomes):[]])
- return {...next,attention,data:next.data?{...next.data,outcomes}:null}
+ const [attention,outcomes,users,members]=await Promise.all([attentionPages(next.attention as Attention & Page<Attention['items'][number]>),next.data?outcomeHistory(next.data.conversation,next.data.outcomes):[],directoryRest('users',next.users),next.data?directoryRest(`conversations/${next.data.conversation}/members`,next.data.members):[]])
+ return {...next,users,attention,data:next.data?{...next.data,outcomes,members}:null}
 }
 async function outcomeHistory(conversation:string,first:Outcome[]):Promise<Outcome[]>{
  if(first.length<1000)return first
@@ -73,4 +74,20 @@ async function attentionPages(first:Attention & Page<Attention['items'][number]>
   if(!page.hasMore)return {items,heldItems,reminders:first.reminders,personalReminders:first.personalReminders,scheduleUntil:first.scheduleUntil,manualUntil:first.manualUntil,deferredCount,observedAt,dndUntil,nextWakeAt}
   if(page.cursor===after)throw Error('Attention could not be read.');after=page.cursor
  }
+}
+
+type DirectoryPage<T>={items:T[];cursor:string|null;hasMore:boolean}
+async function directoryRest<T extends {id:string}>(path:string,first:T[]):Promise<T[]>{
+ if(first.length<1000)return first
+ const items=[...first];let after=first.at(-1)!.id
+ for(;;){const page=await api<DirectoryPage<T>>(`${path}?page=1&after=${encodeURIComponent(after)}`);items.push(...page.items);if(!page.hasMore)return items;if(!page.cursor||page.cursor<=after)throw Error('Directory could not be read.');after=page.cursor}
+}
+const teamDirectories=new WeakMap<TeamRequest,TeamRequest>()
+export function directoryTeamRequest(request:TeamRequest):TeamRequest{
+ const existing=teamDirectories.get(request);if(existing)return existing
+ const wrapped:TeamRequest=async<T,>(path:string,init?:RequestInit):Promise<T>=>{
+  if(path!=='/api/team'||init?.method&&init.method!=='GET')return request<T>(path,init)
+  const items:unknown[]=[];let after=''
+  for(;;){const page=await request<DirectoryPage<{id:string}>>('/api/team?page=1&after='+encodeURIComponent(after),init);items.push(...page.items);if(!page.hasMore)return items as T;if(!page.cursor||page.cursor<=after)throw Error('Team directory could not be read.');after=page.cursor}
+ };teamDirectories.set(request,wrapped);return wrapped
 }

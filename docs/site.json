@@ -84,6 +84,11 @@
           "slug": "integration-tokens",
           "source": "docs/integration-tokens.md",
           "label": "Integration tokens"
+        },
+        {
+          "slug": "directories",
+          "source": "docs/directories.md",
+          "label": "Finding people and channels"
         }
       ]
     }

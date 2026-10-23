@@ -1,8 +1,8 @@
 import {execFile} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {dirname,resolve} from 'node:path';
-import {fileURLToPath} from 'node:url';
 import {promisify} from 'node:util';
+import {readFile,writeFile,rm,mkdir} from 'node:fs/promises';
 import {getPlatformProxy} from 'wrangler';
 
 const execute=promisify(execFile),require=createRequire(import.meta.url);
@@ -25,13 +25,20 @@ export function localD1Migrations(configPath,persistTo){
   async apply(files){
    // Never let two workerd instances open the same persisted D1 database.
    await dispose();
-   for(const file of files){
-    await execute(process.execPath,[cli,'d1','execute','DB','--local','--config',configPath,'--persist-to',persistTo,'--file',fileURLToPath(new URL('../migrations/'+file,import.meta.url))],{
+   if(!files.length)return;
+   // One fixture phase has no observer between these forward migrations. Keep
+   // the historical phase boundaries while avoiding a new Wrangler/workerd
+   // installation for every individual SQL file.
+   await mkdir(persistTo,{recursive:true});
+   const batch=resolve(persistTo,'fixture-migrations.sql');
+   await writeFile(batch,(await Promise.all(files.map(file=>readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))).join('\n'));
+   try{
+    await execute(process.execPath,[cli,'d1','execute','DB','--local','--config',configPath,'--persist-to',persistTo,'--file',batch],{
      cwd:dirname(configPath),
      env:{...process.env,WRANGLER_SEND_METRICS:'false',CI:'true'},
      maxBuffer:4*1024*1024,
     });
-   }
+   }finally{await rm(batch,{force:true});}
   },
  };
 }

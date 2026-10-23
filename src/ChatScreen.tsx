@@ -1,3 +1,4 @@
+import {directoryTeamRequest} from './chat/api'
 import {ForwardPolicy} from './forwards/ForwardPolicy'
 import {AiSettings} from './ai-search/AiSettings'
 import {NotificationApps} from './notification-apps/NotificationApps'
@@ -103,7 +104,7 @@ function Workspace({initial}:{initial:InitialWorkspace}) {
  const action=(o:Outcome,action:string)=>w.mutate(`outcomes/${o.id}`,{version:o.version,action},'PATCH')
  const newMessage=()=>setDialog({kind:'new-message'}),newChannel=()=>setDialog({kind:'new-channel'})
  const caption=w.user.mode==='guest'?'Guest with selected channels':w.user.role==='owner'?'Owner':w.user.role==='admin'?'Admin':'Member'
- const teamPanel=<TeamPanel key={w.accessEpoch} request={request} channels={w.conversations} role={w.user.role!} userId={w.user.id} localDevelopment={initial.localDevelopment}/>
+ const teamPanel=<TeamPanel key={w.accessEpoch} request={directoryTeamRequest(request)} channels={w.conversations} role={w.user.role!} userId={w.user.id} localDevelopment={initial.localDevelopment}/>
  return <TeamBindings.Provider value={{channels:w.conversations,onCommand:commands.run,request,accessEpoch:w.accessEpoch,revision:w.data?.frontier??w.revision,onDenied,onReminder:(source,sourceKind)=>setDialog({kind:'reminder',source,sourceKind}),onReminderCommand:(phrase,onSaved)=>setDialog({kind:'reminder',phrase,onSaved})}}><div className="nook-app" style={accentStyle} data-live-connected={w.connected}><a className="skip-link" href="#primary" onClick={e=>{e.preventDefault();document.getElementById('primary')?.focus()}}>Skip to conversation</a><div className="sr-only" role="status" aria-live="polite">{w.loading?'Loading conversation':''}</div>{route.view==='chat'&&<LiveMessageNotice key={w.user.id+':'+w.accessEpoch+':'+route.conversation+':'+route.thread} projection={w.data}/>}
   <div className="app"><WorkspaceHandoffPrompt device={device}/><Sidebar workspaces={<WorkspacesMenu device={device}/>} showUnreads={showUnreads} canCreate={canCreate} user={w.user} conversations={w.conversations} route={route} attentionCount={(w.attention.items.length+(w.attention.reminders?.items.length??0)+(w.attention.personalReminders?.length??0))} onNavigate={nav} onSelect={select} onNewMessage={newMessage} onNewChannel={newChannel}/>
    <main className="workspace" id="primary" tabIndex={-1}><header className="header"><div className="heading">

@@ -1,2 +1,6 @@
 .nook-app .channel-browser-description{display:block;margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
 .nook-app .team-channel-list>li>.soft-button{flex-shrink:0;max-width:110px}
+
+.nook-app .team-channels form{display:flex;align-items:end;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s4)}
+.nook-app .team-channels form label{display:grid;gap:var(--s1);flex:1;min-width:180px}
+.nook-app .team-channels form input{width:100%;min-width:0}
