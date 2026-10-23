@@ -54,7 +54,7 @@ export async function drainSchedules(env:StorageBindings,now=Date.now()){
   }catch(error){
    const current=await env.DB.prepare(`SELECT 1 WHERE ${fence}`).bind(...fenceValues).first()
    if(current){
-    const reason=error instanceof Error&&[400,409,503].includes((error as any).status)?error.message:'Scheduled send was not confirmed. Review this occurrence before rescheduling.'
+    const reason=error instanceof Error&&[400,409,413,415,503].includes((error as any).status)?error.message:'Scheduled send was not confirmed. Review this occurrence before rescheduling.'
     // Stop this occurrence before cleaning partial copies. Another worker with
     // the old version can no longer commit against the same schedule fence.
     await env.DB.batch([guard(fence,fenceValues),w.sql('INSERT INTO nook_schedule_occurrences VALUES(?,?,?,?,?,NULL,?,?,?)',s.id,s.local_at,s.version,s.next_due,s.zone,'failed',reason,now),w.sql("UPDATE nook_schedules SET state='failed',reason=?,updated=? WHERE id=?",reason,now,s.id),w.sql('DELETE FROM nook_guard WHERE id=?',key)]).catch(e=>{if(!String(e).includes('CHECK constraint')&&!String(e).includes('UNIQUE constraint'))throw e})
