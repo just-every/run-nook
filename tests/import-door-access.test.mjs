@@ -62,3 +62,19 @@ test('owner reviews, expiration, Business approval/revocation and owner Undo sha
   await request('status',{planId:plan.planId},{grant:await token('status',namespace),status:403});
  }finally{f.close()}
 });
+
+test('an oversized import request is refused before its whole body is read',async()=>{
+ const {importDoor}=await import('../src/imports/door.ts');
+ const f=await slackServiceFixture();
+ try{
+  const origin=f.c.env.AUTH_ORIGIN,chunk=new Uint8Array(16*1024).fill(32),total=1024*1024,limit=100_000;
+  for(const path of ['/api/operator/import/uploads','/api/rer/import/apply','/api/operator/import/unknown']){
+   let pulled=0,cancelled=false;
+   const body=new ReadableStream({pull(controller){if(pulled>=total)return controller.close();pulled+=chunk.length;controller.enqueue(chunk)},cancel(){cancelled=true}},{highWaterMark:0});
+   const response=await importDoor(new Request(origin+path,{method:'POST',duplex:'half',headers:{Host:new URL(origin).host,Origin:origin,'Content-Type':'application/json','X-Import-Source':'slack'},body}),f.c.env);
+   assert.equal(response.status,413,path);
+   assert.ok(pulled<=2*limit,`${path} read ${pulled} of ${total} bytes`);
+   assert.ok(cancelled,`${path} cancels the rest of the body`);
+  }
+ }finally{f.close()}
+});

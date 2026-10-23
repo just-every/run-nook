@@ -4909,7 +4909,7 @@
       "executable": false
     },
     "src/imports/door.ts": {
-      "sha256": "8dff018dacf55c3697412281e3f58ca7db76692b77f18746d0ffb5055ecbf36b",
+      "sha256": "6c18b123efca3c7d66ab13fc887e6faba6a77e7fb7829ba0e4ebe05a021715c2",
       "executable": false
     },
     "src/imports/DoorPlanPanel.tsx": {
@@ -6301,7 +6301,7 @@
       "executable": false
     },
     "tests/import-door-access.test.mjs": {
-      "sha256": "f61567000c7c67f7b1f8d0b53cc38ff2243cc58e4c096a58b9917d4aaf0f515a",
+      "sha256": "60cfdb5a72ac56089dba6bac7f5835355cc39a1e1f66c44dd28ef55688ae7e98",
       "executable": false
     },
     "tests/import-door-support.mjs": {

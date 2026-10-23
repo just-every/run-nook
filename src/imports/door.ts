@@ -27,9 +27,17 @@ function guardedTargets(predicate: D1Sql): D1TargetAdapter {
 async function inputBody(request: Request) {
   if (request.method === 'GET') return {};
   if (request.headers.get('Content-Type')?.split(';')[0] !== 'application/json') throw new Fault(415, 'JSON required');
-  const body = await request.clone().text();
-  if (new TextEncoder().encode(body).length > 100_000) throw new Fault(413, 'Import request too large');
-  const value = JSON.parse(body);
+  // Base reads the original body again; past the limit, stop and cancel both copies.
+  const reader = request.clone().body?.getReader(), chunks: Uint8Array[] = []; let size = 0;
+  if (reader) for (;;) {
+    const {done, value} = await reader.read(); if (done) break;
+    size += value.byteLength;
+    if (size > 100_000) { await Promise.all([reader.cancel(), request.body?.cancel()]); throw new Fault(413, 'Import request too large'); }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(size); let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  const value = JSON.parse(new TextDecoder().decode(bytes));
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Fault(400, 'JSON object required');
   return value;
 }
