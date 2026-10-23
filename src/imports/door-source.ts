@@ -3,6 +3,7 @@ import { kitSource } from './source';
 import { decodeRoleCapture, encodeRoleEffect } from './role-decisions';
 import { assertImportEffect } from './formats.mjs';
 import { assertLocalCredentials } from './browser-runtime/credentials';
+import { validateCutover } from './slack-cutover.mjs';
 
 export const vendors = { slack: 'Slack', campfire: 'Campfire', mattermost: 'Mattermost' } as const;
 export type ImportVendor = keyof typeof vendors;
@@ -25,6 +26,8 @@ export function decodeDoorPacket(input: any, kind: ImportVendor, workspace: stri
   assertLocalCredentials(input);
   const capture = structuredClone(input.capture);
   decodeRoleCapture(capture);
+  if (kind !== 'slack' && capture.cutover !== undefined) throw Error('Invalid reviewed source bundle');
+  validateCutover(capture.cutover);
   for (const message of capture.messages ?? []) for (const file of message.files ?? []) {
     if (typeof file.base64 !== 'string') throw Error('Original file bytes required');
     file.bytes = Buffer.from(file.base64, 'base64');

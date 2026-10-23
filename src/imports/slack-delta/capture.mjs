@@ -8,6 +8,7 @@ import { analyzeSlackZipCoverage } from './coverage.mjs';
 import { readDeltaBaseline } from './baseline.mjs';
 import { latestDeltaState, outsideDeltaOverlap, sameDeltaMessage } from './state.mjs';
 import { id, invalid, object } from './validation.mjs';
+import { cutoverInvitations } from '../slack-cutover.mjs';
 
 const uniqueSorted = values => [...new Map(values.map(value => [importDigest(value), value])).values()]
     .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
@@ -133,6 +134,7 @@ export function captureSlackDeltaArchive(inspected, review, ownerId, localUsers)
         revised: sortedMessages.filter(message => baseline.messages.has(message.key) && !sameDeltaMessage(baseline.messages.get(message.key), message)).length,
         tombstoned: 0, unverified: coverage.conversations.length, explicitDeletionMarkers: result.delta.explicitDeletions.length, skipped: result.delta.skipped.length };
     result.missingFileInventory = missingFileInventory(missingFiles); result.missingFileInventoryDigest = importDigest(result.missingFileInventory);
+    result.cutover = cutoverInvitations({ users, channels, automationIds: inspected.automationIds });
     result.externalActors = result.actors.filter(actor => inspected.automationIds.has(actor.sourceId)).map(actor => actor.sourceId).sort();
     result.counts = { channels: channels.length, actors: result.actors.length, messages: sortedMessages.length, threads: sortedMessages.filter(message => message.threadRoot).length,
         files: sortedMessages.reduce((sum, message) => sum + message.files.length, 0), bytes: sortedMessages.reduce((sum, message) => sum + message.files.reduce((n, file) => n + file.size, 0), 0), omissions: sortedOmissions.length };
