@@ -9,3 +9,5 @@
 .file-policy input,.file-policy textarea{max-width:100%;width:100%;font:inherit;box-sizing:border-box}.file-policy p,.file-policy label{font-size:max(13px,var(--fs-body,14px))}
 
 .nook-app .file-inert-preview .dialog-note{font-size:13px}
+
+.file-policy .profile-row{border:0}

@@ -15,4 +15,3 @@
 .poll-form-option input{flex:1;min-width:0}
 .poll-form-choices{display:flex;flex-wrap:wrap;gap:1rem}
 .poll-form-actions{display:flex;flex-wrap:wrap;gap:.5rem}
-.poll-launch{padding:0 .75rem}
