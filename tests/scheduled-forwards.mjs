@@ -41,6 +41,10 @@ export async function scheduledForwardJourney({app,member,source,destination,dm}
   const doomed=await call('/api/conversations/'+source.conversation+'/messages','POST',{body:'A temporary source for the scheduled handoff.',intent:crypto.randomUUID()},member.cookie),removed=await schedule('This source will be erased',doomed.id);
   await call('/api/messages/'+doomed.id,'PATCH',{delete:true,version:doomed.version},member.cookie);await drainSchedules(env,due);assert.equal((await list()).find(s=>s.id===removed.id).state,'cancelled');assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_forwards WHERE source=?').bind(doomed.id).first()).n,0);
   const stricter=await schedule('Never silently downgrade Show message');let policy=await call('/api/forwards/policy','GET',undefined,ownerCookie);await call('/api/forwards/policy','POST',{mode:'link-only',version:policy.version},ownerCookie);await drainSchedules(env,due);const refused=(await list()).find(s=>s.id===stricter.id);assert.equal(refused.state,'failed');assert.match(refused.reason,/policy/i);policy=await call('/api/forwards/policy','GET',undefined,ownerCookie);await call('/api/forwards/policy','POST',{mode:'allow',version:policy.version},ownerCookie);
+  const generation=await schedule('An older access grant must never send');
+  await db.prepare('UPDATE nook_access SET generation=generation+1 WHERE user=?').bind(member.user.id).run();
+  await drainSchedules(env,due);const changed=(await list()).find(s=>s.id===generation.id);assert.equal(changed.state,'failed');assert.match(changed.reason,/access generation/i);
+  for(const room of [destination,dm])assert.ok(!(await call('/api/conversations/'+room.id+'/messages','GET',undefined,member.cookie)).some(m=>m.body==='An older access grant must never send'));
   const held=await schedule('Review this after restore');return {id:held.id};
  }finally{await rm(temp,{recursive:true,force:true})}
 }

@@ -20,12 +20,14 @@ type Schedule={id:string;user:string;local_at:string;zone:string;next_due:number
 // on every read and in the final transaction. Archives remove this session ID.
 export async function deliverForward(env:StorageBindings,s:Schedule,f:ForwardDefinition,now:number){
  const c=new Context(env,{id:f.session??'',operatorId:s.user,operator:{version:s.operator_version}} as Session)
- const fence="EXISTS(SELECT 1 FROM nook_schedules s JOIN nook_access a ON a.user=s.user WHERE s.id=? AND s.version=? AND s.state='active' AND s.next_due=? AND a.generation=?)",values=[s.id,s.version,s.next_due,s.access_generation]
+ const fence="EXISTS(SELECT 1 FROM nook_schedules s WHERE s.id=? AND s.version=? AND s.state='active' AND s.next_due=?)",values=[s.id,s.version,s.next_due]
+ const access="EXISTS(SELECT 1 FROM nook_access WHERE user=? AND generation=?)",accessValues=[s.user,s.access_generation]
  const finish=(ids:string[],reason:string|null)=>[
   c.sql('INSERT INTO nook_schedule_occurrences VALUES(?,?,?,?,?,?,?,?,?)',s.id,s.local_at,s.version,s.next_due,s.zone,ids[0]??null,ids.length?'sent':'failed',reason,now),
   c.sql("UPDATE nook_schedules SET state=?,reason=?,updated=? WHERE id=?",ids.length?'complete':'failed',reason,now,s.id),
  ]
  const refused:string[]=[],destinations=[]
+ if(!await env.DB.prepare('SELECT 1 WHERE '+access).bind(...accessValues).first())refused.push('Your access generation changed. Review and save a new time.')
  try{await c.check()}catch{refused.push('Your approving session expired, was revoked, or your account changed. Review and save a new time.')}
  if(!refused.length)for(const [index,destination] of f.destinations.entries()){
   try{const current=await previewForward(c,{...publicForward(f),destinations:[destination]});if(current.confirmation!==f.proofs[index])fail(409,'Source, audience or forwarding policy changed; review disclosure again');destinations.push(destination)}catch(error){refused.push(destination.conversation+': '+((error as any).status?(error as Error).message:'Forwarding is unavailable'))}
@@ -35,7 +37,7 @@ export async function deliverForward(env:StorageBindings,s:Schedule,f:ForwardDef
   try{
    const input={...publicForward(f),destinations,intent:'scheduled:'+s.id+':'+s.version+':'+s.local_at}
    const current=await previewForward(c,input)
-   await sendForward(c,{...input,confirmation:current.confirmation},{condition:fence,values,statements:ids=>finish(ids,reason)})
+   await sendForward(c,{...input,confirmation:current.confirmation},{condition:fence+' AND '+access,values:[...values,...accessValues],statements:ids=>finish(ids,reason)})
    return
   }catch(error){
    // A lost successful response already advanced this same schedule atomically.
