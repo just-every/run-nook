@@ -1,3 +1,7 @@
 .nook-app .conversation-files-tabs{display:flex;gap:8px;padding:8px 24px;border-bottom:1px solid var(--line)}
 .nook-app .conversation-files-tabs .soft-button[aria-pressed=true]{background:var(--ink);color:var(--surface-page)}
 @media(max-width:600px){.nook-app .conversation-files-tabs{padding:8px 16px}}
+
+.nook-app .file-inert-preview{margin:12px 0;min-width:0;max-width:100%}
+.nook-app .file-inert-preview summary{cursor:pointer;padding:8px 0;overflow-wrap:anywhere}
+.nook-app .file-inert-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;background:var(--surface-page);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px}

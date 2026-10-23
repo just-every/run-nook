@@ -1,7 +1,10 @@
+import {importedPreviewFiles} from './file-preview-fixture.mjs'
+import {zipFixture} from './slack-import/fixture.mjs'
 import assert from 'node:assert/strict'
 import {sourceDoor} from './import-fixture.mjs'
 
 export async function filesJourney({owner,registered,post,patch,get,check,restart,origin,sql}){
+ await inertPreviewJourney({owner,registered,post,get,check,origin})
  const member=await registered('FilesColleague'),outside=await registered('FilesOutside')
  const room=(await post('/api/conversations',{name:'Customer launch files',kind:'private',participants:[member.user.id]})).data
  const upload=async(name,body,person=owner,mime='text/plain')=>(await post(`/api/conversations/${room.id}/attachments`,{name,mime,data:Buffer.from(body).toString('base64'),intent:crypto.randomUUID()},person.cookie)).data
@@ -85,5 +88,32 @@ export async function filesJourney({owner,registered,post,patch,get,check,restar
    let erased=(await post('/api/erasures',{kind:'imported-message',target:file.message,confirmation:'ERASE'})).data
    while(erased.state!=='complete')erased=(await post(`/api/erasures/${erased.id}/resume`,{})).data
    assert.ok(!(await get(base)).data.items.some(f=>f.id===file.id))
+ })
+}
+
+export async function inertPreviewJourney({owner,registered,post,get,check,origin}){
+ await check('NOOK-061 bounded inert text, CSV and ZIP previews keep current membership',async()=>{
+  const member=await registered('SyntheticNookPreviewMember'),outside=await registered('SyntheticNookPreviewOutside')
+  const room=(await post('/api/conversations',{name:'Synthetic nook inert previews',kind:'private',participants:[member.user.id]})).data
+  const upload=async(name,mime,bytes)=>(await post(`/api/conversations/${room.id}/attachments`,{name,mime,data:Buffer.from(bytes).toString('base64'),intent:crypto.randomUUID()})).data
+  const active='<img src=x onerror=alert(1)>',zipName=active+'.txt',text='const value = '+JSON.stringify(active)+';',csv='name,value\nsynthetic,'+active
+  const imported=await importedPreviewFiles({origin,owner,member,files:[{name:'synthetic-nook-archive.zip',bytes:zipFixture([[zipName,'Hidden ZIP contents'],['folder/',Buffer.alloc(0)],['folder/note.txt','note']])},{name:'synthetic-nook-broken.zip',bytes:'Malformed archive'},{name:'synthetic-nook-many.zip',bytes:zipFixture(Array.from({length:250},(_,n)=>['entry-'+n+'.txt','note']))},{name:'synthetic-nook-listing.zip',bytes:zipFixture(Array.from({length:100},(_,n)=>['entry-'+n+'-'+('a'.repeat(900))+'.txt','note']))}]}),records=[await upload('synthetic-nook-code.js','text/plain',text),await upload('synthetic-nook-data.csv','text/plain',csv),imported.files.find(file=>file.name==='synthetic-nook-archive.zip')]
+  await post(`/api/conversations/${room.id}/messages`,{body:'Synthetic preview files',attachments:records.slice(0,2).map(f=>f.id),intent:crypto.randomUUID()})
+  for(const [n,file] of records.entries()){
+   const preview=await get(`/api/attachments/${file.id}/preview`,member.cookie)
+   assert.match(preview.response.headers.get('content-type'),/^text\/plain/);assert.equal(preview.response.headers.get('x-content-type-options'),'nosniff');assert.match(preview.response.headers.get('content-security-policy'),/sandbox/)
+   if(n<2)assert.equal(preview.raw,[text,csv][n]);else{assert.ok(preview.raw.includes(zipName));assert.ok(preview.raw.includes('folder/'));assert.ok(preview.raw.includes(Buffer.byteLength('Hidden ZIP contents')+' bytes'));assert.ok(!preview.raw.includes('Hidden ZIP contents'))}
+   await get(`/api/attachments/${file.id}/preview`,outside.cookie,404)
+  }
+  const long=await upload('synthetic-nook-long.csv','text/plain','column\n'+'é'.repeat(40000)),bounded=await get(`/api/attachments/${long.id}/preview`)
+  assert.equal(bounded.response.headers.get('X-Nook-Preview-Truncated'),'true');assert.ok(Buffer.byteLength(bounded.raw)<Buffer.byteLength('column\n'+'é'.repeat(40000)));assert.ok(!bounded.raw.includes('�'))
+  const malformed=imported.files.find(file=>file.name==='synthetic-nook-broken.zip')
+  await get(`/api/attachments/${malformed.id}/preview`,owner.cookie,415)
+  await get(`/api/attachments/${imported.files.find(file=>file.name==='synthetic-nook-many.zip').id}/preview`,owner.cookie,415)
+  const listing=await get(`/api/attachments/${imported.files.find(file=>file.name==='synthetic-nook-listing.zip').id}/preview`);assert.equal(listing.response.headers.get('X-Nook-Preview-Truncated'),'true');assert.ok(listing.raw.includes('entry-0-'));assert.ok(!listing.raw.includes('entry-99-'))
+  await post(`/api/conversations/${room.id}/members`,{user:member.user.id,remove:true})
+  await post(`/api/conversations/${imported.conversation}/members`,{user:member.user.id,remove:true})
+  for(const file of records)await get(`/api/attachments/${file.id}/preview`,member.cookie,404)
+  assert.equal((await get(`/api/attachments/${records[1].id}/download`)).raw,csv)
  })
 }

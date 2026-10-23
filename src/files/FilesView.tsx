@@ -1,3 +1,4 @@
+import {InertPreview} from './InertPreview'
 import {useCallback,useEffect,useId,useRef,useState} from 'react'
 import {api,ApiError} from '../chat/api'
 import type {Conversation,Person} from '../chat/types'
@@ -50,6 +51,7 @@ export function FilesView({conversations,users,user,conversation,revision,privat
     <p className="search-meta">{room?(room.kind==='dm'?'':'# ')+conversationName(room,user)+' · ':''}{file.authorName} · {file.source==='imported'?'Imported':'Native'} · <time dateTime={file.created}>{new Date(file.created).toLocaleString()}</time></p>
     <a className="collection-download" href={`/api/${file.source==='imported'?'import-files':'attachments'}/${encodeURIComponent(file.id)}/download`} download={file.name}>{file.name}</a>
     <p className="collection-meta">{Math.max(1,Math.round(file.size/1024))} KB · {file.mime}</p>
+    <InertPreview attachment={file} accessEpoch={key+':'+revision} onDenied={denied}/>
     <ImagePreview attachment={file} accessEpoch={key+':'+revision} onDenied={denied}/>
     <button className="soft-button" onClick={()=>{if(current())onOpen(file.conversation,file.message,file.parent)}}>Open in conversation</button>
    </article>
