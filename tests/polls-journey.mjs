@@ -85,7 +85,7 @@ test('NOOK-070 anonymous polls seal custody, count one vote set per member until
   await erase('member',lee.user.id)
   assert.deepEqual(counts(await poll(named.id)),[1,0,1],'named votes leave with the member');assert.deepEqual(counts(await poll(anonymous.id)),[1,1,0],'erasure removes the erased member’s sealed vote from aggregate counts')
   assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_poll_votes WHERE voter=?').bind(lee.user.id).first()).n,0)
-  assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_poll_votes v JOIN nook_polls p ON p.message=v.message WHERE p.anonymous=1').first()).n,1,'only the unaffected member’s sealed vote survives')
+  assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_poll_votes v JOIN nook_polls p ON p.message=v.message WHERE p.message=?').bind(anonymous.id).first()).n,1,'only the unaffected member’s sealed vote survives')
   exported=await exportRecords(ownerCookie);assert.ok(!exported.some(r=>r.type==='poll_votes'&&r.data.voter===lee.user.id))
   await erase('message',named.id)
   await call('/api/polls/'+named.id,'GET',undefined,ownerCookie,404)
