@@ -32,7 +32,7 @@ export async function deliverForward(env:StorageBindings,s:Schedule,f:ForwardDef
  if(!refused.length)for(const [index,destination] of f.destinations.entries()){
   try{const current=await previewForward(c,{...publicForward(f),destinations:[destination]});if(current.confirmation!==f.proofs[index])fail(409,'Source, audience or forwarding policy changed; review disclosure again');destinations.push(destination)}catch(error){refused.push(destination.conversation+': '+((error as any).status?(error as Error).message:'Forwarding is unavailable'))}
  }
- const reason=refused.length?refused.join('; ').slice(0,500):null
+ const reason=refused.length?refused.join('; '):null
  if(destinations.length){
   try{
    const input={...publicForward(f),destinations,intent:'scheduled:'+s.id+':'+s.version+':'+s.local_at}
@@ -46,5 +46,5 @@ export async function deliverForward(env:StorageBindings,s:Schedule,f:ForwardDef
   }
  }
  const key=crypto.randomUUID()
- await env.DB.batch([c.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${fence} THEN 1 ELSE 0 END)`,key,...values),...finish([],refused.join('; ').slice(0,500)||'Forwarding unavailable'),c.sql('DELETE FROM nook_guard WHERE id=?',key)]).catch(error=>{if(!/constraint/i.test(String(error)))throw error})
+ await env.DB.batch([c.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${fence} THEN 1 ELSE 0 END)`,key,...values),...finish([],refused.join('; ')||'Forwarding unavailable'),c.sql('DELETE FROM nook_guard WHERE id=?',key)]).catch(error=>{if(!/constraint/i.test(String(error)))throw error})
 }

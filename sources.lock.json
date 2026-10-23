@@ -5653,7 +5653,7 @@
       "executable": false
     },
     "src/scheduled/archive.mjs": {
-      "sha256": "e92591969aeea1a423a9fcfa617fc1c3bf2195d7d37810b2920e2b6fc09f107f",
+      "sha256": "82f433b03e475b12e930df1e9483ad5df6559077eb3e08891b95b022b7f84bb4",
       "executable": false
     },
     "src/scheduled/erasure.ts": {
@@ -5665,7 +5665,7 @@
       "executable": false
     },
     "src/scheduled/forward.ts": {
-      "sha256": "0dbe57c66ebaf1640c3c45391b1462ceb2407896f3113188554be95e0cd369ba",
+      "sha256": "f8308056e1d033611c1edfb3366340b0fe0950b9f13f1809b12d6a9fe40a2071",
       "executable": false
     },
     "src/scheduled/runner.ts": {
@@ -6593,7 +6593,7 @@
       "executable": false
     },
     "tests/scheduled-forwards.mjs": {
-      "sha256": "78b7295a7396459cb5928245606e2a0b5620d61cbc3eb4bf227d97dba00bd10a",
+      "sha256": "2cd6735b14563739a629c2bd0a8f5e0d744afc44a5772a75b23bcaa5005d86ea",
       "executable": false
     },
     "tests/scheduled.mjs": {
