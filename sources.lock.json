@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "29bb35e63d302d9b4fc817722f879fef2a0e681ac1268ec6791895dc8a25e35d",
+      "sha256": "4b1f82a4845d732a0a644b218e94520450d61c5c0c5ff6ed49be57a4f5739e8c",
       "executable": false
     },
     "DEMO.md": {
@@ -5368,6 +5368,14 @@
       "sha256": "4597c018b39f75c3f91d81d614c85e99d7edd51924e5634815d00181eb671b22",
       "executable": false
     },
+    "src/notification-apps/slack-format.ts": {
+      "sha256": "6af64d0ff6c9b8393280ff68d78685f04f3dbb9d2f0d3dc7dbeba3ca8226781a",
+      "executable": false
+    },
+    "src/notification-apps/webhook.ts": {
+      "sha256": "3c8e0689057d9f468ed24b4b142dd0eb9980ba7b860073d83b75becce78ecc19",
+      "executable": false
+    },
     "src/notify/compose.ts": {
       "sha256": "0e92834897a09f3ccbb2729121b7c4bafb9e938177c2cc606139cad4edef05fc",
       "executable": false
@@ -6478,6 +6486,10 @@
     },
     "tests/notification-extension.mjs": {
       "sha256": "04e773446a2730e22a2e6532e80ce1457363f6b2bea53d52805c78743d143927",
+      "executable": false
+    },
+    "tests/notification-webhooks.mjs": {
+      "sha256": "109370dd3bf0449b2916729dff0715bbb4da5b6da5981ef89d0695632239fba1",
       "executable": false
     },
     "tests/notify-journey.mjs": {
