@@ -11,7 +11,7 @@ async function confirmation(c:Context,value:unknown){const key=await crypto.subt
 export async function previewForward(c:Context,input:Record<string,unknown>){
  const id=text(input.source,128),original=await message(c,id);if(original.deleted||original.erased||await c.one("SELECT 1 FROM nook_notification_sharing WHERE conversation=? AND state<>'local'",[original.conversation]))fail(404,'Message unavailable')
  const mode=input.mode;if(!['link','show'].includes(String(mode)))fail(400,'Choose Link only or Show message')
- const note=input.note===undefined?'':text(input.note,2000).trim(),rules=await policy(c);if(rules.mode==='blocked'||mode==='show'&&rules.mode==='link-only')fail(403,'Forwarding policy refuses this mode')
+ const note=input.note===undefined||input.note===''?'':text(input.note,2000).trim(),rules=await policy(c);if(rules.mode==='blocked'||mode==='show'&&rules.mode==='link-only')fail(403,'Forwarding policy refuses this mode')
  if(!Array.isArray(input.destinations)||!input.destinations.length||input.destinations.length>20)fail(400,'Choose 1 to 20 destinations')
  const destinations:Destination[]=(input.destinations as any[]).map((d:any)=>({conversation:text(d?.conversation,128),thread:d?.thread?text(d.thread,128):null}));if(new Set(destinations.map(d=>JSON.stringify(d))).size!==destinations.length)fail(400,'Choose each destination once')
  const sourceMembers=await c.rows<{user:string}>(`SELECT user FROM nook_members m WHERE conversation=? AND ${allowedGrant('m.user','m.conversation')} ORDER BY m.user`,[original.conversation],original.conversation),sourceAudience=new Set(sourceMembers.map(m=>m.user)),audiences=[]
