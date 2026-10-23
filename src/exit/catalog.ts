@@ -17,6 +17,7 @@ export const datasets:Dataset[]=[
  ...clipExportDatasets,
  forwardExport,
  importAttestationExport,
+ {name:'workspace_channel_policy',sql:`SELECT json_array(id) AS _key,'' AS conversation,version,create_public,create_private,archive FROM nook_workspace_channel_policy WHERE EXISTS(SELECT 1 FROM job WHERE workspace_policy_version IS NOT NULL)`},
  {name:'digest_schedules',sql:`SELECT json_array(user) AS _key,'' AS conversation,user,enabled,cadence,local_at,zone,delivery,next_due,version,updated FROM nook_digest_schedules WHERE user=(SELECT owner FROM job)`},
  {name:'digest_deliveries',sql:`SELECT json_array(id) AS _key,'' AS conversation,id,user,version,local_at,due,state,reason,receipt,created,updated FROM nook_digest_deliveries WHERE user=(SELECT owner FROM job)`,project:row=>({...row,receipt:row.receipt?JSON.parse(row.receipt):null})},
  {name:'scheduled_forwards',sql:`SELECT json_array(s.id) AS _key,'' AS conversation,s.id,s.user,s.local_at,s.zone,s.next_due,s.state,s.reason,s.version,json_remove(s.payload,'$.forward.session','$.forward.proofs','$.forward.confirmation') AS payload FROM nook_schedules s WHERE s.user=(SELECT owner FROM job) AND json_type(s.payload,'$.forward')='object'`,project:row=>({...row,payload:JSON.parse(row.payload)})},

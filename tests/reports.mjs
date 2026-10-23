@@ -7,7 +7,7 @@ export async function reportsJourney(h){
   const admin=await registered('synthetic-nook-901'),plain=await registered('synthetic-nook-902'),guest=await registered('synthetic-nook-903'),guest2=await registered('synthetic-nook-904')
   await sql(`UPDATE oa_operators SET role='admin' WHERE id='${admin.user.id}'`)
   Object.assign(admin,await signIn(h.origin(),'synthetic-nook-901@example.test'))
-  for(const actor of [guest,guest2])await sql(`UPDATE nook_access SET mode='guest' WHERE user='${actor.user.id}'`)
+  for(const actor of [guest,guest2]){await sql(`UPDATE nook_access SET mode='guest' WHERE user='${actor.user.id}'`);await sql(`INSERT INTO nook_guest_grants SELECT user,conversation FROM nook_members WHERE user='${actor.user.id}'`)}
   await sql(`WITH RECURSIVE n(value) AS (VALUES(1) UNION ALL SELECT value+1 FROM n WHERE value<35) INSERT INTO oa_operators(id,email,display_name,role,status,version,created_at) SELECT 'synthetic-nook-report-'||value,'synthetic-nook-report-'||value||'@example.test','Synthetic Nook '||value,'member','active',1,${Date.now()} FROM n`)
   await sql("INSERT INTO nook_access(user,mode,active,generation) SELECT id,'member',1,1 FROM oa_operators WHERE id LIKE 'synthetic-nook-report-%'")
   const shared=(await post('/api/conversations',{name:'Report team room',kind:'channel',participants:[admin.user.id,member.user.id]})).data

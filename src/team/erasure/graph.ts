@@ -2,6 +2,7 @@
 const userEdge=(table:string,key:string[],column='user')=>({table,key,from:'nook_actors',on:{[column]:'id'},phase:'identity' as const})
 const messageEdge=(table:string,key:string[])=>({table,key,from:'nook_messages',on:{message:'id'}})
 export const retained = [
+ {table:'nook_workspace_channel_policy',reason:'Body-free workspace channel permissions retain no member attribution; policy changes use the independently anonymized audit log.'},
  {table:'nook_forward_policy',reason:'Installation forwarding policy contains no person attribution.'},
  {table:'nook_ai_settings',reason:'Installation AI policy has no member attribution; restored disabled.'},
  {table:'nook_ai_secrets',reason:'Sealed installation provider key; excluded from archives and exports.'},

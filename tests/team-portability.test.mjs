@@ -27,6 +27,7 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_events VALUES('review',2,'reaction','m',?)").run(guest);f.db.prepare("UPDATE nook_conversations SET seq=2 WHERE id='review'").run();
   f.db.prepare("INSERT INTO nook_saved_items(id,user,conversation,kind,target,created) VALUES('save-live',?,'review','message','m',?),('save-unavailable',?,'review','message','erased-source',?)").run(f.owner.operatorId,now,f.owner.operatorId,now);
   f.db.prepare("INSERT INTO nook_channel_pins(id,conversation,message,actor,created) VALUES('pin-live','review','m',?,?)").run(f.owner.operatorId,now);
+  f.db.prepare("INSERT INTO nook_workspace_channel_policy VALUES(1,1,'owners','admins','owners')").run();
   f.db.prepare('INSERT INTO nook_default_policy VALUES(1,1)').run();
   f.db.prepare("INSERT INTO nook_default_channels VALUES('launch',1)").run();
   f.db.prepare("INSERT INTO nook_default_actions VALUES('default-audit',1,'launch',1,1,?,?)").run(f.owner.operatorId,now);
@@ -72,6 +73,7 @@ test('recovery validates current guest scope and fixed DM attribution while pres
   f.db.prepare("INSERT INTO nook_attachments VALUES('dm-deleted-file','old-dm',?,NULL,'','application/octet-stream',0,NULL,0,'deleted',?,NULL,'dm-upload',NULL)").run(creator,now);
   assert.equal((await f.call('/auth/operator/status',{operatorId:creator,status:'inactive'},f.ownerCookie)).status,200);
   await restoredArchive(await exportedArchive(f),{inspect:target=>{
+   assert.deepEqual({...target.db.prepare('SELECT create_public,create_private,archive FROM nook_workspace_channel_policy').get()},{create_public:'owners',create_private:'admins',archive:'owners'});
    assert.equal(target.db.prepare('SELECT zone FROM nook_profiles WHERE user=?').get(guest).zone,'America/Los_Angeles');
    assert.equal(target.db.prepare("SELECT value FROM nook_profile_values WHERE user=? AND field='department'").get(guest).value,'Customer success');
    assert.equal(target.db.prepare("SELECT section FROM nook_personal_conversations WHERE user=? AND conversation='review'").get(guest).section,'Customers');

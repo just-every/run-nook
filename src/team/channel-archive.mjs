@@ -1,3 +1,4 @@
+import {validateWorkspaceChannelPolicy} from './workspace-policy-archive.mjs';
 const check=(value,code)=>{if(!value)throw Error(code)};
 const tuple=(...parts)=>JSON.stringify(parts);
 const fields=(row,names)=>Object.keys(row).sort().join()===names.sort().join();
@@ -5,6 +6,7 @@ const fields=(row,names)=>Object.keys(row).sort().join()===names.sort().join();
 // Lifecycle rows are additive: older archives supply empty tables. Current
 // rows must retain their exact body-free shape and their durable event links.
 export async function validateChannelArchive(read,{conversations,actors,events}){
+ await validateWorkspaceChannelPolicy(read);
  const settings=await read('nook_channel_settings'),actions=await read('nook_channel_actions');
  const channels=new Map(conversations.map(c=>[c.id,c])),people=new Map(actors.map(a=>[a.id,a])),eventIndex=new Map(events.map(e=>[tuple(e.conversation,e.seq),e]));
  const state=new Map(),byId=new Map(),versions=new Set(),sequences=new Set(),history=new Map();

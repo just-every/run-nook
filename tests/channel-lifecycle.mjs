@@ -66,6 +66,7 @@ export async function channelLifecycleJourney(h){
   await post(`/api/channels/${publicRoom.id}/join`,{},b.cookie)
   await post(`/api/conversations/${publicRoom.id}/messages`,{body:'Posting resumes after restore',intent:crypto.randomUUID()},b.cookie)
  })
+ await workspaceChannelPolicyJourney(h,a)
  await defaultChannelsJourney(h)
 }
 export async function defaultChannelsJourney({post,patch,get,registered,check,owner,origin}){
@@ -119,4 +120,49 @@ export async function defaultChannelsJourney({post,patch,get,registered,check,ow
   const archivable=(await get(`/api/channels/${one.id}/details`)).data;
   await post(`/api/channels/${one.id}/archive`,{version:archivable.version,archived:true});
  });
+}
+
+async function workspaceChannelPolicyJourney(h,manager){
+ const {post,patch,get,registered,check,sql,owner}=h
+ await check('NOOK-060 owner channel policy fences create and archive with no refused effects',async()=>{
+  const admin=await registered('synthetic-nook-960'),guest=await registered('synthetic-nook-961')
+  await sql(`UPDATE oa_operators SET role='admin' WHERE id='${admin.user.id}'`);Object.assign(admin,await signIn(h.origin(),'synthetic-nook-960@example.test'))
+  await sql(`UPDATE nook_access SET mode='guest' WHERE user='${guest.user.id}'`);await sql(`INSERT INTO nook_guest_grants SELECT user,conversation FROM nook_members WHERE user='${guest.user.id}'`)
+  const room=(await post('/api/conversations',{name:'Synthetic channel policy',kind:'private',participants:[owner.user.id,admin.user.id]},manager.cookie)).data
+  const path='/api/team/workspace-policy',initial=(await get(path)).data
+  assert.equal(initial.canManage,true);assert.equal((await get(path,admin.cookie)).data.canManage,false)
+  for(const actor of [manager,guest])await get(path,actor.cookie,403)
+  const restrictive={version:initial.version,create_public:'owners',create_private:'owners',archive:'owners'}
+  for(const actor of [manager,guest,admin])await patch(path,restrictive,actor.cookie,403)
+  const beforePolicy=(await sql("SELECT count(*) AS n FROM nook_audit WHERE kind='policy.channels'"))[0].n
+  let policy=(await patch(path,restrictive)).data
+  assert.equal((await sql("SELECT count(*) AS n FROM nook_audit WHERE kind='policy.channels'"))[0].n,beforePolicy+1)
+  await patch(path,restrictive,owner.cookie,409)
+  const facts=async()=> (await sql('SELECT (SELECT count(*) FROM nook_conversations) AS conversations,(SELECT count(*) FROM nook_members) AS members,(SELECT count(*) FROM nook_events) AS events,(SELECT count(*) FROM nook_audit) AS audits'))[0]
+  const before=await facts(),version=(await get(`/api/channels/${room.id}/details`)).data.version
+  for(const actor of [manager,admin]){
+   for(const kind of ['channel','private']){const refused=await post('/api/conversations',{name:'Synthetic refused policy create',kind},actor.cookie,403);assert.match(refused.data.error,/Workspace channel policy/)}
+   const refused=await post(`/api/channels/${room.id}/archive`,{version,archived:true},actor.cookie,403);assert.match(refused.data.error,/Workspace channel policy/)
+  }
+  assert.deepEqual(await facts(),before)
+  assert.equal((await get(`/api/channels/${room.id}/details`)).data.archived,false)
+  await post('/api/conversations',{name:'Synthetic owner policy create',kind:'private'})
+  policy=(await patch(path,{version:policy.version,create_public:'admins',create_private:'owners',archive:'admins'})).data
+  await post('/api/conversations',{name:'Synthetic admin policy create',kind:'channel'},admin.cookie)
+  await post(`/api/channels/${room.id}/archive`,{version,archived:true},admin.cookie)
+  await post(`/api/channels/${room.id}/archive`,{version:(await get(`/api/channels/${room.id}/details`)).data.version,archived:false})
+  const exportPolicy=(await get('/api/readable-exports/policy')).data
+  await post('/api/readable-exports/policy',{version:exportPolicy.version,enabled:true})
+  let job=(await post('/api/readable-exports',{scope:'workspace',custodyAccepted:true})).data
+  for(let n=0;!job.complete&&n<150;n++)job=(await post(`/api/readable-exports/${job.id}/step`,{})).data
+  assert.equal(job.complete,true)
+  let exported
+  for(let index=0;index<job.pages;index++){const page=(await get(`/api/readable-exports/${job.id}/pages/${index}`)).data;for(const row of page.records??[])if(row.type==='workspace_channel_policy')exported=row}
+  assert.ok(exported,'readable workspace exit carries channel policy');assert.equal(exported.data.create_public,'admins');assert.equal(exported.data.create_private,'owners');assert.equal(exported.data.archive,'admins')
+  policy=(await patch(path,{version:policy.version,create_public:'members',create_private:'members',archive:'members'})).data
+  for(const kind of ['channel','private'])await post('/api/conversations',{name:'Synthetic full member policy create',kind},manager.cookie)
+  await post(`/api/channels/${room.id}/archive`,{version:(await get(`/api/channels/${room.id}/details`)).data.version,archived:true},manager.cookie)
+  await post(`/api/channels/${room.id}/archive`,{version:(await get(`/api/channels/${room.id}/details`)).data.version,archived:false})
+  await h.validateArchive()
+ })
 }
