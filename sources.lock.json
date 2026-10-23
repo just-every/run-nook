@@ -908,6 +908,14 @@
       "sha256": "c03c96134836896b5139d72c90c6f980d0453e10d82d0808f3ce0eafc489eb94",
       "executable": false
     },
+    "evidence/forwards/scheduled-tooltip-hover-1440.png": {
+      "sha256": "44b5ef4bab5b8fc78154706a9607cb59103a4b1753fca5944c2514ee8b958bf4",
+      "executable": false
+    },
+    "evidence/forwards/scheduled-tooltip-long-press-390.png": {
+      "sha256": "671ee472d3df84a159ac2988144d73fc2ac75847f6287beb483d7ced516279ba",
+      "executable": false
+    },
     "evidence/forwards/shown-copy-1440.png": {
       "sha256": "c51b8a6014c71f3ff30dc88b8e0f1d1d67bec657e9af0477e53aa3fcf7b3d9b4",
       "executable": false
