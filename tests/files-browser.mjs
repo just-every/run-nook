@@ -62,12 +62,22 @@ export async function filesBrowser({origin,owner,member,destination}){
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`conversation-${width}.png`)})
     const viewport=await page.evaluate(()=>({width:innerWidth,content:document.documentElement.scrollWidth}))
     assert.ok(viewport.content<=viewport.width+1,'Files view should fit the viewport')
+    // Settle navigation before changing two scopes. Keeping the old Files view
+    // alive between writes legitimately starts denied preview/list/replay reads.
+    const protectedFilesURL=page.url();await page.goto(base+'/app?view=you');await expect(page.locator('.profile-page')).toBeVisible()
     await call(`/api/conversations/${room.id}/members`,{user:member.user.id,remove:true});await call(`/api/conversations/${imported.conversation}/members`,{user:member.user.id,remove:true})
-    await page.reload();await expect(textCard).toHaveCount(0);await expect(imageCard).toHaveCount(0);await expect(page.getByRole('navigation',{name:'Conversation content',exact:true})).toHaveCount(0)
+    await page.goto(protectedFilesURL);await expect(textCard).toHaveCount(0);await expect(imageCard).toHaveCount(0);await expect(page.getByRole('navigation',{name:'Conversation content',exact:true})).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`unavailable-${width}.png`)})
     await page.goto(base+'/app?view=files');await expect(page.getByLabel('File type',{exact:true})).toBeVisible()
     await expect(textCard).toHaveCount(0);await expect(imageCard).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`revoked-${width}.png`)})
+    // Separately prove live withdrawal without reloading the protected view.
+    // HTTP authorization refusals on this page are expected; script failures are not.
+    const liveRoom=await call('/api/conversations',{name:'Synthetic live file access '+width,kind:'private',participants:[member.user.id]})
+    const liveFile=await call(`/api/conversations/${liveRoom.id}/attachments`,{name:'synthetic-nook-live-access-'+width+'.txt',mime:'text/plain',data:Buffer.from('Synthetic live file custody').toString('base64'),intent:crypto.randomUUID()})
+    await call(`/api/conversations/${liveRoom.id}/messages`,{body:'Synthetic live file access control',attachments:[liveFile.id],intent:crypto.randomUUID()})
+    const livePage=await context.newPage();livePage.on('pageerror',error=>errors.push(error.message))
+    try{await livePage.goto(base+'/app?view=files&conversation='+liveRoom.id);const liveCard=livePage.getByRole('article',{name:'File '+liveFile.name,exact:true});await expect(liveCard).toBeVisible();await expect(livePage.locator('.nook-app')).toHaveAttribute('data-live-connected','true');await call(`/api/conversations/${liveRoom.id}/members`,{user:member.user.id,remove:true});await expect(liveCard).toHaveCount(0);if(destination)await livePage.screenshot({animations:'disabled',path:resolve(destination,`live-revoked-${width}.png`)})}finally{await livePage.close()}
     assert.deepEqual(errors,[])
    }finally{await context.close()}
   }
