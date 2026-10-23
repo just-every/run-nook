@@ -1,3 +1,4 @@
+import {workspacePolicy,updateWorkspacePolicy} from './workspace-policy.server'
 import {reportsRoute} from '../reports/server'
 import {digestRoute} from '../digests/server'
 import {auditRoute} from '../audit/server'
@@ -55,6 +56,7 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
  }
  if(parts[1]==='conversations'&&parts.length===4&&parts[3]==='scheduled-audience'&&method==='GET')return Response.json(await scheduleAudience(c,parts[2]))
  if(parts[1]==='conversations'&&parts.length===4&&parts[3]==='scheduled'&&method==='POST')return Response.json(await createSchedule(c,parts[2],input))
+ if(url.pathname==='/api/team/workspace-policy'){if(method==='GET')return Response.json(await workspacePolicy(c));if(method==='PATCH')return Response.json(await updateWorkspacePolicy(c,input))}
  if(url.pathname==='/api/team/default-channels'){
   if(method==='GET')return Response.json(await defaultChannels(c))
   if(method==='PATCH')return Response.json(await updateDefaultChannels(c,input))

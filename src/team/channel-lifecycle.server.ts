@@ -1,3 +1,4 @@
+import {archiveAllowed} from './workspace-policy.server'
 import {fail,text} from '../family/team-chat/domain'
 import {Context} from '../platform/storage/context'
 import {fullMember} from './access'
@@ -27,8 +28,9 @@ export async function channelDetails(c:Context,id:string){
  const leaveReason=channel.kind==='dm'?'Direct conversation participants are fixed':policy.mandatory?'This is a mandatory default channel. An owner must remove its mandatory requirement before you can leave.':transferRequired?'Transfer management before leaving this private channel':null
  const canManage=channel.kind!=='dm'&&!!channel.manage
  const transferCandidates=canManage?await c.rows(`SELECT o.id,o.display_name AS name FROM nook_members m JOIN oa_operators o ON o.id=m.user WHERE m.conversation=? AND o.status='active' AND ${fullMember('o.id')} AND o.id IS NOT ? ORDER BY o.id LIMIT 50`,[id,channel.manager],id):[]
+ const canArchive=channel.kind!=='dm'&&!!await c.one(`SELECT 1 WHERE ${archiveAllowed('?','?')}`,[c.uid,c.uid,id],id)
  const {manage,...data}=channel
- return {...data,defaultChannel:!!policy.defaultChannel,mandatory:!!policy.mandatory,archiveReason:policy.defaultChannel?'Remove this channel from Team → Default channels before archiving it.':null,archived:!!channel.archived,canManage,canLeave:leaveReason===null,leaveReason,transferCandidates,actions:{update:canManage,transfer:canManage,archive:canManage&&!channel.archived&&!policy.defaultChannel,restore:canManage&&!!channel.archived,leave:leaveReason===null}}
+ return {...data,defaultChannel:!!policy.defaultChannel,mandatory:!!policy.mandatory,archiveReason:policy.defaultChannel?'Remove this channel from Team → Default channels before archiving it.':null,archived:!!channel.archived,canManage,canArchive,canLeave:leaveReason===null,leaveReason,transferCandidates,actions:{update:canManage,transfer:canManage,archive:canArchive&&!channel.archived&&!policy.defaultChannel,restore:canManage&&!!channel.archived,leave:leaveReason===null}}
 }
 function version(input:Record<string,any>,keys:string[]){
  if(Object.keys(input).some(key=>!['version',...keys].includes(key)))fail(400,'Unsupported channel setting')
@@ -65,10 +67,11 @@ export async function transferChannel(c:Context,id:string,input:Record<string,an
 }
 export async function archiveChannel(c:Context,id:string,input:Record<string,any>){
  version(input,['archived']);if(typeof input.archived!=='boolean')fail(400,'archived must be boolean')
- const channel=await current(c,id,input)
+ const channel=await current(c,id,input,!input.archived)
+ if(input.archived&&!channel.canArchive)fail(403,'Workspace channel policy does not allow you to archive this channel')
  if(channel.archived===input.archived)return channel
  if(input.archived&&channel.defaultChannel)fail(409,'Remove this channel from Team → Default channels before archiving it')
- await c.batch([...(input.archived?[c.sql("UPDATE nook_invite_plans SET state='cancelled' WHERE state='prepared' AND EXISTS(SELECT 1 FROM json_each(nook_invite_plans.scopes) WHERE value=?)",id)]:[]),c.sql('INSERT INTO nook_channel_settings(conversation,manager,archived) SELECT id,owner,? FROM nook_conversations WHERE id=? ON CONFLICT(conversation) DO UPDATE SET archived=excluded.archived',+input.archived,id),c.sql('UPDATE nook_conversations SET version=version+1 WHERE id=?',id),...action(c,id,input.archived?'archive':'restore')],id,`${revision} AND ${channelManagement('?','?')} AND (?=0 OR NOT (${designatedDefault('?')}))`,[id,input.version,c.uid,id,+input.archived,id])
+ await c.batch([...(input.archived?[c.sql("UPDATE nook_invite_plans SET state='cancelled' WHERE state='prepared' AND EXISTS(SELECT 1 FROM json_each(nook_invite_plans.scopes) WHERE value=?)",id)]:[]),c.sql('INSERT INTO nook_channel_settings(conversation,manager,archived) SELECT id,owner,? FROM nook_conversations WHERE id=? ON CONFLICT(conversation) DO UPDATE SET archived=excluded.archived',+input.archived,id),c.sql('UPDATE nook_conversations SET version=version+1 WHERE id=?',id),...action(c,id,input.archived?'archive':'restore')],id,`${revision} AND ${input.archived?archiveAllowed('?','?'):channelManagement('?','?')} AND (?=0 OR NOT (${designatedDefault('?')}))`,[id,input.version,...(input.archived?[c.uid,c.uid,id]:[c.uid,id]),+input.archived,id])
  await c.hint();return channelDetails(c,id)
 }
 export async function leaveChannel(c:Context,id:string,input:Record<string,any>){
