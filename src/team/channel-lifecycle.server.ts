@@ -49,12 +49,15 @@ async function current(c:Context,id:string,input:Record<string,any>,manage=true)
 }
 const revision=`EXISTS(SELECT 1 FROM nook_conversations WHERE id=? AND kind<>'dm' AND version=?)`
 export async function updateChannel(c:Context,id:string,input:Record<string,any>){
- version(input,['name','topic']);if(input.name===undefined&&input.topic===undefined)fail(400,'Choose a channel setting')
+ version(input,['name','topic','description']);if(input.name===undefined&&input.topic===undefined&&input.description===undefined)fail(400,'Choose a channel setting')
  const name=input.name===undefined?null:text(input.name,80)
  if(input.topic!==undefined&&(typeof input.topic!=='string'||input.topic.length>500))fail(400,'Topic must be at most 500 characters')
  const topic=input.topic===undefined?null:input.topic.trim()
- await current(c,id,input)
- await c.batch([c.sql('INSERT INTO nook_channel_settings(conversation,manager,topic) SELECT id,owner,COALESCE(?,\'\') FROM nook_conversations WHERE id=? ON CONFLICT(conversation) DO UPDATE SET topic=COALESCE(?,topic)',topic,id,topic),c.sql('UPDATE nook_conversations SET name=COALESCE(?,name),version=version+1 WHERE id=?',name,id),...action(c,id,'update')],id,`${revision} AND ${channelManagement('?','?')}`,[id,input.version,c.uid,id])
+ const channel=await current(c,id,input)
+ if(input.description!==undefined&&(typeof input.description!=='string'||input.description.length>2000))fail(400,'Description must be at most 2000 characters')
+ if(input.description!==undefined&&channel.manager!==c.uid)fail(403,'Only the current channel manager may edit the description')
+ const description=input.description===undefined?null:input.description.trim()
+ await c.batch([...(description!==null?[c.sql('INSERT INTO nook_channel_descriptions VALUES(?,?) ON CONFLICT(conversation) DO UPDATE SET description=excluded.description',id,description)]:[]),c.sql('INSERT INTO nook_channel_settings(conversation,manager,topic) SELECT id,owner,COALESCE(?,\'\') FROM nook_conversations WHERE id=? ON CONFLICT(conversation) DO UPDATE SET topic=COALESCE(?,topic)',topic,id,topic),c.sql('UPDATE nook_conversations SET name=COALESCE(?,name),version=version+1 WHERE id=?',name,id),...action(c,id,'update')],id,`${revision} AND ${channelManagement('?','?')} AND (?=0 OR ${channelManager('?')}=?)`,[id,input.version,c.uid,id,+(description!==null),id,c.uid])
  await c.hint();return channelDetails(c,id)
 }
 export async function transferChannel(c:Context,id:string,input:Record<string,any>){

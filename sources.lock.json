@@ -1213,7 +1213,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "13fd142aee70ea1a3857c6bf2a7ae6efdfdd4dd56486c10c213901c62b232611",
+      "sha256": "013b1bbc934a397a7eaa3a13cdf3d50132600b5efd7092995424e74619b4bc3f",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -1478,6 +1478,10 @@
     },
     "migrations/0087_workspace_channel_policy.sql": {
       "sha256": "01ddd0550993589e07d1fb35ff3b9a1cf1e5c73ebe26c37abbe677b1fad54ddd",
+      "executable": false
+    },
+    "migrations/0088_channel_descriptions.sql": {
+      "sha256": "088a8bcd9035f9e972bfbde5a145ad4076d83332c644c1e927edf458c6dade21",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -4501,7 +4505,7 @@
       "executable": false
     },
     "src/exit/catalog.ts": {
-      "sha256": "a9cf35e560774e72e48ecb85fce98ecb8212905de0b3c992bc4d41eb301dc371",
+      "sha256": "44749ebd945b49160a2bb645c3c6334c57e51d7de2e8a035ba990cfe4725a125",
       "executable": false
     },
     "src/exit/client.ts": {
@@ -5937,7 +5941,7 @@
       "executable": false
     },
     "src/team/channel-archive.mjs": {
-      "sha256": "3b0f582182619694ccd0cd69c3d2660a3961a403ee4d147eaaccf512f1762c2b",
+      "sha256": "c647cffb2fbb39d833556f0f903b2afe5a3ec02d336ada1ff956863dbf54efc3",
       "executable": false
     },
     "src/team/channel-departure.ts": {
@@ -5945,7 +5949,7 @@
       "executable": false
     },
     "src/team/channel-lifecycle.server.ts": {
-      "sha256": "9d2b73c8877812b18b4ff1736b954a8346a46de2257536a85a93e3e0607630ef",
+      "sha256": "b266db0c9797f6fb4aae0833de0e95b37cc0bf90601445269337f9d3996b831a",
       "executable": false
     },
     "src/team/channel-membership.server.ts": {
@@ -5953,7 +5957,7 @@
       "executable": false
     },
     "src/team/channel-policy.ts": {
-      "sha256": "b2943b98879bd88a61d9372d3dcdaf6e979299df45ec9a086243eb9fa9f8659e",
+      "sha256": "d9118b20edeff4a5ab29f0fd5ce8eee46ba0cfbdd7d524d9b13d84d4094f5b9d",
       "executable": false
     },
     "src/team/channel-settings.css": {
@@ -5961,15 +5965,15 @@
       "executable": false
     },
     "src/team/ChannelBrowser.tsx": {
-      "sha256": "17b328fb3260bc4634125ecc517ce8f07ad17e519a7341c243b021f9165d559d",
+      "sha256": "e5e3a0f0e6f439a2d4a06df5725444c292f6994b36b8fcf6a4ed979a596f3239",
       "executable": false
     },
     "src/team/channels.server.ts": {
-      "sha256": "e80e1e0d0d7b016f85c7d5e716a9ffe3aa81e680a56d74264c9bce7448ab8b07",
+      "sha256": "c7d073a7ce8f5adf4e45e1362c1b3bdc02ff44661c5a81134e40f5ed9eb762b5",
       "executable": false
     },
     "src/team/ChannelSettings.tsx": {
-      "sha256": "13ac25d6ddbdc8f0578171155dad1b8a066f63b0a0e7353dbae856d67446fba7",
+      "sha256": "d66356356abca5c7e6472dd4ea44c565d1c94b36a5d928632991e163925d943d",
       "executable": false
     },
     "src/team/conversation-notify.server.ts": {
@@ -6037,7 +6041,7 @@
       "executable": false
     },
     "src/team/erasure/graph.ts": {
-      "sha256": "041279e9e915ac9230df036627ea8d92b1e85da65606b1909794d67e973048b2",
+      "sha256": "11005d7e784feeafa13bbac9a94358cb31d66cc7a7e9289cb6eea54f03382f2d",
       "executable": false
     },
     "src/team/erasure/identity.ts": {
@@ -6329,7 +6333,7 @@
       "executable": false
     },
     "tests/channel-lifecycle.mjs": {
-      "sha256": "adf235e42f46ba318cfdb0d5f1950123285d23a18aa588926698c882d53997e0",
+      "sha256": "e2592fee90ef3abe46237e97b83b483b4acee1635039693491aa8c52247ef24f",
       "executable": false
     },
     "tests/cloudflare-account.mjs": {
@@ -6661,7 +6665,7 @@
       "executable": false
     },
     "tests/posting-browser.mjs": {
-      "sha256": "9b61b5279a409165826b224bf75264449a10881e2b9a822fe3d106ddd3bd2c34",
+      "sha256": "5b7225c8bc98a3d456ab6c36928a501a835f04ff63363ea6ede75849d546ec63",
       "executable": false
     },
     "tests/posting.mjs": {
@@ -6941,7 +6945,7 @@
       "executable": false
     },
     "tests/team-portability.test.mjs": {
-      "sha256": "643fa9675a4cd7e68d5b480666c0376d30094573ce2549851a098ca8b51a3219",
+      "sha256": "0267b73fc3d0dcc7ae5014f3c56e6dc6110ed7ff437358c99d63b816c105d160",
       "executable": false
     },
     "tests/team-runtime.mjs": {

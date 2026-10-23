@@ -406,6 +406,12 @@
       "name": "0087_workspace_channel_policy.sql",
       "sha256": "01ddd0550993589e07d1fb35ff3b9a1cf1e5c73ebe26c37abbe677b1fad54ddd",
       "sql": "-- Existing workspaces keep their channel management rules until an owner saves.\nCREATE TABLE nook_workspace_channel_policy(\n id INTEGER PRIMARY KEY CHECK(id=1),\n version INTEGER NOT NULL CHECK(version>0),\n create_public TEXT NOT NULL CHECK(create_public IN ('owners','admins','members')),\n create_private TEXT NOT NULL CHECK(create_private IN ('owners','admins','members')),\n archive TEXT NOT NULL CHECK(archive IN ('owners','admins','members'))\n);\nCREATE TRIGGER nook_exit_workspace_channels_insert AFTER INSERT ON nook_workspace_channel_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\nCREATE TRIGGER nook_exit_workspace_channels_update AFTER UPDATE ON nook_workspace_channel_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\nCREATE TRIGGER nook_exit_workspace_channels_delete AFTER DELETE ON nook_workspace_channel_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0088_channel_descriptions.sql",
+      "sha256": "088a8bcd9035f9e972bfbde5a145ad4076d83332c644c1e927edf458c6dade21",
+      "sql": "CREATE TABLE nook_channel_descriptions(\n conversation TEXT PRIMARY KEY REFERENCES nook_conversations(id),\n description TEXT NOT NULL CHECK(length(description)<=2000)\n);\nCREATE TRIGGER nook_exit_description_insert AFTER INSERT ON nook_channel_descriptions BEGIN INSERT INTO nook_exit_changes VALUES(NEW.conversation,1) ON CONFLICT(conversation) DO UPDATE SET revision=revision+1; END;\nCREATE TRIGGER nook_exit_description_update AFTER UPDATE ON nook_channel_descriptions BEGIN INSERT INTO nook_exit_changes VALUES(NEW.conversation,1) ON CONFLICT(conversation) DO UPDATE SET revision=revision+1; END;\nCREATE TRIGGER nook_exit_description_delete AFTER DELETE ON nook_channel_descriptions BEGIN INSERT INTO nook_exit_changes VALUES(OLD.conversation,1) ON CONFLICT(conversation) DO UPDATE SET revision=revision+1; END;\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

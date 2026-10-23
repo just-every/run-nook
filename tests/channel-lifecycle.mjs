@@ -36,10 +36,13 @@ export async function channelLifecycleJourney(h){
  })
  await check('NOOK-060 versioned channel details, archive/restore and archived write refusal',async()=>{
   const before=await details(publicRoom.id)
-  await patch(`/api/channels/${publicRoom.id}`,{version:before.version,name:'Launch readiness',topic:'Support handoff and rollout windows'},a.cookie)
+  await patch(`/api/channels/${publicRoom.id}`,{version:before.version,name:'Launch readiness',topic:'Support handoff and rollout windows',description:'Synthetic channel description'},a.cookie)
   await patch(`/api/channels/${publicRoom.id}`,{version:before.version,topic:'Stale overwrite'},a.cookie,409)
   const changed=await details(publicRoom.id)
-  assert.equal(changed.name,'Launch readiness');assert.equal(changed.topic,'Support handoff and rollout windows')
+  assert.equal(changed.name,'Launch readiness');assert.equal(changed.topic,'Support handoff and rollout windows');assert.equal(changed.description,'Synthetic channel description')
+  await patch(`/api/channels/${publicRoom.id}`,{version:changed.version,description:'Non-manager overwrite'},b.cookie,403)
+  await patch(`/api/channels/${publicRoom.id}`,{version:changed.version,description:'x'.repeat(2001)},a.cookie,400)
+  const actions=await h.sql(`SELECT count(*) AS n FROM nook_audit WHERE kind='channel.update' AND scope='${publicRoom.id}'`);assert.equal(actions[0].n,1)
   const payload={body:'A durable message before archive',intent:crypto.randomUUID()},message=(await post(`/api/conversations/${publicRoom.id}/messages`,payload,a.cookie)).data
   await post(`/api/channels/${publicRoom.id}/archive`,{version:changed.version,archived:true},a.cookie)
   const frontier=(await get(`/api/conversations/${publicRoom.id}/replay`,a.cookie)).data.frontier
@@ -55,18 +58,18 @@ export async function channelLifecycleJourney(h){
   for(const actor of [b,a])await post(`/api/channels/${publicRoom.id}/leave`,{version:(await details(publicRoom.id,actor)).version},actor.cookie)
   await get(`/api/conversations/${publicRoom.id}/messages`,a.cookie,403)
   const directory=(await get('/api/channels',x.cookie)).data
-  assert.ok(directory.items.some(channel=>channel.id===publicRoom.id&&channel.archived))
+  assert.ok(directory.items.some(channel=>channel.id===publicRoom.id&&channel.archived&&channel.description==='Synthetic channel description'))
   await post(`/api/channels/${publicRoom.id}/join`,{},x.cookie)
   assert.ok((await get(`/api/conversations/${publicRoom.id}/messages`,x.cookie)).data.some(m=>m.id===message.id))
   await post(`/api/conversations/${publicRoom.id}/messages`,{body:'Joining history does not restore posting',intent:crypto.randomUUID()},x.cookie,409)
   await post(`/api/channels/${publicRoom.id}/leave`,{version:(await details(publicRoom.id,x)).version},x.cookie)
   await post(`/api/channels/${publicRoom.id}/join`,{})
-  const archived=(await get(`/api/channels/${publicRoom.id}/details`)).data
+  const archived=(await get(`/api/channels/${publicRoom.id}/details`)).data;assert.equal(archived.description,'Synthetic channel description')
   await post(`/api/channels/${publicRoom.id}/archive`,{version:archived.version,archived:false})
   await post(`/api/channels/${publicRoom.id}/join`,{},b.cookie)
   await post(`/api/conversations/${publicRoom.id}/messages`,{body:'Posting resumes after restore',intent:crypto.randomUUID()},b.cookie)
  })
- await workspaceChannelPolicyJourney(h,a)
+ await workspaceChannelPolicyJourney(h,a,publicRoom)
  await defaultChannelsJourney(h)
 }
 export async function defaultChannelsJourney({post,patch,get,registered,check,owner,origin}){
@@ -122,7 +125,7 @@ export async function defaultChannelsJourney({post,patch,get,registered,check,ow
  });
 }
 
-async function workspaceChannelPolicyJourney(h,manager){
+async function workspaceChannelPolicyJourney(h,manager,describedRoom){
  const {post,patch,get,registered,check,sql,owner}=h
  await check('NOOK-060 owner channel policy fences create and archive with no refused effects',async()=>{
   const admin=await registered('synthetic-nook-960'),guest=await registered('synthetic-nook-961')
@@ -156,9 +159,9 @@ async function workspaceChannelPolicyJourney(h,manager){
   let job=(await post('/api/readable-exports',{scope:'workspace',custodyAccepted:true})).data
   for(let n=0;!job.complete&&n<150;n++)job=(await post(`/api/readable-exports/${job.id}/step`,{})).data
   assert.equal(job.complete,true)
-  let exported
-  for(let index=0;index<job.pages;index++){const page=(await get(`/api/readable-exports/${job.id}/pages/${index}`)).data;for(const row of page.records??[])if(row.type==='workspace_channel_policy')exported=row}
-  assert.ok(exported,'readable workspace exit carries channel policy');assert.equal(exported.data.create_public,'admins');assert.equal(exported.data.create_private,'owners');assert.equal(exported.data.archive,'admins')
+  let exported,description
+  for(let index=0;index<job.pages;index++){const page=(await get(`/api/readable-exports/${job.id}/pages/${index}`)).data;for(const row of page.records??[]){if(row.type==='workspace_channel_policy')exported=row;if(row.type==='conversations'&&row.data.id===describedRoom.id)description=row.data.description}}
+  assert.ok(exported,'readable workspace exit carries channel policy');assert.equal(exported.data.create_public,'admins');assert.equal(exported.data.create_private,'owners');assert.equal(exported.data.archive,'admins');assert.equal(description,'Synthetic channel description')
   policy=(await patch(path,{version:policy.version,create_public:'members',create_private:'members',archive:'members'})).data
   for(const kind of ['channel','private'])await post('/api/conversations',{name:'Synthetic full member policy create',kind},manager.cookie)
   await post(`/api/channels/${room.id}/archive`,{version:(await get(`/api/channels/${room.id}/details`)).data.version,archived:true},manager.cookie)

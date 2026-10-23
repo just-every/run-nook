@@ -9,6 +9,7 @@ export async function validateChannelArchive(read,{conversations,actors,events})
  await validateWorkspaceChannelPolicy(read);
  const settings=await read('nook_channel_settings'),actions=await read('nook_channel_actions');
  const channels=new Map(conversations.map(c=>[c.id,c])),people=new Map(actors.map(a=>[a.id,a])),eventIndex=new Map(events.map(e=>[tuple(e.conversation,e.seq),e]));
+ for(const row of await read('nook_channel_descriptions'))check(fields(row,['conversation','description'])&&channels.has(row.conversation)&&channels.get(row.conversation).kind!=='dm'&&typeof row.description==='string'&&row.description.length<=2000&&row.description.trim()===row.description,'invalid_channel_description');
  const state=new Map(),byId=new Map(),versions=new Set(),sequences=new Set(),history=new Map();
  for(const row of settings){
   check(fields(row,['conversation','manager','topic','archived'])&&channels.has(row.conversation)&&channels.get(row.conversation).kind!=='dm'&&!state.has(row.conversation)&&typeof row.topic==='string'&&row.topic.length<=500&&row.topic.trim()===row.topic&&[0,1].includes(row.archived)&&(row.manager===null||people.has(row.manager)&&!people.get(row.manager).erased),'invalid_channel_settings');
