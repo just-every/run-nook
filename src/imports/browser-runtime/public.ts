@@ -24,6 +24,7 @@ export function publicLocalSummary(capture: any) {
       actors: capture.actors.map(({ sourceRecord, ...actor }: any) => actor),
       archiveDigest: capture.archiveDigest, captureDigest: capture.digest,
       completeness: 'unknown', sourceAuthenticityVerified: false,
+      ...(capture.cutover ? { cutover: capture.cutover } : {}),
       ...(capture.delta ? { delta: {
         overlapDays: capture.delta.overlapDays, baselineDigest: capture.delta.baselineDigest,
         counts: capture.delta.counts, coverage: capture.delta.coverage,

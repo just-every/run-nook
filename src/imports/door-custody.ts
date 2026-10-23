@@ -7,6 +7,7 @@ import { publicLocalSummary } from './browser-runtime/public';
 import { fail } from '../family/team-chat/domain';
 import { recordAttestation } from './attestation.mjs';
 import { publishAttestation } from './attestation-custody';
+import { publishCutover } from './cutover-custody';
 
 export const previewLifetime = 30 * 60 * 1000;
 export async function uploadedCapture(env: DoorBindings, namespace: string, uploadId: string, owner: string, users: any[]) {
@@ -124,4 +125,5 @@ export async function publishResult(env: DoorBindings, predicate: D1Sql, link: a
     ]);
   }
   await publishAttestation(env, predicate, link, result);
+  await publishCutover(env, predicate, link, result);
 }

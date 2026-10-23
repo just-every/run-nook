@@ -1,14 +1,16 @@
 import { DeltaReport } from './DeltaReport';
 import { AttestationReport } from './AttestationReport';
+import { CutoverInvitations } from './CutoverInvitations';
 import type { ImportHistory } from './door-client';
 
 type Props = {
     jobs: ImportHistory[]; busy: boolean;
     onAction: (item: ImportHistory, verb: 'apply' | 'undo' | 'reconcile' | 'status') => Promise<void>;
     onRefresh: () => Promise<void>; onCleanup: () => Promise<void>;
+    onSaveCutover: (item: ImportHistory, choices: Record<string, 'member' | 'admin'>) => Promise<void>;
 };
 const reversed = ['undone', 'rolled_back'];
-export function ImportJobs({ jobs, busy, onAction, onRefresh, onCleanup }: Props) {
+export function ImportJobs({ jobs, busy, onAction, onRefresh, onCleanup, onSaveCutover }: Props) {
     return <section><h2>Import jobs</h2>
         <p>Progress survives closing this page and restarting the application. Undo removes only unchanged records owned by that import; later live work or references stop removal.</p>
         {jobs.length === 0 ? <p>No reviewed imports yet.</p> : jobs.map(item => {
@@ -20,6 +22,7 @@ export function ImportJobs({ jobs, busy, onAction, onRefresh, onCleanup }: Props
                 {total !== undefined && checkpoint !== undefined && <progress value={checkpoint} max={Math.max(1, total)} aria-label="Imported source entries" />}
                 {item.summary?.delta && <DeltaReport delta={item.summary.delta} />}
                 {item.summary?.attestation && <AttestationReport attestation={item.summary.attestation} />}
+                {item.summary?.cutover && <CutoverInvitations key={JSON.stringify(item.summary.cutoverChoices ?? {})} cutover={item.summary.cutover} choices={item.summary.cutoverChoices} busy={busy} onSave={!reversed.includes(state) && item.planId ? choices => onSaveCutover(item, choices) : undefined} />}
                 {item.summary?.delta && reversed.includes(state) && <p>Delta pass {state === 'undone' ? 'undone' : 'rolled back'}. Its reversible imported changes were withdrawn; native work remains.</p>}
                 {item.caption && <p className="import-approval">{item.caption}</p>}
                 {item.legacy && <p>Legacy import · guarded Undo only. To import new history, select a local export and review a new dry run.</p>}

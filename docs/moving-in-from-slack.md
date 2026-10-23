@@ -8,6 +8,8 @@ Upload the export ZIP, review the channel and person associations, choose the au
 
 The importer accepts selected public channel history. Private conversations and direct messages are listed as exclusions; they are not imported. Imported messages remain attributed to their source identities and do not create native unread activity, attention or accepted commitments.
 
+The review also prepares your cutover invitations from the export's member list. Each active member and guest gets one row with the Slack ID, name, address and a proposed Nook role: full members are proposed as members, guests stay guests limited to the channels you mapped, and Slack Workspace Owners and Admins are flagged so you can choose admin. Nobody is proposed as an admin or owner, and a member with no address in the export is listed as needing one, never guessed. Deactivated people and bots get no invitation, though their history still imports under the identity you reviewed. Only you can save these choices on an applied or pending pass. Saving sends nothing and creates no account or access; the choices stay with that pass, appear in your readable export and archive, and are withdrawn if you undo the pass or erase its authors. Sending invitations is a separate step.
+
 ## Files and historical details
 
 Slack ZIP exports usually contain file links, not the actual bytes. The review lists each missing filename, source channel, message key and size, plus the number of missing references and their total known size. Run this on your computer to prepare the companion files:
