@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "da76400f9dbb1888b5cf0d3b2d74db4668ac4b20f32cecdd99eaf9e8220c98ad",
+      "sha256": "ea6029d6355e3ab3168ee3e6bf8f4ea9c0ac47563bf4451db09d13cb9f8912a3",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "9c29ea945f11199792a1db129cca95698e301b61724e5fbc53ac9d76faab976f",
+      "sha256": "51e10dcdbe5c0e75b6064f39145633090adabf3e3b14415a0ba5abd91b3b866d",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "df5dbb148a349beff01f817bd5f5b05e31ee3d76591a1e335ebc19a75efcfbc3",
+      "sha256": "8f06bf4a51a576d7147cfca87222964aa8f8729ac8fc49d19c74ac6acfc7fcf1",
       "executable": false
     },
     "docs/conversations.md": {
@@ -714,6 +714,10 @@
     },
     "docs/readable-export.md": {
       "sha256": "59c000113a997fb48c110e79069ce6c31ab681aed12ecc5af8234bb54f4a6055",
+      "executable": false
+    },
+    "docs/reports.md": {
+      "sha256": "82b849408e84c31ed3392ea097c668390bc758550dc50fef5e36e87b341aacf0",
       "executable": false
     },
     "docs/site.json": {
@@ -5720,6 +5724,18 @@
       "sha256": "3295fb940e90bd0b65b1cbf90569511f7e495fd3e3a59b92fd6e9ca213c92b7e",
       "executable": false
     },
+    "src/reports/reports.css": {
+      "sha256": "8b45188d2be2b918b48bd0764934afccbb97cb0e96d7a2207cdd537097508ef1",
+      "executable": false
+    },
+    "src/reports/Reports.tsx": {
+      "sha256": "a60822273ce61c6e83979f26b0fc4c464ccef5d2218aebcb0783d52d5da6d0be",
+      "executable": false
+    },
+    "src/reports/server.ts": {
+      "sha256": "9cad0049474ea987dc8ee14ca3f8c453e0c60a791d1307e6e0685373bfd15c76",
+      "executable": false
+    },
     "src/router.tsx": {
       "sha256": "8e28d274af3e0490efcc0de2537d6808583814cc1f18298f2d9516f30cdc1af4",
       "executable": false
@@ -5746,6 +5762,10 @@
     },
     "src/routes/imports.tsx": {
       "sha256": "7884a2793f2b9e98823474e34fe6e1e44b40b852dff5f0152311bb0b267071e0",
+      "executable": false
+    },
+    "src/routes/reports.tsx": {
+      "sha256": "830688b39edb46664dae7426c745ddda5a7f10e2ee0794133f5a5018a35b53a7",
       "executable": false
     },
     "src/routeTree.gen.ts": {
@@ -6670,6 +6690,14 @@
     },
     "tests/reminders.mjs": {
       "sha256": "ec35c480db2576a109b61919f2753821f4f13ef26e8014a26e21e501d843861c",
+      "executable": false
+    },
+    "tests/reports-browser.mjs": {
+      "sha256": "9c36ec04b99d680b6e6b084fa0bd77ac32c349b348d697d6a439d260a36eb3d3",
+      "executable": false
+    },
+    "tests/reports.mjs": {
+      "sha256": "6275326235352a8e13903d664e6ebd65b77774752d8bd7d9c374efd6a14d7d37",
       "executable": false
     },
     "tests/runtime-portability.mjs": {
