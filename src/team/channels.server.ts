@@ -4,7 +4,7 @@ import {fullMember} from './access'
 export async function browseChannels(c:Context,after=''){
  if(after.length>128)fail(400,'Invalid channel cursor')
  const mode=await c.one('SELECT mode FROM nook_access WHERE user=?',[c.uid]);if(mode?.mode!=='member')fail(403,'Channel discovery is available to workspace members')
- const rows=await c.rows(`SELECT id,name,COALESCE((SELECT archived FROM nook_channel_settings WHERE conversation=nook_conversations.id),0) AS archived FROM nook_conversations WHERE kind='channel' AND id>? AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=nook_conversations.id AND user=?) AND ${fullMember('?')} ORDER BY id LIMIT 51`,[after,c.uid,c.uid]);
+ const rows=await c.rows(`SELECT id,name,COALESCE((SELECT description FROM nook_channel_descriptions WHERE conversation=nook_conversations.id),'') AS description,COALESCE((SELECT archived FROM nook_channel_settings WHERE conversation=nook_conversations.id),0) AS archived FROM nook_conversations WHERE kind='channel' AND id>? AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=nook_conversations.id AND user=?) AND ${fullMember('?')} ORDER BY id LIMIT 51`,[after,c.uid,c.uid]);
  return {items:rows.slice(0,50),cursor:rows.length>50?rows[49].id:null}
 }
 export async function joinChannel(c:Context,id:string){

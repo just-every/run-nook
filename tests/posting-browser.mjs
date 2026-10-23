@@ -22,10 +22,11 @@ export async function postingBrowser({origin,owner,member,destination='evidence/
    for(const p of [manager,reader,administrator]){p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text())})}
    try{
     await manager.goto(url);await manager.getByRole('button',{name:'Details',exact:true}).click()
-    await manager.screenshot({path:resolve(destination,`channel-settings-top-${width}.png`)})
+    await expect(manager.getByLabel('Channel name',{exact:true})).toHaveValue(room.name);await manager.screenshot({animations:'disabled',path:resolve(destination,`channel-settings-top-${width}.png`)})
+    await manager.getByRole('textbox',{name:'Description',exact:true}).fill('Synthetic channel description '+width);const described=manager.waitForResponse(r=>r.url().endsWith('/api/channels/'+room.id)&&r.request().method()==='PATCH');await manager.getByRole('button',{name:'Save channel details',exact:true}).click();assert.equal((await described).status(),200);await manager.goto(url);await manager.getByRole('button',{name:'Details',exact:true}).click();await expect(manager.getByRole('textbox',{name:'Description',exact:true})).toHaveValue('Synthetic channel description '+width);await expect(manager.getByRole('button',{name:'Save channel details',exact:true})).toBeDisabled();await manager.getByRole('textbox',{name:'Description',exact:true}).scrollIntoViewIfNeeded();await manager.screenshot({animations:'disabled',path:resolve(destination,`channel-description-${width}.png`)})
     const workspace=manager.getByRole('region',{name:'Workspace policy',exact:true});await expect(workspace).toBeVisible();await workspace.getByLabel('Who can create public channels?').selectOption('owners');await workspace.getByLabel('Who can create private channels?').selectOption('admins');await workspace.getByLabel('Who can archive channels?').selectOption('owners');await workspace.getByRole('button',{name:'Save workspace policy',exact:true}).click();await expect(workspace.getByRole('status')).toHaveText('Workspace channel policy saved.')
-    await workspace.scrollIntoViewIfNeeded();await manager.screenshot({path:resolve(destination,`workspace-policy-owner-${width}.png`)})
-    await administrator.goto(url);await administrator.getByRole('button',{name:'Details',exact:true}).click();const readonly=administrator.getByRole('region',{name:'Workspace policy',exact:true});await expect(readonly.getByText('Owners only',{exact:true})).toHaveCount(2);await expect(readonly.getByRole('combobox')).toHaveCount(0);await expect(readonly.getByRole('button')).toHaveCount(0);await readonly.scrollIntoViewIfNeeded();await administrator.screenshot({path:resolve(destination,`workspace-policy-admin-${width}.png`)})
+    await workspace.scrollIntoViewIfNeeded();await manager.screenshot({animations:'disabled',path:resolve(destination,`workspace-policy-owner-${width}.png`)})
+    await administrator.goto(url);await administrator.getByRole('button',{name:'Details',exact:true}).click();const readonly=administrator.getByRole('region',{name:'Workspace policy',exact:true});await expect(readonly.getByText('Owners only',{exact:true})).toHaveCount(2);await expect(readonly.getByRole('combobox')).toHaveCount(0);await expect(readonly.getByRole('button')).toHaveCount(0);await readonly.scrollIntoViewIfNeeded();await administrator.screenshot({animations:'disabled',path:resolve(destination,`workspace-policy-admin-${width}.png`)})
     for(const p of [manager,administrator]){await p.addScriptTag({path:require.resolve('axe-core/axe.min.js')});assert.deepEqual(await p.evaluate(async()=>{const r=await window.axe.run(document.querySelector('dialog[open]'));return r.violations.filter(v=>['serious','critical'].includes(v.impact))}),[]);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.equal(await p.evaluate(()=>window.__rerHydration?.count??0),0)}
     for(const label of ['Who can create public channels?','Who can create private channels?','Who can archive channels?'])await workspace.getByLabel(label).selectOption('members');await workspace.getByRole('button',{name:'Save workspace policy',exact:true}).click();await expect(workspace.getByRole('status')).toHaveText('Workspace channel policy saved.')
     const settings=manager.getByRole('region',{name:'Posting permissions'})
@@ -35,7 +36,7 @@ export async function postingBrowser({origin,owner,member,destination='evidence/
     await settings.getByRole('button',{name:'Save posting permissions'}).click();assert.equal((await saved).status(),200)
     await settings.getByText('Permission history and overrides').click()
     await expect(settings.getByText(/Owners and admins · replies: same people/)).toBeVisible()
-    await settings.scrollIntoViewIfNeeded();await manager.screenshot({path:resolve(destination,`permissions-${width}.png`)})
+    await settings.scrollIntoViewIfNeeded();await manager.screenshot({animations:'disabled',path:resolve(destination,`permissions-${width}.png`)})
     await reader.goto(url);await expect(reader.getByText('Posting is restricted by this channel’s permissions.',{exact:false})).toBeVisible()
     await expect(reader.getByRole('textbox',{name:'Message Company announcements '+width,exact:true})).toHaveCount(0)
     await reader.goto(url+'&thread='+root.id);await expect(reader.getByRole('textbox',{name:'Reply in thread',exact:true})).toHaveCount(0)
@@ -52,7 +53,7 @@ export async function postingBrowser({origin,owner,member,destination='evidence/
     const selected=manager.waitForResponse(r=>r.url().endsWith('/posting')&&r.request().method()==='PATCH')
     await settings.getByRole('button',{name:'Save posting permissions'}).click();assert.equal((await selected).status(),200)
     await expect(settings.getByRole('button',{name:'Save posting permissions'})).toBeEnabled()
-    await settings.scrollIntoViewIfNeeded();await manager.screenshot({path:resolve(destination,`named-${width}.png`)})
+    await settings.scrollIntoViewIfNeeded();await manager.screenshot({animations:'disabled',path:resolve(destination,`named-${width}.png`)})
     await manager.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click()
     await manager.goto(url+'&focus='+root.id)
     await manager.getByRole('button',{name:'Post with admin override'}).click()
@@ -61,7 +62,8 @@ export async function postingBrowser({origin,owner,member,destination='evidence/
     const overridden=manager.waitForResponse(r=>r.url().includes('/messages')&&r.request().method()==='POST')
     await box.press('Enter');assert.equal((await overridden).status(),200)
     await expect(manager.getByText('Admin override',{exact:true})).toBeVisible()
-    await manager.screenshot({path:resolve(destination,`override-${width}.png`)})
+    await manager.screenshot({animations:'disabled',path:resolve(destination,`override-${width}.png`)})
+    const discovery=await call('/api/conversations',{name:'Synthetic described channel '+width,kind:'channel'});await call('/api/channels/'+discovery.id,{version:1,description:'Synthetic discoverable description '+width},'PATCH');await reader.goto(origin+'/app?view=channels');await expect(reader.getByText('Synthetic discoverable description '+width,{exact:true})).toBeVisible();await reader.addScriptTag({path:require.resolve('axe-core/axe.min.js')});assert.deepEqual(await reader.evaluate(async()=>{const r=await window.axe.run(document.querySelector('.team-channels'));return r.violations.filter(v=>['serious','critical'].includes(v.impact))}),[]);assert.ok(await reader.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.equal(await reader.evaluate(()=>window.__rerHydration?.count??0),0);await reader.screenshot({animations:'disabled',path:resolve(destination,`channel-browser-description-${width}.png`)})
     assert.deepEqual(errors,[])
    }finally{for(const context of contexts)await context.close()}
   }
