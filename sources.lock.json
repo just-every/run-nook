@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "284a810eae92577fae3a5b5f2d74e5a3ae2032e8f86d58dee2d7410993cd6e61",
+      "sha256": "f28e2627f745b206b309a4594cfbfb41da733b84d095720e30565191990ef3b1",
       "executable": false
     },
     "DEMO.md": {
@@ -6537,7 +6537,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "56bd31cb6275b4cb3c09b56d85d2edb574a820b0a8539ebebe106814020f4236",
+      "sha256": "88b090a54e7a4027f7614213f17bed9913f0855396184c52c89c4f8b13403706",
       "executable": false
     },
     "tests/notification-extension.mjs": {
