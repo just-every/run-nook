@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "93beaf6edf147570e0d4824e757d8964d0f2df79ac595113d737b489e0f30846",
+      "sha256": "5876593273f8ae08f04be8e7ad11b76318034c1b29da296ac8b75c86cb8d6950",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "5230707987b107930d43b45371a970d3eaadddb5dc975ce07272da1563d71c88",
+      "sha256": "78341a236c4b71c0ad18efe822ad4534a79f56583c0d9f1b7ae41d2f7e1dfac5",
       "executable": false
     },
     "DEMO.md": {
@@ -725,7 +725,7 @@
       "executable": false
     },
     "docs/your-team.md": {
-      "sha256": "691aa9568fc72792a1a0018f3a68c140cfe4a7b34150c279167d6e589eb1592b",
+      "sha256": "51689596b18bbaf4b7882a2a5cef3174ace2f6133e3a71bd5f9ec09bd16e448e",
       "executable": false
     },
     "edition.json": {
@@ -1462,6 +1462,10 @@
     },
     "migrations/0081_scheduled_digests.sql": {
       "sha256": "617cb73d5aa6aee2dfafd7697a68a3a7bcda40923cbd8ce18a8bc107d484fc6d",
+      "executable": false
+    },
+    "migrations/0082_device_mobile_always.sql": {
+      "sha256": "f8ba73b48b3f660566fb6cab7bbed51d9209ddee3014320809401cd2b91672aa",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -6125,7 +6129,7 @@
       "executable": false
     },
     "src/team/routes.server.ts": {
-      "sha256": "75b940f8719003bb15f69ced119f05652426dca36a00b97e2495f69fe24ca401",
+      "sha256": "becbc3ac992ee042286020ccb00593d02b007222ba3723b1f42ad822ff341cec",
       "executable": false
     },
     "src/team/saved-archive.mjs": {
@@ -6153,7 +6157,7 @@
       "executable": false
     },
     "src/team/TeamPanel.tsx": {
-      "sha256": "4f9ce7b4d07e56d89a2614767d796d3c6fbfadb579d48b5641c830fec2f47022",
+      "sha256": "0ace74f5887fe10bee12aad6d27fe19cfa8aab4a9a6872689840ce1a1d4ad445",
       "executable": false
     },
     "src/team/types.ts": {
@@ -6841,7 +6845,7 @@
       "executable": false
     },
     "tests/team-browser.mjs": {
-      "sha256": "46172ad731a10f2eef041fa5e7681262aa3e670812c3a63ae8ab7b7b5399415e",
+      "sha256": "cc12cb0ce8d33a43314b2914e99c76f2d43c74ea5efd2d15c6a1d77ad268b8de",
       "executable": false
     },
     "tests/team-image.test.mjs": {
@@ -6857,7 +6861,7 @@
       "executable": false
     },
     "tests/team-runtime.mjs": {
-      "sha256": "e3b83314c5c722a5fb9309e707e07dfbae4058dc3aff494ae1f1a80098fb3917",
+      "sha256": "74b4481023d8a9ceaef6be96d7839f1d79d43c6fe90e3b810d19a4411afdaf2e",
       "executable": false
     },
     "tests/team-security.test.mjs": {
