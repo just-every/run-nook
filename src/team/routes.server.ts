@@ -28,6 +28,8 @@ import {prepareInvitation,teamDirectory,regrant,removeAccess,cancelPreparation} 
 import {previewBulk,sendBulk,resendInvitation} from './bulk-invitations.server'
 import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
+import {createPoll,readPoll,vote,closePoll} from './polls.server'
+import {bookmarks,addBookmark,reorderBookmarks,removeBookmark} from './bookmarks.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
  const directory=await directoryRoute(c,request);if(directory)return directory
  const reports=await reportsRoute(c,request);if(reports)return reports
@@ -76,6 +78,10 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
   if(method==='POST')return Response.json(await pin(c,parts[2],input))
  }
  if(parts[1]==='conversations'&&parts.length===5&&parts[3]==='pins'&&method==='DELETE')return Response.json(await deletePin(c,parts[2],parts[4]))
+ if(parts[1]==='conversations'&&parts.length===4&&parts[3]==='polls'&&method==='POST')return Response.json(await createPoll(c,parts[2],input))
+ if(parts[1]==='polls'&&parts.length===3&&method==='GET')return Response.json(await readPoll(c,parts[2]))
+ if(parts[1]==='polls'&&parts.length===4&&parts[3]==='vote'&&method==='POST')return Response.json(await vote(c,parts[2],input))
+ if(parts[1]==='polls'&&parts.length===4&&parts[3]==='close'&&method==='POST')return Response.json(await closePoll(c,parts[2],input))
  if(parts[1]==='messages'&&parts.length===4&&parts[3]==='collections'&&method==='GET')return Response.json(await messageCollections(c,parts[2]))
  if(url.pathname.startsWith('/api/erasures')&&method!=='GET'&&request.headers.get('origin')!==url.origin)return Response.json({error:'Origin denied'},{status:403})
  if(url.pathname==='/api/erasures/imported-authors'&&method==='GET')return Response.json(await importedAuthors(c))
@@ -94,6 +100,12 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
  if(url.pathname==='/api/team/remove'&&method==='POST')return Response.json(await removeAccess(c,input))
  if(url.pathname==='/api/channels'&&method==='GET')return Response.json(await browseChannels(c,url.searchParams.get('after')??'',url.searchParams.get('q')??'',Number(url.searchParams.get('limit')??50)))
  if(parts[1]==='channels'&&parts.length===3&&method==='PATCH')return Response.json(await updateChannel(c,parts[2],input))
+ if(parts[1]==='channels'&&parts[3]==='bookmarks'&&parts.length===4){
+  if(method==='GET')return Response.json(await bookmarks(c,parts[2]))
+  if(method==='POST')return Response.json(await addBookmark(c,parts[2],input))
+  if(method==='PATCH')return Response.json(await reorderBookmarks(c,parts[2],input))
+ }
+ if(parts[1]==='channels'&&parts[3]==='bookmarks'&&parts.length===5&&method==='DELETE')return Response.json(await removeBookmark(c,parts[2],parts[4]))
  if(parts[1]==='channels'&&parts.length===4){
   if(parts[3]==='posting'&&method==='GET')return Response.json(await postingPermissions(c,parts[2]))
   if(parts[3]==='posting'&&method==='PATCH')return Response.json(await updatePosting(c,parts[2],input))

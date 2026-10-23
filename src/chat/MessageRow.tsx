@@ -18,6 +18,7 @@ import {OutcomeLines} from './OutcomeLine'
 import {useDismiss} from './useDismiss'
 import {SafeMarkdown} from './composition/SafeMarkdown'
 import {TextPreview} from './TextPreview'
+import {PollCard} from '../team/PollCard'
 import {useInlinePreviews} from './composition/useInlinePreviews'
 type Props={message:Message;user:Person;canErase?:boolean;thread?:boolean;continued?:boolean;outcomes?:Outcome[];onOutcome?:(o:Outcome)=>void;onThread:(m:Message)=>void;onAsk:(m:Message)=>void;onDecision:(m:Message)=>void;onEdit:(m:Message)=>void;onDelete:(m:Message)=>void;onRemove:(id:string)=>void}
 const tool=(label:string,icon:ReactNode,onClick:()=>void)=><button type="button" className="icon-button" title={label} onClick={onClick}>{icon}<span className="sr-only">{label}</span></button>
@@ -44,10 +45,11 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
   {forwarding&&<ForwardDialog message={m} onClose={()=>setForwarding(false)}/>}
   {erasing&&<ErasureDialog kind={m.retainedSource==='native'?'message':m.immutable?'imported-message':'message'} target={m.id} returnFocus={eraseTrigger.current} request={team.request} onClose={()=>setErasing(false)} onChanged={()=>{}}/>}
   {continued?<span className="avatar-gutter" aria-hidden="true"/>:<Avatar person={{id:m.author??m.id,name:m.authorName}}/>}
-  <div className="message-content"><div className="message-meta"><strong className={continued?'sr-only':undefined}>{m.authorName}</strong>{m.nativeContinuation&&<span className="edited">Posted in Nook</span>}{m.app&&<span className="message-via">App</span>}{m.via&&<span className="message-via">via {m.via}</span>}<time className={continued?'reveal':undefined} dateTime={m.created} title={time.toLocaleString([],{dateStyle:'full',timeStyle:'short'})}>{time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>{m.adminOverride&&!m.deleted&&<span className="edited">Admin override</span>}{m.immutable&&<span className="edited">{m.retainedSource?'Retained body · read only':'Imported · read only'}</span>}{m.version>1&&!m.deleted&&!m.retainedSource&&<span className="edited">edited</span>}</div>
+  <div className="message-content"><div className="message-meta"><strong className={continued?'sr-only':undefined}>{m.authorName}</strong>{m.nativeContinuation&&<span className="edited">Posted in Nook</span>}{!!m.app&&<span className="message-via">App</span>}{m.via&&<span className="message-via">via {m.via}</span>}<time className={continued?'reveal':undefined} dateTime={m.created} title={time.toLocaleString([],{dateStyle:'full',timeStyle:'short'})}>{time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>{m.adminOverride&&!m.deleted&&<span className="edited">Admin override</span>}{m.immutable&&<span className="edited">{m.retainedSource?'Retained body · read only':'Imported · read only'}</span>}{m.version>1&&!m.deleted&&!m.retainedSource&&<span className="edited">edited</span>}</div>
    {m.deleted?<p className="message-body">Message deleted</p>:m.immutable?<p className="message-body">{m.slack?.text??m.body}</p>:<div className="message-body"><SafeMarkdown text={m.body}/></div>}
    {!m.deleted&&<>
     <ForwardCard message={m}/>
+    {m.poll&&<PollCard message={m.id} question={m.body}/>}
     {m.broadcast&&<BroadcastRecipients message={m.id} broadcast={m.broadcast}/>}
     {(m.urgent||!!m.notified?.length)&&<div className="message-routing">{m.urgent&&<strong>Urgent</strong>}{!!m.notified?.length&&<span>Notified: {m.notified.map(person=>person.name).join(', ')}</span>}{m.urgent&&m.urgentReason&&<span className="message-urgent-reason">{m.urgentReason}</span>}</div>}
     {!thread&&onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}

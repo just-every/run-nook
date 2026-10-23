@@ -41,7 +41,7 @@
     "test:push": "node --test --test-concurrency=1 tests/push-journey.mjs tests/push-clock.mjs",
     "integration:generate": "node scripts/delivery/integration.mjs",
     "integration:check": "node scripts/delivery/integration.mjs --check",
-    "test:notes": "node --test tests/notes-journey.mjs",
+    "test:notes": "node --test --test-concurrency=1 tests/notes-journey.mjs tests/polls-journey.mjs tests/bookmarks-journey.mjs",
     "test:notification-apps": "node --test tests/notification-apps.mjs"
   },
   "dependencies": {

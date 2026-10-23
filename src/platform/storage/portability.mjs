@@ -14,9 +14,11 @@ export const normalizedPortability={
  importSafety:{nook_digest_schedules:{enabled:[0]},nook_ai_settings:{enabled:[0]},ik_door_settings:{enabled:[0]},nook_notification_apps:{state:['reissue'],ended:[null]}},
  importRow(table,row){if(table==='nook_digest_schedules')return portableDigestSchedule(row);if(table==='nook_digest_deliveries')return portableDigestDelivery(row);if(table==='nook_schedules')return portableSchedule(row);if(table==='nook_ai_settings')return {...row,enabled:0};if(table==='nook_notification_apps')return {...row,state:'reissue',ended:null};if(table==='nook_quiet_schedules')return {...row,quiet_until:0,next_change:0};return table==='ik_door_settings'?{...row,enabled:0}:row;},
  // The notification queue is delivery state: a restored installation sends nothing old.
- excludeTables:['nook_ai_secrets','nook_ai_calls',...notificationExcludedTables,'nook_audit_context',...readableExportExcludedTables,'nook_typing','nook_broadcast_presence','nook_read_undo','nook_read_generations','nook_guard','nook_conversion','nook_erasure_work','nook_erasure_blobs','nook_notify_queue','nook_push_devices','nook_push_presence','nook_push_secrets',...teamExcludedTables,...integrationExcludedTables],
+ excludeTables:['nook_poll_votes','nook_ai_secrets','nook_ai_calls',...notificationExcludedTables,'nook_audit_context',...readableExportExcludedTables,'nook_typing','nook_broadcast_presence','nook_read_undo','nook_read_generations','nook_guard','nook_conversion','nook_erasure_work','nook_erasure_blobs','nook_notify_queue','nook_push_devices','nook_push_presence','nook_push_secrets',...teamExcludedTables,...integrationExcludedTables],
  buckets:{FILES:{prefix:'private/',objectReferences:{table:'nook_object_inventory',keyColumn:'object_key'}}},
  exportRow(table,row){
+  // A backup carries aggregate poll results, never sealed voter custody. Restored snapshots are closed.
+  if(table==='nook_polls')return {...row,closed_at:row.closed_at??row.created};
   if(table==='nook_digest_schedules')return portableDigestSchedule(row);if(table==='nook_digest_deliveries')return portableDigestDelivery(row);
   if(table==='nook_ai_settings')return {...row,enabled:0};
   if(table==='nook_notification_apps')return {...row,state:row.state==='active'?'reissue':row.state};

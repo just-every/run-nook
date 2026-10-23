@@ -1,3 +1,4 @@
+import {readChoices} from '../poll-custody'
 import {hasClipAttribution} from '../../clips/erasure'
 import {detachAssignee} from './audit'
 import {authIdentity} from './auth-identity'
@@ -35,6 +36,14 @@ export async function identity(c:Context,f:Awaited<ReturnType<typeof fenceServic
  if(await c.one('SELECT 1 FROM nook_profile_field_actions WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_profile_field_actions SET actor=NULL WHERE actor=?',target))
  if(await c.one('SELECT 1 FROM nook_channel_pins WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_channel_pins SET actor=NULL WHERE actor=?',target))
  if(await c.one('SELECT 1 FROM nook_broadcast_actions WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_broadcast_actions SET actor=NULL WHERE actor=?',target))
+ // Erasure opens only the target's sealed custody, removes their counts and
+ // destroys the link. No vote choice or voter enters an audit or export.
+ for(const ballot of await c.rows<{message:string;sealed:string}>('SELECT message,sealed FROM nook_poll_votes WHERE voter=?',[target])){
+  const choices=await readChoices(ballot.sealed,c.env.SESSION_SECRET,ballot.message,target)
+  result.push(...await f.checkpoint(),sql('UPDATE nook_poll_options SET count=count-1 WHERE message=? AND position IN (SELECT value FROM json_each(?))',ballot.message,JSON.stringify(choices)),sql('UPDATE nook_polls SET voters=voters-1 WHERE message=?',ballot.message),sql('DELETE FROM nook_poll_votes WHERE message=? AND voter=?',ballot.message,target))
+ }
+ if(await c.one('SELECT 1 FROM nook_polls WHERE creator=? OR closed_by=? LIMIT 1',[target,target]))result.push(...await f.checkpoint(),sql('UPDATE nook_polls SET creator=NULL WHERE creator=?',target),sql('UPDATE nook_polls SET closed_by=NULL WHERE closed_by=?',target))
+ if(await c.one('SELECT 1 FROM nook_bookmarks WHERE author=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_bookmarks SET author=NULL WHERE author=?',target))
  if(await c.one('SELECT 1 FROM nook_default_actions WHERE actor=? LIMIT 1',[target]))result.push(...await f.checkpoint(),sql('UPDATE nook_default_actions SET actor=NULL WHERE actor=?',target))
  result.push(sql("UPDATE nook_invite_plans SET state='cancelled' WHERE email=? OR issuer=?",person.email,target),sql('DELETE FROM nook_invite_plans WHERE email=? OR issuer=?',person.email,target),
   sql("INSERT INTO nook_channel_settings(conversation,manager) SELECT c.id,NULL FROM nook_conversations c LEFT JOIN nook_channel_settings s ON s.conversation=c.id WHERE c.kind<>'dm' AND CASE WHEN s.conversation IS NULL THEN c.owner ELSE s.manager END=? ON CONFLICT(conversation) DO UPDATE SET manager=NULL",target),

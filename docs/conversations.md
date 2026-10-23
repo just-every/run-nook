@@ -38,6 +38,14 @@ Channel members can choose **More → Pin to channel** and retrieve shared conte
 
 Every list reload checks current access and source availability. Losing membership or erasing a source removes its excerpt and leaves an unavailable item; no saved body copy is kept. You can remove your own unavailable save. Pin and save links open their original context under the same access checks.
 
+## Polls and channel bookmarks
+
+Choose **Create poll** above the composer to ask a question in any conversation where you may post. A poll has two to twenty options, single or multiple choice, anonymous votes and an optional close time. It is one message in the conversation, so it follows that conversation's posting permissions, search, unread counts and erasure. Everyone currently in the conversation sees the counts update as people vote, and each person can change their own vote until the poll closes. The poll's creator, the channel manager, owners and admins can close it early; a closed poll shows its final count and takes no more votes. A vote is only a count: it never records a decision or accepts a request.
+
+All polls are anonymous. Nobody sees another member’s choice, including owners and admins. Each person can change or withdraw their own vote until close. The person-to-choice link is encrypted custody inside this installation; member erasure removes that person’s choices and updates the aggregate counts. Readable exports and operational backups contain aggregate results only. A restored backup presents every poll as a closed snapshot because voter custody and its key do not travel with the archive. Named polls and reopening an aggregate snapshot are not implemented.
+
+A channel with bookmarks shows them in a bar above its messages: links, files from the channel and folders of bookmarks. Open **Conversation options → Channel bookmarks** to add, reorder or remove them. Members who may post in the channel can change the bar; guests and members held to an announcement-only policy can read it and see why they cannot change it. A link is stored text that opens in a new tab and is never fetched by Nook. A file opens through its normal access check, so a file nobody can open any more shows as unavailable with no name. Every change is recorded in the administrative audit log, and the bar travels with the channel in readable export and backup.
+
 ## All unreads and group conversations
 
 Open **All unreads** in the sidebar, or from **You** on a phone, to catch up in sidebar order. Reading the list leaves messages unread until you open their conversation or choose **Mark conversation read** or **Mark all read**. Undo is available for ten seconds. A later read from another session wins over undo; Attention and accepted work are unchanged. Ctrl Shift A (Command Shift A on a Mac) opens the view; Shift Escape marks all read. You can hide its sidebar entry under You.
