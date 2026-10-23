@@ -32,3 +32,7 @@ Every create, rotate, revoke, post, repeated post and refusal is listed under **
 ## Backups
 
 Archives leave tokens out, like every other sign-in token and secret. After a restore, create new tokens; the activity record and the "via" labels are kept.
+
+## Slack-compatible webhooks
+
+When you approve a notification app for a channel, Nook also shows a **webhook URL** (once, with the token). A tool that posts to a Slack incoming webhook, such as a GitHub Actions step or a `curl` command, posts to that URL instead. Nook accepts Slack's JSON body, or the form-encoded `payload=` body, with `text`, simple `blocks` (a section with fields, a header, a divider or a context line) and `thread_ts` set to the ID of the message to reply under. The post appears as the approved app, never as a person; a custom username or icon is ignored and nothing is fetched from a link. Formatting Nook does not support shows its text with a note saying so. Nook answers `ok`, or Slack's error words: `no_text`, `invalid_payload`, `channel_not_found`, `action_prohibited` when the channel's posting rules refuse the app, and `rate_limited` with a wait time when the channel's limit is spent. Revoking the approval stops the URL at once; a revoked or unknown URL answers `no_service`. This covers incoming webhooks only: Slack's Web API, events, slash commands and interactive messages are not available yet.

@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "1d2dc97172ba0495c3878f66a00e444e20540aef56611af23e1f3155ca4f1cb7",
+      "sha256": "346f8530718fbafab60c04f65eeb742c5c48bae79c02c73a02bd7ea9473cd044",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "c8679919bcf7e80cde5d0bfd1b0a115e6093079119d7abb776e65e5e0b3d64ea",
+      "sha256": "29bb35e63d302d9b4fc817722f879fef2a0e681ac1268ec6791895dc8a25e35d",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "2712d03fd479705db3d840e7df927c32d4547d14da891318abf2e26eb687a442",
+      "sha256": "267ba6e57be401b3627464bccabd2f27b796d0025e3bad93db1e073d9a8221d0",
       "executable": false
     },
     "docs/conversations.md": {
@@ -693,7 +693,7 @@
       "executable": false
     },
     "docs/integration-tokens.md": {
-      "sha256": "84b5d12cbe38e02168adf10c7e443d79d6ed6fe425a83ea99031e4d591c245f2",
+      "sha256": "69b80831f3c2eceb65135ef7f8391ace9688b4eff30ece3831f37b56cced9d60",
       "executable": false
     },
     "docs/mattermost-import.md": {
@@ -5273,7 +5273,7 @@
       "executable": false
     },
     "src/integrations/integrations.css": {
-      "sha256": "c709db80a18a60ec1a7c4d3b37b66af7efaaf3f638140c83af8c06d5d9dd70bb",
+      "sha256": "77bb75f5592a2d854eca5770d1580a1651a3591e3e272fc283731cfb4f7566ac",
       "executable": false
     },
     "src/integrations/IntegrationTokens.tsx": {
@@ -5361,7 +5361,7 @@
       "executable": false
     },
     "src/notification-apps/NotificationApps.tsx": {
-      "sha256": "f399fe3c443606734020b064a3ef1e4c497bbfe671738ddcb9ca4fd8cdc2a49b",
+      "sha256": "7cab77b5b8a28c4db7f1af4b67fbbc88037753836ec91c13d48477124495c5af",
       "executable": false
     },
     "src/notification-apps/receipts.ts": {
@@ -5881,7 +5881,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "40158f2e6f6dba94d2b1fc295977210c1586d6cf4ebec8350c5fd2ae2d35e469",
+      "sha256": "6f5d9e818f5132f182bb684f7593a1098a43160abdb5ed9bc52bd1ee289dc68e",
       "executable": false
     },
     "src/site/pages.tsx": {
@@ -6401,7 +6401,7 @@
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
-      "sha256": "5c752307688429ba8e5ee28abd531ee48d2717de1e102fa1503215499dbca080",
+      "sha256": "cf560667b078159402ca451f5e248116c7cc31cc2716701f64b16be1dee2ac42",
       "executable": false
     },
     "tests/integration-tokens.mjs": {
@@ -6473,7 +6473,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "1e4ce62dde03e8501d47f038a99aa138c07390de535b2f4657d01eba7f03f85b",
+      "sha256": "56bd31cb6275b4cb3c09b56d85d2edb574a820b0a8539ebebe106814020f4236",
       "executable": false
     },
     "tests/notification-extension.mjs": {
