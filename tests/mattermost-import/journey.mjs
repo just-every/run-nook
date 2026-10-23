@@ -73,6 +73,15 @@ export async function mattermostJourney({origin,owner,restart,sql,validateArchiv
     if(post.is_pinned)assert.equal(pins.items.find(p=>p.message?.id===actual.id).pinnedBy,null)
    }
   }
+  // The imported-history pages show members the same shared source metadata as ordinary history.
+  for(const [id,source]of channels){
+   const {records}=await call(`/api/conversations/${id}/imported-history?limit=1000`,{actor:people[source.sourceMembers[0]]})
+   assert.ok(records.length,'imported history page has records')
+   for(const record of records){
+    for(const field of ['flagged_by','mappedSavedUsers','thread_followers'])assert.ok(!(field in record.provenance.sourceRecord),field+' stays private')
+    assert.deepEqual(record.provenance.sourceRecord,histories.get(id).find(m=>m.id===record.id).provenance.sourceRecord)
+   }
+  }
   for(const [name,actor]of Object.entries(people)){
    const saves=(await call('/api/saved',{actor})).items
    for(const post of expected.posts)assert.equal(saves.some(s=>s.message?.id===byBody.get(post.message).id),post.saved_by.includes(name),name+' private saved state')
