@@ -167,7 +167,7 @@ try {
   await check('NOOK-034 schedule and review messages at both widths',async()=>{await(await import('./scheduled-browser.mjs')).scheduledBrowser({origin,owner,member})})
   await check('NOOK-071 All unreads and group conversion at both widths',async()=>{await(await import('./unreads-browser.mjs')).unreadsBrowser({origin,owner,member,outsider})})
   await check('NOOK-020 saved reminders at both widths',async()=>{await(await import('./saved-reminders-browser.mjs')).savedRemindersBrowser({origin,owner,member})})
-  await check('NOOK-066 posting settings and restricted composers at both widths',async()=>{await(await import('./posting-browser.mjs')).postingBrowser({origin,owner,member})})
+  await check('NOOK-066 posting settings and restricted composers at both widths',async()=>{await(await import('./posting-browser.mjs')).postingBrowser({origin,owner,member,sql})})
   await check('React/Start desktop and mobile native journey',async()=>{await(await import('./browser.mjs')).runBrowser(origin,resolve(root,'evidence/nook-1'))})
   await check('owner/admin erasure, modal keyboard containment and accessibility at desktop/mobile widths',async()=>{await(await import('./erasure-browser-support.mjs')).runErasureJourney({origin,ownerCookie:owner.cookie,destination:resolve(root,'evidence/nook-1/erasure')})})
   await check('keyboard focus, routing drafts and visible read frontier',async()=>{await(await import('./keyboard.mjs')).runKeyboard(origin,resolve(root,'evidence/nook-1'))})
