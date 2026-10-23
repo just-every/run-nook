@@ -33,7 +33,7 @@ export async function installation(edge,{bootstrap=true,migrate=true,origin:conf
  if(!bootstrap)return {mf,db,raw,call,origin,signIn,close:async()=>{unregister();await mf.dispose()}};
  const initial=await raw('/auth/bootstrap','POST',{token,displayName:'Owner'});assert.equal(initial.status,303);const ownerCookie=initial.headers.get('set-cookie').split(';')[0];
  const owner=await call('/api/me','GET',undefined,ownerCookie);
- const invite=async(name,conversation)=>{const email=name+'@example.test';await call('/api/team/invitations','POST',{email,role:'member',mode:'member',scopes:[conversation]},ownerCookie);await call('/auth/invite','POST',{email,displayName:name,role:'member'},ownerCookie,202);return confirmLatest()};
+ const invite=async(name,conversation,mode='member')=>{const email=name+'@example.test';await call('/api/team/invitations','POST',{email,role:'member',mode,scopes:[conversation]},ownerCookie);await call('/auth/invite','POST',{email,displayName:name,role:'member'},ownerCookie,202);return confirmLatest()};
  return {mf,db,raw,call,owner,ownerCookie,invite,signIn,withRotatedSecret,origin,close:async()=>{unregister();await mf.dispose()}};
  }catch(error){unregister?.();await mf.dispose();throw error}
 }
