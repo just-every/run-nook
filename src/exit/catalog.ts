@@ -3,6 +3,8 @@ import {forwardExport} from '../forwards/export'
 import {importAttestationExport} from '../imports/attestation-export'
 import {cutoverInvitationExport} from '../imports/cutover-export'
 import {noteExportDatasets} from '../notes/export'
+import {pollExportDatasets} from '../team/polls-export'
+import {bookmarkExportDatasets} from '../team/bookmarks-export'
 import {publicMattermostRecord} from '../imports/mattermost-public'
 import {publishedImport} from '../imports/projection'
 import {messageAuthorLabel,actorLabel} from '../imports/slack-records.mjs'
@@ -16,6 +18,8 @@ const source=`JOIN nook_imports j ON j.id=r.job AND j.state='complete' AND ${pub
 export const datasets:Dataset[]=[
  ...noteExportDatasets,
  ...clipExportDatasets,
+ ...pollExportDatasets,
+ ...bookmarkExportDatasets,
  forwardExport,
  importAttestationExport,
  cutoverInvitationExport,
