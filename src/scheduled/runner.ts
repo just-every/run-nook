@@ -1,3 +1,4 @@
+import {keywordUsers} from '../notify/keywords.server'
 import {deliverForward} from './forward'
 import {broadcastKind,broadcastFence} from '../broadcast/audience'
 import {literal} from '../broadcast/policy'
@@ -45,7 +46,7 @@ export async function drainSchedules(env:StorageBindings,now=Date.now()){
    const fileFence="NOT EXISTS(SELECT 1 FROM json_each(?) j WHERE NOT EXISTS(SELECT 1 FROM nook_attachments f WHERE f.id=j.value AND f.conversation=? AND f.author=? AND f.state='staged' AND f.expires>CAST(unixepoch('subsec')*1000 AS INTEGER)))"
    await env.DB.batch([
     guard(`${fence} AND ${rules.map(r=>'('+r.sql+')').join(' AND ')} AND ${fileFence}`,[...fenceValues,...rules.flatMap(r=>r.values),JSON.stringify(files),id,s.user]),
-    ...messageStatements(w,{id,mid,confirmBroadcast:payload.confirmBroadcast===true,body:payload.body,parent,ids:files,attention:{mentions:payload.mentions,urgent:payload.urgent,urgentReason:payload.urgentReason},intent,payload:JSON.stringify({...payload,attachments:files}),now:new Date(now).toISOString()}),
+    ...messageStatements(w,{id,mid,confirmBroadcast:payload.confirmBroadcast===true,body:payload.body,parent,ids:files,attention:{mentions:payload.mentions,urgent:payload.urgent,urgentReason:payload.urgentReason},intent,payload:JSON.stringify({...payload,attachments:files}),now:new Date(now).toISOString(),keywordUsers:await keywordUsers(env.DB,id,payload.body,s.user)}),
     w.sql("INSERT INTO nook_schedule_occurrences VALUES(?,?,?,?,?,?,'sent',NULL,?)",s.id,s.local_at,s.version,s.next_due,s.zone,mid,now),
     ...(!local?[w.sql('INSERT OR IGNORE INTO nook_object_deletes(object_key,created) SELECT object_key,? FROM nook_schedule_files WHERE schedule=?',now,s.id),w.sql('DELETE FROM nook_schedule_files WHERE schedule=?',s.id)]:[]),
     w.sql('UPDATE nook_schedules SET local_at=?,next_due=?,state=?,payload=?,reason=NULL,updated=? WHERE id=?',local??s.local_at,nextDue,local?'active':'complete',local?s.payload:JSON.stringify({...payload,attachments:[]}),now,s.id),w.sql('DELETE FROM nook_guard WHERE id=?',key),

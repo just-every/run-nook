@@ -32,6 +32,7 @@ export async function deltaJourney(){
   }
   const native=await call(`/api/conversations/${room.id}/messages`,'POST',{body:'Native safety check remains open.',parent:original.id,intent:'synthetic-nook-178'},ownerCookie);
   const beforeNative=await db.prepare('SELECT * FROM nook_messages WHERE id=?').bind(native.id).first();
+  await call('/api/notify','PATCH',{keywords:['release','handoff','friday']},ownerCookie);
   const beforeSignals=await signalState(db,room.id);
   const edit={type:'message',subtype:'message_changed',original_ts:root.ts,ts:ts(100),user:'U1',editor_id:'U1',text:'Monday release plan: wait for the safety check.',previous:{text:root.text}};
   const reply={type:'message',user:'U2',ts:ts(200),thread_ts:root.ts,text:'Monday source reply: agreed to wait.'};

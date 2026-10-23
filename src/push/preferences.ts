@@ -1,10 +1,10 @@
 import {pushBroadcastChoice} from '../broadcast/policy'
 import type {Context} from '../platform/storage/context'
 import {fail} from '../family/team-chat/domain'
-const fields={mentions:'push_mentions',urgent:'push_urgent',urgentQuiet:'push_urgent_quiet',direct:'push_direct',threads:'push_threads'} as const
+const fields={mentions:'push_mentions',urgent:'push_urgent',urgentQuiet:'push_urgent_quiet',direct:'push_direct',threads:'push_threads',keywords:'push_keywords'} as const
 export async function pushSettings(c:Context){
  const since=Date.now()-7*86400_000
- const [p,problems,caused,workspace]=await Promise.all([c.one('SELECT thread_badge,push_mentions,push_urgent,push_urgent_quiet,push_direct,push_threads FROM nook_notify_preferences WHERE user=?',[c.uid]),
+ const [p,problems,caused,workspace]=await Promise.all([c.one('SELECT thread_badge,push_mentions,push_urgent,push_urgent_quiet,push_direct,push_threads,push_keywords FROM nook_notify_preferences WHERE user=?',[c.uid]),
  c.rows("SELECT error,state,updated FROM nook_notify_queue WHERE channel='push' AND user=? AND state IN ('retrying','failed') AND updated>? ORDER BY updated DESC LIMIT 5",[c.uid,since]),
  c.rows("SELECT q.error,q.state,q.updated,o.display_name AS recipient FROM nook_notify_queue q JOIN oa_operators o ON o.id=q.user WHERE q.channel='push' AND q.actor=? AND q.state IN ('retrying','failed') AND q.updated>? ORDER BY q.updated DESC LIMIT 5",[c.uid,since]),
  c.session.operator.role==='owner'?c.one("SELECT count(*) AS count,(SELECT error FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>? ORDER BY updated DESC LIMIT 1) AS error,(SELECT state FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>? ORDER BY updated DESC LIMIT 1) AS state FROM nook_notify_queue WHERE channel='push' AND state IN ('retrying','failed') AND updated>?",[since,since,since]):null,

@@ -7,6 +7,7 @@ const where=(c:EmailInput['conversation'])=>c.kind==='dm'?'a direct conversation
 const subjects:Record<Reason,(actor:string,place:string)=>string>={
  'broadcast':(a,p)=>`${a} sent a channel-wide mention in ${p}`,
  'mention':(a,p)=>`${a} mentioned you in ${p}`,
+ 'keyword':(a,p)=>`${a} wrote a message with one of your keywords in ${p}`,
  'urgent-request':(a,p)=>`Urgent request from ${a} in ${p}`,
  'commitment-proposal':(a,p)=>`${a} asked you to take on a commitment in ${p}`,
  'commitment-revision':(a,p)=>`${a} changed a commitment they asked of you in ${p}`,
