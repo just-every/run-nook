@@ -489,7 +489,9 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-- **NOOK-087 — Provider-generated transcripts.** **Status: missing.** Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
+- **NOOK-087 — Provider-generated transcripts.** **Status: partial.** Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
+
+  Current evidence: `src/transcripts/*`; `src/clips/ProviderRequest.tsx`; `tests/notification-apps.mjs` — “NOOK-024 browser clips keep private bytes, seekable human captions and immutable correction history” with its provider steps, and `tests/integration-tokens-browser.mjs` (clipsBrowser at 1440 and 390) (push-triggered Verify, verify (integration tokens)). Built against a network-edge fake only: an outsider is refused with nothing created and nothing sent, a member who is neither the clip's author nor an owner or admin is refused, a failed provider answer, a malformed one, a human edit during processing and a spent cap each show a reason and create no revision, a provider revision is labelled and a human correction is the next version, and export, restore (settings back disabled, key absent) and erasure carry the revisions. Implementation default ADOPTED: one owner-supplied provider; only the clip's author and owners and admins who can read it may request. Not built or NOT RUN: a live provider receipt (no key was used), holds (NOOK-038 is missing, so the positive hold half stays in the Gap exactly as NOOK-024 names it), call recordings and consent records (NOOK-022, NOOK-085), and the provider-timeout class is built but not asserted.
 
   Current evidence: No implementing source/test; journey pending.
 

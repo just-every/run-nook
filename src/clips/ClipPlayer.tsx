@@ -6,6 +6,7 @@ import {isClipMime,MAX_CLIP_BYTES} from './media'
 import {TranscriptEditor,type TranscriptInput} from './TranscriptEditor'
 import {TranscriptHistory} from './TranscriptHistory'
 import type {ClipTranscript} from './types'
+import {ProviderRequest} from './ProviderRequest'
 import './clips.css'
 
 export type ClipPlayerProps={file:FileRecord;request:TeamRequest;accessEpoch:number|string;revision?:number;canEdit?:boolean;onDenied:()=>void}
@@ -58,10 +59,11 @@ function PlayerScope({file,request,revision=0,canEdit=true,onDenied}:ClipPlayerP
   {mediaError&&<p className="warning" role="alert">{mediaError} <button type="button" className="text-button" disabled={loadingMedia} onClick={()=>void loadMedia()}>Retry playback</button></p>}
   {error&&<p className="warning" role="alert">{error} <button type="button" className="text-button" onClick={()=>void load()}>Retry transcript</button></p>}
   {clip&&<><div className="clip-toolbar"><strong>Transcript & captions</strong><span className="clip-meta">{clip.version?'Version '+clip.version:'No transcript yet'}</span></div>
-   <p className="clip-meta">Human typed or uploaded captions · private to this source message. Retention, export and erasure follow the source; no holds apply.</p>
+   <p className="clip-meta">{clip.source==='provider'?`Provider-generated transcript, requested by ${clip.actorName??'a former member'} · not yet reviewed by a person; a correction becomes the next version.`:'Human typed or uploaded captions.'} Private to this source message. Retention, export and erasure follow the source; no holds apply.</p>
    {editing?<TranscriptEditor cues={editing.cues} language={editing.language} busy={busy} onSave={save} onCancel={()=>setEditing(null)}/>:<>
     {clip.cues.length?<ol className="clip-cues" aria-label="Clip transcript">{clip.cues.map((cue,index)=><li key={index}><button type="button" className="text-button" aria-label={'Seek to '+timestamp(cue.start)} onClick={()=>seek(cue.start)}>{timestamp(cue.start)}</button><p>{cue.text}</p></li>)}</ol>:<p className="clip-meta">A member can add timestamped text or a WebVTT track.</p>}
     <div className="clip-toolbar">{canEdit&&<button type="button" className="text-button" onClick={()=>setEditing({version:clip.version,cues:clip.cues,language:clip.language})}>{clip.version?'Correct transcript':'Add transcript or captions'}</button>}{clip.version>0&&<button type="button" className="text-button" aria-expanded={showHistory} onClick={()=>setShowHistory(!showHistory)}>Transcript history</button>}<button type="button" className="text-button" disabled={busy} onClick={()=>void load()}>Reload transcript</button></div>
+    {clip.provider?.canRequest&&<ProviderRequest version={clip.provider.version} host={clip.provider.host!} path={path} request={request} onCreated={next=>{setClip(next);setShowHistory(false)}}/>}
    </>}
    {showHistory&&<TranscriptHistory key={clip.version} path={path} request={request}/>}</>}
  </section>

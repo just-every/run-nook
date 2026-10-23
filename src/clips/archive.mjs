@@ -12,6 +12,8 @@ export async function validateClipsArchive(read,{manifest,actors,conversations,m
  if(present&&!names.some(name=>present.has(name)))return new Map();
  check(!present||names.every(name=>present.has(name)),'incomplete_clip_schema');
  const [clips,history]=await Promise.all(names.map(read)),map=new Map(),groups=new Map(),seen=new Set();
+ // An archive from before provider transcripts has no source column; every such revision is human. A current archive must carry it.
+ const sourced=!present||!!manifest.tables.find(t=>t.name==='nook_clip_transcripts')?.columns?.some(column=>column.name==='source');
  const supplied=importedFiles??new Set((await read('nook_import_files')).map(row=>row.attachment));
  for(const clip of clips){
   check(fields(clip,['attachment','message','conversation','version','created'])&&id(clip.attachment)&&id(clip.message)&&id(clip.conversation)&&!map.has(clip.attachment)&&version(clip.version)&&time(clip.created)&&conversations.has(clip.conversation),'invalid_clip');
@@ -21,7 +23,7 @@ export async function validateClipsArchive(read,{manifest,actors,conversations,m
  }
  for(const row of history){
   const clip=map.get(row.attachment),key=JSON.stringify([row.attachment,row.version]);
-  check(fields(row,['attachment','message','conversation','version','actor','created','format','language','cues_json'])&&clip&&row.message===clip.message&&row.conversation===clip.conversation&&version(row.version)&&row.version<=clip.version&&!seen.has(key)&&time(row.created)&&['typed','webvtt'].includes(row.format)&&typeof row.language==='string'&&row.language.length<=35&&/^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$/.test(row.language)&&(row.actor===null||id(row.actor)&&actors.has(row.actor)&&!actors.get(row.actor).erased),'invalid_clip_transcript');
+  check(fields(row,['attachment','message','conversation','version','actor','created','format','language','cues_json',...(sourced?['source']:[])])&&(!sourced||['human','provider'].includes(row.source))&&clip&&row.message===clip.message&&row.conversation===clip.conversation&&version(row.version)&&row.version<=clip.version&&!seen.has(key)&&time(row.created)&&['typed','webvtt'].includes(row.format)&&typeof row.language==='string'&&row.language.length<=35&&/^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$/.test(row.language)&&(row.actor===null||id(row.actor)&&actors.has(row.actor)&&!actors.get(row.actor).erased),'invalid_clip_transcript');
   check(typeof row.cues_json==='string'&&row.cues_json.length<=800000,'invalid_clip_cues');
   try{validateCues(JSON.parse(row.cues_json))}catch{throw Error('invalid_clip_cues')}
   seen.add(key);const items=groups.get(row.attachment)??[];items.push(row);groups.set(row.attachment,items);
