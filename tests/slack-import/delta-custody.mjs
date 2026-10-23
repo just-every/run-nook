@@ -22,6 +22,7 @@ export async function deltaCustody({app,room,root,oldBody,pass,attestation,outsi
   await importer.imports.finalize(id,{contentHash:archive.at(-1).contentHash,archiveHash:archive.at(-1).archiveHash});
   const rows=(await restored.db.prepare('SELECT body FROM nook_import_records WHERE id=?').bind(root.id).all()).results;assert.equal(rows.length,1);
   const restoredPass=await restored.db.prepare('SELECT summary_json FROM nook_door_imports WHERE plan_id=?').bind(pass.planId).first();assert.deepEqual(JSON.parse(restoredPass.summary_json).attestation,attestation,'archive restores the pass attestation with populated history');
+  assert.equal((await restored.db.prepare('SELECT count(*) AS n FROM nook_notify_queue').first()).n,0,'restored attestation queues no mail');assert.equal((await restored.db.prepare("SELECT count(*) AS n FROM nook_schedules WHERE state='active'").first()).n,0,'restored attestation resumes no scheduled send');
   const history=(await restored.db.prepare('SELECT record_json FROM ik_provenance WHERE target_id=? AND reversed=0 UNION ALL SELECT record_json FROM ik_d1_history WHERE target_id=? AND reversed=0').bind(root.id,root.id).all()).results;assert.ok(JSON.stringify(history).includes(oldBody));
  }finally{await restored.close()}
 }
