@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "ef58b30781143a9626a360d8422fdbf3a90993e7c3f3724d5d7db7df52333d0b",
+      "sha256": "b5e4e3cddfa9264a107de3c4f02e98127272e80e264c8a9a89cbc6ba069eda73",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "50224e825f1405e2607fafe6fa9e8d0a1857eb530d46aa1a78951055c7057875",
+      "sha256": "3317109e1cb9bb60db30bdd5087f765dc5d23ef6d3b59ac15169c72cb5cc134e",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "4c2340398ab5f9f4828e2c830c5cc89a6536b75fff3452d8b415ab9db9bfff46",
+      "sha256": "b5a4a6a8a1a60e93199c8714ef89c9c98727c75276c906eb4edca0cd768386a1",
       "executable": false
     },
     "docs/conversations.md": {
@@ -716,8 +716,12 @@
       "sha256": "59c000113a997fb48c110e79069ce6c31ab681aed12ecc5af8234bb54f4a6055",
       "executable": false
     },
+    "docs/reports.md": {
+      "sha256": "dfc7746cf8fc93d265c0ff37de74f381d8e14689c6c24907874905607a848e89",
+      "executable": false
+    },
     "docs/site.json": {
-      "sha256": "a99b9928596b80b671328181ac160b570ef329954cb60e91f1dd483b6675f857",
+      "sha256": "1cd8c324fa52b303514a749fc66e0952c8b51761c4250570fd1bc08cbce4d8c8",
       "executable": false
     },
     "docs/updating.md": {
@@ -4241,7 +4245,7 @@
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "d0461ae617f57f740657dec9ccd8b64444b0345b9a4319eb1c4798035aef96f0",
+      "sha256": "0fff7b0abbd3e9a5969e26ce04fb4dccc20193d7e246fd2850152e1d7948cc2f",
       "executable": false
     },
     "src/client.tsx": {
@@ -5784,6 +5788,18 @@
       "sha256": "3295fb940e90bd0b65b1cbf90569511f7e495fd3e3a59b92fd6e9ca213c92b7e",
       "executable": false
     },
+    "src/reports/reports.css": {
+      "sha256": "8b45188d2be2b918b48bd0764934afccbb97cb0e96d7a2207cdd537097508ef1",
+      "executable": false
+    },
+    "src/reports/Reports.tsx": {
+      "sha256": "60f4be4ef5a61d7b5339b7e4a44a8e49afcbe54e920051c07ba6d899ffe91a04",
+      "executable": false
+    },
+    "src/reports/server.ts": {
+      "sha256": "4fa598e9aa9b4b4d03edd2b23069c0a5ea99fa42bdb4ca4a4de3e3445ec56939",
+      "executable": false
+    },
     "src/router.tsx": {
       "sha256": "8e28d274af3e0490efcc0de2537d6808583814cc1f18298f2d9516f30cdc1af4",
       "executable": false
@@ -5812,8 +5828,12 @@
       "sha256": "7884a2793f2b9e98823474e34fe6e1e44b40b852dff5f0152311bb0b267071e0",
       "executable": false
     },
+    "src/routes/reports.tsx": {
+      "sha256": "830688b39edb46664dae7426c745ddda5a7f10e2ee0794133f5a5018a35b53a7",
+      "executable": false
+    },
     "src/routeTree.gen.ts": {
-      "sha256": "2ce715fe0b29bee220f9c2b3581e432e44fdf2dda59bb15ce4fa6f74b2e6e906",
+      "sha256": "507646180a20c6ea1a0285e231db2e1f58ea97740acbf27194033e3be1547c1c",
       "executable": false
     },
     "src/scheduled/archive.mjs": {
@@ -6157,7 +6177,7 @@
       "executable": false
     },
     "src/team/routes.server.ts": {
-      "sha256": "becbc3ac992ee042286020ccb00593d02b007222ba3723b1f42ad822ff341cec",
+      "sha256": "72c77d68e9046131370258001051614a4aac4837000267ac14b82b37bb438ebc",
       "executable": false
     },
     "src/team/saved-archive.mjs": {
@@ -6752,12 +6772,20 @@
       "sha256": "ec35c480db2576a109b61919f2753821f4f13ef26e8014a26e21e501d843861c",
       "executable": false
     },
+    "tests/reports-browser.mjs": {
+      "sha256": "f7af7feabcf1c51a5e096f04ea8b322241f6d5b28c6019a5d6e65ad61440824e",
+      "executable": false
+    },
+    "tests/reports.mjs": {
+      "sha256": "184b74df8244144f0b443c4cbd5b945b306bf967cc2320e7666b68708418c8b4",
+      "executable": false
+    },
     "tests/runtime-portability.mjs": {
       "sha256": "0d723be644f5089fe8e91784eac58c3cbb8786884243c96c9728b9de679c85b8",
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "6d2e70635057e7e7607630868a40a79b72550ff575dd9fa2f45d92939191f134",
+      "sha256": "5f82323df251fbd4e025ed65d6eeaa64344973193995b94f8eabd90581843b88",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {

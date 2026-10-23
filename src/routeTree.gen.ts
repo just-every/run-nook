@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as ExportRouteImport } from './routes/export'
 import { Route as ImportsRouteImport } from './routes/imports'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as DocsSlugRouteImport } from './routes/docs.$slug'
 
@@ -30,6 +31,11 @@ const ImportsRoute = ImportsRouteImport.update({
   path: '/imports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/docs/',
   path: '/docs/',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/export': typeof ExportRoute
   '/imports': typeof ImportsRoute
+  '/reports': typeof ReportsRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/docs/': typeof DocsIndexRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/export': typeof ExportRoute
   '/imports': typeof ImportsRoute
+  '/reports': typeof ReportsRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/docs': typeof DocsIndexRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/export': typeof ExportRoute
   '/imports': typeof ImportsRoute
+  '/reports': typeof ReportsRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/docs/': typeof DocsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/app' | '/export' | '/imports' | '/docs/$slug' | '/docs/'
+  fullPaths:
+    '/app' | '/export' | '/imports' | '/reports' | '/docs/$slug' | '/docs/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/app' | '/export' | '/imports' | '/docs/$slug' | '/docs'
-  id: '__root__' | '/app' | '/export' | '/imports' | '/docs/$slug' | '/docs/'
+  to: '/app' | '/export' | '/imports' | '/reports' | '/docs/$slug' | '/docs'
+  id:
+    | '__root__'
+    | '/app'
+    | '/export'
+    | '/imports'
+    | '/reports'
+    | '/docs/$slug'
+    | '/docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   ExportRoute: typeof ExportRoute
   ImportsRoute: typeof ImportsRoute
+  ReportsRoute: typeof ReportsRoute
   DocsSlugRoute: typeof DocsSlugRoute
   DocsIndexRoute: typeof DocsIndexRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/docs/': {
       id: '/docs/'
       path: '/docs'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   ExportRoute: ExportRoute,
   ImportsRoute: ImportsRoute,
+  ReportsRoute: ReportsRoute,
   DocsSlugRoute: DocsSlugRoute,
   DocsIndexRoute: DocsIndexRoute,
 }
