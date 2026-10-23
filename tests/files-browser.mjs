@@ -1,3 +1,7 @@
+import {importedPreviewFiles} from './file-preview-fixture.mjs'
+import {createRequire} from 'node:module'
+import {zipFixture} from './slack-import/fixture.mjs'
+const require=createRequire(import.meta.url)
 import {chromium,expect} from '@playwright/test'
 import {mkdir,readFile} from 'node:fs/promises'
 import {resolve} from 'node:path'
@@ -17,19 +21,26 @@ export async function filesBrowser({origin,owner,member,destination}){
    const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000}})
    try{
     const [name,...value]=member.cookie.split('=');await context.addCookies([{name,value:value.join('='),url:base}])
-    const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message))
+    const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error')errors.push(message.text())})
     const room=await call('/api/conversations',{name:'Customer rollout documents '+width,kind:'private',participants:[member.user.id]})
     const notes='Thursday rollout\nCustomer success briefing: 09:00\nSupport handoff: 09:30\nLaunch owner: Elena\n'
     const document=await call(`/api/conversations/${room.id}/attachments`,{name:(width===1440?'east':'west')+'-coast-rollout-checklist.txt',mime:'text/plain',data:Buffer.from(notes).toString('base64'),intent:crypto.randomUUID()})
     const root=await call(`/api/conversations/${room.id}/messages`,{body:'Here is the customer rollout checklist. Please review the support handoff before Thursday.',attachments:[document.id],intent:crypto.randomUUID()})
     const image=await call(`/api/conversations/${room.id}/attachments`,{name:(width===1440?'east':'west')+'-coast-launch-icon.png',mime:'image/png',data:png.toString('base64'),intent:crypto.randomUUID()},member)
     const reply=await call(`/api/conversations/${room.id}/messages`,{body:'The Nook icon for the launch briefing is attached.',parent:root.id,attachments:[image.id],intent:crypto.randomUUID()},member)
-    await page.goto(base+'/app?view=you');if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`you-${width}.png`)});await page.locator('.profile-page').getByRole('button',{name:'Files',exact:true}).click()
+    const inert=[];for(const [name,mime,bytes] of [['synthetic-nook-data.csv','text/plain','name,value\nsynthetic,<img src=x onerror=alert(1)>'],['synthetic-nook-long.txt','text/plain','const label = "synthetic";\n'.repeat(4000)]]){const file=await call(`/api/conversations/${room.id}/attachments`,{name,mime,data:Buffer.from(bytes).toString('base64'),intent:crypto.randomUUID()});inert.push(file)}await call(`/api/conversations/${room.id}/messages`,{body:'Synthetic inert preview samples',attachments:inert.map(file=>file.id),intent:crypto.randomUUID()})
+    const imported=await importedPreviewFiles({origin:base,owner,member,files:[{name:'synthetic-nook-archive.zip',bytes:zipFixture([['<img src=x onerror=alert(1)>.txt','Private content']])}]});inert.push(imported.files[0])
+    await page.goto(base+'/app?view=you');await expect(page.locator('.nook-app')).toHaveAttribute('data-live-connected','true');if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`you-${width}.png`)});await page.locator('.profile-page').getByRole('button',{name:'Files',exact:true}).click()
     const textCard=page.getByRole('article',{name:'File '+document.name,exact:true}),imageCard=page.getByRole('article',{name:'File '+image.name,exact:true})
     await expect(textCard).toBeVisible();await expect(imageCard.getByRole('img',{name:image.name,exact:true})).toBeVisible()
     await page.getByLabel('Conversation',{exact:true}).selectOption(room.id)
     await expect(textCard).toBeVisible();await expect(imageCard).toBeVisible()
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`files-${width}.png`)})
+    await page.getByLabel('Conversation',{exact:true}).selectOption('')
+    for(const file of [document,...inert]){const card=page.getByRole('article',{name:'File '+file.name,exact:true});await card.getByText('Preview '+file.name,{exact:true}).click();await expect(card.getByRole('textbox')).toHaveCount(0);await expect(card.getByLabel('Preview of '+file.name,{exact:true})).toBeVisible();if(file.name.endsWith('.csv')||file.name.endsWith('.zip')){await expect(card.getByLabel('Preview of '+file.name,{exact:true})).toContainText('<img src=x onerror=alert(1)>');await expect(card.locator('img')).toHaveCount(0)}if(file.name==='synthetic-nook-long.txt')await expect(card.getByRole('status')).toContainText('Truncated preview')}
+    await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});assert.deepEqual(await page.evaluate(async()=>{const r=await window.axe.run(document.querySelector('.page-content'));return r.violations.filter(v=>['serious','critical'].includes(v.impact))}),[]);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.equal(await page.evaluate(()=>window.__rerHydration?.count??0),0)
+    const zipCard=page.getByRole('article',{name:'File synthetic-nook-archive.zip',exact:true});await zipCard.scrollIntoViewIfNeeded();if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`inert-previews-${width}.png`)})
+    await page.getByLabel('Conversation',{exact:true}).selectOption(room.id)
     await page.getByLabel('File type',{exact:true}).selectOption('text')
     await expect(textCard).toBeVisible();await expect(imageCard).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`text-${width}.png`)})
@@ -51,7 +62,7 @@ export async function filesBrowser({origin,owner,member,destination}){
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`conversation-${width}.png`)})
     const viewport=await page.evaluate(()=>({width:innerWidth,content:document.documentElement.scrollWidth}))
     assert.ok(viewport.content<=viewport.width+1,'Files view should fit the viewport')
-    await call(`/api/conversations/${room.id}/members`,{user:member.user.id,remove:true})
+    await call(`/api/conversations/${room.id}/members`,{user:member.user.id,remove:true});await call(`/api/conversations/${imported.conversation}/members`,{user:member.user.id,remove:true})
     await page.reload();await expect(textCard).toHaveCount(0);await expect(imageCard).toHaveCount(0);await expect(page.getByRole('navigation',{name:'Conversation content',exact:true})).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`unavailable-${width}.png`)})
     await page.goto(base+'/app?view=files');await expect(page.getByLabel('File type',{exact:true})).toBeVisible()
