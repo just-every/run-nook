@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "fde2895f97abafb216c1278d09af657e86a842554124ddf0eaeec3ec630cabc1",
+      "sha256": "19653470fd9c9bb764fc4d1528164194379553ed74629017ca7a42c36732e01d",
       "executable": false
     },
     "DEMO.md": {
@@ -1041,67 +1041,67 @@
       "executable": false
     },
     "evidence/recaps/ask-1440.png": {
-      "sha256": "4bf4f18b8639754a98d787ae6134df2ec1d47868021f048de64096a402aac118",
+      "sha256": "7dcb37fe903cc39bc62be5cfc1a1a8831ccc68cad156e7c7b5e17f73178da240",
       "executable": false
     },
     "evidence/recaps/ask-390.png": {
-      "sha256": "7d60ab923c2aa7879b2fda7d52c7945b42e76042c2ca23e896db8633946e503f",
+      "sha256": "998f9f4ca559837c27a2c5a4f269a44592235863d29512311b9724e338394eeb",
       "executable": false
     },
     "evidence/recaps/cited-1440.png": {
-      "sha256": "7d54ca974e5fd8954f8b40a1de4ea43911f41d971f4c3aa516710a498f52513c",
+      "sha256": "6c33b375bb8b2de8c49774c2927f1e3445e2cd093877232759ee3950eb390f46",
       "executable": false
     },
     "evidence/recaps/cited-390.png": {
-      "sha256": "c8e5ad9e0e4457d44c5a145d8da9dc94cf282f849b244960ab75c1ea9f145ca5",
+      "sha256": "d99fd1ec592c4d05f2f55c16ef5ca0da6938953d41380847d29b6942d874765d",
       "executable": false
     },
     "evidence/recaps/correction-1440.png": {
-      "sha256": "e442455b1c0c9ae0726d263913587c58db588730d5a6b5a2cedd49b800ef5945",
+      "sha256": "aa17a269a325e6c57990ae75edf5347622103d4258a9b3336a2d8061e50e51bb",
       "executable": false
     },
     "evidence/recaps/correction-390.png": {
-      "sha256": "93a599cc8370276be3b230f793afac29a2a5754f0e931555577d925f1b6592d6",
+      "sha256": "ec62763575a85bcabbe4d83edffec09d66e39bf1f2525ccadbe6937624352ecb",
       "executable": false
     },
     "evidence/recaps/digest-settings-1440.png": {
-      "sha256": "a4bbda02a95ef57f0e4b8bebb81eb8a6445e74ca0314133743a45e8f32ef28b2",
+      "sha256": "e41e74911af9df945f6be7980628e3e36e0ecfff777901b8ca42655948fa1ce6",
       "executable": false
     },
     "evidence/recaps/digest-settings-390.png": {
-      "sha256": "3fd5c30ff39702380c6be7bd1441c514bf01fd090fed6fd1c6c756bc24c1558f",
+      "sha256": "47e7b4ee7e3b102d06f3707b7c0fc5bdc518af5628169ffe30be395a8c68c059",
       "executable": false
     },
     "evidence/recaps/omissions-1440.png": {
-      "sha256": "039f07e001e4f1dedf30a2488ed3f8c9cdccfe37123abc5e997cdf4722e4bb91",
+      "sha256": "baf41b7a596bec7a2f324dcc401dcb5d99656c47bdab2d1a1d71a4105b9d0e20",
       "executable": false
     },
     "evidence/recaps/omissions-390.png": {
-      "sha256": "b25f984eb382b72e384f95191ba4ff01fd23d634f10935093926033066fc7f42",
+      "sha256": "a54c47f0e67f3e70507cc6dcce4b79b107c06beffbc8bbdc1efe90d6bc55a197",
       "executable": false
     },
     "evidence/recaps/received-digest-1440.png": {
-      "sha256": "00ac19ffdd151d3f64f62d0b63d1ab66c35844db29335f679aa6cff4351be716",
+      "sha256": "f52abd1db0b9c3717dd7ef0fc89e8068ecfc92a2f0381fbfd1567b179330c58e",
       "executable": false
     },
     "evidence/recaps/received-digest-390.png": {
-      "sha256": "051f7d24a461b2516571b176b528f33c35a20aa431e43b485f53e3e4d9304de7",
+      "sha256": "1223758034eecc47c9ef2f51e183daddb27f476f7e2fb493efecc33c75c864a5",
       "executable": false
     },
     "evidence/recaps/refused-1440.png": {
-      "sha256": "b5b36dbbfa32971c53c90f6b47fa0f33dcc67fb318b9ce022fd62b1182e8f770",
+      "sha256": "cc0e67aa9006d3bbfc577cd5815eb74f7bc6fbb4d6644d1c454a54d582f801ab",
       "executable": false
     },
     "evidence/recaps/refused-390.png": {
-      "sha256": "8a3f346988c3c4f942fa7761d60fdd32e448c38998fbed44ab890d3bc97db4ea",
+      "sha256": "f7e0d6854d8bfdf60e185dd33d0b4034816b875c29f27dc802b245c9c61084c7",
       "executable": false
     },
     "evidence/recaps/thread-door-1440.png": {
-      "sha256": "d4b1de35c30b3aae5398e48d96431a4e1b594ca51933af944bb4a9f4f93f28b9",
+      "sha256": "53e036262d040ebe10d45cfb44b21416aabe03fe30abcd18f4eb414d3b8721d8",
       "executable": false
     },
     "evidence/recaps/thread-door-390.png": {
-      "sha256": "667c83bb807ce5768edb384f0daf97cc3bb433edf59fa1dc3961f2439690975a",
+      "sha256": "f49cfa5e807b328759e57ea4106f9be726a71a7040001eb017249abc3f9e4cc5",
       "executable": false
     },
     "evidence/slack-delta/preview-1440.png": {
