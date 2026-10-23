@@ -665,7 +665,7 @@
       "executable": false
     },
     "docs/backups.md": {
-      "sha256": "035b349bb4d0af2bb779272511516203f565ff97ed24413d36a5d33b965ae596",
+      "sha256": "6f3e4c1cc45728ff28058da775314bec11de03345b183ff1757ad880e9e6002a",
       "executable": false
     },
     "docs/campfire-import.md": {
@@ -721,7 +721,7 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "104956ddbb243cce930e3afed8c8c34108ac6cb3c5ba0342a6778cf215a3cda4",
+      "sha256": "946038b7af4627e973a9a8f83af71fa66881a10fbd25000654f8730b876bdaba",
       "executable": false
     },
     "docs/your-team.md": {
@@ -5533,7 +5533,7 @@
       "executable": false
     },
     "src/portability/download.ts": {
-      "sha256": "6b6adbc5dca63e2c5ba866647a7617eb1fede10fdeb0e069e3a8a847053e7b08",
+      "sha256": "00e3a4082e1ba5339ed13a68312c9ebcd5e7467f2041a4b75766e9e831a36c10",
       "executable": false
     },
     "src/portability/ExportScreen.tsx": {
@@ -6641,7 +6641,7 @@
       "executable": false
     },
     "tests/readable-export-browser.mjs": {
-      "sha256": "402c8f30bb15361523a4f03a628936de8574c997bd932588322004f9460216dd",
+      "sha256": "b279ddaecf29249b0150128806b1f49ba7550f4841ae42f81d79f395e13ce0e9",
       "executable": false
     },
     "tests/readable-export.test.mjs": {
