@@ -147,6 +147,20 @@ export async function readableExportBrowser({origin,owner,member,outsider,destin
     await expect(region.getByText('Start a new export from your current scope.',{exact:true}).first()).toBeVisible()
     await region.getByText(/Conversation · unavailable/).first().scrollIntoViewIfNeeded();await page.screenshot({animations:'disabled',path:resolve(destination,`revoked-${width}.png`)})
    }finally{await limited.close()}
+   // The hosted exit export reports a platform HTML error page by its status, never as a parser message, and a retry downloads.
+   const exit=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000},acceptDownloads:true})
+   try{
+    await exit.addCookies([cookie(owner)]);const page=await exit.newPage();let refused=0
+    await page.route('**/api/portability/exports',route=>route.request().method()==='POST'&&!refused++?route.fulfill({status:502,contentType:'text/html',body:'<!DOCTYPE html><html><body>Bad gateway</body></html>'}):route.continue())
+    await page.goto(origin+'/export')
+    const start=page.getByRole('button',{name:'Download workspace archive',exact:true}),alert=page.getByRole('alert').filter({hasText:/HTTP/})
+    await start.click();await expect(alert).toContainText('HTTP 502');await expect(alert).not.toContainText('Unexpected token')
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true)
+    await page.screenshot({animations:'disabled',path:resolve(destination,`exit-502-${width}.png`)})
+    const archive=page.waitForEvent('download',{timeout:90_000});await start.click()
+    assert.equal((await archive).suggestedFilename(),'nook-workspace.rer');await expect(page.getByRole('status').filter({hasText:/archive is ready/})).toBeVisible({timeout:90_000})
+    assert.equal(refused,2)
+   }finally{await exit.close()}
   }
  }finally{await browser.close();await rm(directory,{recursive:true,force:true})}
 }

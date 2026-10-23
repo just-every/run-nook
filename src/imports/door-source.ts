@@ -25,6 +25,7 @@ export function decodeDoorPacket(input: any, kind: ImportVendor, workspace: stri
   assertLocalCredentials(input);
   const capture = structuredClone(input.capture);
   decodeRoleCapture(capture);
+  if (capture.cutover !== undefined) throw Error('Invalid reviewed source bundle');
   for (const message of capture.messages ?? []) for (const file of message.files ?? []) {
     if (typeof file.base64 !== 'string') throw Error('Original file bytes required');
     file.bytes = Buffer.from(file.base64, 'base64');

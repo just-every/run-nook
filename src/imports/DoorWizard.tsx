@@ -5,6 +5,7 @@ import { DoorPlanPanel, ReconciliationPanel } from './DoorPlanPanel';
 import { ImportJobs } from './ImportJobs';
 import { DeltaReport } from './DeltaReport';
 import { AttestationReport } from './AttestationReport';
+import { CutoverInvitations } from './CutoverInvitations';
 import { attestedRange, recordAttestation } from './attestation.mjs';
 import { ReviewPanel } from './ReviewPanel';
 import { SourceInstructions } from './SourceInstructions';
@@ -84,7 +85,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
             retained.current = { uploadId: id, namespace };
             setBusy(`Uploading reviewed history: ${done} of ${total} chunks`);
         }, namespace);
-        const next = await doorRequest(kind, 'plan', { uploadId, ...(catchup ? { catchup: true } : {}), ...(stated ? {attestation: stated} : {}) }, namespace);
+        const next = await doorRequest(kind, 'plan', { uploadId, ...(catchup ? { catchup: true } : {}), ...(stated ? {attestation: stated} : {}), ...(result.summary.cutover ? {cutover: result.summary.cutover} : {}) }, namespace);
         retained.current = { uploadId, namespace, planId: next.planId };
         setPlan(next); setCurrentJob(null); setNow(Date.now());
         setStatus('Dry run ready. Review its counts, rejections and differences before applying.');
@@ -139,6 +140,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
             {kind === 'slack' && catchup && <label>Overlap in days<input type="number" min={1} max={12000000} step={1} required value={Number.isNaN(overlapDays) ? '' : overlapDays} disabled={!!busy} onChange={event => { setOverlapDays(event.target.valueAsNumber); change(review); }} /><small>Recheck an overlap up to the full source history. Changed source records are reviewed before applying.</small></label>}
             {summary?.delta && <DeltaReport delta={summary.delta} />}
             {summary?.attestation && <AttestationReport attestation={summary.attestation} />}
+            {summary?.cutover && <CutoverInvitations cutover={summary.cutover} />}
             {summary?.delta && deltaBaseline && <p>The preview is bound to the current imported baseline. Creating a dry run checks it again.</p>}
             {summary && <fieldset disabled={!!busy}><ReviewPanel kind={kind} preview={summary} accepted={accepted} onAccept={(value: boolean) => { setAccepted(value); setPlan(null); }} withoutMissingFiles={review.importWithoutMissingFiles === true} onMissingFiles={chooseMissingFiles} /></fieldset>}
             <button type="submit" className={summary ? '' : 'import-primary'} disabled={!!busy || !mappingReady(kind, source, review)}>Preview exact import</button>
@@ -147,7 +149,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
             {plan && <><DoorPlanPanel plan={plan} expired={expired} /><button type="button" className="import-primary" disabled={!!busy || expired || !!currentJob && ['completed', 'failed', 'undone', 'rolled_back'].includes(currentJob.state)} onClick={() => void apply()}>Apply reviewed plan</button></>}
         </form>}
         {report && <ReconciliationPanel report={report} onClose={() => setReport(null)} />}
-        <ImportJobs jobs={jobs} busy={!!busy} onAction={action} onRefresh={() => work('Refreshing jobs', refresh)} onCleanup={() => work('Finishing file cleanup', async () => { await doorRequest(kind, 'cleanup'); await refresh(); setStatus('Durable file cleanup checked.'); })} />
+        <ImportJobs jobs={jobs} busy={!!busy} onAction={action} onSaveCutover={(item, choices) => work('Saving invitation choices', async () => { await doorRequest('slack', 'cutover-choices', { planId: item.planId, choices }, item.sourceNamespace); await refresh(); setStatus('Invitation choices saved. Nothing was sent.'); })} onRefresh={() => work('Refreshing jobs', refresh)} onCleanup={() => work('Finishing file cleanup', async () => { await doorRequest(kind, 'cleanup'); await refresh(); setStatus('Durable file cleanup checked.'); })} />
         <BusinessImports business={business} busy={!!busy} onEnable={enabled => work('Updating Business import access', async () => { await doorRequest(kind, 'settings', { enabled }); await refresh(); })} onRevoke={kid => work('Revoking Business signing key', async () => { await doorRequest(kind, 'revocations', { kid }); await refresh(); })} />
     </main>;
 }

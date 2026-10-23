@@ -8,6 +8,7 @@ import { analyzeSlackZipCoverage } from './coverage.mjs';
 import { readDeltaBaseline } from './baseline.mjs';
 import { latestDeltaState, outsideDeltaOverlap, sameDeltaMessage } from './state.mjs';
 import { id, invalid, object } from './validation.mjs';
+import { cutoverInvitations } from '../slack-cutover.mjs';
 
 const uniqueSorted = values => [...new Map(values.map(value => [importDigest(value), value])).values()]
     .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
@@ -137,5 +138,7 @@ export function captureSlackDeltaArchive(inspected, review, ownerId, localUsers)
     result.counts = { channels: channels.length, actors: result.actors.length, messages: sortedMessages.length, threads: sortedMessages.filter(message => message.threadRoot).length,
         files: sortedMessages.reduce((sum, message) => sum + message.files.length, 0), bytes: sortedMessages.reduce((sum, message) => sum + message.files.reduce((n, file) => n + file.size, 0), 0), omissions: sortedOmissions.length };
     result.digest = importDigest({ ...result, messages: result.messages.map(message => ({ ...message, files: message.files.map(({ bytes, ...file }) => file) })) });
+    // Member names and addresses are pass metadata for the owner's preview, never part of the retained source packet.
+    result.cutover = cutoverInvitations({ users, channels, automationIds: inspected.automationIds });
     return result;
 }

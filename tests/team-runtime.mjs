@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {signIn} from './auth-support.mjs';
+import {runBulkInvitations} from './team-bulk.mjs';
 export const tinyPng=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=','base64');
 // Called by the parent-owned finite local Worker harness; opens no processes.
 export async function runTeamSurfaces({origin,ownerCookie}){
@@ -13,6 +14,7 @@ export async function runTeamSurfaces({origin,ownerCookie}){
  const launch=await create('Launch'),review=await create('Client review','private'),publicOther=await create('Public directory');
  async function invite(name,mode,scopes){const email=`team-${name}-${stamp}@example.test`;await json('/api/team/invitations',{method:'POST',body:{email,role:'member',mode,scopes}});await call('/auth/invite',{method:'POST',body:{email,displayName:name,role:'member'},status:202});return {...await signIn(origin,email,{requestLink:false}),email}}
  const member=await invite('member','member',[launch.id]),guest=await invite('guest','guest',[review.id]),outsider=await invite('outsider','member',[publicOther.id]);
+ await runBulkInvitations({origin,ownerCookie,call,json,launch,review,publicOther,member,guest,stamp});
  const browse=await json('/api/channels',{cookie:member.cookie});assert.ok(browse.items.some(c=>c.id===publicOther.id));assert.ok(!browse.items.some(c=>c.id===review.id));
  await json(`/api/channels/${publicOther.id}/join`,{method:'POST',cookie:member.cookie,body:{}});await json(`/api/channels/${publicOther.id}/join`,{method:'POST',cookie:member.cookie,body:{}});
  await call('/api/channels',{cookie:guest.cookie,status:403});await call(`/api/channels/${launch.id}/join`,{method:'POST',cookie:guest.cookie,body:{},status:403});

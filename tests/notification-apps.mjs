@@ -20,6 +20,7 @@ test('NOOK-080 [NOOK-089] channel-scoped notification approvals, threads, receip
  const refusedWrite=async(fn)=>{const before=await count(),response=await fn();assert.ok(response.status>=400);assert.deepEqual(await count(),before);return response};
  try{
   await (await import('./notification-extension.mjs')).notificationExtension(app);
+  await (await import('./notification-webhooks.mjs')).notificationWebhooks(app);
   const room=await call('/api/conversations','POST',{name:'Release coordination',kind:'private'},ownerCookie);
   const member=await app.invite('Ana',room.id);
   const inviteRole=async(name,role,mode)=>{const email=name.toLowerCase()+'@example.test';await call('/api/team/invitations','POST',{email,role,mode,scopes:[room.id]},ownerCookie);await call('/auth/invite','POST',{email,role,displayName:name},ownerCookie,202);return signIn(origin,email,{requestLink:false})};

@@ -56,5 +56,6 @@ export async function routing(c){
  const manyDm=await room('Ten device DM','dm'),manyDirect=await send(manyDm);const directAlerts=await delivered(manyDirect,10);assert.equal(directAlerts.length,10);assert.equal((await sync()).badge,1,'ordinary DM events also deduplicate across ten devices');await read(manyDm);assert.equal((await sync()).badge,0);for(const alert of directAlerts)assert.ok(!(await sync()).active.includes(alert.value.ids[0]));
  for(const d of extra)await call('/api/devices','DELETE',{id:d.id},member.cookie);
  assert.equal((await call('/api/devices','GET',undefined,member.cookie)).devices[0].id,device.id);
+ await (await import('./keywords.mjs')).keywords(c);
  c.t.diagnostic('Routing: DM, followed reply, conversation-follow exclusion, actual five-second burst, quiet deadline and urgent override, ten-device rejection/replacement, deduplicated badge and read/done sync passed.');
 }

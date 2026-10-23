@@ -4,6 +4,7 @@ import { importDigest } from '../family/team-chat/import-capture.mjs';
 import { sourceFiles } from './slack-files.mjs';
 import { systemSubtypes, contentSubtypes, isAutomation, actorLabel, sourceActorId, referencedActors, validateMessageMetadata, missingFileInventory } from './slack-records.mjs';
 import { captureSlackDeltaArchive } from './slack-delta/capture.mjs';
+import { cutoverInvitations } from './slack-cutover.mjs';
 const bad = reason => { throw new Error(`SLACK_INVALID: ${reason}`); };
 const object = x => x !== null && typeof x === 'object' && !Array.isArray(x);
 const id = x => typeof x === 'string' && /^[A-Za-z0-9_.-]{1,128}$/.test(x);
@@ -179,5 +180,7 @@ export function captureSlackArchive(inspected, review, ownerId, localUsers) {
     result.externalActors = result.actors.filter(a => inspected.automationIds.has(a.sourceId)).map(a => a.sourceId).sort();
     result.counts = { channels: channels.length, actors: result.actors.length, messages: result.messages.length, threads: result.messages.filter(m => m.threadRoot).length, files: result.messages.reduce((n, m) => n + m.files.length, 0), bytes: result.messages.reduce((n, m) => n + m.files.reduce((n, f) => n + f.size, 0), 0), omissions: sortedOmissions.length };
     result.digest = importDigest({ ...result, messages: result.messages.map(m => ({ ...m, files: m.files.map(({ bytes, ...f }) => f) })) });
+    // Member names and addresses are pass metadata for the owner's preview, never part of the retained source packet.
+    result.cutover = cutoverInvitations({ users, channels, automationIds: inspected.automationIds });
     return result;
 }

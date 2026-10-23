@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "39dffbd714644bd2e6153a97b87c902d18e7378eab63b53377212439f0a9a318",
+      "sha256": "ef58b30781143a9626a360d8422fdbf3a90993e7c3f3724d5d7db7df52333d0b",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "ba3713d07b4e408bc6b02ff535209b5c49ad38ab396c5371dcb274a6c0e65b52",
+      "sha256": "50224e825f1405e2607fafe6fa9e8d0a1857eb530d46aa1a78951055c7057875",
       "executable": false
     },
     "DEMO.md": {
@@ -661,11 +661,11 @@
       "executable": false
     },
     "docs/attention.md": {
-      "sha256": "f49c2f050ee3b44ae1a277b098dba5eee3696306b940dddff5e1b05481cc8c11",
+      "sha256": "e5eef5d91b313d7835a9416606a67de637f2e309042a86a5ed9124f354db8e63",
       "executable": false
     },
     "docs/backups.md": {
-      "sha256": "035b349bb4d0af2bb779272511516203f565ff97ed24413d36a5d33b965ae596",
+      "sha256": "6f3e4c1cc45728ff28058da775314bec11de03345b183ff1757ad880e9e6002a",
       "executable": false
     },
     "docs/campfire-import.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "e723df8e7cf0b12d57cb6888967fd40adda55e5271a11fff61142b38676e405f",
+      "sha256": "4c2340398ab5f9f4828e2c830c5cc89a6536b75fff3452d8b415ab9db9bfff46",
       "executable": false
     },
     "docs/conversations.md": {
@@ -693,7 +693,7 @@
       "executable": false
     },
     "docs/integration-tokens.md": {
-      "sha256": "84b5d12cbe38e02168adf10c7e443d79d6ed6fe425a83ea99031e4d591c245f2",
+      "sha256": "69b80831f3c2eceb65135ef7f8391ace9688b4eff30ece3831f37b56cced9d60",
       "executable": false
     },
     "docs/mattermost-import.md": {
@@ -701,7 +701,7 @@
       "executable": false
     },
     "docs/moving-in-from-slack.md": {
-      "sha256": "f3728dfea3388fe7cebe22457f92e93e70f622c3c278cf915b3e49c571b24190",
+      "sha256": "482c45a2df3588d52766201ab95ba75b636c775cdc40e0882ba44ed0af7616f2",
       "executable": false
     },
     "docs/overview.md": {
@@ -721,11 +721,11 @@
       "executable": false
     },
     "docs/updating.md": {
-      "sha256": "104956ddbb243cce930e3afed8c8c34108ac6cb3c5ba0342a6778cf215a3cda4",
+      "sha256": "946038b7af4627e973a9a8f83af71fa66881a10fbd25000654f8730b876bdaba",
       "executable": false
     },
     "docs/your-team.md": {
-      "sha256": "691aa9568fc72792a1a0018f3a68c140cfe4a7b34150c279167d6e589eb1592b",
+      "sha256": "e06febbc531f800e1f71b234259e43563a38a1244e85ea6817bab9f4bee1fa9b",
       "executable": false
     },
     "edition.json": {
@@ -797,19 +797,19 @@
       "executable": false
     },
     "evidence/device-routing/alerts-1440.png": {
-      "sha256": "e3e4ab1a8d7a2f2814141a417b780d07105a72436f93f31f6caa25eabf12d22c",
+      "sha256": "e541c19920f47061f9859e5f60c2e0fbe8b254a9366e30196cbfa409a1e9dc52",
       "executable": false
     },
     "evidence/device-routing/alerts-390.png": {
-      "sha256": "ac1da1c64ca0cf2106c98eb639db117e57a588a42febae117f2c54b051fc3bc9",
+      "sha256": "0f73b90cdc424e7c39a2f3a5333af2069970b99db9fd3fb531ff81282c9a4640",
       "executable": false
     },
     "evidence/device-routing/delivery-1440.png": {
-      "sha256": "4ec693f0af92079d797bd72989b1c91f960f6b89d5fc19efcc069ab61963b313",
+      "sha256": "0f3a7e629bce9fec8597614b2e8428d6c56b2e36f1aa8a809d1d2e9bb8d57571",
       "executable": false
     },
     "evidence/device-routing/delivery-390.png": {
-      "sha256": "91b712fac32f077dce595778447c95fa0ee1a3a63e0fe4f3fa8ffa84635fca4b",
+      "sha256": "784efeace211aa34449723fca318678e828929e65d70067c172b26eb1611a20e",
       "executable": false
     },
     "evidence/forwards/blocked-policy-1440.png": {
@@ -1105,19 +1105,19 @@
       "executable": false
     },
     "evidence/slack-delta/attestation-preview-1440.png": {
-      "sha256": "de0fa3a60e3df52ebcf828f55a960f01f0f8322ebecdd88caf0f4aa83e0d6451",
+      "sha256": "32a597857e4e728396f8e9e89b74d9069e8fd354ba855115667d906014e4cc53",
       "executable": false
     },
     "evidence/slack-delta/attestation-preview-390.png": {
-      "sha256": "9ddeb43e637a1f2cc09ce3825023578906e342ab7a41bd7f07b1c99bb66db65d",
+      "sha256": "041cccc6c6108af456d74021234286bc96a6a6b90a533c7c0c45f49625bf8e6b",
       "executable": false
     },
     "evidence/slack-delta/attestation-range-1440.png": {
-      "sha256": "c3d2114f45e59d0399e781f140d68b05eacd2813a04ecf4d7b79138ecc933782",
+      "sha256": "b5a26ecc95fe1d5a980f6c8a386360577a35731ebf18e9fc5054e4a3fc8a38c1",
       "executable": false
     },
     "evidence/slack-delta/attestation-range-390.png": {
-      "sha256": "f751dc46c2a3beb9e3c3258dfee6f82f27560ab6564c4d85b95dad259d353bc9",
+      "sha256": "46d5d69809a91e46e6593c8b85e333cb932ac217b6d3a61eb1ee8adb10c58472",
       "executable": false
     },
     "evidence/slack-delta/attestation-refused-1440.png": {
@@ -1129,51 +1129,67 @@
       "executable": false
     },
     "evidence/slack-delta/attestation-result-1440.png": {
-      "sha256": "22911071a18869c5ed5a95e3896f27a4ddc2625b372cd59bc9bae0a5d1873e78",
+      "sha256": "7ac33dda1979c9993240058a15e1a733c7e31c302c6a01c231a953b3ee3efaf2",
       "executable": false
     },
     "evidence/slack-delta/attestation-result-390.png": {
-      "sha256": "1868a5ac979d8cff4d129303caf777eadce1878ba1a7ca33958d1ed6b8bfe833",
+      "sha256": "e6f3aa0a76ed84037288bbecc873541fb786175fcdf44c730992a1e0e62f7eab",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-preview-1440.png": {
+      "sha256": "75d978932de642411b0e64551ca74e1a6629102e2766e6f5ffed07371d8a8ec1",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-preview-390.png": {
+      "sha256": "d9f2db6e00007dc33ab84e201e5d9841e5c08bc6bf66e0cff83de6a4559748dc",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-saved-1440.png": {
+      "sha256": "44eeb6a1845b87241f45de293056350928302dc29a8956d6da45b9c6ef3a62c5",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-saved-390.png": {
+      "sha256": "601b0cdeb2d52772cb5bff19d0a63081b35534a2ec0b976ccb4695f057837081",
       "executable": false
     },
     "evidence/slack-delta/preview-1440.png": {
-      "sha256": "de0fa3a60e3df52ebcf828f55a960f01f0f8322ebecdd88caf0f4aa83e0d6451",
+      "sha256": "32a597857e4e728396f8e9e89b74d9069e8fd354ba855115667d906014e4cc53",
       "executable": false
     },
     "evidence/slack-delta/preview-390.png": {
-      "sha256": "9ddeb43e637a1f2cc09ce3825023578906e342ab7a41bd7f07b1c99bb66db65d",
+      "sha256": "041cccc6c6108af456d74021234286bc96a6a6b90a533c7c0c45f49625bf8e6b",
       "executable": false
     },
     "evidence/slack-delta/result-1440.png": {
-      "sha256": "22911071a18869c5ed5a95e3896f27a4ddc2625b372cd59bc9bae0a5d1873e78",
+      "sha256": "7ac33dda1979c9993240058a15e1a733c7e31c302c6a01c231a953b3ee3efaf2",
       "executable": false
     },
     "evidence/slack-delta/result-390.png": {
-      "sha256": "1868a5ac979d8cff4d129303caf777eadce1878ba1a7ca33958d1ed6b8bfe833",
+      "sha256": "e6f3aa0a76ed84037288bbecc873541fb786175fcdf44c730992a1e0e62f7eab",
       "executable": false
     },
     "evidence/slack-delta/revisions-1440.png": {
-      "sha256": "2613db841243e8448911b2c006e1e3307b7e2828dac221329b28d3b05aa2aa14",
+      "sha256": "53c3fd0635f4c6e3119e670da2f81af13dfe127320a2985ce703d88df0b3ef9a",
       "executable": false
     },
     "evidence/slack-delta/revisions-390.png": {
-      "sha256": "6f5d7301403f02f479d708d94ba0693d4068782666a19d743075dc559200ef74",
+      "sha256": "bf61b364929ae822f5bbb9e9954e05b6e57c2609224f4ca1f5a900e1c90454e6",
       "executable": false
     },
     "evidence/slack-delta/thread-1440.png": {
-      "sha256": "d0469d5bc7c58dccf5833ec08ddf474d09a766f1f8a328d2f5e0dadc46ff22a6",
+      "sha256": "17dee4c5cb8653db403ffc3d380012ce86916a076bf21c48039cdc24a11092b0",
       "executable": false
     },
     "evidence/slack-delta/thread-390.png": {
-      "sha256": "09712e12f8d2520ab1d81e8d41a7bd80b47b50d26398ed42bfbe84afdc30dce5",
+      "sha256": "e9005421b19264e00fe681d41db69a8fd835029ddc502aff7101b36d5bf10c89",
       "executable": false
     },
     "evidence/slack-delta/undo-1440.png": {
-      "sha256": "f72defd8d662673213e4edcea75edfd6bdf84bd646f2b45b09a177563220f45d",
+      "sha256": "e0388de5f6e1c6145d5bfe2712a87c372be97e96350dc9fd2e4888c7614e53f2",
       "executable": false
     },
     "evidence/slack-delta/undo-390.png": {
-      "sha256": "fc5d0ceb1955d9ad02977c749178a14817511e532e1c0aa314cc1d551b2bd67b",
+      "sha256": "f3acd8821c51c04702452404444593bc225af12890d3f0b5b8be0785ecd563db",
       "executable": false
     },
     "IMPORT-APPLY.md": {
@@ -1193,7 +1209,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "392f874e58f10efa523f68db171509d4b0effb0d3ec6521613086aee98725c5b",
+      "sha256": "310015787022f8c501ea16b27354b78dda2c75c350b2a44060fc5ba1bbc3a9fa",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -1446,6 +1462,14 @@
     },
     "migrations/0081_scheduled_digests.sql": {
       "sha256": "617cb73d5aa6aee2dfafd7697a68a3a7bcda40923cbd8ce18a8bc107d484fc6d",
+      "executable": false
+    },
+    "migrations/0082_device_mobile_always.sql": {
+      "sha256": "f8ba73b48b3f660566fb6cab7bbed51d9209ddee3014320809401cd2b91672aa",
+      "executable": false
+    },
+    "migrations/0083_personal_keywords.sql": {
+      "sha256": "64bbe17b4d9bcb7e5f419a610d9efa758c8e400e2d0456a472e71104e99870b7",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -4013,7 +4037,7 @@
       "executable": false
     },
     "src/chat/AttentionView.tsx": {
-      "sha256": "d7d49d39600afb7dc2653ddc0b241efbb86ff4a66c759227d456d362a97c5693",
+      "sha256": "26fbe39741aef3883a99439c2d82885f2a36b0b99d39b707d60064380414018e",
       "executable": false
     },
     "src/chat/Avatar.tsx": {
@@ -4469,7 +4493,7 @@
       "executable": false
     },
     "src/exit/catalog.ts": {
-      "sha256": "3f0276fc93b51d7c276a857ebeb536d6da1323f235cda56cdcd2589732369d5f",
+      "sha256": "08648979229ba962b6f5f911337854010b6568f958089f4864074daa9c45dd5d",
       "executable": false
     },
     "src/exit/client.ts": {
@@ -4821,7 +4845,7 @@
       "executable": false
     },
     "src/imports/browser-runtime/packet.ts": {
-      "sha256": "d30db40fe99bbba029cd5b0559555b14b20b0ff21c4f56feeb4cf934b9088aaa",
+      "sha256": "1cac440410b9e2f0a26f361016b66fb4b24bc433ac4d35a18ba6b1600a516c6c",
       "executable": false
     },
     "src/imports/browser-runtime/pako.d.ts": {
@@ -4829,7 +4853,7 @@
       "executable": false
     },
     "src/imports/browser-runtime/public.ts": {
-      "sha256": "41a56bef921006de2a92ccba938b9aba447ed47dd9204cc008b82a0c1024d6e9",
+      "sha256": "eb74ca3664f4187ee20e4466d8e30e05afe568a810b9f680fcb52e9380c3ba1b",
       "executable": false
     },
     "src/imports/browser-runtime/zlib.ts": {
@@ -4876,6 +4900,22 @@
       "sha256": "f823530e0eaad4eb4da74f4da2eb68018363f240977a584a85bfc7a46ca48cfd",
       "executable": false
     },
+    "src/imports/cutover-choices.ts": {
+      "sha256": "7b173754c8b62beb8b56e87e9053124302d01263c9685937f43419af4779db64",
+      "executable": false
+    },
+    "src/imports/cutover-custody.ts": {
+      "sha256": "c92bc39aea41e38542157378b6138b4292fb1bc8ba85d3eb06901785eeb714f6",
+      "executable": false
+    },
+    "src/imports/cutover-export.ts": {
+      "sha256": "9b7006aa9ece5e291435da336b069f2f593331fcc379d1ed0308b62cfd165596",
+      "executable": false
+    },
+    "src/imports/CutoverInvitations.tsx": {
+      "sha256": "a389812646221d11d53d7ffa5bafd0f6bfa5d57ea7988f4b25a0c29cdcf6d6f0",
+      "executable": false
+    },
     "src/imports/delta-state.ts": {
       "sha256": "4f7b07145f3a1bf5c1aa367c5a06b8f49e3d6bebf4128ca5f7ff7c9a4e384b28",
       "executable": false
@@ -4893,15 +4933,15 @@
       "executable": false
     },
     "src/imports/door-custody.ts": {
-      "sha256": "b96d3490a6c06cf95e748617abc98c7207a2f056ff01a1b812bf8484c5a832cf",
+      "sha256": "2507af8745dc4a06e82f7a7629e788f75dcd46f8f7b8d4a22881e6fdb5f40c08",
       "executable": false
     },
     "src/imports/door-history.ts": {
-      "sha256": "317c4446daf84411ef25a799d3b4c0ccfee6e4bdee34619bf931a67a7f4d8e54",
+      "sha256": "0d553b1df211dab19e7d5c238527c265b04dd40002249fa569b78dbe4bd72f22",
       "executable": false
     },
     "src/imports/door-source.ts": {
-      "sha256": "ce0ad4c4906cd2a430e8da3e1bcf3bda05e1d4cbbe9ffe300c386f2d47a71052",
+      "sha256": "9ba6ed843d42b5fb1ccf9b406c3137dc9a90ceaf9adeee7f123db6ed36561ff3",
       "executable": false
     },
     "src/imports/door-undo.ts": {
@@ -4909,7 +4949,7 @@
       "executable": false
     },
     "src/imports/door.ts": {
-      "sha256": "8dff018dacf55c3697412281e3f58ca7db76692b77f18746d0ffb5055ecbf36b",
+      "sha256": "c279c71f06eaed247716a22a133d77faee7175192e0df33f8090ee0e6f42cc7b",
       "executable": false
     },
     "src/imports/DoorPlanPanel.tsx": {
@@ -4917,7 +4957,7 @@
       "executable": false
     },
     "src/imports/DoorWizard.tsx": {
-      "sha256": "943475e96519540e9d55e36e97676f8858203afe5e6607501b764704879c5709",
+      "sha256": "2895f1040a593fea2e4a8618d5c672166390b36ac24dfeaa50b3a452239406a0",
       "executable": false
     },
     "src/imports/formats.d.mts": {
@@ -4945,7 +4985,7 @@
       "executable": false
     },
     "src/imports/ImportJobs.tsx": {
-      "sha256": "b5c15b00f276efbbd2e1a92c057d66da6e90e91c47f825618a7847728ddb0522",
+      "sha256": "6c06f87de2df7504f1b76fd2638b3e8c402df8d875b9829968ee0a28d8b01f2f",
       "executable": false
     },
     "src/imports/imports.css": {
@@ -5084,6 +5124,14 @@
       "sha256": "02cd711ae9f6940f7e22114a02d0b555915d2420088ce6cefdf54fb47a384b1b",
       "executable": false
     },
+    "src/imports/slack-cutover.d.mts": {
+      "sha256": "acf898d486858a4935e49a73b1ecdcbd1017c36cdde957908c6037cab70f4072",
+      "executable": false
+    },
+    "src/imports/slack-cutover.mjs": {
+      "sha256": "c017fa5fda6baf251c84fd67bf85c3a6cf40c50c55f76493917f0c9a8d2c0018",
+      "executable": false
+    },
     "src/imports/slack-delta/baseline.mjs": {
       "sha256": "7e3a88c6de2a5e3619a4a266f8ac2bebd20e55415a46822cf6643cf7c7f7e777",
       "executable": false
@@ -5093,7 +5141,7 @@
       "executable": false
     },
     "src/imports/slack-delta/capture.mjs": {
-      "sha256": "9e5665f7044e393a6b1fafaf41837f5d8d251134dbcb8c19236fd8854fd8103c",
+      "sha256": "c07416dd021948753bdc59b0e9e724918af03656611c460b2c1f58bb32f3ff18",
       "executable": false
     },
     "src/imports/slack-delta/coverage.mjs": {
@@ -5149,7 +5197,7 @@
       "executable": false
     },
     "src/imports/slack.mjs": {
-      "sha256": "fc25396ae759e6269b8ab486a57795559e771b2fcfd4486e1e61b2e2de4128c5",
+      "sha256": "1a7de9f8a7adf8742236171d524b80b97e86485ad6aeefbc197c40a39265badd",
       "executable": false
     },
     "src/imports/SlackHistory.tsx": {
@@ -5225,7 +5273,7 @@
       "executable": false
     },
     "src/integrations/integrations.css": {
-      "sha256": "c709db80a18a60ec1a7c4d3b37b66af7efaaf3f638140c83af8c06d5d9dd70bb",
+      "sha256": "77bb75f5592a2d854eca5770d1580a1651a3591e3e272fc283731cfb4f7566ac",
       "executable": false
     },
     "src/integrations/IntegrationTokens.tsx": {
@@ -5313,19 +5361,35 @@
       "executable": false
     },
     "src/notification-apps/NotificationApps.tsx": {
-      "sha256": "f399fe3c443606734020b064a3ef1e4c497bbfe671738ddcb9ca4fd8cdc2a49b",
+      "sha256": "7cab77b5b8a28c4db7f1af4b67fbbc88037753836ec91c13d48477124495c5af",
       "executable": false
     },
     "src/notification-apps/receipts.ts": {
       "sha256": "4597c018b39f75c3f91d81d614c85e99d7edd51924e5634815d00181eb671b22",
       "executable": false
     },
+    "src/notification-apps/slack-format.ts": {
+      "sha256": "6af64d0ff6c9b8393280ff68d78685f04f3dbb9d2f0d3dc7dbeba3ca8226781a",
+      "executable": false
+    },
+    "src/notification-apps/webhook.ts": {
+      "sha256": "3c8e0689057d9f468ed24b4b142dd0eb9980ba7b860073d83b75becce78ecc19",
+      "executable": false
+    },
     "src/notify/compose.ts": {
-      "sha256": "652cc1cf08e362f0a4d056ec4ab8fe179feeadcf746b9050b271ed3c76b16adf",
+      "sha256": "0e92834897a09f3ccbb2729121b7c4bafb9e938177c2cc606139cad4edef05fc",
       "executable": false
     },
     "src/notify/explain.ts": {
       "sha256": "78ddfbac6a65bf04a21c1ded71c801e0a86d24df49c1641596127c3ab5c01c2f",
+      "executable": false
+    },
+    "src/notify/keywords.server.ts": {
+      "sha256": "3d41ab2499c140d8d5cb7a0a080206e0e0c97e8ee45d228c79996328db9d4e83",
+      "executable": false
+    },
+    "src/notify/KeywordSettings.tsx": {
+      "sha256": "dfad4f5285fc4ea7f2c22c3a3d08d84ee04cb30641db181c1ad6df5263e536b2",
       "executable": false
     },
     "src/notify/policy.ts": {
@@ -5333,11 +5397,11 @@
       "executable": false
     },
     "src/notify/preferences.ts": {
-      "sha256": "b3374cc4cf243e925e1335e4088c35ac3ae1a1f9a6f5543c00f5f1ed25e50f90",
+      "sha256": "1a86949f83a394de03e867c4e0ba10c6fb8e2ab86f9cc4d3c4cb4b4079dd109e",
       "executable": false
     },
     "src/notify/queue.ts": {
-      "sha256": "c68fc41baa289607b42ab771160fd87a15970b66bca6620d511f2dc378307251",
+      "sha256": "9551c86b40d9ee76c9bb493a5a7cbeb1e6bca3e8cf8cee16fa443d468afb4a3a",
       "executable": false
     },
     "src/notify/quiet-archive.mjs": {
@@ -5361,7 +5425,7 @@
       "executable": false
     },
     "src/notify/run.ts": {
-      "sha256": "21dfd1b8bca6d3b5a404ed9a31402b19f9617fd6a4df4167aeceb3faf232b930",
+      "sha256": "b0d55302a7110524ad332c686f0857d2933f01cd03e03d8d564c79b0680aaffd",
       "executable": false
     },
     "src/notify/sender.ts": {
@@ -5485,11 +5549,11 @@
       "executable": false
     },
     "src/platform/storage/message-statements.ts": {
-      "sha256": "3635822adcc54808614376c62c231460e15483594acbb4bed1b315978ab8b588",
+      "sha256": "06bf93346db6430c1c6b316a62121582c79293aa473277655255e9f47681b5ab",
       "executable": false
     },
     "src/platform/storage/messages.ts": {
-      "sha256": "a98613fc888e9f983919b9a33bb8080f933867b6021a15c22499763b4e1e8bc4",
+      "sha256": "43c07f87b4137d10f78a5571b926509c2f8cd508b35e3b6af18d4407824f026f",
       "executable": false
     },
     "src/platform/storage/outcome-history.ts": {
@@ -5533,7 +5597,7 @@
       "executable": false
     },
     "src/portability/download.ts": {
-      "sha256": "6b6adbc5dca63e2c5ba866647a7617eb1fede10fdeb0e069e3a8a847053e7b08",
+      "sha256": "00e3a4082e1ba5339ed13a68312c9ebcd5e7467f2041a4b75766e9e831a36c10",
       "executable": false
     },
     "src/portability/ExportScreen.tsx": {
@@ -5593,7 +5657,7 @@
       "executable": false
     },
     "src/push/activity.ts": {
-      "sha256": "d9748840b7fa9730e6f7555f31bc0f001ff23ef1505dab9b3f0072af1951bae3",
+      "sha256": "852e89b8065059839bf1f9db1f8e5545c0c0667f8f4bce6914db0e0c841213b4",
       "executable": false
     },
     "src/push/archive.mjs": {
@@ -5601,7 +5665,7 @@
       "executable": false
     },
     "src/push/client.ts": {
-      "sha256": "3b97017089591c378f0484472074564f2573f3ac2cb7de526063a03e71fcc257",
+      "sha256": "beb873ea74df0dc2ee6b3c2de509e69f006109a7c2fbb4fe336a89684da853b4",
       "executable": false
     },
     "src/push/crypto.ts": {
@@ -5609,11 +5673,11 @@
       "executable": false
     },
     "src/push/DeviceDelivery.tsx": {
-      "sha256": "8abdd561ba91930819cc9faf9d0bd0f7a8b4140496b104d233e0c0aa0491b881",
+      "sha256": "e20ae709e133bd8050a15885636cc206e135e63b05b4eaa04708ac06f9c9297e",
       "executable": false
     },
     "src/push/devices.ts": {
-      "sha256": "158053664767a44e3b5c25f08b7c9e7dc15c45d74c00f777630a649a0f59947d",
+      "sha256": "f87b335b2bcba699e2d68d860b23abb4440ddef171d5b90f30b9ac13e374975b",
       "executable": false
     },
     "src/push/mobile-preferences.ts": {
@@ -5625,19 +5689,19 @@
       "executable": false
     },
     "src/push/policy.ts": {
-      "sha256": "fa9a492a02ef4d938a7a78161cab4b5b61ba273998723cf4f6cb62f5f37db33d",
+      "sha256": "6d07118a939381180d9bb8e8581b2c5668f6699b30015347695a48aac6f9dec4",
       "executable": false
     },
     "src/push/preferences.ts": {
-      "sha256": "6f412329462c158f0088384fbfbe0a6737ab29d697781107dd35f109dd1e4606",
+      "sha256": "fb325268ff41d057940999792a4fda50fc87c4f3816533932cc6b40bbe1d3006",
       "executable": false
     },
     "src/push/queue.ts": {
-      "sha256": "af3f1f061daf05e4b2c8dcb8f2efdbf9467f31c5182c7fd9b9ebc381d99883f5",
+      "sha256": "8914c6835efe446b820f18d5d31cbfa99bafc3ecaf45889d26d6635dbafc0f2f",
       "executable": false
     },
     "src/push/run.ts": {
-      "sha256": "24169d784365099399cab453761145a60e9598ba3074f39df0bbc9b15033994e",
+      "sha256": "eb99392ac791b3f6f68c3e8e889a8980c8f0ef35a616f712a312a559787bc8ba",
       "executable": false
     },
     "src/push/sender.ts": {
@@ -5769,7 +5833,7 @@
       "executable": false
     },
     "src/scheduled/runner.ts": {
-      "sha256": "815af380ff51cea57c4e4ff2a2f04a70762e96f2af90aa932ff42f94d96870d6",
+      "sha256": "7a501c77e76ea47c0168cce874b562592ba179af28d824cc307557ef0da3f119",
       "executable": false
     },
     "src/scheduled/ScheduledView.tsx": {
@@ -5825,7 +5889,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "4eb5e0578ffb94afaa209535b96af65a92ba81860e235d55d8dd2103cd6f3b5c",
+      "sha256": "6f5d9e818f5132f182bb684f7593a1098a43160abdb5ed9bc52bd1ee289dc68e",
       "executable": false
     },
     "src/site/pages.tsx": {
@@ -5838,6 +5902,14 @@
     },
     "src/team/access.ts": {
       "sha256": "cc0bd282cfa3faaf1979c8d514a51b744447835aeadb65be9a324f7a2217e647",
+      "executable": false
+    },
+    "src/team/bulk-invitations.server.ts": {
+      "sha256": "1156e1121d28fdb7f7962dbe041607b8d741b7f864e6ac0272e188b323000f6b",
+      "executable": false
+    },
+    "src/team/BulkInvitations.tsx": {
+      "sha256": "973037a38390141be437f687669d8c9d20c14d2260aa6e2cc58e3902f0085bb0",
       "executable": false
     },
     "src/team/channel-archive.mjs": {
@@ -5893,7 +5965,7 @@
       "executable": false
     },
     "src/team/EmailControl.tsx": {
-      "sha256": "7aee73f1952d08d429aceee3ee6f7172d5de2dc6343e5ad86578322971186c43",
+      "sha256": "665b2cbbf7c07425b9dedc842fbc7bce542d7f6aaba8684fa6a1250bfd9ae1d9",
       "executable": false
     },
     "src/team/erasure/archive.mjs": {
@@ -5941,7 +6013,7 @@
       "executable": false
     },
     "src/team/erasure/graph.ts": {
-      "sha256": "6e65cf445f20f6c5dd797542de1271f9ed385b0c0a1c0a6b1fce9d61636d369d",
+      "sha256": "22a4422f797637e5cf2c53d7f43b687e4cc6bcbde1c5f76f7342571535040ae4",
       "executable": false
     },
     "src/team/erasure/identity.ts": {
@@ -6073,7 +6145,7 @@
       "executable": false
     },
     "src/team/PushControl.tsx": {
-      "sha256": "84b829e5f24e64469a434323c0e9205fa048c593ce1b8921e8d182edb2b7ba49",
+      "sha256": "f92bdbe1a92a11b398f3a23172f3091c888cf28de6adabdfb0a62dfca1a87ba4",
       "executable": false
     },
     "src/team/ReactionBar.tsx": {
@@ -6085,7 +6157,7 @@
       "executable": false
     },
     "src/team/routes.server.ts": {
-      "sha256": "75b940f8719003bb15f69ced119f05652426dca36a00b97e2495f69fe24ca401",
+      "sha256": "becbc3ac992ee042286020ccb00593d02b007222ba3723b1f42ad822ff341cec",
       "executable": false
     },
     "src/team/saved-archive.mjs": {
@@ -6113,7 +6185,7 @@
       "executable": false
     },
     "src/team/TeamPanel.tsx": {
-      "sha256": "4f9ce7b4d07e56d89a2614767d796d3c6fbfadb579d48b5641c830fec2f47022",
+      "sha256": "0ace74f5887fe10bee12aad6d27fe19cfa8aab4a9a6872689840ce1a1d4ad445",
       "executable": false
     },
     "src/team/types.ts": {
@@ -6305,7 +6377,7 @@
       "executable": false
     },
     "tests/import-door-support.mjs": {
-      "sha256": "1aebd284a4123042bbac0a476f06189948c3c54d93d0f0d9af3aa0ea3c9650e8",
+      "sha256": "24add647609bc213c99f54aa3b9c4580ab5b55b3d0d89d34b3afe7e2cbeec9d1",
       "executable": false
     },
     "tests/import-fixture.mjs": {
@@ -6337,7 +6409,7 @@
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
-      "sha256": "5c752307688429ba8e5ee28abd531ee48d2717de1e102fa1503215499dbca080",
+      "sha256": "cf560667b078159402ca451f5e248116c7cc31cc2716701f64b16be1dee2ac42",
       "executable": false
     },
     "tests/integration-tokens.mjs": {
@@ -6409,11 +6481,15 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "1e4ce62dde03e8501d47f038a99aa138c07390de535b2f4657d01eba7f03f85b",
+      "sha256": "56bd31cb6275b4cb3c09b56d85d2edb574a820b0a8539ebebe106814020f4236",
       "executable": false
     },
     "tests/notification-extension.mjs": {
       "sha256": "04e773446a2730e22a2e6532e80ce1457363f6b2bea53d52805c78743d143927",
+      "executable": false
+    },
+    "tests/notification-webhooks.mjs": {
+      "sha256": "109370dd3bf0449b2916729dff0715bbb4da5b6da5981ef89d0695632239fba1",
       "executable": false
     },
     "tests/notify-journey.mjs": {
@@ -6429,7 +6505,7 @@
       "executable": false
     },
     "tests/notify/browser.mjs": {
-      "sha256": "86d5046e70be61075b086fa2e0c5655290fb59fe837c29fcbb2f89aaa7f61ece",
+      "sha256": "c43a578bdb6ace6eb388f05e6c40ad6bef34809077a3cc11135ad201cf257e7d",
       "executable": false
     },
     "tests/notify/install.mjs": {
@@ -6581,7 +6657,7 @@
       "executable": false
     },
     "tests/push/delivery-browser.mjs": {
-      "sha256": "ac388a1134889cf5047e2fa577ce4d181f3d5490abd7637f953b78170eda4f3e",
+      "sha256": "fbadbb40e06d743df22981e8e05a2b2e26a596a8fb59b7823f2d5e0298888269",
       "executable": false
     },
     "tests/push/erasure.mjs": {
@@ -6600,12 +6676,16 @@
       "sha256": "2d29bfd7bb65f0669953f2ffb6edcdd31422225731952284f29e2fa3a7503551",
       "executable": false
     },
+    "tests/push/keywords.mjs": {
+      "sha256": "e7ed046f9050c681a85dbeba4c90d7ee5cde244e4e91a7f61384b1be1ec39841",
+      "executable": false
+    },
     "tests/push/packet.mjs": {
       "sha256": "61f120c082eee4e91db9549f484918ff02c7416d3bf0c82b12d19d40c46dcad3",
       "executable": false
     },
     "tests/push/presence.mjs": {
-      "sha256": "1f9c51c239385902864a47e7e6712726d33eefb410aa75f36c40a2166e716e4d",
+      "sha256": "ff85a5e7b71b4c18c2fedbd7d6627fa08d00099eeaace66e140b276bff8dfcdf",
       "executable": false
     },
     "tests/push/quiet.mjs": {
@@ -6617,7 +6697,7 @@
       "executable": false
     },
     "tests/push/routing.mjs": {
-      "sha256": "659cae36bc75b44345a9dd924518a4e09bf4cb8cdb96d1118cf7b44ff7cbb026",
+      "sha256": "b4d624f6bfaeab62af9240469dd5b7f1fa361f224c493abd963aa134f4ce0cbe",
       "executable": false
     },
     "tests/push/setup-failure.mjs": {
@@ -6641,7 +6721,7 @@
       "executable": false
     },
     "tests/readable-export-browser.mjs": {
-      "sha256": "402c8f30bb15361523a4f03a628936de8574c997bd932588322004f9460216dd",
+      "sha256": "b279ddaecf29249b0150128806b1f49ba7550f4841ae42f81d79f395e13ce0e9",
       "executable": false
     },
     "tests/readable-export.test.mjs": {
@@ -6713,7 +6793,7 @@
       "executable": false
     },
     "tests/slack-delta-browser.mjs": {
-      "sha256": "44ecefdafb656fd0de234101dadfb6db8300b56e5687ec0b22276c931e559c3e",
+      "sha256": "61909196ab3edfcf7cac9b5f5c5a7d05142c6e58c6577922ff48db9737ba61b2",
       "executable": false
     },
     "tests/slack-files.test.mjs": {
@@ -6740,12 +6820,16 @@
       "sha256": "c3d2181e58845ec378154400053536b5eec7cc2a7c596f906c2bc7c1df1d337e",
       "executable": false
     },
+    "tests/slack-import/cutover.mjs": {
+      "sha256": "663248f1bc00e97e44867b966bc06315bcaeacfa98e32f0a19307016087d7fd0",
+      "executable": false
+    },
     "tests/slack-import/delta-custody.mjs": {
-      "sha256": "f427472a01b2d3a7da5cf5f8cdd6dd91bf74f67dd7b79152097189d4fa09806c",
+      "sha256": "3e1c2ed5e6eb2c91412670873a690bfd254670835eee3dc4a23f4580b55d9353",
       "executable": false
     },
     "tests/slack-import/delta-journey.mjs": {
-      "sha256": "721d5acefd48eef4ff567053ce58856d45e745a11bb827c936a60a3680608f9e",
+      "sha256": "77f335a29df64370b8ec3b8515d2e9f59e25009e403a236ab4a70612529eba65",
       "executable": false
     },
     "tests/slack-import/fixture.mjs": {
@@ -6797,7 +6881,11 @@
       "executable": false
     },
     "tests/team-browser.mjs": {
-      "sha256": "46172ad731a10f2eef041fa5e7681262aa3e670812c3a63ae8ab7b7b5399415e",
+      "sha256": "cc12cb0ce8d33a43314b2914e99c76f2d43c74ea5efd2d15c6a1d77ad268b8de",
+      "executable": false
+    },
+    "tests/team-bulk.mjs": {
+      "sha256": "dcd827d957094b5097d148aa2b5bc87ab5c8fdca6ea28ff236077d98f10f5f7b",
       "executable": false
     },
     "tests/team-image.test.mjs": {
@@ -6813,7 +6901,7 @@
       "executable": false
     },
     "tests/team-runtime.mjs": {
-      "sha256": "e3b83314c5c722a5fb9309e707e07dfbae4058dc3aff494ae1f1a80098fb3917",
+      "sha256": "74b4481023d8a9ceaef6be96d7839f1d79d43c6fe90e3b810d19a4411afdaf2e",
       "executable": false
     },
     "tests/team-security.test.mjs": {

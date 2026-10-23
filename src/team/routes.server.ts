@@ -21,6 +21,7 @@ import {browseChannels,joinChannel} from './channels.server'
 import {channelDetails,updateChannel,transferChannel,archiveChannel,leaveChannel} from './channel-lifecycle.server'
 import {reactions,react,reactionActors} from './reactions.server'
 import {prepareInvitation,teamDirectory,regrant,removeAccess,cancelPreparation} from './invitations.server'
+import {previewBulk,sendBulk,resendInvitation} from './bulk-invitations.server'
 import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
@@ -78,6 +79,9 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
  if(parts[1]==='erasures'&&parts.length===4&&parts[3]==='resume'&&method==='POST')return Response.json(await advance(c,parts[2]))
  if(url.pathname==='/api/team'&&method==='GET')return Response.json(await teamDirectory(c))
  if(url.pathname==='/api/team/invitations'&&method==='POST')return Response.json(await prepareInvitation(c,input))
+ if(url.pathname==='/api/team/invitations/preview'&&method==='POST')return Response.json(await previewBulk(c,input))
+ if(url.pathname==='/api/team/invitations/bulk'&&method==='POST')return Response.json(await sendBulk(c,request,input))
+ if(url.pathname==='/api/team/invitations/resend'&&method==='POST')return Response.json(await resendInvitation(c,request,input))
  if(url.pathname==='/api/team/invitations/cancel-preparation'&&method==='POST')return Response.json(await cancelPreparation(c,input))
  if(url.pathname==='/api/team/access'&&method==='POST')return Response.json(await regrant(c,input))
  if(url.pathname==='/api/team/remove'&&method==='POST')return Response.json(await removeAccess(c,input))

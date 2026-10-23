@@ -2,7 +2,7 @@ import {useCallback,useEffect,useRef,useState} from 'react'
 import type {TeamRequest} from '../team/types'
 import {clearPushNotices} from './notices'
 import type {WorkspaceSnapshot} from '../chat/types'
-export type Choices={threadBadge:'all'|'mentions';broadcasts:boolean;mentions:boolean;urgent:boolean;urgentQuiet:boolean;direct:boolean;threads:boolean}
+export type Choices={threadBadge:'all'|'mentions';broadcasts:boolean;mentions:boolean;urgent:boolean;urgentQuiet:boolean;direct:boolean;threads:boolean;keywords:boolean}
 export type PushSettings=Choices&{problems:{error:string;state:string}[];notDelivered:{recipient:string;error:string}[];workspace:{count:number;error:string|null;state:string|null}|null}
 const decode=(value:string)=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))
 const STORE='nook.push.device'

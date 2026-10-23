@@ -7,6 +7,7 @@ import { publicLocalSummary } from './browser-runtime/public';
 import { fail } from '../family/team-chat/domain';
 import { recordAttestation } from './attestation.mjs';
 import { publishAttestation } from './attestation-custody';
+import { publishCutover } from './cutover-custody';
 
 export const previewLifetime = 30 * 60 * 1000;
 export async function uploadedCapture(env: DoorBindings, namespace: string, uploadId: string, owner: string, users: any[]) {
@@ -27,9 +28,10 @@ export async function refuseLegacyDuplicate(env: DoorBindings, value: DoorCaptur
     UNION ALL SELECT 1 FROM nook_import_records WHERE key IN (SELECT value FROM json_each(?)) AND job<>? LIMIT 1`).bind(value.capture.archiveDigest, JSON.stringify(value.effects.filter(e => e.kind === 'message').map(e => (e.payload as any).key)), value.domainJob).first();
   if (old) fail(409, 'already imported');
 }
-export async function bindPlan(env: DoorBindings, predicate: D1Sql, value: DoorCapture, result: any, uploadId: string, owner: string, range?: {from: string; to: string}) {
+export async function bindPlan(env: DoorBindings, predicate: D1Sql, value: DoorCapture, result: any, uploadId: string, owner: string, range?: {from: string; to: string}, cutover?: unknown) {
   const now = Date.now();
   const summary: any = publicLocalSummary(value.capture);
+  if (cutover) summary.cutover = cutover;
   if (range) {
     const person = await env.DB.prepare('SELECT display_name AS name FROM oa_operators WHERE id=?').bind(owner).first<{name: string}>();
     if (!person) fail(409, 'Workspace owner changed; review the import again');
@@ -124,4 +126,5 @@ export async function publishResult(env: DoorBindings, predicate: D1Sql, link: a
     ]);
   }
   await publishAttestation(env, predicate, link, result);
+  await publishCutover(env, predicate, link, result);
 }

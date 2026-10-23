@@ -1,6 +1,7 @@
 .nook-app .integration-tokens fieldset { display: grid; gap: 4px; margin: 8px 0; padding: 8px 12px; border: 1px solid var(--line, rgba(0,0,0,.12)); border-radius: 10px; }
 .nook-app .integration-secret { margin: 12px 0; padding: 12px; border-radius: 12px; background: var(--surface-rail); }
 .nook-app .integration-secret code { display: block; margin: 8px 0; overflow-wrap: anywhere; font-size: 13px; }
+.nook-app .integration-secret samp { display: block; margin: 8px 0; overflow-wrap: anywhere; font-size: 13px; }
 .nook-app .integration-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .nook-app .integration-list { display: grid; gap: 10px; margin: 12px 0; padding: 0; list-style: none; }
 .nook-app .integration-list article { padding: 10px 12px; border-radius: 12px; background: var(--surface-raised); }

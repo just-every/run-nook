@@ -28,6 +28,8 @@ chmod 600 exports/nook-workspace.rer
 rer import --input exports/nook-workspace.rer --yes
 ```
 
+Restore an archive into a checkout of the release it was exported from: use the release tag's own clone (for example `git clone --branch v0.4.0 https://github.com/just-every/run-nook.git nook`), import there, then update that checkout locally as [Updating and deploying](updating.md) describes. A fresh clone of newer `main` refuses an older archive with `schema_mismatch`.
+
 Then follow the identity recovery procedure above. Reopen the restored workspace and compare messages, file downloads and search results before stopping the original hosting. The archive's manifest also carries its erasure journal; retain your latest archive when restoring an older one.
 
 You can also call Nook's existing `scripts/local/remote-export.mjs` helper from a checkout with its dependencies installed. It uses the owner-only hosted export door to download authoritative D1 records and private R2 bytes, verifies the archive and saves its erasure journal. `rer export` is local-only and refuses a hosted origin:

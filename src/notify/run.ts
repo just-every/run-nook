@@ -18,7 +18,8 @@ const cancelReason=`CASE ${recipientCancellation}
  ${attentionCancellation('q.dedupe','(SELECT event_seq FROM nook_attention WHERE id=q.dedupe)')}
  WHEN q.reason='broadcast' AND ${broadcastSuppressed('q.user','q.conversation')} THEN 'broadcast-suppressed'
  WHEN q.reason='broadcast' AND ${emailBroadcastChoice('q.user')}<>1 THEN 'turned-off'
- WHEN q.reason<>'broadcast' AND NOT EXISTS(SELECT 1 FROM nook_notify_preferences p WHERE p.user=q.user AND CASE WHEN q.reason='urgent-request' THEN p.urgent ELSE p.mentions END=1) THEN 'turned-off' END`
+ WHEN q.reason='keyword' AND EXISTS(SELECT 1 FROM nook_preferences p WHERE p.user=q.user AND p.conversation=q.conversation AND p.muted=1) AND COALESCE((SELECT keywords_in_muted FROM nook_notify_preferences WHERE user=q.user),0)=0 THEN 'muted'
+ WHEN q.reason<>'broadcast' AND NOT EXISTS(SELECT 1 FROM nook_notify_preferences p WHERE p.user=q.user AND CASE WHEN q.reason='urgent-request' THEN p.urgent WHEN q.reason='keyword' THEN p.keywords ELSE p.mentions END=1) THEN 'turned-off' END`
 /** One pass of the delivery run loop. Returns when it next needs to run, or null. */
 export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=20):Promise<number|null>{
  const db:D1Database=env.DB,sql=(text:string,...values:unknown[])=>db.prepare(text).bind(...values)

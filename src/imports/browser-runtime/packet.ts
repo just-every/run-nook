@@ -12,9 +12,11 @@ export type LocalSourcePacket = {
 };
 
 export function localPacket(kind: LocalSourcePacket['sourceType'], capture: any, review: any): LocalSourcePacket {
+  // Preview-only pass metadata (member names and addresses) travels with the plan request, not in the retained source packet.
+  const { cutover: _cutover, ...retained } = capture;
   const transferable = {
-    ...capture,
-    messages: capture.messages.map((message: any) => ({
+    ...retained,
+    messages: retained.messages.map((message: any) => ({
       ...message,
       files: message.files.map(({ bytes, ...file }: any) => {
         if (!(bytes instanceof Uint8Array)) throw new Error('Selected attachment bytes unavailable');
