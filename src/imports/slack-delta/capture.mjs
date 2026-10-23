@@ -134,10 +134,11 @@ export function captureSlackDeltaArchive(inspected, review, ownerId, localUsers)
         revised: sortedMessages.filter(message => baseline.messages.has(message.key) && !sameDeltaMessage(baseline.messages.get(message.key), message)).length,
         tombstoned: 0, unverified: coverage.conversations.length, explicitDeletionMarkers: result.delta.explicitDeletions.length, skipped: result.delta.skipped.length };
     result.missingFileInventory = missingFileInventory(missingFiles); result.missingFileInventoryDigest = importDigest(result.missingFileInventory);
-    result.cutover = cutoverInvitations({ users, channels, automationIds: inspected.automationIds });
     result.externalActors = result.actors.filter(actor => inspected.automationIds.has(actor.sourceId)).map(actor => actor.sourceId).sort();
     result.counts = { channels: channels.length, actors: result.actors.length, messages: sortedMessages.length, threads: sortedMessages.filter(message => message.threadRoot).length,
         files: sortedMessages.reduce((sum, message) => sum + message.files.length, 0), bytes: sortedMessages.reduce((sum, message) => sum + message.files.reduce((n, file) => n + file.size, 0), 0), omissions: sortedOmissions.length };
     result.digest = importDigest({ ...result, messages: result.messages.map(message => ({ ...message, files: message.files.map(({ bytes, ...file }) => file) })) });
+    // Member names and addresses are pass metadata for the owner's preview, never part of the retained source packet.
+    result.cutover = cutoverInvitations({ users, channels, automationIds: inspected.automationIds });
     return result;
 }

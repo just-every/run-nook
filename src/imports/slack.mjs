@@ -177,9 +177,10 @@ export function captureSlackArchive(inspected, review, ownerId, localUsers) {
     const result = { reviewDigest: importDigest(review), skippedKinds, missingFiles: { count: missingFiles.length, bytes: missingFiles.reduce((sum, f) => sum + (f.size ?? 0), 0), unknownSizes: missingFiles.filter(f => f.size === null).length, accepted: review.importWithoutMissingFiles === true }, namespace: review.namespace, archiveDigest: archive.archiveDigest, channels, actors: [...actors.values()].filter(a => usedActors.has(a.sourceId)), messages: [...admitted.values()].sort(compareSourceMessages), omissions: sortedOmissions, omissionDigest, omissionsAccepted: accepted || !sortedOmissions.length, blockers: sortedBlockers, blocked: sortedBlockers.length > 0, completeness: 'unknown', sourceAuthenticityVerified: false };
     result.missingFileInventory = missingFileInventory(missingFiles);
     result.missingFileInventoryDigest = importDigest(result.missingFileInventory);
-    result.cutover = cutoverInvitations({ users, channels, automationIds: inspected.automationIds });
     result.externalActors = result.actors.filter(a => inspected.automationIds.has(a.sourceId)).map(a => a.sourceId).sort();
     result.counts = { channels: channels.length, actors: result.actors.length, messages: result.messages.length, threads: result.messages.filter(m => m.threadRoot).length, files: result.messages.reduce((n, m) => n + m.files.length, 0), bytes: result.messages.reduce((n, m) => n + m.files.reduce((n, f) => n + f.size, 0), 0), omissions: sortedOmissions.length };
     result.digest = importDigest({ ...result, messages: result.messages.map(m => ({ ...m, files: m.files.map(({ bytes, ...f }) => f) })) });
+    // Member names and addresses are pass metadata for the owner's preview, never part of the retained source packet.
+    result.cutover = cutoverInvitations({ users, channels, automationIds: inspected.automationIds });
     return result;
 }

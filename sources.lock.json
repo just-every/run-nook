@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "4ac2a255fe6c5360430957b767de82a7671d044780280c27c95c1cbfaf0b859f",
+      "sha256": "1d2dc97172ba0495c3878f66a00e444e20540aef56611af23e1f3155ca4f1cb7",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "3a7afdb35795bd26ca4b5605d8b1b31b966c5462468ae66e1d1b8c61aee7c21c",
+      "sha256": "c8679919bcf7e80cde5d0bfd1b0a115e6093079119d7abb776e65e5e0b3d64ea",
       "executable": false
     },
     "DEMO.md": {
@@ -4845,7 +4845,7 @@
       "executable": false
     },
     "src/imports/browser-runtime/packet.ts": {
-      "sha256": "d30db40fe99bbba029cd5b0559555b14b20b0ff21c4f56feeb4cf934b9088aaa",
+      "sha256": "1cac440410b9e2f0a26f361016b66fb4b24bc433ac4d35a18ba6b1600a516c6c",
       "executable": false
     },
     "src/imports/browser-runtime/pako.d.ts": {
@@ -4933,7 +4933,7 @@
       "executable": false
     },
     "src/imports/door-custody.ts": {
-      "sha256": "715053207436d78630d5a1f7c7ca00c514d24c4398104c26fbc4a835e0b26278",
+      "sha256": "2507af8745dc4a06e82f7a7629e788f75dcd46f8f7b8d4a22881e6fdb5f40c08",
       "executable": false
     },
     "src/imports/door-history.ts": {
@@ -4941,7 +4941,7 @@
       "executable": false
     },
     "src/imports/door-source.ts": {
-      "sha256": "119f70df7041af031fceea0b40d51a4e78b4963340958a465c69cb9685fa0cb7",
+      "sha256": "9ba6ed843d42b5fb1ccf9b406c3137dc9a90ceaf9adeee7f123db6ed36561ff3",
       "executable": false
     },
     "src/imports/door-undo.ts": {
@@ -4949,7 +4949,7 @@
       "executable": false
     },
     "src/imports/door.ts": {
-      "sha256": "8dff018dacf55c3697412281e3f58ca7db76692b77f18746d0ffb5055ecbf36b",
+      "sha256": "c279c71f06eaed247716a22a133d77faee7175192e0df33f8090ee0e6f42cc7b",
       "executable": false
     },
     "src/imports/DoorPlanPanel.tsx": {
@@ -4957,7 +4957,7 @@
       "executable": false
     },
     "src/imports/DoorWizard.tsx": {
-      "sha256": "bf7ed77d43a787eff9a7c9e73c6b6122a06c8652c735b479cd91c7bcd8de0b35",
+      "sha256": "2895f1040a593fea2e4a8618d5c672166390b36ac24dfeaa50b3a452239406a0",
       "executable": false
     },
     "src/imports/formats.d.mts": {
@@ -5141,7 +5141,7 @@
       "executable": false
     },
     "src/imports/slack-delta/capture.mjs": {
-      "sha256": "ee98e27829ccb060fe257f7ce77112b13afaa29db7fbb9123476f8e919f14f4d",
+      "sha256": "c07416dd021948753bdc59b0e9e724918af03656611c460b2c1f58bb32f3ff18",
       "executable": false
     },
     "src/imports/slack-delta/coverage.mjs": {
@@ -5197,7 +5197,7 @@
       "executable": false
     },
     "src/imports/slack.mjs": {
-      "sha256": "fe3f112dec717b695cdf88caa02f936891b1580bc70832bb1677f73242973e94",
+      "sha256": "1a7de9f8a7adf8742236171d524b80b97e86485ad6aeefbc197c40a39265badd",
       "executable": false
     },
     "src/imports/SlackHistory.tsx": {
@@ -6369,7 +6369,7 @@
       "executable": false
     },
     "tests/import-door-support.mjs": {
-      "sha256": "1aebd284a4123042bbac0a476f06189948c3c54d93d0f0d9af3aa0ea3c9650e8",
+      "sha256": "24add647609bc213c99f54aa3b9c4580ab5b55b3d0d89d34b3afe7e2cbeec9d1",
       "executable": false
     },
     "tests/import-fixture.mjs": {
@@ -6817,7 +6817,7 @@
       "executable": false
     },
     "tests/slack-import/delta-journey.mjs": {
-      "sha256": "10fef752987983ce0a474f74b4498ac3c779303dedb1d7f6069acf97fa9a610e",
+      "sha256": "77f335a29df64370b8ec3b8515d2e9f59e25009e403a236ab4a70612529eba65",
       "executable": false
     },
     "tests/slack-import/fixture.mjs": {

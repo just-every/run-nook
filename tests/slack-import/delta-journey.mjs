@@ -13,7 +13,7 @@ export async function deltaJourney(){
  try{
   const namespace='synthetic-nook-177',now=Math.floor(Date.now()/1000),ts=offset=>`${now+offset}.000001`;
   const range={from:new Date((now-7*86400)*1000).toISOString().slice(0,10),to:new Date(now*1000).toISOString().slice(0,10)};
-  const statedPlan=async(source,review)=>{const prepared=await door.prepare(source,review),uploadId=await door.upload(prepared.packet);return {...prepared.summary,...await door.request('plan',{uploadId,...(review.delta?{catchup:true}:{}),attestation:range},{namespace:review.namespace})}};
+  const statedPlan=async(source,review)=>{const prepared=await door.prepare(source,review),uploadId=await door.upload(prepared.packet);return {...prepared.summary,...await door.request('plan',{uploadId,...(review.delta?{catchup:true}:{}),attestation:range,cutover:prepared.summary.cutover},{namespace:review.namespace})}};
   const users=[{id:'U1',name:'Alex',deleted:false},{id:'U2',name:'Mara',deleted:false}],channel={id:'C1',name:'release'};
   const root={type:'message',user:'U1',ts:ts(-86400),text:'Friday release plan: deploy after checks.'};
   const retired={type:'message',user:'U2',ts:ts(-86000),text:'Friday fallback plan.'};
