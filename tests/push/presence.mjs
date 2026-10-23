@@ -45,13 +45,24 @@ async function handoff(c,{beat,phoneRow,phone,complete,count}){
 }
 
 export async function presence(c){
- const {call,member,room,send,read,register}=c;
+ const {call,member,room,send,read,register,rows,device}=c;
  const desktop=await desk(c),{phone,page,beat,phoneRow,complete,count}=desktop;
  const {direct,mention}=await handoff(c,desktop);
  // Input idleness, even with a visible fresh heartbeat, counts as inactive.
  await beat(true,Date.now()-601000);const idleRoom=await room('Idle desktop'),idle=await send(idleRoom,{mentions:[member.user.id]});await complete(idle);await read(idleRoom);
  // Account preference bypasses activity while preserving desktop delivery.
  await beat();await call('/api/notify','PATCH',{mobileWhenActive:'always'},member.cookie);const alwaysRoom=await room('Always mobile'),always=await send(alwaysRoom,{mentions:[member.user.id]});await complete(always);assert.equal((await phoneRow(always)).held_at,null);await read(alwaysRoom);
+ // One phone alone is set to always while the account holds phones: it alerts with the desktop active and a second phone stays held.
+ await call('/api/notify','PATCH',{mobileWhenActive:'inactive'},member.cookie);
+ const second=await register(member,'Second phone',undefined,'mobile');await beat();
+ await call('/api/devices','PATCH',{id:device.id,mobileWhenActive:'always'},member.cookie,400);await call('/api/devices','PATCH',{id:phone.id,mobileWhenActive:'sometimes'},member.cookie,400);await call('/api/devices','PATCH',{id:phone.id,mobileWhenActive:'always'},c.ownerCookie,404);
+ await call('/api/devices','PATCH',{id:phone.id,mobileWhenActive:'always'},member.cookie);
+ const soloRoom=await room('One phone always'),solo=await send(soloRoom,{mentions:[member.user.id]}),byDevice=async()=>Object.fromEntries((await rows(solo)).map(r=>[r.device,r]));
+ await until(async()=>{const r=await byDevice();return r[device.id]?.state==='sent'&&r[phone.id]?.state==='sent'},'the desktop and the always-send phone alert');
+ const solos=await byDevice();assert.equal(solos[phone.id].held_at,null);assert.ok(solos[second.id].held_at&&solos[second.id].state==='pending','a second phone stays held while the desktop is active');assert.equal(count(solo).length,2);
+ const listed=(await call('/api/devices','GET',undefined,member.cookie)).devices;assert.equal(listed.find(d=>d.id===phone.id).routing,'Always send: this device');assert.match(listed.find(d=>d.id===second.id).routing,/^Phone held: active on/);
+ assert.ok(!(await call('/api/devices','GET',undefined,c.ownerCookie)).devices.some(d=>d.id===phone.id),'an owner never reads another member’s devices');
+ await read(soloRoom);await call('/api/devices','PATCH',{id:phone.id,mobileWhenActive:'account'},member.cookie);await call('/api/devices','DELETE',{id:second.id},member.cookie);
  await call('/api/notify','PATCH',{mobileWhenActive:'inactive',push:{urgentQuiet:true}},member.cookie);await call('/api/settings','PATCH',{dndUntil:Date.now()+60000},member.cookie);await beat();
  const urgentRoom=await room('Urgent bypass'),urgent=await send(urgentRoom,{mentions:[member.user.id],urgent:true,urgentReason:'Please join the incident response'});await complete(urgent);assert.equal((await phoneRow(urgent)).held_at,null);await read(urgentRoom);await call('/api/settings','PATCH',{dndUntil:null},member.cookie);
  // Use a second real sign-in, revoke only it, and replay its last heartbeat.

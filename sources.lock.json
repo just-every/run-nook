@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "098f1a3537687565575ad631f671211139b092a07543f3e916a34387d626406a",
+      "sha256": "93beaf6edf147570e0d4824e757d8964d0f2df79ac595113d737b489e0f30846",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "d560f23d4f4e432b2150912671e04f7f58ffc64d907d326819a59fafc45cbc63",
+      "sha256": "5230707987b107930d43b45371a970d3eaadddb5dc975ce07272da1563d71c88",
       "executable": false
     },
     "DEMO.md": {
@@ -661,7 +661,7 @@
       "executable": false
     },
     "docs/attention.md": {
-      "sha256": "f49c2f050ee3b44ae1a277b098dba5eee3696306b940dddff5e1b05481cc8c11",
+      "sha256": "02659cd90dc079071626f0a5899de849c93eee69f3eb32a0af60ef3b9f038f0b",
       "executable": false
     },
     "docs/backups.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "e723df8e7cf0b12d57cb6888967fd40adda55e5271a11fff61142b38676e405f",
+      "sha256": "f257a5f5558543c6db7a90a80df607edd0a4555308962ccddd3e5097891181b7",
       "executable": false
     },
     "docs/conversations.md": {
@@ -797,19 +797,19 @@
       "executable": false
     },
     "evidence/device-routing/alerts-1440.png": {
-      "sha256": "e3e4ab1a8d7a2f2814141a417b780d07105a72436f93f31f6caa25eabf12d22c",
+      "sha256": "e541c19920f47061f9859e5f60c2e0fbe8b254a9366e30196cbfa409a1e9dc52",
       "executable": false
     },
     "evidence/device-routing/alerts-390.png": {
-      "sha256": "ac1da1c64ca0cf2106c98eb639db117e57a588a42febae117f2c54b051fc3bc9",
+      "sha256": "0f73b90cdc424e7c39a2f3a5333af2069970b99db9fd3fb531ff81282c9a4640",
       "executable": false
     },
     "evidence/device-routing/delivery-1440.png": {
-      "sha256": "4ec693f0af92079d797bd72989b1c91f960f6b89d5fc19efcc069ab61963b313",
+      "sha256": "0f3a7e629bce9fec8597614b2e8428d6c56b2e36f1aa8a809d1d2e9bb8d57571",
       "executable": false
     },
     "evidence/device-routing/delivery-390.png": {
-      "sha256": "91b712fac32f077dce595778447c95fa0ee1a3a63e0fe4f3fa8ffa84635fca4b",
+      "sha256": "784efeace211aa34449723fca318678e828929e65d70067c172b26eb1611a20e",
       "executable": false
     },
     "evidence/forwards/blocked-policy-1440.png": {
@@ -1134,6 +1134,22 @@
     },
     "evidence/slack-delta/attestation-result-390.png": {
       "sha256": "e6f3aa0a76ed84037288bbecc873541fb786175fcdf44c730992a1e0e62f7eab",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-preview-1440.png": {
+      "sha256": "75d978932de642411b0e64551ca74e1a6629102e2766e6f5ffed07371d8a8ec1",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-preview-390.png": {
+      "sha256": "d9f2db6e00007dc33ab84e201e5d9841e5c08bc6bf66e0cff83de6a4559748dc",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-saved-1440.png": {
+      "sha256": "44eeb6a1845b87241f45de293056350928302dc29a8956d6da45b9c6ef3a62c5",
+      "executable": false
+    },
+    "evidence/slack-delta/cutover-saved-390.png": {
+      "sha256": "601b0cdeb2d52772cb5bff19d0a63081b35534a2ec0b976ccb4695f057837081",
       "executable": false
     },
     "evidence/slack-delta/preview-1440.png": {
@@ -4876,6 +4892,22 @@
       "sha256": "f823530e0eaad4eb4da74f4da2eb68018363f240977a584a85bfc7a46ca48cfd",
       "executable": false
     },
+    "src/imports/cutover-choices.ts": {
+      "sha256": "7b173754c8b62beb8b56e87e9053124302d01263c9685937f43419af4779db64",
+      "executable": false
+    },
+    "src/imports/cutover-custody.ts": {
+      "sha256": "c92bc39aea41e38542157378b6138b4292fb1bc8ba85d3eb06901785eeb714f6",
+      "executable": false
+    },
+    "src/imports/cutover-export.ts": {
+      "sha256": "9b7006aa9ece5e291435da336b069f2f593331fcc379d1ed0308b62cfd165596",
+      "executable": false
+    },
+    "src/imports/CutoverInvitations.tsx": {
+      "sha256": "a389812646221d11d53d7ffa5bafd0f6bfa5d57ea7988f4b25a0c29cdcf6d6f0",
+      "executable": false
+    },
     "src/imports/delta-state.ts": {
       "sha256": "4f7b07145f3a1bf5c1aa367c5a06b8f49e3d6bebf4128ca5f7ff7c9a4e384b28",
       "executable": false
@@ -5082,6 +5114,14 @@
     },
     "src/imports/role-decisions.ts": {
       "sha256": "02cd711ae9f6940f7e22114a02d0b555915d2420088ce6cefdf54fb47a384b1b",
+      "executable": false
+    },
+    "src/imports/slack-cutover.d.mts": {
+      "sha256": "acf898d486858a4935e49a73b1ecdcbd1017c36cdde957908c6037cab70f4072",
+      "executable": false
+    },
+    "src/imports/slack-cutover.mjs": {
+      "sha256": "c017fa5fda6baf251c84fd67bf85c3a6cf40c50c55f76493917f0c9a8d2c0018",
       "executable": false
     },
     "src/imports/slack-delta/baseline.mjs": {
@@ -5593,7 +5633,7 @@
       "executable": false
     },
     "src/push/activity.ts": {
-      "sha256": "d9748840b7fa9730e6f7555f31bc0f001ff23ef1505dab9b3f0072af1951bae3",
+      "sha256": "852e89b8065059839bf1f9db1f8e5545c0c0667f8f4bce6914db0e0c841213b4",
       "executable": false
     },
     "src/push/archive.mjs": {
@@ -5609,11 +5649,11 @@
       "executable": false
     },
     "src/push/DeviceDelivery.tsx": {
-      "sha256": "8abdd561ba91930819cc9faf9d0bd0f7a8b4140496b104d233e0c0aa0491b881",
+      "sha256": "e20ae709e133bd8050a15885636cc206e135e63b05b4eaa04708ac06f9c9297e",
       "executable": false
     },
     "src/push/devices.ts": {
-      "sha256": "158053664767a44e3b5c25f08b7c9e7dc15c45d74c00f777630a649a0f59947d",
+      "sha256": "7b9e5e8cd6add9130b8a00f1f27dc909841287b5d0c222e1e708fc39d2b32a0a",
       "executable": false
     },
     "src/push/mobile-preferences.ts": {
@@ -5633,7 +5673,7 @@
       "executable": false
     },
     "src/push/queue.ts": {
-      "sha256": "af3f1f061daf05e4b2c8dcb8f2efdbf9467f31c5182c7fd9b9ebc381d99883f5",
+      "sha256": "4da0f03be7d055bcca2aa0b78fc677d3b1f8b6b319fad130492abd5dec296bbe",
       "executable": false
     },
     "src/push/run.ts": {
@@ -5825,7 +5865,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "4eb5e0578ffb94afaa209535b96af65a92ba81860e235d55d8dd2103cd6f3b5c",
+      "sha256": "40158f2e6f6dba94d2b1fc295977210c1586d6cf4ebec8350c5fd2ae2d35e469",
       "executable": false
     },
     "src/site/pages.tsx": {
@@ -6581,7 +6621,7 @@
       "executable": false
     },
     "tests/push/delivery-browser.mjs": {
-      "sha256": "ac388a1134889cf5047e2fa577ce4d181f3d5490abd7637f953b78170eda4f3e",
+      "sha256": "fbadbb40e06d743df22981e8e05a2b2e26a596a8fb59b7823f2d5e0298888269",
       "executable": false
     },
     "tests/push/erasure.mjs": {
@@ -6605,7 +6645,7 @@
       "executable": false
     },
     "tests/push/presence.mjs": {
-      "sha256": "1f9c51c239385902864a47e7e6712726d33eefb410aa75f36c40a2166e716e4d",
+      "sha256": "ff85a5e7b71b4c18c2fedbd7d6627fa08d00099eeaace66e140b276bff8dfcdf",
       "executable": false
     },
     "tests/push/quiet.mjs": {
@@ -6738,6 +6778,10 @@
     },
     "tests/slack-import/archive-roundtrip.mjs": {
       "sha256": "c3d2181e58845ec378154400053536b5eec7cc2a7c596f906c2bc7c1df1d337e",
+      "executable": false
+    },
+    "tests/slack-import/cutover.mjs": {
+      "sha256": "663248f1bc00e97e44867b966bc06315bcaeacfa98e32f0a19307016087d7fd0",
       "executable": false
     },
     "tests/slack-import/delta-custody.mjs": {
