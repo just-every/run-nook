@@ -15,6 +15,7 @@ import { importTargets } from './target';
 import { ownerAction } from './door-history';
 import { guardUndo } from './door-undo';
 import {validateDeltaBaseline} from './delta-state';
+import { attestedRange } from './attestation.mjs';
 import type { D1Sql, D1TargetAdapter } from './kit';
 
 const headers = {'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'};
@@ -50,9 +51,13 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
       if (result !== null) return Response.json(result, {headers});
     }
     const users = await people(env.DB), source = importSource(admitted.namespace, admitted.principal, users)!;
-    let predicate = admitted.predicate, link: any, capture;
+    let predicate = admitted.predicate, link: any, capture, attestation;
     if (action === 'plan') {
       cleanup = () => withdrawUnplanned(env, predicate, admitted.namespace, input.uploadId);
+      if (Object.hasOwn(input, 'attestation')) {
+        if (!admitted.c || listed.kind !== 'slack') throw new Fault(403, 'Only the workspace owner can attest a Slack ZIP date range');
+        try { attestation = attestedRange(input.attestation); } catch (error) { throw new Fault(400, (error as Error).message); }
+      }
       capture = await uploadedCapture(env, admitted.namespace, input.uploadId, admitted.principal, users);
       if(capture.capture.delta){if(!admitted.c||input.catchup!==true)throw new Fault(403,'An owner-reviewed delta pass is required');await validateDeltaBaseline(admitted.c,capture.capture);}
       await refuseLegacyDuplicate(env, capture);
@@ -83,7 +88,15 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
     const handler = admitted.claim
       ? createImportDoorHandler({...runtime, installationId: doorKey, claim: admitted.claim, source: name => importSource(name, admitted.principal, users)})
       : createImportOperatorHandler({...runtime, ...source, installationId: doorKey, appOrigin: authBindings(env).AUTH_ORIGIN, ownerEmail: admitted.email, namespace: admitted.namespace, authorize: async () => predicate});
-    const response = await handler(request);
+    // Attestation is Nook-owned pass metadata. Base still receives its exact
+    // plan schema; every other unknown request field remains a refusal.
+    let handledRequest = request;
+    if (action === 'plan' && Object.hasOwn(input, 'attestation')) {
+      const { attestation: _range, ...planInput } = input, planHeaders = new Headers(request.headers);
+      planHeaders.delete('content-length');
+      handledRequest = new Request(request, { headers: planHeaders, body: JSON.stringify(planInput) });
+    }
+    const response = await handler(handledRequest);
     if (!response) return null;
     let result = await response.json() as any;
     if (!response.ok) { await cleanup?.(); return Response.json({...result, errorCode: result.error, error: vendor + ': ' + result.error}, {status: /fingerprint/.test(result.error) ? 409 : response.status, headers}); }
@@ -91,7 +104,7 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
       cleanup = () => withdrawUnplanned(env, predicate, admitted.namespace, result.uploadId);
       await uploadedCapture(env, admitted.namespace, result.uploadId, admitted.principal, users);
     }
-    if (action === 'plan') result = await bindPlan(env, predicate, capture!, result, input.uploadId, admitted.principal);
+    if (action === 'plan') result = await bindPlan(env, predicate, capture!, result, input.uploadId, admitted.principal, attestation);
     if (link && ['apply','undo'].includes(action)) await publishResult(env, predicate, link, result);
     if (admitted.c && (result.state === 'cancelled' || ['undone','rolled_back'].includes(result.job?.state))) {await cleanupImportObjects(admitted.c);await admitted.c.hint();}
     if (link && ['status','apply'].includes(action)) result.destinations = (await env.DB.prepare('SELECT source_id AS sourceId,conversation AS id FROM nook_import_channels WHERE job=? ORDER BY source_id').bind(link.domain_job).all()).results;

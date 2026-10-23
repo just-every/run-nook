@@ -1,4 +1,5 @@
 import { DeltaReport } from './DeltaReport';
+import { AttestationReport } from './AttestationReport';
 import type { ImportHistory } from './door-client';
 
 type Props = {
@@ -18,6 +19,7 @@ export function ImportJobs({ jobs, busy, onAction, onRefresh, onCleanup }: Props
                 <p>{state}{total !== undefined && checkpoint !== undefined ? ` · ${checkpoint} / ${total} source entries` : ''}</p>
                 {total !== undefined && checkpoint !== undefined && <progress value={checkpoint} max={Math.max(1, total)} aria-label="Imported source entries" />}
                 {item.summary?.delta && <DeltaReport delta={item.summary.delta} />}
+                {item.summary?.attestation && <AttestationReport attestation={item.summary.attestation} />}
                 {item.summary?.delta && reversed.includes(state) && <p>Delta pass {state === 'undone' ? 'undone' : 'rolled back'}. Its reversible imported changes were withdrawn; native work remains.</p>}
                 {item.caption && <p className="import-approval">{item.caption}</p>}
                 {item.legacy && <p>Legacy import · guarded Undo only. To import new history, select a local export and review a new dry run.</p>}

@@ -4,6 +4,8 @@ import { BusinessImports } from './BusinessImports';
 import { DoorPlanPanel, ReconciliationPanel } from './DoorPlanPanel';
 import { ImportJobs } from './ImportJobs';
 import { DeltaReport } from './DeltaReport';
+import { AttestationReport } from './AttestationReport';
+import { attestedRange, recordAttestation } from './attestation.mjs';
 import { ReviewPanel } from './ReviewPanel';
 import { SourceInstructions } from './SourceInstructions';
 import { SourceMapping, mappingReady } from './SourceMapping';
@@ -22,6 +24,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
     const [busy, setBusy] = useState(''), [status, setStatus] = useState(''), [error, setError] = useState<Error | null>(null);
     const [report, setReport] = useState<any>(null), [currentJob, setCurrentJob] = useState<DoorJob | null>(null), [catchup, setCatchup] = useState(false);
     const [overlapDays, setOverlapDays] = useState(7), [deltaBaseline, setDeltaBaseline] = useState<any>(null);
+    const [range, setRange] = useState({from: '', to: ''});
     const [live, setLive] = useState(false), [now, setNow] = useState(Date.now()), [stale, setStale] = useState(false);
     const retained = useRef<{ uploadId: string; planId?: string; namespace: string; started?: boolean } | null>(null);
     useEffect(() => { setLive(true); const timer = setInterval(() => setNow(Date.now()), 15000); return () => clearInterval(timer); }, []);
@@ -48,7 +51,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
     };
     const inspect = (file: File) => work(`Reading local ${vendor} export`, async () => {
         await withdraw();
-        setSource(null); change(emptyReview(kind)); setStatus(''); setCatchup(false); setOverlapDays(7);
+        setSource(null); change(emptyReview(kind)); setStatus(''); setCatchup(false); setOverlapDays(7); setRange({from: '', to: ''});
         const next = await inspectLocal(file, kind, initial.users);
         setSource({ ...next, owner: initial.owner, users: initial.users });
         setReview({ ...emptyReview(kind), actors: kind === 'slack' ? {} : Object.fromEntries(next.actors.map((actor: any) => [actor.sourceId, null])) });
@@ -64,14 +67,16 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
         return { ...next, delta };
     };
     const preview = () => work('Checking local historical import', async () => {
+        const stated = attestedRange(range.from || range.to ? range : undefined);
         const result = await prepareLocal(source.handle, await reviewedSource({ ...review, acceptedOmissions: [] }), initial.owner, initial.users);
-        setSummary(result.summary); setStale(false); setPlan(null); setAccepted(false); setCurrentJob(null);
+        setSummary({...result.summary, ...(stated ? {attestation: recordAttestation(stated, {id: initial.owner, name: initial.users.find(user => user.id === initial.owner).name}, Date.now())} : {})}); setStale(false); setPlan(null); setAccepted(false); setCurrentJob(null);
         setStatus(result.summary.blocked ? 'Import blocked. Review the source issues below.' : 'Review the historical import and its exact omissions before creating a dry run.');
     });
     const createPlan = () => work('Creating reviewed dry run', async () => {
+        const stated = attestedRange(range.from || range.to ? range : undefined);
         const nextReview = { ...review, acceptedOmissions: accepted ? [summary.omissionDigest] : [] };
         const result = await prepareLocal(source.handle, await reviewedSource(nextReview), initial.owner, initial.users);
-        setSummary(result.summary);
+        setSummary({...result.summary, ...(stated ? {attestation: recordAttestation(stated, {id: initial.owner, name: initial.users.find(user => user.id === initial.owner).name}, Date.now())} : {})});
         if (result.summary.blocked || result.summary.needsOmissionReview) { setStatus('Review and accept the exact omissions before creating a dry run.'); return; }
         await withdraw();
         const namespace = review.namespace;
@@ -79,7 +84,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
             retained.current = { uploadId: id, namespace };
             setBusy(`Uploading reviewed history: ${done} of ${total} chunks`);
         }, namespace);
-        const next = await doorRequest(kind, 'plan', { uploadId, ...(catchup ? { catchup: true } : {}) }, namespace);
+        const next = await doorRequest(kind, 'plan', { uploadId, ...(catchup ? { catchup: true } : {}), ...(stated ? {attestation: stated} : {}) }, namespace);
         retained.current = { uploadId, namespace, planId: next.planId };
         setPlan(next); setCurrentJob(null); setNow(Date.now());
         setStatus('Dry run ready. Review its counts, rejections and differences before applying.');
@@ -126,9 +131,14 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
         {source && <form onSubmit={event => { event.preventDefault(); void preview(); }}><h2>2. {kind === 'slack' ? 'Choose destinations and identities' : 'Map identities and review audiences'}</h2>
             <button type="button" disabled={!!busy} onClick={() => void work('Discarding reviewed export', async () => { await withdraw(); setSource(null); change(emptyReview(kind)); setStatus('Local export and unused dry run discarded.'); })}>Discard local export</button>
             <SourceMapping kind={kind} source={source} review={review} onChange={change} busy={!!busy} />
+            {kind === 'slack' && <fieldset disabled={!!busy}><legend>attested, not verified</legend>
+                <label>Attested from (UTC)<input type="date" min="1970-01-01" max={new Date(now).toISOString().slice(0,10)} value={range.from} onChange={event => {setRange({...range, from: event.target.value}); change(review);}} /></label>
+                <label>Attested to (UTC)<input type="date" min="1970-01-01" max={new Date(now).toISOString().slice(0,10)} value={range.to} onChange={event => {setRange({...range, to: event.target.value}); change(review);}} /></label>
+            </fieldset>}
             {kind === 'slack' && <label className="import-check"><input type="checkbox" checked={catchup} disabled={!!busy} onChange={event => { setCatchup(event.target.checked); change(review); }} />Delta pass over existing history</label>}
             {kind === 'slack' && catchup && <label>Overlap in days<input type="number" min={1} max={12000000} step={1} required value={Number.isNaN(overlapDays) ? '' : overlapDays} disabled={!!busy} onChange={event => { setOverlapDays(event.target.valueAsNumber); change(review); }} /><small>Recheck an overlap up to the full source history. Changed source records are reviewed before applying.</small></label>}
             {summary?.delta && <DeltaReport delta={summary.delta} />}
+            {summary?.attestation && <AttestationReport attestation={summary.attestation} />}
             {summary?.delta && deltaBaseline && <p>The preview is bound to the current imported baseline. Creating a dry run checks it again.</p>}
             {summary && <fieldset disabled={!!busy}><ReviewPanel kind={kind} preview={summary} accepted={accepted} onAccept={(value: boolean) => { setAccepted(value); setPlan(null); }} withoutMissingFiles={review.importWithoutMissingFiles === true} onMissingFiles={chooseMissingFiles} /></fieldset>}
             <button type="submit" className={summary ? '' : 'import-primary'} disabled={!!busy || !mappingReady(kind, source, review)}>Preview exact import</button>

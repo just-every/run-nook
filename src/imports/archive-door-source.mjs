@@ -1,12 +1,14 @@
 import {canonicalJson,sha256} from './kit.ts';
 import {kitSource} from './source.ts';
 import {decodeRoleCapture,encodeRoleEffect} from './role-decisions.ts';
+import {validateStoredAttestation} from './attestation.mjs';
 const check=(ok,code)=>{if(!ok)throw Error(code)};
 const equal=(a,b)=>canonicalJson(a)===canonicalJson(b);
 
 /** Reproduce the source normalizer from the retained packet. Audience liveness
  * belongs to import time; offline archives preserve historical membership. */
 export function validateDoorSource(binding,plan){
+ validateStoredAttestation(JSON.parse(binding.summary_json).attestation,binding);
  if(plan.erasure){
   check(plan.erasure.originalPolicy==='withdraw-all-job-artifacts'&&plan.source.artifacts.every(a=>a.original?.status==='unavailable'&&a.original.reason==='unavailable-after-erasure'&&!a.original.base64),'door_erased_original_retained');
   for(const entry of plan.entries)if(entry.erased)check(entry.effects.length===0&&equal(entry.source.payload,{erased:true})&&entry.source.sourceId==='erased:'+entry.identity,'door_erased_source_changed');

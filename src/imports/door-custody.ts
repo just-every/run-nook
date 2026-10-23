@@ -5,6 +5,8 @@ import { canonicalJson, sha256, type D1Sql } from './kit';
 import { sql } from '../base/modules/import-kit/src/door/store';
 import { publicLocalSummary } from './browser-runtime/public';
 import { fail } from '../family/team-chat/domain';
+import { recordAttestation } from './attestation.mjs';
+import { publishAttestation } from './attestation-custody';
 
 export const previewLifetime = 30 * 60 * 1000;
 export async function uploadedCapture(env: DoorBindings, namespace: string, uploadId: string, owner: string, users: any[]) {
@@ -25,10 +27,18 @@ export async function refuseLegacyDuplicate(env: DoorBindings, value: DoorCaptur
     UNION ALL SELECT 1 FROM nook_import_records WHERE key IN (SELECT value FROM json_each(?)) AND job<>? LIMIT 1`).bind(value.capture.archiveDigest, JSON.stringify(value.effects.filter(e => e.kind === 'message').map(e => (e.payload as any).key)), value.domainJob).first();
   if (old) fail(409, 'already imported');
 }
-export async function bindPlan(env: DoorBindings, predicate: D1Sql, value: DoorCapture, result: any, uploadId: string, owner: string) {
+export async function bindPlan(env: DoorBindings, predicate: D1Sql, value: DoorCapture, result: any, uploadId: string, owner: string, range?: {from: string; to: string}) {
   const now = Date.now();
-  await fencedBatch(env, predicate, [sql(`INSERT OR IGNORE INTO nook_door_imports(plan_id,domain_job,owner,source_type,namespace,capture_digest,archive_digest,created,expires_at,authority_json,summary_json,upload_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, result.planId, value.domainJob, owner, value.packet.sourceType, value.packet.namespace, value.capture.digest, value.capture.archiveDigest, now, now + previewLifetime, canonicalJson(value.authority), JSON.stringify(publicLocalSummary(value.capture)), uploadId)]);
-  const binding = await env.DB.prepare('SELECT expires_at FROM nook_door_imports WHERE plan_id=?').bind(result.planId).first<{expires_at: number}>();
+  const summary: any = publicLocalSummary(value.capture);
+  if (range) {
+    const person = await env.DB.prepare('SELECT display_name AS name FROM oa_operators WHERE id=?').bind(owner).first<{name: string}>();
+    if (!person) fail(409, 'Workspace owner changed; review the import again');
+    summary.attestation = recordAttestation(range, {id: owner, name: person!.name}, now);
+  }
+  await fencedBatch(env, predicate, [sql(`INSERT OR IGNORE INTO nook_door_imports(plan_id,domain_job,owner,source_type,namespace,capture_digest,archive_digest,created,expires_at,authority_json,summary_json,upload_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, result.planId, value.domainJob, owner, value.packet.sourceType, value.packet.namespace, value.capture.digest, value.capture.archiveDigest, now, now + previewLifetime, canonicalJson(value.authority), JSON.stringify(summary), uploadId)]);
+  const binding = await env.DB.prepare('SELECT expires_at,summary_json FROM nook_door_imports WHERE plan_id=?').bind(result.planId).first<{expires_at: number; summary_json: string}>();
+  const saved = JSON.parse(binding!.summary_json).attestation;
+  if (!!saved !== !!range || range && (saved.from !== range.from || saved.to !== range.to)) fail(409, 'The attested date range changed; create a new reviewed import');
   return {...result, expiresAt: new Date(binding!.expires_at).toISOString()};
 }
 export function reviewedAudience(link: any): D1Sql {
@@ -113,4 +123,5 @@ export async function publishResult(env: DoorBindings, predicate: D1Sql, link: a
       sql("UPDATE nook_door_imports SET summary_json=json_set(summary_json,'$.delta.undonePublished',1) WHERE plan_id=?",link.plan_id),
     ]);
   }
+  await publishAttestation(env, predicate, link, result);
 }
