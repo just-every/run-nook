@@ -1,0 +1,11 @@
+# Workspace reports
+
+Open **You → Workspace reports**. Administration is available only to current full-member installation owners and admins. It shows current account and app inventories, anonymous public/private conversation buckets, native message activity in a chosen range, stored attachment metadata, retained notification delivery classes, import-job states and registered push-device counts. A small nonzero bucket is shown as “fewer than 5”. There are no per-person activity scores.
+
+Each section states its denominator, computation time, newest recorded source timestamp and missing data. The viewer’s profile time zone is used for daily activity; without a profile the installation default is UTC. Range inputs explicitly use UTC. Account inventories and channel state are current snapshots, not reconstructed historical inventories. Original channel creation times are not recorded, so new-channel growth is unavailable. Imported message volume is not included. Missing retention, workflow, client-health and connector-sync implementations are named; a storage read error marks only its section incomplete.
+
+Commitments are available to current full-member channel managers and owners/admins, over only the conversations they can currently read. Other members and guests get an empty report with the reason. Accepted commitments, overdue accepted commitments and recorded decisions are listed without copying their source message bodies. Blocked and separately resolved states do not exist in the outcome model, so the report explicitly discloses those gaps. An undated outcome remains visible as undated. Removing conversation access removes its rows on the next request.
+
+**Download CSV** exports the displayed rows and includes the range, time zone and filters. A changed row set requires refreshing the report. Spreadsheet formula prefixes are neutralized. Each successful export records one body-free administrative audit fact. Treat downloaded reports as private copies in your custody; later membership removal cannot recall them.
+
+Capacity at 1,000 members / 5,000 channels, historical growth, blocked/resolved outcome states, retention jobs, failed workflows, client-health detail, connector synchronization and scheduled report delivery remain unproven or unavailable. Provider acceptance is not proof that a person saw a notification.

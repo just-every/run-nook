@@ -90,6 +90,7 @@ try {
  const assets=await readdir(resolve(root,'dist/server/assets')); let fnId
  for(const file of assets.filter(x=>x.startsWith('loaders-')&&x.endsWith('.js'))) { const source=await readFile(resolve(root,'dist/server/assets',file),'utf8'); fnId=source.match(/id: "([a-f0-9]{64})",\s*name: "loadWorkspace"/)?.[1] ?? fnId }
  let broadcastFixture
+ if(['core-api-product','core-browser'].includes(suite)){const harness={post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,registered,sql,check,origin:()=>origin};const fixture=await(await import('./reports.mjs')).reportsJourney(harness);if(suite==='core-browser'&&!withoutBrowser)await check('Report filters, current source drill-through and CSV at 1440 and 390',()=>import('./reports-browser.mjs').then(m=>m.reportsBrowser({origin,owner,fixture})))}
  assert.ok(fnId,'private generated transport must exist in emitted artifact')
  if(['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite)){
  const post=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status});

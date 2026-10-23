@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "39dffbd714644bd2e6153a97b87c902d18e7378eab63b53377212439f0a9a318",
+      "sha256": "da76400f9dbb1888b5cf0d3b2d74db4668ac4b20f32cecdd99eaf9e8220c98ad",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "ba3713d07b4e408bc6b02ff535209b5c49ad38ab396c5371dcb274a6c0e65b52",
+      "sha256": "9c29ea945f11199792a1db129cca95698e301b61724e5fbc53ac9d76faab976f",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "e723df8e7cf0b12d57cb6888967fd40adda55e5271a11fff61142b38676e405f",
+      "sha256": "df5dbb148a349beff01f817bd5f5b05e31ee3d76591a1e335ebc19a75efcfbc3",
       "executable": false
     },
     "docs/conversations.md": {
@@ -717,7 +717,7 @@
       "executable": false
     },
     "docs/site.json": {
-      "sha256": "a99b9928596b80b671328181ac160b570ef329954cb60e91f1dd483b6675f857",
+      "sha256": "1cd8c324fa52b303514a749fc66e0952c8b51761c4250570fd1bc08cbce4d8c8",
       "executable": false
     },
     "docs/updating.md": {
@@ -4217,7 +4217,7 @@
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "d0461ae617f57f740657dec9ccd8b64444b0345b9a4319eb1c4798035aef96f0",
+      "sha256": "0fff7b0abbd3e9a5969e26ce04fb4dccc20193d7e246fd2850152e1d7948cc2f",
       "executable": false
     },
     "src/client.tsx": {
@@ -5749,7 +5749,7 @@
       "executable": false
     },
     "src/routeTree.gen.ts": {
-      "sha256": "2ce715fe0b29bee220f9c2b3581e432e44fdf2dda59bb15ce4fa6f74b2e6e906",
+      "sha256": "507646180a20c6ea1a0285e231db2e1f58ea97740acbf27194033e3be1547c1c",
       "executable": false
     },
     "src/scheduled/archive.mjs": {
@@ -6085,7 +6085,7 @@
       "executable": false
     },
     "src/team/routes.server.ts": {
-      "sha256": "75b940f8719003bb15f69ced119f05652426dca36a00b97e2495f69fe24ca401",
+      "sha256": "172f56979f0bedc7f5f0ac401c11cb33bed72828eb04913e84786426004e517c",
       "executable": false
     },
     "src/team/saved-archive.mjs": {
@@ -6677,7 +6677,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "6d2e70635057e7e7607630868a40a79b72550ff575dd9fa2f45d92939191f134",
+      "sha256": "5f82323df251fbd4e025ed65d6eeaa64344973193995b94f8eabd90581843b88",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {

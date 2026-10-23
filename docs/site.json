@@ -33,6 +33,7 @@
     {
       "title": "Use Nook",
       "pages": [
+        {"slug":"reports","source":"docs/reports.md","label":"Workspace reports"},
         {
           "slug": "attention",
           "source": "docs/attention.md",
