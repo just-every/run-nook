@@ -489,7 +489,7 @@ Schema migration 0010 appends normalized tables without changing 0001–0003. Ex
 
 ## Status
 
-Judged from the code and tests at commit `4ae7b83fa691ea32c4c8fb14ec8b6a548601b9d3` (23 October 2026).
+Judged from the code and tests at commit `f42de0d7db6578f8b396d7acf786144e1ff7484e` (23 October 2026).
 
 Coverage is 34 done, 22 partial and 35 missing of 91 (Published 15/2/0 of 17; Target and push further 19/20/35 of 74). NOOK-035 and NOOK-067 are done for their proved web remainders, including every formerly unasserted clause-sentence part. NOOK-024 and NOOK-077 remain partial with their stated Gaps; NOOK-081, NOOK-083 and NOOK-085 through NOOK-088 remain missing. NOOK-084 implements member-approved digests and remains partial for its shared-channel and provider Gaps. NOOK-082 implements responsive-web scheduled forwarding and remains partial for its native-client Gap. NOOK-089 implements its three public-door parts and is done under the ruled app-identity default. NOOK-073 remains partial for per-device web choice and the email-entry export sentence; NOOK-015 remains partial for real provider/device acceptance.
 
