@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "437ed32ee830943ca3ea51cbc103a76008bf8471a8970341e507b492bb20bf9b",
+      "sha256": "284a810eae92577fae3a5b5f2d74e5a3ae2032e8f86d58dee2d7410993cd6e61",
       "executable": false
     },
     "DEMO.md": {
@@ -6717,7 +6717,7 @@
       "executable": false
     },
     "tests/push/erasure.mjs": {
-      "sha256": "20ab322ace8795332ce7e1e97fc310c24575928227f0b3f8fd4e9ac465b55161",
+      "sha256": "006f96061fedb5024bcd708760f5268e69bf47f3c80e9a85d311a39c34bd63a7",
       "executable": false
     },
     "tests/push/failures.mjs": {
