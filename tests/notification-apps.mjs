@@ -96,8 +96,11 @@ test('NOOK-080 [NOOK-089] channel-scoped notification approvals, threads, receip
   }
   // A fresh channel makes the burst bound independent of earlier test work.
   const rateRoom=await call('/api/conversations','POST',{name:'Rate-limited reports',kind:'private'},ownerCookie),rateA=await approve('Slate rate',rateRoom),rateB=await approve('Uptime rate',rateRoom);
-  const started=performance.now(),rateResults=[];
-  for(let n=0;n<21;n++)rateResults.push(await send(n%2?rateA.token:rateB.token,rateRoom.id,'POST',{body:'Report '+n},'report-'+n));
+  // Sequential HTTP round trips may exceed a second without producing a burst.
+  // Send the first 20 concurrently, then the 21st; keep the real-time bound and exact quota assertions.
+  const report=n=>send(n%2?rateA.token:rateB.token,rateRoom.id,'POST',{body:'Report '+n},'report-'+n);
+  const started=performance.now(),rateResults=await Promise.all(Array.from({length:20},(_,n)=>report(n)));
+  rateResults.push(await report(20));
   assert.ok(performance.now()-started<1000,'burst proved within one real second');
   for(const response of rateResults.slice(0,20))assert.equal(response.status,200,await response.clone().text());assert.equal(rateResults[20].status,429,await rateResults[20].clone().text());assert.equal(Number(rateResults[20].headers.get('retry-after')),1);
   assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_messages WHERE conversation=?').bind(rateRoom.id).first()).n,20);
