@@ -5,16 +5,16 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url),{build}=createRequire(require.resolve('wrangler'))('esbuild');
-export async function scheduledForwardJourney({app,member,source,destination,dm}){
+export async function scheduledForwardJourney({app,member,source,destination,dm,groupDm}){
  const {call,ownerCookie,db}=app,temp=await mkdtemp(join(tmpdir(),'nook-forward-clock-'));
  try{
   const output=join(temp,'runner.mjs');await build({stdin:{contents:"export {drainSchedules} from './src/scheduled/runner'",resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',outfile:output,logLevel:'silent'});
   const {drainSchedules}=await import(pathToFileURL(output)),env=await app.mf.getBindings();
   const at=new Date(Date.now()+3600000).toISOString().slice(0,16),due=Date.parse(at+'Z');
-  const schedule=async(note='Review this at the handoff',sourceId=source.id)=>{
-   const input={source:sourceId,mode:'show',note,destinations:[{conversation:destination.id},{conversation:dm.id}]};
-   const preview=await call('/api/forwards/preview','POST',input,member.cookie);
-   return call('/api/forwards','POST',{...input,confirmation:preview.confirmation,intent:crypto.randomUUID(),schedule:{localAt:at,zone:'UTC',recurrence:'none',endDate:null}},member.cookie);
+  const schedule=async(note='Review this at the handoff',sourceId=source.id,destinations=[{conversation:destination.id},{conversation:dm.id}],cookie=member.cookie)=>{
+   const input={source:sourceId,mode:'show',note,destinations};
+   const preview=await call('/api/forwards/preview','POST',input,cookie);
+   return call('/api/forwards','POST',{...input,confirmation:preview.confirmation,intent:crypto.randomUUID(),schedule:{localAt:at,zone:'UTC',recurrence:'none',endDate:null}},cookie);
   };
   const list=async()=> (await call('/api/scheduled','GET',undefined,member.cookie)).items;
   const one=await schedule(),pending=(await list()).find(s=>s.id===one.id);assert.equal(pending.payload.forward.destinations.length,2);assert.equal(pending.next_due,due);
@@ -28,6 +28,11 @@ export async function scheduledForwardJourney({app,member,source,destination,dm}
    assert.equal((await call('/api/forwards/'+copies[0].id+'/source','GET',undefined,member.cookie)).id,source.id);
   }
   assert.equal((await call('/api/conversations/'+destination.id+'/messages','GET',undefined,member.cookie)).length,before+1);
+  const root=await call('/api/conversations/'+destination.id+'/messages','POST',{body:'Scheduled thread context',intent:crypto.randomUUID()},member.cookie);
+  const threaded=await schedule('Thread and group handoff',source.id,[{conversation:destination.id,thread:root.id},{conversation:groupDm.id}]);
+  await drainSchedules(env,due);assert.equal((await list()).find(s=>s.id===threaded.id).state,'complete');
+  assert.ok((await call('/api/conversations/'+destination.id+'/messages','GET',undefined,member.cookie)).some(m=>m.parent===root.id&&m.body==='Thread and group handoff'));
+  assert.equal((await call('/api/conversations/'+groupDm.id+'/messages','GET',undefined,member.cookie)).filter(m=>m.body==='Thread and group handoff').length,1);
   const partial=await schedule('A destination may be restricted before delivery');
   let details=await call('/api/channels/'+destination.id+'/details','GET',undefined,ownerCookie);
   await call('/api/channels/'+destination.id+'/posting','PATCH',{version:details.version,level:'admins',replies:'same',people:[]},ownerCookie);
@@ -45,6 +50,10 @@ export async function scheduledForwardJourney({app,member,source,destination,dm}
   await db.prepare('UPDATE nook_access SET generation=generation+1 WHERE user=?').bind(member.user.id).run();
   await drainSchedules(env,due);const changed=(await list()).find(s=>s.id===generation.id);assert.equal(changed.state,'failed');assert.match(changed.reason,/access generation/i);
   for(const room of [destination,dm])assert.ok(!(await call('/api/conversations/'+room.id+'/messages','GET',undefined,member.cookie)).some(m=>m.body==='An older access grant must never send'));
+  const approval=await app.signIn((await call('/api/notify','GET',undefined,member.cookie)).address);
+  const revoked=await schedule('This approval will be revoked',source.id,undefined,approval.cookie);await call('/api/logout','POST',{},approval.cookie);await drainSchedules(env,due);
+  const expired=(await list()).find(s=>s.id===revoked.id);assert.equal(expired.state,'failed');assert.match(expired.reason,/approving session/i);
+  for(const room of [destination,dm])assert.ok(!(await call('/api/conversations/'+room.id+'/messages','GET',undefined,member.cookie)).some(m=>m.body==='This approval will be revoked'));
   const held=await schedule('Review this after restore');return {id:held.id};
  }finally{await rm(temp,{recursive:true,force:true})}
 }

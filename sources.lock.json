@@ -6297,7 +6297,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "674f2e4ee7fa7603c6d16a55ce9bfdbb8929a26ec64486a6677e1bcd72ac1fbe",
+      "sha256": "23c9df370c5e96ed474941b4e7275a82dab58e5db0ccf6f376f54ef88137285d",
       "executable": false
     },
     "tests/notification-extension.mjs": {
@@ -6585,7 +6585,7 @@
       "executable": false
     },
     "tests/scheduled-forwards.mjs": {
-      "sha256": "d56739d278eedc0ca28593be011a4d07e2fdbd7761d56f00d26680ab01c78f77",
+      "sha256": "2a094ba115134ded2f496fef08dfcbe8b521ac66e03c481fec3d383027390e41",
       "executable": false
     },
     "tests/scheduled.mjs": {
