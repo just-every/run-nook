@@ -6189,7 +6189,7 @@
       "executable": false
     },
     "tests/digests.mjs": {
-      "sha256": "9218ef8f12574c46e1e8b88267a1c39d0408ea65c7e59076ba78309df1b72eb1",
+      "sha256": "00fa7b3d3b85d9c3291bdbc9a5a9d81ff4452b40684e172a4fe986a4fe8d9225",
       "executable": false
     },
     "tests/docs-site.test.mjs": {
