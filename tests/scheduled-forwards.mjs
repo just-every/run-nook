@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url),{build}=createRequire(require.resolve('wrangler'))('esbuild');
-export async function scheduledForwardJourney({app,member,source,destination,dm,groupDm}){
+export async function scheduledForwardJourney({app,member,source,publicSource,destination,dm,groupDm}){
  const {call,ownerCookie,db}=app,temp=await mkdtemp(join(tmpdir(),'nook-forward-clock-'));
  try{
   const output=join(temp,'runner.mjs');await build({stdin:{contents:"export {drainSchedules} from './src/scheduled/runner'",resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',outfile:output,logLevel:'silent'});
@@ -17,6 +17,25 @@ export async function scheduledForwardJourney({app,member,source,destination,dm,
    return call('/api/forwards','POST',{...input,confirmation:preview.confirmation,intent:crypto.randomUUID(),schedule:{localAt:at,zone:'UTC',recurrence:'none',endDate:null}},cookie);
   };
   const list=async()=> (await call('/api/scheduled','GET',undefined,member.cookie)).items;
+  // Every source door, for the forwarding member's own and another member's
+  // messages. A reviewed source edit invalidates each kind before delivery.
+  for(const [kind,room,parent] of [['public channel',publicSource],['private channel',{id:source.conversation}],['DM',dm],['thread reply',{id:source.conversation},source.id],['group DM',groupDm]]){
+   for(const [author,cookie] of [['own',member.cookie],['another',ownerCookie]]){
+    const label=kind+' / '+author,original=await call('/api/conversations/'+room.id+'/messages','POST',{body:'Release handoff from '+label,intent:crypto.randomUUID(),...(parent?{parent}:{})},cookie);
+    const created=await schedule('',original.id,[{conversation:destination.id}]),reviewed=(await list()).find(s=>s.id===created.id);
+    assert.equal(reviewed.payload.forward.source,original.id,label+' reviewed source');assert.equal(reviewed.next_due,due,label+' scheduled time');
+    await drainSchedules(env,due-60000);
+    assert.ok(!(await call('/api/conversations/'+destination.id+'/messages','GET',undefined,member.cookie)).some(m=>m.forward?.source===original.id),label+' never early');
+    await drainSchedules(env,due);await drainSchedules(env,due);
+    const completed=(await list()).find(s=>s.id===created.id);assert.equal(completed.state,'complete',label+' complete');assert.equal(completed.occurrences.length,1,label+' one occurrence');
+    const copies=(await call('/api/conversations/'+destination.id+'/messages','GET',undefined,member.cookie)).filter(m=>m.forward?.source===original.id);
+    assert.equal(copies.length,1,label+' delivered once');assert.equal(copies[0].forward.body,original.body,label+' body');assert.equal(copies[0].forward.note,'',label+' optional note absent');
+    const stale=await schedule('Changed source '+label,original.id,[{conversation:destination.id}]);
+    await call('/api/messages/'+original.id,'PATCH',{body:'Revised handoff from '+label,version:original.version},cookie);await drainSchedules(env,due);
+    const refused=(await list()).find(s=>s.id===stale.id);assert.equal(refused.state,'failed',label+' changed source refused');assert.match(refused.reason,/source|disclosure/i,label+' visible reason');
+    assert.ok(!(await call('/api/conversations/'+destination.id+'/messages','GET',undefined,member.cookie)).some(m=>m.body==='Changed source '+label),label+' refused source sends nothing');
+   }
+  }
   const one=await schedule(),pending=(await list()).find(s=>s.id===one.id);assert.equal(pending.payload.forward.destinations.length,2);assert.equal(pending.next_due,due);
   assert.ok(!JSON.stringify(pending).includes(env.SESSION_SECRET));
   const before=(await call('/api/conversations/'+destination.id+'/messages','GET',undefined,member.cookie)).length;
