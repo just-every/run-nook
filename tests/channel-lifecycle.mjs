@@ -70,6 +70,7 @@ export async function channelLifecycleJourney(h){
   await post(`/api/conversations/${publicRoom.id}/messages`,{body:'Posting resumes after restore',intent:crypto.randomUUID()},b.cookie)
  })
  await workspaceChannelPolicyJourney(h,a,publicRoom)
+ await publicChannelJourney(h,a,b,x)
  await defaultChannelsJourney(h)
 }
 export async function defaultChannelsJourney({post,patch,get,registered,check,owner,origin}){
@@ -132,6 +133,7 @@ async function workspaceChannelPolicyJourney(h,manager,describedRoom){
   await sql(`UPDATE oa_operators SET role='admin' WHERE id='${admin.user.id}'`);Object.assign(admin,await signIn(h.origin(),'synthetic-nook-960@example.test'))
   await sql(`UPDATE nook_access SET mode='guest' WHERE user='${guest.user.id}'`);await sql(`INSERT INTO nook_guest_grants SELECT user,conversation FROM nook_members WHERE user='${guest.user.id}'`)
   const room=(await post('/api/conversations',{name:'Synthetic channel policy',kind:'private',participants:[owner.user.id,admin.user.id]},manager.cookie)).data
+  await post(`/api/conversations/${describedRoom.id}/members`,{user:admin.user.id});const described=(await get(`/api/channels/${describedRoom.id}/details`)).data;await patch(`/api/channels/${describedRoom.id}`,{version:described.version,description:'Synthetic non-manager admin overwrite'},admin.cookie,403)
   const path='/api/team/workspace-policy',initial=(await get(path)).data
   assert.equal(initial.canManage,true);assert.equal((await get(path,admin.cookie)).data.canManage,false)
   for(const actor of [manager,guest])await get(path,actor.cookie,403)
@@ -166,6 +168,32 @@ async function workspaceChannelPolicyJourney(h,manager,describedRoom){
   for(const kind of ['channel','private'])await post('/api/conversations',{name:'Synthetic full member policy create',kind},manager.cookie)
   await post(`/api/channels/${room.id}/archive`,{version:(await get(`/api/channels/${room.id}/details`)).data.version,archived:true},manager.cookie)
   await post(`/api/channels/${room.id}/archive`,{version:(await get(`/api/channels/${room.id}/details`)).data.version,archived:false})
+  await h.validateArchive()
+ })
+}
+
+async function publicChannelJourney(h,manager,member,outsider){
+ const {post,patch,get,sql,check}=h
+ await check('NOOK-060 private channel conversion confirms current history and preserves custody',async()=>{
+  const room=(await post('/api/conversations',{name:'Synthetic public conversion',kind:'private',participants:[member.user.id]},manager.cookie)).data,path=`/api/channels/${room.id}`
+  const send=async(body,parent,attachments=[])=>(await post(`/api/conversations/${room.id}/messages`,{body,parent,attachments,intent:crypto.randomUUID()},manager.cookie)).data
+  const file=(await post(`/api/conversations/${room.id}/attachments`,{name:'synthetic-nook-history.txt',mime:'text/plain',data:Buffer.from('Synthetic history').toString('base64'),intent:crypto.randomUUID()},manager.cookie)).data
+  const root=await send('Synthetic root',null,[file.id]);await send('Synthetic reply',root.id)
+  const erased=await send('Synthetic erased history',null);await patch(`/api/messages/${erased.id}`,{version:1,delete:true},manager.cookie)
+  const preview=async()=>(await get(path+'/public-preview',manager.cookie)).data
+  let p=await preview();assert.equal(p.messages,2);assert.equal(p.files,1);assert.equal(p.earliest,root.created);assert.ok(p.audience>=3);assert.ok(p.gainingAccess>=1)
+  await get(path+'/public-preview',member.cookie,403);await get(path+'/public-preview',outsider.cookie,403)
+  const dm=(await post('/api/conversations',{name:'Synthetic conversion DM',kind:'dm',participants:[member.user.id]},manager.cookie)).data;await get(`/api/channels/${dm.id}/public-preview`,manager.cookie,403)
+  const facts=async()=>(await sql(`SELECT kind,version,seq,(SELECT count(*) FROM nook_audit WHERE kind='channel.public' AND scope='${room.id}') AS audits FROM nook_conversations WHERE id='${room.id}'`))[0]
+  const before=await facts();await post(path+'/make-public',{preview:p.version},manager.cookie,400);await post(path+'/make-public',{preview:p.version,confirmed:false},manager.cookie,400);await post(path+'/make-public',{preview:p.version,confirmed:true},member.cookie,403);assert.deepEqual(await facts(),before)
+  await send('Synthetic new history',null);await post(path+'/make-public',{preview:p.version,confirmed:true},manager.cookie,409)
+  p=await preview();await post(`/api/conversations/${room.id}/members`,{user:outsider.user.id},manager.cookie);await post(path+'/make-public',{preview:p.version,confirmed:true},manager.cookie,409)
+  await sql(`INSERT INTO nook_retained_message_bodies VALUES('${erased.id}','Synthetic retained custody','synthetic retained custody')`);await get(path+'/public-preview',manager.cookie,409);assert.equal((await sql(`SELECT body FROM nook_retained_message_bodies WHERE id='${erased.id}'`))[0].body,'Synthetic retained custody');await sql(`DELETE FROM nook_retained_message_bodies WHERE id='${erased.id}'`)
+  const erasureBefore=await sql(`SELECT * FROM nook_erased_messages WHERE id='${erased.id}'`),members=await sql(`SELECT user FROM nook_members WHERE conversation='${room.id}' ORDER BY user`)
+  p=await preview();assert.equal(p.messages,3);const converted=(await post(path+'/make-public',{preview:p.version,confirmed:true},manager.cookie)).data;assert.equal(converted.kind,'channel')
+  assert.deepEqual(await sql(`SELECT user FROM nook_members WHERE conversation='${room.id}' ORDER BY user`),members);assert.deepEqual(await sql(`SELECT * FROM nook_erased_messages WHERE id='${erased.id}'`),erasureBefore)
+  const history=(await get(`/api/conversations/${room.id}/messages`,manager.cookie)).data;assert.equal(history.filter(m=>!m.deleted).length,p.messages+1);assert.equal(history.filter(m=>m.body.startsWith('System notice: This channel is now public.')).length,1);assert.equal(history.filter(m=>!m.deleted).flatMap(m=>m.attachments).length,p.files);assert.equal((await facts()).audits,1)
+  await post(path+'/make-public',{preview:p.version,confirmed:true},manager.cookie,403)
   await h.validateArchive()
  })
 }

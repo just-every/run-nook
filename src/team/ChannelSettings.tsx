@@ -1,3 +1,4 @@
+import {ChannelPublic} from './ChannelPublic'
 import {WorkspacePolicy} from './WorkspacePolicy'
 import {BroadcastPolicySettings} from '../broadcast/PolicySettings'
 import {useEffect,useId,useState} from 'react'
@@ -38,6 +39,7 @@ export function ChannelSettings({conversation,members,user,refresh,onLeft}:Props
    </>:<>{details.topic&&<p className="channel-topic">{details.topic}</p>}{details.description&&<p className="channel-topic">{details.description}</p>}</>}
    {!details.archived&&<button className="text-button" disabled={busy||!details.canArchive||!!details.archiveReason} onClick={()=>setConfirm('archive')}>Archive channel</button>}
    {(user.role==='owner'||user.role==='admin')&&user.mode!=='guest'&&<WorkspacePolicy/>}
+   {details.kind==='private'&&details.manager===user.id&&!details.archived&&<ChannelPublic id={conversation.id} refresh={async()=>{await load();await refresh()}}/>}
    <BroadcastPolicySettings conversation={conversation.id}/>
    <PostingSettings id={conversation.id} version={details.version} canManage={details.canManage} members={members} refresh={async()=>{await load();await refresh()}}/>
    {confirm==='archive'&&<div className="channel-confirm"><p>Archive #{details.name}? Members keep the history. New messages, replies and uploads stop until the channel is restored.</p><button className="danger-button" disabled={busy} onClick={()=>void change('/archive',{version:details.version,archived:true})}>Confirm archive</button><button className="soft-button" disabled={busy} onClick={()=>setConfirm(null)}>Keep channel open</button></div>}

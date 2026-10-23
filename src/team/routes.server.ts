@@ -1,3 +1,4 @@
+import {publicChannelPreview,makeChannelPublic} from './channel-public.server'
 import {workspacePolicy,updateWorkspacePolicy} from './workspace-policy.server'
 import {reportsRoute} from '../reports/server'
 import {digestRoute} from '../digests/server'
@@ -94,6 +95,8 @@ export async function teamRoute(c:Context,request:Request,input:Record<string,an
  if(parts[1]==='channels'&&parts.length===4){
   if(parts[3]==='posting'&&method==='GET')return Response.json(await postingPermissions(c,parts[2]))
   if(parts[3]==='posting'&&method==='PATCH')return Response.json(await updatePosting(c,parts[2],input))
+  if(parts[3]==='public-preview'&&method==='GET')return Response.json(await publicChannelPreview(c,parts[2]))
+  if(parts[3]==='make-public'&&method==='POST')return Response.json(await makeChannelPublic(c,parts[2],input))
   if(parts[3]==='details'&&method==='GET')return Response.json(await channelDetails(c,parts[2]))
   if(parts[3]==='transfer'&&method==='POST')return Response.json(await transferChannel(c,parts[2],input))
   if(parts[3]==='archive'&&method==='POST')return Response.json(await archiveChannel(c,parts[2],input))
