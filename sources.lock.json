@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "f239579332c65b5b5ee7618f20889b72dae46640335a451e22cffca89c57f0bd",
+      "sha256": "d986c7a8e3128c44a2a8c7172100fd4fa81468b8bb2e9cf5fb28400ede7b21eb",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "4814461f9eb9650a0178c430b7dc9a6bab20966c0674bf5dacdb84d400fdbd49",
+      "sha256": "3eee63334d17886b02ba11542ba10064b448b582d1aa9a159326a13de6372ea6",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "c0af30fb284f3817985232ea3851f81abbec4f888617340bc87a70a18df12277",
+      "sha256": "47b5f00fa6ffe7573680d198349b245c037fb700770273b70662c5fc3f73b5b2",
       "executable": false
     },
     "docs/conversations.md": {
@@ -725,7 +725,7 @@
       "executable": false
     },
     "docs/your-team.md": {
-      "sha256": "475bbb0effd7a9d08cc380b790044af35b8fe143722fb311e80b8cfcdbd0089f",
+      "sha256": "3cccd0384aeb04aab719425bc3b6771a4f493248c4d4ebe5184ae33298d928d2",
       "executable": false
     },
     "edition.json": {
@@ -4106,6 +4106,14 @@
     },
     "src/chat/ThreadsView.tsx": {
       "sha256": "6d4e455ef9c6979bf0090b0db42f3c6b09c5eef2f05c72d3e39a28e9eb3eb050",
+      "executable": false
+    },
+    "src/chat/tooltip.css": {
+      "sha256": "fbc5e4b294d7670cc052249752ae3bf28ff2c93dbcb4e588ddd018a112ba03fb",
+      "executable": false
+    },
+    "src/chat/TooltipButton.tsx": {
+      "sha256": "9d3582e060fbde1c5a3ce4e28fa618ac3721541ac6d53488ca82235fed670678",
       "executable": false
     },
     "src/chat/types.ts": {
