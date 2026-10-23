@@ -14,8 +14,14 @@ export async function runBulkInvitations({origin,ownerCookie,call,json,launch,re
  assert.equal(preview.counts.total,50);assert.equal(preview.counts.sendable,48);assert.equal(preview.counts['duplicate-in-batch'],1);assert.equal(preview.counts['invalid-address'],1);
  assert.equal((await people()).length,before,'a preview writes nothing');
  // Other flags: an existing account, a role the bulk door never issues, an unknown channel, a guest with no channel and a missing name; a member with no channel is sendable into the default channels.
- const flags=await (await post('/api/team/invitations/preview',{csv:[head,`${member.email},Existing,member,${launch.name}`,`bulk-admin-${stamp}@example.test,Admin,admin,${launch.name}`,`bulk-x-${stamp}@example.test,Unknown,member,No such channel`,`bulk-g-${stamp}@example.test,Guest,guest,`,`bulk-n-${stamp}@example.test,,member,${launch.name}`,`bulk-d-${stamp}@example.test,Default,member,`].join('\n')})).json();
- assert.deepEqual(flags.rows.map(r=>r.status),['existing-account','role-not-allowed','unknown-channel','guest-needs-channel','name-missing','ok']);
+ const noChannel=`bulk-d-${stamp}@example.test,Default,member,`,flagCsv=[head,`${member.email},Existing,member,${launch.name}`,`bulk-admin-${stamp}@example.test,Admin,admin,${launch.name}`,`bulk-x-${stamp}@example.test,Unknown,member,No such channel`,`bulk-g-${stamp}@example.test,Guest,guest,`,`bulk-n-${stamp}@example.test,,member,${launch.name}`,noChannel].join('\n'),flagRows=async()=>(await (await post('/api/team/invitations/preview',{csv:flagCsv})).json()).rows.map(r=>r.status)
+ // Its own precondition: a member row with no channel needs an enabled default channel (NOOK-060). A workspace with none flags that row; saving one through the policy door makes it sendable.
+ const policy=await json('/api/team/default-channels');
+ if(!policy.channels.some(c=>c.enabled)){
+  assert.equal((await flagRows()).at(-1),'no-default-channel');
+  await call('/api/team/default-channels',{method:'PATCH',body:{version:policy.version,channels:[{id:launch.id,mandatory:false}]}});
+ }
+ assert.deepEqual(await flagRows(),['existing-account','role-not-allowed','unknown-channel','guest-needs-channel','name-missing','ok']);
  // Refusals: members and guests cannot use the door; a batch over 1,000 rows or 256 KiB is refused; sending needs confirmation.
  for(const cookie of [member.cookie,guest.cookie])for(const path of ['preview','bulk'])await post('/api/team/invitations/'+path,{csv,confirm:true},{cookie,status:403});
  await post('/api/team/invitations/preview',{csv:Array.from({length:1001},(_,i)=>`over-${i}-${stamp}@example.test,Over,member,${launch.name}`).join('\n')},{status:400});

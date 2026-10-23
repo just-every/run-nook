@@ -6885,7 +6885,7 @@
       "executable": false
     },
     "tests/team-bulk.mjs": {
-      "sha256": "c7934b8aa90016d796b6ff1d8a998286e11d17da657702271f9562abbc7b3e00",
+      "sha256": "dcd827d957094b5097d148aa2b5bc87ab5c8fdca6ea28ff236077d98f10f5f7b",
       "executable": false
     },
     "tests/team-image.test.mjs": {
