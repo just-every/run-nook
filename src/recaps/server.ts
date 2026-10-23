@@ -56,8 +56,9 @@ export async function recapRoute(c:Context,method:string,p:string[],input:Record
  if(shown.state!=='answered')fail(404,'Recap unavailable')
  const kind=input.kind;if(!['correction','dismissal'].includes(String(kind)))fail(400,'Choose correction or dismissal')
  const correction=kind==='correction'?text(input.correction,2000).trim():'';if(kind==='correction'&&!correction)fail(400,'Enter a correction')
- const message=shown.claims.find(p=>p.source.message===input.message)?.source.message??shown.claims[0]?.source.message
+ const selected=shown.claims.find(p=>p.source.message===input.message)?.source??shown.claims[0]?.source
+ const message=selected?.message
  if(!message)fail(404,'Recap unavailable')
- const id=crypto.randomUUID();await c.batch([c.sql('INSERT INTO nook_recap_feedback VALUES(?,?,?,?,?,?,?,?)',id,c.uid,receipt.range.conversation,message,await digest(token),kind,correction,Date.now())],receipt.range.conversation,`EXISTS(SELECT 1 FROM nook_message_history WHERE id=? AND deleted=0) OR EXISTS(SELECT 1 FROM nook_import_history WHERE id=? AND erased=0)`,[message,message])
+ const id=crypto.randomUUID();await c.batch([c.sql('INSERT INTO nook_recap_feedback VALUES(?,?,?,?,?,?,?,?)',id,c.uid,selected!.conversation,message,await digest(token),kind,correction,Date.now())],selected!.conversation,`EXISTS(SELECT 1 FROM nook_message_history WHERE id=? AND deleted=0) OR EXISTS(SELECT 1 FROM nook_import_history WHERE id=? AND erased=0)`,[message,message])
  return {id,kind}
 }

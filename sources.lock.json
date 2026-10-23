@@ -5629,7 +5629,7 @@
       "executable": false
     },
     "src/recaps/server.ts": {
-      "sha256": "5f1374420d5323350cf496d221432098904e1df6ed77f37825cefab164009054",
+      "sha256": "3b064a5c8021c2e6277c20caab48a2306c064a94d226610ab9ed28071c5b9b84",
       "executable": false
     },
     "src/reminders/archive.mjs": {
@@ -6189,7 +6189,7 @@
       "executable": false
     },
     "tests/digests.mjs": {
-      "sha256": "dec475b22e4d5efe40b86b1ac784c41d440ddc509c8ef25f3cb5a8b166166a35",
+      "sha256": "1ccbe93af86f8d5ce3240637c57f994a85b715bd341a80d7a3394e834e7f13ad",
       "executable": false
     },
     "tests/docs-site.test.mjs": {
