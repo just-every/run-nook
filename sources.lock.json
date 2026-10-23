@@ -5949,7 +5949,7 @@
       "executable": false
     },
     "src/team/erasure/import-commit.ts": {
-      "sha256": "ee8506f2b9ea5168eb8da5a05a809e0e677e1fc74731af766bbe7a8dc2d01840",
+      "sha256": "a2d63d7685b58dc9e73476bf04df9c134eadae71ec513cc883c72696d5f293c9",
       "executable": false
     },
     "src/team/erasure/import-preview.ts": {
@@ -6257,7 +6257,7 @@
       "executable": false
     },
     "tests/erasure.test.mjs": {
-      "sha256": "7882b4308e22b335247ff4e947fca01b70e87085014e045ed5c7dbcc93fc09a7",
+      "sha256": "1749136a7eacbbd679f4ac876e7b5be6063001c0065c91a2fc44ce387bc645fb",
       "executable": false
     },
     "tests/exit-export.test.mjs": {

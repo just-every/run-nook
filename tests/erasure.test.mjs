@@ -371,6 +371,23 @@ test('associated import retention withdraws real kit source custody, preserves v
  }finally{f.close()}
 });
 
+test('an admin removed from an imported channel during erasure cannot erase its imported message',async()=>{
+ const {slackServiceFixture}=await import('./slack-import/sqlite-service.mjs'),{zipFixture}=await import('./slack-import/fixture.mjs');
+ const f=await slackServiceFixture(),batch=f.adapter.batch;f.db.exec('PRAGMA foreign_keys=ON');try{
+  const joined=await f.accept(await f.invite('imported-admin@example.test',{role:'admin'})),admin=await f.auth.getSession(f.request('/auth/session',null,joined.headers.get('set-cookie').split(';')[0]));
+  const zip=zipFixture([['users.json',[{id:'U1',name:'Source author'}]],['channels.json',[{id:'C1',name:'general'}]],['general/2024-01-01.json',[{type:'message',user:'U1',text:'Imported launch figures',ts:'1700000000.000001'}]]]);
+  const plan=await f.door.plan(await f.door.inspect(zip),{namespace:'departing-admin',channels:[{sourceId:'C1',name:'Imported launch',members:[f.owner.operatorId,admin.operatorId]}],actors:{U1:null},acceptedOmissions:[]});await f.finish(plan);
+  const env={...f.c.env,CHAT_HUB:{idFromName:()=>'',get:()=>({fetch:async()=>new Response()})}},owner=new Context(env,f.owner),c=new Context(env,admin),record=f.db.prepare('SELECT * FROM nook_import_records').get();
+  // The owner removes the admin from the channel while the erasure prepares its final import batch.
+  let pending=true;
+  f.adapter.batch=async statements=>{if(pending&&statements.some(s=>s.sql.startsWith('DELETE FROM nook_import_records'))){pending=false;assert.equal((await teamRoute(owner,new Request('https://fixture.test/api/team/remove',{method:'POST',headers:{origin:'https://fixture.test'}}),{user:admin.operatorId,conversation:record.conversation})).status,200)}return batch(statements)};
+  await assert.rejects(door(standard,c,'',{kind:'imported-message',target:record.id,confirmation:'ERASE'}));
+  assert.equal(pending,false);assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records WHERE id=?').get(record.id).n,1,'the imported message remains');
+  await finishDoor(standard,owner,await door(standard,owner,'',{kind:'imported-message',target:record.id,confirmation:'ERASE'}));
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM nook_import_records WHERE id=?').get(record.id).n,0,'a current member can still erase it');
+ }finally{f.adapter.batch=batch;f.close()}
+});
+
 test('member receipt inherits already pending author deletion and expired-file obligations before identity disappears',async()=>{
  const f=await fixture();try{
   const member=await f.person('pendingauthor'),c=f.context(member),owner=f.context(f.owner);

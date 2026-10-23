@@ -4,7 +4,7 @@ import {importTargets} from '../../imports/target'
 import {redactInSteps} from './redaction-steps'
 import {mappingVersion} from '../../imports/formats.mjs'
 import {importDigest} from '../../family/team-chat/import-capture.mjs'
-import {authority,authFence,type Context} from '../../platform/storage/context'
+import {authority,authFence,memberFence,type Context} from '../../platform/storage/context'
 import {authorizeWork} from './authorization'
 import type {fenceService,Sql} from './portability'
 /** A person's exact identifiers: their account email and the email their
@@ -26,7 +26,9 @@ export async function eraseImportedTarget(c:Context,work:any,kind:'actor'|'messa
   if(review.destination!==job.owner||review.namespace!==job.namespace||review.mapping_version!==(door?'nook-'+door.source_type+'-door-v1':mappingVersion(review)))throw Error('Import custody binding changed')
   // Native rows, the portability fence, the redaction checkpoint and import custody
   // commit in one batch (with a reaction redaction, in its final step).
-  const ctx:D1ImportContext={destination:job.owner,namespace:door?door.kit_namespace:job.namespace,mappingVersion:review.mapping_version,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence} AND (${scope.condition})`,params:[...c.credentials,...scope.params]})}}
+  // As in Context.batch, a channel-scoped erasure also fences current membership.
+  const member=scope.conversation?[scope.conversation,c.uid]:[]
+  const ctx:D1ImportContext={destination:job.owner,namespace:door?door.kit_namespace:job.namespace,mappingVersion:review.mapping_version,originalErasurePolicy:'withdraw-all-job-artifacts',storage:{database:c.db,targets:importTargets()},authorization:{principalId:c.uid,predicate:()=>({sql:`${authority} AND ${authFence}${member.length?' AND '+memberFence:''} AND (${scope.condition})`,params:[...c.credentials,...member,...scope.params]})}}
   if(door)statements.push(...doorMetadataRetirement(job.owner))
   if(!related?.fields){await retireD1ImportCustody({target:{kind,id:target},values,related},statements,ctx,await f.checkpoint());return}
   await redactInSteps(c,work,scope,{kind,id:target},values,related,statements,job.owner,ctx,f)
