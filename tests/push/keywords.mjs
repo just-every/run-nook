@@ -14,7 +14,7 @@ export async function keywords(c){
  assert.equal((await sync()).badge,1,'the keyword item counts once in the badge');const mine=await items(hit);assert.equal(mine.length,1,'two matching keywords make one item');assert.equal(mine[0].reason,'keyword');assert.equal((await rows(hit)).length,1);assert.equal((await rows(hit))[0].reason,'keyword');
  assert.equal((await items(hit,sender.cookie)).length,0,'the author gets nothing');
  const own=await send(billing,{body:'my own invoice'},member.cookie);assert.equal((await items(own)).length,0,'never for their own message');
- const partial=await send(billing,{body:'invoicing the whole team'});assert.equal((await items(partial)).length,0,'whole words only');assert.deepEqual(await rows(partial),[]);
+ const partial=await send(billing,{body:'the invoices are late'});assert.equal((await items(partial)).length,0,'whole words only');assert.deepEqual(await rows(partial),[]);
  const plain=await send(billing,{body:'nothing relevant here'});await call(`/api/messages/${plain.id}`,'PATCH',{version:1,body:'now it says invoice'},sender.cookie);assert.equal((await items(plain)).length,0,'an edit does not re-alert');
  // A read on a second session clears it everywhere.
  const second=await signIn(settings.address),rooms=await call('/api/conversations','GET',undefined,second.cookie);
