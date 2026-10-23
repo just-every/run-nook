@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "b5e4e3cddfa9264a107de3c4f02e98127272e80e264c8a9a89cbc6ba069eda73",
+      "sha256": "dff695c02cbd98343b3d0b94598620dbd5acab525afe06e3e58c350434923765",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "3317109e1cb9bb60db30bdd5087f765dc5d23ef6d3b59ac15169c72cb5cc134e",
+      "sha256": "06fad441989185b9eebcdd5630fe81045a558c980819ccc6559bce07441170e5",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "b5a4a6a8a1a60e93199c8714ef89c9c98727c75276c906eb4edca0cd768386a1",
+      "sha256": "229b19d6aeebc3440e572ca0e2b3abf2557d5a1ce1a832b2120f2d144198a105",
       "executable": false
     },
     "docs/conversations.md": {
@@ -717,7 +717,7 @@
       "executable": false
     },
     "docs/reports.md": {
-      "sha256": "dfc7746cf8fc93d265c0ff37de74f381d8e14689c6c24907874905607a848e89",
+      "sha256": "82b849408e84c31ed3392ea097c668390bc758550dc50fef5e36e87b341aacf0",
       "executable": false
     },
     "docs/site.json": {
@@ -5793,11 +5793,11 @@
       "executable": false
     },
     "src/reports/Reports.tsx": {
-      "sha256": "60f4be4ef5a61d7b5339b7e4a44a8e49afcbe54e920051c07ba6d899ffe91a04",
+      "sha256": "a60822273ce61c6e83979f26b0fc4c464ccef5d2218aebcb0783d52d5da6d0be",
       "executable": false
     },
     "src/reports/server.ts": {
-      "sha256": "4fa598e9aa9b4b4d03edd2b23069c0a5ea99fa42bdb4ca4a4de3e3445ec56939",
+      "sha256": "9cad0049474ea987dc8ee14ca3f8c453e0c60a791d1307e6e0685373bfd15c76",
       "executable": false
     },
     "src/router.tsx": {
@@ -6773,11 +6773,11 @@
       "executable": false
     },
     "tests/reports-browser.mjs": {
-      "sha256": "f7af7feabcf1c51a5e096f04ea8b322241f6d5b28c6019a5d6e65ad61440824e",
+      "sha256": "9c36ec04b99d680b6e6b084fa0bd77ac32c349b348d697d6a439d260a36eb3d3",
       "executable": false
     },
     "tests/reports.mjs": {
-      "sha256": "184b74df8244144f0b443c4cbd5b945b306bf967cc2320e7666b68708418c8b4",
+      "sha256": "6275326235352a8e13903d664e6ebd65b77774752d8bd7d9c374efd6a14d7d37",
       "executable": false
     },
     "tests/runtime-portability.mjs": {
