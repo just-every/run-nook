@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "fde2604f623b2ad3c13b9764d83ef1cc20695410e096cdddd828a9857ac368a1",
+      "sha256": "30a6ee5436a300ecf05672c1c79e4227f6633c3ff26a41e877f56ed96fa91d2c",
       "executable": false
     },
     "DEMO.md": {
@@ -694,6 +694,10 @@
     },
     "docs/directories.md": {
       "sha256": "adddc782655b9d6727078b2270421511834d11ccfe7028776733db3fad9cdf15",
+      "executable": false
+    },
+    "docs/file-previews.md": {
+      "sha256": "dde24a28e7cc5f26730e7d21248fc86c51654e3e88aa010e5013480393a8ed8f",
       "executable": false
     },
     "docs/install.md": {
@@ -4632,6 +4636,10 @@
       "sha256": "06df4063bae4ccf00535786fc1d1d71674e8ddf8d37cc9972a0bcb550996edfc",
       "executable": false
     },
+    "src/files/InertPreview.tsx": {
+      "sha256": "971408a41e7dfa03d96d6766cf97efb6184675abc68dded596ebdcdae005d0c8",
+      "executable": false
+    },
     "src/files/query.ts": {
       "sha256": "8f6e99f8a667db8e032c93bf84f9f2f659e3186127728e3a7955233503f732aa",
       "executable": false
@@ -6410,6 +6418,10 @@
     },
     "tests/fake-cloudflare.mjs": {
       "sha256": "a0a574700bff9a3e1089b600a926f17b7e3bb99638dcb60efdf9a9a708aa7ded",
+      "executable": false
+    },
+    "tests/file-preview-fixture.mjs": {
+      "sha256": "35a9d9082fc266fb450503a7c6e730e8097f2242b76185a15c12e7032fac29f0",
       "executable": false
     },
     "tests/files-browser.mjs": {
