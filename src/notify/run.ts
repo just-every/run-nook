@@ -45,9 +45,14 @@ export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=
   const held=foldedUntil(last?.at??null,now)
   if(held!==null){await db.batch(ready.map(r=>sql('UPDATE nook_notify_queue SET due=?,updated=? WHERE id=?',held,now,r.id)));continue}
   const lead=ready[0],token=hex(crypto.getRandomValues(new Uint8Array(32)).buffer),hash=await tokenHash(token)
-  await db.batch(ready.map(r=>sql("UPDATE nook_notify_queue SET state='sending',attempts=attempts+1,due=?,email=?,token_hash=?,updated=? WHERE id=?",now+LEASE_MS,lead.id,hash,now,r.id)))
+  await db.batch(ready.map(r=>sql("UPDATE nook_notify_queue SET state='sending',attempts=attempts+1,due=?,email=?,token_hash=?,updated=? WHERE id=? AND state IN ('pending','retrying')",now+LEASE_MS,lead.id,hash,now,r.id)))
   const context=await sql('SELECT c.name,c.kind,(SELECT display_name FROM oa_operators WHERE id=?) AS actor FROM nook_conversations c WHERE c.id=?',lead.actor,group.conversation).first<{name:string;kind:string;actor:string|null}>()
   const email=composeEmail({workspace:branding.name,origin:authBindings(env).AUTH_ORIGIN,actor:context?.actor??'Someone',conversation:{id:group.conversation,name:context?.name??'',kind:context?.kind??'channel'},reason:lead.reason,message:lead.message,count:ready.length,token})
+  // Immediately before the provider, re-read the claim, its cancellation and the
+  // address: access, choices or the address may have changed while it was prepared.
+  // No request was made, so an invalid claim is cancelled or returned to the queue.
+  const valid=await sql(`SELECT count(*) AS n FROM nook_notify_queue q WHERE q.channel='email' AND q.email=? AND q.token_hash=? AND q.state='sending' AND (${cancelReason}) IS NULL AND EXISTS(SELECT 1 FROM oa_operators o WHERE o.id=q.user AND o.email=?)`,lead.id,hash,person!.email).first<{n:number}>()
+  if(valid?.n!==ready.length){await sql(`UPDATE nook_notify_queue AS q SET state=CASE WHEN (${cancelReason}) IS NOT NULL THEN 'cancelled' WHEN attempts>1 THEN 'retrying' ELSE 'pending' END,error=COALESCE(${cancelReason},error),attempts=attempts-1,due=?,email=NULL,token_hash=NULL,updated=? WHERE channel='email' AND email=? AND token_hash=? AND state='sending'`,now,now,lead.id,hash).run();continue}
   const result=await send({deliveryId:lead.id,to:person!.email,...email})
   if(result.ok){await db.batch([sql("UPDATE nook_notify_queue SET state='sent',error=NULL,updated=? WHERE id=?",now,lead.id),...ready.slice(1).map(r=>sql("UPDATE nook_notify_queue SET state='folded',error=NULL,updated=? WHERE id=?",now,r.id))]);continue}
   await db.batch(ready.map(r=>{const next=afterFailure(r.attempts+1,result.retryable,now);return sql('UPDATE nook_notify_queue SET state=?,due=?,error=?,email=NULL,updated=? WHERE id=?',next.state,next.due,result.error,now,r.id)}))

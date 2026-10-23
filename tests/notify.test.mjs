@@ -89,3 +89,17 @@ test('quiet time holds routine items until it ends; urgent goes through only whe
   assert.equal(t.sent.length,1);
  }finally{t.f.close()}
 });
+
+test('a recipient removed from a private channel while their email is prepared is not emailed',async()=>{
+ const t=await fixture();try{
+  await write(t.sam,'members','review',{user:t.rowan.uid});await updateNotifySettings(t.rowan,{mentions:true});
+  const start=Date.parse((await send(t.sam,'review',{body:'Private review plan',intent:'private-mention',mentions:[t.rowan.uid]})).created);
+  // The channel manager removes the recipient just after the delivery run claims the email.
+  const batch=t.f.adapter.batch;
+  t.f.adapter.batch=async statements=>{const results=await batch(statements);if(statements.some(s=>s.sql.includes("SET state='sending'"))){t.f.adapter.batch=batch;await write(t.sam,'members','review',{user:t.rowan.uid,remove:true})}return results};
+  await t.drain(start+GATHER_MS);
+  assert.equal(t.f.db.prepare("SELECT count(*) AS n FROM nook_members WHERE conversation='review' AND user=?").get(t.rowan.uid).n,0);
+  assert.deepEqual(t.sent,[],'no email reaches the provider after access ends');
+  assert.deepEqual(t.rows().map(r=>[r.state,r.error]),[['cancelled','no-access']]);
+ }finally{t.f.close()}
+});

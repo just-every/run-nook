@@ -5361,7 +5361,7 @@
       "executable": false
     },
     "src/notify/run.ts": {
-      "sha256": "21dfd1b8bca6d3b5a404ed9a31402b19f9617fd6a4df4167aeceb3faf232b930",
+      "sha256": "c40d313403a0e647ea5b02cae61e49aa6b1dc6d2c787eefc3ca686ac30db3ed7",
       "executable": false
     },
     "src/notify/sender.ts": {
@@ -6421,7 +6421,7 @@
       "executable": false
     },
     "tests/notify.test.mjs": {
-      "sha256": "fd7cbd39139be960dc3d3f4e58115e2c08c91fc464acf1a707914030ead7b314",
+      "sha256": "99ab359524128436453045ab1669e2a9d1493cb984c4dfd703afdbbe8939fcf1",
       "executable": false
     },
     "tests/notify/broadcast.mjs": {
