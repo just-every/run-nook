@@ -3,6 +3,7 @@ import {forwardingRoute} from './forwards/server'
 import {recapRoute} from './recaps/server'
 import {aiRoute} from './ai-search/server'
 import {isAppRequest,appRequest} from './notification-apps/door'
+import {isWebhookRequest,webhookRequest} from './notification-apps/webhook'
 import {manageApps} from './notification-apps/manage'
 import {noteRoute} from './notes/route'
 import {mattermostEmojiRoute} from './imports/mattermost-emoji'
@@ -150,6 +151,7 @@ export default withDemo({
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
   if(url.pathname==='/signin')return await signInRoute(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/notify/off') return unsubscribeRoute(env,request)
+  if(isWebhookRequest(request)) return webhookRequest(env,request)
   if(url.pathname==='/auth/owner-claim') return await ownerClaim(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/api/editor/config'||url.pathname==='/api/editor/session') return editorRoute(env,request)
   if(url.pathname.startsWith('/api/mattermost-emoji/'))return (await mattermostEmojiRoute(request,env))!
