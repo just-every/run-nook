@@ -6593,7 +6593,7 @@
       "executable": false
     },
     "tests/scheduled-forwards.mjs": {
-      "sha256": "eb8a61e944cc413e0efee01d0bc6e5c413b601bd48ce32031cb7d16fc2ad9f52",
+      "sha256": "78b7295a7396459cb5928245606e2a0b5620d61cbc3eb4bf227d97dba00bd10a",
       "executable": false
     },
     "tests/scheduled.mjs": {
