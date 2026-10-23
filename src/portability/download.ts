@@ -4,7 +4,11 @@ export async function downloadWorkspace(report:(message:string)=>void){
  const base='/api/portability/exports'
  async function call(path:string,body?:object){
   const response=await fetch(base+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined})
-  if(!response.ok){const result=await response.json() as {error?:string};throw Error(result.error==='unauthorized'?'Sign in as a workspace owner to download your data.':result.error==='reconcile_pending_object_work_before_export'?'Finish pending uploads, deletions and imports, then try again.':'We couldn’t prepare the archive. Please try again.')}
+  if(!response.ok){
+   // A platform or uncaught Worker error answers an HTML page, not the protocol's JSON.
+   const result=await response.json().catch(()=>undefined) as {error?:string}|undefined
+   if(!result)throw Error(`The server answered with HTTP ${response.status} instead of an archive step. Please try again in a minute.`)
+   throw Error(result.error==='unauthorized'?'Sign in as a workspace owner to download your data.':result.error==='reconcile_pending_object_work_before_export'?'Finish pending uploads, deletions and imports, then try again.':'We couldn’t prepare the archive. Please try again.')}
   return response
  }
  let id:string|undefined
