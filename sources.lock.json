@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "2ff88af25805c109fe605cca3e0a8a6868100ecd108eb574f59a1834d643b6ab",
+      "sha256": "c7fa967bbc0bb1d7594d4bffb0e783a4c7a25bcff00c2695983b2ae1f2a6ec6a",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "5a81ba43a8bdc226d6c78aeeab55702025536155c9953c8da30e1e84422fda74",
+      "sha256": "aee97605b642419dfe421b2f256bcb27eb13dc77135faf89315a4172494fec99",
       "executable": false
     },
     "DEMO.md": {
@@ -673,7 +673,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "424af2c8a4088a44f1169767906d3c0cbe0ab431b9382304258b5f6e4ae35474",
+      "sha256": "dc3470178a8a0eac3f17b5ea5ad001d395cc11de014e535a76e790cbf68df42e",
       "executable": false
     },
     "docs/conversations.md": {
@@ -725,7 +725,7 @@
       "executable": false
     },
     "docs/your-team.md": {
-      "sha256": "e06febbc531f800e1f71b234259e43563a38a1244e85ea6817bab9f4bee1fa9b",
+      "sha256": "2e8d0603351e5812d08b3165d3bb6fffd979c0df3ada73125a9df3bc035c7ff6",
       "executable": false
     },
     "edition.json": {
@@ -748,52 +748,100 @@
       "sha256": "8329d0ecc25798300ae8897fcb6186c98e5f5f9c32afb5a34f921b12e1ba1226",
       "executable": false
     },
+    "evidence/bookmarks/bookmarks-bar-1440-axe.json": {
+      "sha256": "b9495142408ab185e525a40591336244fc67cf70a9d94e590ad2e1a5f0c6dca0",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-bar-1440.png": {
+      "sha256": "52d868352715833963a0cc8258a73c842ecbc0d1af17f7bc7a52e5768c82aa08",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-bar-390-axe.json": {
+      "sha256": "351e3ada91b53cf310f3f870b3ede56ecd2eed538769a81ab1e61434498431b8",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-bar-390.png": {
+      "sha256": "968c250a17395662efda4dedfc5643a537a73d3f8e74e54e583f241e77419429",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-dialog-1440-axe.json": {
+      "sha256": "bbc52037e1c414e44478e9dd3e73a2eb528ce733ca4e6451098de75d9ba691a3",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-dialog-1440.png": {
+      "sha256": "d5fd4916e3bfe152765e446da70caba4776ca9951d0d4975a07de7d0f89d0299",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-dialog-390-axe.json": {
+      "sha256": "be43b597bc02a54a5a045bc555f76a0eb540ada763578e3928e8b4781d47f348",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-dialog-390.png": {
+      "sha256": "6dcbd5fe9379d08d77096180693a87326164a5fae428272fb1d8433ae63d82c4",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-restricted-1440-axe.json": {
+      "sha256": "ec45d034b320ea505f4451ebc234ca1d6fdcbefc65b6b7f74868407c1bdc122c",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-restricted-1440.png": {
+      "sha256": "bcdc453f1f0dffcc6fe53bb0b1c320c7f71b689a9e1b0e83afc7b396f168ed0c",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-restricted-390-axe.json": {
+      "sha256": "27abeb618f0ffbc2d68a1add974cfeb846507ff467deb61c237e9481d6de8b81",
+      "executable": false
+    },
+    "evidence/bookmarks/bookmarks-restricted-390.png": {
+      "sha256": "d4f0b2a3fa41daa8bc1217aeb0a1a09cc7734bd75956c9e1abfc745d0fb3a948",
+      "executable": false
+    },
     "evidence/clips/correction-history-1440.png": {
-      "sha256": "09fbde8ad26ccf0d21b43087e360913c29f1ab29a56de7824ec8e5812cf01cb0",
+      "sha256": "4cdfd135687410b21786ad501e03a6e95e05901a62ea975599c26976e78613c4",
       "executable": false
     },
     "evidence/clips/correction-history-390.png": {
-      "sha256": "c91436fcdfd79fd6f97cf56e6203dc3adeafed8ca016bb39165f2f2651ee55eb",
+      "sha256": "b1763252d25e9e07faaa4ba438160dd772a39413f55126b785daf847574932ad",
       "executable": false
     },
     "evidence/clips/player-transcript-1440.png": {
-      "sha256": "567a651497b23844fa533a1909de33ded3cdf34a176c4c40de5ef77e258c9844",
+      "sha256": "2a3ff431b4611c24bee91a4d24660a3c747469183c6975250ecc87de95b55407",
       "executable": false
     },
     "evidence/clips/player-transcript-390.png": {
-      "sha256": "c00677b4930c4eceece9bb2b7859e6f7137c1681aaa40b7f6936ea1a1070ab67",
+      "sha256": "693bfee66ba7aec6c6515dc737b2cfc25a149f1901155c23e1b12bf34226d413",
       "executable": false
     },
     "evidence/clips/recorder-1440.png": {
-      "sha256": "edbd67e8c2a6207e4eb4b78080b2321c5e07b11d07cfd7e2998fcbeb1ce18784",
+      "sha256": "9296c6869137d13ff5147e4771e6b851be487aaec55f0d36508314e3f61c0a88",
       "executable": false
     },
     "evidence/clips/recorder-390.png": {
-      "sha256": "6a5bd94cc49b52cc84e5890ded3f4db09bcce28f19055b9bd9d65c84837e6a55",
+      "sha256": "ebed1b0e0db5497394cb8c436879b4f81ddc80c7e543c5b13b7df64a38109b45",
       "executable": false
     },
     "evidence/clips/transcript-editor-1440.png": {
-      "sha256": "a527476a608e429434e14725c188f2fdc49a79d06f5a1993a9d6b6eb1eb40c0c",
+      "sha256": "a384629c6f5db4aefce529bccea0234413ff127b60577a3746746f423d0c6005",
       "executable": false
     },
     "evidence/clips/transcript-editor-390.png": {
-      "sha256": "2b5013b87db0fcad23292e2cf5a67d09b7c202e6bde8d0189a4b6802b9f23118",
+      "sha256": "df72f360e17142ad416babd9cd4db687c812db38ebcd384bdd738be6e374cb26",
       "executable": false
     },
     "evidence/clips/upload-retry-1440.png": {
-      "sha256": "25dbf7008aabbcfc25de65d9fb215b6f068815e2a3d7c51bddf5a496270bda64",
+      "sha256": "65f1a0491020a0ef4cdbd7cfc1c129e0748f8f1153a42227e5d4dd06468f9774",
       "executable": false
     },
     "evidence/clips/upload-retry-390.png": {
-      "sha256": "a8a99e351f06e3435e8bcf40f032643e1570f972b2f0938a13f77f6023e5be1e",
+      "sha256": "17e8ebbf49fda16dd019e36783515c6f45d9d88655bd4e2f4256b2a700cade8b",
       "executable": false
     },
     "evidence/clips/uploaded-captions-1440.png": {
-      "sha256": "940b897c4ae0da87483d255c5afec75cb52a49d5da84c1ba38321df6070d9d66",
+      "sha256": "36d66ad14a371250baff1a93dc2dbd4ba939040f5d389db85c9f3061a39eaca2",
       "executable": false
     },
     "evidence/clips/uploaded-captions-390.png": {
-      "sha256": "a7c0679daefdf71b41de03d5b22ffc1280179a863b811f6d2010e9fa2051d4f5",
+      "sha256": "3121a88718a9e038c402d8bc360111fae78eecdd412e929b933459daa4496633",
       "executable": false
     },
     "evidence/device-routing/alerts-1440.png": {
@@ -962,6 +1010,38 @@
     },
     "evidence/notes/thread-390.png": {
       "sha256": "f1d8460dce7dddd520d6993462f8ee5d44addb22f23ff4d3efcfa86d78d5eea1",
+      "executable": false
+    },
+    "evidence/polls/poll-anonymous-1440-axe.json": {
+      "sha256": "739de223624461dfeb3157b35c218cbd73060f3f2129a2195ca5d7de2d253665",
+      "executable": false
+    },
+    "evidence/polls/poll-anonymous-1440.png": {
+      "sha256": "959b84c66b2018090057976859b5a81d488a69b3049681426bddc3d657e7c301",
+      "executable": false
+    },
+    "evidence/polls/poll-anonymous-390-axe.json": {
+      "sha256": "77dd9dc9e463bddfcf17e71ad0c0c858d11a8d012cf11102db06ce8bf997f470",
+      "executable": false
+    },
+    "evidence/polls/poll-anonymous-390.png": {
+      "sha256": "a1cd67e1b33e6fff826785f5e1ac261da26a4d85999dcdbb83574341f94f0368",
+      "executable": false
+    },
+    "evidence/polls/poll-named-1440-axe.json": {
+      "sha256": "24538b72e5b3abb3ec88371b6bf7af704466ec19809360a896b530bcedfc3be0",
+      "executable": false
+    },
+    "evidence/polls/poll-named-1440.png": {
+      "sha256": "1509d9003f1025e1823066172bb83893d4096b6929674d76557e5291c1422986",
+      "executable": false
+    },
+    "evidence/polls/poll-named-390-axe.json": {
+      "sha256": "d554bd860919e41a180a2af7e54f44286bb4fc292df426e7c5f33a98c38dab9e",
+      "executable": false
+    },
+    "evidence/polls/poll-named-390.png": {
+      "sha256": "8fee45d6880c7c7d771569f393ae90ff358a7eca38b9e6c64ae158ef55addbf2",
       "executable": false
     },
     "evidence/quiet/not-delivered-member-1440.png": {
@@ -1209,7 +1289,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "4c19727868d17e7da7d1f7d844abfb1cf588b45293c4f9032808c02890437f51",
+      "sha256": "257a60d2bd583eefa050f98b23632f655677a7f5834db1edaedd13d830532614",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -1470,6 +1550,14 @@
     },
     "migrations/0083_personal_keywords.sql": {
       "sha256": "64bbe17b4d9bcb7e5f419a610d9efa758c8e400e2d0456a472e71104e99870b7",
+      "executable": false
+    },
+    "migrations/0084_polls.sql": {
+      "sha256": "73df38840b4acd706e10357335781546f4199a34649012eac223856d4fe975de",
+      "executable": false
+    },
+    "migrations/0085_bookmarks.sql": {
+      "sha256": "b5dd7f3a56dc1dd1393205a99f1df49df4f40dba356e02ee8d3bf8a580a200fa",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -4241,7 +4329,7 @@
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "924485e569595f56416fe4a6096819ceb60d9fa4616aa34dccaaffd2aa4d76c3",
+      "sha256": "12711dcf9c9eab384b8dccd87221486227f4941dc6d6dc124ab5b6a7c117fe46",
       "executable": false
     },
     "src/client.tsx": {
@@ -4249,11 +4337,11 @@
       "executable": false
     },
     "src/clips/archive.mjs": {
-      "sha256": "0a1295c2e37518f13f542b01c8e9f9d68db16e33dded4816fe5c1cfa9e637fb6",
+      "sha256": "97467042be4580e6f61c444c5e42277839b259dc2c87ce2c20330c563a41ac21",
       "executable": false
     },
     "src/clips/ClipPlayer.tsx": {
-      "sha256": "f6af99cd539f8d084060fc30a674ffb6bb0b3410cdddc03b568e91d5d51f0a21",
+      "sha256": "57b8eb106ad4e70ce89f19b27971bdcf7bcb2f561ce19cfe3584b538442156df",
       "executable": false
     },
     "src/clips/ClipRecorder.tsx": {
@@ -4261,7 +4349,7 @@
       "executable": false
     },
     "src/clips/clips.css": {
-      "sha256": "3817f71e051433066f84ff09b9bc245935837d9a43d5a87e7c2b872ff743240e",
+      "sha256": "b0148aed711440fe43fdca001f557927c25ba37b1a66f157d5c0be982ba3ddca",
       "executable": false
     },
     "src/clips/cues.d.mts": {
@@ -4285,7 +4373,7 @@
       "executable": false
     },
     "src/clips/server.ts": {
-      "sha256": "4507b3b33abab5bfd2a7936ff7b7ef5eeaf9b7c4ba50803611545323271e1ada",
+      "sha256": "adc7c88361820b0a7f103113ba025772d9a8be8084c39dcfd7068b3252e3d2d0",
       "executable": false
     },
     "src/clips/signature.ts": {
@@ -4297,11 +4385,11 @@
       "executable": false
     },
     "src/clips/TranscriptHistory.tsx": {
-      "sha256": "a03deca8c0a7837d8f196b19cffb766bda3d9e18b856a33e39e19b46f9c02790",
+      "sha256": "c1364c80ad771bd3fede5c0c0320d69a3d8c6d1e8b59f8f5c7cbe04d5f03a2e7",
       "executable": false
     },
     "src/clips/types.ts": {
-      "sha256": "55acba81d618230523fce78f6baeef2263cf0d0c1fe3cedbe81a15bd5ea7f14f",
+      "sha256": "40dff06b5885746c79ef99cc6aebf6a51af3312119e413a26f233eb6d99144d0",
       "executable": false
     },
     "src/clips/useClipCapture.ts": {
@@ -5565,7 +5653,7 @@
       "executable": false
     },
     "src/platform/storage/portability.mjs": {
-      "sha256": "7a359a303f97ae482caef036d488fcd8af5f80b4ea7160c8b705a975746cc939",
+      "sha256": "a851f30f86dd811101e9fe902e38cb5d85ed53b5a1c0000ad48bf3a8d5cdd580",
       "executable": false
     },
     "src/platform/storage/read.ts": {
@@ -5889,7 +5977,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "6f5d9e818f5132f182bb684f7593a1098a43160abdb5ed9bc52bd1ee289dc68e",
+      "sha256": "95e7b438d64a799f4f2dc7e7d7290d3143efb8d2b4044aac32549fa265e8f462",
       "executable": false
     },
     "src/site/pages.tsx": {
@@ -5902,6 +5990,30 @@
     },
     "src/team/access.ts": {
       "sha256": "cc0bd282cfa3faaf1979c8d514a51b744447835aeadb65be9a324f7a2217e647",
+      "executable": false
+    },
+    "src/team/bookmarks-export.ts": {
+      "sha256": "e18742277c064e1337c21465239222b4e0c2b1b8b250b20701bcc1816dc31100",
+      "executable": false
+    },
+    "src/team/bookmarks-types.ts": {
+      "sha256": "9d60e41c4a0de7094c557f1908cda7a2e88cd9410b99bd98a2fc5957124e6f67",
+      "executable": false
+    },
+    "src/team/bookmarks.css": {
+      "sha256": "6de1790352ff113276ba1b96e4c82b820afeb18af3b215bc8b9211b7666c3440",
+      "executable": false
+    },
+    "src/team/bookmarks.server.ts": {
+      "sha256": "62dd25a78a4d62082d127c967db21c880dea62d526b1408d65bc9a669629a17a",
+      "executable": false
+    },
+    "src/team/BookmarksBar.tsx": {
+      "sha256": "d92631678c2ee15a1b6d767c9592b90b4147097f8928a8d1fc31bbf01667c247",
+      "executable": false
+    },
+    "src/team/BookmarksManager.tsx": {
+      "sha256": "839aaf8ac46d968b5b161172790f8563a2aa46c04f14484eb251ae61b2bd9bef",
       "executable": false
     },
     "src/team/bulk-invitations.server.ts": {
@@ -6013,7 +6125,7 @@
       "executable": false
     },
     "src/team/erasure/graph.ts": {
-      "sha256": "0e50a13067621f2df13ba1edf2352afec5b181227d6c7cdbe4b667a3b6cabb40",
+      "sha256": "5024f8be92b06e4e5d2dae4fadd90c4dd852fe06f62f06318f771c3fdafe8166",
       "executable": false
     },
     "src/team/erasure/identity.ts": {
@@ -6118,6 +6230,30 @@
     },
     "src/team/legacy-recovery.mjs": {
       "sha256": "9bf1ca97d7804434fd47b5f49e693d080fc31545849d14de56e3bca88bb4f15b",
+      "executable": false
+    },
+    "src/team/poll-limits.ts": {
+      "sha256": "3355c4c045d2cd04f659c22e5e77e5f5e4899c8c0ba277884680edea6595c504",
+      "executable": false
+    },
+    "src/team/PollCard.tsx": {
+      "sha256": "9e3bd673e1a85c9d60cfee5b823f5f26ce75b8e2a55565493db7463e16fc2f2b",
+      "executable": false
+    },
+    "src/team/PollForm.tsx": {
+      "sha256": "e56033faed5140cd9ec66e3e6311755bf1af532cbdfdc19a67ddd26325ab9f75",
+      "executable": false
+    },
+    "src/team/polls-export.ts": {
+      "sha256": "c597106d71a509d26d0daf3f220c159b7cbd20d4013c9b443b4e341d63c0d7e3",
+      "executable": false
+    },
+    "src/team/polls.css": {
+      "sha256": "e590d1a944da0084045b7bfd461f5e02022143a56b82382c6e656820dfa37fe0",
+      "executable": false
+    },
+    "src/team/polls.server.ts": {
+      "sha256": "a0d56f263e8d2fbb5b2bb7595459bc3adda3355f198b371cfd397d6b0f944624",
       "executable": false
     },
     "src/team/portability.mjs": {
@@ -6240,6 +6376,14 @@
       "sha256": "0e56de34abcbdc5ee86eecd177fd86fbb1578d9d1d6f1211f57d468e68a4585d",
       "executable": false
     },
+    "tests/bookmarks-browser.mjs": {
+      "sha256": "a78e1172b3e3a69feaa04dd8e0faa36dd9c7d82dd5d79cd2a791bee4ba54298e",
+      "executable": false
+    },
+    "tests/bookmarks-journey.mjs": {
+      "sha256": "cf6b9b899570c624cd9508df9e4b18d43e2e7b125df23c373d62e0f7c696423c",
+      "executable": false
+    },
     "tests/broadcast-browser.mjs": {
       "sha256": "c0838b1a0e50839c3c6508f8ddc3541215f2e829a155ce6db0220c677f515120",
       "executable": false
@@ -6250,6 +6394,10 @@
     },
     "tests/browser-markup.mjs": {
       "sha256": "dc2a271fc268e0e85a06ab5c5a66c954dfacbee0d38eabeb5e3468e9c76de895",
+      "executable": false
+    },
+    "tests/browser-support.mjs": {
+      "sha256": "a9ff5fad7789a4d975fd38ba948005ed60390747b77e6d66ff828bf2656afb40",
       "executable": false
     },
     "tests/browser.mjs": {
@@ -6409,7 +6557,7 @@
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
-      "sha256": "cf560667b078159402ca451f5e248116c7cc31cc2716701f64b16be1dee2ac42",
+      "sha256": "a4cf804f5626c12a58a672df1aece04cba4d8d6caac543d898b7f7aa2fd152ab",
       "executable": false
     },
     "tests/integration-tokens.mjs": {
@@ -6481,7 +6629,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "56bd31cb6275b4cb3c09b56d85d2edb574a820b0a8539ebebe106814020f4236",
+      "sha256": "158c5a0f60f19defb6adef9453d0d992130eba803dd2b5868cfae06ca25187f7",
       "executable": false
     },
     "tests/notification-extension.mjs": {
@@ -6622,6 +6770,14 @@
     },
     "tests/pilot/runtime.mjs": {
       "sha256": "525d2ba10a5667c138a88d6da1194ccd8641d14468a6caa398ff9270e7b9fd4f",
+      "executable": false
+    },
+    "tests/polls-browser.mjs": {
+      "sha256": "0a780032ab6638583bb7eedbf9c63f64fd7421b14be35b3c78f09b0f206d70a2",
+      "executable": false
+    },
+    "tests/polls-journey.mjs": {
+      "sha256": "7f1fc75be00fc4191a5c24f36982ee91b3ace1d741c5e5589e8b406a8659a9a7",
       "executable": false
     },
     "tests/posting-browser.mjs": {

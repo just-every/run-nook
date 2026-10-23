@@ -26,3 +26,4 @@
 .nook-app .clip-editor fieldset{max-height:none;overflow:visible}.clip-door{grid-column:1/-1;justify-self:start;font-size:12px}.file-row:has(.clip-player){flex-wrap:wrap}
 .clip-recorder{max-height:48dvh;overflow:auto}.nook-app .clip-recorder .clip-toolbar button{min-height:36px}@media(max-width:500px){.clip-recorder video{max-height:180px}}
 .clip-player video{max-height:220px;object-fit:contain}@media(max-width:500px){.clip-player video{max-height:150px}}
+.clip-provider{display:grid;gap:.5rem;margin:.25rem 0}

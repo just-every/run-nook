@@ -37,38 +37,6 @@
               "id": "color-contrast",
               "data": {
                 "contrastRatio": 0,
-                "fontSize": "10.5pt (14px)",
-                "fontWeight": "normal",
-                "messageKey": "elmPartiallyObscured",
-                "expectedContrastRatio": "4.5:1"
-              },
-              "relatedNodes": [
-                {
-                  "html": "<dialog id=\"dialog\" data-kind=\"bookmarks\" aria-labelledby=\"dialog-title\" open=\"\">",
-                  "target": [
-                    "#dialog"
-                  ]
-                }
-              ],
-              "impact": "serious",
-              "message": "Element's background color could not be determined because it's partially obscured by another element"
-            }
-          ],
-          "all": [],
-          "none": [],
-          "impact": "serious",
-          "html": "<button type=\"button\" class=\"text-button\" aria-label=\"Remove FAQ 1440\">Remove</button>",
-          "target": [
-            "button[aria-label=\"Remove FAQ 1440\"]"
-          ],
-          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
-        },
-        {
-          "any": [
-            {
-              "id": "color-contrast",
-              "data": {
-                "contrastRatio": 0,
                 "fontSize": "11.3pt (15px)",
                 "fontWeight": "bold",
                 "messageKey": "elmPartiallyObscured",
@@ -133,102 +101,6 @@
               "id": "color-contrast",
               "data": {
                 "contrastRatio": 0,
-                "fontSize": "10.5pt (14px)",
-                "fontWeight": "normal",
-                "messageKey": "elmPartiallyObscured",
-                "expectedContrastRatio": "4.5:1"
-              },
-              "relatedNodes": [
-                {
-                  "html": "<dialog id=\"dialog\" data-kind=\"bookmarks\" aria-labelledby=\"dialog-title\" open=\"\">",
-                  "target": [
-                    "#dialog"
-                  ]
-                }
-              ],
-              "impact": "serious",
-              "message": "Element's background color could not be determined because it's partially obscured by another element"
-            }
-          ],
-          "all": [],
-          "none": [],
-          "impact": "serious",
-          "html": "<button type=\"button\" class=\"text-button\" aria-label=\"Move earlier: Plan 1440\">Move earlier</button>",
-          "target": [
-            "button[aria-label=\"Move earlier: Plan 1440\"]"
-          ],
-          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
-        },
-        {
-          "any": [
-            {
-              "id": "color-contrast",
-              "data": {
-                "contrastRatio": 0,
-                "fontSize": "10.5pt (14px)",
-                "fontWeight": "normal",
-                "messageKey": "elmPartiallyObscured",
-                "expectedContrastRatio": "4.5:1"
-              },
-              "relatedNodes": [
-                {
-                  "html": "<dialog id=\"dialog\" data-kind=\"bookmarks\" aria-labelledby=\"dialog-title\" open=\"\">",
-                  "target": [
-                    "#dialog"
-                  ]
-                }
-              ],
-              "impact": "serious",
-              "message": "Element's background color could not be determined because it's partially obscured by another element"
-            }
-          ],
-          "all": [],
-          "none": [],
-          "impact": "serious",
-          "html": "<button type=\"button\" class=\"text-button\" aria-label=\"Move later: Plan 1440\">Move later</button>",
-          "target": [
-            "button[aria-label=\"Move later: Plan 1440\"]"
-          ],
-          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
-        },
-        {
-          "any": [
-            {
-              "id": "color-contrast",
-              "data": {
-                "contrastRatio": 0,
-                "fontSize": "10.5pt (14px)",
-                "fontWeight": "normal",
-                "messageKey": "elmPartiallyObscured",
-                "expectedContrastRatio": "4.5:1"
-              },
-              "relatedNodes": [
-                {
-                  "html": "<dialog id=\"dialog\" data-kind=\"bookmarks\" aria-labelledby=\"dialog-title\" open=\"\">",
-                  "target": [
-                    "#dialog"
-                  ]
-                }
-              ],
-              "impact": "serious",
-              "message": "Element's background color could not be determined because it's partially obscured by another element"
-            }
-          ],
-          "all": [],
-          "none": [],
-          "impact": "serious",
-          "html": "<button type=\"button\" class=\"text-button\" aria-label=\"Remove Plan 1440\">Remove</button>",
-          "target": [
-            "button[aria-label=\"Remove Plan 1440\"]"
-          ],
-          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
-        },
-        {
-          "any": [
-            {
-              "id": "color-contrast",
-              "data": {
-                "contrastRatio": 0,
                 "fontSize": "12.0pt (16px)",
                 "fontWeight": "normal",
                 "messageKey": "bgGradient",
@@ -268,7 +140,7 @@
               },
               "relatedNodes": [
                 {
-                  "html": "<select id=\"_r_3_-file\" required=\"\"><option value=\"\">Choose a file</option><option value=\"7101bda7-45c3-45f4-a5cf-35dbf15d67e3\">Roadmap.txt</option></select>",
+                  "html": "<select id=\"_r_3_-file\" required=\"\"><option value=\"\">Choose a file</option><option value=\"aef8b392-7819-4df2-8b28-bb1d479bc529\">Roadmap.txt</option></select>",
                   "target": [
                     "#_r_3_-file"
                   ]
@@ -281,7 +153,7 @@
           "all": [],
           "none": [],
           "impact": "serious",
-          "html": "<select id=\"_r_3_-file\" required=\"\"><option value=\"\">Choose a file</option><option value=\"7101bda7-45c3-45f4-a5cf-35dbf15d67e3\">Roadmap.txt</option></select>",
+          "html": "<select id=\"_r_3_-file\" required=\"\"><option value=\"\">Choose a file</option><option value=\"aef8b392-7819-4df2-8b28-bb1d479bc529\">Roadmap.txt</option></select>",
           "target": [
             "#_r_3_-file"
           ],
@@ -300,7 +172,7 @@
               },
               "relatedNodes": [
                 {
-                  "html": "<select id=\"_r_3_-parent\"><option value=\"\">The bar itself</option><option value=\"7e81fed8-1735-42ca-b2d7-4e066bd793da\">Customer 1440</option><option value=\"3e50d39d-9202-4c13-848b-09c0a2b0f1c2\">Customer 390</option></select>",
+                  "html": "<select id=\"_r_3_-parent\"><option value=\"\">The bar itself</option><option value=\"c6ea07f6-fad8-45c2-a0a9-35bfdfa00ddc\">Customer 1440</option><option value=\"9b869301-8241-4bc2-ae7a-71865201f0ad\">Customer 390</option></select>",
                   "target": [
                     "#_r_3_-parent"
                   ]
@@ -313,7 +185,7 @@
           "all": [],
           "none": [],
           "impact": "serious",
-          "html": "<select id=\"_r_3_-parent\"><option value=\"\">The bar itself</option><option value=\"7e81fed8-1735-42ca-b2d7-4e066bd793da\">Customer 1440</option><option value=\"3e50d39d-9202-4c13-848b-09c0a2b0f1c2\">Customer 390</option></select>",
+          "html": "<select id=\"_r_3_-parent\"><option value=\"\">The bar itself</option><option value=\"c6ea07f6-fad8-45c2-a0a9-35bfdfa00ddc\">Customer 1440</option><option value=\"9b869301-8241-4bc2-ae7a-71865201f0ad\">Customer 390</option></select>",
           "target": [
             "#_r_3_-parent"
           ],

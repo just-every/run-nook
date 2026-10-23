@@ -1,8 +1,8 @@
 import type {Context} from '../platform/storage/context'
-import {message} from '../platform/storage/read'
 import {fail,Fault} from '../family/team-chat/domain'
+import {source,liveSource} from './source.server'
+import {configuration} from '../transcripts/settings.server'
 import {canPost} from '../team/posting-policy'
-import {isClipMime} from './media'
 import {parseWebVTT,validateCues} from './cues.mjs'
 import type {ClipPolicy} from './types'
 
@@ -10,21 +10,13 @@ const policy:ClipPolicy={audience:'source-message',retention:'source-inherited',
 function exact(input:Record<string,unknown>,keys:string[]){if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(key=>!keys.includes(key)))fail(400,'Unexpected clip fields')}
 function id(value:unknown):string{if(typeof value!=='string'||!value.length||value.length>128||value.trim()!==value||/[\u0000-\u001f\u007f]/.test(value))fail(400,'Invalid clip ID');return value as string}
 function project(row:Record<string,any>){const {cues_json,...rest}=row;return {...rest,cues:JSON.parse(cues_json)}}
-/** First identify the source through a no-scope query, then authorize with the
- * ordinary message door. Unrelated admins receive the same 404 as missing. */
-async function source(c:Context,attachment:string){
- const file=await c.one("SELECT a.id,a.message,a.conversation,a.mime FROM nook_attachments a JOIN nook_messages m ON m.id=a.message AND m.conversation=a.conversation AND m.deleted=0 WHERE a.id=? AND a.state='attached' AND NOT EXISTS(SELECT 1 FROM nook_import_files f WHERE f.attachment=a.id)",[attachment])
- if(!file||!isClipMime(file.mime))fail(404,'Clip unavailable')
- const parent=await message(c,file.message).catch(error=>{if(error instanceof Fault&&[403,404].includes(error.status))fail(404,'Clip unavailable');throw error})
- if(parent.deleted||parent.immutable||parent.conversation!==file.conversation)fail(404,'Clip unavailable')
- return {...file,parent:parent.parent}
-}
-const liveSource=`EXISTS(SELECT 1 FROM nook_attachments a JOIN nook_messages m ON m.id=a.message AND m.conversation=a.conversation AND m.deleted=0 WHERE a.id=? AND a.message=? AND a.conversation=? AND a.state='attached' AND a.mime=? AND NOT EXISTS(SELECT 1 FROM nook_import_files f WHERE f.attachment=a.id))`
-async function readClip(c:Context,attachment:string){
+export async function readClip(c:Context,attachment:string){
  const file=await source(c,attachment)
  const row=await c.one(`SELECT h.*,a.name AS actorName FROM nook_attachments source LEFT JOIN nook_clips clip ON clip.attachment=source.id LEFT JOIN nook_clip_transcripts h ON h.attachment=clip.attachment AND h.version=clip.version LEFT JOIN nook_actor_history a ON a.id=h.actor WHERE source.id=? AND ${liveSource}`,[attachment,attachment,file.message,file.conversation,file.mime],file.conversation)
  if(!row)fail(404,'Clip unavailable')
- return {...(row.version?project(row):{version:0,created:null,actor:null,actorName:null,format:'typed',language:'en',cues:[]}),attachment,message:file.message,conversation:file.conversation,mime:file.mime,policy}
+ const cfg=await configuration(c),offered=!!cfg.enabled&&!!await c.one('SELECT 1 FROM nook_transcript_secrets WHERE id=1'),mayRequest=file.author===c.uid||['owner','admin'].includes(c.session.operator.role)
+ // The disclosure names only the provider's host; the key and every other setting stay with the owner.
+ return {...(row.version?project(row):{version:0,created:null,actor:null,actorName:null,format:'typed',language:'en',source:'human',cues:[]}),attachment,message:file.message,conversation:file.conversation,mime:file.mime,policy,provider:{available:offered,canRequest:offered&&mayRequest,host:offered?new URL(cfg.base_url).hostname:null}}
 }
 async function history(c:Context,attachment:string,input:Record<string,unknown>){
  exact(input,['before']);const before=input.before===undefined?Number.MAX_SAFE_INTEGER:Number(input.before)

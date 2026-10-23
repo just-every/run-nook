@@ -1,4 +1,5 @@
 import {clipRoute} from './clips/server'
+import {transcriptRoute} from './transcripts/route.server'
 import {forwardingRoute} from './forwards/server'
 import {recapRoute} from './recaps/server'
 import {aiRoute} from './ai-search/server'
@@ -73,6 +74,7 @@ api.all('/api/*', async c => {
  const session=await repository.authenticated(req.headers),exit=await readableExportRoute(session,req,input);if(exit)return exit
  const team=await teamRoute(session,req,input);if(team)return team
  if(['ai-search','recaps'].includes(action)&&req.headers.has('signature-agent'))fail(403,'AI search is not available to agents')
+ const transcript=await transcriptRoute(session,req.method,p,input as Record<string,unknown>,req.headers.has('signature-agent'));if(transcript)return c.json(transcript)
  const clip=await clipRoute(session,req.method,p,req.method==='GET'?Object.fromEntries(url.searchParams):input as Record<string,unknown>);if(clip)return c.json(clip)
  const forwarded=await forwardingRoute(session,req.method,p,input as Record<string,unknown>);if(forwarded)return c.json(forwarded)
  const recap=await recapRoute(session,req.method,p,input as Record<string,unknown>);if(recap)return c.json(recap)

@@ -128,7 +128,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"0 votes\">0</span>",
           "target": [
-            "#message-537ba692-6b14-4416-9ee9-7defd61b5f32 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"0 votes\"]"
+            "#message-e0c43bad-45a5-4f9e-85d1-6a4eebc54ed6 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"0 votes\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -154,7 +154,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-537ba692-6b14-4416-9ee9-7defd61b5f32 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-e0c43bad-45a5-4f9e-85d1-6a4eebc54ed6 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -180,7 +180,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-fb0f9b8e-7e1f-46b6-9036-cfdf60e24709 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-94df5c04-f602-49f3-a805-1f79deb65fb4 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -206,7 +206,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-fb0f9b8e-7e1f-46b6-9036-cfdf60e24709 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-94df5c04-f602-49f3-a805-1f79deb65fb4 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -232,7 +232,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"0 votes\">0</span>",
           "target": [
-            "#message-4ae02462-1c47-476a-959d-353c687ed7d0 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"0 votes\"]"
+            "#message-585855b8-0469-4c10-a7bf-c01a2c686ab4 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"0 votes\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -258,7 +258,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-4ae02462-1c47-476a-959d-353c687ed7d0 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-585855b8-0469-4c10-a7bf-c01a2c686ab4 > .message-content > .poll-card[data-open=\"false\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -284,7 +284,7 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-e44b3bc3-5113-4169-891a-5760f449a564 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-9386f110-c795-465e-848b-e8b7e137fd0e > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(2) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
         },
@@ -310,9 +310,55 @@
           "impact": "serious",
           "html": "<span class=\"poll-count\" aria-label=\"1 vote\">1</span>",
           "target": [
-            "#message-e44b3bc3-5113-4169-891a-5760f449a564 > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
+            "#message-9386f110-c795-465e-848b-e8b7e137fd0e > .message-content > .poll-card[data-open=\"true\"] > fieldset > .poll-option:nth-child(3) > .poll-count[aria-label=\"1 vote\"]"
           ],
           "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on \"span\" elements with no valid role attribute."
+        }
+      ]
+    },
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ],
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+      "nodes": [
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "contrastRatio": 0,
+                "fontSize": "11.3pt (15px)",
+                "fontWeight": "normal",
+                "messageKey": "bgOverlap",
+                "expectedContrastRatio": "4.5:1"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element's background color could not be determined because it is overlapped by another element"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<p>Which rooms should we book? 390</p>",
+          "target": [
+            "#message-9386f110-c795-465e-848b-e8b7e137fd0e > .message-content > .message-body > .formatted-text > p"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
         }
       ]
     },
@@ -347,7 +393,7 @@
           "impact": "serious",
           "html": "<button class=\"icon-button\" type=\"button\" aria-pressed=\"false\" aria-label=\"Add 👍 reaction\" title=\"React 👍\">👍</button>",
           "target": [
-            "#message-e44b3bc3-5113-4169-891a-5760f449a564 > .message-tools.reveal-tap[role=\"group\"] > .icon-button[aria-label=\"Add 👍 reaction\"][title=\"React 👍\"]"
+            "#message-9386f110-c795-465e-848b-e8b7e137fd0e > .message-tools.reveal-tap[role=\"group\"] > .icon-button[aria-label=\"Add 👍 reaction\"][title=\"React 👍\"]"
           ],
           "failureSummary": "Fix any of the following:\n  Unable to determine if the visible text is part of the accessible name"
         }

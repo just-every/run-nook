@@ -11,7 +11,67 @@
     "orientationType": "landscape-primary"
   },
   "violations": [],
-  "incomplete": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ],
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+      "nodes": [
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "contrastRatio": 0,
+                "fontSize": "11.3pt (15px)",
+                "fontWeight": "normal",
+                "messageKey": "elmPartiallyObscured",
+                "expectedContrastRatio": "4.5:1"
+              },
+              "relatedNodes": [
+                {
+                  "html": "<ul class=\"popover inline\"><li><a class=\"bookmark\" href=\"https://docs.example.test/faq\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">FAQ 390</a></li></ul>",
+                  "target": [
+                    "details[open=\"\"] > .inline"
+                  ]
+                },
+                {
+                  "html": "<nav class=\"bookmarks-bar\" aria-label=\"Channel bookmarks\">",
+                  "target": [
+                    ".bookmarks-bar"
+                  ]
+                }
+              ],
+              "impact": "serious",
+              "message": "Element's background color could not be determined because it's partially obscured by another element"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<a class=\"bookmark\" href=\"https://docs.example.test/faq\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">FAQ 390</a>",
+          "target": [
+            "details[open=\"\"] > .inline > li > a[href$=\"faq\"][target=\"_blank\"][rel=\"noopener noreferrer nofollow\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+        }
+      ]
+    }
+  ],
   "passes": [
     "aria-allowed-attr",
     "aria-allowed-role",
