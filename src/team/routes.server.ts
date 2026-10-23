@@ -1,3 +1,4 @@
+import {reportsRoute} from '../reports/server'
 import {digestRoute} from '../digests/server'
 import {auditRoute} from '../audit/server'
 import {revisions as importedRevisions} from '../imports/revisions'
@@ -25,6 +26,7 @@ import {previewBulk,sendBulk,resendInvitation} from './bulk-invitations.server'
 import {preview} from './preview.server'
 import {listSaved,save,deleteSaved,pins,pin,deletePin,messageCollections} from './saved.server'
 export async function teamRoute(c:Context,request:Request,input:Record<string,any>):Promise<Response|null>{
+ const reports=await reportsRoute(c,request);if(reports)return reports
  const audit=await auditRoute(c,request);if(audit)return audit
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),method=request.method
  if(parts.length===4&&parts[1]==='messages'&&parts[3]==='imported-revisions'&&method==='GET')return Response.json(await importedRevisions(c,parts[2]))
