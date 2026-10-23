@@ -145,6 +145,22 @@ test('unauthenticated notification destination requests leave no audit records',
  }finally{await app.close()}
 });
 
+test('an admin removed from a private channel cannot revoke or remove its app approvals',{timeout:240000},async()=>{
+ const app=await installation(async()=>assert.fail('no provider request'));
+ try{
+  const {call,db,ownerCookie,origin}=app,email='departing-admin@example.test';
+  const room=await call('/api/conversations','POST',{name:'Finance approvals',kind:'private'},ownerCookie);
+  await call('/api/team/invitations','POST',{email,role:'admin',mode:'member',scopes:[room.id]},ownerCookie);await call('/auth/invite','POST',{email,role:'admin',displayName:'Departing admin'},ownerCookie,202);
+  const admin=await signIn(origin,email,{requestLink:false}),approvals=[];
+  for(const name of ['Ledger','Payroll'])approvals.push((await call('/api/notification-apps','POST',{name,channels:[room.id]},ownerCookie)).approvals[0]);
+  assert.deepEqual((await call('/api/notification-apps','GET',undefined,admin.cookie)).approvals.map(a=>a.id).sort(),approvals.map(a=>a.id).sort());
+  await call(`/api/conversations/${room.id}/members`,'POST',{user:admin.user.id,remove:true},ownerCookie);
+  await call(`/api/notification-apps/${approvals[0].id}/revoke`,'POST',{},admin.cookie,403);
+  await call(`/api/notification-apps/${approvals[1].id}/remove`,'POST',{},admin.cookie,403);
+  for(const approval of approvals){assert.equal((await db.prepare('SELECT state FROM nook_notification_apps WHERE id=?').bind(approval.id).first()).state,'active');assert.ok(await db.prepare('SELECT app FROM nook_notification_secrets WHERE app=?').bind(approval.id).first(),'its credential is kept')}
+ }finally{await app.close()}
+});
+
 test('NOOK-036 cited AI search uses one bounded provider call and survives hostile output, revocation and credential-free restore',{timeout:240000},async t=>{
  const edge={calls:[],mode:'normal',during:null,lastKey:''};let restore;
  const app=await installation(async request=>{assert.equal(request.url,'https://model.example.test/v1/messages');edge.lastKey=request.headers.get('x-api-key');const body=await request.json();edge.calls.push({url:request.url,body});const data=JSON.parse(body.messages[0].content),passages=data.quotedPassages;if(edge.during){const run=edge.during;edge.during=null;await run()}if(edge.mode==='unavailable')return new Response(null,{status:503});const claims=passages.map(p=>({passageId:p.id,quote:p.text}));if(edge.mode==='unsupported')return Response.json({content:[{type:'text',text:JSON.stringify({claims:[{passageId:'fabricated-citation',quote:'unsupported model assertion'}],conflicts:[],abstain:false})}]});const conflicts=edge.mode==='conflicts'&&passages.length>1?[{left:passages[0].id,right:passages[1].id}]:[];if(edge.mode==='hostile')claims.push({passageId:'fabricated-citation',quote:'injected-tool'});return Response.json({content:[{type:'text',text:JSON.stringify({claims,conflicts,abstain:false})},...(edge.mode==='hostile'?[{type:'tool_use',name:'injected-tool',input:{url:'https://attacker.example.test'}}]:[])]})},{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});

@@ -32,8 +32,9 @@ export async function manageApps(c:Context,method:string,p:string[],input:Record
  if(p.length===4&&method==='POST'&&['revoke','remove'].includes(p[3])){
   const app=await c.one<{conversation:string}>('SELECT conversation FROM nook_notification_apps WHERE id=?',[p[2]])??fail(404,'Approval unavailable')
   const management=channelManagement('?', '?')
-  if(!await c.one(`SELECT 1 WHERE ${management}`,[c.uid,app.conversation]))fail(403,'Only an owner, admin or channel manager may revoke this approval')
-  await c.batch([c.sql('UPDATE nook_notification_apps SET state=?,ended=? WHERE id=?',p[3]==='remove'?'removed':'revoked',Date.now(),p[2]),c.sql('DELETE FROM nook_notification_secrets WHERE app=?',p[2]),audit(c,p[2],app.conversation,c.uid,p[3])],undefined,management,[c.uid,app.conversation])
+  // Management role alone is not enough: current membership is fenced too.
+  if(!await c.one(`SELECT 1 WHERE ${management}`,[c.uid,app.conversation],app.conversation))fail(403,'Only an owner, admin or channel manager may revoke this approval')
+  await c.batch([c.sql('UPDATE nook_notification_apps SET state=?,ended=? WHERE id=?',p[3]==='remove'?'removed':'revoked',Date.now(),p[2]),c.sql('DELETE FROM nook_notification_secrets WHERE app=?',p[2]),audit(c,p[2],app.conversation,c.uid,p[3])],app.conversation,management,[c.uid,app.conversation])
   return {ok:true}
  }
  fail(404,'Not found')

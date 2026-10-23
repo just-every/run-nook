@@ -5309,7 +5309,7 @@
       "executable": false
     },
     "src/notification-apps/manage.ts": {
-      "sha256": "4634dca0151a42e35652b42bed3194df2e1fa471ecbd1f2771a7aeffd941b503",
+      "sha256": "05debc9d867063c3c1d05905e089c869dfb84d4d34bbfbdf559dcfafc6e88c79",
       "executable": false
     },
     "src/notification-apps/NotificationApps.tsx": {
@@ -6409,7 +6409,7 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "c4f4b2d8c40f509f5a08627be1ee67f323a9a81772e42ff817d6518873ead543",
+      "sha256": "23067d30fdd7f6ee27f3a559bd5bbc1a52473c9aecda581dd7a4b182e2440264",
       "executable": false
     },
     "tests/notification-extension.mjs": {
