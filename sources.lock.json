@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "43804c5ff6fb58e2a02bb8d0f8a23d58c17339a51333815b3ec9650367486269",
+      "sha256": "65d12cf4c0677f822cdb518471f1de13329c3fbfb05d3b9973b575399dbe814f",
       "executable": false
     },
     "DEMO.md": {
@@ -6305,7 +6305,7 @@
       "executable": false
     },
     "src/team/notification-defaults.server.ts": {
-      "sha256": "bfdd002a826cf60aff1cf0bda6d64d6516bb5740c516b6dd53b1dd043c0246bb",
+      "sha256": "16a1862ebc900b7044e02e499175d86f290e87f8b2385b176c0808c2a72cea45",
       "executable": false
     },
     "src/team/NotificationDefaults.tsx": {
