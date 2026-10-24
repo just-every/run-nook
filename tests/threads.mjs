@@ -1,6 +1,7 @@
+import {withRestoredArchive} from './archive-roundtrip.mjs'
 import assert from 'node:assert/strict'
 
-export async function threadJourney({post,patch,get,registered,check,restart,validateArchive}){
+export async function threadJourney({post,patch,get,request,owner,registered,check,restart,validateArchive}){
  const a=await registered('ThreadA'),b=await registered('ThreadB'),c=await registered('ThreadC')
  const room=(await post('/api/conversations',{name:'Launch coordination',kind:'private',participants:[b.user.id,c.user.id]},a.cookie)).data
  const send=async(actor,body,parent=null,mentions=[]) => (await post(`/api/conversations/${room.id}/messages`,{body,parent,mentions,intent:crypto.randomUUID()},actor.cookie)).data
@@ -19,6 +20,13 @@ export async function threadJourney({post,patch,get,registered,check,restart,val
   assert.equal((await get('/api/search?q=synthetic-nook%20broadcast%20reply',a.cookie)).data.items.filter(m=>m.id===broadcast.id).length,1);
   assert.equal((await get('/api/attention',a.cookie)).data.items.filter(i=>i.message?.id===broadcast.id).length,1);
   if(validateArchive)await validateArchive();
+  await withRestoredArchive({request,owner},async restored=>{
+   const reader=await restored.actor(a.user.id);
+   for(const query of ['', '?thread='+root.id]){
+    const window=await restored.call('/api/conversations/'+room.id+'/messages/window'+query,'GET',undefined,reader.cookie);
+    const matches=window.items.filter(m=>m.id===broadcast.id);assert.equal(matches.length,1);assert.equal(matches[0].body,payload.body);assert.equal(matches[0].parent,root.id);assert.equal(!!matches[0].channelBroadcast,true);
+   }
+  });
   await patch('/api/messages/'+broadcast.id,{body:'synthetic-nook edited broadcast',version:1},b.cookie);
   assert.equal((await channel())[0].body,'synthetic-nook edited broadcast');assert.equal((await thread())[0].body,'synthetic-nook edited broadcast');
   await patch('/api/messages/'+broadcast.id,{delete:true,version:2},b.cookie);

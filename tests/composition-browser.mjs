@@ -1,3 +1,6 @@
+import {withRestoredArchive} from './archive-roundtrip.mjs'
+import {installation} from './push/fixture.mjs'
+import {auditAccessibility} from './accessibility.mjs'
 import {profileFieldReadOrdering,profileFieldScopeOrdering} from './profile-fields-ordering.mjs'
 import {chromium,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
@@ -41,6 +44,7 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await expect(page.locator('[data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');
     await expect(threadView.locator('.thread-log [data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');await threadView.close();await slow.send('Emulation.setCPUThrottlingRate',{rate:1});await slow.send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});await slow.detach();
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`thread-broadcast-${width}.png`)});
+    await broadcastRestoreBrowser({browser,width,destination});
     await page.goto(base+'/app?conversation='+room.id);
 
     await call('/api/conversations/'+room.id+'/typing',{page:'owner-browser-'+width,typing:true})
@@ -172,4 +176,29 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
    }finally{await context.close()}
   }
  }finally{await browser.close()}
+}
+
+// A fresh source keeps this archive independent of unrelated clock and erasure
+// fixtures in the encompassing browser stage.
+async function broadcastRestoreBrowser({browser,width,destination}){
+ const source=await installation(undefined)
+ try{
+  const room=await source.call('/api/conversations','POST',{name:'Synthetic restored broadcast',kind:'private'},source.ownerCookie)
+  const root=await source.call('/api/conversations/'+room.id+'/messages','POST',{body:'Synthetic restored thread root',intent:crypto.randomUUID()},source.ownerCookie)
+  const reply=await source.call('/api/conversations/'+room.id+'/messages','POST',{body:'Synthetic restored broadcast reply',parent:root.id,channelBroadcast:true,intent:crypto.randomUUID()},source.ownerCookie)
+  const request=async(path,{method='GET',body,cookie=source.ownerCookie,status=200}={})=>{const response=await source.raw(path,method,body,cookie),raw=await response.text();assert.equal(response.status,status,raw);return {response,raw,data:response.headers.get('content-type')?.includes('application/json')?JSON.parse(raw):undefined}}
+  await withRestoredArchive({request,owner:{cookie:source.ownerCookie,user:source.owner}},async restored=>{
+   const setup=await fetch(restored.origin+'/setup',{method:'POST',redirect:'manual',headers:{cookie:restored.owner.cookie,Origin:restored.origin,'Content-Type':'application/x-www-form-urlencoded'},body:'confirm=yes'});assert.equal(setup.status,303)
+   const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000}})
+   try{
+    const [name,...value]=restored.owner.cookie.split('=');await context.addCookies([{name,value:value.join('='),url:restored.origin}]);const page=await context.newPage()
+    for(const [view,query,scope] of [['channel','','.chat'],['thread','&thread='+root.id,'.thread-log']]){
+     await page.goto(restored.origin+'/app?conversation='+room.id+query)
+     const row=page.locator(scope+' [data-message="'+reply.id+'"]');await expect(row).toHaveCount(1);await expect(row.locator('.message-body')).toHaveText(reply.body);await expect(row.locator('.message-body')).toBeVisible()
+     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
+     await auditAccessibility(page,destination??'evidence/composition',`restored-broadcast-${view}-${width}`)
+    }
+   }finally{await context.close()}
+  })
+ }finally{await source.close()}
 }
