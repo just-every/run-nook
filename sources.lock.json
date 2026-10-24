@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "ec02b0ed44ab4cb51efd4a7b9945f733d3a57d66d9bd7e7aedbbdb141e23a751",
+      "sha256": "c58f8942be89e2bc8a9dcdaf6a7563682e91d66759bb876ab4c4dc734a786051",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "4decc193a4d5e32803a1dccd89070ee2236034aac257b9df3fdcda64f4c521c9",
+      "sha256": "dbd4132370a34f84cadf739ee006aafe012564922471318ebd15390d12b117d5",
       "executable": false
     },
     "DEMO.md": {
@@ -702,6 +702,10 @@
     },
     "docs/getting-started.md": {
       "sha256": "769f9d2cf2a41d5d3c499d1826445283f4a8198e9df7a1aa95402993e36e7e12",
+      "executable": false
+    },
+    "docs/google-chat-import.md": {
+      "sha256": "7040faa8631d016b5898cd9ab71b77e5cfa8c642dde2db75ae9e7461333132e3",
       "executable": false
     },
     "docs/install.md": {
