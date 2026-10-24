@@ -157,8 +157,11 @@ OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… M
   rer deploy
 ```
 
-The dry run builds and validates the Worker, assets and every migration with no
-provider request. A real deploy creates or reuses the D1 database and Worker
+Without `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, the dry run is expected
+to refuse with exit 3 (`missing_input`), naming both missing inputs. It cannot
+inspect the target secret bindings without them. Supply those credentials in
+your environment or an owned 0600 `--env-file` for a complete dry run; it reads
+the target configuration without deploying. A real deploy creates or reuses the D1 database and Worker
 named after this project, applies pending migrations, uploads the build, checks
 health and then claims the hosted owner from `OWNER_EMAIL`. Set it to your real
 email address at deploy; the local development identity is for this computer.
