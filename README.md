@@ -44,12 +44,15 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 One line installs the `rer` command, clones the latest source from `main` into
 `run-nook` and starts it. Git is required; rer brings Node and pnpm.
 
+Use `curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-nook`.
+
+Already have Node 22 or later? This does the same:
+
 ```sh
-curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-nook
+npx -y @runeditrun/rer dev just-every/run-nook
 ```
 
-Already have Node 22 or later? `npx -y @runeditrun/rer dev just-every/run-nook`
-does the same. To start it again later, run the same line from the same folder,
+To start it again later, run the same line from the same folder,
 or `cd run-nook && rer dev`.
 
 To run the **0.4.0 release** instead, clone it in place of the line above,
