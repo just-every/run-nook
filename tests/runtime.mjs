@@ -94,8 +94,8 @@ try {
  await request('/api/logout',{method:'POST',cookie:revoked.cookie,body:{}})
  const assets=await readdir(resolve(root,'dist/server/assets')); let fnId
  for(const file of assets.filter(x=>x.startsWith('loaders-')&&x.endsWith('.js'))) { const source=await readFile(resolve(root,'dist/server/assets',file),'utf8'); fnId=source.match(/id: "([a-f0-9]{64})",\s*name: "loadWorkspace"/)?.[1] ?? fnId }
- let broadcastFixture
- if(['core-api-product','core-browser'].includes(suite)){const harness={post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,registered,sql,check,origin:()=>origin};const fixture=await(await import('./reports.mjs')).reportsJourney(harness);if(suite==='core-browser'&&!withoutBrowser)await check('Report filters, current source drill-through and CSV at 1440 and 390',()=>import('./reports-browser.mjs').then(m=>m.reportsBrowser({origin,owner,fixture})))}
+ let broadcastFixture,reportFixture
+ if(['core-api-product','core-browser'].includes(suite)){const harness={post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,registered,sql,check,origin:()=>origin};const fixture=reportFixture=await(await import('./reports.mjs')).reportsJourney(harness);if(suite==='core-browser'&&!withoutBrowser)await check('Report filters, current source drill-through and CSV at 1440 and 390',()=>import('./reports-browser.mjs').then(m=>m.reportsBrowser({origin,owner,fixture})))}
  assert.ok(fnId,'private generated transport must exist in emitted artifact')
  if(['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite)){
  const post=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status});
@@ -186,6 +186,7 @@ try {
  }
  }
  if(['all','core','core-api','core-api-product','installer'].includes(suite))await(await import('./profiles.mjs')).profilesJourney({post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin})
+ if(reportFixture)await(await import('./reports.mjs')).reportsFailureProbe({get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),sql},reportFixture)
  await stop()
  if(suite==='all'||suite==='core')await new Promise((ok,bad)=>{const child=spawn(process.execPath,['tests/runtime.mjs','--suite=conversion'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Isolated group-conversion journey failed')))})
  if(suite!=='core-api-product'&&suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})

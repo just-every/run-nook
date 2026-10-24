@@ -60,11 +60,16 @@ export async function reportsJourney(h){
   await get('/api/reports/commitments?'+exportQuery,admin.cookie,409)
   await get('/api/messages/'+source.id,admin.cookie,404)
   await post(`/api/conversations/${shared.id}/members`,{user:admin.user.id})
-  // Force a real storage-edge read error, restore the table in finally. No
-  // application fault toggle or fabricated report result is used.
-  await sql('ALTER TABLE nook_imports RENAME TO synthetic_nook_report_unavailable')
-  try{const failed=(await get('/api/reports/administration',admin.cookie)).data;assert.deepEqual(failed.sections.find(s=>s.name==='Connector health').missing,['storage-read-error']);assert.ok(failed.sections.find(s=>s.name==='Approved apps').state==='complete');assert.deepEqual(failed.sections.find(s=>s.name==='Stored files').missing,['storage-read-error']);assert.deepEqual(failed.privateSummary,{suppressed:true,notice:'Private totals unavailable: storage-read-error'})}finally{await sql('ALTER TABLE synthetic_nook_report_unavailable RENAME TO nook_imports')}
   fixture={admin,plain,shared,source,accepted}
  })
  return fixture
+}
+
+// Run destructive storage probes after every archive journey. SQLite schema
+// invalidation survives a rename-back in prepared statements held by the Worker.
+export async function reportsFailureProbe({get,sql},fixture){
+  // Force a real storage-edge read error, restore the table in finally. No
+  // application fault toggle or fabricated report result is used.
+  await sql('ALTER TABLE nook_imports RENAME TO synthetic_nook_report_unavailable')
+  try{const failed=(await get('/api/reports/administration',fixture.admin.cookie)).data;assert.deepEqual(failed.sections.find(s=>s.name==='Connector health').missing,['storage-read-error']);assert.ok(failed.sections.find(s=>s.name==='Approved apps').state==='complete');assert.deepEqual(failed.sections.find(s=>s.name==='Stored files').missing,['storage-read-error']);assert.deepEqual(failed.privateSummary,{suppressed:true,notice:'Private totals unavailable: storage-read-error'})}finally{await sql('ALTER TABLE synthetic_nook_report_unavailable RENAME TO nook_imports')}
 }
