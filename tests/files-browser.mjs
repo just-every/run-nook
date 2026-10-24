@@ -7,7 +7,7 @@ import {mkdir,readFile} from 'node:fs/promises'
 import {resolve} from 'node:path'
 import assert from 'node:assert/strict'
 
-export async function filesBrowser({origin,owner,member,destination}){
+export async function filesBrowser({origin,owner,member,destination,sql}){
  const base=typeof origin==='function'?origin():origin
  const call=async(path,body,person=owner)=>{
   const response=await fetch(base+path,{method:'POST',headers:{cookie:person.cookie,origin:base,'content-type':'application/json'},body:JSON.stringify(body)})
@@ -41,6 +41,17 @@ export async function filesBrowser({origin,owner,member,destination}){
      await uploadPage.addScriptTag({content:await readFile(require.resolve('axe-core/axe.min.js'),'utf8')});
      const serious=await uploadPage.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id));assert.deepEqual(serious,[]);
      if(destination)await uploadPage.screenshot({path:resolve(destination,`upload-resumed-${width}.png`),fullPage:true});
+     dropped=false;const expiredName='synthetic-nook-expired-'+width+'.zip';
+     const declared=uploadPage.waitForResponse(response=>new URL(response.url()).pathname==='/api/conversations/'+room.id+'/uploads'&&response.request().method()==='POST');
+     const expiredInterrupted=uploadPage.waitForEvent('requestfailed',{predicate:request=>/\/api\/uploads\/[^/]+\/parts\/2$/.test(new URL(request.url()).pathname)});
+     await uploadPage.getByLabel('Attach file',{exact:true}).setInputFiles({name:expiredName,mimeType:'application/zip',buffer:content});const expired=(await(await declared).json());await expiredInterrupted;await expect(uploadPage.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled();
+     await sql(`UPDATE nook_attachments SET expires=0 WHERE id='${expired.id}'`);await sql(`UPDATE nook_multipart_uploads SET expires=0 WHERE attachment='${expired.id}'`);
+     const cleanup=await call('/api/conversations/'+room.id+'/attachments',{name:'synthetic-nook-expiry-cleanup.txt',mime:'text/plain',data:Buffer.from('cleanup').toString('base64'),intent:crypto.randomUUID()},member);
+     await uploadPage.reload();await uploadPage.getByLabel('Attach file',{exact:true}).setInputFiles({name:expiredName,mimeType:'application/zip',buffer:content});await uploadPage.getByRole('button',{name:'Retry upload',exact:true}).click();await expect(uploadPage.getByRole('alert')).toContainText('Upload expired');
+     await uploadPage.addScriptTag({content:await readFile(require.resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await uploadPage.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);
+     if(destination)await uploadPage.screenshot({path:resolve(destination,`upload-expired-${width}.png`),fullPage:true});
+     await uploadPage.getByRole('button',{name:'Discard upload',exact:true}).click();const removed=await context.request.patch(base+'/api/attachments/'+cleanup.id,{headers:{Origin:base},data:{delete:true}});assert.equal(removed.status(),200);
+
     }finally{await uploadPage.close()}
     const notes='Thursday rollout\nCustomer success briefing: 09:00\nSupport handoff: 09:30\nLaunch owner: Elena\n'
     const document=await call(`/api/conversations/${room.id}/attachments`,{name:(width===1440?'east':'west')+'-coast-rollout-checklist.txt',mime:'text/plain',data:Buffer.from(notes).toString('base64'),intent:crypto.randomUUID()})

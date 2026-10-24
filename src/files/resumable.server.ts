@@ -6,7 +6,7 @@ import {fail,text,Fault} from '../family/team-chat/domain';
 import {sha256} from '@noble/hashes/sha2.js';
 export const LARGE_FILE_LIMIT=1024*1024*1024,PART_SIZE=8*1024*1024;
 const hex=(bytes:Uint8Array)=>Array.from(bytes,x=>x.toString(16).padStart(2,'0')).join('');
-async function owned(c:Context,id:string){const row=await c.one('SELECT a.*,u.multipart_id FROM nook_attachments a LEFT JOIN nook_multipart_uploads u ON u.attachment=a.id WHERE a.id=? AND a.author=?',[id,c.uid]);if(!row)fail(404,'Upload unavailable');await c.check(row.conversation);if(row.state==='deleted'||row.state==='reserved'&&row.expires<=Date.now())fail(409,'Upload expired');return row}
+async function owned(c:Context,id:string){const row=await c.one('SELECT a.*,u.multipart_id FROM nook_attachments a LEFT JOIN nook_multipart_uploads u ON u.attachment=a.id WHERE a.id=? AND a.author=?',[id,c.uid]);if(!row)fail(404,'Upload unavailable');await c.check(row.conversation);if(row.state==='reserved'&&row.expires<=Date.now()){await expireMultipart(c.env);fail(409,'Upload expired')}if(row.state==='deleted')fail(409,'Upload expired');return row}
 export async function declareUpload(c:Context,conversation:string,input:any){
  const name=text(input.name,120),intent=text(input.intent,128),mime=text(input.mime,255);
  if(/[\u0000-\u001f\u007f/\\<>:"|?*]/.test(name)||!Number.isSafeInteger(input.size)||input.size<1||input.size>LARGE_FILE_LIMIT||!/^[a-f0-9]{64}$/.test(input.sha256)||!/^[-a-zA-Z0-9!#$&^_.+]+\/[-a-zA-Z0-9!#$&^_.+]+$/.test(mime))fail(400,'Declare a filename, MIME type, SHA-256 and size from 1 byte to 1 GiB');
@@ -16,6 +16,8 @@ export async function declareUpload(c:Context,conversation:string,input:any){
  if(!row){const id=crypto.randomUUID();await c.writeBatch([c.sql("INSERT INTO nook_attachments(id,conversation,author,message,name,mime,size,sha256,expires,state,created,object_key,intent) VALUES(?,?,?,NULL,?,?,?,?,?,'reserved',?,?,?)",id,conversation,c.uid,name,mime,input.size,input.sha256,Date.now()+86400000,new Date().toISOString(),'private/'+crypto.randomUUID(),intent)],conversation,`NOT EXISTS(SELECT 1 FROM nook_erased_attachments WHERE intent_digest=?) AND (SELECT count(*) FROM nook_attachments WHERE author=? AND state IN ('reserved','staged'))<50 AND ${filePolicyVersion}=?`,[digest,c.uid,policy.version]);row={id};}
  await c.writeBatch([c.sql("INSERT OR IGNORE INTO nook_multipart_uploads SELECT id,object_key,NULL,expires FROM nook_attachments WHERE id=? AND state='reserved'",row.id)],conversation);
  const current=await owned(c,row.id);if(current.name!==name||current.mime!==mime||current.size!==input.size||current.sha256!==input.sha256||current.conversation!==conversation)fail(409,'Upload intent changed');
+ // Expiry is durable work, independent of advisory live hints.
+ try{const alarm=await c.env.CHAT_HUB.get(c.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/reminders',{method:'POST'});if(!alarm.ok)throw Error('unavailable')}catch{fail(503,'Upload reserved; expiry scheduling unavailable. Retry the same upload.')}
  await c.hint();return uploadStatus(c,row.id);
 }
 export async function uploadStatus(c:Context,id:string){const row=await owned(c,id),parts=await c.rows('SELECT part,size,sha256 FROM nook_multipart_parts WHERE attachment=? ORDER BY part',[id],row.conversation);return {id:row.id,state:row.state,partSize:PART_SIZE,parts,file:row.state==='reserved'?null:await c.one(`SELECT ${attachmentColumns} FROM nook_attachments WHERE id=?`,[id],row.conversation)}}
@@ -55,7 +57,7 @@ export async function completeUpload(c:Context,id:string){
 export async function expireMultipart(env:Pick<StorageBindings,'DB'|'FILES'>){
  const rows=(await env.DB.prepare('SELECT u.* FROM nook_multipart_uploads u WHERE (u.expires<=? OR NOT EXISTS(SELECT 1 FROM nook_attachments a WHERE a.id=u.attachment)) AND NOT EXISTS(SELECT 1 FROM nook_upload_attempts p WHERE p.object_key=u.object_key) LIMIT 25').bind(Date.now()).all<any>()).results;
  for(const row of rows){try{if(row.multipart_id)await env.FILES.resumeMultipartUpload(row.object_key,row.multipart_id).abort()}catch(error){if(!/NoSuchUpload|does not exist|not found/i.test(String(error)))continue}
-  await env.DB.batch([env.DB.prepare('DELETE FROM nook_multipart_parts WHERE attachment=?').bind(row.attachment),env.DB.prepare('DELETE FROM nook_multipart_uploads WHERE attachment=?').bind(row.attachment),env.DB.prepare("INSERT OR IGNORE INTO nook_object_deletes(object_key,created) SELECT object_key,? FROM nook_attachments WHERE id=? AND state='reserved'").bind(Date.now(),row.attachment),env.DB.prepare("DELETE FROM nook_attachments WHERE id=? AND state='reserved'").bind(row.attachment)]);
+  await env.DB.batch([env.DB.prepare('DELETE FROM nook_multipart_parts WHERE attachment=?').bind(row.attachment),env.DB.prepare('DELETE FROM nook_multipart_uploads WHERE attachment=?').bind(row.attachment),env.DB.prepare("INSERT OR IGNORE INTO nook_object_deletes(object_key,created) SELECT object_key,? FROM nook_attachments WHERE id=? AND state='reserved'").bind(Date.now(),row.attachment),env.DB.prepare("UPDATE nook_attachments SET state='deleted',name='',mime='application/octet-stream',size=0,sha256=NULL,object_key=NULL WHERE id=? AND state='reserved'").bind(row.attachment)]);
  }
 }
 export async function resumableRoute(env:StorageBindings,request:Request):Promise<Response|null>{

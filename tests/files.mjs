@@ -1,10 +1,11 @@
+import {withRestoredArchive} from './archive-roundtrip.mjs'
 import {importedPreviewFiles} from './file-preview-fixture.mjs'
 import {zipFixture} from './slack-import/fixture.mjs'
 import assert from 'node:assert/strict'
 import {createHash} from 'node:crypto'
 import {sourceDoor} from './import-fixture.mjs'
 
-export async function filesJourney({owner,registered,post,patch,get,check,restart,origin,sql,validateArchive}){
+export async function filesJourney({owner,registered,post,patch,get,request,check,restart,origin,sql,validateArchive}){
  await check('NOOK-061 ordered multipart resumes after restart and verifies bytes before one binding',async()=>{
   const base=typeof origin==='function'?origin():origin,room=(await post('/api/conversations',{name:'synthetic-nook multipart custody',kind:'private',participants:[]})).data;
   const call=async(path,{method='GET',body,status=200,type='application/json'}={})=>{const response=await fetch(base+path,{method,headers:{Connection:'close',cookie:owner.cookie,Origin:base,'Content-Type':type},body:body===undefined?undefined:body instanceof Uint8Array?body:JSON.stringify(body)});const result=await response.json();assert.equal(response.status,status,JSON.stringify(result));return result};
@@ -20,6 +21,9 @@ export async function filesJourney({owner,registered,post,patch,get,check,restar
   const declaration=await call(path,{method:'POST',body:input});assert.equal((await call(path,{method:'POST',body:input})).id,declaration.id);
   await call('/api/uploads/'+declaration.id+'/parts/2',{method:'PUT',type:'application/octet-stream',body:bytes.subarray(8*1024*1024),status:409});
   await call('/api/uploads/'+declaration.id+'/parts/1',{method:'PUT',type:'application/octet-stream',body:bytes.subarray(0,8*1024*1024)});
+  const refused=await request('/api/portability/exports',{method:'POST',cookie:owner.cookie,body:{},status:409});
+  assert.equal(refused.data.error,'reconcile_pending_object_work_before_export','an incomplete multipart upload has a named archive refusal');
+  assert.equal((await call('/api/uploads/'+declaration.id)).parts.length,1,'refused backup preserves the resumable upload');
   await restart();assert.equal((await call('/api/uploads/'+declaration.id)).parts.length,1);
   await call('/api/uploads/'+declaration.id+'/parts/1',{method:'PUT',type:'application/octet-stream',body:bytes.subarray(0,8*1024*1024)});
   await call('/api/uploads/'+declaration.id+'/parts/2',{method:'PUT',type:'application/octet-stream',body:bytes.subarray(8*1024*1024)});
@@ -27,9 +31,26 @@ export async function filesJourney({owner,registered,post,patch,get,check,restar
   assert.equal((await call('/api/uploads/'+declaration.id+'/complete',{method:'POST'})).file.id,completed.file.id);
   const message=(await post('/api/conversations/'+room.id+'/messages',{body:'synthetic-nook resumable file',attachments:[completed.file.id],intent:crypto.randomUUID()})).data;
   const downloaded=await fetch(base+'/api/attachments/'+completed.file.id+'/download',{headers:{Connection:'close',cookie:owner.cookie}});assert.equal(createHash('sha256').update(Buffer.from(await downloaded.arrayBuffer())).digest('hex'),checksum);
+  await withRestoredArchive({request,owner},async restored=>{
+   const response=await restored.raw('/api/attachments/'+completed.file.id+'/download','GET',undefined,restored.owner.cookie);
+   assert.equal(response.status,200);assert.equal(createHash('sha256').update(Buffer.from(await response.arrayBuffer())).digest('hex'),checksum);
+   for(const table of ['nook_multipart_parts','nook_multipart_uploads'])assert.equal((await restored.db.prepare('SELECT count(*) AS n FROM '+table).first()).n,0,'restored completed file has no orphan '+table);
+   const status=await restored.call('/api/uploads/'+completed.file.id,'GET',undefined,restored.owner.cookie);assert.equal(status.state,'attached');assert.deepEqual(status.parts,[]);
+  });
   if(validateArchive)await validateArchive();
   await patch('/api/messages/'+message.id,{delete:true,version:1});
   await get('/api/attachments/'+completed.file.id+'/download',owner.cookie,404);
+  const expiredInput={...input,name:'synthetic-nook-expired.zip',intent:crypto.randomUUID()},expired=await call(path,{method:'POST',body:expiredInput});
+  await call('/api/uploads/'+expired.id+'/parts/1',{method:'PUT',type:'application/octet-stream',body:bytes.subarray(0,8*1024*1024)});
+  await sql(`UPDATE nook_attachments SET expires=0 WHERE id='${expired.id}'`);await sql(`UPDATE nook_multipart_uploads SET expires=0 WHERE attachment='${expired.id}'`);
+  const resumed=await fetch(base+'/api/uploads/'+expired.id,{headers:{Connection:'close',cookie:owner.cookie}});assert.ok([404,409].includes(resumed.status));assert.match((await resumed.json()).error,/Upload (expired|unavailable)/);
+  // An ordinary binary upload runs the same durable object cleanup as alarms.
+  const cleanup=(await post('/api/conversations/'+room.id+'/attachments',{name:'synthetic-nook-cleanup.txt',mime:'text/plain',data:Buffer.from('cleanup').toString('base64'),intent:crypto.randomUUID()})).data;
+  for(const table of ['nook_multipart_parts','nook_multipart_uploads'])assert.equal((await sql(`SELECT count(*) AS n FROM ${table} WHERE attachment='${expired.id}'`))[0].n,0,'expiry drops '+table);
+  await call(path,{method:'POST',body:expiredInput,status:409});
+  await get('/api/uploads/'+expired.id,owner.cookie,409);
+  await restart();await call(path,{method:'POST',body:expiredInput,status:409});
+  await patch('/api/attachments/'+cleanup.id,{delete:true});
   const current=(await get('/api/team/file-policy')).data;await patch('/api/team/file-policy',{...current,maxBytes:policy.maxBytes,blockedExtensions:policy.blockedExtensions});
  });
  await inertPreviewJourney({owner,registered,post,get,check,origin})
