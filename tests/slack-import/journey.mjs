@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import { slackFixture, largeSlackFixture, zipFixture } from './fixture.mjs';
 import {importDoorClient,importUsers} from '../import-door-support.mjs';
 import { invite, signIn } from '../auth-support.mjs';
 export async function importJourney({ origin, owner, restart, sql, validateArchive }) {
     const report = [], suffix = crypto.randomUUID().slice(0, 8), member = await invite(origin, owner.cookie, 'ImportReader' + suffix), outsider = await invite(origin, owner.cookie, 'ImportOutsider' + suffix);
     // Worker restarts must not reuse a pooled socket to the disposed listener.
-    async function call(path, { actor = owner, body, zip, status = 200, method } = {}) { const r = await fetch(origin + path, { method: method ?? (body !== undefined || zip ? 'POST' : 'GET'), headers: { Connection: 'close', Origin: origin, cookie: actor.cookie, ...(zip ? { 'Content-Type': 'application/zip' } : body !== undefined ? { 'Content-Type': 'application/json' } : {}) }, body: zip ?? (body !== undefined ? JSON.stringify(body) : undefined) }); const raw = await r.text(); assert.equal(r.status, status, `${path}: ${raw}`); return r.headers.get('content-type')?.includes('json') ? JSON.parse(raw) : raw; }
+    async function call(path, { actor = owner, body, zip, status = 200, method, plain=false } = {}) { const r = await fetch(origin + path, { method: method ?? (body !== undefined || zip ? 'POST' : 'GET'), headers: { Connection: 'close', Origin: origin, cookie: actor.cookie, ...(zip ? { 'Content-Type': 'application/zip' } : body !== undefined ? { 'Content-Type': 'application/json' } : {}) }, body: zip ?? (body !== undefined ? JSON.stringify(body) : undefined) }); const raw = await r.text(); assert.equal(r.status, status, `${path}: ${raw}`); return !plain&&r.headers.get('content-type')?.includes('json') ? JSON.parse(raw) : raw; }
     const welcome=(await call('/api/conversations')).find(c=>c.kind==='channel'&&!c.archived);
     async function scopedActor(name,role,mode){
         const email=(name+suffix).toLowerCase()+'@example.test';
@@ -216,9 +217,9 @@ async function largeImportJourney({ call, door, owner, restart, suffix }) {
     return { name: 'large actual D1 import resumes after cold restart and all 1205 messages across two normal histories/search are reachable', passed: true, counts: { messages: count, actors: 205, replies, kitEntries: 1412, applyRequests: requests } };
 }
 
-async function privateHistoryJourney({call,door,owner,member,outsider,admin,guest,suffix,validateArchive}) {
+export async function privateHistoryJourney({call,door,owner,member,outsider,admin,guest,suffix,validateArchive}) {
  const {privateSlackFixture}=await import('../slack-private-fixture.mjs');
- const inspection=await door.inspect(privateSlackFixture());
+ const inspection=await door.inspect(privateSlackFixture({files:true}));
  assert.deepEqual(inspection.channels.map(c=>c.visibility),['private','dm','group-dm']);
  assert.ok(!JSON.stringify(inspection).includes('canary'),'inspection exposes counts and rosters, never history text');
  assert.equal(inspection.integrations.length,5);
@@ -243,9 +244,19 @@ async function privateHistoryJourney({call,door,owner,member,outsider,admin,gues
   for(const actor of [owner,admin,guest]){
    await call(`/api/conversations/${room.id}/messages`,{actor,status:403});
    await call(`/api/messages/${messages[0].id}`,{actor,status:404});
+   await call('/api/readable-exports',{actor,body:{scope:'conversation',conversationId:room.id,custodyAccepted:true},status:403});
+   for(const file of messages[0].attachments)await call('/api/attachments/'+file.id+'/download',{actor,status:404});
    assert.equal((await call('/api/search?q=Synthetic%20private',{actor})).items.some(m=>m.id===messages[0].id),false);
   }
  }
+ const privateFile=(await call(`/api/conversations/${privateRoom.id}/messages`,{actor:member}))[0].attachments[0];assert.ok(privateFile);
+ const fileBytes=await call('/api/attachments/'+privateFile.id+'/download',{actor:outsider});assert.equal(fileBytes,'synthetic-nook private file bytes!');
+ const exported=await call('/api/portability/exports',{body:{},status:201});let archiveStatus;
+ for(let n=0;n<200;n++){archiveStatus=await call('/api/portability/exports/'+exported.id+'/advance',{body:{maxParts:16}});if(archiveStatus.phase!=='building')break}assert.equal(archiveStatus.phase,'complete');
+ const archiveText=await call('/api/portability/exports/'+exported.id+'/download',{plain:true}),{readArchive}=await import('@runeditrun/rer/modules/portability'),archiveRecords=[];
+ for await(const record of readArchive(new Blob([archiveText]).stream()))archiveRecords.push(record);
+ const archiveFile=archiveRecords.flatMap(r=>r.items??[]).find(r=>r.table==='nook_attachments'&&r.row.id===privateFile.id)?.row;assert.ok(archiveFile);assert.ok([member.user.id,outsider.user.id].includes(archiveFile.author));assert.notEqual(archiveFile.author,owner.user.id);assert.equal(archiveFile.sha256,createHash('sha256').update(fileBytes).digest('hex'));assert.ok(archiveRecords[0].objects.some(o=>o.key===archiveFile.object_key&&o.size===Buffer.byteLength(fileBytes)));
+ await call('/api/portability/exports/'+exported.id+'/abort',{body:{}});
  const dmMessage=(await call(`/api/conversations/${dm.id}/messages`,{actor:member}))[0];
  assert.match(dmMessage.slack.links[0].href,/focus=/);
  const forged=structuredClone((await door.prepare(inspection,review)).packet);forged.capture.channels[0].members.push(owner.user.id);
