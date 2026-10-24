@@ -661,7 +661,7 @@
       "executable": false
     },
     "docs/attention.md": {
-      "sha256": "e5eef5d91b313d7835a9416606a67de637f2e309042a86a5ed9124f354db8e63",
+      "sha256": "aeba51beeb615b47c0aaae7aef76bf87722d6ca38617815857d68c67807e540f",
       "executable": false
     },
     "docs/backups.md": {
@@ -697,7 +697,7 @@
       "executable": false
     },
     "docs/file-previews.md": {
-      "sha256": "502f59a8c587f35e98a08b8b7cc8cb955274aa5046fe6199e682af452f0b65e3",
+      "sha256": "d2326d49632c7e186814429b6ff88dc3c3c9fb0d02d19292819f0b1e3ae1b65c",
       "executable": false
     },
     "docs/getting-started.md": {
@@ -737,7 +737,7 @@
       "executable": false
     },
     "docs/site.json": {
-      "sha256": "26633fbe30dc57f275b751097bb6e345b61694a51487f87827a709ab5b889a64",
+      "sha256": "ddf9ec9786fe1a3a9ff72e200c1f94f47a22ae4b5126452390aff2a6c1d2fabe",
       "executable": false
     },
     "docs/updating.md": {
@@ -4093,7 +4093,7 @@
       "executable": false
     },
     "src/chat/api.ts": {
-      "sha256": "0e9110a1db04bf2d1e805b0c542b7b6836b67f44a3ca77dc866e8cc7c0c6453c",
+      "sha256": "e30c86beefb3a205a60c40dc804d41f5fea933c239b2ef239f5c8cc08964c52d",
       "executable": false
     },
     "src/chat/AttentionView.tsx": {
@@ -5177,7 +5177,7 @@
       "executable": false
     },
     "src/imports/presentation.ts": {
-      "sha256": "699c73bbe06723cc62b7a95c4b089def9cf9f7b172cca4c4018e434ba8cfb567",
+      "sha256": "572e107900eb71917337c95f9d3cadeda6a99fde565a757a0f8febe053131f38",
       "executable": false
     },
     "src/imports/projection.ts": {
@@ -5297,7 +5297,7 @@
       "executable": false
     },
     "src/imports/slack.mjs": {
-      "sha256": "c41aa44cd4b27043c0c1b06a36d388375aa5cbb4d88d31422478c28a2f30a558",
+      "sha256": "f1e65addd513553eb97a37e46ac280904323717184ec49b2d2a7cdd119e91612",
       "executable": false
     },
     "src/imports/SlackHistory.tsx": {
@@ -7053,7 +7053,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "8c8a6ea41bb1c624342dd5e56d0767eb9b343781d2cd17bc86b2e25c82e489b4",
+      "sha256": "ee18e8e6509f7e4c7decad332b0b22b04ac4bc8a5f69eec7f74c71757918cd29",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
@@ -7109,7 +7109,7 @@
       "executable": false
     },
     "tests/slack-import.test.mjs": {
-      "sha256": "0ebe2498475120baf204ee8a8906dcc53398513f95d563865961df3ac267a375",
+      "sha256": "70e34ac4dc84d311a6167962f0b8c16c4dd5ec899394c1069f55ba9098af1a50",
       "executable": false
     },
     "tests/slack-import/archive-roundtrip.mjs": {

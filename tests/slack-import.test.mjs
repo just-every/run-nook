@@ -56,6 +56,12 @@ test('Slack review preserves external actors, exact text, threads and supplied f
     assert.equal(plan.counts.effects, 9);
     assert.throws(() => captureSlackArchive(inspected, { ...fixtureReview, actors: { U1: null } }, 'owner', fixtureUsers), /explicit actor decision/);
     assert.throws(() => captureSlackArchive(inspected, { ...fixtureReview, channels: [{ sourceId: 'G1', name: 'leak', members: ['owner'] }] }, 'owner', fixtureUsers), /unavailable/);
+    const aliasZip=zipFixture([
+        ['users.json',[]],
+        ['channels.json',[{id:'C1',name:'D1'}]],
+        ['dms.json',[{id:'D1',members:['U1','U2']}]]
+    ]);
+    assert.throws(()=>inspectSlackArchive(aliasZip),/channel folder alias/);
     const confusedFile = zipFixture([['users.json', [{ id: 'U1' }]], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', [{ type: 'message', user: 'U1', ts: '1.000001', text: 'public', files: [{ id: 'F1', name: 'private.txt', mimetype: 'text/plain', local_path: 'secret/2024-01-01.json' }] }]], ['secret/2024-01-01.json', 'PRIVATE CANARY']]);
     assert.throws(() => captureSlackArchive(inspectSlackArchive(confusedFile), { namespace: 'custody', channels: [{ sourceId: 'C1', name: 'history', members: ['owner'] }], actors: { U1: null }, acceptedOmissions: [] }, 'owner', fixtureUsers), /file identity/);
 

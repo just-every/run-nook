@@ -13,7 +13,7 @@ async function responseValue<T>(response:Response):Promise<T>{
  return value
 }
 export function attachmentMime(file:File){
- const mime=(/^audio\/|^video\//.test(file.type)||/\.(webm|mp4|m4a|ogg|mp3|wav)$/i.test(file.name))?clipFile(file).type:file.type||({txt:'text/plain',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',pdf:'application/pdf'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()]
+ const mime=(isClipMime(file.type)||!file.type&&/\.(webm|mp4|m4a|ogg|mp3|wav)$/i.test(file.name))?clipFile(file).type:file.type||({txt:'text/plain',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',pdf:'application/pdf'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()]
  return mime||'application/octet-stream'
 }
 export async function uploadAttachment(conversation:string,file:File,intent:string):Promise<FileRecord>{

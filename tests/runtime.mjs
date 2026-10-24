@@ -141,6 +141,9 @@ try {
  if(suite!=='core-api-storage'){
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
  await(await import('./threads.mjs')).threadJourney(normalizedHarness)
+ // Archive proofs run before later journeys deliberately corrupt reminder clocks.
+ await(await import('./personal.mjs')).personalJourney(normalizedHarness)
+ await(await import('./files.mjs')).filesJourney(normalizedHarness)
  await(await import('./channel-lifecycle.mjs')).channelLifecycleJourney(normalizedHarness)
  await(await import('./scheduled.mjs')).scheduledJourney(normalizedHarness)
  await(await import('./reminders.mjs')).remindersJourney(normalizedHarness)
@@ -149,8 +152,6 @@ try {
  broadcastFixture=await(await import('./broadcast.mjs')).broadcastJourney(normalizedHarness)
  await(await import('./saved-reminders.mjs')).savedRemindersJourney(normalizedHarness)
  await(await import('./saved-search.mjs')).savedSearchJourney(normalizedHarness)
- await(await import('./personal.mjs')).personalJourney(normalizedHarness)
- await(await import('./files.mjs')).filesJourney(normalizedHarness)
  }
  if(suite!=='core-api-product')await(await import('./media-adversarial.mjs')).runMedia(normalizedHarness)
  if(suite!=='core-api-storage'){

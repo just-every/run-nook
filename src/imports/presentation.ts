@@ -11,7 +11,7 @@ async function sourceNames(c: Context, row: any, source: any) {
 // plan and archive); the plain reading is derived here. An unlabeled reference
 // to a channel that was not imported shows its Slack ID.
 async function channelNames(c: Context, row: any) {
-    const rows = row.body.includes('<#') ? await c.rows('SELECT source_id,source_record FROM nook_import_channels WHERE job=?', [row.job], row.conversation) : [];
+    const rows = row.body.includes('<#') ? await c.rows(`SELECT ch.source_id,ch.source_record FROM nook_import_channels ch JOIN nook_members m ON m.conversation=ch.conversation WHERE ch.job=? AND m.user=? AND ${allowedGrant('m.user','m.conversation')}`, [row.job,c.uid], row.conversation) : [];
     return new Map<string,string>(rows.map((r: any): [string, string] => [r.source_id, JSON.parse(r.source_record).name]).filter(([, name]) => typeof name === 'string'));
 }
 const displayText = async (c: Context, row: any, names: Map<string,string>) => slackPlainText(row.body, names, await channelNames(c, row));

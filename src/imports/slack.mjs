@@ -31,10 +31,11 @@ export function inspectSlackArchive(bytes, localUsers = []) {
     identityRows([...channels, ...excluded], 'channel export');
     const names = new Set(), omissions = [], candidates = [];
     for (const c of [...channels, ...excluded]) {
-        if (typeof c.name === 'string') {
-            canonicalPath(c.name);
-            if (c.name.includes('/') || c.name === 'files') bad('channel folder');
-            const alias = c.name.normalize('NFKC').toLowerCase();
+        const folder=c.name??(c.visibility?c.id:undefined);
+        if (typeof folder === 'string') {
+            canonicalPath(folder);
+            if (folder.includes('/') || folder === 'files') bad('channel folder');
+            const alias = folder.normalize('NFKC').toLowerCase();
             if (names.has(alias))
                 bad('channel folder alias');
             names.add(alias);
