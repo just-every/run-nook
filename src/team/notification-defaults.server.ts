@@ -5,7 +5,7 @@ const owner=(user:string)=>`EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access
 export async function notificationDefaults(c:Context){
  if(!await c.one(`SELECT 1 WHERE ${owner('?')}`,[c.uid]))fail(403,'Only owners manage new-member notification defaults');
  const row=await c.one('SELECT * FROM nook_notification_defaults WHERE id=1');
- return {version:row?.version??0,push:row?JSON.parse(row.push_json):Object.fromEntries(fields.map(f=>[f,f!=='urgentQuiet'])),channels:row?JSON.parse(row.channels_json):[],awayEmail:!!row?.away_email,defaultChannels:await c.rows('SELECT c.id,c.name FROM nook_default_channels d JOIN nook_conversations c ON c.id=d.conversation ORDER BY c.name')};
+ return {version:row?.version??0,push:row?JSON.parse(row.push_json):Object.fromEntries(fields.map(f=>[f,false])),channels:row?JSON.parse(row.channels_json):[],awayEmail:!!row?.away_email,defaultChannels:await c.rows('SELECT c.id,c.name FROM nook_default_channels d JOIN nook_conversations c ON c.id=d.conversation ORDER BY c.name')};
 }
 export async function updateNotificationDefaults(c:Context,input:any){
  const current=await notificationDefaults(c);
