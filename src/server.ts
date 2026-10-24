@@ -1,3 +1,4 @@
+import {resumableRoute} from './files/resumable.server';
 import {clipRoute} from './clips/server'
 import {transcriptRoute} from './transcripts/route.server'
 import {forwardingRoute} from './forwards/server'
@@ -157,6 +158,7 @@ export default withDemo({
   if(url.pathname==='/auth/owner-claim') return await ownerClaim(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/api/editor/config'||url.pathname==='/api/editor/session') return editorRoute(env,request)
   if(url.pathname.startsWith('/api/mattermost-emoji/'))return (await mattermostEmojiRoute(request,env))!
+  const multipart=await resumableRoute(env,request);if(multipart)return multipart;
   const imported = await importDoor(request,env)
   if(imported)return imported
   if(url.pathname==='/api/portability'||url.pathname.startsWith('/api/portability/'))return portabilityRoute(env,request)

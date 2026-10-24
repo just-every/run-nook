@@ -23,6 +23,24 @@ export async function filesBrowser({origin,owner,member,destination}){
     const [name,...value]=member.cookie.split('=');await context.addCookies([{name,value:value.join('='),url:base}])
     const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error')errors.push(message.text())})
     const room=await call('/api/conversations',{name:'Customer rollout documents '+width,kind:'private',participants:[member.user.id]})
+    const uploadPage=await context.newPage();
+    try{
+     const content=Buffer.alloc(8*1024*1024+17,65),filename='synthetic-nook-resume-'+width+'.zip';let dropped=false,firstParts=0;
+     uploadPage.on('request',request=>{if(/\/api\/uploads\/[^/]+\/parts\/1$/.test(new URL(request.url()).pathname))firstParts++});
+     await uploadPage.route('**/api/uploads/*/parts/2',async route=>{if(!dropped){dropped=true;await route.abort()}else await route.continue()});
+     await uploadPage.goto(base+'/app?conversation='+room.id);
+     await uploadPage.getByLabel('Attach file',{exact:true}).setInputFiles({name:filename,mimeType:'application/zip',buffer:content});
+     await expect(uploadPage.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled();assert.equal(dropped,true);
+     if(destination)await uploadPage.screenshot({path:resolve(destination,`upload-interrupted-${width}.png`),fullPage:true});
+     await uploadPage.reload();await uploadPage.getByLabel('Attach file',{exact:true}).setInputFiles({name:filename,mimeType:'application/zip',buffer:content});
+     await uploadPage.getByRole('button',{name:'Retry upload',exact:true}).click();
+     await expect(uploadPage.locator('.staged-files')).toContainText(filename);assert.equal(firstParts,1,'reload resumes after the stored first part');
+     await uploadPage.getByRole('textbox',{name:'Message '+room.name,exact:true}).fill('synthetic-nook resumed upload '+width);await uploadPage.getByRole('button',{name:'Send',exact:true}).click();
+     await expect(uploadPage.locator('.file-row a[download="'+filename+'"]')).toBeVisible();
+     await uploadPage.addScriptTag({content:await readFile(require.resolve('axe-core/axe.min.js'),'utf8')});
+     const serious=await uploadPage.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id));assert.deepEqual(serious,[]);
+     if(destination)await uploadPage.screenshot({path:resolve(destination,`upload-resumed-${width}.png`),fullPage:true});
+    }finally{await uploadPage.close()}
     const notes='Thursday rollout\nCustomer success briefing: 09:00\nSupport handoff: 09:30\nLaunch owner: Elena\n'
     const document=await call(`/api/conversations/${room.id}/attachments`,{name:(width===1440?'east':'west')+'-coast-rollout-checklist.txt',mime:'text/plain',data:Buffer.from(notes).toString('base64'),intent:crypto.randomUUID()})
     const root=await call(`/api/conversations/${room.id}/messages`,{body:'Here is the customer rollout checklist. Please review the support handoff before Thursday.',attachments:[document.id],intent:crypto.randomUUID()})

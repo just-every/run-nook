@@ -1,3 +1,4 @@
+import {expireMultipart} from '../../files/resumable.server';
 import {readFilePolicy,enforceFilePolicy,filePolicyVersion} from '../../files/policy.server'
 import {isClipMime} from '../../clips/media'
 import {clipSignature} from '../../clips/signature'
@@ -20,6 +21,7 @@ export async function download(c:Context,id:string){const row=await c.one(`SELEC
 export async function remove(c:Context,id:string){if(await c.one('SELECT id FROM nook_import_files WHERE attachment=?',[id]))fail(403,'Imported history files are immutable');const receipt=await erase(c,'attachment',id,{confirmation:'ERASE'},true);return {...await c.one(`SELECT ${attachmentColumns} FROM nook_attachment_history WHERE id=?`,[id]),receipt}}
 
 export async function recoverDeletes(env:{DB:D1Database;FILES:R2Bucket}){
+ await expireMultipart(env);
  const rows=await env.DB.prepare('SELECT object_key FROM nook_object_deletes d WHERE NOT EXISTS(SELECT 1 FROM nook_upload_attempts p WHERE p.object_key=d.object_key) AND NOT EXISTS(SELECT 1 FROM nook_attachments a WHERE a.object_key=d.object_key) AND NOT EXISTS(SELECT 1 FROM nook_schedule_files f WHERE f.object_key=d.object_key) ORDER BY created LIMIT 25').all<{object_key:string}>();
  for(const row of rows.results){try{
   const guard=crypto.randomUUID();

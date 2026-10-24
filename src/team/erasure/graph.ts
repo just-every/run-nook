@@ -2,6 +2,8 @@
 const userEdge=(table:string,key:string[],column='user')=>({table,key,from:'nook_actors',on:{[column]:'id'},phase:'identity' as const})
 const messageEdge=(table:string,key:string[])=>({table,key,from:'nook_messages',on:{message:'id'}})
 export const retained = [
+ {table:'nook_multipart_uploads',reason:'Ephemeral R2 abort custody is excluded from archives; cleanup aborts parts after expiry or attachment erasure.'},
+ {table:'nook_multipart_parts',reason:'Ephemeral chunk receipts are excluded from archives and removed with their aborted or completed upload.'},
  {table:'nook_thread_broadcasts',reason:'Body-free projection identity keeps one erased reply tombstone in its channel and thread; no copied body or member attribution.'},
  {table:'nook_channel_descriptions',reason:'Shared channel description text remains with the conversation like its topic; manager attribution resides in independently anonymized channel actions.'},
  {table:'nook_workspace_channel_policy',reason:'Body-free workspace channel permissions retain no member attribution; policy changes use the independently anonymized audit log.'},

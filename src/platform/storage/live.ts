@@ -64,7 +64,9 @@ export class ChatHub extends DurableObject<StorageBindings>{
   let next:number|null=null;try{next=await drainNotifications(this.env,mailSend(this.env))}catch(error){console.error('Notification delivery pass failed',error instanceof Error?error.message:'');next=Date.now()+60_000}
   let pushNext:number|null=null;try{pushNext=await drainPush(this.env)}catch{console.error('Push delivery pass failed');pushNext=Date.now()+60_000}
   const live=this.ctx.getWebSockets().length||(await this.env.DB.prepare('SELECT object_key FROM nook_object_deletes UNION ALL SELECT operation FROM nook_erasure_work LIMIT 1').first())?Date.now()+5000:null
-  const at=[live,next,pushNext,reminderNext,scheduleNext,personalNext,digestNext].filter((value):value is number=>value!==null);if(at.length)await this.soon(Math.max(Math.min(...at)-Date.now(),1000))
+  const multipart=await this.env.DB.prepare('SELECT MIN(expires) AS expires FROM nook_multipart_uploads').first<{expires:number|null}>();
+  const multipartNext=multipart?.expires==null?null:Math.max(multipart.expires,Date.now()+60000);
+  const at=[multipartNext,live,next,pushNext,reminderNext,scheduleNext,personalNext,digestNext].filter((value):value is number=>value!==null);if(at.length)await this.soon(Math.max(Math.min(...at)-Date.now(),1000))
  }
  async webSocketMessage(socket:WebSocket){await this.deliver(socket,true)}
  // The configured compatibility date lets the runtime complete the close handshake.

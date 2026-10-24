@@ -10,7 +10,7 @@ export function FilePolicySettings({request}:{request:TeamRequest}){
  <p>Owners set the size and file extensions accepted for new files. Existing files stay available. Scanning and quarantine are not available, and no file is marked scanned, clean or safe.</p>
  <p>While this policy is restricted, history-import uploads are refused before storing their embedded bytes. Uploads already in progress must finish or be reconciled before you change this policy.</p>
  {value&&<form className="integration-create" onSubmit={e=>void save(e)}>
- <div className="field"><label htmlFor={id+'-size'}>Maximum file size (MiB)</label><input id={id+'-size'} type="number" min={1/1048576} max={25} step="any" required value={value.maxBytes/1048576} onChange={e=>setValue({...value,maxBytes:Math.round(Number(e.target.value)*1048576)})}/></div>
+ <div className="field"><label htmlFor={id+'-size'}>Maximum file size (MiB)</label><input id={id+'-size'} type="number" min={1/1048576} max={1024} step="any" required value={value.maxBytes/1048576} onChange={e=>setValue({...value,maxBytes:Math.round(Number(e.target.value)*1048576)})}/></div>
  <div className="field"><label htmlFor={id+'-extensions'}>Blocked file extensions</label><textarea id={id+'-extensions'} rows={3} maxLength={1700} value={extensions} onChange={e=>setExtensions(e.target.value)} placeholder="exe\nzip"/></div>
  <p>Enter extensions separated by spaces, commas or new lines. Matching ignores case and includes compound extensions such as tar.gz.</p>
  <div className="profile-row"><button className="soft-button" disabled={busy}>Save file policy</button><button type="button" className="text-button" disabled={busy} onClick={()=>void load()}>Reload file policy</button></div>

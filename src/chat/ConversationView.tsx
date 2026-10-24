@@ -21,7 +21,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
  // A conversation opened at its landing keeps that landing while the panel opens and closes: changing it would reset the window and blank the chat.
  const keepLanding=route.landing?{landing:true}:{}
  const setShowOutcomes=(value:boolean)=>navigate({panel:value?'outcomes':null,...(!value?{focus:null}:{}),...keepLanding})
- const name=conversationName(c,user),roots=data.rootWindow.items.filter(m=>!m.parent),root=data.threadWindow?.root,replies=data.threadWindow?.items||[]
+ const name=conversationName(c,user),roots=data.rootWindow.items.filter(m=>!m.parent||m.channelBroadcast),root=data.threadWindow?.root,replies=data.threadWindow?.items||[]
  const activeLog=route.thread?threadLog:log
  const activeWindow=data.threadWindow||data.rootWindow
  const latestWindow=useRef(activeWindow);latestWindow.current=activeWindow

@@ -1,3 +1,4 @@
+import {fileChecksum} from '../files/resumable-client';
 import {useEffect,useRef,useState} from 'react'
 import {ApiError,attachmentMime,uploadAttachment} from './api'
 import type {FileRecord} from './types'
@@ -7,9 +8,8 @@ export type PendingUpload=FileIdentity & {intent:string}
 type Options={conversation:string;isCurrent:()=>boolean;getPending:()=>PendingUpload|null;getCount:()=>number;onPending:(pending:PendingUpload|null)=>void;onUploaded:(file:FileRecord)=>void;onError:(error:unknown)=>void}
 async function identity(file:File):Promise<FileIdentity>{
  const mime=attachmentMime(file)
- if(file.size<1||file.size>25*1024*1024)throw new ApiError(413,'Choose a file between 1 byte and 25 MiB.')
- const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer())
- return {name:file.name,mime,size:file.size,sha256:Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('')}
+ if(file.size<1||file.size>1024*1024*1024)throw new ApiError(413,'Choose a file between 1 byte and 1 GiB.')
+ return {name:file.name,mime,size:file.size,sha256:await fileChecksum(file)}
 }
 const matches=(file:FileIdentity,pending:PendingUpload)=>file.name===pending.name&&file.mime===pending.mime&&file.size===pending.size&&file.sha256===pending.sha256
 

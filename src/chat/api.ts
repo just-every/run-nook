@@ -1,3 +1,4 @@
+import {resumableUpload} from '../files/resumable-client';
 import type {TeamRequest} from '../team/types'
 import {isClipMime,clipFile} from '../clips/media'
 import type {Attention,FileRecord,LocationState,MessageWindow,Outcome,Page,Projection,WorkspaceSnapshot,Replay} from './types'
@@ -13,11 +14,11 @@ async function responseValue<T>(response:Response):Promise<T>{
 }
 export function attachmentMime(file:File){
  const mime=(/^audio\/|^video\//.test(file.type)||/\.(webm|mp4|m4a|ogg|mp3|wav)$/i.test(file.name))?clipFile(file).type:file.type||({txt:'text/plain',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',pdf:'application/pdf'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()]
- if(!['text/plain','image/png','image/jpeg','application/pdf'].includes(mime)&&!isClipMime(mime))throw new ApiError(415,'Unsupported file type')
- return mime
+ return mime||'application/octet-stream'
 }
 export async function uploadAttachment(conversation:string,file:File,intent:string):Promise<FileRecord>{
  const mime=attachmentMime(file)
+ if(file.size>1024*1024||!['text/plain','image/png','image/jpeg','application/pdf'].includes(mime)&&!isClipMime(mime)){try{return await resumableUpload(conversation,file,intent,mime)}catch(error){const e=error as Error&{status?:number};throw new ApiError(e.status??409,e.message)}}
  const response=await fetch(`/api/conversations/${conversation}/attachments`,{method:'POST',headers:{'Content-Type':mime,'X-Filename':encodeURIComponent(file.name),'X-Upload-Intent':intent},body:file,cache:'no-store'})
  return responseValue<FileRecord>(response)
 }
