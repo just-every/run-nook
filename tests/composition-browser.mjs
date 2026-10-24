@@ -3,7 +3,7 @@ import {chromium,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
 import {resolve} from 'node:path'
 import assert from 'node:assert/strict'
-export async function compositionBrowser({origin,owner,member,outsider,destination}){
+export async function compositionBrowser({origin,owner,member,outsider,destination,sql,directoryPerson='Elena Rivera'}){
  const base=typeof origin==='function'?origin():origin
  const call=async(path,body,actor=owner,method=body?'POST':'GET')=>{const r=await fetch(base+path,{method,headers:{cookie:actor.cookie,origin:base,...(body?{'content-type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});assert.equal(r.status,200,await r.clone().text());return r.json()}
  await call('/api/profile',{name:'Priya Chen'})
@@ -116,18 +116,19 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
      await expect(fields.getByRole('button',{name:'Edit Sales region '+width,exact:true})).toBeVisible()
      }finally{await ordering?.close()}
      const team=admin.getByLabel('Team people',{exact:true})
-     await expect(team.locator('ul.team-people>li')).toHaveCount(50)
-     await team.getByRole('button',{name:'Next people',exact:true}).click();await expect(team.getByRole('status')).toContainText('51–100')
+     const firstPeople=await call('/api/team?page=1&limit=50')
+     await expect(team.locator('ul.team-people>li')).toHaveCount(firstPeople.items.length)
+     if(firstPeople.hasMore){const nextPeople=await call('/api/team?page=1&limit=50&after='+encodeURIComponent(firstPeople.cursor));await team.getByRole('button',{name:'Next people',exact:true}).click();await expect(team.getByRole('status')).toContainText('51–'+(50+nextPeople.items.length))}else await expect(team.getByRole('button',{name:'Next people',exact:true})).toBeDisabled()
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`team-page-${width}.png`)})
-     await team.getByLabel('Find teammates',{exact:true}).fill('Directory Colleague 5001')
-     await expect(team.locator('ul.team-people>li')).toHaveCount(1);await expect(team.getByText('Directory Colleague 5001',{exact:true})).toBeVisible()
+     await team.getByLabel('Find teammates',{exact:true}).fill(directoryPerson)
+     await expect(team.locator('ul.team-people>li')).toHaveCount(1);await expect(team.getByText(directoryPerson,{exact:true})).toBeVisible()
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`team-search-${width}.png`)})
      await team.getByLabel('Find teammates',{exact:true}).fill('')
      await fields.getByRole('button',{name:'Edit Sales region '+width,exact:true}).scrollIntoViewIfNeeded()
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-created-${width}.png`)})
      await fields.getByRole('heading',{name:'Profile fields',exact:true}).scrollIntoViewIfNeeded()
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-policy-${width}.png`)})
-     await profileFieldScopeOrdering(admin,fields,width)
+     await profileFieldScopeOrdering(admin,fields,width,()=>sql(`UPDATE oa_sessions SET created_at=0 WHERE operator_id='${owner.user.id}'`))
      assert.ok(await admin.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1))
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-reloaded-${width}.png`)})
      assert.equal((await call('/api/people?q=415%20555%200198',undefined,owner)).items.length,0)

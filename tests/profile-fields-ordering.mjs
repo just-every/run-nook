@@ -38,7 +38,7 @@ export async function profileFieldReadOrdering(page){
 
 // Retire a private scope through a real step-up refusal while an already
 // committed field response is in flight. No response body or product is mocked.
-export async function profileFieldScopeOrdering(page,fields,width){
+export async function profileFieldScopeOrdering(page,fields,width,expireProof){
  const gate=()=>{let resolve;const promise=new Promise(done=>resolve=done);return {promise,resolve}}
  const committed=gate(),release=gate(),finished=gate();let started=false
  const path=url=>url.pathname==='/api/profile/fields'
@@ -48,6 +48,8 @@ export async function profileFieldScopeOrdering(page,fields,width){
  }
  await page.route(path,handler)
  try{
+  // Age the synthetic native sign-in proof without expiring its session.
+  await expireProof()
   await fields.getByRole('button',{name:'Edit Sales region '+width,exact:true}).click()
   await fields.getByLabel('Field label',{exact:true}).fill('Regional coverage '+width)
   await fields.getByRole('button',{name:'Save field',exact:true}).click();await committed.promise
