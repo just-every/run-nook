@@ -1613,7 +1613,11 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "bf5ee2d5c88c2c50e9a4a6650376a8decf70c3fea54141f83567bc0930d37645",
+      "sha256": "a995a1fd9e4bcf3a8f0db89d154a4b7b034cec932025de743ec785fe9009fd1d",
+      "executable": false
+    },
+    "release-history/0.4.0.json": {
+      "sha256": "1bf6717a653c67a45c01fe416e8624f02666907931f513752447d4422d10bee1",
       "executable": false
     },
     "RELEASE.json": {

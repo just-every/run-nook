@@ -55,7 +55,7 @@ npx -y @runeditrun/rer dev just-every/run-nook
 To start it again later, run the same line from the same folder,
 or `cd run-nook && rer dev`.
 
-To run the **0.4.0 release** instead, clone it in place of the line above,
+To run the **0.5.0 release** instead, clone it in place of the line above,
 then run `rer dev` from the cloned folder:
 
 ```sh
