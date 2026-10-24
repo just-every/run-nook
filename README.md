@@ -41,20 +41,22 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 
 ## Run it on your computer
 
-You need npm and Git. One line installs the `rer` command, clones the latest
-source from `main` and starts it:
+One line installs the `rer` command, clones the latest source from `main` into
+`run-nook` and starts it. Git is required; rer brings Node and pnpm.
 
 ```sh
-npx -y @runeditrun/rer dev just-every/run-nook
+curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-nook
 ```
 
-To start it again later, run `cd run-nook && rer dev`.
+Already have Node 22 or later? `npx -y @runeditrun/rer dev just-every/run-nook`
+does the same. To start it again later, run the same line from the same folder,
+or `cd run-nook && rer dev`.
 
 To run the **0.4.0 release** instead, clone it in place of the line above,
 then run `rer dev` from the cloned folder:
 
 ```sh
-git clone --branch v0.4.0 https://github.com/just-every/run-nook.git nook && cd nook
+git clone --branch v0.4.0 https://github.com/just-every/run-nook.git run-nook && cd run-nook
 ```
 
 The release tag checks out a fixed version. The `git pull --ff-only` update

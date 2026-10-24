@@ -7,13 +7,15 @@ Run these commands from your Nook checkout. You need npm and Git; `rer` manages 
 For a new checkout, one line installs `rer`, clones the latest source from `main` and starts it:
 
 ```sh
-npx -y @runeditrun/rer dev just-every/run-nook
+curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-nook
 ```
+
+Already have Node 22 or later? `npx -y @runeditrun/rer dev just-every/run-nook` does the same.
 
 Or clone the fixed **0.4.0 release** instead (the line above installs `rer` if you do not have it yet):
 
 ```sh
-git clone --branch v0.4.0 https://github.com/just-every/run-nook.git nook && cd nook
+git clone --branch v0.4.0 https://github.com/just-every/run-nook.git run-nook && cd run-nook
 rer dev
 ```
 
@@ -52,7 +54,9 @@ After local development setup (`rer dev` or `rer setup` in the same checkout), `
 
 ## Deploy to your Cloudflare account
 
-You supply a Cloudflare account ID and a scoped API token. On the first deployment you also supply the mail-from address and a SendGrid API key. Set `OWNER_EMAIL` to the real email address that will own the hosted workspace. Local `rer setup` is optional and is not required for deployment:
+**Or let Run Edit Run host it.** [Run Edit Run](https://app.runeditrun.com/?product=team-workspace&plan=assisted) can set Nook up on your own Cloudflare account and keep it updated; sign-ups are by request for now.
+
+To do it yourself, you supply a Cloudflare account ID and a scoped API token. On the first deployment you also supply the mail-from address and a SendGrid API key. Set `OWNER_EMAIL` to the real email address that will own the hosted workspace. Local `rer setup` is optional and is not required for deployment:
 
 ```sh
 OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \

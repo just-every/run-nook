@@ -1,16 +1,18 @@
 # Install Nook
 
-One line installs `rer`, clones Nook and starts it:
+One line installs `rer`, clones Nook into `run-nook` and starts it:
 
 ```sh
-npx -y @runeditrun/rer dev just-every/run-nook
+curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-nook
 ```
 
-To start it again later, run `cd run-nook && rer dev`.
+Git is required; rer brings Node and pnpm. Already have Node 22 or later?
+`npx -y @runeditrun/rer dev just-every/run-nook` does the same. If the installer
+prints a line that puts `rer` on your PATH, run that line too. To start it again
+later, run the same line from the same folder, or `cd run-nook && rer dev`.
 
-You need Node.js 22 or newer, npm and Git to bootstrap `rer`. Once bootstrapped,
-`rer` installs the pinned Node and pnpm Nook needs; no separate pnpm installation
-is required.
+Once bootstrapped, `rer` installs the pinned Node and pnpm Nook needs; no separate
+pnpm installation is required.
 
 `rer dev` prepares the private local settings and database and creates a
 placeholder development owner. Open the printed `RER_OPEN` link on this computer
