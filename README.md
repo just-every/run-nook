@@ -146,7 +146,10 @@ SendGrid or Resend mail options, with your own provider credentials.
 ### Deploy to your own Cloudflare account
 
 Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment before
-the dry run. rer 0.2.25 validates production sign-in configuration before building.
+the dry run. rer 0.2.80 validates production sign-in configuration before building.
+After `rer reset` and `rer import`, the local installer answers are gone. Append
+`--owner-name "Your name"` to the dry run and real deploy commands below so the
+hosted owner has your name; `OWNER_EMAIL` supplies the mailbox only.
 
 ```sh
 rer deploy --dry-run
