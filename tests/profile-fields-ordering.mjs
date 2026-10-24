@@ -40,11 +40,11 @@ export async function profileFieldReadOrdering(page){
 // committed field response is in flight. No response body or product is mocked.
 export async function profileFieldScopeOrdering(page,fields,width){
  const gate=()=>{let resolve;const promise=new Promise(done=>resolve=done);return {promise,resolve}}
- const committed=gate(),release=gate()
+ const committed=gate(),release=gate(),finished=gate();let started=false
  const path=url=>url.pathname==='/api/profile/fields'
  const handler=async route=>{
   if(route.request().method()!=='POST')return route.continue()
-  const response=await route.fetch();committed.resolve();await release.promise;await route.fulfill({response})
+  started=true;try{const response=await route.fetch();committed.resolve();await release.promise;await route.fulfill({response})}finally{finished.resolve()}
  }
  await page.route(path,handler)
  try{
@@ -55,7 +55,7 @@ export async function profileFieldScopeOrdering(page,fields,width){
   const invite=page.locator('form.team-invite')
   await invite.getByLabel('Name',{exact:true}).fill('Synthetic owner '+width)
   await invite.getByLabel('Email',{exact:true}).fill('synthetic-nook-field-'+width+'@example.test')
-  await invite.getByLabel('Role',{exact:true}).selectOption('owner');await invite.getByRole('checkbox').first().check()
+  await invite.locator('select').filter({has:page.locator('option[value="owner"]')}).selectOption('owner');await invite.getByRole('checkbox').first().check()
   const refused=page.waitForResponse(response=>new URL(response.url()).pathname==='/auth/invite'&&response.status()===403)
   await invite.getByRole('button',{name:'Send invitation',exact:true}).click();await refused
   await expect(fields.getByRole('status')).toHaveText('Profile fields changed while saving. Waiting for the result.')
@@ -63,5 +63,5 @@ export async function profileFieldScopeOrdering(page,fields,width){
   await expect(fields).toHaveAttribute('data-save','idle');await expect(fields).toHaveAttribute('aria-busy','false')
   await expect(fields.getByRole('status')).toHaveText('Profile fields changed while saving. The list was reloaded.')
   await expect(fields.getByRole('button',{name:'Edit Regional coverage '+width,exact:true})).toBeVisible()
- }finally{release.resolve();await page.unroute(path,handler)}
+ }finally{release.resolve();if(started)await finished.promise;await page.unroute(path,handler)}
 }
