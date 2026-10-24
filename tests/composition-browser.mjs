@@ -29,6 +29,7 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await expect(page.locator('.thread-log .message-body').filter({hasText:'synthetic-nook composer broadcast '+width})).toHaveCount(1);
     await page.goto(base+'/app?conversation='+room.id);
     await expect(page.locator('.message-body').filter({hasText:'synthetic-nook composer broadcast '+width})).toHaveCount(1);
+    await expect(page.locator('.nook-app')).toHaveAttribute('data-live-connected','true');
     const broadcast=await call('/api/search?q='+encodeURIComponent('synthetic-nook composer broadcast '+width),undefined,member);
     const sent=broadcast.items.find(m=>m.body==='synthetic-nook composer broadcast '+width);assert.ok(sent);
     await call('/api/messages/'+sent.id,{body:'synthetic-nook composer broadcast edited '+width,version:1},member,'PATCH');
