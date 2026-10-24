@@ -31,7 +31,7 @@
 
 # Nook
 
-The current release is **0.4.0**. See the [release notes](CHANGELOG.md#040-2026-10-19)
+The current release is **0.5.0**. See the [release notes](CHANGELOG.md#050--2026-10-24)
 and [updating guide](docs/updating.md) before upgrading an existing Nook.
 
 Nook is a team workspace with private channels, fixed-participant DMs, threads,
@@ -59,7 +59,7 @@ To run the **0.4.0 release** instead, clone it in place of the line above,
 then run `rer dev` from the cloned folder:
 
 ```sh
-git clone --branch v0.4.0 https://github.com/just-every/run-nook.git run-nook && cd run-nook
+git clone --branch v0.5.0 https://github.com/just-every/run-nook.git run-nook && cd run-nook
 ```
 
 The release tag checks out a fixed version. The `git pull --ff-only` update
