@@ -69,7 +69,7 @@ try{
   if(line==='rer dev --stop'){await stopDev();continue}
   const command=line.replace('--owner-email EMAIL','--owner-email '+ownerEmail)
   if(line==='rer export --output exports/nook.rer')assert.equal(dev.exitCode!=null||dev.signalCode!=null,true,'the app is stopped before export')
-  const output=run(line==='rer deploy --dry-run'?'OWNER_EMAIL=nativeowner@example.test MAIL_FROM=auth@mail.runeditrun.com SENDGRID_API_KEY=test-only-sendgrid-key '+command:command)
+  const output=run(line==='rer deploy --dry-run'?'OWNER_EMAIL=nativeowner@example.test MAIL_FROM=auth@mail.runeditrun.com SENDGRID_API_KEY=test-only-sendgrid-key '+command+' --owner-name "Synthetic Nook"':command)
  }
  assert.equal((await stat(join(clone,'exports/nook.rer'))).mode&0o077,0,'the archive is owner-only')
  // Export again after reset and import: the restored installation holds the same records.
