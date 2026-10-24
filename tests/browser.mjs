@@ -247,8 +247,11 @@ export async function runBrowser(origin,destination){
     const revoked=new Promise(resolve=>{releaseRead=resolve})
     const threadReadPath=`/api/messages/${deep.id}/read`
     const readHeld=bob.waitForRequest(request=>new URL(request.url()).pathname===threadReadPath)
-    const readResponse=bob.waitForResponse(response=>new URL(response.url()).pathname===threadReadPath)
-    await bob.route(url=>url.pathname===threadReadPath,async route=>{await revoked;await route.continue()})
+    let finishRead,failRead
+    const readResponse=new Promise((resolve,reject)=>{finishRead=resolve;failRead=reject})
+    // Observe the server response at this paused network edge even if live
+    // revocation correctly aborts the page's private request first.
+    await bob.route(url=>url.pathname===threadReadPath,async route=>{await revoked;try{const response=await route.fetch();finishRead(response);await route.fulfill({response})}catch(error){failRead(error);throw error}})
     await bob.goto(origin+`/app?view=chat&conversation=${channel.id}&thread=${deep.id}`);await bob.getByText('Detailed planning context',{exact:true}).waitFor()
     await readHeld
     await shot(bob,'revocation-pending')
