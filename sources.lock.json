@@ -1981,7 +1981,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "15c069e8cfe530aaad3583b33190fdc8908edd845ec2750550691deab68af9bb",
+      "sha256": "697b650065915a683a80f3367e443199b94cf3c35467bf7a5a31405664b4d632",
       "executable": false
     },
     "SLACK-IMPORT.md": {
@@ -4097,7 +4097,7 @@
       "executable": false
     },
     "src/chat/api.ts": {
-      "sha256": "e30c86beefb3a205a60c40dc804d41f5fea933c239b2ef239f5c8cc08964c52d",
+      "sha256": "cca3e63cc08ab2e63f14b36891d2357cbc4b317559f7a05c51d0160dee667c52",
       "executable": false
     },
     "src/chat/AttentionView.tsx": {
@@ -4301,7 +4301,7 @@
       "executable": false
     },
     "src/chat/useWorkspace.ts": {
-      "sha256": "40c2b28170e27a671c678a17d3bf720d4837d6bc49bc1b98a53d2ba6e300bb1a",
+      "sha256": "1902b6cab22bbd2c6032154626cc52ee50def2ad5b32807fc14c540bec44f523",
       "executable": false
     },
     "src/ChatScreen.tsx": {
@@ -5485,11 +5485,11 @@
       "executable": false
     },
     "src/notify/email-offer.css": {
-      "sha256": "e4a4ef2a3fc6612671429413b62748dbcb8bc9e93199ef71debb93202485980f",
+      "sha256": "8b1edfef2aad6776ff00d21f9e7e62b37d37caafa8dac89bffad782c387b7ab6",
       "executable": false
     },
     "src/notify/EmailOffer.tsx": {
-      "sha256": "5992b8246c1e19e52e7a5a4a2eb5f0c99120352d51183360f5f41efcd61b6fb2",
+      "sha256": "30459114704d8375d2b3cd180cb86af3db53f0de3e826672f59368cff55fe0c9",
       "executable": false
     },
     "src/notify/explain.ts": {
@@ -5669,7 +5669,7 @@
       "executable": false
     },
     "src/platform/storage/live.ts": {
-      "sha256": "da422239ab2f5dbe3b8127eccf1d7ae3fd32ab56cdea3d5080b0317376a2a825",
+      "sha256": "bf2349dc70dd126f82150446f8ecf94888d3c93df96d753d37c87dc969fd6576",
       "executable": false
     },
     "src/platform/storage/message-statements.ts": {
@@ -6517,7 +6517,7 @@
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "d3f9ded8a333cfa5f51f19480dc4268bca3913268f494e50f6112517b5df8032",
+      "sha256": "58b3c5d4f38770cc31c81d72771afcacb5fce3ae2d21dd9209a510477f9f3347",
       "executable": false
     },
     "tests/campfire-import/browser.mjs": {
@@ -6565,7 +6565,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "b086d7b307d377decbc809bd293aef88c20b420980b040533939cc9be1c9e74b",
+      "sha256": "314d5b85a136ad7df22c5a9047e0d2866f0b917b50af34139b6dc54dc9b88b22",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -6873,7 +6873,7 @@
       "executable": false
     },
     "tests/personal-browser.mjs": {
-      "sha256": "299bb22b330aa82cc289bc896824ea4a7f6c1f1fd539dad0f08dca0d6404a132",
+      "sha256": "9a22c3c3d650decd15ee97f21b5ecbbac9bab335d453abf8c9bc7de4a73d6eda",
       "executable": false
     },
     "tests/personal.mjs": {
@@ -7005,7 +7005,7 @@
       "executable": false
     },
     "tests/pwa-install.mjs": {
-      "sha256": "ab5638e4a6be0843f50eb7a9cba1178cfb14526c79cae7515ef8f65f4b45c410",
+      "sha256": "19a10139dc26c15ba33b95e2dfd6487a6cc9fa18c8db24b90c9ce44f375ca663",
       "executable": false
     },
     "tests/quick-switcher.mjs": {
@@ -7053,7 +7053,7 @@
       "executable": false
     },
     "tests/reports.mjs": {
-      "sha256": "d4d70b8693fea3bcd396de41aa9b1ade6e1185296468ac93255c51f6830276c3",
+      "sha256": "ca09da28846654d3667f2280c121db9d38ef5aa460908a9598a9f21ea377e5ab",
       "executable": false
     },
     "tests/runtime-portability.mjs": {
@@ -7061,7 +7061,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "4451b46894e4ed361f4402d29078f82a34c3dfb18d53f56ebbecd7ad22735051",
+      "sha256": "97824c1a1db4ea5a76571e5916f4252778c7961949ada17baf930b43cb998a07",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
