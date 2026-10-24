@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "2fd8b3bcab5f7ddfb4b7ed607eb906ddc3a824e71f2e2643a3ebe841213bc536",
+      "sha256": "73e059f2d6773035aad6c989f8eb0d9b8ae9a5581792499e9ba0edfb9bc492fa",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "a983bc6bad8fb8fecedfad2c83b242a78cce4718d1077332c2545ede60bdebf6",
+      "sha256": "855b9c660be7fd6dac273a1eca234c5b2966fdc7e08b4f084b89f35b8a83bb38",
       "executable": false
     },
     "DEMO.md": {
@@ -2029,7 +2029,7 @@
       "executable": false
     },
     "src/app-style/conversation.css": {
-      "sha256": "2b20164898f7f213b16477e50c81d2a1c845e592b93b47bb74be9ab8152ff9c7",
+      "sha256": "5fc32cd564a77a902a2c8eb9f8c9a8f112f809ac3078de7ed742e7a3140e2238",
       "executable": false
     },
     "src/app-style/dialogs.css": {
@@ -5077,7 +5077,7 @@
       "executable": false
     },
     "src/imports/ids.mjs": {
-      "sha256": "a14247b48bc9cf1ab04281471a29b233ebfa7a10d052919008087743297702d1",
+      "sha256": "305de18fb169167a970316d105341da8aac993c13f8a7c64c3607621e52aa852",
       "executable": false
     },
     "src/imports/ImportedRevisions.tsx": {
@@ -5181,7 +5181,7 @@
       "executable": false
     },
     "src/imports/presentation.ts": {
-      "sha256": "572e107900eb71917337c95f9d3cadeda6a99fde565a757a0f8febe053131f38",
+      "sha256": "037a46abd7cfa2e1cbf62bdfabe1fc5d3db122c752d37d7837c9aad56e5d68a5",
       "executable": false
     },
     "src/imports/projection.ts": {
@@ -5213,7 +5213,7 @@
       "executable": false
     },
     "src/imports/ReviewPanel.tsx": {
-      "sha256": "ea42cdc8467d603c476c36f2309a3b31631aae038ddb8ed343fc0df32f94e64e",
+      "sha256": "b7300fbc77844bd13401dea90fd94004dec0ca8adbbf7cb078e86a9e737f550b",
       "executable": false
     },
     "src/imports/revisions.ts": {
@@ -5484,8 +5484,12 @@
       "sha256": "7648c3ab2f61fb646278966498db654d8ff436156316167f75580afbfde294f3",
       "executable": false
     },
+    "src/notify/email-offer.css": {
+      "sha256": "e4a4ef2a3fc6612671429413b62748dbcb8bc9e93199ef71debb93202485980f",
+      "executable": false
+    },
     "src/notify/EmailOffer.tsx": {
-      "sha256": "0aa3b1a669a702f80eb3d7c956a4a1b40ac65d753033c8d641787521b83567be",
+      "sha256": "5992b8246c1e19e52e7a5a4a2eb5f0c99120352d51183360f5f41efcd61b6fb2",
       "executable": false
     },
     "src/notify/explain.ts": {
@@ -5633,7 +5637,7 @@
       "executable": false
     },
     "src/platform/storage/archive-validation.mjs": {
-      "sha256": "9e57369faa02ae35cad6b98a886dc4682c825e51d338f4b3266270121e6f94f2",
+      "sha256": "504fee76daea2b102b281d4c321c0f319e0a5dd8e71b3d2b14c7f46523023e72",
       "executable": false
     },
     "src/platform/storage/commands.ts": {
@@ -6513,7 +6517,7 @@
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "6abd86d38fc157c0b0d036ff49a722d9f288ef9c878fc92119f2f23baf341a6f",
+      "sha256": "d3f9ded8a333cfa5f51f19480dc4268bca3913268f494e50f6112517b5df8032",
       "executable": false
     },
     "tests/campfire-import/browser.mjs": {
@@ -6561,7 +6565,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "38b61ae771d38edfb243f86351f52f65a46eb6e937d5bee589043556fd6b4064",
+      "sha256": "b086d7b307d377decbc809bd293aef88c20b420980b040533939cc9be1c9e74b",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -7101,7 +7105,7 @@
       "executable": false
     },
     "tests/slack-import-browser.mjs": {
-      "sha256": "42306d0d76e80edb643ddb9ec60688121c21c10d503505cbdf08fa90b860e7b8",
+      "sha256": "23f0fa46eb0cbf8ccee357c6890ab077bf8bb2e0d451839977b71f7a4957c9b5",
       "executable": false
     },
     "tests/slack-import-history.test.mjs": {
@@ -7137,7 +7141,7 @@
       "executable": false
     },
     "tests/slack-import/journey.mjs": {
-      "sha256": "0ac5c56155292711d92f9915fe65b6379311239c453e900e354b0b6d83b9021f",
+      "sha256": "3d70b350a3df6af9320175787383a500189982419561ce4471afc138a4632a42",
       "executable": false
     },
     "tests/slack-import/lost-ack.mjs": {
@@ -7161,7 +7165,7 @@
       "executable": false
     },
     "tests/slack-private-fixture.mjs": {
-      "sha256": "a544af37d6e41c0a1528a5f738be6295b8bb6b96eb2a8c550a6563821900a056",
+      "sha256": "2af9a5f142d6783efe90d51a6aaf62a9582e5374ee6b79b9bd9fcdf27b725af0",
       "executable": false
     },
     "tests/sqlite-binding.mjs": {
