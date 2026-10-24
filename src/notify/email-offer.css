@@ -6,3 +6,7 @@
 .nook-app .email-offer-actions .soft-button { flex:1; min-width:0; white-space:normal; }
 .nook-app .email-offer-actions .text-button { flex:none; }
 @media(max-width:850px) { .nook-app .email-offer label { margin-left:auto; } .nook-app .email-offer-actions { flex-basis:100%; } }
+
+.nook-app .email-offer details { min-width:0; flex:1; }
+.nook-app .email-offer summary { cursor:pointer; width:fit-content; min-height:32px; display:flex; align-items:center; font-size:14px; }
+.nook-app .email-offer-choices { display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; padding-block:6px; }

@@ -253,7 +253,7 @@ export async function runBrowser(origin,destination){
     // revocation correctly aborts the page's private request first.
     await bob.route(url=>url.pathname===threadReadPath,async route=>{await revoked;try{const response=await route.fetch();finishRead(response);await route.fulfill({response})}catch(error){failRead(error);throw error}})
     await bob.goto(origin+`/app?view=chat&conversation=${channel.id}&thread=${deep.id}`);await bob.getByText('Detailed planning context',{exact:true}).waitFor()
-    await readHeld
+    try{await readHeld}catch(error){await shot(bob,'read-stall');console.error('Read stall geometry',JSON.stringify(await bob.evaluate(()=>Object.fromEntries(['.email-offer','.thread-log', '.thread-log [data-message]'].map(selector=>[selector,[...document.querySelectorAll(selector)].map(e=>({text:e.textContent,rect:e.getBoundingClientRect().toJSON()}))])))),null,2));throw error}
     await shot(bob,'revocation-pending')
     revocationExpected=true
     try{await json(alice,origin,`conversations/${channel.id}/members`,{user:bobUser.id,remove:true})}finally{releaseRead()}
