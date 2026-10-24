@@ -18,7 +18,9 @@ export async function quietPush(c){
  await until(async()=>(await rows(held)).some(r=>r.state==='pending'&&r.due===vacation.ends),'vacation holds device alerts');
  assert.equal(received.filter(r=>new URL(r.value.url).searchParams.get('focus')===held.id).length,0);
  await call('/api/notify','PATCH',{push:{urgent:true,urgentQuiet:true}},member.cookie);
- const urgent=await send(vacationRoom,{mentions:[member.user.id],urgent:true,urgentReason:'synthetic-nook urgent vacation exception'},c.ownerCookie);assert.equal((await delivered(urgent)).length,1);
+ // Isolate the urgent witness from the ordinary room's existing ten-minute fold window.
+ const urgentRoom=await room('synthetic-nook urgent vacation exception');
+ const urgent=await send(urgentRoom,{mentions:[member.user.id],urgent:true,urgentReason:'synthetic-nook urgent vacation exception'},c.ownerCookie);assert.equal((await delivered(urgent)).length,1);
  await call('/api/notify','PATCH',{vacation:null,push:{urgent:prefs.push.urgent,urgentQuiet:prefs.push.urgentQuiet}},member.cookie);assert.equal((await delivered(held)).length,1);await read(vacationRoom);
  const record=(await deliveries(c,conversation)).find(r=>r.id.startsWith('push:'+message.id+':'));assert.ok(record);assert.equal(record.state,'sent');assert.ok(record.holds.some(h=>h.kind==='quiet-schedule'&&h.start>0&&h.release>=h.start));c.holdWitnesses=[record,canceledRecord];
 
