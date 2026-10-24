@@ -28,6 +28,34 @@ export async function personalJourney({owner,registered,post,get,request,check,r
   if(validateArchive)await validateArchive();
   await request('/api/notify',{method:'PATCH',cookie:owner.cookie,body:{vacation:null}});
   assert.ok((await get('/api/attention')).data.items.some(i=>i.message?.id===message.id));
+  // Keyword policy uses the same public scheduled-send, readable export,
+  // operational archive and erasure doors as ordinary member work.
+  const keywordPerson=await registered('synthetic-nook-keyword-custody');
+  const keywordRoom=(await post('/api/conversations',{name:'synthetic-nook keyword custody',kind:'private',participants:[keywordPerson.user.id]})).data;
+  const memberRequest=(path,method,body)=>request(path,{method,cookie:keywordPerson.cookie,body});
+  await memberRequest('/api/notify','PATCH',{keywords:['Invoice'],vacation:{starts:Date.now()+86400000,ends:Date.now()+172800000}});
+  await memberRequest('/api/conversations/'+keywordRoom.id+'/notify','PATCH',{level:'nothing'});
+  const silent=(await post('/api/conversations/'+keywordRoom.id+'/messages',{body:'synthetic-nook invoice is silent',intent:crypto.randomUUID()})).data;
+  assert.ok(!(await get('/api/attention',keywordPerson.cookie)).data.items.some(i=>i.message?.id===silent.id),'nothing suppresses keyword Attention');
+  assert.equal((await sql(`SELECT count(*) AS n FROM nook_notify_queue WHERE message='${silent.id}' AND user='${keywordPerson.user.id}'`))[0].n,0,'nothing queues no keyword alert');
+  await memberRequest('/api/conversations/'+keywordRoom.id+'/notify','PATCH',{level:'mentions'});
+  const at=new Date(Date.now()+65000).toISOString().slice(0,16);
+  const schedule=(await post('/api/conversations/'+keywordRoom.id+'/scheduled',{body:'synthetic-nook scheduled invoice',localAt:at,zone:'UTC',recurrence:'none',endDate:null,attachments:[],intent:crypto.randomUUID()})).data;
+  const deadline=Date.now()+80000;let sent;
+  while(Date.now()<deadline){sent=(await get('/api/scheduled')).data.items.find(s=>s.id===schedule.id);if(sent?.state==='complete')break;await new Promise(resolve=>setTimeout(resolve,300))}
+  assert.equal(sent?.state,'complete','scheduled keyword message commits through its real alarm');
+  const keywordItems=(await get('/api/attention',keywordPerson.cookie)).data.items.filter(i=>i.reason==='keyword');assert.equal(keywordItems.length,1);assert.equal(keywordItems[0].message.body,'synthetic-nook scheduled invoice');
+  let readable=(await memberRequest('/api/readable-exports','POST',{scope:'conversation',conversationId:keywordRoom.id,custodyAccepted:true})).data;
+  for(let n=0;!readable.complete&&n<200;n++)readable=(await memberRequest('/api/readable-exports/'+readable.id+'/step','POST',{})).data;
+  assert.ok(readable.complete);const records=[];
+  for(const page of (await get('/api/readable-exports/'+readable.id+'/index',keywordPerson.cookie)).data.items)records.push(...(await get('/api/readable-exports/'+readable.id+'/pages/'+page.ordinal,keywordPerson.cookie)).data.records);
+  assert.deepEqual(records.find(r=>r.type==='personal_keywords').data.keywords,['Invoice']);
+  const archive=async()=>{const id=(await request('/api/portability/exports',{method:'POST',cookie:owner.cookie,body:{},status:201})).data.id;let status;for(let n=0;n<200;n++){status=(await request('/api/portability/exports/'+id+'/advance',{method:'POST',cookie:owner.cookie,body:{maxParts:16}})).data;if(status.phase!=='building')break}assert.equal(status.phase,'complete');const raw=(await request('/api/portability/exports/'+id+'/download',{cookie:owner.cookie})).raw;const {readArchive}=await import('@runeditrun/rer/modules/portability');const rows=[];for await(const part of readArchive(new Blob([raw]).stream()))rows.push(...(part.items??[]));await request('/api/portability/exports/'+id+'/abort',{method:'POST',cookie:owner.cookie,body:{}});return rows};
+  const before=await archive();assert.ok(before.some(r=>r.table==='nook_keywords'&&r.row.user===keywordPerson.user.id&&r.row.keyword==='Invoice'));assert.ok(before.some(r=>r.table==='nook_vacations'&&r.row.user===keywordPerson.user.id));
+  await request('/api/erasures/preview',{method:'POST',cookie:owner.cookie,body:{kind:'member',target:keywordPerson.user.id}});
+  let receipt=(await request('/api/erasures',{method:'POST',cookie:owner.cookie,body:{kind:'member',target:keywordPerson.user.id,confirmation:'ERASE'}})).data;
+  for(let n=0;receipt.state!=='complete'&&n<30;n++)receipt=(await request('/api/erasures/'+receipt.id+'/resume',{method:'POST',cookie:owner.cookie,body:{}})).data;
+  assert.equal(receipt.state,'complete');const after=await archive();for(const table of ['nook_keywords','nook_vacations','nook_notify_preferences'])assert.ok(!after.some(r=>r.table===table&&r.row.user===keywordPerson.user.id),'fresh archive excludes erased '+table);
  });
  await check('NOOK-017 sent history pages own recent messages under current access',async()=>{
   const room=(await post('/api/conversations',{name:'Regional customer launch',kind:'private',participants:[member.user.id]})).data
