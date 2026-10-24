@@ -15,7 +15,7 @@ export function ReviewPanel({ preview, accepted, onAccept, withoutMissingFiles, 
     </section>;
     return <section aria-labelledby="import-review-title">
         <h2 id="import-review-title">Review the historical import</h2>
-        {!!preview.integrations?.length && <><h3>Integration inventory</h3><ul className="import-omissions">{preview.integrations.map((item: any,index: number)=><li key={index}><strong>{item.name}</strong><span>{item.kind}: {item.disposition}</span></li>)}</ul></>}
+        {!!preview.integrations?.length && <><h3>Integration inventory</h3><ul className="import-omissions" tabIndex={0} aria-label="Integration dispositions">{preview.integrations.map((item: any,index: number)=><li key={index}><strong>{item.name}</strong><span>{item.kind}: {item.disposition}</span></li>)}</ul></>}
         {preview.blocked && <div role="alert" className="import-error">
             <h3>Import blocked: selected history is incomplete or unsupported</h3>
             <p>Nothing in this selection can be applied. Deselect each affected channel or upload a corrected export with its source actors and thread roots. Supply missing file bytes or make the explicit choice below. Slack files must be at most 1 MiB each. Individual records cannot be discarded to approve this import.</p>
