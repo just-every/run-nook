@@ -15,7 +15,7 @@ export async function personalBrowser({origin,owner,member,destination='evidence
    const offerContext=await browser.newContext({serviceWorkers:'block',viewport:{width,height:900}});
    try{const invitee=await invite(origin,owner.cookie,'synthetic-nook-offer-'+width+'-'+Date.now());await offerContext.addCookies([cookie(invitee)]);const offer=await offerContext.newPage();await offer.goto(origin+'/app?view=you');
     const region=offer.getByRole('region',{name:'Email notification offer',exact:true});await expect(region).toContainText('Email is off.');await region.getByLabel('Bundle interval').selectOption('60');
-    await offer.screenshot({path:resolve(destination,`email-offer-before-${width}.png`),fullPage:true});
+    await offer.addScriptTag({content:await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await offer.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);await offer.screenshot({path:resolve(destination,`email-offer-before-${width}.png`),fullPage:true});
     await region.getByRole('button',{name:'Email me about mentions and DMs when I’m away',exact:true}).click();await expect(region).toHaveCount(0);
     const prefs=await(await offerContext.request.get(origin+'/api/notify')).json();assert.equal(prefs.awayEmail,true);assert.equal(prefs.awayInterval,60);
     await offer.screenshot({path:resolve(destination,`email-offer-${width}.png`),fullPage:true});
@@ -30,6 +30,7 @@ export async function personalBrowser({origin,owner,member,destination='evidence
    const local=stamp=>new Date(stamp-stamp.getTimezoneOffset()*60000).toISOString().slice(0,16);
    await page.getByLabel('Vacation starts',{exact:true}).fill(local(vacationStart));await page.getByLabel('Vacation ends',{exact:true}).fill(local(vacationEnd));
    await page.getByRole('button',{name:'Save vacation',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Vacation saved.'})).toBeVisible();
+   await page.addScriptTag({content:await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await page.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);
    await page.screenshot({path:resolve(destination,`vacation-settings-${width}.png`),fullPage:true});
    await page.goto(origin+'/app?view=attention');await expect(page.getByText(/Your vacation holds device and email alerts/)).toBeVisible();await page.screenshot({path:resolve(destination,`vacation-attention-${width}.png`),fullPage:true});
    await page.goto(origin+'/app?view=you');await page.getByRole('button',{name:'End vacation',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Vacation ended.'})).toBeVisible();

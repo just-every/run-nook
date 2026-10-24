@@ -27,5 +27,5 @@ export default {
 };
 `);
  await writeFile(config,JSON.stringify({...original,main:entry}));
- return {path:config,close:async()=>{await unlink(entry);await unlink(config)}};
+ return {path:config,close:async()=>{for(const path of [entry,config])try{await unlink(path)}catch(error){if(error.code!=='ENOENT')throw error}}};
 }

@@ -5061,7 +5061,7 @@
       "executable": false
     },
     "src/imports/gchat.mjs": {
-      "sha256": "3bdf78445430546bb38b1590a92f1e093a175f829a2673ca9d0bfaea06981407",
+      "sha256": "69fa01c3922e074526893d0b9033b6be4f1f9c794b289d2b029d8dd561e4144d",
       "executable": false
     },
     "src/imports/history.ts": {
@@ -5297,7 +5297,7 @@
       "executable": false
     },
     "src/imports/slack.mjs": {
-      "sha256": "c23a403f9538a292f7b6591f56d1e30cc906da21116cf9ac32329da9381097a6",
+      "sha256": "c41aa44cd4b27043c0c1b06a36d388375aa5cbb4d88d31422478c28a2f30a558",
       "executable": false
     },
     "src/imports/SlackHistory.tsx": {
@@ -5501,7 +5501,7 @@
       "executable": false
     },
     "src/notify/preferences.ts": {
-      "sha256": "6cc882876de1bbfe446e4ea52000fd79e803a79adb1a416943e8a6ac6ea531e6",
+      "sha256": "9b464b7260c4ebae65c9261ca297cd7e50ec6ec0f32943523fb5734521fe8cf2",
       "executable": false
     },
     "src/notify/queue.ts": {
@@ -5629,7 +5629,7 @@
       "executable": false
     },
     "src/platform/storage/archive-validation.mjs": {
-      "sha256": "39435e92c657fd24792ccd40889ed4375eda133b3b3c59c0c6739e314baf5866",
+      "sha256": "9e57369faa02ae35cad6b98a886dc4682c825e51d338f4b3266270121e6f94f2",
       "executable": false
     },
     "src/platform/storage/commands.ts": {
@@ -6297,7 +6297,7 @@
       "executable": false
     },
     "src/team/notification-defaults.server.ts": {
-      "sha256": "89c48f9c3b64ad04d95c6cc86b3db601058a4dd4750e7a4f56fcf1638a2d98f3",
+      "sha256": "bfdd002a826cf60aff1cf0bda6d64d6516bb5740c516b6dd53b1dd043c0246bb",
       "executable": false
     },
     "src/team/NotificationDefaults.tsx": {
@@ -6865,7 +6865,7 @@
       "executable": false
     },
     "tests/personal-browser.mjs": {
-      "sha256": "b106bbceaad6c22e7eed6dedf618f97d4018dbf33448221a2613c00ce4fedb53",
+      "sha256": "4174212314fba21ea0ea952ec298cf8d219f483555b3f63ec8899cdd8ddad410",
       "executable": false
     },
     "tests/personal.mjs": {
@@ -7173,7 +7173,7 @@
       "executable": false
     },
     "tests/storage-hint-loss.mjs": {
-      "sha256": "98e42515af89b9adf62f568b5ea5a32f52accd4b5bb290a60ef300d5f2bf7e65",
+      "sha256": "bf0a64a1700005ad266eddec4939f0fbe2a15f2edcabc3326167eedd190c6fa9",
       "executable": false
     },
     "tests/storage-migration.mjs": {

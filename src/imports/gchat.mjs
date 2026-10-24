@@ -23,8 +23,9 @@ export function inspectGchatArchive(bytes,localUsers=[]){
  for(const path of paths.filter(p=>p.startsWith(root+'Users/')&&p.endsWith('/user_info.json')))person(jsonEntry(archive.files,path));
  for(const path of paths.filter(p=>p.startsWith(root+'Groups/')&&p.endsWith('/group_info.json')).sort()){
   const folder=path.slice(0,-'group_info.json'.length),info=jsonEntry(archive.files,path);
-  check(info&&typeof info==='object'&&typeof info.name==='string'&&Array.isArray(info.members),'group_info fields');
+  check(info&&typeof info==='object'&&typeof info.name==='string'&&info.name.trim().length>0&&info.name.length<=80&&Array.isArray(info.members),'group_info fields');
   const id=key(folder.slice(root.length));
+  if(info.group_type==='SPACE'&&typeof info.is_external!=='boolean'&&typeof info.externally_owned!=='boolean'){omissions.push({kind:'channel',key:id,reason:'space-ownership-not-supplied'});continue;}
   if(info.is_external===true||info.externally_owned===true){omissions.push({kind:'channel',key:id,reason:'externally-owned-space-omitted'});continue;}
   check(['SPACE','DM','GROUP_DM'].includes(info.group_type),'group_type must be SPACE, DM or GROUP_DM');
   const members=info.members.map(person);check(members.length>0&&new Set(members).size===members.length,'exact membership roster');
@@ -34,10 +35,11 @@ export function inspectGchatArchive(bytes,localUsers=[]){
  check(channels.length>0&&channels.length<=50,'no supported groups or group limit');
  for(const group of groups){
   const document=jsonEntry(archive.files,group.folder+'messages.json');check(document&&Array.isArray(document.messages),'messages.json object with messages array required');
-  const topics=new Map(),seen=new Set(),rows=[];
-  const messages=[...document.messages].sort((a,b)=>time(a.created_date).localeCompare(time(b.created_date)));
+  const topics=new Map(),seen=new Set(),messageIds=new Set(),rows=[];
+  const messages=[...document.messages].sort((a,b)=>Number(BigInt(time(a.created_date).replace('.',''))-BigInt(time(b.created_date).replace('.',''))));
   for(const m of messages){
    check(typeof m.message_id==='string'&&m.message_id.length<=512,'stable message_id required');
+   check(!messageIds.has(m.message_id),'duplicate source message_id');messageIds.add(m.message_id);
    const ts=time(m.created_date);check(!seen.has(ts),'duplicate source timestamp');seen.add(ts);
    const author=person(m.creator);check(m.deleted_date!==undefined||typeof m.text==='string'&&m.text.length<=100000,'message text required');
    if(m.deleted_date!==undefined)time(m.deleted_date);
@@ -64,6 +66,8 @@ export function inspectGchatArchive(bytes,localUsers=[]){
 export function captureGchatArchive(inspected,review,owner,users){
  const capture=captureSlackArchive(inspected,review,owner,users);
  capture.sourceType='gchat';delete capture.cutover;
+ const messageKeys=new Map(capture.messages.map(m=>[m.key,`${capture.namespace}:${m.channel}:${key(m.sourceRecord.googleChat.message_id)}`]));
+ for(const message of capture.messages){message.key=messageKeys.get(message.key);if(message.threadRoot)message.threadRoot=messageKeys.get(message.threadRoot);}
  for(const channel of capture.channels)channel.name=inspected.groups.find(g=>g.id===channel.sourceId)?.name??channel.name;
  capture.digest=importDigest({...capture,messages:capture.messages.map(m=>({...m,files:m.files.map(({bytes,...f})=>f)}))});
  return capture;

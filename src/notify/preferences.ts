@@ -22,7 +22,7 @@ export async function notifySettings(c:Context){
  ])
  const workspace=owner?{sending:sendingSetup(c.env),notDelivered}:null
  const broadcasts=!!(await c.one(`SELECT ${emailBroadcastChoice('?')} AS enabled`,[c.uid,c.uid]))?.enabled
- return {awayEmail:!!p?.away_email,awayInterval:p?.away_interval??15,emailOffer:p?.email_offer_seen===0,vacation:await c.one('SELECT starts,ends FROM nook_vacations WHERE user=?',[c.uid]),quietSchedule:await quietSettings(c),...await mobileSettings(c),push,broadcasts,mentions:!!p?.mentions,urgent:!!p?.urgent,urgentQuiet:!!p?.urgent_quiet,keywords:await keywordList(c),keywordsInMuted:!!p?.keywords_in_muted,keywordEmail:!!p?.keywords,address:c.session.operator.email,
+ return {awayEmail:!!p?.away_email,awayInterval:p?.away_interval??15,emailOffer:p?.email_offer_seen===0&&!p.mentions&&!p.urgent&&!p.away_email&&!broadcasts,vacation:await c.one('SELECT starts,ends FROM nook_vacations WHERE user=?',[c.uid]),quietSchedule:await quietSettings(c),...await mobileSettings(c),push,broadcasts,mentions:!!p?.mentions,urgent:!!p?.urgent,urgentQuiet:!!p?.urgent_quiet,keywords:await keywordList(c),keywordsInMuted:!!p?.keywords_in_muted,keywordEmail:!!p?.keywords,address:c.session.operator.email,
   problem:mine?{error:mine.error,retrying:mine.state==='retrying',at:mine.updated}:null,
   notDelivered:caused.map(r=>({recipient:r.recipient,error:r.error,retrying:r.state==='retrying',at:r.updated})),
   workspace:workspace&&{sending:workspace.sending,notDelivered:workspace.notDelivered?.count?{count:workspace.notDelivered.count,error:workspace.notDelivered.error,at:workspace.notDelivered.latest}:null}}
