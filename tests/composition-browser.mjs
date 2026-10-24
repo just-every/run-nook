@@ -32,10 +32,13 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await expect(page.locator('.nook-app')).toHaveAttribute('data-live-connected','true');
     const broadcast=await call('/api/search?q='+encodeURIComponent('synthetic-nook composer broadcast '+width),undefined,member);
     const sent=broadcast.items.find(m=>m.body==='synthetic-nook composer broadcast '+width);assert.ok(sent);
+    const threadView=await context.newPage();await threadView.goto(base+'/app?conversation='+room.id+'&thread='+root.id);await expect(threadView.locator('.nook-app')).toHaveAttribute('data-live-connected','true');
     await call('/api/messages/'+sent.id,{body:'synthetic-nook composer broadcast edited '+width,version:1},member,'PATCH');
     await expect(page.locator('.message-body').filter({hasText:'synthetic-nook composer broadcast edited '+width})).toHaveCount(1);
+    await expect(threadView.locator('.thread-log .message-body').filter({hasText:'synthetic-nook composer broadcast edited '+width})).toHaveCount(1);
     await call('/api/messages/'+sent.id,{delete:true,version:2},member,'PATCH');
     await expect(page.locator('[data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');
+    await expect(threadView.locator('[data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');await threadView.close();
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`thread-broadcast-${width}.png`)});
     await page.goto(base+'/app?conversation='+room.id);
 
