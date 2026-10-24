@@ -46,7 +46,12 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
    again.current=false;const epoch=generation.current
    try {
     const routeSnapshot=current.current,previous=cache.current?.key===windowKey(routeSnapshot)?cache.current:null
-    const nextSnapshot=await workspace(routeSnapshot,previous)
+    const nextSnapshot=await workspace(routeSnapshot,previous,early=>{
+     if(privateSignal.aborted||epoch!==generation.current||windowKey(current.current)!==windowKey(routeSnapshot)||early.dataError)return
+     if(early.data&&early.conversations.some(c=>c.id===early.data!.conversation)){
+      cache.current=early.data;setData(early.data)
+     }
+    })
     if(privateSignal.aborted)return
     if(epoch!==generation.current)continue
     const {user:me,conversations:list,users:people,attention:inbox,data:next}=nextSnapshot,allowed=new Set(list.map(c=>c.id))

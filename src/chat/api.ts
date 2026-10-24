@@ -38,12 +38,16 @@ async function replay(conversation:string,after:number){
  let cursor=after,newMessageCount=0,erased=false
  for(;;){const page=await api<Replay>(`conversations/${conversation}/replay?after=${cursor}`);if(page.cursor<cursor||page.hasMore&&page.cursor===cursor)throw Error('Conversation updates could not be read. Reopen the conversation.');for(const event of page.events){if(event.kind==='message')newMessageCount++;if(event.kind==='erasure')erased=true}cursor=page.cursor;if(!page.hasMore)return {cursor,newMessageCount,erased}}
 }
-export async function workspace(route:LocationState,previous:Projection|null):Promise<WorkspaceSnapshot>{
+export async function workspace(route:LocationState,previous:Projection|null,onWindow?:(snapshot:WorkspaceSnapshot)=>void):Promise<WorkspaceSnapshot>{
  const events=previous?await replay(previous.conversation,previous.frontier):null
  const query=routeQuery(route)
  if(previous?.rootWindow.target&&!events?.erased)query.set('target',previous.rootWindow.target.id)
  const next=await api<WorkspaceSnapshot & {attention:Attention & Page<Attention['items'][number]>}>('workspace?'+query)
- return completeSnapshot({...next,data:next.data?{...next.data,key:windowKey(route),newMessageCount:events?.newMessageCount??0,frontier:events?.cursor??next.data.frontier}:null})
+ const prepared={...next,data:next.data?{...next.data,key:windowKey(route),newMessageCount:events?.newMessageCount??0,frontier:events?.cursor??next.data.frontier}:null}
+ // Current messages must not wait for unrelated directory/history pages. The
+ // caller still guards identity, route generation and current membership.
+ onWindow?.(prepared)
+ return completeSnapshot(prepared)
 }
 function routeQuery(route:LocationState){
  const query=new URLSearchParams({view:route.view})

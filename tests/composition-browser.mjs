@@ -33,12 +33,13 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     const broadcast=await call('/api/search?q='+encodeURIComponent('synthetic-nook composer broadcast '+width),undefined,member);
     const sent=broadcast.items.find(m=>m.body==='synthetic-nook composer broadcast '+width);assert.ok(sent);
     const threadView=await context.newPage();await threadView.goto(base+'/app?conversation='+room.id+'&thread='+root.id);await expect(threadView.locator('.nook-app')).toHaveAttribute('data-live-connected','true');
+    const slow=await context.newCDPSession(page);await slow.send('Emulation.setCPUThrottlingRate',{rate:4});await slow.send('Network.enable');await slow.send('Network.emulateNetworkConditions',{offline:false,latency:500,downloadThroughput:-1,uploadThroughput:-1});
     await call('/api/messages/'+sent.id,{body:'synthetic-nook composer broadcast edited '+width,version:1},member,'PATCH');
     await expect(page.locator('.message-body').filter({hasText:'synthetic-nook composer broadcast edited '+width})).toHaveCount(1);
     await expect(threadView.locator('.thread-log .message-body').filter({hasText:'synthetic-nook composer broadcast edited '+width})).toHaveCount(1);
     await call('/api/messages/'+sent.id,{delete:true,version:2},member,'PATCH');
     await expect(page.locator('[data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');
-    await expect(threadView.locator('.thread-log [data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');await threadView.close();
+    await expect(threadView.locator('.thread-log [data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');await threadView.close();await slow.send('Emulation.setCPUThrottlingRate',{rate:1});await slow.send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});await slow.detach();
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`thread-broadcast-${width}.png`)});
     await page.goto(base+'/app?conversation='+room.id);
 

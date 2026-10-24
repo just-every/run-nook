@@ -25,9 +25,9 @@ export class ChatHub extends DurableObject<StorageBindings>{
   // A post-commit hint never waits for delivery: it starts or extends the one
   // running broadcast and returns. The alarm and authoritative replay repair any miss.
   if(new URL(request.url).pathname==='/reminders'){await this.soon(0);return new Response(null,{status:204})}
-  if(new URL(request.url).pathname==='/hint'){this.ctx.waitUntil(this.broadcast());await this.soon(5000);return new Response(null,{status:204})}
+  if(new URL(request.url).pathname==='/hint'){this.ctx.waitUntil(this.broadcast());await this.soon(1000);return new Response(null,{status:204})}
   const info=JSON.parse(request.headers.get('x-nook-subscriber')??'null') as Subscriber;if(!info||request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket required',{status:400});if(!await this.active(info))return new Response('Sign in required',{status:401});info.key=crypto.randomUUID();
-  const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(info);await this.deliver(server,true);await this.soon(5000);return new Response(null,{status:101,webSocket:client})
+  const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(info);await this.deliver(server,true);await this.soon(1000);return new Response(null,{status:101,webSocket:client})
  }
  async active(info:Subscriber){return !!await this.env.DB.prepare(`SELECT 1 WHERE ${authority} AND ${authFence}`).bind(info.id,info.uid,info.version).first()}
  async deliver(socket:WebSocket,initial=false){
@@ -63,7 +63,7 @@ export class ChatHub extends DurableObject<StorageBindings>{
   // restarted Worker resumes it.
   let next:number|null=null;try{next=await drainNotifications(this.env,mailSend(this.env))}catch(error){console.error('Notification delivery pass failed',error instanceof Error?error.message:'');next=Date.now()+60_000}
   let pushNext:number|null=null;try{pushNext=await drainPush(this.env)}catch{console.error('Push delivery pass failed');pushNext=Date.now()+60_000}
-  const live=this.ctx.getWebSockets().length||(await this.env.DB.prepare('SELECT object_key FROM nook_object_deletes UNION ALL SELECT operation FROM nook_erasure_work LIMIT 1').first())?Date.now()+5000:null
+  const live=this.ctx.getWebSockets().length||(await this.env.DB.prepare('SELECT object_key FROM nook_object_deletes UNION ALL SELECT operation FROM nook_erasure_work LIMIT 1').first())?Date.now()+1000:null
   const multipart=await this.env.DB.prepare('SELECT MIN(expires) AS expires FROM nook_multipart_uploads').first<{expires:number|null}>();
   const multipartNext=multipart?.expires==null?null:Math.max(multipart.expires,Date.now()+60000);
   const at=[multipartNext,live,next,pushNext,reminderNext,scheduleNext,personalNext,digestNext].filter((value):value is number=>value!==null);if(at.length)await this.soon(Math.max(Math.min(...at)-Date.now(),1000))
