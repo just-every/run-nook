@@ -43,14 +43,18 @@ export async function importDoor(request: Request, env: DoorBindings): Promise<R
   let vendor = vendors[request.headers.get('X-Import-Source') as keyof typeof vendors] ?? 'Source';
   let cleanup: (() => Promise<void>) | undefined;
   try {
-    const input = await inputBody(request), admitted = await access(env, request, input, namespace => {const source=sourceName(namespace);if(source)vendor=vendors[source.kind];}), listed = sourceName(admitted.namespace);
+    const action = path.split('/').at(-1)!;
+    const selectedSource=(namespace:string)=>{const source=sourceName(namespace);if(source)vendor=vendors[source.kind];};
+    // Upload authority and namespace come from the session/grant and headers.
+    // Captures may embed files: authenticate, then refuse restricted captures
+    // before inputBody reads any bytes, until metadata-first admission exists.
+    const uploadAccess=action==='uploads'?await access(env,request,{},selectedSource):null;
+    const filePolicy=uploadAccess?await readFilePolicy(env.DB):null;
+    if(filePolicy&&(filePolicy.max_bytes<DEFAULT_FILE_LIMIT||JSON.parse(filePolicy.blocked_json).length))throw new Fault(409,'Workspace file policy: history-import uploads are unavailable while size or extension restrictions are set');
+    const input = await inputBody(request), admitted = uploadAccess??await access(env, request, input, selectedSource), listed = sourceName(admitted.namespace);
     if (!listed) throw new Fault(400, 'Unknown import source');
     vendor = vendors[listed.kind];
     auditActor=admitted.c?.uid??null;
-    const action = path.split('/').at(-1)!;
-    const filePolicy=action==='uploads'?await readFilePolicy(env.DB):null;
-    // Captures may embed file bytes across chunks; without a verified metadata-first door, refuse restricted captures before their first stored byte.
-    if(filePolicy&&(filePolicy.max_bytes<DEFAULT_FILE_LIMIT||JSON.parse(filePolicy.blocked_json).length))throw new Fault(409,'Workspace file policy: history-import uploads are unavailable while size or extension restrictions are set');
     if (admitted.c) {
       const result = await ownerAction(env, admitted.c, action, input, listed.kind);
       if (result !== null) return Response.json(result, {headers});

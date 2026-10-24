@@ -1,3 +1,4 @@
+import {profileFieldReadOrdering} from './profile-fields-ordering.mjs'
 import {chromium,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
 import {resolve} from 'node:path'
@@ -70,7 +71,7 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await field.fill('/collapse');await field.press('Enter');await expect(snippetRow.getByText('Preview snippet.txt',{exact:true})).toHaveCount(0)
     await field.fill('/expand');await field.press('Enter');await expect(snippetRow.getByText('Preview snippet.txt',{exact:true})).toBeVisible()
     await field.fill('/shrug ok');await field.press('Enter');await expect(field).toHaveValue('');assert.ok((await call('/api/conversations/'+room.id+'/messages',undefined,member)).some(m=>m.body==='ok ¯\\_(ツ)_/¯'))
-    await field.fill('/status :palm_tree: Out until Monday');await composer.getByRole('button',{name:'Send',exact:true}).click();await page.getByLabel('Command result').getByRole('button',{name:'Confirm',exact:true}).click()
+    await field.fill('/status :palm_tree: Out until Monday');await composer.getByRole('button',{name:'Send',exact:true}).click();await page.getByLabel('Command result').getByRole('button',{name:'Confirm',exact:true}).click();await expect(page.getByLabel('Command result')).toHaveCount(0)
     assert.equal((await call('/api/profile',undefined,member)).profile.status.text,'Out until Monday')
     await page.goto(base+'/app?view=you')
     const profile=page.getByRole('region',{name:'Your profile',exact:true})
@@ -99,16 +100,21 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
      const [ownerName,...ownerValue]=owner.cookie.split('=');await ownerContext.addCookies([{name:ownerName,value:ownerValue.join('='),url:base}])
      const admin=await ownerContext.newPage()
      await admin.goto(base+'/app?view=team')
-     const fields=admin.getByRole('region',{name:'Profile fields',exact:true})
+     const fields=admin.getByRole('region',{name:'Profile fields',exact:true}),ordering=width===390?await profileFieldReadOrdering(admin):null
+     try{
      await fields.getByRole('button',{name:'Edit Phone',exact:true}).click()
      await fields.getByLabel('Visible to',{exact:true}).selectOption('self')
      await fields.getByRole('button',{name:'Save field',exact:true}).click()
-     await expect(fields.getByRole('status')).toContainText('Profile field saved')
+     await expect(fields.getByRole('status')).toContainText('Profile field saved');await ordering?.captured()
      await fields.getByRole('button',{name:'Add profile field',exact:true}).click()
      await fields.getByLabel('Field ID',{exact:true}).fill('region-'+width)
      await fields.getByLabel('Field label',{exact:true}).fill('Sales region '+width)
      await fields.getByRole('button',{name:'Save field',exact:true}).click()
+     await expect(fields.getByRole('status')).toHaveText('Profile field saved.');await ordering?.deliver()
      await expect(fields.getByRole('button',{name:'Edit Sales region '+width,exact:true})).toBeVisible()
+     }finally{await ordering?.close()}
+     await fields.getByRole('button',{name:'Edit Sales region '+width,exact:true}).scrollIntoViewIfNeeded()
+     if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-created-${width}.png`)})
      await fields.getByRole('heading',{name:'Profile fields',exact:true}).scrollIntoViewIfNeeded()
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-policy-${width}.png`)})
      assert.equal((await call('/api/people?q=415%20555%200198',undefined,owner)).items.length,0)

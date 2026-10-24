@@ -5009,7 +5009,7 @@
       "executable": false
     },
     "src/imports/door.ts": {
-      "sha256": "9b727f537ccf29dd5ef87a99fff297f295f02c1d4d3c972e9225c8aeedb9b52d",
+      "sha256": "405cfa61f9adbbc1ab6bccaeadc9b9924d6a3b4cf16c6c709c838c7e5bd75feb",
       "executable": false
     },
     "src/imports/DoorPlanPanel.tsx": {
@@ -5677,7 +5677,7 @@
       "executable": false
     },
     "src/profiles/FieldSettings.tsx": {
-      "sha256": "e3d2d8635364958036869337a08cd63d75c49b6392ba011e65e068700e83eab9",
+      "sha256": "c7004bab93eb8d1a46d8dbe4b1e8c7c7fb58763e5f83dab1eb7264c3ab116a75",
       "executable": false
     },
     "src/profiles/PeopleDirectory.tsx": {
@@ -6493,7 +6493,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "8c517999d32472a5568cf6b12c6e57cc1c43dff0cea3f44dee0cabf819acb3df",
+      "sha256": "6100a99de4850503436e9e432b0cd83ead48a10d565a8d286d2f88b0fa6b8b55",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -6537,7 +6537,7 @@
       "executable": false
     },
     "tests/file-policy-journey.mjs": {
-      "sha256": "c165524db4616deb125dbff133327dee530fd529ad87754d53d962f6d986e732",
+      "sha256": "9daa4d45a643b48e8a533fa67a221fbe9f235bc091172b1df4083c7d8f208fb0",
       "executable": false
     },
     "tests/file-preview-fixture.mjs": {
@@ -6838,6 +6838,10 @@
     },
     "tests/posting.mjs": {
       "sha256": "dec67da95d4472525b7e5bdb308c08135c946538954033527e11a0233bb919f7",
+      "executable": false
+    },
+    "tests/profile-fields-ordering.mjs": {
+      "sha256": "b7bc1bb61c20cd7c2e829503f293cb6f8d35e43b443b665efa9a9cc010a8f8b2",
       "executable": false
     },
     "tests/profiles.mjs": {

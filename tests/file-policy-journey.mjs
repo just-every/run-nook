@@ -1,3 +1,4 @@
+import {request as httpRequest} from 'node:http'
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {installation,until} from './push/fixture.mjs'
@@ -29,6 +30,13 @@ test('NOOK-061 owner file policy versions size and extensions before native, cli
   assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_attachments').first()).n,attachments,'every refused native/clip upload reserves no attachment')
   assert.deepEqual((await bucket.list()).objects.map(o=>o.key).sort(),before,'refused files store no bytes')
   const importBefore=(await db.prepare('SELECT count(*) AS n FROM ik_door_chunks').first()).n
+  // Withhold the entire capture body: admission must answer using headers and
+  // policy alone, before parsing or reading any embedded source-file bytes.
+  for(const source of ['slack','campfire','mattermost'])await new Promise((resolve,reject)=>{
+   const upload=httpRequest(origin+'/api/operator/import/uploads',{method:'POST',signal:AbortSignal.timeout(5000),headers:{cookie:ownerCookie,origin,'content-type':'application/json','content-length':'2','X-Import-Source':source,'X-Import-Namespace':'synthetic-file-policy'}},response=>{
+    let body='';response.on('data',part=>body+=part);response.on('end',()=>{try{assert.equal(response.statusCode,409);assert.match(JSON.parse(body).error,/Workspace file policy/);resolve()}catch(error){reject(error)}finally{upload.destroy()}})
+   });upload.on('error',reject);upload.flushHeaders()
+  })
   for(const source of ['slack','campfire','mattermost']){const refused=await call('/api/operator/import/uploads','POST',{name:source+'-reviewed-history.json',totalBytes:2,totalChunks:1,index:0,base64:'e30=',bundleSha256:'0'.repeat(64),chunkSha256:'0'.repeat(64)},ownerCookie,409,{'X-Import-Source':source,'X-Import-Namespace':'synthetic-file-policy'});assert.match(refused.error,/Workspace file policy/)}
   assert.equal((await db.prepare('SELECT count(*) AS n FROM ik_door_chunks').first()).n,importBefore,'restricted import captures store no chunk bytes')
   const accepted=await binary('synthetic-accepted.txt','Allowed text');assert.equal(accepted.size,12)

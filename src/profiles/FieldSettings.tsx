@@ -9,25 +9,30 @@ const blank=():Draft=>({id:'',label:'',type:'text',visibility:'members',version:
 const visibilityLabels={members:'Workspace members','shared-conversation':'People sharing a conversation',admins:'Owners and admins',self:'The profile owner only'}
 export function ProfileFieldSettings({revision,privateSignal,onSaved}:Props){
  const [result,setResult]=useState<FieldResult|null>(null),[draft,setDraft]=useState<Draft|null>(null),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[error,setError]=useState('')
- const alive=useRef(true),generation=useRef(0)
+ const alive=useRef(true),generation=useRef(0),fieldReads=useRef(0)
  useEffect(()=>{
   alive.current=true
-  const clear=()=>{alive.current=false;generation.current++;setResult(null);setDraft(null);setError('');setNotice('')}
+  const clear=()=>{alive.current=false;generation.current++;fieldReads.current++;setResult(null);setDraft(null);setError('');setNotice('')}
   privateSignal?.addEventListener('abort',clear,{once:true});if(privateSignal?.aborted)clear()
-  return()=>{alive.current=false;generation.current++;privateSignal?.removeEventListener('abort',clear)}
+  return()=>{alive.current=false;generation.current++;fieldReads.current++;privateSignal?.removeEventListener('abort',clear)}
  },[privateSignal])
  useEffect(()=>{
   let active=true
+  const read=++fieldReads.current
   if(privateSignal?.aborted)return
-  void api<FieldResult>('profile/fields').then(value=>{if(active&&alive.current)setResult(value)}).catch(cause=>{if(active&&alive.current)setError(cause.message)})
+  void api<FieldResult>('profile/fields').then(value=>{if(active&&alive.current&&read===fieldReads.current)setResult(value)}).catch(cause=>{if(active&&alive.current&&read===fieldReads.current)setError(cause.message)})
   return()=>{active=false}
  },[revision,privateSignal])
  const save=async(remove=false)=>{
   if(!draft||busy)return
+  // A read started before or during this write must not replace its result.
+  // Workspace hints can otherwise deliver an older list after the save succeeds.
+  fieldReads.current++
   const run=generation.current;setBusy(true);setError('');setNotice('')
   try{
    const next=await api<FieldResult>('profile/fields',remove?{id:draft.id,version:draft.version,remove:true}:draft)
    if(!alive.current||run!==generation.current)return
+   fieldReads.current++
    setResult(next);setDraft(null);setNotice(remove?'Profile field and its values removed.':'Profile field saved.');onSaved?.()
   }catch(cause){if(alive.current&&run===generation.current)setError(cause instanceof Error?cause.message:'Could not save the profile field')}finally{if(alive.current&&run===generation.current)setBusy(false)}
  }
