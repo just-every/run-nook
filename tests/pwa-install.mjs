@@ -44,7 +44,7 @@ export async function runPwaInstall({origin,ownerCookie,destination,channel='chr
    await app.setViewportSize({width,height:width===390?844:1000});
    await app.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
    await app.getByRole('region',{name:'Push notifications',exact:true}).waitFor();
-   await app.getByLabel('Mentions and commitments',{exact:true}).waitFor();
+   await app.getByRole('region',{name:'Push notifications',exact:true}).getByLabel('Mentions and commitments',{exact:true}).waitFor();
    assert.equal(await app.evaluate(()=>matchMedia('(display-mode: standalone)').matches),true,'launch is an app window');
    assert.equal(await app.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
    const path=join(destination,`installed-nook-${width}.png`);await app.screenshot({path});captures.push(path);
