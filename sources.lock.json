@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "f2b54a66428caedd707fded577f79c7321e3dd0fe427248cf2461aee5274f6ac",
+      "sha256": "43804c5ff6fb58e2a02bb8d0f8a23d58c17339a51333815b3ec9650367486269",
       "executable": false
     },
     "DEMO.md": {
@@ -4301,7 +4301,7 @@
       "executable": false
     },
     "src/chat/useWorkspace.ts": {
-      "sha256": "1902b6cab22bbd2c6032154626cc52ee50def2ad5b32807fc14c540bec44f523",
+      "sha256": "f94298951f4642804392db06059ca44beb94c62c2791cb63deff0815c8a88682",
       "executable": false
     },
     "src/ChatScreen.tsx": {
@@ -6589,7 +6589,7 @@
       "executable": false
     },
     "tests/erasure-browser.mjs": {
-      "sha256": "3e9bd21086fc528bb1a7150f46f1bf717b517311873996b66fcde4b7a8d5c44e",
+      "sha256": "807fe25788415aadd4492e5e3b5af5d3b733ee8b1cf1fbc21accabbb58439ee5",
       "executable": false
     },
     "tests/erasure.test.mjs": {
