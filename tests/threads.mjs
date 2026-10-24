@@ -1,12 +1,29 @@
 import assert from 'node:assert/strict'
 
-export async function threadJourney({post,patch,get,registered,check,restart}){
+export async function threadJourney({post,patch,get,registered,check,restart,validateArchive}){
  const a=await registered('ThreadA'),b=await registered('ThreadB'),c=await registered('ThreadC')
  const room=(await post('/api/conversations',{name:'Launch coordination',kind:'private',participants:[b.user.id,c.user.id]},a.cookie)).data
  const send=async(actor,body,parent=null,mentions=[]) => (await post(`/api/conversations/${room.id}/messages`,{body,parent,mentions,intent:crypto.randomUUID()},actor.cookie)).data
  const prefs=async actor=>(await get(`/api/conversations/${room.id}/preferences`,actor.cookie)).data
  const source=async(actor,id)=>(await prefs(actor)).threadFollows.find(f=>f.message===id)?.source
  const list=async actor=>(await get('/api/threads',actor.cookie)).data.items
+ await check('NOOK-070 one thread broadcast shares channel history, edit, delete and notification identity',async()=>{
+  const root=await send(a,'synthetic-nook broadcast root');
+  const payload={body:'synthetic-nook broadcast reply',parent:root.id,channelBroadcast:true,intent:crypto.randomUUID()};
+  const broadcast=(await post(`/api/conversations/${room.id}/messages`,payload,b.cookie)).data;
+  assert.equal((await post(`/api/conversations/${room.id}/messages`,payload,b.cookie)).data.id,broadcast.id);
+  await post(`/api/conversations/${room.id}/messages`,{...payload,channelBroadcast:false},b.cookie,409);
+  const channel=()=>get(`/api/conversations/${room.id}/messages/window`,a.cookie).then(r=>r.data.items.filter(m=>m.id===broadcast.id));
+  const thread=()=>get(`/api/conversations/${room.id}/messages/window?thread=${root.id}`,a.cookie).then(r=>r.data.items.filter(m=>m.id===broadcast.id));
+  assert.equal((await channel()).length,1);assert.equal((await thread()).length,1);
+  assert.equal((await get('/api/search?q=synthetic-nook%20broadcast%20reply',a.cookie)).data.items.filter(m=>m.id===broadcast.id).length,1);
+  assert.equal((await get('/api/attention',a.cookie)).data.items.filter(i=>i.message?.id===broadcast.id).length,1);
+  if(validateArchive)await validateArchive();
+  await patch('/api/messages/'+broadcast.id,{body:'synthetic-nook edited broadcast',version:1},b.cookie);
+  assert.equal((await channel())[0].body,'synthetic-nook edited broadcast');assert.equal((await thread())[0].body,'synthetic-nook edited broadcast');
+  await patch('/api/messages/'+broadcast.id,{delete:true,version:2},b.cookie);
+  assert.equal((await channel())[0].deleted,1);assert.equal((await thread())[0].deleted,1);
+ });
  await check('NOOK-072 automatic follows, sticky unfollow, DM default and atomic retry',async()=>{
   const root=await send(a,'Review the launch brief')
   assert.equal(await source(a,root.id),'authored')

@@ -1,3 +1,4 @@
+import {inChannel} from '../platform/storage/thread-broadcast';
 import { fail } from '../family/team-chat/domain';
 import type { Context } from '../platform/storage/context';
 import { firstUnreadMessage, historyPage, historyWindow } from '../platform/storage/history';
@@ -32,7 +33,7 @@ export async function mixedWindow(c: Context, id: string, input: Record<string, 
     const root = rootId ? await lookup(rootId) : null;
     if (rootId && (!root || root.parent)) fail(404, 'Thread root unavailable');
     if (thread && target && target.id !== thread && target.parent !== thread) fail(404, 'Message unavailable in this thread');
-    const nativeFilter = effectiveThread ? 'm.parent=?' : 'm.parent IS NULL';
+    const nativeFilter = effectiveThread ? 'm.parent=?' : inChannel('m');
     const sourceFilter = effectiveThread ? 'r.parent=?' : 'r.parent IS NULL';
     const params = effectiveThread ? [effectiveThread] : [];
     // Delta history may be newer than live replies. Display cursors are ranks

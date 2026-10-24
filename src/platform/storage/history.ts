@@ -1,3 +1,4 @@
+import {inChannel} from './thread-broadcast';
 import {broadcastSummary} from '../../broadcast/recipients'
 import {literal} from '../../broadcast/policy'
 import {countedMessage} from './thread-badge'
@@ -6,7 +7,7 @@ import {Context} from './context'
 import {threadSeen} from './threads'
 // Every projection uses one indexed page and at most five attachment rows per
 // message. Public sequence is also the exclusive window cursor.
-const projection=`m.id,m.conversation,m.author,EXISTS(SELECT 1 FROM nook_notification_apps app WHERE app.id=m.author) AS app,m.body,m.parent,m.version,m.deleted,m.created,m.intent,m.sequence,m.retained_body,EXISTS(SELECT 1 FROM nook_polls pl WHERE pl.message=m.id) AS poll,CASE WHEN m.deleted=0 THEN ${broadcastSummary('m.id')} END AS broadcast_json,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE o.name END AS authorName,(SELECT ia.name FROM nook_integration_audit ia WHERE ia.message=m.id AND ia.action='post') AS via,(SELECT json_group_array(json_object('id',a.id,'conversation',a.conversation,'author',a.author,'message',a.message,'name',a.name,'mime',a.mime,'size',a.size,'sha256',a.sha256,'expires',a.expires,'state',a.state,'created',a.created)) FROM (SELECT * FROM nook_attachment_history WHERE message=m.id ORDER BY position LIMIT 5) a) AS files`
+const projection=`m.id,m.conversation,m.author,EXISTS(SELECT 1 FROM nook_thread_broadcasts channel_reply WHERE channel_reply.message=m.id) AS channelBroadcast,EXISTS(SELECT 1 FROM nook_notification_apps app WHERE app.id=m.author) AS app,m.body,m.parent,m.version,m.deleted,m.created,m.intent,m.sequence,m.retained_body,EXISTS(SELECT 1 FROM nook_polls pl WHERE pl.message=m.id) AS poll,CASE WHEN m.deleted=0 THEN ${broadcastSummary('m.id')} END AS broadcast_json,CASE WHEN m.retained_body=1 THEN 'Former member' ELSE o.name END AS authorName,(SELECT ia.name FROM nook_integration_audit ia WHERE ia.message=m.id AND ia.action='post') AS via,(SELECT json_group_array(json_object('id',a.id,'conversation',a.conversation,'author',a.author,'message',a.message,'name',a.name,'mime',a.mime,'size',a.size,'sha256',a.sha256,'expires',a.expires,'state',a.state,'created',a.created)) FROM (SELECT * FROM nook_attachment_history WHERE message=m.id ORDER BY position LIMIT 5) a) AS files`
 export async function historyPage(c:Context,id:string,where:string,values:unknown[],limit:number,descending=false){
  const rows=await c.rows(`SELECT ${projection} FROM nook_message_history m JOIN nook_actor_history o ON o.id=m.author WHERE m.conversation=? AND ${where} ORDER BY m.sequence ${descending?'DESC':'ASC'} LIMIT ?`,[id,...values,limit],id)
  return rows.map(({files,broadcast_json,via,poll,...m})=>({...m,...(poll?{poll:true}:{}),...(via?{via}:{}),broadcast:broadcast_json?JSON.parse(broadcast_json):null,...(m.retained_body?{immutable:true,retainedSource:'native'}:{}),attachments:JSON.parse(files)}))
@@ -29,7 +30,7 @@ export async function historyWindow(c:Context,id:string,input:Record<string,any>
  const root=rootId?(await historyPage(c,id,'m.id=? AND m.parent IS NULL',[rootId],1))[0]:null
  if(rootId&&!root)fail(404,'Thread root unavailable')
  if(thread&&target&&target.id!==thread&&target.parent!==thread)fail(404,'Message unavailable in this thread')
- const filter=effectiveThread?'m.parent=?':'m.parent IS NULL',params=effectiveThread?[effectiveThread]:[]
+ const filter=effectiveThread?'m.parent=?':inChannel('m'),params=effectiveThread?[effectiveThread]:[]
  let items:any[]
  if(target&&(!effectiveThread||target.id!==effectiveThread)){
   const prior=await historyPage(c,id,filter+' AND m.sequence<?',[...params,target.sequence],Math.floor(limit/2),true)

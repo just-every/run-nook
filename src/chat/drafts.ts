@@ -2,9 +2,9 @@ import {clearCommandIntents} from '../commands/intents'
 import type {FileRecord} from './types'
 import type {PendingUpload} from './useAttachmentUpload'
 
-export type Intent={confirmBroadcast?:true;adminOverride?:true;body:string;intent:string;parent:string|null;attachments:string[];mentions:string[];urgent:boolean;urgentReason:string|null}
+export type Intent={channelBroadcast?:true;confirmBroadcast?:true;adminOverride?:true;body:string;intent:string;parent:string|null;attachments:string[];mentions:string[];urgent:boolean;urgentReason:string|null}
 export type SendPlan={kind:'split'|'snippet';parts:Intent[];next:number;snippet?:{intent:string;name:string;file:FileRecord|null}}
-export type Draft={body:string;files:FileRecord[];recipient:string;mentionIds?:string[];urgent:boolean;reason:string;pending:Intent|null;upload:PendingUpload|null;plan?:SendPlan|null;delivery:'draft'|'pending'|'unconfirmed'|'failed';failure:string}
+export type Draft={channelBroadcast?:boolean;body:string;files:FileRecord[];recipient:string;mentionIds?:string[];urgent:boolean;reason:string;pending:Intent|null;upload:PendingUpload|null;plan?:SendPlan|null;delivery:'draft'|'pending'|'unconfirmed'|'failed';failure:string}
 export type DraftScope={user:string;conversation:string;parent:string|null}
 export const blankDraft=():Draft=>({body:'',files:[],recipient:'',urgent:false,reason:'',pending:null,upload:null,delivery:'draft',failure:''})
 const part=encodeURIComponent
@@ -12,7 +12,7 @@ const accountPrefix=(user:string)=>`nook:drafts:v1:${part(window.location.origin
 export const draftKey=(scope:DraftScope)=>typeof window==='undefined'?'':accountPrefix(scope.user)+`${part(scope.conversation)}:${part(scope.parent??'')}`
 const legacyKey=(scope:DraftScope)=>`nook:draft:${scope.user}:${scope.conversation}:${scope.parent||'root'}`
 const strings=(value:unknown):value is string[]=>Array.isArray(value)&&value.every(v=>typeof v==='string')
-const validIntent=(pending:Intent)=>pending&&!(pending.confirmBroadcast!==undefined&&pending.confirmBroadcast!==true)&&!(pending.adminOverride!==undefined&&pending.adminOverride!==true)&&typeof pending.body==='string'&&typeof pending.intent==='string'&&(pending.parent===null||typeof pending.parent==='string')&&strings(pending.attachments)&&strings(pending.mentions)&&typeof pending.urgent==='boolean'&&(pending.urgentReason===null||typeof pending.urgentReason==='string')
+const validIntent=(pending:Intent)=>pending&&!(pending.channelBroadcast!==undefined&&pending.channelBroadcast!==true)&&!(pending.confirmBroadcast!==undefined&&pending.confirmBroadcast!==true)&&!(pending.adminOverride!==undefined&&pending.adminOverride!==true)&&typeof pending.body==='string'&&typeof pending.intent==='string'&&(pending.parent===null||typeof pending.parent==='string')&&strings(pending.attachments)&&strings(pending.mentions)&&typeof pending.urgent==='boolean'&&(pending.urgentReason===null||typeof pending.urgentReason==='string')
 function decode(raw:string):Draft{
  const value=JSON.parse(raw)
  if(!value||typeof value.body!=='string'||!Array.isArray(value.files)||value.files.some((file:FileRecord)=>!file||typeof file.id!=='string'||typeof file.name!=='string')||typeof value.recipient!=='string'||typeof value.urgent!=='boolean'||typeof value.reason!=='string')throw Error('Saved draft could not be read. Its stored contents have not been changed.')

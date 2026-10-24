@@ -20,6 +20,24 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await page.goto(base+'/app?view=chat&conversation='+room.id)
     const composer=page.locator('.composer').filter({has:page.locator('textarea:visible')}),field=page.getByRole('textbox',{name:'Message '+room.name,exact:true})
     await expect(field).toBeVisible()
+    const root=await call('/api/conversations/'+room.id+'/messages',{body:'synthetic-nook thread broadcast root',intent:crypto.randomUUID()});
+    await page.goto(base+'/app?conversation='+room.id+'&thread='+root.id);
+    const reply=page.getByRole('textbox',{name:'Reply in thread',exact:true});await expect(reply).toBeVisible();
+    await reply.fill('synthetic-nook composer broadcast '+width);
+    await page.getByLabel('Also send to #'+room.name,{exact:true}).check();
+    await reply.press('Enter');
+    await expect(page.locator('.thread-log .message-body').filter({hasText:'synthetic-nook composer broadcast '+width})).toHaveCount(1);
+    await page.goto(base+'/app?conversation='+room.id);
+    await expect(page.locator('.message-body').filter({hasText:'synthetic-nook composer broadcast '+width})).toHaveCount(1);
+    const broadcast=await call('/api/search?q='+encodeURIComponent('synthetic-nook composer broadcast '+width),undefined,member);
+    const sent=broadcast.items.find(m=>m.body==='synthetic-nook composer broadcast '+width);assert.ok(sent);
+    await call('/api/messages/'+sent.id,{body:'synthetic-nook composer broadcast edited '+width,version:1},member,'PATCH');
+    await expect(page.locator('.message-body').filter({hasText:'synthetic-nook composer broadcast edited '+width})).toHaveCount(1);
+    await call('/api/messages/'+sent.id,{delete:true,version:2},member,'PATCH');
+    await expect(page.locator('[data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');
+    if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`thread-broadcast-${width}.png`)});
+    await page.goto(base+'/app?conversation='+room.id);
+
     await call('/api/conversations/'+room.id+'/typing',{page:'owner-browser-'+width,typing:true})
     await expect(composer.getByRole('status')).toContainText('Priya Chen is typing')
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`typing-${width}.png`)})

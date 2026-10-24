@@ -17,8 +17,10 @@ export type MessageExtra={statements:(mid:string)=>D1PreparedStatement[]}
 export async function send(c:Context,id:string,input:Record<string,any>,extra?:MessageExtra){
  if(input.confirmBroadcast!==undefined&&typeof input.confirmBroadcast!=='boolean')fail(400,'confirmBroadcast must be boolean')
  if(input.adminOverride!==undefined&&typeof input.adminOverride!=='boolean')fail(400,'adminOverride must be boolean')
+ if(input.channelBroadcast!==undefined&&typeof input.channelBroadcast!=='boolean')fail(400,'channelBroadcast must be boolean');
+ if(input.channelBroadcast&&!input.parent)fail(400,'Only a thread reply can also be sent to the channel');
  const body=messageBody(input.body),intent=text(input.intent,128);if(input.parent!==undefined&&input.parent!==null&&typeof input.parent!=='string')fail(400,'Invalid parent');const parent=input.parent||null;
- const ids=input.attachments??[];if(!Array.isArray(ids)||ids.length>5||ids.some(x=>typeof x!=='string')||new Set(ids).size!==ids.length)fail(400,'Invalid attachment IDs');const attention=messageAttentionInput(input),payload=JSON.stringify({body,parent,attachments:ids,...attention,...(input.adminOverride?{adminOverride:true}:{})});
+ const ids=input.attachments??[];if(!Array.isArray(ids)||ids.length>5||ids.some(x=>typeof x!=='string')||new Set(ids).size!==ids.length)fail(400,'Invalid attachment IDs');const attention=messageAttentionInput(input),payload=JSON.stringify({body,parent,attachments:ids,...attention,...(input.adminOverride?{adminOverride:true}:{}),...(input.channelBroadcast?{channelBroadcast:true}:{})});
  const digest=await erasedIntent(c.uid,intent,id)
  const [erased,old]=await Promise.all([
   c.one('SELECT 1 FROM nook_erased_messages WHERE intent_digest=?',[digest],id),
@@ -30,7 +32,7 @@ export async function send(c:Context,id:string,input:Record<string,any>,extra?:M
  const broadcast=c.memberBroadcasts?await previewBroadcast(c,id,body):null
  if(broadcast&&broadcast.recipients>=6&&input.confirmBroadcast!==true)throw new BroadcastConfirmation(broadcast)
  const broadcastCondition=broadcast?broadcastFence(literal(id),literal(c.uid),broadcast.kind,input.confirmBroadcast===true):'1'
- const permission=`(${canPost('?','?','?')} OR (?=1 AND ${adminPoster('?')}))`,permissionValues=[id,parent,c.uid,input.adminOverride?1:0,c.uid]
+ const permission=`(${canPost('?','?','?')} OR (?=1 AND ${adminPoster('?')})) AND (?=0 OR ${canPost('?','?','NULL')})`,permissionValues=[id,parent,c.uid,input.adminOverride?1:0,c.uid,input.channelBroadcast?1:0,id,c.uid]
  if(!await c.one(`SELECT 1 WHERE ${permission}`,permissionValues,id))fail(403,'Posting is restricted in this channel; ask a channel manager')
  if(input.adminOverride&&!await c.one(`SELECT 1 WHERE ${adminPoster('?')}`,[c.uid],id))fail(403,'Only owners and admins may use a labelled override')
  if(parent&&!await c.one(`SELECT id FROM (${liveThreadRoots}) WHERE id=? AND conversation=?`,[parent,id],id))fail(400,'Thread root unavailable');for(const uid of attention.mentions)if(!await c.one(`SELECT user FROM nook_members m WHERE conversation=? AND user=? AND ${allowedGrant('m.user','m.conversation')}`,[id,uid],id))fail(400,'Mention recipient must be a current member');for(const aid of ids)if(!await c.one("SELECT id FROM nook_attachments WHERE id=? AND author=? AND conversation=? AND state='staged' AND expires>?",[aid,c.uid,id,Date.now()],id))fail(400,'Attachment must be uploader-owned staged file in this conversation');

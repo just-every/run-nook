@@ -48,6 +48,7 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
   <div className="message-content"><div className="message-meta"><strong className={continued?'sr-only':undefined}>{m.authorName}</strong>{m.nativeContinuation&&<span className="edited">Posted in Nook</span>}{!!m.app&&<span className="message-via">App</span>}{m.via&&<span className="message-via">via {m.via}</span>}<time className={continued?'reveal':undefined} dateTime={m.created} title={time.toLocaleString([],{dateStyle:'full',timeStyle:'short'})}>{time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>{m.adminOverride&&!m.deleted&&<span className="edited">Admin override</span>}{m.immutable&&<span className="edited">{m.retainedSource?'Retained body · read only':'Imported · read only'}</span>}{m.version>1&&!m.deleted&&!m.retainedSource&&<span className="edited">edited</span>}</div>
    {m.deleted?<p className="message-body">Message deleted</p>:m.immutable?<p className="message-body">{m.slack?.text??m.body}</p>:<div className="message-body"><SafeMarkdown text={m.body}/></div>}
    {!m.deleted&&<>
+    {m.channelBroadcast&&m.parent&&<a className="text-button" href={`/app?conversation=${encodeURIComponent(m.conversation)}&thread=${encodeURIComponent(m.parent)}&focus=${encodeURIComponent(m.id)}`}>Also sent to channel · View thread</a>}
     <ForwardCard message={m}/>
     {m.poll&&<PollCard message={m.id} question={m.body}/>}
     {m.broadcast&&<BroadcastRecipients message={m.id} broadcast={m.broadcast}/>}

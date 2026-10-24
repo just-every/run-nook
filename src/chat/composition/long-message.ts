@@ -2,7 +2,7 @@ import {MESSAGE_LIMIT} from '../../family/team-chat/domain'
 import type {Draft,Intent,SendPlan} from '../drafts'
 
 export function messageIntent(draft:Draft,parent:string|null,override:boolean):Intent{
- return {body:draft.body,intent:crypto.randomUUID(),parent,attachments:draft.files.map(f=>f.id),mentions:[...new Set([...(draft.mentionIds??[]),...(draft.recipient?[draft.recipient]:[])])],urgent:draft.urgent,urgentReason:draft.urgent?draft.reason:null,...(override?{adminOverride:true as const}:{})}
+ return {...(parent&&draft.channelBroadcast?{channelBroadcast:true as const}:{}),body:draft.body,intent:crypto.randomUUID(),parent,attachments:draft.files.map(f=>f.id),mentions:[...new Set([...(draft.mentionIds??[]),...(draft.recipient?[draft.recipient]:[])])],urgent:draft.urgent,urgentReason:draft.urgent?draft.reason:null,...(override?{adminOverride:true as const}:{})}
 }
 // Slice source verbatim, including newlines, while never bisecting a Unicode
 // surrogate pair. Prefer paragraph/word boundaries without dropping separators.
