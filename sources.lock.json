@@ -1613,7 +1613,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "aa59e14641aba684c80ca6fc6063b33b3500ec441747860389db69da3cd68d6a",
+      "sha256": "6737dfd6557c7db19d4e4db13f476a41def9c36b0cfdb8b096fbb9558bb26194",
       "executable": false
     },
     "release-history/0.4.0.json": {
@@ -7033,7 +7033,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "d567ee9090d5a986e7b1623a85ceeeeec9593c83597ddaa39f149672313351a5",
+      "sha256": "b89374cabd95d7e0fa6a76de6e48affa49178653ba9865ed247b77d10a073394",
       "executable": false
     },
     "tests/readme-team-flow.mjs": {
