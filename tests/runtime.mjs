@@ -45,7 +45,9 @@ async function start(port,{envFile}={}) {
 }
 async function stop(){if(worker){const current=worker;worker=undefined;await current.close()}}
 async function request(path,{method='GET',body,cookie='',status=200,extra={}}={}) {
- const response=await fetch(origin+path,{method,redirect:'manual',headers:{Connection:'close',origin,...(cookie?{cookie}:{}),...(body!==undefined?{'content-type':'application/json'}:{}),...extra},body:body===undefined?undefined:JSON.stringify(body)})
+ // Each fixture request owns its socket. A synchronous archive validation or a
+ // Worker restart must not reuse an idle pooled socket the server has closed.
+ const response=await new Promise((resolve,reject)=>{const req=httpRequest(origin+path,{method,agent:false,headers:{origin,...(cookie?{cookie}:{}),...(body!==undefined?{'content-type':'application/json'}:{}),...extra}},res=>{const chunks=[];res.on('data',chunk=>chunks.push(chunk));res.on('error',reject);res.on('end',()=>{const headers=new Headers();for(const [name,value] of Object.entries(res.headers))for(const item of Array.isArray(value)?value:[value])if(item!==undefined)headers.append(name,item);resolve(new Response(chunks.length?Buffer.concat(chunks):null,{status:res.statusCode,headers}))})});req.on('error',reject);req.end(body===undefined?undefined:JSON.stringify(body))})
  const raw=await response.text(); assert.equal(response.status,status,`${method} ${path}: ${raw}`)
  return {response,raw,data:response.headers.get('content-type')?.includes('application/json')?JSON.parse(raw):undefined}
 }

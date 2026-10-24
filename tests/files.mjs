@@ -7,7 +7,7 @@ import {sourceDoor} from './import-fixture.mjs'
 export async function filesJourney({owner,registered,post,patch,get,check,restart,origin,sql,validateArchive}){
  await check('NOOK-061 ordered multipart resumes after restart and verifies bytes before one binding',async()=>{
   const base=typeof origin==='function'?origin():origin,room=(await post('/api/conversations',{name:'synthetic-nook multipart custody',kind:'private',participants:[]})).data;
-  const call=async(path,{method='GET',body,status=200,type='application/json'}={})=>{const response=await fetch(base+path,{method,headers:{cookie:owner.cookie,Origin:base,'Content-Type':type},body:body===undefined?undefined:body instanceof Uint8Array?body:JSON.stringify(body)});const result=await response.json();assert.equal(response.status,status,JSON.stringify(result));return result};
+  const call=async(path,{method='GET',body,status=200,type='application/json'}={})=>{const response=await fetch(base+path,{method,headers:{Connection:'close',cookie:owner.cookie,Origin:base,'Content-Type':type},body:body===undefined?undefined:body instanceof Uint8Array?body:JSON.stringify(body)});const result=await response.json();assert.equal(response.status,status,JSON.stringify(result));return result};
   const policy=(await get('/api/team/file-policy')).data;
   await patch('/api/team/file-policy',{...policy,maxBytes:1073741824,blockedExtensions:['exe']});
   const invalid=await call('/api/conversations/'+room.id+'/uploads',{method:'POST',body:{name:'synthetic-nook-bad-checksum.zip',mime:'application/zip',size:17,sha256:'0'.repeat(64),intent:crypto.randomUUID()}});
@@ -26,7 +26,7 @@ export async function filesJourney({owner,registered,post,patch,get,check,restar
   const completed=await call('/api/uploads/'+declaration.id+'/complete',{method:'POST'});assert.equal(completed.file.sha256,checksum);
   assert.equal((await call('/api/uploads/'+declaration.id+'/complete',{method:'POST'})).file.id,completed.file.id);
   const message=(await post('/api/conversations/'+room.id+'/messages',{body:'synthetic-nook resumable file',attachments:[completed.file.id],intent:crypto.randomUUID()})).data;
-  const downloaded=await fetch(base+'/api/attachments/'+completed.file.id+'/download',{headers:{cookie:owner.cookie}});assert.equal(createHash('sha256').update(Buffer.from(await downloaded.arrayBuffer())).digest('hex'),checksum);
+  const downloaded=await fetch(base+'/api/attachments/'+completed.file.id+'/download',{headers:{Connection:'close',cookie:owner.cookie}});assert.equal(createHash('sha256').update(Buffer.from(await downloaded.arrayBuffer())).digest('hex'),checksum);
   if(validateArchive)await validateArchive();
   await patch('/api/messages/'+message.id,{delete:true,version:1});
   await get('/api/attachments/'+completed.file.id+'/download',owner.cookie,404);

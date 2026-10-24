@@ -89,3 +89,7 @@
 @media (max-width: 600px) { .nook-app .team-image img { max-height: 260px; } }
 .nook-app .file-row:has(.team-image) { flex-wrap: wrap; }
 .nook-app .file-row .team-image { flex-basis: 100%; width: 100%; }
+
+.nook-app .notification-defaults fieldset { display:grid; gap:2px; min-width:0; max-height:none; overflow:visible; border:0; border-radius:0; margin:12px 0; padding:0; }
+.nook-app .notification-default-choice { display:flex; align-items:center; gap:8px; min-height:32px; font-size:14px; }
+.nook-app .notification-default-choice input { flex:none; width:20px; height:20px; margin:0; }
