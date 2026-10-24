@@ -125,5 +125,8 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
   return ()=>{stopped=true;socketReady.current=false;clearTimeout(reconnect);socket?.close();window.removeEventListener('focus',wake);window.removeEventListener('online',wake);document.removeEventListener('visibilitychange',wake)}
  },[refresh,clearPrivate,onError,privateSignal])
  async function mutate<T>(path:string,input:unknown,method?:string):Promise<T>{const end=beginWrite();try{if(privateSignal.aborted)throw Error('This workspace view is no longer active.');setError('');const result=await api<T>(path,input,method);if(privateSignal.aborted)throw Error('This workspace view is no longer active.');await refresh();if(privateSignal.aborted)throw Error('This workspace view is no longer active.');return result}catch(e){if(!privateSignal.aborted){onError(e);if(e instanceof ApiError&&e.status===409)await refresh()}throw e}finally{end()}}
- return {snapshot,user,attentionLoaded,conversations,users,data:data===cache.current&&data?.key===windowKey(route)?data:null,attention,error,setError,loading,revision,accessEpoch,privateSignal,conversationCurrent,threadCurrent,connected,refresh,beginWrite,sendMessage,onRead,mutate,onError,clearPrivate}
+ // A newer authorized projection can reach the cache before React commits its
+ // matching state. Hiding that same-scope state unmounts message dialogs and
+ // loses an in-flight receipt. Null cache and route keys still retire scopes.
+ return {snapshot,user,attentionLoaded,conversations,users,data:cache.current&&data?.key===windowKey(route)?data:null,attention,error,setError,loading,revision,accessEpoch,privateSignal,conversationCurrent,threadCurrent,connected,refresh,beginWrite,sendMessage,onRead,mutate,onError,clearPrivate}
 }
