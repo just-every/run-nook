@@ -21,7 +21,7 @@ export function ProfileFieldSettings({revision,privateSignal,onSaved}:Props){
   let active=true
   const read=++fieldReads.current
   if(privateSignal?.aborted)return
-  void api<FieldResult>('profile/fields').then(value=>{if(active&&alive.current&&read===fieldReads.current){setResult(value);if(interrupted.current){setNotice(pending.current?'Profile fields changed while saving. Waiting for the result.':'Profile fields changed while saving. The list was reloaded.');if(!pending.current){interrupted.current=false;setSaveState(state=>state==='saving'?'idle':state)}}}}).catch(cause=>{if(active&&alive.current&&read===fieldReads.current)setError(cause.message)})
+  void api<FieldResult>('profile/fields').then(value=>{if(active&&alive.current&&read===fieldReads.current){setResult(value);if(interrupted.current){setNotice(pending.current?'Profile fields changed while saving. Waiting for the result.':'Profile fields changed while saving. The list was reloaded.');if(!pending.current){interrupted.current=false;setSaveState(state=>state==='saving'?'idle':state)}}}}).catch(cause=>{if(active&&alive.current&&read===fieldReads.current){setError(cause.message);if(!pending.current){setNotice('');setSaveState('idle')}}})
   return()=>{active=false}
  },[revision,privateSignal])
  const save=async(remove=false)=>{

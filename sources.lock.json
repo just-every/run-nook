@@ -5677,7 +5677,7 @@
       "executable": false
     },
     "src/profiles/FieldSettings.tsx": {
-      "sha256": "91f2ece37fdcd415ef358e6b4f4c706627ea5fd79acd0f727d80681f6c6f824f",
+      "sha256": "fcc486e5abf6734b41584251eccc0253be0738277e1c3ae09933f663ae294783",
       "executable": false
     },
     "src/profiles/PeopleDirectory.tsx": {
@@ -6493,7 +6493,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "225db2c55a58acb0edd3817baaa0b52ef649abc127cd70eb078b43996ac923ea",
+      "sha256": "fd4dfd1b17d459775acf794ea2181839296da71af4b2f451c5936d8e876e41b4",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -6841,7 +6841,7 @@
       "executable": false
     },
     "tests/profile-fields-ordering.mjs": {
-      "sha256": "c85ea5ead665d1c1aa94c2389333aba0737c157b761a706aa555bfa3635caf43",
+      "sha256": "5f2a6e76b2e845515718cf62663ca8de3d8d764c6cc8b6dae8f8dea4a95ea6e1",
       "executable": false
     },
     "tests/profiles.mjs": {
@@ -6977,7 +6977,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "5f82323df251fbd4e025ed65d6eeaa64344973193995b94f8eabd90581843b88",
+      "sha256": "c33b64cb9efef446301301e471457f5ec53cc82e9b94d843004db1ef9e2c58cf",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
