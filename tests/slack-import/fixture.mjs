@@ -46,8 +46,9 @@ export function zipFixture(entries, { deflate = false, descriptor = false, descr
     end.writeUInt32LE(offset, 16);
     return Buffer.concat([...locals, cd, end]);
 }
-export function slackFixture() {
+export function slackFixture({incomingWebhook=false}={}) {
     return zipFixture([
+        ...(incomingWebhook?[["integration_logs.json",[{service_id:'synthetic-nook-webhook',service_name:'Incoming webhook',service_type:'incoming-webhook',channel_id:'C1'}]]]:[]),
         ['users.json', [{ id: 'U1', name: 'Rin', profile: { email: '  RIN@EXAMPLE.TEST ' } }, { id: 'U2', name: 'Rin', profile: { email: 'same@example.test' } }, { id: 'U404', name: 'External historical actor' }]],
         ['channels.json', [{ id: 'C1', name: 'general', is_private: false }, { id: 'C2', name: 'engineering' }]],
         ['groups.json', [{ id: 'G1', name: 'secret' }]],

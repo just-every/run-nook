@@ -19,7 +19,7 @@ export async function importJourney({ origin, owner, restart, sql, validateArchi
     const door=importDoorClient({origin,owner,users:()=>importUsers(sql)});
     report.push(await privateHistoryJourney({call,door,owner,member,outsider,admin,guest,suffix,validateArchive}));
     report.push(await sourceFidelityJourney({call,door,owner,suffix}));
-    const upload=await door.inspect(slackFixture()),namespace='slack-proof-'+suffix;
+    const upload=await door.inspect(slackFixture({incomingWebhook:true})),namespace='slack-proof-'+suffix;
     assert.equal(upload.channels.length,2);assert.ok(upload.actors.some(a=>a.sourceId==='U404'));
     for(const actor of [member,guest,admin])await door.history({actor,status:403});
     const review={namespace,channels:upload.channels.map((c,i)=>({sourceId:c.sourceId,name:'Imported '+c.name+' '+suffix,members:i===0?[owner.user.id,member.user.id,guest.user.id]:[owner.user.id]})),actors:{U1:owner.user.id,U2:null,U404:null},acceptedOmissions:[]};
@@ -115,6 +115,13 @@ export async function importJourney({ origin, owner, restart, sql, validateArchi
     assert.ok(older.items[0].sequence < 0);
     assert.equal(older.hasNewer, true);
 
+    const incoming=upload.integrations.find(item=>item.kind==='webhook');assert.ok(incoming);assert.match(incoming.disposition,/NOOK-063/);
+    const approval=(await call('/api/notification-apps',{body:{name:incoming.name,channels:[liveChannel.id]}})).approvals[0];
+    const hook=await fetch(origin+'/hooks/slack/'+approval.token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'synthetic-nook repointed incoming webhook'})});assert.equal(hook.status,200);assert.equal(await hook.text(),'ok');
+    const delivered=(await call('/api/conversations/'+liveChannel.id+'/messages',{actor:member})).filter(m=>m.body==='synthetic-nook repointed incoming webhook');assert.equal(delivered.length,1);assert.equal(delivered[0].conversation,liveChannel.id);assert.equal(!!delivered[0].app,true);assert.equal(delivered[0].authorName,incoming.name);
+    await call('/api/conversations/'+liveChannel.id+'/messages',{status:403,actor:outsider});
+    await call('/api/notification-apps/'+approval.id+'/revoke',{body:{}});
+    const refusedHook=await fetch(origin+'/hooks/slack/'+approval.token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'synthetic-nook revoked incoming webhook'})});assert.equal(refusedHook.status,404);assert.equal(await refusedHook.text(),'no_service');
     const importedRoot=(await call(`/api/conversations/${liveChannel.id}/messages`)).find(m=>m.immutable&&!m.parent);
     const nativeReply=await call(`/api/conversations/${liveChannel.id}/messages`,{actor:member,body:{body:'Continue the imported discussion in Nook',parent:importedRoot.id,intent:'imported-reply-'+suffix}});
     assert.equal(nativeReply.parent,importedRoot.id);

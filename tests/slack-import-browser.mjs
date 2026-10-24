@@ -33,6 +33,7 @@ try {
             await page.getByLabel('private-history private source').check();
             await page.getByLabel('synthetic-nook-5 dm source').check();
             await page.getByLabel('group-history group-dm source').check();
+            await page.getByLabel('New channel name',{exact:true}).nth(0).fill('Imported webhook channel '+width);
             await page.getByLabel('New channel name',{exact:true}).nth(1).fill('Imported private DM '+width);
             await shot('private-mapping');
             const privatePlan=await createBrowserPlan(page,{omissions:'I have reviewed these omissions and accept this exact list.'});
@@ -51,6 +52,16 @@ try {
             await page.getByRole('link',{name:'Open imported Slack thread',exact:true}).click();
             await expect(page.getByRole('region',{name:'Thread messages',exact:true}).locator('.message-body').filter({hasText:'Synthetic private channel canary'})).toBeVisible();
             await shot('private-link');
+            const mappedWebhook=privateRooms.find(c=>c.name==='Imported webhook channel '+width);assert.ok(mappedWebhook);
+            await page.goto(origin+'/app?view=team');const apps=page.getByRole('region',{name:'Notification apps',exact:true});await apps.getByLabel('App name',{exact:true}).fill('Incoming webhook');await apps.getByRole('checkbox',{name:'#'+mappedWebhook.name,exact:true}).check();await apps.getByRole('button',{name:'Approve app',exact:true}).click();
+            const secret=apps.getByRole('region',{name:'New app tokens',exact:true});await expect(secret).toBeVisible();const repointed=(await secret.locator('samp').textContent()).trim();assert.equal(new URL(repointed).origin,origin);assert.match(new URL(repointed).pathname,/^\/hooks\/slack\//);
+            await page.addScriptTag({content:await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await page.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);
+            await page.screenshot({path:`evidence/nook-1/slack-webhook-approval-${width}.png`,fullPage:true,animations:'disabled',mask:[secret.locator('code'),secret.locator('samp')]});
+            const webhookText='synthetic-nook imported webhook delivery '+width,delivered=await fetch(repointed,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:webhookText})});assert.equal(delivered.status,200);assert.equal(await delivered.text(),'ok');
+            await secret.getByRole('button',{name:'I have saved the tokens',exact:true}).click();await page.goto(origin+'/app?conversation='+mappedWebhook.id);const webhookRow=page.locator('[data-message]').filter({hasText:webhookText});await expect(webhookRow).toHaveCount(1);await expect(webhookRow.getByText('Incoming webhook',{exact:true})).toBeVisible();await expect(webhookRow.getByText('App',{exact:true})).toBeVisible();await shot('webhook-delivered');
+            await page.addScriptTag({content:await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await page.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);
+            await page.goto(origin+'/app?view=team');await apps.getByRole('button',{name:'Revoke Incoming webhook in '+mappedWebhook.name,exact:true}).click();await expect(apps.getByRole('article',{name:'Incoming webhook in '+mappedWebhook.name,exact:true})).toContainText('Revoked');
+
             await page.goto(origin+'/app?view=you');await page.getByRole('link',{name:'Import Slack history',exact:true}).click();
             const incomplete = zipFixture([['users.json', []], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', [{ type: 'message', user: 'Umissing', ts: '1.000001', text: 'Missing source actor' }]]]);
             await expect(page.getByLabel('Slack export ZIP')).toBeEnabled();
