@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "68b08eb9461c311776be69aaa48c8a9ee14ee8539625ce0402170c3bee3e8463",
+      "sha256": "a983bc6bad8fb8fecedfad2c83b242a78cce4718d1077332c2545ede60bdebf6",
       "executable": false
     },
     "DEMO.md": {
@@ -6561,7 +6561,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "e75be3ce0375ca53fdb1e9c6c89504d704f245b8df33a712d98628d71415ba28",
+      "sha256": "38b61ae771d38edfb243f86351f52f65a46eb6e937d5bee589043556fd6b4064",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -7057,7 +7057,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "d7c752dd6b6a324e41eaad3dcb0fa3150d80492f350abb0f5d95ddfde8d4ab00",
+      "sha256": "4451b46894e4ed361f4402d29078f82a34c3dfb18d53f56ebbecd7ad22735051",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
