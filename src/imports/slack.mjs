@@ -94,6 +94,8 @@ export function captureSlackArchive(inspected, review, ownerId, localUsers) {
         bad('review required');
     const { archive, users } = inspected, userById = new Map(users.map(u => [u.id, u])), omissions = [...inspected.omissions], blockers = [], channels = [], messages = [], actors = new Map(), seen = new Set(), selected = new Set(), usedFiles = new Set(), missingFiles = [], skippedKinds = {};
     for (const actor of users) if (!Object.hasOwn(review.actors, actor.id)) bad(`explicit actor decision required: ${actor.id}`);
+    const mappedParticipants=new Map(),collisions=new Set();
+    for(const choice of review.channels){const source=inspected.channels.find(c=>c.id===choice.sourceId);for(const uid of source?.visibility?source.members:[]){const local=review.actors[uid];if(!local)continue;const previous=mappedParticipants.get(local);if(previous&&previous!==uid){collisions.add(previous);collisions.add(uid)}mappedParticipants.set(local,uid);}}
     for (const choice of review.channels) {
         if (!object(choice) || Object.keys(choice).sort().join() !== 'members,name,sourceId' || selected.has(choice.sourceId))
             bad('channel selection');
@@ -106,7 +108,7 @@ export function captureSlackArchive(inspected, review, ownerId, localUsers) {
             bad('destination or current audience');
         if (source.visibility) {
             const mapped=source.members.map(uid=>review.actors[uid]);
-            if (mapped.some(uid=>!uid) || new Set(mapped).size!==mapped.length || importDigest([...mapped].sort())!==importDigest([...choice.members].sort())) {
+            if (source.members.some(uid=>collisions.has(uid)) || mapped.some(uid=>!uid) || new Set(mapped).size!==mapped.length || importDigest([...mapped].sort())!==importDigest([...choice.members].sort())) {
                 omissions.push({kind:'channel',key:source.id,reason:'private-membership-not-exactly-mapped'});
                 continue;
             }

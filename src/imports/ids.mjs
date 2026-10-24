@@ -17,9 +17,11 @@ export function effectInputs(capture, owner, uploadId, reviewId) {
     assertSlackCaptureAdmitted(capture);
     const targetId=(namespace,kind,key)=>capture.sourceType==='gchat'?'gchat-'+importDigest([namespace,kind,key]).slice(0,40):nativeId(namespace,kind,key);
     const deltaSequences = capture.delta ? validatedDeltaSequences(capture) : null;
+    const privateMappings=new Map();
     for (const c of capture.channels) if (c.sourceRecord.visibility) {
         const roster=c.sourceRecord.members;
         const mapped=Array.isArray(roster)?roster.map(id=>capture.actors.find(a=>a.sourceId===id)?.association):[];
+        for(const uid of roster??[]){const local=capture.actors.find(a=>a.sourceId===uid)?.association,prior=privateMappings.get(local);if(local&&prior&&prior!==uid)throw Error('SLACK_INVALID: injective private identity mapping required');if(local)privateMappings.set(local,uid);}
         if (!mapped.length || mapped.some(id=>!id) || new Set(mapped).size!==mapped.length || importDigest([...mapped].sort())!==importDigest([...c.members].sort())) throw Error('SLACK_INVALID: exact private audience required');
     }
     const domainJob = captureJobId(capture, uploadId), effects = [];
