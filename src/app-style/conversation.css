@@ -158,3 +158,6 @@
 }
 
 .nook-app .composer .schedule-draft { grid-area: schedule; justify-self: start; }
+
+/* Long drafts and pending-upload controls remain reachable above mobile tabs. */
+.nook-app .chat > .composer { flex-shrink:1; min-height:0; overflow-y:auto; }

@@ -1,0 +1,8 @@
+.nook-app .email-offer { display:flex; flex:none; flex-wrap:wrap; align-items:center; gap:6px 12px; padding:8px 16px; background:var(--wash); font-size:14px; }
+.nook-app .email-offer p { margin:0; }
+.nook-app .email-offer label { display:flex; align-items:center; gap:8px; margin:0; }
+.nook-app .email-offer select { width:auto; min-height:32px; padding:3px 8px; }
+.nook-app .email-offer-actions { display:flex; flex:1 1 auto; align-items:center; gap:8px; }
+.nook-app .email-offer-actions .soft-button { flex:1; min-width:0; white-space:normal; }
+.nook-app .email-offer-actions .text-button { flex:none; }
+@media(max-width:850px) { .nook-app .email-offer label { margin-left:auto; } .nook-app .email-offer-actions { flex-basis:100%; } }
