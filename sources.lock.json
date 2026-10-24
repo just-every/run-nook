@@ -5049,7 +5049,7 @@
       "executable": false
     },
     "src/imports/DoorWizard.tsx": {
-      "sha256": "495599da0a71ffb55b720c9e59a2678c03ebbf13e740b514d8ebcd5869a52a20",
+      "sha256": "5d52059dac9a075bb79772aab9428ddb56d42775d8343057dda19d4911c402e7",
       "executable": false
     },
     "src/imports/formats.d.mts": {
@@ -6513,7 +6513,7 @@
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "1eeac4ce3801277fc4a38956d157ea56b803dcefa3c164e8654e5a20521c9cc9",
+      "sha256": "6abd86d38fc157c0b0d036ff49a722d9f288ef9c878fc92119f2f23baf341a6f",
       "executable": false
     },
     "tests/campfire-import/browser.mjs": {
@@ -6561,7 +6561,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "af70a040d8da9403405ef18449e40d2c5a0fe008004cf1f045118d438f6aefd1",
+      "sha256": "e75be3ce0375ca53fdb1e9c6c89504d704f245b8df33a712d98628d71415ba28",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -6613,7 +6613,7 @@
       "executable": false
     },
     "tests/files-browser.mjs": {
-      "sha256": "054b659424521dff19f5b4c4631cc8d36ca164dcad96241ed9b979f4e28270d6",
+      "sha256": "f6fe0f0c071b337097aeb2f8b7f55a2b143838118250e5127922f7d5befcade0",
       "executable": false
     },
     "tests/files.mjs": {
@@ -6621,7 +6621,7 @@
       "executable": false
     },
     "tests/google-chat-import/browser.mjs": {
-      "sha256": "fdbbe0bf34f1cd5ae6d9a6550c000d33d22cba4842ebc03a699e8309f2ba62b9",
+      "sha256": "73c89e650921b4e8134730c94f275c2e8379e8447436a03203d2de5f64f8b063",
       "executable": false
     },
     "tests/google-chat-import/fixture.mjs": {
@@ -7101,7 +7101,7 @@
       "executable": false
     },
     "tests/slack-import-browser.mjs": {
-      "sha256": "b459a219e3500adc1a4b228990c4e15681a12db57e9fc44d2ff6e601f76fa90f",
+      "sha256": "42306d0d76e80edb643ddb9ec60688121c21c10d503505cbdf08fa90b860e7b8",
       "executable": false
     },
     "tests/slack-import-history.test.mjs": {

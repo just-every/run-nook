@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
 import {chromium,expect} from '@playwright/test'
 import {keyed} from './dev-key.mjs'
 import {mkdir,writeFile,readFile} from 'node:fs/promises'
@@ -160,20 +161,29 @@ export async function runBrowser(origin,destination){
     const handoverBytes=Buffer.alloc(25*1024*1024,32)
     handoverBytes.write('Release handover notes\n')
     handoverBytes.write('End of handover',handoverBytes.length-'End of handover'.length)
-    const uploadIntents=[],uploadedFiles=[]
-    await alice.route('**/api/conversations/*/attachments',async route=>{
-     const request=route.request(),headers=request.headers()
-     assert.equal(headers['content-type'],'text/plain','file bytes use the binary upload route')
-     assert.equal(decodeURIComponent(headers['x-filename']),'handover.txt')
-     assert.ok(headers['x-upload-intent'],'the upload carries its own intent')
-     uploadIntents.push(headers['x-upload-intent'])
-     const response=await route.fetch();assert.equal(response.status(),200)
-     uploadedFiles.push(await response.json())
-     if(uploadedFiles.length===1){expectedFailures.set(request.url(),'upload');intentionalAbort=true;await route.abort('failed')}else await route.fulfill({response})
+    const uploadIntents=[],uploadedFiles=[];let uploadedBytes=0
+    await alice.route('**/api/conversations/*/uploads',async route=>{
+     const declaration=route.request().postDataJSON()
+     assert.equal(declaration.mime,'text/plain');assert.equal(declaration.name,'handover.txt')
+     assert.equal(declaration.size,handoverBytes.length);assert.equal(declaration.sha256,createHash('sha256').update(handoverBytes).digest('hex'))
+     assert.ok(declaration.intent,'the upload carries its own intent');uploadIntents.push(declaration.intent)
+     const response=await route.fetch();assert.equal(response.status(),200);const result=await response.json()
+     if(result.file)uploadedFiles.push(result.file)
+     await route.fulfill({response})
+    })
+    await alice.route('**/api/uploads/*/parts/*',async route=>{
+     assert.equal(route.request().headers()['content-type'],'application/octet-stream','chunks use the binary upload route')
+     const bytes=route.request().postDataBuffer();assert.ok(bytes.length>0&&bytes.length<=8*1024*1024);uploadedBytes+=bytes.length
+     await route.continue()
+    })
+    await alice.route('**/api/uploads/*/complete',async route=>{
+     const response=await route.fetch();assert.equal(response.status(),200);uploadedFiles.push((await response.json()).file)
+     if(uploadedFiles.length===1){expectedFailures.set(route.request().url(),'upload');intentionalAbort=true;await route.abort('failed')}else await route.fulfill({response})
     })
     const fileInput=alice.locator('.chat input[type=file]')
+    const uploadInterrupted=alice.waitForEvent('requestfailed',{predicate:request=>/\/api\/uploads\/[^/]+\/complete$/.test(new URL(request.url()).pathname)})
     await fileInput.setInputFiles({name:'handover.txt',mimeType:'text/plain',buffer:handoverBytes})
-    await expect(alice.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled()
+    await uploadInterrupted;await expect(alice.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled()
     await expect(alice.locator('.chat .send')).toBeDisabled()
     await composer.fill(hostileMessage+' Draft remains editable.')
     await composer.press('Enter');await expect(composer).toHaveValue(hostileMessage+' Draft remains editable.')
@@ -192,7 +202,8 @@ export async function runBrowser(origin,destination){
     assert.equal(uploadIntents.length,1,'reselection verifies bytes without an automatic retry')
     await alice.getByRole('button',{name:'Retry upload',exact:true}).click()
     await alice.getByRole('button',{name:'Discard handover.txt',exact:true}).waitFor()
-    await alice.unroute('**/api/conversations/*/attachments')
+    await alice.unroute('**/api/conversations/*/uploads');await alice.unroute('**/api/uploads/*/parts/*');await alice.unroute('**/api/uploads/*/complete')
+    assert.equal(uploadedBytes,handoverBytes.length,'lost completion acknowledgement never repeats stored chunks')
     assert.equal(uploadIntents.length,2,'one initial upload and one explicit retry')
     assert.equal(uploadIntents[1],uploadIntents[0],'upload intent survives the lost acknowledgement and reload')
     assert.equal(uploadedFiles[1].id,uploadedFiles[0].id,'retry reuses the same private upload reservation')
