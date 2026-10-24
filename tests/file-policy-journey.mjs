@@ -20,7 +20,7 @@ test('NOOK-061 owner file policy versions size and extensions before native, cli
   const at=new Date(Math.ceil((Date.now()+30000)/60000)*60000).toISOString().slice(0,16),scheduled=await call(`/api/conversations/${room.id}/scheduled`,'POST',{body:'Synthetic scheduled file policy control',localAt:at,zone:'UTC',recurrence:'none',endDate:null,attachments:[existing.id],intent:crypto.randomUUID()},ownerCookie)
   const input={version:0,maxBytes:1024,blockedExtensions:['.EXE']}
   for(const actor of [member,admin]){await call(path,'GET',undefined,actor.cookie,403);await call(path,'PATCH',input,actor.cookie,403)}
-  await call(path,'PATCH',{...input,maxBytes:26214401},ownerCookie,400);await call(path,'PATCH',{...input,blockedExtensions:['bad.']},ownerCookie,400)
+  await call(path,'PATCH',{...input,maxBytes:1073741825},ownerCookie,400);await call(path,'PATCH',{...input,blockedExtensions:['bad.']},ownerCookie,400)
   const policy=await call(path,'PATCH',input,ownerCookie);assert.deepEqual(policy,{version:1,maxBytes:1024,blockedExtensions:['exe']})
   await call(path,'PATCH',input,ownerCookie,409)
   const bucket=await app.mf.getR2Bucket('FILES'),before=(await bucket.list()).objects.map(o=>o.key).sort(),attachments=(await db.prepare('SELECT count(*) AS n FROM nook_attachments').first()).n
@@ -32,12 +32,12 @@ test('NOOK-061 owner file policy versions size and extensions before native, cli
   const importBefore=(await db.prepare('SELECT count(*) AS n FROM ik_door_chunks').first()).n
   // Withhold the entire capture body: admission must answer using headers and
   // policy alone, before parsing or reading any embedded source-file bytes.
-  for(const source of ['slack','campfire','mattermost'])await new Promise((resolve,reject)=>{
+  for(const source of ['slack','campfire','mattermost','gchat'])await new Promise((resolve,reject)=>{
    const upload=httpRequest(origin+'/api/operator/import/uploads',{method:'POST',signal:AbortSignal.timeout(5000),headers:{cookie:ownerCookie,origin,'content-type':'application/json','content-length':'2','X-Import-Source':source,'X-Import-Namespace':'synthetic-file-policy'}},response=>{
     let body='';response.on('data',part=>body+=part);response.on('end',()=>{try{assert.equal(response.statusCode,409);assert.match(JSON.parse(body).error,/Workspace file policy/);resolve()}catch(error){reject(error)}finally{upload.destroy()}})
    });upload.on('error',reject);upload.flushHeaders()
   })
-  for(const source of ['slack','campfire','mattermost']){const refused=await call('/api/operator/import/uploads','POST',{name:source+'-reviewed-history.json',totalBytes:2,totalChunks:1,index:0,base64:'e30=',bundleSha256:'0'.repeat(64),chunkSha256:'0'.repeat(64)},ownerCookie,409,{'X-Import-Source':source,'X-Import-Namespace':'synthetic-file-policy'});assert.match(refused.error,/Workspace file policy/)}
+  for(const source of ['slack','campfire','mattermost','gchat']){const refused=await call('/api/operator/import/uploads','POST',{name:source+'-reviewed-history.json',totalBytes:2,totalChunks:1,index:0,base64:'e30=',bundleSha256:'0'.repeat(64),chunkSha256:'0'.repeat(64)},ownerCookie,409,{'X-Import-Source':source,'X-Import-Namespace':'synthetic-file-policy'});assert.match(refused.error,/Workspace file policy/)}
   assert.equal((await db.prepare('SELECT count(*) AS n FROM ik_door_chunks').first()).n,importBefore,'restricted import captures store no chunk bytes')
   const accepted=await binary('synthetic-accepted.txt','Allowed text');assert.equal(accepted.size,12)
   await call(`/api/conversations/${room.id}/messages`,'POST',{body:'Synthetic accepted control',attachments:[accepted.id],intent:crypto.randomUUID()},ownerCookie)
