@@ -23,8 +23,9 @@ try {
             const shot=async name=>{assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no import screen overflow');await mkdir('evidence/nook-1',{recursive:true});await page.screenshot({path:`evidence/nook-1/slack-${name}-${width}.png`,fullPage:true,animations:'disabled'})};
             await shot('entry');
             const me=await (await context.request.get(origin+'/api/me')).json();
+            await expect(page.getByLabel('Slack export ZIP')).toBeEnabled();
             await page.getByLabel('Slack export ZIP').setInputFiles({name:'private.zip',mimeType:'application/zip',buffer:privateSlackFixture()});
-            await page.getByLabel('Source workspace namespace').fill('synthetic-nook-browser-private-'+width+'-'+Date.now());
+            try { await page.getByLabel('Source workspace namespace').fill('synthetic-nook-browser-private-'+width+'-'+Date.now()); } catch (error) { console.error('Slack local inspection:',await page.locator('main').innerText()); throw error; }
             const selects=page.locator('.import-actors select');
             await selects.nth(0).selectOption(me.id);
             const other=await selects.nth(1).locator('option').evaluateAll(options=>options.map(o=>o.value).find(value=>value&&value!=='external'&&value!==document.querySelector('.import-actors select').value));
