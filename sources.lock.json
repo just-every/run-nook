@@ -621,7 +621,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "3983e334f8ff4ec417288c578703153e6c6ea411cbe0cdb98a75adf43a42d7cb",
+      "sha256": "017e4191c755664efc3243c0bad7cc4155b8dfbc8533bddc8147867b5559b4d1",
       "executable": false
     },
     "AGENTS.md": {
@@ -645,7 +645,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "65d12cf4c0677f822cdb518471f1de13329c3fbfb05d3b9973b575399dbe814f",
+      "sha256": "341b63ad11ed6086d09d08b0669b7618a22eccc10186a71a0a477c4dc95c5423",
       "executable": false
     },
     "DEMO.md": {
@@ -661,7 +661,7 @@
       "executable": false
     },
     "docs/attention.md": {
-      "sha256": "aeba51beeb615b47c0aaae7aef76bf87722d6ca38617815857d68c67807e540f",
+      "sha256": "54981ef8d72aa55a034c54a123b263d25872f478d004e72b57558fb51550760b",
       "executable": false
     },
     "docs/backups.md": {
@@ -697,7 +697,7 @@
       "executable": false
     },
     "docs/file-previews.md": {
-      "sha256": "d2326d49632c7e186814429b6ff88dc3c3c9fb0d02d19292819f0b1e3ae1b65c",
+      "sha256": "d9d6d9375a5cdd55cf6bd200d492a462b5643bde6d2baeae7c0f46a0280e58dc",
       "executable": false
     },
     "docs/getting-started.md": {
@@ -4705,7 +4705,7 @@
       "executable": false
     },
     "src/files/resumable.server.ts": {
-      "sha256": "00971ead24a22e007912123f2a1232c763edfc5e09bbf84294fa041f2f747ce9",
+      "sha256": "e995ec6eb14704e82e8fcc24860b2cdafc6535a4bea531f71a472d37b99b166f",
       "executable": false
     },
     "src/files/server.ts": {
@@ -5481,7 +5481,7 @@
       "executable": false
     },
     "src/notify/compose.ts": {
-      "sha256": "7648c3ab2f61fb646278966498db654d8ff436156316167f75580afbfde294f3",
+      "sha256": "380de99193a9766715c1cda5bab4032861e914d7a6745fb61b2e732b503c5d79",
       "executable": false
     },
     "src/notify/email-offer.css": {
@@ -5537,7 +5537,7 @@
       "executable": false
     },
     "src/notify/run.ts": {
-      "sha256": "1fee12f612a6efbe07b821713ce2cd1fc53e7524532203081dcf7f5937ad988e",
+      "sha256": "b8767f8a2ae2777012759140203723d1671e12e5202ac9b35f01ed934fa73c9b",
       "executable": false
     },
     "src/notify/sender.ts": {
@@ -5637,7 +5637,7 @@
       "executable": false
     },
     "src/platform/storage/archive-validation.mjs": {
-      "sha256": "504fee76daea2b102b281d4c321c0f319e0a5dd8e71b3d2b14c7f46523023e72",
+      "sha256": "c28b9e7f9a7f2de193b84576c4a7b4a54b4b9a230bd9459040a45bd3712f3fbd",
       "executable": false
     },
     "src/platform/storage/commands.ts": {
@@ -6472,6 +6472,10 @@
       "sha256": "abb32a68f4b2ba1cbedb012fb392a4b46d61743039315e6d4b6d0877f441aaac",
       "executable": false
     },
+    "tests/archive-roundtrip.mjs": {
+      "sha256": "7b45931778314ecf60f011ff0f23b2b9c8a2e25ae934f62c5b21f83c6fa08144",
+      "executable": false
+    },
     "tests/attention.mjs": {
       "sha256": "681dd26bff244082175cf2f767402eb6033b882cbec75ae6799fa7fe1de58a4a",
       "executable": false
@@ -6565,7 +6569,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "314d5b85a136ad7df22c5a9047e0d2866f0b917b50af34139b6dc54dc9b88b22",
+      "sha256": "2152d0044a63aa5c9744f2d8099cc886133ff121c2842f9696b0491f26c32052",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -6617,11 +6621,11 @@
       "executable": false
     },
     "tests/files-browser.mjs": {
-      "sha256": "f6fe0f0c071b337097aeb2f8b7f55a2b143838118250e5127922f7d5befcade0",
+      "sha256": "35dae93e040eabf15d3f6ecfe94280a81c31e46124a725338d71f21bdb438faf",
       "executable": false
     },
     "tests/files.mjs": {
-      "sha256": "1fc8c72bab928a86069842dabcf1baa1c2228f11d7f4711b7da0530330390851",
+      "sha256": "9db68de7031ca04c51ff45612cde14e715ec43ac0dd08c61042b333f150778c7",
       "executable": false
     },
     "tests/google-chat-import/browser.mjs": {
@@ -6801,7 +6805,7 @@
       "executable": false
     },
     "tests/notify/quiet.mjs": {
-      "sha256": "905ec03cceceab3a3fab7c3cdce6da4a5e3a69afc6800d192075254b1c7f25c9",
+      "sha256": "adac4e2b575d73294488bf40a389dd05e96767a87218d31b7578699997db2fde",
       "executable": false
     },
     "tests/operator-auth.test.mjs": {
@@ -6877,7 +6881,7 @@
       "executable": false
     },
     "tests/personal.mjs": {
-      "sha256": "bfa47afa90535f40ec708de4174b2fe25080dc521883a4eca39ebe76524c11d5",
+      "sha256": "ab9b64c1efea0bb70e59a6948f006c80e9689ccaef7b3a2312361af1703e6acc",
       "executable": false
     },
     "tests/pilot-journey.mjs": {
@@ -7061,7 +7065,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "97824c1a1db4ea5a76571e5916f4252778c7961949ada17baf930b43cb998a07",
+      "sha256": "e6351b219836e6bec903e80c33feae55c2fb7de654649090ba0789322cc835f9",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
@@ -7105,7 +7109,7 @@
       "executable": false
     },
     "tests/slack-import-browser.mjs": {
-      "sha256": "23f0fa46eb0cbf8ccee357c6890ab077bf8bb2e0d451839977b71f7a4957c9b5",
+      "sha256": "5d65e68d05f0ebdc02336e7232f602fbd12cd5e65b4b6b7ef5d43364a354addb",
       "executable": false
     },
     "tests/slack-import-history.test.mjs": {
@@ -7137,11 +7141,11 @@
       "executable": false
     },
     "tests/slack-import/fixture.mjs": {
-      "sha256": "37739993495212eda8b93e006ceb2b5f47e87d1d5f6c9c5ac1a65b3f1af54562",
+      "sha256": "f50dd987232ed5a4061366cd363f9fa2cc3b2a6f96aac04e4321b1109ba5e301",
       "executable": false
     },
     "tests/slack-import/journey.mjs": {
-      "sha256": "3d70b350a3df6af9320175787383a500189982419561ce4471afc138a4632a42",
+      "sha256": "1ded3c800166f33faffafd9e70b6b0d6f9eeacc74e8c1a92bfcfc113eadd7d00",
       "executable": false
     },
     "tests/slack-import/lost-ack.mjs": {
@@ -7225,7 +7229,7 @@
       "executable": false
     },
     "tests/threads.mjs": {
-      "sha256": "1912462dd249c5b1095aa31430c2f4af48c8e120a1fd38caf5d423fb58c4dcb6",
+      "sha256": "c04ec58c6a17f30efbcdaf1536a797ecda6ec7d877798926dc6b002f8775f2e1",
       "executable": false
     },
     "tests/unreads-browser.mjs": {
