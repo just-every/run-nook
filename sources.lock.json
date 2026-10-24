@@ -5677,7 +5677,7 @@
       "executable": false
     },
     "src/profiles/FieldSettings.tsx": {
-      "sha256": "c7004bab93eb8d1a46d8dbe4b1e8c7c7fb58763e5f83dab1eb7264c3ab116a75",
+      "sha256": "91f2ece37fdcd415ef358e6b4f4c706627ea5fd79acd0f727d80681f6c6f824f",
       "executable": false
     },
     "src/profiles/PeopleDirectory.tsx": {
@@ -6333,7 +6333,7 @@
       "executable": false
     },
     "src/team/TeamPanel.tsx": {
-      "sha256": "0ace74f5887fe10bee12aad6d27fe19cfa8aab4a9a6872689840ce1a1d4ad445",
+      "sha256": "6725c54446b4afeeccfbecc96164ed53b84eacff4ea82a57f4f008f796ae7248",
       "executable": false
     },
     "src/team/types.ts": {
@@ -6493,7 +6493,7 @@
       "executable": false
     },
     "tests/composition-browser.mjs": {
-      "sha256": "6100a99de4850503436e9e432b0cd83ead48a10d565a8d286d2f88b0fa6b8b55",
+      "sha256": "225db2c55a58acb0edd3817baaa0b52ef649abc127cd70eb078b43996ac923ea",
       "executable": false
     },
     "tests/dev-key.mjs": {
@@ -6517,7 +6517,7 @@
       "executable": false
     },
     "tests/erasure-browser.mjs": {
-      "sha256": "a7e28968989657d57d077b3713cce8c6b32c5503801a66d92141b352b8915ada",
+      "sha256": "3e9bd21086fc528bb1a7150f46f1bf717b517311873996b66fcde4b7a8d5c44e",
       "executable": false
     },
     "tests/erasure.test.mjs": {
@@ -6841,7 +6841,7 @@
       "executable": false
     },
     "tests/profile-fields-ordering.mjs": {
-      "sha256": "b7bc1bb61c20cd7c2e829503f293cb6f8d35e43b443b665efa9a9cc010a8f8b2",
+      "sha256": "c85ea5ead665d1c1aa94c2389333aba0737c157b761a706aa555bfa3635caf43",
       "executable": false
     },
     "tests/profiles.mjs": {

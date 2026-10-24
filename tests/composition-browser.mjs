@@ -1,4 +1,4 @@
-import {profileFieldReadOrdering} from './profile-fields-ordering.mjs'
+import {profileFieldReadOrdering,profileFieldScopeOrdering} from './profile-fields-ordering.mjs'
 import {chromium,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
 import {resolve} from 'node:path'
@@ -98,25 +98,38 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     const ownerContext=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000}})
     try{
      const [ownerName,...ownerValue]=owner.cookie.split('=');await ownerContext.addCookies([{name:ownerName,value:ownerValue.join('='),url:base}])
-     const admin=await ownerContext.newPage()
+     const admin=await ownerContext.newPage(),ordering=width===390?await profileFieldReadOrdering(admin):null
      await admin.goto(base+'/app?view=team')
-     const fields=admin.getByRole('region',{name:'Profile fields',exact:true}),ordering=width===390?await profileFieldReadOrdering(admin):null
+     const fields=admin.getByRole('region',{name:'Profile fields',exact:true})
      try{
      await fields.getByRole('button',{name:'Edit Phone',exact:true}).click()
      await fields.getByLabel('Visible to',{exact:true}).selectOption('self')
      await fields.getByRole('button',{name:'Save field',exact:true}).click()
+     await expect(fields).toHaveAttribute('data-save','saved');await expect(fields).toHaveAttribute('aria-busy','false')
      await expect(fields.getByRole('status')).toContainText('Profile field saved');await ordering?.captured()
      await fields.getByRole('button',{name:'Add profile field',exact:true}).click()
      await fields.getByLabel('Field ID',{exact:true}).fill('region-'+width)
      await fields.getByLabel('Field label',{exact:true}).fill('Sales region '+width)
      await fields.getByRole('button',{name:'Save field',exact:true}).click()
+     await expect(fields).toHaveAttribute('data-save','saved');await expect(fields).toHaveAttribute('aria-busy','false')
      await expect(fields.getByRole('status')).toHaveText('Profile field saved.');await ordering?.deliver()
      await expect(fields.getByRole('button',{name:'Edit Sales region '+width,exact:true})).toBeVisible()
      }finally{await ordering?.close()}
+     const team=admin.getByLabel('Team people',{exact:true})
+     await expect(team.locator('ul.team-people>li')).toHaveCount(50)
+     await team.getByRole('button',{name:'Next people',exact:true}).click();await expect(team.getByRole('status')).toContainText('51–100')
+     if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`team-page-${width}.png`)})
+     await team.getByLabel('Find teammates',{exact:true}).fill('Directory Colleague 5001')
+     await expect(team.locator('ul.team-people>li')).toHaveCount(1);await expect(team.getByText('Directory Colleague 5001',{exact:true})).toBeVisible()
+     if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`team-search-${width}.png`)})
+     await team.getByLabel('Find teammates',{exact:true}).fill('')
      await fields.getByRole('button',{name:'Edit Sales region '+width,exact:true}).scrollIntoViewIfNeeded()
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-created-${width}.png`)})
      await fields.getByRole('heading',{name:'Profile fields',exact:true}).scrollIntoViewIfNeeded()
      if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-policy-${width}.png`)})
+     await profileFieldScopeOrdering(admin,fields,width)
+     assert.ok(await admin.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1))
+     if(destination)await admin.screenshot({animations:'disabled',path:resolve(destination,`field-reloaded-${width}.png`)})
      assert.equal((await call('/api/people?q=415%20555%200198',undefined,owner)).items.length,0)
      const commandsRoom=await call('/api/conversations',{name:'Command planning '+width,kind:'channel',participants:[member.user.id]})
      await admin.goto(base+'/app?view=chat&conversation='+commandsRoom.id)
