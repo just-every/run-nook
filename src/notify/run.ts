@@ -40,16 +40,14 @@ export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=
   const recurring=await sql('SELECT quiet_until FROM nook_quiet_schedules WHERE user=?',group.user).first<{quiet_until:number}>()
   const until=Math.max(person?.dnd_until??0,recurring?.quiet_until??0),quiet=until>now?until:null
   const activity=await sql(`SELECT ${activeDesktopUntil('?').replace("COALESCE(d.device_class,p.device_class)='desktop'",'1')} AS until`,group.user).first<{until:number}>();
-  const heldUntil=(row:Row)=>Math.max(['direct-message'].includes(row.reason)?Math.max(row.due,row.created+GATHER_MS+(person?.away_interval??15)*60000,(activity?.until??0)>now?(activity?.until??0)+60000:0):0,row.snooze??0,row.reason==='urgent-request'&&person?.urgent_quiet===1?0:quiet??0)
+  const deliveries=(await sql("SELECT conversation,max(updated) AS at FROM nook_notify_queue WHERE channel='email' AND user=? AND state IN ('sent','folded') GROUP BY conversation",group.user).all<{conversation:string;at:number}>()).results
+  const lastByConversation=new Map(deliveries.map(row=>[row.conversation,row.at]))
+  const lastAway=group.conversation?null:await sql("SELECT max(updated) AS at FROM nook_notify_queue WHERE channel='email' AND user=? AND reason='direct-message' AND state IN ('sent','folded')",group.user).first<{at:number|null}>()
+  const awayUntil=lastAway?.at==null?0:lastAway.at+(person?.away_interval??15)*60000
+  const heldUntil=(row:Row)=>Math.max(['direct-message'].includes(row.reason)?Math.max(row.due,row.created+GATHER_MS+(person?.away_interval??15)*60000,(activity?.until??0)>now?(activity?.until??0)+60000:0):0,row.snooze??0,row.reason==='urgent-request'&&person?.urgent_quiet===1?0:quiet??0,foldedUntil(lastByConversation.get(row.conversation)??null,now)??0,awayUntil)
   const ready=live.filter(row=>heldUntil(row)<=now),waiting=live.filter(row=>heldUntil(row)>now)
   if(waiting.length)await db.batch(waiting.map(row=>sql('UPDATE nook_notify_queue SET due=?,updated=? WHERE id=?',heldUntil(row),now,row.id)))
   if(!ready.length||!ready.some(r=>r.due<=now))continue
-  const last=await sql(`SELECT max(updated) AS at FROM nook_notify_queue WHERE channel='email' AND user=? AND ${group.conversation?"conversation=? AND reason<>'direct-message'":"reason='direct-message'"} AND state='sent'`,group.user,...(group.conversation?[group.conversation]:[])).first<{at:number|null}>()
-  // Away bundles share the person's selected interval across conversations;
-  // explicitly enabled notification email keeps its existing per-room fold.
-  const awayUntil=(last?.at??0)+(person?.away_interval??15)*60000
-  const held=group.conversation?foldedUntil(last?.at??null,now):last?.at!=null&&awayUntil>now?awayUntil:null
-  if(held!==null){await db.batch(ready.map(r=>sql('UPDATE nook_notify_queue SET due=?,updated=? WHERE id=?',held,now,r.id)));continue}
   const lead=ready[0],token=hex(crypto.getRandomValues(new Uint8Array(32)).buffer),hash=await tokenHash(token)
   await db.batch(ready.map(r=>sql("UPDATE nook_notify_queue SET state='sending',attempts=attempts+1,due=?,email=?,token_hash=?,updated=? WHERE id=?",now+LEASE_MS,lead.id,hash,now,r.id)))
   const context=await sql('SELECT c.name,c.kind,(SELECT display_name FROM oa_operators WHERE id=?) AS actor FROM nook_conversations c WHERE c.id=?',lead.actor,lead.conversation).first<{name:string;kind:string;actor:string|null}>()

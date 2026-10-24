@@ -88,9 +88,17 @@ export async function quietJourney({installation,rowan,sam,room,say,browser,evid
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+14*60000);assert.ok(!awaySent.some(mail=>bundleIds.includes(mail.deliveryId)));
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+16*60000);assert.equal(awaySent.filter(mail=>bundleIds.includes(mail.deliveryId)).length,1);
   const bundle=awaySent.find(mail=>bundleIds.includes(mail.deliveryId));assert.match(bundle.text,/2 conversations/);assert.match(bundle.text,/Sam/);assert.match(bundle.text,/a direct conversation/);assert.match(bundle.text,/view=attention/);for(const message of [first,second,third])assert.ok(!bundle.text.includes(message.body),'bundle contains no message bodies');
-  const fourth=await say(sam,other,'synthetic-nook next interval',{mentions:[rowan.user.id]});
+  const fourth=await say(sam,direct.id,'synthetic-nook next interval');
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+17*60000);assert.ok(!awaySent.some(mail=>mail.deliveryId===fourth.id+'.'+rowan.user.id),'another conversation cannot bypass the shared interval');
+  await rowan.patch('/api/notify',{mentions:true});
+  const fifth=await say(sam,other,'synthetic-nook explicit mention after folded away update',{mentions:[rowan.user.id]});
+  await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+17*60000);assert.ok(!awaySent.some(mail=>mail.deliveryId===fifth.id+'.'+rowan.user.id),'a folded-away conversation keeps its ten-minute delivery fence');
+  await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+27*60000);assert.equal(awaySent.filter(mail=>mail.deliveryId===fifth.id+'.'+rowan.user.id).length,1);
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+32*60000);assert.equal(awaySent.filter(mail=>mail.deliveryId===fourth.id+'.'+rowan.user.id).length,1);
+  const sixth=await say(sam,direct.id,'synthetic-nook explicit mention after away lead',{mentions:[rowan.user.id]});
+  await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+33*60000);assert.ok(!awaySent.some(mail=>mail.deliveryId===sixth.id+'.'+rowan.user.id),'an away lead keeps the existing per-conversation email limit');
+  await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+43*60000);assert.equal(awaySent.filter(mail=>mail.deliveryId===sixth.id+'.'+rowan.user.id).length,1);
+
   await rowan.patch('/api/notify',{mentions:true,awayEmail:false});
  }finally{await rm(temp,{recursive:true,force:true})}
 }
