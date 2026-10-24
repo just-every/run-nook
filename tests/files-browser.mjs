@@ -29,8 +29,9 @@ export async function filesBrowser({origin,owner,member,destination}){
      uploadPage.on('request',request=>{if(/\/api\/uploads\/[^/]+\/parts\/1$/.test(new URL(request.url()).pathname))firstParts++});
      await uploadPage.route('**/api/uploads/*/parts/2',async route=>{if(!dropped){dropped=true;await route.abort()}else await route.continue()});
      await uploadPage.goto(base+'/app?conversation='+room.id);
+     const interrupted=uploadPage.waitForEvent('requestfailed',{predicate:request=>/\/api\/uploads\/[^/]+\/parts\/2$/.test(new URL(request.url()).pathname)});
      await uploadPage.getByLabel('Attach file',{exact:true}).setInputFiles({name:filename,mimeType:'application/zip',buffer:content});
-     await expect(uploadPage.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled();assert.equal(dropped,true);
+     await interrupted;await expect(uploadPage.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled();assert.equal(dropped,true);
      if(destination)await uploadPage.screenshot({path:resolve(destination,`upload-interrupted-${width}.png`),fullPage:true});
      await uploadPage.reload();await uploadPage.getByLabel('Attach file',{exact:true}).setInputFiles({name:filename,mimeType:'application/zip',buffer:content});
      await uploadPage.getByRole('button',{name:'Retry upload',exact:true}).click();
