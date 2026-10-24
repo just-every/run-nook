@@ -16,11 +16,12 @@ export async function personalJourney({owner,registered,post,get,request,check,r
   await restart();prefs=(await get('/api/notify',newcomer.cookie)).data;assert.equal(prefs.awayEmail,false);assert.equal(prefs.push.direct,true);assert.equal((await get('/api/conversations/'+publicRoom.id+'/notify',newcomer.cookie)).data.level,'nothing');
   const latest=(await get('/api/team/notification-defaults')).data;await request('/api/team/notification-defaults',{method:'PATCH',cookie:owner.cookie,body:{version:latest.version,push:defaults.push,channels:defaults.channels,awayEmail:defaults.awayEmail}});
   const channelPolicy=(await get('/api/team/default-channels')).data;await request('/api/team/default-channels',{method:'PATCH',cookie:owner.cookie,body:{version:channelPolicy.version,channels:defaultChannels.channels.filter(c=>c.enabled).map(c=>({id:c.id,mandatory:!!c.mandatory}))}});
+  const vacationSender=await registered('synthetic-nook-vacation-sender');
   const vacation={starts:Date.now()-60000,ends:Date.now()+3600000};
   await request('/api/notify',{method:'PATCH',cookie:owner.cookie,body:{vacation}});
   assert.deepEqual((await get('/api/notify')).data.vacation,vacation);
-  const room=(await post('/api/conversations',{name:'synthetic-nook vacation',kind:'private',participants:[member.user.id]})).data;
-  const message=(await post('/api/conversations/'+room.id+'/messages',{body:'synthetic-nook vacation mention',mentions:[owner.user.id],intent:crypto.randomUUID()},member.cookie)).data;
+  const room=(await post('/api/conversations',{name:'synthetic-nook vacation',kind:'private',participants:[vacationSender.user.id]})).data;
+  const message=(await post('/api/conversations/'+room.id+'/messages',{body:'synthetic-nook vacation mention',mentions:[owner.user.id],intent:crypto.randomUUID()},vacationSender.cookie)).data;
   assert.ok((await get('/api/attention')).data.heldItems.some(i=>i.id===message.id+'.'+owner.user.id&&i.explanation.includes('vacation')));
   assert.equal((await get('/api/notify',member.cookie)).data.vacation,null);
   await restart();assert.deepEqual((await get('/api/notify')).data.vacation,vacation);

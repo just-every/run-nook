@@ -5541,7 +5541,7 @@
       "executable": false
     },
     "src/notify/vacation.ts": {
-      "sha256": "904d743601a08f024c364eb52796003e0a0937cbeeaadce4e4d2b12eb3b0d713",
+      "sha256": "fb4e494f986bd2f4a15de469cb68220fee9534f0eaa3f9f85da9547f8f8a1a88",
       "executable": false
     },
     "src/notify/VacationSettings.tsx": {
@@ -6481,7 +6481,7 @@
       "executable": false
     },
     "tests/auth-support.mjs": {
-      "sha256": "0e56de34abcbdc5ee86eecd177fd86fbb1578d9d1d6f1211f57d468e68a4585d",
+      "sha256": "e2376cabc2994434adecd52b7eb2521267112ffb029bc97e105ba8d5647bdae8",
       "executable": false
     },
     "tests/bookmarks-browser.mjs": {
@@ -6869,7 +6869,7 @@
       "executable": false
     },
     "tests/personal.mjs": {
-      "sha256": "d830c3ddd9cb0833e54ee8912d530e2e5c8ae1e1bf7588bd7c425fa029aede6f",
+      "sha256": "ea0bcc3f31565aa630285ba017a3a666e98881c565d43ed0e57f6adf17398002",
       "executable": false
     },
     "tests/pilot-journey.mjs": {
@@ -7053,7 +7053,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "c1904a12d7900aa7152cb3886bc2098f8b78acff1ca43223afccc9952b060217",
+      "sha256": "8c8a6ea41bb1c624342dd5e56d0767eb9b343781d2cd17bc86b2e25c82e489b4",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {

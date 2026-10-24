@@ -45,7 +45,7 @@ async function start(port,{envFile}={}) {
 }
 async function stop(){if(worker){const current=worker;worker=undefined;await current.close()}}
 async function request(path,{method='GET',body,cookie='',status=200,extra={}}={}) {
- const response=await fetch(origin+path,{method,redirect:'manual',headers:{origin,...(cookie?{cookie}:{}),...(body!==undefined?{'content-type':'application/json'}:{}),...extra},body:body===undefined?undefined:JSON.stringify(body)})
+ const response=await fetch(origin+path,{method,redirect:'manual',headers:{Connection:'close',origin,...(cookie?{cookie}:{}),...(body!==undefined?{'content-type':'application/json'}:{}),...extra},body:body===undefined?undefined:JSON.stringify(body)})
  const raw=await response.text(); assert.equal(response.status,status,`${method} ${path}: ${raw}`)
  return {response,raw,data:response.headers.get('content-type')?.includes('application/json')?JSON.parse(raw):undefined}
 }
