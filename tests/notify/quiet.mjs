@@ -87,7 +87,7 @@ export async function quietJourney({installation,rowan,sam,room,say,browser,evid
   const awaySent=[];env.DB=installation.database();const created=Date.now();
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+14*60000);assert.ok(!awaySent.some(mail=>bundleIds.includes(mail.deliveryId)));
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+16*60000);assert.equal(awaySent.filter(mail=>bundleIds.includes(mail.deliveryId)).length,1);
-  const bundle=awaySent.find(mail=>bundleIds.includes(mail.deliveryId));assert.match(bundle.text,/2 conversations/);assert.match(bundle.text,/view=attention/);for(const message of [first,second,third])assert.ok(!bundle.text.includes(message.body),'bundle contains no message bodies');
+  const bundle=awaySent.find(mail=>bundleIds.includes(mail.deliveryId));assert.match(bundle.text,/2 conversations/);assert.match(bundle.text,/Sam/);assert.match(bundle.text,/a direct conversation/);assert.match(bundle.text,/view=attention/);for(const message of [first,second,third])assert.ok(!bundle.text.includes(message.body),'bundle contains no message bodies');
   const fourth=await say(sam,other,'synthetic-nook next interval',{mentions:[rowan.user.id]});
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+17*60000);assert.ok(!awaySent.some(mail=>mail.deliveryId===fourth.id+'.'+rowan.user.id),'another conversation cannot bypass the shared interval');
   await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+32*60000);assert.equal(awaySent.filter(mail=>mail.deliveryId===fourth.id+'.'+rowan.user.id).length,1);

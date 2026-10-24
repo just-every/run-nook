@@ -15,14 +15,16 @@ const subjects:Record<Reason,(actor:string,place:string)=>string>={
  'commitment-complete':(a,p)=>`${a} reported a commitment complete in ${p}`,
 }
 export function composeEmail(input:EmailInput){
- const place=where(input.conversation),more=input.count-1,cross=(input.conversationCount??1)>1,line=cross?`${input.workspace} has updates for you in ${input.conversationCount} conversations`:subjects[input.reason](input.actor,place)
- const open=new URL('/app',input.origin);open.searchParams.set('conversation',input.conversation.id);if(input.message)open.searchParams.set('focus',input.message);else open.searchParams.set('panel','outcomes');if(cross){open.search='';open.searchParams.set('view','attention')}
+ const place=where(input.conversation),more=input.count-1,cross=(input.conversationCount??1)>1,line=subjects[input.reason](input.actor,place)
+ const open=new URL('/app',input.origin);open.searchParams.set('conversation',input.conversation.id);if(input.message)open.searchParams.set('focus',input.message);else open.searchParams.set('panel','outcomes')
+ const all=new URL('/app?view=attention',input.origin)
  const off=new URL('/notify/off',input.origin);off.searchParams.set('t',input.token)
  const manage=new URL('/app',input.origin);manage.searchParams.set('view','you')
  const text=[
   line+'.',
   '',
   `Open it in ${input.workspace}: ${open}`,
+  ...(cross?['',`This bundle covers ${input.count} updates in ${input.conversationCount} conversations.`,`Review all updates in ${input.workspace}: ${all}`]:[]),
   ...(!cross&&more>0?['',`There ${more===1?'is 1 more update':`are ${more} more updates`} for you in ${place}.`]:[]),
   '',
   'Message text is not included in email.'+(input.reason==='urgent-request'?' Urgent requests are requests inside Nook, not pages.':''),
