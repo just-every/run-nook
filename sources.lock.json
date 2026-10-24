@@ -637,7 +637,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "d8af20d8d91809219047f2213a825c0e43521663e5ac4c163633c7b400c66066",
+      "sha256": "f479ee899294289eb5bd7f75688e4754e49c82355199b091041db36c0b0ae91f",
       "executable": false
     },
     "CLAUDE.md": {
@@ -1621,7 +1621,7 @@
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "a23210b588df5b247dafac7a9b466fbf84b704ba7763e6db8aef2f9f1d2cd098",
+      "sha256": "da7d076412e62b0fa18fbbd8e7b7cb9c993f88ebd3b35cfe0d0577fa17b76172",
       "executable": false
     },
     "rer-project.json": {
@@ -7033,7 +7033,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "967ab1bc1f8c84d8365d9acd77d86c4b3760185ae220b2bec0619e4552f32e76",
+      "sha256": "680986ae1d9215ca3f69a9364c9136c623b13b006830576fa001d13845735061",
       "executable": false
     },
     "tests/readme-team-flow.mjs": {
