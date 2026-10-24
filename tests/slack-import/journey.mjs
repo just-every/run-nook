@@ -258,7 +258,7 @@ export async function privateHistoryJourney({call,door,owner,member,outsider,adm
  const archiveFile=archiveRecords.flatMap(r=>r.items??[]).find(r=>r.table==='nook_attachments'&&r.row.id===privateFile.id)?.row;assert.ok(archiveFile);assert.ok([member.user.id,outsider.user.id].includes(archiveFile.author));assert.notEqual(archiveFile.author,owner.user.id);assert.equal(archiveFile.sha256,createHash('sha256').update(fileBytes).digest('hex'));assert.ok(archiveRecords[0].objects.some(o=>o.key===archiveFile.object_key&&o.size===Buffer.byteLength(fileBytes)));
  await call('/api/portability/exports/'+exported.id+'/abort',{body:{}});
  const dmMessage=(await call(`/api/conversations/${dm.id}/messages`,{actor:member}))[0];
- assert.match(dmMessage.slack.links[0].href,/focus=/);
+ assert.match(dmMessage.slack.links[0].href,/focus=/);assert.match(dmMessage.slack.links[0].href,/thread=/);
  const forged=structuredClone((await door.prepare(inspection,review)).packet);forged.capture.channels[0].members.push(owner.user.id);
  await assert.rejects(()=>door.upload(forged),/exact private audience required/);
  if(validateArchive)await validateArchive();

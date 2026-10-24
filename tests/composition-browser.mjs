@@ -38,7 +38,7 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await expect(threadView.locator('.thread-log .message-body').filter({hasText:'synthetic-nook composer broadcast edited '+width})).toHaveCount(1);
     await call('/api/messages/'+sent.id,{delete:true,version:2},member,'PATCH');
     await expect(page.locator('[data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');
-    await expect(threadView.locator('[data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');await threadView.close();
+    await expect(threadView.locator('.thread-log [data-message="'+sent.id+'"] .message-body')).toContainText('Message deleted');await threadView.close();
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`thread-broadcast-${width}.png`)});
     await page.goto(base+'/app?conversation='+room.id);
 

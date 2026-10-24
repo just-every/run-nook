@@ -49,7 +49,7 @@ try {
             const privateRoom=privateRooms.find(c=>c.name==='Imported private DM '+width);assert.ok(privateRoom);
             await page.goto(origin+'/app?conversation='+privateRoom.id);
             await page.getByRole('link',{name:'Open imported Slack thread',exact:true}).click();
-            await expect(page.locator('.message-body').filter({hasText:'Synthetic private channel canary'})).toBeVisible();
+            await expect(page.getByRole('region',{name:'Thread messages',exact:true}).locator('.message-body').filter({hasText:'Synthetic private channel canary'})).toBeVisible();
             await shot('private-link');
             await page.goto(origin+'/app?view=you');await page.getByRole('link',{name:'Import Slack history',exact:true}).click();
             const incomplete = zipFixture([['users.json', []], ['channels.json', [{ id: 'C1', name: 'general' }]], ['general/2024-01-01.json', [{ type: 'message', user: 'Umissing', ts: '1.000001', text: 'Missing source actor' }]]]);
