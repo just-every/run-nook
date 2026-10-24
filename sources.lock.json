@@ -6841,7 +6841,7 @@
       "executable": false
     },
     "tests/profile-fields-ordering.mjs": {
-      "sha256": "5f2a6e76b2e845515718cf62663ca8de3d8d764c6cc8b6dae8f8dea4a95ea6e1",
+      "sha256": "35c5da81f293970bca3299da12b48f2e6fc18e9d879350aa4008916b0787b20a",
       "executable": false
     },
     "tests/profiles.mjs": {
