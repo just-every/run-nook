@@ -67,7 +67,10 @@
 .nook-app .file-row a { flex: 1 1 140px; min-width: 0; color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
 .nook-app .file-row strong { font-size: var(--fs-ui); font-weight: 500; }
 .nook-app .file-row small { display: block; color: var(--ink-soft); font-size: var(--fs-meta); }
-.nook-app .file-row .text-button { flex-shrink: 0; }
+/* File controls sit on nested washes. Use full ink and reveal immediately:
+   fading text through partial opacity creates low-contrast intermediate frames. */
+.nook-app .file-row .text-button { flex-shrink: 0; color: var(--ink); }
+.nook-app .file-row .text-button.reveal { transition: none; }
 
 /* Reactions: count chips only; the imported group is quiet meta */
 .nook-app .reaction-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
