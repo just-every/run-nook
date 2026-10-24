@@ -1549,11 +1549,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "c3e87a245a7b6f0f8e798025d46c5aa2be31bc54c1767c58cc68e3cfc742bf94",
+      "sha256": "6375813de6b74faf6b8e23c6e4568561fdfa6a5aa2b4f470f11feb82a6456ad7",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "3cfc4fdcceab6f4b51923d785cd186bf3fc1f4c5bbda703d7da32976b29f9304",
+      "sha256": "3657324e34b49c07ad83b5f0228911d74c0a57f372eeac8632f1fd8d49566adb",
       "executable": false
     },
     "public/brand/band.svg": {
@@ -1613,7 +1613,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "cdd94847e998a4700f98e0a235e50d0befdb0f305208800bbe939bf0a973c3db",
+      "sha256": "5cdd5607f3a5757685fffba2ee37a0fed33e23d482778f64b656fdc76b3cc430",
       "executable": false
     },
     "RELEASE.json": {
