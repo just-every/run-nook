@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## 0.5.0 — 2026-10-24
+
+Nook 0.5.0 brings the work on main since 0.4.0 into a native release and pins rer 0.2.80.
+
+### In this release
+
+- Reviewed Slack, Campfire and Mattermost history now uses the shared import door, with dry runs, audience review and guarded Undo.
+- Channel-scoped notification apps, conversation notes, polls, bookmarks, private clips, forwarding and scheduled forwarding join the workspace. AI search, recaps and digests retain their documented provider and permission limits.
+- Notification routing retains sender and conversation context across away bundles, mobile delay, quiet schedules and vacation choices.
+- The README command works with the retained fresh-checkout journey. Local development sends and stores no email.
+
+### Updating
+
+Export first. Keep the existing owner, private settings, resource identities and every applied migration. Update the source, then run rer setup locally or rer deploy for the same hosted environment. The 29 migrations added since v0.4.0 are applied in order; never reset populated data to upgrade. The populated native v0.4.0 upgrade preserved every prior row and private file.
+
+A fresh Platform-ledger export restored into native rer 0.2.80 with every archived product row and private file preserved; the native installation keeps its own migration ledger.
+
+### Not in this release
+
+Native desktop/mobile clients, calls and screen sharing, external shared channels, enterprise retention/compliance and autonomous agent follow-through remain incomplete. CONTRACT.md and ACCEPTANCE.md retain 35 done, 26 partial and 30 missing clauses; this release does not promote any clause.
+
+### Known issues
+
+The retained v0.4.0 Platform-ledger archive is refused with schema_mismatch. Restore into the release you exported from, then upgrade the original installation and export again; archives made before migration 0074 cannot be restored directly into this release.
+
+### Further changes since 0.4.0
+
 A checkout set up on one port now opens its app when `rer dev` or `rer demo` serves it on another: `/setup` and `/app` admit the origin the local run serves instead of answering `invalid_host`.
 
 AI search adds bounded, permission-filtered cited evidence and separate feedback with owner-controlled provider settings. NOOK-036 remains partial.
@@ -16,7 +43,7 @@ Existing import history and guarded Undo survive the additive upgrade. Business
 imports share this pipeline and stay off until explicitly enabled.
 
 
-### Contract changes since 0.4.0 (for the next RELEASE.json)
+### Contract changes since 0.4.0
 
 - **NOOK-015 changed (A1).** Clarify retained history and preserve published erasure duties.
 
@@ -59,6 +86,8 @@ imports share this pipeline and stay off until explicitly enabled.
   Now: `Member, message and outcome erasure removes associated delivery records: the queue rows and routing records of every alert the erased person, message or commitment caused, and all of an erased person's own devices, delivery rows and routing records.`
 
 - Attention and readable-export guides distinguish retained Web Push history from email queue rules and disclose legacy hold limits. Conversation and erasure guides name complete shared-note content and thread-root clearing. The next release copies these contract and prose amendments verbatim; the issued 0.4.0 RELEASE.json remains unchanged.
+
+Product screenshot: .github/assets/release/nook-launch-channel-1600.png
 
 ## 0.4.0 (2026-10-19)
 

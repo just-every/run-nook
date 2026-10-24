@@ -1,7 +1,7 @@
 {
   "id": "team-workspace",
   "name": "Nook",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "maturity": "local-native-worker-d1-feasibility",
   "category": "chat",
   "spine": {
