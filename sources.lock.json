@@ -620,6 +620,10 @@
       "sha256": "a0e27aeeac42d6102f4ff2bce40d8fb011c07e5cb28eff3c9d77e68df29e5dd6",
       "executable": false
     },
+    ".publish-check/config.json": {
+      "sha256": "edca7d04da4b0230fc231591a1a972195e9be970a26c517b9b952eeed2cfed9a",
+      "executable": false
+    },
     "ACCEPTANCE.md": {
       "sha256": "e335d930e73317d8a283be0a994fe7004602282875cc4f8bf8ec605dce17d244",
       "executable": false
