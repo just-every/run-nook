@@ -6869,7 +6869,7 @@
       "executable": false
     },
     "tests/personal.mjs": {
-      "sha256": "11a94e113a76f8c0a6fd91d6b08e0832fc9c2e359c09b1b4929bcd7206a3803d",
+      "sha256": "d830c3ddd9cb0833e54ee8912d530e2e5c8ae1e1bf7588bd7c425fa029aede6f",
       "executable": false
     },
     "tests/pilot-journey.mjs": {
@@ -7053,7 +7053,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "25f36b03e6eae4a864dd65c3d88874c13591b38a479c1b8e960d3399cd507a87",
+      "sha256": "c1904a12d7900aa7152cb3886bc2098f8b78acff1ca43223afccc9952b060217",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {

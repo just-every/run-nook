@@ -33,7 +33,9 @@ let worker,output = '',origin,checks = 0,bootstrapCookie,lossConfig
 const sessionSecret=crypto.randomUUID()+crypto.randomUUID(),setupToken=crypto.randomUUID()+crypto.randomUUID()
 const evidence = {clause:'BASE-ACCESS-002',runtime:'emitted Worker with local D1',wire:'parameterless GET; x-tsr-serverFn=true; same-origin; identical headers and URL for all session controls',matrix:[],checks:[]}
 const command = args => new Promise((ok,bad) => { const p=spawn(process.execPath,[...cli,...args],{cwd:root,env,stdio:['ignore','pipe','pipe']}); let out='',err=''; p.stdout.on('data',c=>out+=c); p.stderr.on('data',c=>err+=c); p.on('error',bad); p.on('exit',code=>code===0?ok(out):bad(new Error(out+err))) })
-const sql = async statement => JSON.parse(await command(['d1','execute','DB','--local','--persist-to',state,'--config','dist/server/wrangler.json','--command',statement,'--json']))[0].results
+// The running Worker owns this SQLite store. Query its D1 binding rather than
+// starting a competing Wrangler/workerd writer against the same file.
+const sql = async statement => worker ? (await worker.db.prepare(statement).all()).results : JSON.parse(await command(['d1','execute','DB','--local','--persist-to',state,'--config','dist/server/wrangler.json','--command',statement,'--json']))[0].results
 const facts = async () => (await sql("SELECT (SELECT count(*) FROM nook_events) AS events,(SELECT count(*) FROM nook_messages) AS messages,(SELECT count(*) FROM nook_attachments) AS attachments"))[0]
 async function start(port,{envFile}={}) {
  await released(port)
