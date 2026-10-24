@@ -1,0 +1,9 @@
+import {useEffect,useState} from 'react';
+import type {TeamRequest} from '../team/types';
+const localDate=(time:number)=>{const d=new Date(time);return new Date(time-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};
+export function VacationSettings({request}:{request:TeamRequest}){
+ const [starts,setStarts]=useState(''),[ends,setEnds]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
+ useEffect(()=>{let current=true;request<any>('/api/notify').then(data=>{if(current&&data.vacation){setStarts(localDate(data.vacation.starts));setEnds(localDate(data.vacation.ends))}}).catch(error=>{if(current)setNotice(error.message)});return()=>{current=false}},[request]);
+ const save=async(clear=false)=>{setBusy(true);try{await request('/api/notify',{method:'PATCH',body:JSON.stringify({vacation:clear?null:{starts:Date.parse(starts),ends:Date.parse(ends)}})});if(clear){setStarts('');setEnds('')}setNotice(clear?'Vacation ended.':'Vacation saved. Device and email alerts follow your quiet-time urgent exceptions.')}catch(error){setNotice((error as Error).message)}finally{setBusy(false)}};
+ return <section className="quiet-settings team-section"><h3>Vacation</h3><p>Hold device and email alerts between these dates. Times use this device’s time zone. Your urgent-through-quiet choices also apply to vacation.</p><form onSubmit={event=>{event.preventDefault();void save()}}><label className="field">Vacation starts<input type="datetime-local" required value={starts} onChange={event=>setStarts(event.target.value)}/></label><label className="field">Vacation ends<input type="datetime-local" required value={ends} onChange={event=>setEnds(event.target.value)}/></label><button className="soft-button" disabled={busy}>Save vacation</button><button className="text-button" type="button" disabled={busy} onClick={()=>void save(true)}>End vacation</button></form><p role="status">{notice}</p></section>;
+}

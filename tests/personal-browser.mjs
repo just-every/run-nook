@@ -1,6 +1,8 @@
+import {invite} from './auth-support.mjs';
 import {chromium,expect} from '@playwright/test'
 import assert from 'node:assert/strict'
-import {mkdir} from 'node:fs/promises'
+import {createRequire} from 'node:module'
+import {mkdir,readFile} from 'node:fs/promises'
 import {resolve} from 'node:path'
 export async function personalBrowser({origin,owner,member,destination='evidence/personal'}){
  const post=async(path,body)=>{const r=await fetch(origin+path,{method:'POST',headers:{cookie:owner.cookie,origin,'content-type':'application/json'},body:JSON.stringify(body)});assert.equal(r.status,200,await r.clone().text());return r.json()}
@@ -10,9 +12,28 @@ export async function personalBrowser({origin,owner,member,destination='evidence
   let context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000}})
   try{
    await context.addCookies([cookie(owner)]);let page=await context.newPage()
+   const offerContext=await browser.newContext({serviceWorkers:'block',viewport:{width,height:900}});
+   try{const invitee=await invite(origin,owner.cookie,'synthetic-nook-offer-'+width+'-'+Date.now());await offerContext.addCookies([cookie(invitee)]);const offer=await offerContext.newPage();await offer.goto(origin+'/app?view=you');
+    const region=offer.getByRole('region',{name:'Email notification offer',exact:true});await expect(region).toContainText('Email is off.');await region.getByLabel('Bundle interval').selectOption('60');
+    await offer.screenshot({path:resolve(destination,`email-offer-before-${width}.png`),fullPage:true});
+    await region.getByRole('button',{name:'Email me about mentions and DMs when I’m away',exact:true}).click();await expect(region).toHaveCount(0);
+    const prefs=await(await offerContext.request.get(origin+'/api/notify')).json();assert.equal(prefs.awayEmail,true);assert.equal(prefs.awayInterval,60);
+    await offer.screenshot({path:resolve(destination,`email-offer-${width}.png`),fullPage:true});
+    await offerContext.request.patch(origin+'/api/notify',{headers:{Origin:origin},data:{awayEmail:false}});
+   }finally{await offerContext.close()}
+   await page.goto(origin+'/app?view=you');const defaults=page.getByRole('heading',{name:'New-member notifications',exact:true}).locator('..');await expect(defaults).toBeVisible();await defaults.getByRole('button',{name:'Save notification defaults',exact:true}).click();await expect(defaults.getByRole('status')).toContainText('saved');await page.screenshot({path:resolve(destination,`notification-defaults-${width}.png`),fullPage:true});
    const room=await post('/api/conversations',{name:'Product launch handoff '+width,kind:'private',participants:[member.user.id]})
    const root=await post(`/api/conversations/${room.id}/messages`,{body:'The customer success briefing is confirmed for Thursday.',intent:crypto.randomUUID()})
    await page.goto(origin+'/app?conversation='+room.id)
+   await page.goto(origin+'/app?view=you');
+   const vacationStart=new Date(Date.now()-60000),vacationEnd=new Date(Date.now()+3600000);
+   const local=stamp=>new Date(stamp-stamp.getTimezoneOffset()*60000).toISOString().slice(0,16);
+   await page.getByLabel('Vacation starts',{exact:true}).fill(local(vacationStart));await page.getByLabel('Vacation ends',{exact:true}).fill(local(vacationEnd));
+   await page.getByRole('button',{name:'Save vacation',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Vacation saved.'})).toBeVisible();
+   await page.screenshot({path:resolve(destination,`vacation-settings-${width}.png`),fullPage:true});
+   await page.goto(origin+'/app?view=attention');await expect(page.getByText(/Your vacation holds device and email alerts/)).toBeVisible();await page.screenshot({path:resolve(destination,`vacation-attention-${width}.png`),fullPage:true});
+   await page.goto(origin+'/app?view=you');await page.getByRole('button',{name:'End vacation',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Vacation ended.'})).toBeVisible();
+   await page.goto(origin+'/app?conversation='+room.id);
    const draft='Before the Thursday rollout, ask Ana to confirm the West Coast support rotation.'
    await page.getByRole('textbox',{name:'Message Product launch handoff '+width,exact:true}).fill(draft)
    await page.goto(origin+'/app?view=drafts');await expect(page.getByRole('heading',{name:'Drafts & sent',exact:true})).toBeVisible();await expect(page.getByText(draft,{exact:true})).toBeVisible()

@@ -2,6 +2,7 @@
 const userEdge=(table:string,key:string[],column='user')=>({table,key,from:'nook_actors',on:{[column]:'id'},phase:'identity' as const})
 const messageEdge=(table:string,key:string[])=>({table,key,from:'nook_messages',on:{message:'id'}})
 export const retained = [
+ {table:'nook_notification_defaults',reason:'Workspace defaults contain only event booleans and default-channel levels; changes retain independently anonymized audit attribution.'},
  {table:'nook_multipart_uploads',reason:'Ephemeral R2 abort custody is excluded from archives; cleanup aborts parts after expiry or attachment erasure.'},
  {table:'nook_multipart_parts',reason:'Ephemeral chunk receipts are excluded from archives and removed with their aborted or completed upload.'},
  {table:'nook_thread_broadcasts',reason:'Body-free projection identity keeps one erased reply tombstone in its channel and thread; no copied body or member attribution.'},
@@ -65,7 +66,7 @@ export const graph={
   {table:'nook_outcomes',key:['id'],from:'nook_actors',on:{author:'id'},hook:'outcomes'},
   {table:'nook_import_actors',key:['job','source_id'],from:'nook_actors',on:{association:'id'},hook:'importedStep'},
   {table:'nook_outcomes',key:['id'],from:'nook_actors',on:{assignee:'id'},hook:'detachAssignee'},
-  userEdge('nook_broadcast_choices',['user']),userEdge('nook_broadcast_ignores',['user','conversation']),userEdge('nook_broadcast_presence',['session','page']),userEdge('nook_broadcast_recipients',['message','user']),userEdge('nook_broadcast_people',['scope','user']),
+  userEdge('nook_vacations',['user']),userEdge('nook_broadcast_choices',['user']),userEdge('nook_broadcast_ignores',['user','conversation']),userEdge('nook_broadcast_presence',['session','page']),userEdge('nook_broadcast_recipients',['message','user']),userEdge('nook_broadcast_people',['scope','user']),
   userEdge('nook_typing',['session','page']),userEdge('nook_profiles',['user']),userEdge('nook_profile_values',['user','field']),userEdge('nook_personal_conversations',['user','conversation']),userEdge('nook_personal_installations',['user','origin']),
   userEdge('nook_ai_feedback',['id']),userEdge('nook_recap_feedback',['id']),
   userEdge('nook_notification_email_facts',['user']),

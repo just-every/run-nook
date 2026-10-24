@@ -14,7 +14,8 @@ export function AttentionView({attention,user,conversations,onOpen,onAction,onDi
    {quiet&&<p className="muted">Quiet until {new Date(attention.dndUntil!).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}. Urgent requests can still reach you here.</p>}
    <button className="soft-button" onClick={()=>act('settings',{dndUntil:manual?null:Date.now()+3600000},'PATCH')}>{manual?'End quiet time':'Quiet for one hour'}</button>
   </div>
-  {!!attention.scheduleUntil&&attention.scheduleUntil>Date.now()&&<p className="muted">Your recurring quiet schedule is active. <a href="/app?view=you">Change your quiet schedule</a></p>}
+  {!!attention.vacationUntil&&attention.vacationUntil>Date.now()&&<p>Your vacation holds device and email alerts until {new Date(attention.vacationUntil).toLocaleString()}. Urgent alerts follow your quiet-time choices.</p>}
+  {!attention.vacationUntil&&!!attention.scheduleUntil&&attention.scheduleUntil>Date.now()&&<p className="muted">Your recurring quiet schedule is active. <a href="/app?view=you">Change your quiet schedule</a></p>}
   {attention.heldItems?.map(item=><article className="attention-card" key={'held-'+item.id}><strong>{conversations.find(c=>c.id===item.conversation)?.name??'Conversation'}</strong><p>Explain why: {item.explanation}</p></article>)}
   {attention.deferredCount>0&&<p className="muted">{attention.deferredCount} saved for later.</p>}
   <ReminderCards items={attention.reminders?.items??[]} hasMore={!!attention.reminders?.hasMore} onOpen={onOpen} mutate={mutate}/>

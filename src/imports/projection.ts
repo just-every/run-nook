@@ -1,3 +1,4 @@
+import {gchatPresentation} from './gchat-presentation';
 import {publicMattermostRecord} from './mattermost-public';
 import {mattermostPresentation} from './mattermost-presentation';
 import { messageAuthorLabel } from './slack-records.mjs';
@@ -7,8 +8,8 @@ export const sourceCreated = (timestamp: string) => new Date(Number(timestamp.sp
 export async function historicalMessage(c: Context, row: any) {
     if(row.erased)return {id:row.id,conversation:row.conversation,author:null,authorName:row.retained_body?'Former member':'Erased author',body:row.body,parent:row.parent,version:1,deleted:row.retained_body?0:1,retainedSource:row.retained_body?'imported':undefined,created:sourceCreated(row.source_timestamp),sequence:row.display_sequence,immutable:true,attachments:[]};
     const actor = JSON.parse(row.actor_record), attachments = JSON.parse(row.files ?? '[]'), sourceRecord = JSON.parse(row.source_record);
-    const slack = row.job.startsWith('slack-') ? await slackPresentation(c, row, sourceRecord, attachments) : row.job.startsWith('mattermost-') ? await mattermostPresentation(c,row,sourceRecord) : row.job.startsWith('gchat-') ? {source:'Google Chat' as const,text:row.body,edited:!!sourceRecord.edited,missingFiles:[],reactions:[]} : undefined;
-    return { id: row.id, conversation: row.conversation, author: null, authorName: messageAuthorLabel(actor, sourceRecord) ?? row.source_actor, body: row.body, parent: row.parent, version: 1, deleted: 0, created: sourceCreated(row.source_timestamp), sequence: row.display_sequence, replyCount: row.reply_count ?? 0, immutable: true, attachments, slack, provenance: { namespace: row.namespace, key: row.key, actor: row.source_actor, label: messageAuthorLabel(actor, sourceRecord) ?? row.source_actor, association: row.association, timestamp: row.source_timestamp, sourceRecord:publicMattermostRecord(sourceRecord) } };
+    const slack = row.job.startsWith('slack-') ? await slackPresentation(c, row, sourceRecord, attachments) : row.job.startsWith('mattermost-') ? await mattermostPresentation(c,row,sourceRecord) : row.job.startsWith('gchat-') ? await gchatPresentation(c,row,sourceRecord) : undefined;
+    return { id: row.id, conversation: row.conversation, author: null, authorName: messageAuthorLabel(actor, sourceRecord) ?? row.source_actor, body: row.body, parent: row.parent, version: 1, deleted: sourceRecord.nookSource==='gchat'&&sourceRecord.googleChat?.deleted_date?1:0, created: sourceCreated(row.source_timestamp), sequence: row.display_sequence, replyCount: row.reply_count ?? 0, immutable: true, attachments, slack, provenance: { namespace: row.namespace, key: row.key, actor: row.source_actor, label: messageAuthorLabel(actor, sourceRecord) ?? row.source_actor, association: row.association, timestamp: row.source_timestamp, sourceRecord:publicMattermostRecord(sourceRecord) } };
 }
 // Base records strict Undo intent before checking native conflicts. An already
 // published import keeps its remaining history and native conversation readable

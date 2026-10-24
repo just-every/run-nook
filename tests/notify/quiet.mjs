@@ -73,5 +73,19 @@ export async function quietJourney({installation,rowan,sam,room,say,browser,evid
    }finally{await context.close()}
   }
   const final=(await rowan.get('/api/notify')).quietSchedule;delete final.until;delete final.next;await rowan.patch('/api/notify',{quietSchedule:{...final,enabled:false}});await rowan.patch('/api/settings',{dndUntil:null})
+  const vacation={starts:Date.now()-60000,ends:Date.now()+3600000};await rowan.patch('/api/notify',{vacation,urgent:true,urgentQuiet:false});
+  const away=await room('synthetic-nook vacation mail',rowan),held=await say(sam,away,'synthetic-nook vacation mention',{mentions:[rowan.user.id]});
+  const sent=[];env.DB=installation.database();await drainNotifications(env,async mail=>{sent.push(mail);return {ok:true}},Date.now()+10000);
+  assert.ok(!sent.some(mail=>mail.deliveryId===held.id+'.'+rowan.user.id));assert.equal((await installation.read("SELECT due FROM nook_notify_queue WHERE message=?",held.id))[0].due,vacation.ends);
+  await installation.stop();await installation.start();assert.deepEqual((await rowan.get('/api/notify')).vacation,vacation);env.DB=installation.database();
+  await drainNotifications(env,async mail=>{sent.push(mail);return {ok:true}},vacation.ends);assert.ok(sent.some(mail=>mail.deliveryId===held.id+'.'+rowan.user.id));
+  await rowan.patch('/api/notify',{vacation:null,urgent:false,urgentQuiet:false});
+  await rowan.patch('/api/notify',{mentions:false,awayEmail:true,awayInterval:15});
+  const direct=await sam.post('/api/conversations',{kind:'dm',name:'synthetic-nook away bundle',participants:[rowan.user.id]});
+  const first=await say(sam,direct.id,'synthetic-nook away mention',{mentions:[rowan.user.id]}),second=await say(sam,direct.id,'synthetic-nook away DM');
+  const awaySent=[];env.DB=installation.database();const created=Date.now();
+  await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+14*60000);assert.ok(!awaySent.some(mail=>[first.id+'.'+rowan.user.id,second.id+'.'+rowan.user.id].includes(mail.deliveryId)));
+  await drainNotifications(env,async mail=>{awaySent.push(mail);return {ok:true}},created+16*60000);assert.equal(awaySent.filter(mail=>[first.id+'.'+rowan.user.id,second.id+'.'+rowan.user.id].includes(mail.deliveryId)).length,1);
+  await rowan.patch('/api/notify',{mentions:true,awayEmail:false});
  }finally{await rm(temp,{recursive:true,force:true})}
 }

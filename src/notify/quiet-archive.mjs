@@ -1,5 +1,8 @@
 export async function validateQuietArchive(read,manifest,actors){
  if(manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_quiet_schedules'))return;
+ if(!manifest?.tables||manifest.tables.some(t=>t.name==='nook_vacations')){const users=new Set();for(const row of await read('nook_vacations')){if(users.has(row.user)||!actors.has(row.user)||actors.get(row.user)?.erased||!Number.isSafeInteger(row.starts)||!Number.isSafeInteger(row.ends)||row.starts<0||row.starts>=row.ends)throw Error('invalid_vacation');users.add(row.user);}}
+ if(!manifest?.tables||manifest.tables.some(t=>t.name==='nook_notification_defaults')){for(const row of await read('nook_notification_defaults')){const push=JSON.parse(row.push_json),channels=JSON.parse(row.channels_json);if(row.id!==1||!Number.isSafeInteger(row.version)||row.version<1||![0,1].includes(row.away_email)||Object.keys(push).sort().join()!=='broadcasts,direct,keywords,mentions,threads,urgent,urgentQuiet'||Object.values(push).some(v=>typeof v!=='boolean')||!Array.isArray(channels)||channels.some(c=>!c||typeof c.id!=='string'||!['all','mentions','nothing'].includes(c.level)))throw Error('invalid_notification_defaults');}}
+ for(const row of await read('nook_notify_preferences'))if('away_email'in row&&(![0,1].includes(row.away_email)||![15,60].includes(row.away_interval)||![0,1].includes(row.email_offer_seen)))throw Error('invalid_away_email');
  const seen=new Set(),time=s=>typeof s==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(s);
  for(const row of await read('nook_quiet_schedules')){
   let days,zone;try{days=JSON.parse(row.days_json);zone=new Intl.DateTimeFormat('en',{timeZone:row.zone}).resolvedOptions().timeZone}catch{throw Error('invalid_quiet_schedule')}

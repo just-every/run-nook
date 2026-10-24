@@ -1,6 +1,33 @@
 import assert from 'node:assert/strict'
-export async function personalJourney({owner,registered,post,get,request,check,restart,sql}){
+export async function personalJourney({owner,registered,post,get,request,check,restart,sql,validateArchive}){
  const member=await registered('PersonalSender'),outsider=await registered('PersonalOutside')
+ await check('NOOK-032 first-sign-in defaults, member choices and dated vacation preserve notification ownership',async()=>{
+  const defaults=(await get('/api/team/notification-defaults')).data,defaultChannels=(await get('/api/team/default-channels')).data;
+  await get('/api/team/notification-defaults',member.cookie,403);
+  const publicRoom=(await post('/api/conversations',{name:'synthetic-nook default alerts',kind:'channel',participants:[]})).data;
+  await request('/api/team/default-channels',{method:'PATCH',body:{version:defaultChannels.version,channels:[...defaultChannels.channels.filter(c=>c.enabled).map(c=>({id:c.id,mandatory:!!c.mandatory})),{id:publicRoom.id,mandatory:false}]}});
+  const policy={version:defaults.version,push:{...defaults.push,direct:false},channels:[{id:publicRoom.id,level:'all'}],awayEmail:true};
+  await request('/api/team/notification-defaults',{method:'PATCH',body:policy});
+  const newcomer=await registered('synthetic-nook-notification-defaults');
+  let prefs=(await get('/api/notify',newcomer.cookie)).data;assert.equal(prefs.awayEmail,true);assert.equal(prefs.push.direct,false);
+  assert.equal((await get('/api/conversations/'+publicRoom.id+'/notify',newcomer.cookie)).data.level,'all');
+  await request('/api/notify',{method:'PATCH',cookie:newcomer.cookie,body:{awayEmail:false,push:{direct:true}}});
+  await request('/api/conversations/'+publicRoom.id+'/notify',{method:'PATCH',cookie:newcomer.cookie,body:{level:'nothing'}});
+  await restart();prefs=(await get('/api/notify',newcomer.cookie)).data;assert.equal(prefs.awayEmail,false);assert.equal(prefs.push.direct,true);assert.equal((await get('/api/conversations/'+publicRoom.id+'/notify',newcomer.cookie)).data.level,'nothing');
+  const latest=(await get('/api/team/notification-defaults')).data;await request('/api/team/notification-defaults',{method:'PATCH',body:{version:latest.version,push:defaults.push,channels:defaults.channels,awayEmail:defaults.awayEmail}});
+  const channelPolicy=(await get('/api/team/default-channels')).data;await request('/api/team/default-channels',{method:'PATCH',body:{version:channelPolicy.version,channels:defaultChannels.channels.filter(c=>c.enabled).map(c=>({id:c.id,mandatory:!!c.mandatory}))}});
+  const vacation={starts:Date.now()-60000,ends:Date.now()+3600000};
+  await request('/api/notify',{method:'PATCH',body:{vacation}});
+  assert.deepEqual((await get('/api/notify')).data.vacation,vacation);
+  const room=(await post('/api/conversations',{name:'synthetic-nook vacation',kind:'private',participants:[member.user.id]})).data;
+  const message=(await post('/api/conversations/'+room.id+'/messages',{body:'synthetic-nook vacation mention',mentions:[owner.user.id],intent:crypto.randomUUID()},member.cookie)).data;
+  assert.ok((await get('/api/attention')).data.heldItems.some(i=>i.id===message.id+'.'+owner.user.id&&i.explanation.includes('vacation')));
+  assert.equal((await get('/api/notify',member.cookie)).data.vacation,null);
+  await restart();assert.deepEqual((await get('/api/notify')).data.vacation,vacation);
+  if(validateArchive)await validateArchive();
+  await request('/api/notify',{method:'PATCH',body:{vacation:null}});
+  assert.ok((await get('/api/attention')).data.items.some(i=>i.message?.id===message.id));
+ });
  await check('NOOK-017 sent history pages own recent messages under current access',async()=>{
   const room=(await post('/api/conversations',{name:'Regional customer launch',kind:'private',participants:[member.user.id]})).data
   const expected=new Set()

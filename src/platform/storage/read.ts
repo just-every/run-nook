@@ -72,7 +72,7 @@ export async function search(c:Context,input:Record<string,any>,source:'native'|
 async function attention(c:Context,input:Record<string,any>){
  const now=Date.now();await syncQuiet(c.db,now,c.uid)
  const [settings,rows,wake,reminders,personal]=await Promise.all([
- c.one('SELECT (SELECT dnd_until FROM nook_settings WHERE user=?) AS dnd_until,(SELECT quiet_until FROM nook_quiet_schedules WHERE user=?) AS schedule_until,(SELECT next_change FROM nook_quiet_schedules WHERE user=?) AS next_change',[c.uid,c.uid,c.uid]),
+ c.one('SELECT (SELECT dnd_until FROM nook_settings WHERE user=?) AS dnd_until,(SELECT quiet_until FROM nook_quiet_schedules WHERE user=?) AS schedule_until,(SELECT next_change FROM nook_quiet_schedules WHERE user=?) AS next_change,(SELECT ends FROM nook_vacations WHERE user=? AND starts<=? AND ends>?) AS vacation_until',[c.uid,c.uid,c.uid,c.uid,now,now]),
  // Each authorized conversation contributes at most 100 candidates per state.
  // Old/done/private history cannot make a page scan an unbounded inbox.
  c.rows(`WITH candidates AS (
@@ -84,7 +84,7 @@ async function attention(c:Context,input:Record<string,any>){
  input.after?Promise.resolve({items:[],hasMore:false,deferredCount:0,nextWakeAt:null}):reminderAttention(c),
  input.after?Promise.resolve([]):personalReminderAttention(c),
  ])
- const scheduleUntil=settings?.schedule_until??0,manualUntil=settings?.dnd_until??0,dndUntil=Math.max(scheduleUntil,manualUntil)||null;let deferredCount=0;const items=[];
+ const vacationUntil=settings?.vacation_until??0,scheduleUntil=settings?.schedule_until??0,manualUntil=settings?.dnd_until??0,dndUntil=Math.max(scheduleUntil,manualUntil)||null;let deferredCount=0;const items=[];
  const visible=rows.filter(a=>!(a.state==='snoozed'&&a.snooze_until>now||(dndUntil??0)>now&&a.reason!=='urgent-request'))
  deferredCount=rows.length-visible.length
  const messages=new Map<string,any>(),outcomes=new Map<string,any>()
@@ -99,7 +99,7 @@ async function attention(c:Context,input:Record<string,any>){
  }))
  for(const a of visible){if(a.outcome&&!outcomes.has(a.outcome))fail(404,'Outcome unavailable');items.push({...a,explanation:a.notificationLevel==='nothing'?'Device and email alerts suppressed by your level':'Delivered to Attention; device and email alerts follow your choices',message:messages.get(a.message)??null,outcome:outcomes.get(a.outcome)??null})}
 
- const heldItems=rows.filter(a=>!visible.includes(a)).map(a=>({id:a.id,conversation:a.conversation,explanation:scheduleUntil>now&&a.reason!=='urgent-request'?'Held until '+new Date(scheduleUntil).toISOString()+' by your quiet schedule':a.state==='snoozed'&&a.snooze_until>now?'Held until '+new Date(a.snooze_until).toISOString()+' by your item snooze':'Held until '+new Date(manualUntil).toISOString()+' by your quiet snooze'}))
+ const heldItems=rows.filter(a=>!visible.includes(a)).map(a=>({id:a.id,conversation:a.conversation,explanation:vacationUntil>now&&a.reason!=='urgent-request'?'Held until '+new Date(vacationUntil).toISOString()+' by your vacation':scheduleUntil>now&&a.reason!=='urgent-request'?'Held until '+new Date(scheduleUntil).toISOString()+' by your quiet schedule':a.state==='snoozed'&&a.snooze_until>now?'Held until '+new Date(a.snooze_until).toISOString()+' by your item snooze':'Held until '+new Date(manualUntil).toISOString()+' by your quiet snooze'}))
  const deadlines=[settings?.next_change,wake?.deadline,dndUntil,reminders.nextWakeAt].filter((value):value is number=>typeof value==='number'&&value>now);
- return {items,heldItems,scheduleUntil,manualUntil,personalReminders:(dndUntil??0)>now?[]:personal,reminders:{items:reminders.items,hasMore:reminders.hasMore},deferredCount:deferredCount+reminders.deferredCount+((dndUntil??0)>now?personal.length:0),dndUntil,observedAt:now,nextWakeAt:deadlines.length?Math.min(...deadlines):null,cursor:rows.at(-1)?.id??input.after??'',hasMore:rows.length===100,deferredCountScope:'this page'}
+ return {items,heldItems,vacationUntil,scheduleUntil,manualUntil,personalReminders:(dndUntil??0)>now?[]:personal,reminders:{items:reminders.items,hasMore:reminders.hasMore},deferredCount:deferredCount+reminders.deferredCount+((dndUntil??0)>now?personal.length:0),dndUntil,observedAt:now,nextWakeAt:deadlines.length?Math.min(...deadlines):null,cursor:rows.at(-1)?.id??input.after??'',hasMore:rows.length===100,deferredCountScope:'this page'}
 }

@@ -5,7 +5,7 @@ import {relative,resolve} from 'node:path';
 export async function hintLossConfig(root,transferFaults=null){
  const directory=resolve(root,'dist/server'),original=JSON.parse(await readFile(resolve(directory,'wrangler.json'),'utf8'));
  // Wrangler's no-bundle modules are named relative to this module directory.
- const entry=resolve(directory,'storage-hint-loss-worker.mjs'),config=resolve(directory,'storage-hint-loss-wrangler.json'),main='./'+relative(directory,resolve(directory,original.main)).split('\\').join('/');
+ const entry=resolve(directory,'storage-hint-loss-'+process.pid+'-worker.mjs'),config=resolve(directory,'storage-hint-loss-'+process.pid+'-wrangler.json'),main='./'+relative(directory,resolve(directory,original.main)).split('\\').join('/');
  await writeFile(entry,`import app from ${JSON.stringify(main)};
 export {ChatHub} from ${JSON.stringify(main)};
 export default {

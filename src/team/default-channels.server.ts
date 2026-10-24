@@ -1,3 +1,4 @@
+import {initialNotificationStatements} from './notification-defaults.server';
 import {fail} from '../family/team-chat/domain'
 import type {Context} from '../platform/storage/context'
 import {fullMember} from './access'
@@ -56,8 +57,9 @@ export async function initializeDefaultChannels(c:Context){
  if(admission.state!=='pending')return
  if(!await c.one(`SELECT 1 WHERE ${fullMember('?')}`,[c.uid]))return
  const version=(await c.one(`SELECT ${policyVersion} AS version`)).version
+ const notification=await initialNotificationStatements(c);
  const channels=await c.rows('SELECT conversation FROM nook_default_channels ORDER BY conversation')
- const guard=`${policyVersion}=? AND ${fullMember('?')} AND (NOT (${pending('?')}) OR NOT (${blocked('?')}))`
+ const guard=`COALESCE((SELECT version FROM nook_notification_defaults WHERE id=1),0)=${notification.version} AND ${policyVersion}=? AND ${fullMember('?')} AND (NOT (${pending('?')}) OR NOT (${blocked('?')}))`
  const missing=`${pending('?')} AND NOT EXISTS(SELECT 1 FROM nook_members WHERE conversation=? AND user=?)`
  try{
   await c.batch([
@@ -66,6 +68,7 @@ export async function initializeDefaultChannels(c:Context){
     c.sql(`INSERT INTO nook_events SELECT id,seq,'membership',?,? FROM nook_conversations WHERE id=? AND ${missing}`,c.uid,c.uid,id,c.uid,id,c.uid),
     c.sql(`INSERT OR IGNORE INTO nook_members SELECT ?,? WHERE ${pending('?')}`,id,c.uid,c.uid),
    ]),
+   ...notification.statements,
    c.sql("UPDATE nook_default_admissions SET state='complete' WHERE user=?",c.uid),
   ],undefined,guard,[version,c.uid,c.uid,c.uid])
  }catch(error){

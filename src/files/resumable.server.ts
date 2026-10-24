@@ -45,7 +45,7 @@ export async function completeUpload(c:Context,id:string){
  const claim=await attempt(c,row);let durable=false;
  try{
   if(!await c.env.FILES.head(row.object_key))await c.env.FILES.resumeMultipartUpload(row.object_key,row.multipart_id).complete(parts.map(p=>({partNumber:p.part,etag:p.etag})));
-  const object=await c.env.FILES.get(row.object_key);if(!object||object.size!==row.size)fail(409,'Completed file size changed');
+  const object=await c.env.FILES.get(row.object_key);durable=!!object;if(!object||object.size!==row.size)fail(409,'Completed file size changed');
   const hash=sha256.create(),reader=object!.body.getReader();for(;;){const {done,value}=await reader!.read();if(done)break;hash.update(value)}
   if(hex(hash.digest())!==row.sha256)fail(409,'Completed file checksum changed');durable=true;
   await c.writeBatch([c.sql("UPDATE nook_attachments SET state='staged' WHERE id=? AND state='reserved'",id),c.sql('DELETE FROM nook_multipart_parts WHERE attachment=?',id),c.sql('DELETE FROM nook_multipart_uploads WHERE attachment=?',id),c.sql('DELETE FROM nook_upload_attempts WHERE id=?',claim)],row.conversation,"EXISTS(SELECT 1 FROM nook_attachments WHERE id=? AND state='reserved' AND expires>?)",[id,Date.now()]);

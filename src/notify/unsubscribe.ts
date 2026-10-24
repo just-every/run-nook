@@ -23,7 +23,7 @@ export async function unsubscribeRoute(env:{DB:D1Database},request:Request){
  const now=Date.now()
  await env.DB.batch([
   env.DB.prepare('INSERT INTO nook_broadcast_choices(user,email) VALUES(?,0) ON CONFLICT(user) DO UPDATE SET email=0').bind(row.user),
-  env.DB.prepare('INSERT INTO nook_notify_preferences(user,mentions,urgent,urgent_quiet,updated) VALUES(?,0,0,0,?) ON CONFLICT(user) DO UPDATE SET mentions=0,urgent=0,urgent_quiet=0,updated=excluded.updated').bind(row.user,now),
+  env.DB.prepare('INSERT INTO nook_notify_preferences(user,mentions,urgent,urgent_quiet,updated) VALUES(?,0,0,0,?) ON CONFLICT(user) DO UPDATE SET away_email=0,mentions=0,urgent=0,urgent_quiet=0,updated=excluded.updated').bind(row.user,now),
   env.DB.prepare("UPDATE nook_notify_queue SET state='cancelled',error='turned-off',updated=? WHERE channel='email' AND user=? AND state IN ('pending','retrying')").bind(now,row.user),
  ])
  return page(200,'Email notifications are off',`<p>Nook will not email you about mentions, channel-wide broadcasts, commitments or urgent requests. You can turn them on again in your settings.</p>${manage}`)

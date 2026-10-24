@@ -436,6 +436,30 @@
       "name": "0092_file_policy.sql",
       "sha256": "82376e81311d4054eaa1402abb0f699767115e4c03225c7ddc8c234cb6753a76",
       "sql": "CREATE TABLE nook_file_policy(\n id INTEGER PRIMARY KEY CHECK(id=1),version INTEGER NOT NULL CHECK(version>=0),\n max_bytes INTEGER NOT NULL CHECK(max_bytes BETWEEN 1 AND 26214400),\n blocked_json TEXT NOT NULL CHECK(json_valid(blocked_json) AND json_type(blocked_json)='array')\n);\nINSERT INTO nook_file_policy VALUES(1,0,26214400,'[]');\nCREATE TRIGGER nook_exit_file_policy_update AFTER UPDATE ON nook_file_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\nCREATE TRIGGER nook_exit_file_policy_delete AFTER DELETE ON nook_file_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0093_thread_broadcasts.sql",
+      "sha256": "58987fd4b84c399941464885b761544f03f8ae6ddb35bc9e85140f31ba6dbda4",
+      "sql": "-- Body-free projection identity survives deletion of the message's body and\n-- retry payload, so both the channel and thread retain the same tombstone.\nCREATE TABLE nook_thread_broadcasts(message TEXT PRIMARY KEY);\nCREATE TRIGGER nook_thread_broadcast_capture AFTER INSERT ON nook_messages\nWHEN json_valid(NEW.payload) AND json_extract(NEW.payload,'$.channelBroadcast')=1\nBEGIN INSERT INTO nook_thread_broadcasts VALUES(NEW.id); END;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0094_resumable_uploads.sql",
+      "sha256": "c13e31c6bf9d00bcd778511a416ed6ff291be1354a3156ecee02c8279a2b0c1c",
+      "sql": "CREATE TABLE nook_multipart_uploads(attachment TEXT PRIMARY KEY,object_key TEXT NOT NULL UNIQUE,multipart_id TEXT,expires INTEGER NOT NULL);\nCREATE TABLE nook_multipart_parts(attachment TEXT NOT NULL,part INTEGER NOT NULL CHECK(part>=1),size INTEGER NOT NULL CHECK(size>0),sha256 TEXT NOT NULL,etag TEXT NOT NULL,PRIMARY KEY(attachment,part));\nCREATE TABLE nook_file_policy_large(id INTEGER PRIMARY KEY CHECK(id=1),version INTEGER NOT NULL CHECK(version>=0),max_bytes INTEGER NOT NULL CHECK(max_bytes BETWEEN 1 AND 1073741824),blocked_json TEXT NOT NULL CHECK(json_valid(blocked_json) AND json_type(blocked_json)='array'));\nINSERT INTO nook_file_policy_large SELECT * FROM nook_file_policy;\nDROP TABLE nook_file_policy;\nALTER TABLE nook_file_policy_large RENAME TO nook_file_policy;\nCREATE TRIGGER nook_exit_file_policy_update AFTER UPDATE ON nook_file_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\nCREATE TRIGGER nook_exit_file_policy_delete AFTER DELETE ON nook_file_policy BEGIN UPDATE nook_exit_clock SET revision=revision+1 WHERE id=1; END;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0095_vacations.sql",
+      "sha256": "b11ba01891e8041a8b05a3f0f3a91e3f9260e53a613483f5e8d4c95b1d7d92b8",
+      "sql": "CREATE TABLE nook_vacations(user TEXT PRIMARY KEY,starts INTEGER NOT NULL,ends INTEGER NOT NULL,CHECK(starts<ends));\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0096_notification_defaults.sql",
+      "sha256": "492c9b64ee5f9b7823735657558cd6bba305fd0e537dfa2fd561d8c43d33a3b6",
+      "sql": "ALTER TABLE nook_notify_preferences ADD COLUMN away_email INTEGER NOT NULL DEFAULT 0 CHECK(away_email IN (0,1));\nALTER TABLE nook_notify_preferences ADD COLUMN away_interval INTEGER NOT NULL DEFAULT 15 CHECK(away_interval IN (15,60));\nALTER TABLE nook_notify_preferences ADD COLUMN email_offer_seen INTEGER NOT NULL DEFAULT 1 CHECK(email_offer_seen IN (0,1));\nCREATE TABLE nook_notification_defaults(id INTEGER PRIMARY KEY CHECK(id=1),version INTEGER NOT NULL,push_json TEXT NOT NULL,channels_json TEXT NOT NULL,away_email INTEGER NOT NULL CHECK(away_email IN (0,1)));\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

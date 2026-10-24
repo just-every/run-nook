@@ -39,11 +39,13 @@ export function inspectGchatArchive(bytes,localUsers=[]){
   for(const m of messages){
    check(typeof m.message_id==='string'&&m.message_id.length<=512,'stable message_id required');
    const ts=time(m.created_date);check(!seen.has(ts),'duplicate source timestamp');seen.add(ts);
-   const author=person(m.creator);check(typeof m.text==='string'&&m.text.length<=100000,'message text required');
+   const author=person(m.creator);check(m.deleted_date!==undefined||typeof m.text==='string'&&m.text.length<=100000,'message text required');
+   if(m.deleted_date!==undefined)time(m.deleted_date);
    check(m.annotations===undefined||Array.isArray(m.annotations)&&m.annotations.length===0,'unsupported annotations; no partial message import');
-   check(!m.deleted_date,'deleted-message layout unsupported');
-   check(m.reactions===undefined||Array.isArray(m.reactions)&&m.reactions.length===0,'unsupported reaction layout');
-   const attachments=m.attachments??[];check(Array.isArray(attachments)&&attachments.length<=5,'attachments');
+
+   check(m.reactions===undefined||Array.isArray(m.reactions)&&m.reactions.length<=100,'unsupported reaction layout');
+   const reactions=(m.reactions??[]).map(r=>{check(r&&typeof r.emoji==='string'&&r.emoji.length>0&&r.emoji.length<=100&&Array.isArray(r.reactors),'reaction requires emoji and reactors');const users=r.reactors.map(person);check(new Set(users).size===users.length,'duplicate reactor');return {name:r.emoji,count:users.length,users}});
+   const attachments=m.deleted_date?[]:m.attachments??[];check(Array.isArray(attachments)&&attachments.length<=5,'attachments');
    const originalFiles=attachments.map((file,index)=>{
     check(typeof file.export_name==='string'&&!file.export_name.includes('..')&&!file.export_name.startsWith('/')&&typeof file.name==='string'&&typeof file.content_type==='string','attachment layout');
     const body=archive.files.get(group.folder+file.export_name);check(body&&body.length>0&&body.length<=1024*1024,'referenced attachment missing or over 1 MiB');
@@ -52,7 +54,7 @@ export function inspectGchatArchive(bytes,localUsers=[]){
    });
    let thread_ts;
    if(m.topic_id!==undefined){check(typeof m.topic_id==='string','topic_id');thread_ts=topics.get(m.topic_id);if(!thread_ts)topics.set(m.topic_id,ts);}
-   rows.push({type:'message',user:author,ts,text:m.text,files:originalFiles,...(thread_ts?{thread_ts}:{}),...(m.last_updated_date?{edited:{ts:time(m.last_updated_date)}}:{}),nookSource:'gchat',googleChat:{message_id:m.message_id,created_date:m.created_date,creator:{name:m.creator.name,email:m.creator.email},topic_id:m.topic_id??null,last_updated_date:m.last_updated_date??null}});
+   rows.push({type:'message',user:author,ts,text:m.deleted_date?'':m.text,reactions,files:originalFiles,...(thread_ts?{thread_ts}:{}),...(m.last_updated_date?{edited:{ts:time(m.last_updated_date)}}:{}),nookSource:'gchat',googleChat:{message_id:m.message_id,created_date:m.created_date,creator:{name:m.creator.name,email:m.creator.email},topic_id:m.topic_id??null,last_updated_date:m.last_updated_date??null,deleted_date:m.deleted_date??null}});
   }
   files.set(group.id+'/2000-01-01.json',new TextEncoder().encode(JSON.stringify(rows)));
  }

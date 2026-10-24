@@ -10,6 +10,10 @@ export async function filesJourney({owner,registered,post,patch,get,check,restar
   const call=async(path,{method='GET',body,status=200,type='application/json'}={})=>{const response=await fetch(base+path,{method,headers:{cookie:owner.cookie,Origin:base,'Content-Type':type},body:body===undefined?undefined:body instanceof Uint8Array?body:JSON.stringify(body)});const result=await response.json();assert.equal(response.status,status,JSON.stringify(result));return result};
   const policy=(await get('/api/team/file-policy')).data;
   await patch('/api/team/file-policy',{...policy,maxBytes:1073741824,blockedExtensions:['exe']});
+  const invalid=await call('/api/conversations/'+room.id+'/uploads',{method:'POST',body:{name:'synthetic-nook-bad-checksum.zip',mime:'application/zip',size:17,sha256:'0'.repeat(64),intent:crypto.randomUUID()}});
+  await call('/api/uploads/'+invalid.id+'/parts/1',{method:'PUT',type:'application/octet-stream',body:Buffer.alloc(17,65)});
+  await call('/api/uploads/'+invalid.id+'/complete',{method:'POST',status:409});
+  await patch('/api/attachments/'+invalid.id,{delete:true});
   const bytes=Buffer.alloc(8*1024*1024+17,65),checksum=createHash('sha256').update(bytes).digest('hex'),input={name:'synthetic-nook-large.zip',mime:'application/zip',size:bytes.length,sha256:checksum,intent:crypto.randomUUID()},path='/api/conversations/'+room.id+'/uploads';
   await call(path,{method:'POST',body:{...input,size:1073741825},status:400});
   await call(path,{method:'POST',body:{...input,name:'synthetic-nook-blocked.exe'},status:415});
