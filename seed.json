@@ -21,15 +21,9 @@
   "description": "Keep team conversations, decisions and commitments together so work stays clear.",
   "capabilities": [
     {
-      "id": "http-dispatch",
-      "clauses": [
-        "HTTP-001"
-      ]
-    },
-    {
       "id": "native-access",
       "clauses": [
-        "BASE-ACCESS-002"
+        "NOOK-001"
       ]
     },
     {
