@@ -22,6 +22,50 @@ The contract assessment remains 35 done, 26 partial and 30 missing clauses out o
 
 A retained v0.4.0 Platform-ledger archive may be refused by the native importer with schema_mismatch. Restore into the release you exported from, then upgrade the original installation and export again. This release adds no per-seed ledger shim.
 
+### Contract changes since 0.4.0
+
+- **NOOK-015 changed (A1).** Clarify retained history and preserve published erasure duties.
+
+  Was: `Failure classes show to the recipient, the sender and the owner for seven days; terminal delivery metadata lasts thirty days.`
+
+  Now: `Failure classes show to the recipient, the sender and the owner for seven days; terminal delivery queue rows last thirty days, while NOOK-073's held, released and canceled routing records are retained as that clause states.`
+
+- **NOOK-015 changed (A2).** Clarify retained history and preserve published erasure duties.
+
+  Was: `Today fresh visible presence holds all of the member's Web Push; NOOK-073's cross-device active-elsewhere rule replaces that hold for Web Push exactly as for native push:`
+
+  Now: `Visible presence alone holds no Web Push; NOOK-073's cross-device active-elsewhere rule governs Web Push exactly as native push:`
+
+- **NOOK-015 changed (A3).** Clarify retained history and preserve published erasure duties.
+
+  Was: `Archives exclude keys, devices, presence and all delivery state; restored installations send nothing old. Member/message/outcome erasure removes associated push records.`
+
+  Now: `Archives exclude keys, devices, presence and the live delivery queue; NOOK-073's body-free routing records travel in operational archives as history and are never sent, so restored installations send nothing old. Member/message/outcome erasure removes associated push records: the erased member's devices, presence, preferences, queue rows and routing records, and every recipient's queue rows and routing records of alerts the erased member, message or outcome caused.`
+
+- **ERASURE-001 changed (A4).** Clarify retained history and preserve published erasure duties.
+
+  Was: `Other authors retain work and state without erased assignee/action attribution.`
+
+  Now: `Other authors retain work and state without erased assignee/action attribution. Shared conversation notes are such work: member erasure removes only the member's author, reviser and pin attribution, and a note another member authored or revised keeps its title, text, checklist items, links, pin state and every snapshot for the other participants; notes the member wrote alone, and notes on the member's erased thread roots, are cleared (NOOK-053). Web Push routing records are removed with the member they belong to and with the message, outcome or member that caused them (NOOK-015, NOOK-073); none is a structural tombstone.`
+
+- **NOOK-080 added.**
+
+  **NOOK-080 — Notification destination door.** An owner or admin approves a notifying app (a sibling such as Slate, or any `NOOK-025` app) for named channels only, issuing a channel-scoped token shown once, stored hashed, revocable by owner, admin or channel manager. Posts are authenticated, idempotent on a client key, limited to 1 per second per channel (burst 20) with `429` and `Retry-After`, and editable only by the posting app. For approved channels only, the token reads: privacy, sharing (`NOOK-031`), and members with verified email, guest flag and bot flag. After revocation, archive, sharing or removal, posts write nothing. Messages show the app identity and badge, and are audited (`NOOK-051`) and exported (`NOOK-047`).
+
+  **Acceptance evidence:** Approve an app for one private channel. Post, edit and delete; replay a key; exceed the rate; read every audience fact. Then add a guest, share, archive and revoke: facts change and later posts write nothing. Channel A's token cannot reach channel B.
+
+### Prose changes since 0.4.0
+
+- **docs/privacy.md (A5).** Reverse the unrecorded narrowing of the published erasure promise.
+
+  Was at 0.4.0: `Member, message and outcome erasure removes associated delivery records.`
+
+  Was before this correction: `Member, message and outcome erasure removes associated delivery queue rows; member erasure also removes that person's routing records.`
+
+  Now: `Member, message and outcome erasure removes associated delivery records: the queue rows and routing records of every alert the erased person, message or commitment caused, and all of an erased person's own devices, delivery rows and routing records.`
+
+- Attention and readable-export guides distinguish retained Web Push history from email queue rules and disclose legacy hold limits. Conversation and erasure guides name complete shared-note content and thread-root clearing. The next release copies these contract and prose amendments verbatim; the issued 0.4.0 RELEASE.json remains unchanged.
+
 Product screenshot: .github/assets/release/nook-launch-channel-1600.png
 
 ## 0.4.0 (2026-10-19)
