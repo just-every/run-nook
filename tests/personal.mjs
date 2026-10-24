@@ -1,3 +1,4 @@
+import {withRestoredArchive} from './archive-roundtrip.mjs'
 import assert from 'node:assert/strict'
 export async function personalJourney({owner,registered,post,get,request,check,restart,sql,validateArchive}){
  const member=await registered('PersonalSender'),outsider=await registered('PersonalOutside')
@@ -33,7 +34,7 @@ export async function personalJourney({owner,registered,post,get,request,check,r
   const keywordPerson=await registered('synthetic-nook-keyword-custody');
   const keywordRoom=(await post('/api/conversations',{name:'synthetic-nook keyword custody',kind:'private',participants:[keywordPerson.user.id]})).data;
   const memberRequest=(path,method,body)=>request(path,{method,cookie:keywordPerson.cookie,body});
-  await memberRequest('/api/notify','PATCH',{keywords:['Invoice'],vacation:{starts:Date.now()+86400000,ends:Date.now()+172800000}});
+  await memberRequest('/api/notify','PATCH',{keywords:['Invoice'],awayEmail:false,awayInterval:60,dismissEmailOffer:true,vacation:{starts:Date.now()+86400000,ends:Date.now()+172800000}});
   await memberRequest('/api/conversations/'+keywordRoom.id+'/notify','PATCH',{level:'nothing'});
   const silent=(await post('/api/conversations/'+keywordRoom.id+'/messages',{body:'synthetic-nook invoice is silent',intent:crypto.randomUUID()})).data;
   assert.ok(!(await get('/api/attention',keywordPerson.cookie)).data.items.some(i=>i.message?.id===silent.id),'nothing suppresses keyword Attention');
@@ -51,6 +52,20 @@ export async function personalJourney({owner,registered,post,get,request,check,r
   for(const page of (await get('/api/readable-exports/'+readable.id+'/index',keywordPerson.cookie)).data.items)records.push(...(await get('/api/readable-exports/'+readable.id+'/pages/'+page.ordinal,keywordPerson.cookie)).data.records);
   assert.deepEqual(records.find(r=>r.type==='personal_keywords').data.keywords,['Invoice']);
   const archive=async()=>{const id=(await request('/api/portability/exports',{method:'POST',cookie:owner.cookie,body:{},status:201})).data.id;let status;for(let n=0;n<200;n++){status=(await request('/api/portability/exports/'+id+'/advance',{method:'POST',cookie:owner.cookie,body:{maxParts:16}})).data;if(status.phase!=='building')break}assert.equal(status.phase,'complete');const raw=(await request('/api/portability/exports/'+id+'/download',{cookie:owner.cookie})).raw;const {readArchive}=await import('@runeditrun/rer/modules/portability');const rows=[];for await(const part of readArchive(new Blob([raw]).stream()))rows.push(...(part.items??[]));await request('/api/portability/exports/'+id+'/abort',{method:'POST',cookie:owner.cookie,body:{}});return rows};
+  const savedDefaultChannels=(await get('/api/team/default-channels')).data;
+  await request('/api/team/default-channels',{method:'PATCH',cookie:owner.cookie,body:{version:savedDefaultChannels.version,channels:[...savedDefaultChannels.channels.filter(c=>c.enabled).map(c=>({id:c.id,mandatory:!!c.mandatory})),{id:publicRoom.id,mandatory:false}]}});
+  const savedDefaults=(await get('/api/team/notification-defaults')).data;
+  await request('/api/team/notification-defaults',{method:'PATCH',cookie:owner.cookie,body:{version:savedDefaults.version,push:{...savedDefaults.push,direct:false},channels:[{id:publicRoom.id,level:'all'}],awayEmail:true}});
+  const archiveDefaults=(await get('/api/team/notification-defaults')).data,archivePreferences=(await get('/api/notify',keywordPerson.cookie)).data;
+  await withRestoredArchive({request,owner},async restored=>{
+   const person=await restored.actor(keywordPerson.user.id),preferences=await restored.call('/api/notify','GET',undefined,person.cookie);
+   assert.deepEqual(preferences.vacation,archivePreferences.vacation);assert.equal(preferences.emailOffer,false);assert.equal(preferences.awayEmail,false);assert.equal(preferences.awayInterval,60);assert.deepEqual(preferences.keywords,['Invoice']);
+   const defaults=await restored.call('/api/team/notification-defaults','GET',undefined,restored.owner.cookie);
+   for(const key of ['push','channels','awayEmail'])assert.deepEqual(defaults[key],archiveDefaults[key],key+' owner defaults survive restore');
+   assert.equal((await restored.db.prepare('SELECT count(*) AS n FROM nook_notify_queue').first()).n,0,'a restored vacation and offer choice send no old email');
+  });
+  const restoreDefaults=(await get('/api/team/notification-defaults')).data;await request('/api/team/notification-defaults',{method:'PATCH',cookie:owner.cookie,body:{version:restoreDefaults.version,push:savedDefaults.push,channels:savedDefaults.channels,awayEmail:savedDefaults.awayEmail}});
+  const restoredDefaultChannels=(await get('/api/team/default-channels')).data;await request('/api/team/default-channels',{method:'PATCH',cookie:owner.cookie,body:{version:restoredDefaultChannels.version,channels:savedDefaultChannels.channels.filter(c=>c.enabled).map(c=>({id:c.id,mandatory:!!c.mandatory}))}});
   const before=await archive();assert.ok(before.some(r=>r.table==='nook_keywords'&&r.row.user===keywordPerson.user.id&&r.row.keyword==='Invoice'));assert.ok(before.some(r=>r.table==='nook_vacations'&&r.row.user===keywordPerson.user.id));
   await request('/api/erasures/preview',{method:'POST',cookie:owner.cookie,body:{kind:'member',target:keywordPerson.user.id}});
   let receipt=(await request('/api/erasures',{method:'POST',cookie:owner.cookie,body:{kind:'member',target:keywordPerson.user.id,confirmation:'ERASE'}})).data;

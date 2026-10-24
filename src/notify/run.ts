@@ -28,9 +28,9 @@ export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=
  // gone out. It is shown as not confirmed and never sent again.
  await db.batch([sql("UPDATE nook_notify_queue SET state='failed',error='uncertain',updated=? WHERE channel='email' AND state='sending' AND due<=?",now,now),sql("DELETE FROM nook_notify_queue WHERE channel='email' AND state IN ('sent','folded','cancelled','failed') AND updated<?",now-KEEP_MS)])
  await syncQuiet(db,now)
- const groups=(await sql("SELECT DISTINCT user,conversation FROM nook_notify_queue WHERE channel='email' AND state IN ('pending','retrying') AND due<=? ORDER BY due LIMIT ?",now,limit).all<{user:string;conversation:string}>()).results
+ const groups=(await sql("SELECT DISTINCT user,CASE WHEN reason='direct-message' THEN '' ELSE conversation END AS conversation FROM nook_notify_queue WHERE channel='email' AND state IN ('pending','retrying') AND due<=? ORDER BY due LIMIT ?",now,limit).all<{user:string;conversation:string}>()).results
  for(const group of groups){
-  const rows=(await sql(`SELECT q.*,(SELECT snooze_until FROM nook_attention WHERE id=q.dedupe AND state='snoozed') AS snooze,${cancelReason} AS cancel FROM nook_notify_queue q WHERE q.channel='email' AND q.user=? AND q.conversation=? AND q.state IN ('pending','retrying') ORDER BY q.created,q.id`,group.user,group.conversation).all<Row>()).results
+  const rows=(await sql(`SELECT q.*,(SELECT snooze_until FROM nook_attention WHERE id=q.dedupe AND state='snoozed') AS snooze,${cancelReason} AS cancel FROM nook_notify_queue q WHERE q.channel='email' AND q.user=? AND ${group.conversation?"q.conversation=? AND q.reason<>'direct-message'":"q.reason='direct-message'"} AND q.state IN ('pending','retrying') ORDER BY q.created,q.id`,group.user,...(group.conversation?[group.conversation]:[])).all<Row>()).results
   const cancelled=rows.filter(r=>r.cancel)
   if(cancelled.length)await db.batch(cancelled.map(r=>sql("UPDATE nook_notify_queue SET state='cancelled',error=?,updated=? WHERE id=? AND state IN ('pending','retrying')",r.cancel,now,r.id)))
   const live=rows.filter(r=>!r.cancel);if(!live.length)continue
@@ -44,13 +44,16 @@ export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=
   const ready=live.filter(row=>heldUntil(row)<=now),waiting=live.filter(row=>heldUntil(row)>now)
   if(waiting.length)await db.batch(waiting.map(row=>sql('UPDATE nook_notify_queue SET due=?,updated=? WHERE id=?',heldUntil(row),now,row.id)))
   if(!ready.length||!ready.some(r=>r.due<=now))continue
-  const last=await sql("SELECT max(updated) AS at FROM nook_notify_queue WHERE channel='email' AND user=? AND conversation=? AND state='sent'",group.user,group.conversation).first<{at:number|null}>()
-  const held=foldedUntil(last?.at??null,now)
+  const last=await sql(`SELECT max(updated) AS at FROM nook_notify_queue WHERE channel='email' AND user=? AND ${group.conversation?"conversation=? AND reason<>'direct-message'":"reason='direct-message'"} AND state='sent'`,group.user,...(group.conversation?[group.conversation]:[])).first<{at:number|null}>()
+  // Away bundles share the person's selected interval across conversations;
+  // explicitly enabled notification email keeps its existing per-room fold.
+  const awayUntil=(last?.at??0)+(person?.away_interval??15)*60000
+  const held=group.conversation?foldedUntil(last?.at??null,now):last?.at!=null&&awayUntil>now?awayUntil:null
   if(held!==null){await db.batch(ready.map(r=>sql('UPDATE nook_notify_queue SET due=?,updated=? WHERE id=?',held,now,r.id)));continue}
   const lead=ready[0],token=hex(crypto.getRandomValues(new Uint8Array(32)).buffer),hash=await tokenHash(token)
   await db.batch(ready.map(r=>sql("UPDATE nook_notify_queue SET state='sending',attempts=attempts+1,due=?,email=?,token_hash=?,updated=? WHERE id=?",now+LEASE_MS,lead.id,hash,now,r.id)))
-  const context=await sql('SELECT c.name,c.kind,(SELECT display_name FROM oa_operators WHERE id=?) AS actor FROM nook_conversations c WHERE c.id=?',lead.actor,group.conversation).first<{name:string;kind:string;actor:string|null}>()
-  const email=composeEmail({workspace:branding.name,origin:authBindings(env).AUTH_ORIGIN,actor:context?.actor??'Someone',conversation:{id:group.conversation,name:context?.name??'',kind:context?.kind??'channel'},reason:lead.reason,message:lead.message,count:ready.length,token})
+  const context=await sql('SELECT c.name,c.kind,(SELECT display_name FROM oa_operators WHERE id=?) AS actor FROM nook_conversations c WHERE c.id=?',lead.actor,lead.conversation).first<{name:string;kind:string;actor:string|null}>()
+  const email=composeEmail({workspace:branding.name,origin:authBindings(env).AUTH_ORIGIN,actor:context?.actor??'Someone',conversation:{id:lead.conversation,name:context?.name??'',kind:context?.kind??'channel'},reason:lead.reason,message:lead.message,count:ready.length,conversationCount:new Set(ready.map(row=>row.conversation)).size,token})
   const result=await send({deliveryId:lead.id,to:person!.email,...email})
   if(result.ok){await db.batch([sql("UPDATE nook_notify_queue SET state='sent',error=NULL,updated=? WHERE id=?",now,lead.id),...ready.slice(1).map(r=>sql("UPDATE nook_notify_queue SET state='folded',error=NULL,updated=? WHERE id=?",now,r.id))]);continue}
   await db.batch(ready.map(r=>{const next=afterFailure(r.attempts+1,result.retryable,now);return sql('UPDATE nook_notify_queue SET state=?,due=?,error=?,email=NULL,updated=? WHERE id=?',next.state,next.due,result.error,now,r.id)}))
