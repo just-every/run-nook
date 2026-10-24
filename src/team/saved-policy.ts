@@ -43,7 +43,7 @@ export function savedAfter(value:unknown){
 }
 // Correlated current membership matches Context.memberFence, including guest
 // grants and unpublished imports. A role never opens a saved source.
-export const savedAccess=(conversation:string,user:string)=>`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=${conversation} AND mf.user=${user} AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
+export const savedAccess=(conversation:string,user:string)=>`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=${conversation} AND mf.user=${user} AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-' AND substr(j.id,1,6)<>'gchat-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
 export const savedCollectionsSql=`WITH source AS (
  SELECT id,conversation FROM nook_messages WHERE id=? AND deleted=0
  UNION ALL SELECT r.id,r.conversation FROM nook_import_records r JOIN nook_imports j ON j.id=r.job WHERE r.id=? AND j.state='complete' AND ${publishedImport}

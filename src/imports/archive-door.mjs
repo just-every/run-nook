@@ -23,7 +23,7 @@ export async function doorArchivePlans(read,decode,db){
  const proofs=new Map(),snapshots=new Map();
  for(const row of plans.values()){
   const binding=links.get(row.id);check(binding,'door_plan_without_product_binding');
-  check(['slack','campfire','mattermost'].includes(binding.source_type)&&binding.domain_job===binding.source_type+'-'+sha256(canonicalJson([binding.source_type,binding.namespace])).slice(0,40)&&(row.namespace===binding.source_type||row.namespace===binding.source_type+':'+binding.namespace),'door_product_binding_changed');
+  check(['slack','campfire','mattermost','gchat'].includes(binding.source_type)&&binding.domain_job===binding.source_type+'-'+sha256(canonicalJson([binding.source_type,binding.namespace])).slice(0,40)&&(row.namespace===binding.source_type||row.namespace===binding.source_type+':'+binding.namespace),'door_product_binding_changed');
   const summary=JSON.parse(binding.summary_json);
   check(summary.captureDigest===binding.capture_digest&&summary.archiveDigest===binding.archive_digest,'door_capture_binding_changed');
   const chunks=data.ik_door_plan_chunks.filter(c=>c.plan_id===row.id).sort((a,b)=>a.ordinal-b.ordinal);

@@ -7,13 +7,13 @@ import { publicLocalInspection, publicLocalSummary } from './browser-runtime/pub
 import { localPacket } from './browser-runtime/packet.ts';
 import { credentialOmissions } from './browser-runtime/credentials.ts';
 
-export type LocalSourceKind = 'slack' | 'campfire' | 'mattermost';
+export type LocalSourceKind = 'slack' | 'campfire' | 'mattermost' | 'gchat';
 declare const localHandle: unique symbol;
 export type LocalSourceHandle = { readonly [localHandle]: true };
 export type { LocalSourcePacket } from './browser-runtime/packet.ts';
 
 const sources = new WeakMap<LocalSourceHandle, { kind: LocalSourceKind; inspected: any }>();
-const kinds = new Set(['slack', 'campfire', 'mattermost']);
+const kinds = new Set(['slack', 'campfire', 'mattermost', 'gchat']);
 
 /** Opaque handles contain no archive bytes and serialize as {}. Raw input stays
  * in this tab's memory; this module performs no upload, fetch or persistence. */

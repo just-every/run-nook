@@ -53,6 +53,6 @@ export function validateSlackArchiveRecords(proofs, tables) {
     }
     // Slack destinations are stable IDs; removing review/job custody must not
     // downgrade their rows into the older source-capture import path.
-    for (const envelope of envelopes.values()) if (envelope.id.startsWith('slack-')||envelope.id.startsWith('campfire-')||envelope.id.startsWith('mattermost-')) check(validated.has(envelope.id), 'slack_history_without_completed_job');
+    for (const envelope of envelopes.values()) if (envelope.id.startsWith('gchat-')||envelope.id.startsWith('slack-')||envelope.id.startsWith('campfire-')||envelope.id.startsWith('mattermost-')) check(validated.has(envelope.id), 'slack_history_without_completed_job');
     return validated;
 }

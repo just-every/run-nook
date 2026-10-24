@@ -1,5 +1,5 @@
-export type ImportSource = 'slack' | 'campfire' | 'mattermost';
-export const sourceNames: Record<ImportSource, string> = { slack: 'Slack', campfire: 'Campfire', mattermost: 'Mattermost' };
+export type ImportSource = 'slack' | 'campfire' | 'mattermost' | 'gchat';
+export const sourceNames: Record<ImportSource, string> = { slack: 'Slack', campfire: 'Campfire', mattermost: 'Mattermost', gchat: 'Google Chat' };
 export type DoorJob = { id: string; state: string; checkpoint: number; total: number; fence: number; error?: string | null };
 export type ImportHistory = {
     planId?: string; jobId: string; namespace: string; sourceType: ImportSource;

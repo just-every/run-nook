@@ -4,7 +4,7 @@ import { decodeRoleCapture, encodeRoleEffect } from './role-decisions';
 import { assertImportEffect } from './formats.mjs';
 import { assertLocalCredentials } from './browser-runtime/credentials';
 
-export const vendors = { slack: 'Slack', campfire: 'Campfire', mattermost: 'Mattermost' } as const;
+export const vendors = { slack: 'Slack', campfire: 'Campfire', mattermost: 'Mattermost', gchat: 'Google Chat' } as const;
 export type ImportVendor = keyof typeof vendors;
 export const doorKey = 'nook-history-imports-v1';
 export function sourceName(name: string) {
@@ -22,6 +22,7 @@ export function decodeDoorPacket(input: any, kind: ImportVendor, workspace: stri
     || !/^[A-Za-z0-9_.-]{1,128}$/.test(input.namespace) || workspace && input.namespace !== workspace
     || !input.capture || input.capture.namespace !== input.namespace || input.capture.archiveDigest !== input.archiveDigest
     || !/^[a-f0-9]{64}$/.test(input.archiveDigest)) throw Error('Invalid reviewed source bundle');
+  if (kind==='gchat' && input.capture.sourceType!=='gchat') throw Error('Invalid Google Chat source declaration');
   assertLocalCredentials(input);
   const capture = structuredClone(input.capture);
   decodeRoleCapture(capture);

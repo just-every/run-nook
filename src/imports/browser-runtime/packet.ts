@@ -4,7 +4,7 @@ import { assertLocalCredentials, assertLocalFileCredentials } from './credential
 
 export type LocalSourcePacket = {
   version: 1;
-  sourceType: 'slack' | 'campfire' | 'mattermost';
+  sourceType: 'slack' | 'campfire' | 'mattermost' | 'gchat';
   namespace: string;
   archiveDigest: string;
   review: any;

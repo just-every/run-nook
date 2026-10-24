@@ -18,8 +18,9 @@ export function assertSlackCaptureAdmitted(capture) {
  * omission can turn an incomplete selected history into an applied plan. */
 export function assertSlackEffect(kind, value) {
     if (kind === 'channel') {
-        if (value.kind !== 'private' || !value.members.includes(value.owner))
+        if (!['private','dm'].includes(value.kind) || !value.members.includes(value.owner))
             reject('new private destination required');
+        if (value.sourceRecord?.visibility && (value.sourceRecord.sourceKind!==value.kind || value.sourceRecord.mappedOwner!==value.owner || importDigest(value.sourceRecord.mappedMembers)!==importDigest(value.members))) reject('private source audience binding changed');
     } else if (kind === 'actor') {
         if (value.sourceRecord?.id !== value.sourceId || value.sourceRecord.missingFromExport === true)
             reject('source actor missing from export');

@@ -5,7 +5,7 @@ export function ReviewPanel({ preview, accepted, onAccept, withoutMissingFiles, 
         {preview.credentialOmissions?.map((item: any, index: number) => <p key={index}>{item.detail}</p>)}
         {preview.blocked && <div role="alert" className="import-error"><h3>Import blocked</h3><ul className="import-omissions">{preview.blockers.map((item: any, index: number) => <li key={index}><code>{item.key}</code><span>{item.kind}: {item.reason ?? item.detail}</span></li>)}</ul></div>}
         <ImportCounts counts={preview.counts} />
-        <p>{kind === 'campfire'
+        <p>{kind === 'gchat' ? 'Spaces and direct conversations retain their mapped audiences, authors, times, threads and supplied file bytes. Historical imports create no unread activity, notifications or accepted work.' : kind === 'campfire'
             ? 'Historical messages keep original authors, times and file relationships. They create no unread activity, notifications or accepted work. This source version supplies no native reply relationship; none is invented.'
             : 'Historical messages keep original authors, times and file relationships. They create no unread activity, notifications or accepted work. Nested replies, reactions, custom emoji, private saves and shared channel pins retain their source meaning. The source does not identify who pinned an item; no actor is invented.'}</p>
         <h3>Original files</h3><ul className="import-omissions">{(preview.fileHashes ?? []).map((file: any) => <li key={file.key + file.sourceId}><strong>{file.name}</strong><span>{file.size} bytes · {file.mime}</span><code>SHA-256 {file.sha256}</code></li>)}</ul>
@@ -15,6 +15,7 @@ export function ReviewPanel({ preview, accepted, onAccept, withoutMissingFiles, 
     </section>;
     return <section aria-labelledby="import-review-title">
         <h2 id="import-review-title">Review the historical import</h2>
+        {!!preview.integrations?.length && <><h3>Integration inventory</h3><ul className="import-omissions">{preview.integrations.map((item: any,index: number)=><li key={index}><strong>{item.name}</strong><span>{item.kind}: {item.disposition}</span></li>)}</ul></>}
         {preview.blocked && <div role="alert" className="import-error">
             <h3>Import blocked: selected history is incomplete or unsupported</h3>
             <p>Nothing in this selection can be applied. Deselect each affected channel or upload a corrected export with its source actors and thread roots. Supply missing file bytes or make the explicit choice below. Slack files must be at most 1 MiB each. Individual records cannot be discarded to approve this import.</p>

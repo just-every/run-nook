@@ -4,9 +4,9 @@ export function publicLocalInspection(inspected: any, kind: string, users: any[]
   if (kind === 'mattermost') return publicMattermostInspection(inspected, users);
   if (kind === 'campfire') return publicCampfire(inspected, users);
   return {
-    sourceType: 'slack',
-    channels: inspected.channels.map((channel: any) => ({ sourceId: channel.id, name: channel.name, visibility: 'public' })),
-    actors: inspected.actors, omissions: inspected.omissions,
+    sourceType: inspected.sourceType ?? 'slack',
+    channels: inspected.channels.map((channel: any) => ({ sourceId: channel.id, name: channel.name, displayName:channel.googleChat?.name, visibility: channel.visibility ?? 'public', members: channel.visibility ? channel.members : undefined, messageCount: [...inspected.archive.files.keys()].filter((path: string)=>path.startsWith(channel.name+'/')&&path.endsWith('.json')).reduce((n: number,path: string)=>n+JSON.parse(new TextDecoder().decode(inspected.archive.files.get(path))).length,0) })),
+    integrations:inspected.integrations, actors: inspected.actors, omissions: inspected.omissions,
     completeness: inspected.completeness, sourceAuthenticityVerified: false,
   };
 }
@@ -15,7 +15,7 @@ export function publicLocalInspection(inspected: any, kind: string, users: any[]
 export function publicLocalSummary(capture: any) {
   const result = capture.sourceType === 'mattermost' ? mattermostSummary(capture)
     : capture.sourceType === 'campfire' ? summaryCampfire(capture) : {
-      sourceType: 'slack', reviewDigest: capture.reviewDigest, externalActors: capture.externalActors,
+      sourceType: capture.sourceType ?? 'slack', integrations:capture.integrations, reviewDigest: capture.reviewDigest, externalActors: capture.externalActors,
       skippedKinds: capture.skippedKinds, missingFiles: capture.missingFiles,
       missingFileInventoryDigest: capture.missingFileInventoryDigest, counts: capture.counts,
       omissions: capture.omissions, omissionDigest: capture.omissionDigest,

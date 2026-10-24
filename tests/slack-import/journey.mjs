@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { slackFixture, largeSlackFixture, zipFixture } from './fixture.mjs';
 import {importDoorClient,importUsers} from '../import-door-support.mjs';
 import { invite, signIn } from '../auth-support.mjs';
-export async function importJourney({ origin, owner, restart, sql }) {
+export async function importJourney({ origin, owner, restart, sql, validateArchive }) {
     const report = [], suffix = crypto.randomUUID().slice(0, 8), member = await invite(origin, owner.cookie, 'ImportReader' + suffix), outsider = await invite(origin, owner.cookie, 'ImportOutsider' + suffix);
     // Worker restarts must not reuse a pooled socket to the disposed listener.
     async function call(path, { actor = owner, body, zip, status = 200, method } = {}) { const r = await fetch(origin + path, { method: method ?? (body !== undefined || zip ? 'POST' : 'GET'), headers: { Connection: 'close', Origin: origin, cookie: actor.cookie, ...(zip ? { 'Content-Type': 'application/zip' } : body !== undefined ? { 'Content-Type': 'application/json' } : {}) }, body: zip ?? (body !== undefined ? JSON.stringify(body) : undefined) }); const raw = await r.text(); assert.equal(r.status, status, `${path}: ${raw}`); return r.headers.get('content-type')?.includes('json') ? JSON.parse(raw) : raw; }
@@ -16,6 +16,7 @@ export async function importJourney({ origin, owner, restart, sql }) {
     }
     const guest=await scopedActor('ImportGuest','member','guest'),admin=await scopedActor('ImportAdmin','admin','member');
     const door=importDoorClient({origin,owner,users:()=>importUsers(sql)});
+    report.push(await privateHistoryJourney({call,door,owner,member,outsider,admin,guest,suffix,validateArchive}));
     report.push(await sourceFidelityJourney({call,door,owner,suffix}));
     const upload=await door.inspect(slackFixture()),namespace='slack-proof-'+suffix;
     assert.equal(upload.channels.length,2);assert.ok(upload.actors.some(a=>a.sourceId==='U404'));
@@ -213,4 +214,43 @@ async function largeImportJourney({ call, door, owner, restart, suffix }) {
     }
     assert.equal(found, 1205);
     return { name: 'large actual D1 import resumes after cold restart and all 1205 messages across two normal histories/search are reachable', passed: true, counts: { messages: count, actors: 205, replies, kitEntries: 1412, applyRequests: requests } };
+}
+
+async function privateHistoryJourney({call,door,owner,member,outsider,admin,guest,suffix,validateArchive}) {
+ const {privateSlackFixture}=await import('../slack-private-fixture.mjs');
+ const inspection=await door.inspect(privateSlackFixture());
+ assert.deepEqual(inspection.channels.map(c=>c.visibility),['private','dm','group-dm']);
+ assert.ok(!JSON.stringify(inspection).includes('canary'),'inspection exposes counts and rosters, never history text');
+ assert.equal(inspection.integrations.length,5);
+ assert.match(inspection.integrations.find(i=>i.name==='Polly').disposition,/NOOK-070/);
+ assert.match(inspection.integrations.find(i=>i.name==='Donut').disposition,/NOOK-026/);
+ const actors={'synthetic-nook-1':member.user.id,'synthetic-nook-2':outsider.user.id,'synthetic-nook-3':null};
+ const review={namespace:'synthetic-nook-private-'+suffix,actors,channels:inspection.channels.map(c=>({sourceId:c.sourceId,name:'Imported '+c.name+' '+suffix,members:c.members.map(id=>actors[id]).filter(Boolean)})),acceptedOmissions:[]};
+ let preview=await door.prepare(inspection,review);
+ assert.equal(preview.summary.counts.channels,2);
+ assert.ok(preview.summary.omissions.some(o=>o.reason==='private-membership-not-exactly-mapped'));
+ assert.equal(preview.packet.capture.messages.some(m=>m.body.includes('group DM')),false,'unmapped group history never leaves the local reader');
+ const collision=structuredClone(review);collision.actors['synthetic-nook-2']=member.user.id;collision.channels.forEach(c=>c.members=[member.user.id]);
+ assert.equal((await door.prepare(inspection,collision)).summary.blocked,true,'one local person cannot stand for two participants');
+ review.acceptedOmissions=[preview.summary.omissionDigest];
+ const plan=await door.plan(inspection,review);await door.finish(plan);
+ const rooms=await call('/api/conversations',{actor:member});
+ const privateRoom=rooms.find(c=>c.name===review.channels[0].name),dm=rooms.find(c=>c.name===review.channels[1].name);
+ assert.ok(privateRoom&&dm);assert.equal(dm.kind,'dm');
+ for(const room of [privateRoom,dm]){
+  const messages=await call(`/api/conversations/${room.id}/messages`,{actor:member});assert.equal(messages.length,1);
+  assert.equal((await call(`/api/conversations/${room.id}/messages`,{actor:outsider})).length,1);
+  for(const actor of [owner,admin,guest]){
+   await call(`/api/conversations/${room.id}/messages`,{actor,status:403});
+   await call(`/api/messages/${messages[0].id}`,{actor,status:404});
+   assert.equal((await call('/api/search?q=Synthetic%20private',{actor})).items.some(m=>m.id===messages[0].id),false);
+  }
+ }
+ const dmMessage=(await call(`/api/conversations/${dm.id}/messages`,{actor:member}))[0];
+ assert.match(dmMessage.slack.links[0].href,/focus=/);
+ const forged=structuredClone((await door.prepare(inspection,review)).packet);forged.capture.channels[0].members.push(owner.user.id);
+ await assert.rejects(()=>door.upload(forged),/exact private audience required/);
+ if(validateArchive)await validateArchive();
+ await door.undo(plan);
+ return {name:'private supplied Slack histories publish only to exact injective source audiences; unmapped group stays local; non-member owner and admin denied',passed:true};
 }

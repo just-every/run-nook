@@ -4,7 +4,7 @@ import type { ImportSource } from './door-client';
 export function SourceMapping({ kind, source, review, onChange, busy }: {
     kind: ImportSource; source: any; review: any; onChange: (review: any) => void; busy: boolean;
 }) {
-    if (kind === 'slack') return <fieldset disabled={busy}><MappingForm source={source} review={review} setReview={onChange} /></fieldset>;
+    if (kind === 'slack' || kind === 'gchat') return <fieldset disabled={busy}><MappingForm source={source} review={review} setReview={onChange} /></fieldset>;
     const mattermost = kind === 'mattermost';
     const label = (id: string) => source.actors.find((actor: any) => actor.sourceId === id)?.label ?? id;
     return <fieldset disabled={busy}>
@@ -28,7 +28,7 @@ export function SourceMapping({ kind, source, review, onChange, busy }: {
 
 export function mappingReady(kind: ImportSource, source: any, review: any) {
     if (!review.namespace) return false;
-    if (kind === 'slack') return review.channels.length > 0 && source.actors.every((actor: any) => Object.hasOwn(review.actors, actor.sourceId));
+    if (kind === 'slack' || kind === 'gchat') return review.channels.length > 0 && source.actors.every((actor: any) => Object.hasOwn(review.actors, actor.sourceId));
     return source.actors.every((actor: any) => !(actor.required || actor.participant) || review.actors[actor.sourceId])
         && (kind !== 'mattermost' || source.roleInventory.every((role: string) => review.roles[role] === 'historical-only'));
 }

@@ -1,3 +1,4 @@
+import {slackIntegrations} from './slack-integrations.mjs';
 import { compareSourceMessages } from './timestamps.mjs';
 import { readSlackZip, jsonEntry, sha256, canonicalPath } from './zip.mjs';
 import { importDigest } from '../family/team-chat/import-capture.mjs';
@@ -26,7 +27,7 @@ export function inspectSlackArchive(bytes, localUsers = []) {
         if (user.name !== undefined && typeof user.name !== 'string' || user.profile !== undefined && !object(user.profile) || user.profile?.email !== undefined && typeof user.profile.email !== 'string' || ['is_bot', 'is_app_user'].some(key => user[key] !== undefined && typeof user[key] !== 'boolean'))
             bad('user fields');
     const channels = identityRows(records(jsonEntry(files, 'channels.json'), 'channels'), 'channel');
-    const excluded = [...registry(files, 'groups.json'), ...registry(files, 'dms.json'), ...registry(files, 'mpims.json')];
+    const excluded = [['groups.json','private'],['dms.json','dm'],['mpims.json','group-dm']].flatMap(([path,visibility]) => registry(files,path).map(c=>({...c,visibility})));
     identityRows([...channels, ...excluded], 'channel export');
     const names = new Set(), omissions = [], candidates = [];
     for (const c of [...channels, ...excluded]) {
@@ -46,9 +47,18 @@ export function inspectSlackArchive(bytes, localUsers = []) {
         }
         candidates.push({ ...c });
     }
-    for (const c of excluded)
-        omissions.push({ kind: 'channel', key: id(c.id) ? c.id : 'unknown', reason: 'private-or-direct-export-excluded' });
-    const recognized = new Set(['users.json', 'channels.json', 'groups.json', 'dms.json', 'mpims.json']), folders = new Set([...channels, ...excluded].map(c => c.name ?? c.id).filter(x => typeof x === 'string'));
+    for (const c of excluded) {
+        if (!Array.isArray(c.members) || c.members.length < (c.visibility === 'private' ? 1 : 2) || c.members.length > 50 || c.members.some(m=>!id(m)) || new Set(c.members).size!==c.members.length) {
+            omissions.push({kind:'channel',key:c.id,reason:'private-membership-not-supplied'});
+            continue;
+        }
+        candidates.push({...c,name:c.name ?? c.id});
+    }
+    for (const c of [...candidates]) if (c.is_shared || c.is_ext_shared || c.is_org_shared) {
+        candidates.splice(candidates.indexOf(c),1);
+        omissions.push({kind:'channel',key:c.id,reason:'shared-channel-history-not-supported'});
+    }
+    const recognized = new Set(['users.json', 'channels.json', 'groups.json', 'dms.json', 'mpims.json', 'integration_logs.json']), folders = new Set([...channels, ...excluded].map(c => c.name ?? c.id).filter(x => typeof x === 'string'));
     for (const path of files.keys())
         if (!recognized.has(path) && !path.startsWith('files/') && !folders.has(path.split('/')[0]))
             omissions.push({ kind: 'entry', key: sha256(path), reason: 'unsupported-export-entry' });
@@ -76,7 +86,7 @@ export function inspectSlackArchive(bytes, localUsers = []) {
         if (!existing) users.push(row);
     }
     const actors = users.map(u => { const externalOnly = automationIds.has(u.id), email = normalizedEmail(u.profile?.email), matches = !externalOnly && email ? localUsers.filter(x => x.active && normalizedEmail(x.email) === email).map(x => x.id) : []; return { sourceId: u.id, label: actorLabel(u), email, externalOnly, candidates: matches, match: externalOnly ? 'bot/app · external only' : matches.length === 1 ? 'suggested' : matches.length > 1 ? 'ambiguous' : email ? 'unmapped' : 'unknown' }; });
-    return { archive, users, automationIds, channels: candidates, actors, omissions, completeness: 'unknown', sourceAuthenticityVerified: false };
+    return { integrations:slackIntegrations(files,users,botRows.values()), archive, users, automationIds, channels: candidates, actors, omissions, completeness: 'unknown', sourceAuthenticityVerified: false };
 }
 export function captureSlackArchive(inspected, review, ownerId, localUsers) {
     if (review?.delta !== undefined) return captureSlackDeltaArchive(inspected, review, ownerId, localUsers);
@@ -92,8 +102,15 @@ export function captureSlackArchive(inspected, review, ownerId, localUsers) {
         if (!source)
             bad('selected source channel unavailable');
         const block = (kind, key, reason) => blockers.push({ channel: source.id, kind, key, reason });
-        if (typeof choice.name !== 'string' || !choice.name.trim() || choice.name.length > 80 || !Array.isArray(choice.members) || choice.members.length > 50 || !choice.members.includes(ownerId) || new Set(choice.members).size !== choice.members.length || choice.members.some(uid => !localUsers.some(u => u.id === uid && u.active)))
+        if (typeof choice.name !== 'string' || !choice.name.trim() || choice.name.length > 80 || !Array.isArray(choice.members) || choice.members.length > 50 || (!source.visibility && !choice.members.includes(ownerId)) || new Set(choice.members).size !== choice.members.length || choice.members.some(uid => !localUsers.some(u => u.id === uid && u.active)))
             bad('destination or current audience');
+        if (source.visibility) {
+            const mapped=source.members.map(uid=>review.actors[uid]);
+            if (mapped.some(uid=>!uid) || new Set(mapped).size!==mapped.length || importDigest([...mapped].sort())!==importDigest([...choice.members].sort())) {
+                omissions.push({kind:'channel',key:source.id,reason:'private-membership-not-exactly-mapped'});
+                continue;
+            }
+        }
         channels.push({ sourceId: source.id, name: choice.name, members: [...choice.members].sort(), guestMembers: choice.members.filter(uid => localUsers.find(u => u.id === uid)?.mode === 'guest').sort(), sourceRecord: source });
         const days = [...archive.files.keys()].filter(p => p.startsWith(`${source.name}/`));
         if (days.some(p => !new RegExp(`^${source.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/\\d{4}-\\d{2}-\\d{2}\\.json$`).test(p)))
@@ -151,8 +168,7 @@ export function captureSlackArchive(inspected, review, ownerId, localUsers) {
             messages.push({ key, channel: source.id, sourceActor: actorId, sourceTimestamp: r.ts, threadRoot: r.thread_ts && r.thread_ts !== r.ts ? `${review.namespace}:${source.id}:${r.thread_ts}` : null, body: r.text, sourceRecord, files, ...(absent.length ? { missingFiles: absent } : {}) });
         }
     }
-    if (!channels.length)
-        bad('select at least one channel');
+    if (!channels.length) blockers.push({kind:'channel',key:'selection',reason:'no-publishable-selected-channel'});
     for (const c of inspected.channels)
         if (!selected.has(c.id))
             omissions.push({ kind: 'channel', key: c.id, reason: 'not-selected' });
@@ -173,8 +189,13 @@ export function captureSlackArchive(inspected, review, ownerId, localUsers) {
     const sortedOmissions = [...new Map(omissions.map(x => [`${x.kind}:${x.key}:${x.reason}`, x])).values()].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
     const sortedBlockers = [...new Map(blockers.map(x => [`${x.channel}:${x.kind}:${x.key}:${x.reason}`, x])).values()].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
     const omissionDigest = importDigest(sortedOmissions), accepted = review.acceptedOmissions.includes(omissionDigest);
-    const usedActors = new Set([...admitted.values()].flatMap(m => [m.sourceActor, ...referencedActors(m.sourceRecord)]));
-    const result = { reviewDigest: importDigest(review), skippedKinds, missingFiles: { count: missingFiles.length, bytes: missingFiles.reduce((sum, f) => sum + (f.size ?? 0), 0), unknownSizes: missingFiles.filter(f => f.size === null).length, accepted: review.importWithoutMissingFiles === true }, namespace: review.namespace, archiveDigest: archive.archiveDigest, channels, actors: [...actors.values()].filter(a => usedActors.has(a.sourceId)), messages: [...admitted.values()].sort(compareSourceMessages), omissions: sortedOmissions, omissionDigest, omissionsAccepted: accepted || !sortedOmissions.length, blockers: sortedBlockers, blocked: sortedBlockers.length > 0, completeness: 'unknown', sourceAuthenticityVerified: false };
+    for (const c of channels) for (const uid of c.sourceRecord.visibility ? c.sourceRecord.members : []) {
+        const sourceRecord=userById.get(uid);
+        if (!sourceRecord || inspected.automationIds.has(uid)) bad('private participant identity unavailable');
+        actors.set(uid,{sourceId:uid,association:review.actors[uid],sourceRecord});
+    }
+    const usedActors = new Set([...channels.flatMap(c=>c.sourceRecord.visibility?c.sourceRecord.members:[]), ...[...admitted.values()].flatMap(m => [m.sourceActor, ...referencedActors(m.sourceRecord)])]);
+    const result = { integrations:inspected.integrations, reviewDigest: importDigest(review), skippedKinds, missingFiles: { count: missingFiles.length, bytes: missingFiles.reduce((sum, f) => sum + (f.size ?? 0), 0), unknownSizes: missingFiles.filter(f => f.size === null).length, accepted: review.importWithoutMissingFiles === true }, namespace: review.namespace, archiveDigest: archive.archiveDigest, channels, actors: [...actors.values()].filter(a => usedActors.has(a.sourceId)), messages: [...admitted.values()].sort(compareSourceMessages), omissions: sortedOmissions, omissionDigest, omissionsAccepted: accepted || !sortedOmissions.length, blockers: sortedBlockers, blocked: sortedBlockers.length > 0, completeness: 'unknown', sourceAuthenticityVerified: false };
     result.missingFileInventory = missingFileInventory(missingFiles);
     result.missingFileInventoryDigest = importDigest(result.missingFileInventory);
     result.externalActors = result.actors.filter(a => inspected.automationIds.has(a.sourceId)).map(a => a.sourceId).sort();

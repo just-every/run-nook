@@ -17,7 +17,7 @@ import './imports.css';
 import '../brand/controls.css';
 
 type Initial = { owner: string; users: any[]; jobs: ImportHistory[]; business: BusinessSettings };
-const emptyReview = (kind: ImportSource): any => ({ namespace: '', actors: {}, acceptedOmissions: [], ...(kind === 'slack' ? { channels: [] } : kind === 'mattermost' ? { roles: {} } : {}) });
+const emptyReview = (kind: ImportSource): any => ({ namespace: '', actors: {}, acceptedOmissions: [], ...(['slack','gchat'].includes(kind) ? { channels: [] } : kind === 'mattermost' ? { roles: {} } : {}) });
 export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSource }) {
     const [source, setSource] = useState<any>(null), [review, setReview] = useState<any>(() => emptyReview(kind));
     const [summary, setSummary] = useState<any>(null), [accepted, setAccepted] = useState(false), [plan, setPlan] = useState<DoorPlan | null>(null);
@@ -123,7 +123,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
     });
     const hasOmissions = !!summary?.omissions.length;
     return <main className="imports-page"><header><a className="import-back" href="/app">← Back to conversations</a><p className="import-eyebrow">Workspace owner</p><h1>Bring your {vendor} history into Nook</h1>
-        <nav aria-label="Other import sources">{(['slack', 'campfire', 'mattermost'] as const).filter(sourceKind => sourceKind !== kind).map(sourceKind => <a key={sourceKind} href={`/imports?source=${sourceKind}`}>Import {sourceNames[sourceKind]} history</a>)}</nav>
+        <nav aria-label="Other import sources">{(['slack', 'campfire', 'mattermost','gchat'] as const).filter(sourceKind => sourceKind !== kind).map(sourceKind => <a key={sourceKind} href={`/imports?source=${sourceKind}`}>Import {sourceNames[sourceKind]} history</a>)}</nav>
         <p>{kind === 'slack' ? 'Upload a local export ZIP, review its limits, and choose who can read each new private channel.' : kind === 'campfire' ? 'Review a consistent Campfire backup, map its people, and keep every room’s original audience.' : 'Review teams, channels and private conversations from a Mattermost bulk export. Keep every original audience and map identities without granting source privileges.'}</p>
     </header>
         {error && <div role="alert" className="import-error"><strong>{vendor} import</strong><p>{error.message}</p>{error instanceof ImportRequestError && error.details !== undefined && <pre className="import-json">{JSON.stringify(error.details, null, 2)}</pre>}</div>}
