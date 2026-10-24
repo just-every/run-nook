@@ -13,6 +13,7 @@ export async function googleChatBrowser({origin}){
   try{
    await browserEmailSignIn(page,origin,'nativeowner@example.test');await page.goto(origin+'/imports?source=gchat');
    await expect(page.getByRole('heading',{name:'Bring your Google Chat history into Nook'})).toBeVisible();
+   await expect(page.getByLabel('Google Chat export ZIP')).toBeEnabled();
    await page.getByLabel('Google Chat export ZIP').setInputFiles({name:'synthetic-nook-gchat.zip',mimeType:'application/zip',buffer:googleChatFixture()});
    await page.getByLabel('Source workspace namespace').fill('synthetic-nook-gchat-browser-'+width+'-'+Date.now());
    const me=await(await context.request.get(origin+'/api/me')).json(),selects=page.locator('.import-actors select');
