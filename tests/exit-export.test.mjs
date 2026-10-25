@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {mkdtemp,mkdir,writeFile,readdir,symlink,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readdir,symlink,rm,cp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {execFile} from 'node:child_process';
@@ -13,6 +13,8 @@ import {transfer} from '../scripts/local/transfer.mjs';
 import {recoverNormalizedFixture} from './recovery-support.mjs';
 import {opaqueToken} from '../src/base/modules/operator-auth/crypto.mjs';
 import {ownerSigninDigest} from '../src/base/modules/operator-auth/owner-signin-grant.mjs';
+import {archiveContent} from '../scripts/local/archive-content.mjs';
+import {assertRestoreAudit} from './archive-content.mjs';
 
 // One public hosted-export -> offline import journey. D1 and R2 are real local
 // Cloudflare bindings. No application, archive, search or file implementation is replaced.
@@ -23,15 +25,19 @@ test('an owner can export a hosted workspace and restore messages, files, search
   const require=createRequire(import.meta.url),{build}=createRequire(require.resolve('wrangler'))('esbuild'),bundle=join(directory,'routes.mjs');
   await build({stdin:{contents:"export {portabilityRoute} from './src/platform/portability.server';export {authRoute} from './src/platform/operator-auth.server';export {context} from './src/platform/storage/context';export {write} from './src/platform/storage/commands';export {read} from './src/platform/storage/read';export {upload,download} from './src/platform/storage/files';export {createSchedule} from './src/scheduled/service';export {createReminder,reminderPreview} from './src/reminders/service'",resolveDir:root},bundle:true,platform:'node',format:'esm',outfile:bundle,logLevel:'silent'});
   const app=await import(bundle);
-  async function installation(name){
+  async function installation(name,migrate=true){
    const path=join(directory,name);await mkdir(path);await symlink(join(root,'migrations'),join(path,'migrations'));
    await writeFile(join(path,'wrangler.jsonc'),JSON.stringify({name:'nook-exit',compatibility_date:'2026-09-08',d1_databases:[{binding:'DB',database_name:'nook-exit',database_id:'00000000-0000-0000-0000-000000000001',migrations_dir:'migrations'}],r2_buckets:[{binding:'FILES',bucket_name:'nook-exit-files'}]}));
-   await execute(process.execPath,[resolve('node_modules/wrangler/bin/wrangler.js'),'d1','migrations','apply','DB','--local','--config',join(path,'wrangler.jsonc'),'--persist-to',join(path,'.wrangler/state')],{env:{...process.env,CI:'true',WRANGLER_SEND_METRICS:'false'},maxBuffer:4*1024*1024});return path;
+   if(migrate)await execute(process.execPath,[resolve('node_modules/wrangler/bin/wrangler.js'),'d1','migrations','apply','DB','--local','--config',join(path,'wrangler.jsonc'),'--persist-to',join(path,'.wrangler/state')],{env:{...process.env,CI:'true',WRANGLER_SEND_METRICS:'false'},maxBuffer:4*1024*1024});return path;
   }
   async function open(path){return getPlatformProxy({configPath:join(path,'wrangler.jsonc'),persist:{path:join(path,'.wrangler/state/v3')},remoteBindings:false})}
-  // Both empty installations use the real migration CLI. Prepare them together
-  // so fixture setup does not consume the hosted export/restore deadline twice.
-  const [source,fresh]=await Promise.all([installation('source'),installation('fresh')]);proxy=await open(source);
+  // Apply the real migration CLI once, then copy its stopped, still-empty
+  // state (including any WAL) before starting either binding or creating data.
+  // Both installations have real migrated D1 databases and independent state;
+  // repeating every migration is not part of this hosted export/restore proof.
+  const source=await installation('source'),fresh=await installation('fresh',false);
+  await cp(join(source,'.wrangler/state'),join(fresh,'.wrangler/state'),{recursive:true,errorOnExist:true,force:false});
+  proxy=await open(source);
   // The remote hint transport carries no product data; the restored replay is checked below.
   const hub={idFromName:()=> 'workspace',get:()=>({fetch:async()=>new Response(null,{status:204})})};
   let env;
@@ -60,9 +66,14 @@ test('an owner can export a hosted workspace and restore messages, files, search
   assert.ok(exported.tables.some(t=>t.name==='nook_messages'&&t.count===2));
   assert.equal((await env.DB.prepare('SELECT count(*) AS n FROM rer_portability_segments').first()).n,0);
   await proxy.dispose();proxy=null;
-  const imported=await transfer('import',archive,{root:fresh});assert.equal(imported.contentHash,exported.contentHash);
+  const started=Date.now(),imported=await transfer('import',archive,{root:fresh}),finished=Date.now();assert.equal(imported.contentHash,exported.contentHash);
+  const sourceArchive=await archiveContent(archive);
   const folder=join(fresh,'.wrangler/state/v3/d1/miniflare-D1DatabaseObject'),database=join(folder,(await readdir(folder)).find(n=>n.endsWith('.sqlite')&&!n.startsWith('metadata')));
   await recoverNormalizedFixture(database,owner);proxy=await open(fresh);env={...proxy.env,...settings,CHAT_HUB:hub};
+  const restoredAudit=(await env.DB.prepare('SELECT * FROM nook_audit').all()).results;
+  for(const row of sourceArchive.audit)assert.deepEqual(restoredAudit.find(kept=>kept.id===row.id),row,'hosted archive retains every original audit row');
+  const restoreEvents=restoredAudit.filter(row=>row.kind==='archive.import.complete');assert.equal(restoreEvents.length,1);
+  assertRestoreAudit(restoreEvents[0],{manifest:sourceArchive.manifest,closing:sourceArchive.closing,actor:'direct',started,finished});
   // Use the real one-time owner confirmation door after offline identity recovery.
   const token=opaqueToken(),now=Date.now();await env.DB.prepare('INSERT INTO oa_owner_signins VALUES(?,?,?,?,?,?,NULL)').bind(crypto.randomUUID(),await ownerSigninDigest(token),owner,1,now,now+60_000).run();
   const confirmed=await app.authRoute(env,authRequest('/auth/owner-signin',{token}));assert.equal(confirmed.status,303);cookie=confirmed.headers.get('set-cookie').split(';')[0];c=await app.context(env,new Headers({Cookie:cookie,Host:new URL(origin).host}));

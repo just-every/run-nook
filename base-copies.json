@@ -742,28 +742,6 @@
       }
     },
     {
-      "path": "src/base/modules/import-kit/FIXTURES.md",
-      "originPath": "modules/import-kit/FIXTURES.md",
-      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
-      "files": {
-        "src/base/modules/import-kit/FIXTURES.md": "2f193cf36fce01f7497721f577e4d6aca6dfaeb3cc5615c96be8c847cd6be5f3"
-      },
-      "modes": {
-        "src/base/modules/import-kit/FIXTURES.md": "100644"
-      }
-    },
-    {
-      "path": "src/base/modules/import-kit/README.md",
-      "originPath": "modules/import-kit/README.md",
-      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
-      "files": {
-        "src/base/modules/import-kit/README.md": "64305ae9baf79d9531db7822a4282152b0d63a6b9c41bba61d8ff0c1c27257a3"
-      },
-      "modes": {
-        "src/base/modules/import-kit/README.md": "100644"
-      }
-    },
-    {
       "path": "src/base/modules/import-kit/extraction.json",
       "originPath": "modules/import-kit/extraction.json",
       "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
@@ -772,6 +750,17 @@
       },
       "modes": {
         "src/base/modules/import-kit/extraction.json": "100644"
+      }
+    },
+    {
+      "path": "src/base/modules/import-kit/FIXTURES.md",
+      "originPath": "modules/import-kit/FIXTURES.md",
+      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
+      "files": {
+        "src/base/modules/import-kit/FIXTURES.md": "2f193cf36fce01f7497721f577e4d6aca6dfaeb3cc5615c96be8c847cd6be5f3"
+      },
+      "modes": {
+        "src/base/modules/import-kit/FIXTURES.md": "100644"
       }
     },
     {
@@ -799,6 +788,17 @@
         "src/base/modules/import-kit/proof/zendesk/source.ts": "100644",
         "src/base/modules/import-kit/proof/zendesk/sqlite.ts": "100644",
         "src/base/modules/import-kit/proof/zendesk/worker.ts": "100644"
+      }
+    },
+    {
+      "path": "src/base/modules/import-kit/README.md",
+      "originPath": "modules/import-kit/README.md",
+      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
+      "files": {
+        "src/base/modules/import-kit/README.md": "64305ae9baf79d9531db7822a4282152b0d63a6b9c41bba61d8ff0c1c27257a3"
+      },
+      "modes": {
+        "src/base/modules/import-kit/README.md": "100644"
       }
     },
     {
@@ -1078,28 +1078,6 @@
       }
     },
     {
-      "path": "src/base/modules/import-kit/src/door/ADOPTING.md",
-      "originPath": "modules/import-kit/src/door/ADOPTING.md",
-      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
-      "files": {
-        "src/base/modules/import-kit/src/door/ADOPTING.md": "918d2ea38a152c711cdb25c9a9d8b5ff5a9b5c6a293064fbaf91329a363eb4df"
-      },
-      "modes": {
-        "src/base/modules/import-kit/src/door/ADOPTING.md": "100644"
-      }
-    },
-    {
-      "path": "src/base/modules/import-kit/src/door/README.md",
-      "originPath": "modules/import-kit/src/door/README.md",
-      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
-      "files": {
-        "src/base/modules/import-kit/src/door/README.md": "1cc6c400007eb6a08a9698a22d4b6cfd41ace42b04eb59927bd34c776bbe444c"
-      },
-      "modes": {
-        "src/base/modules/import-kit/src/door/README.md": "100644"
-      }
-    },
-    {
       "path": "src/base/modules/import-kit/src/door/admission.ts",
       "originPath": "modules/import-kit/src/door/admission.ts",
       "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
@@ -1108,6 +1086,17 @@
       },
       "modes": {
         "src/base/modules/import-kit/src/door/admission.ts": "100644"
+      }
+    },
+    {
+      "path": "src/base/modules/import-kit/src/door/ADOPTING.md",
+      "originPath": "modules/import-kit/src/door/ADOPTING.md",
+      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
+      "files": {
+        "src/base/modules/import-kit/src/door/ADOPTING.md": "918d2ea38a152c711cdb25c9a9d8b5ff5a9b5c6a293064fbaf91329a363eb4df"
+      },
+      "modes": {
+        "src/base/modules/import-kit/src/door/ADOPTING.md": "100644"
       }
     },
     {
@@ -1207,6 +1196,17 @@
       },
       "modes": {
         "src/base/modules/import-kit/src/door/protocol.ts": "100644"
+      }
+    },
+    {
+      "path": "src/base/modules/import-kit/src/door/README.md",
+      "originPath": "modules/import-kit/src/door/README.md",
+      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
+      "files": {
+        "src/base/modules/import-kit/src/door/README.md": "1cc6c400007eb6a08a9698a22d4b6cfd41ace42b04eb59927bd34c776bbe444c"
+      },
+      "modes": {
+        "src/base/modules/import-kit/src/door/README.md": "100644"
       }
     },
     {
@@ -1980,44 +1980,58 @@
     {
       "path": "src/base/modules/portability",
       "originPath": "modules/portability",
-      "revision": "6d38b54a6401879989e8d1f7ab4a02ffbdb4c46c",
+      "revision": "11f94fec479228d71ba6d7dd6ea7796c0d42c544",
       "files": {
-        "src/base/modules/portability/bookkeeping.mjs": "64bf389143458ed33fb6f62bf63784c466817a22c04106d56c04074514637a0f",
-        "src/base/modules/portability/bridge.mjs": "ab9f9bdc083fd5c0cadf2bd95708a297e3dc9eaf6b91424e26b885cb005e0d11",
-        "src/base/modules/portability/catalogue.mjs": "0cdc0f650a074ab56b8866f03de16ced1234d45f2d97a9dc815432b7f3473b94",
+        "src/base/modules/portability/backfills.mjs": "7db91ebf1905f5f22096dc5078e987957ccabe8433fd5217632780ee37ba0ea5",
+        "src/base/modules/portability/bookkeeping.mjs": "463159369ea8d6a03ebe4308bf7282f0a003d6d32764873456a74001bec7a27d",
+        "src/base/modules/portability/bridge.mjs": "dda545e304946606c71e39501c769281cc07d2f2852986c66c9bcd43ba793442",
+        "src/base/modules/portability/catalogue.mjs": "3ced7f119e18788a24905ca1e8b9ecd274620807e884e785011ad4091ba3ff62",
         "src/base/modules/portability/cli-options.mjs": "b9f966f13711e879b3dbc7ed036f1c607ee81d47f8a48ba2edd4eb2a33275526",
-        "src/base/modules/portability/cli.mjs": "c1d832e0f70bad3871902eceddb70ed2e8c2454c4c5ec2a91fad5c0ff726f692",
+        "src/base/modules/portability/cli.mjs": "ad48337cbd0d977670239f21ec93f8207d06c682895ec8e8347de20c02f3d185",
         "src/base/modules/portability/copies.mjs": "a09c8f4706611cbaf64274faeb1903eb5bb736ae0914f8efe52765c161300c44",
         "src/base/modules/portability/dev-data.mjs": "2627e3e19d677b3aee90917e40ec24f3ba3b5ae63b7052e0ff2103e1d8101b79",
         "src/base/modules/portability/diff.mjs": "39535327c3aab2ca4231e26d086a8415f6ced81b4bf24a56b5a0b37eb8737e98",
-        "src/base/modules/portability/export.mjs": "c72b55cf0c4a824c662cc06f65bf263bec3309abfc9f8d9321795b7d966eb49c",
+        "src/base/modules/portability/export.mjs": "afefcd992a3555be105f0f893d53750da87c5cc286371f4d378eafb69943b826",
         "src/base/modules/portability/files.mjs": "e24e04e9483f8d429d020f57e4dceef1469ec432232e985d18e2e8b467e25b09",
-        "src/base/modules/portability/format.mjs": "a894cab57d5642119c20f648096dbbfee6586ed18168c86107188c62d84f6767",
+        "src/base/modules/portability/format.mjs": "12c9e979db3fa97e8f7ada6d71f69df64f262cf25358831ebd65c7780f335ae6",
         "src/base/modules/portability/generated.mjs": "2f48d914dd57d577e2ae66ae71770b3473dfa8549d86c9ef855be7f93b3c96c9",
         "src/base/modules/portability/hash.mjs": "cebcd71801f57eac68099fe412769f2bf07bd225dac0e6d93ea1921997854510",
         "src/base/modules/portability/http-client.mjs": "4f9623396cdba0b7e4ee1d2cc52ba3636b3fbf5ee2da4a513b1d816ec15ba72b",
-        "src/base/modules/portability/http.mjs": "c4dad3b6ea5c2a5384262e391bfebe83365ba3f934f99050cb3efd54171af16d",
+        "src/base/modules/portability/http-errors.mjs": "b7d0ab905e81728c9b5cda2e7f7e045c872b0bb07fc0943d98cd8faca557664c",
+        "src/base/modules/portability/http.mjs": "b3543f54b308c59cf86c6c210865aa50ce82c084993da4ecc951b3d34af29625",
+        "src/base/modules/portability/import-lease.mjs": "bc0cf968df07ff6fdefe10c347241ae8c468d4bf054a7096cf5e9194619d8d52",
         "src/base/modules/portability/import-safety.mjs": "7e2ad8cf632526856174747d19892e8702710d8d671f90ade1e05a560b3ebec4",
         "src/base/modules/portability/import-staging.mjs": "54e08876ce1eb15f28b60a3101a17129cc75e897b76450d5ae866cd3c6a17987",
-        "src/base/modules/portability/import.mjs": "41fc94713e4015023aa0c35e90c740d069364766f30f8cc2b0ab5646898bd8f9",
-        "src/base/modules/portability/index.d.mts": "0984922abc96c8b5a658b5d00c415c6558ee2d8c8ef285b82d772f524bee65af",
-        "src/base/modules/portability/index.mjs": "9f476bd63470d255ed92a4eb390e67925e43e3c11446f34714b98839d76ca383",
+        "src/base/modules/portability/import.mjs": "b60cc9006e8bbb4e757369202ffffd1ffcb360b73ad9a9e936f8a31abee4c4b2",
+        "src/base/modules/portability/index.d.mts": "8450097d38ce60472b62a16703a4295a3c7b1b56e43887ddcc2ef2c7f066aee5",
+        "src/base/modules/portability/index.mjs": "417db6c1232f5f0ff1ada7cef3c99e2d49e89c61b7a5a8d87013ef23e1b03d97",
         "src/base/modules/portability/journal.mjs": "9b6d17f28ecee050e043bbae7c252872e9651bfe9a675a8cf03d535d49de9fe9",
-        "src/base/modules/portability/ledgers.mjs": "0e61bf0202c4fa87a693fae7548fc6d532f2edc1971c6cd232a71bc0e67209b1",
+        "src/base/modules/portability/ledgers.mjs": "74bfc7023e66bd76b1bd664c270543c941c99260aef0f8cd77886c96c28360f2",
         "src/base/modules/portability/legacy-files.mjs": "ecaebacab08d5d2e600e7437fc257edc485ff9281797010f1808d867c8ca4793",
         "src/base/modules/portability/legacy-safety.mjs": "7a7c6a66ade6b303868025fdec0116f111848eacaa712510e271a41e7fe86d80",
         "src/base/modules/portability/lines.mjs": "63b23f3414962ba89abccb3d57a15d5c8dd0df953e7426b13c998242c35158b9",
-        "src/base/modules/portability/migration-history.mjs": "8ce67cea4f4626ea212df3ac514b0b16746c55fe4ef75413f1b47935da8af63e",
-        "src/base/modules/portability/migration-statements.mjs": "6192afd23eea84c1b58e38e7c9a8ab4ec7c3e70b96ba99d899099650bd9f781d",
+        "src/base/modules/portability/migration-history.mjs": "424f6c388e95a969b06a5b18e1aba76de039024778a5849c91a7b6a9596f8ec4",
+        "src/base/modules/portability/migration-sql.mjs": "8bda4ab14f193dac4cdc5e9ee3e2d4f98dd14d7fe2b81031d36bb8e6479e9366",
+        "src/base/modules/portability/migration-statements.mjs": "f4c3f6895f499cc988dbf81492d8a477d63ef754d7a5b3e515761930370733a1",
         "src/base/modules/portability/payloads.mjs": "bcfb978b8c0a0ac1d5dfb5fbccc9f2ed5c3c20c7d6286f0ab6bcadc95ea691a2",
+        "src/base/modules/portability/policy-data.mjs": "647f6784b44860b6842bd65d7f954961450253345dc63b27d9b40cbdfef99d2a",
         "src/base/modules/portability/progress.mjs": "fece9aa4accbade5b97c8a81edabe1338582e7673d6b4a104f83c300f83958cf",
         "src/base/modules/portability/provider-data.mjs": "705cbebbb02df1f4ed4e01f0fa0e7c5ea94fc70c1907ee82cd350d082a075505",
-        "src/base/modules/portability/README.md": "90f1b36750687451397f7f9be6e68282192f00af0e3f42002f715fdb0793538d",
+        "src/base/modules/portability/README.md": "0a3485dd35630b4f5762c08863f0fe533e574b4e184481067d9033a9325ba7b2",
+        "src/base/modules/portability/rebuilds.mjs": "625f28cbe8ac7fc73acb5f6cb6497a3342be24143c2dfb7450f3718dd5968344",
+        "src/base/modules/portability/references.mjs": "e8aa6eeb72efd1dc95da27a4845632695297ab5c8c4e3734ff44459c26e00063",
+        "src/base/modules/portability/replay-views.mjs": "86fe27bce062825e399cea780efaf0c0d29870f4ec14733a960a15b404d1ce9b",
         "src/base/modules/portability/restore-safety.mjs": "5144c97ad7679f2c119f71fe7ebc3ac823276d3bab7dbfbcc1c80257a39d5900",
+        "src/base/modules/portability/schema-identity.mjs": "7758fc4c6086b97be280023486ca2e99229eae7172b00507f9c0e9e4732ceba0",
+        "src/base/modules/portability/schema-legacy.mjs": "880f96f757facbe3f97734a00fb718bad66b641d4b571c20ffbef6d12d59b0c2",
         "src/base/modules/portability/schema/portability.sql": "c7db9042f6d5c571e10297c02df858ad2f3466beb4fa85649fee407cc228747b",
-        "src/base/modules/portability/storage.mjs": "4b25a8d56c8905817b3f5b7955b68843c83cbf1350a1e36b219cd5ef62fded6a"
+        "src/base/modules/portability/sql-text.mjs": "19cd8578a841aa2cdfb40b6acc7cdf3ac73bdd579a60f9ca6819f3f5d2739c18",
+        "src/base/modules/portability/sqlite-tokens.mjs": "b0a7ae8bfb77a561662337bfa52779b5963afbd825044632c1a7ab9828de4446",
+        "src/base/modules/portability/storage.mjs": "33b0585d9c38658c647c5785231c87397cec26d4630c16eab2405db59d317355",
+        "src/base/modules/portability/transient-tables.mjs": "ab979701cb97593daab22d623c6b6dc413c35efdc20ac7a5cebbd9d62b12cbdd"
       },
       "modes": {
+        "src/base/modules/portability/backfills.mjs": "100644",
         "src/base/modules/portability/bookkeeping.mjs": "100644",
         "src/base/modules/portability/bridge.mjs": "100644",
         "src/base/modules/portability/catalogue.mjs": "100644",
@@ -2032,7 +2046,9 @@
         "src/base/modules/portability/generated.mjs": "100644",
         "src/base/modules/portability/hash.mjs": "100644",
         "src/base/modules/portability/http-client.mjs": "100644",
+        "src/base/modules/portability/http-errors.mjs": "100644",
         "src/base/modules/portability/http.mjs": "100644",
+        "src/base/modules/portability/import-lease.mjs": "100644",
         "src/base/modules/portability/import-safety.mjs": "100644",
         "src/base/modules/portability/import-staging.mjs": "100644",
         "src/base/modules/portability/import.mjs": "100644",
@@ -2044,14 +2060,24 @@
         "src/base/modules/portability/legacy-safety.mjs": "100644",
         "src/base/modules/portability/lines.mjs": "100644",
         "src/base/modules/portability/migration-history.mjs": "100644",
+        "src/base/modules/portability/migration-sql.mjs": "100644",
         "src/base/modules/portability/migration-statements.mjs": "100644",
         "src/base/modules/portability/payloads.mjs": "100644",
+        "src/base/modules/portability/policy-data.mjs": "100644",
         "src/base/modules/portability/progress.mjs": "100644",
         "src/base/modules/portability/provider-data.mjs": "100644",
         "src/base/modules/portability/README.md": "100644",
+        "src/base/modules/portability/rebuilds.mjs": "100644",
+        "src/base/modules/portability/references.mjs": "100644",
+        "src/base/modules/portability/replay-views.mjs": "100644",
         "src/base/modules/portability/restore-safety.mjs": "100644",
+        "src/base/modules/portability/schema-identity.mjs": "100644",
+        "src/base/modules/portability/schema-legacy.mjs": "100644",
         "src/base/modules/portability/schema/portability.sql": "100644",
-        "src/base/modules/portability/storage.mjs": "100644"
+        "src/base/modules/portability/sql-text.mjs": "100644",
+        "src/base/modules/portability/sqlite-tokens.mjs": "100644",
+        "src/base/modules/portability/storage.mjs": "100644",
+        "src/base/modules/portability/transient-tables.mjs": "100644"
       }
     },
     {
