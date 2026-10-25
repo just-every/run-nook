@@ -1237,7 +1237,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "c34fb78e51f4d914f2fe672df9ff7674f5dfeb87ed33e9c2b851f1901bf27224",
+      "sha256": "6b913745a7c4381261a244054ef8e02f10a65e086e68e96d85cdc409331866e0",
       "executable": false
     },
     "migrations/0001_workspace.sql": {
@@ -1538,6 +1538,10 @@
     },
     "migrations/0096_notification_defaults.sql": {
       "sha256": "492c9b64ee5f9b7823735657558cd6bba305fd0e537dfa2fd561d8c43d33a3b6",
+      "executable": false
+    },
+    "migrations/0097_export_archive_audit.sql": {
+      "sha256": "57975aa7265074832673e1af6e0dc9911eaa7b1c46c419fa59a55ed320c53f17",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -6497,7 +6501,7 @@
       "executable": false
     },
     "tests/audit-runtime.mjs": {
-      "sha256": "a1737c9182489beb5bf44af73bbc2901de764841d93542de940c346445037316",
+      "sha256": "8f53f38f30dfce7d5e80d20f1eccae127084f6b964e67169397cf51ae8bf013c",
       "executable": false
     },
     "tests/auth-support.mjs": {

@@ -30,7 +30,8 @@ test('NOOK-051 membership revocation, export, erasure and an interrupted step ap
    for(const record of records)if(record.kind==='part')await importer.imports.uploadPart(restoreId,record.index,record)
    const end=records.at(-1);await importer.imports.finalize(restoreId,{contentHash:end.contentHash,archiveHash:end.archiveHash})
    for(const row of rows){const kept=await restored.db.prepare('SELECT * FROM nook_audit WHERE id=?').bind(row.id).first();assert.ok(kept,row.kind);for(const key of ['actor','at','version','reason','outcome','count'])assert.equal(kept[key],row[key])}
-   assert.equal((await restored.db.prepare("SELECT count(*) AS n FROM nook_audit WHERE kind='archive.import.complete' AND outcome='confirmed'").first()).n,1)
+   // A restore adds no audit row of its own, so a re-export carries the archived content unchanged.
+   assert.equal((await restored.db.prepare('SELECT count(*) AS n FROM nook_audit').first()).n,records[0].tables.find(table=>table.name==='nook_audit').count)
    assert.equal((await restored.db.prepare('SELECT count(*) AS n FROM oa_sessions').first()).n,0)
   }})
  }finally{await restored?.close();await app.close()}

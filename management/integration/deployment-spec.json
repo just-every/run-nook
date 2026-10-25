@@ -460,6 +460,12 @@
       "name": "0096_notification_defaults.sql",
       "sha256": "492c9b64ee5f9b7823735657558cd6bba305fd0e537dfa2fd561d8c43d33a3b6",
       "sql": "ALTER TABLE nook_notify_preferences ADD COLUMN away_email INTEGER NOT NULL DEFAULT 0 CHECK(away_email IN (0,1));\nALTER TABLE nook_notify_preferences ADD COLUMN away_interval INTEGER NOT NULL DEFAULT 15 CHECK(away_interval IN (15,60));\nALTER TABLE nook_notify_preferences ADD COLUMN email_offer_seen INTEGER NOT NULL DEFAULT 1 CHECK(email_offer_seen IN (0,1));\nCREATE TABLE nook_notification_defaults(id INTEGER PRIMARY KEY CHECK(id=1),version INTEGER NOT NULL,push_json TEXT NOT NULL,channels_json TEXT NOT NULL,away_email INTEGER NOT NULL CHECK(away_email IN (0,1)));\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0097_export_archive_audit.sql",
+      "sha256": "57975aa7265074832673e1af6e0dc9911eaa7b1c46c419fa59a55ed320c53f17",
+      "sql": "-- NOOK-051 audits exports. A restore only brings an archive's own rows back: its\n-- import job is transfer bookkeeping that never travels, so it adds no audit row\n-- and exporting the restored installation again yields the same content hash.\nDROP TRIGGER nook_audit_portability_phase;\nCREATE TRIGGER nook_audit_portability_phase AFTER UPDATE OF phase ON rer_portability_jobs WHEN NEW.phase<>OLD.phase AND NEW.kind='export' BEGIN\n INSERT OR IGNORE INTO nook_audit VALUES('archive:'||NEW.id||':'||NEW.phase,(SELECT actor FROM nook_audit_context WHERE id=1),'portability',CAST(unixepoch('subsec')*1000 AS INTEGER),'archive.'||NEW.kind||'.'||NEW.phase,'workspace',1,CASE WHEN NEW.phase='complete' THEN 'Archive operation complete' ELSE 'Archive operation interrupted or in progress; completion unconfirmed' END,CASE WHEN NEW.phase='complete' THEN 'confirmed' ELSE 'uncertain' END,1);\nEND;\n"
     }
   ],
   "compatibilityDate": "2026-09-08",
