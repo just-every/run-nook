@@ -6869,7 +6869,7 @@
       "executable": false
     },
     "tests/notify/browser.mjs": {
-      "sha256": "c43a578bdb6ace6eb388f05e6c40ad6bef34809077a3cc11135ad201cf257e7d",
+      "sha256": "5086ee38ec23b87409c5aee953c214a888258600fb6f030618f4c4dc3f69c1c1",
       "executable": false
     },
     "tests/notify/install.mjs": {
@@ -6977,7 +6977,7 @@
       "executable": false
     },
     "tests/pilot/imports.mjs": {
-      "sha256": "bcb4e14acb916f7f0ac580085caa600f4ccddb0a6afc808285c2cb1eec28aef5",
+      "sha256": "659b0d8f8d1a28a9e3e12a13b4fdaed35c7cf5cf981c659a2a2f86cec1be1946",
       "executable": false
     },
     "tests/pilot/progress.mjs": {
@@ -7185,7 +7185,7 @@
       "executable": false
     },
     "tests/slack-import-browser.mjs": {
-      "sha256": "5d65e68d05f0ebdc02336e7232f602fbd12cd5e65b4b6b7ef5d43364a354addb",
+      "sha256": "e5d717ad634af4d005ea1878596c2cc957424a74cad8c637c7089f9949c5c3e2",
       "executable": false
     },
     "tests/slack-import-history.test.mjs": {

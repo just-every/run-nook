@@ -32,8 +32,10 @@ async function reviewedImport({owner,origin,fixture,stamp,name,selected,width,ph
  await owner.getByLabel('Slack export ZIP').setInputFiles({name:'realistic-synthetic-slack.zip',mimeType:'application/zip',buffer:fixture.zip});
  await owner.getByLabel('Source workspace namespace').fill('pilot-'+stamp);
  for(const channel of selected){
-  const choice=owner.locator('.import-choice').filter({has:owner.getByLabel(channel.name+' public source',{exact:true})});
-  await choice.getByLabel(channel.name+' public source',{exact:true}).check();
+  // The existing accessible label includes the source message count.
+  const sourceLabel=new RegExp('^'+channel.name+' public source · [0-9]+ messages$');
+  const choice=owner.locator('.import-choice').filter({has:owner.getByRole('checkbox',{name:sourceLabel})});
+  await choice.getByRole('checkbox',{name:sourceLabel}).check();
   await choice.getByLabel('New channel name',{exact:true}).fill(`${channel.name} ${stamp}`);
   if(channel.name==='general')await choice.getByLabel(name,{exact:true}).check();
  }

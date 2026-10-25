@@ -28,7 +28,11 @@ try {
             try { await page.getByLabel('Source workspace namespace').fill('synthetic-nook-browser-private-'+width+'-'+Date.now()); } catch (error) { console.error('Slack local inspection:',await page.locator('main').innerText()); throw error; }
             const selects=page.locator('.import-actors select');
             await selects.nth(0).selectOption(me.id);
-            const other=await selects.nth(1).locator('option').evaluateAll(options=>options.map(o=>o.value).find(value=>value&&value!=='external'&&value!==document.querySelector('.import-actors select').value));
+            // Earlier browser journeys create guests. This private-DM fixture needs a
+            // current full member; guests deliberately cannot enter native DMs.
+            const teamResponse=await context.request.get(origin+'/api/team');assert.equal(teamResponse.status(),200);
+            const team=await teamResponse.json();
+            const other=team.find(person=>person.id!==me.id&&person.status==='active'&&person.productActive===1&&person.mode==='member')?.id;
             assert.ok(other);await selects.nth(1).selectOption(other);await selects.nth(2).selectOption('external');
             await page.getByLabel('private-history private source').check();
             await page.getByLabel('synthetic-nook-5 dm source').check();

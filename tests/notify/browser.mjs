@@ -12,6 +12,9 @@ export async function settingsBrowser({browser,origin,rowan,sam,evidence,axeSour
   await context.addCookies([{name:person.cookie.slice(0,at),value:person.cookie.slice(at+1),url:origin}]);
   try{
    const page=await context.newPage();await page.goto(origin+'/app?view=you');
+   // The settings are server-rendered. Wait for the live client before a
+   // keyboard action, so hydration cannot replace the unhandled DOM toggle.
+   await expect(page.locator('.nook-app')).toHaveAttribute('data-live-connected','true');
    const block=page.getByRole('region',{name:'Email me when…'});await expect(block).toBeVisible();
    const mentions=block.getByRole('checkbox',{name:/mentions me/}),broadcasts=block.getByRole('checkbox',{name:/uses @channel/}),urgent=block.getByRole('checkbox',{name:/sends me an urgent request/}),through=block.getByRole('checkbox',{name:/through quiet time/});
    if(phase==='settings'&&who==='member'&&width===1440){
