@@ -8,6 +8,7 @@ import {join} from 'node:path';
 import {promisify} from 'node:util';
 import {pilotPhase} from './progress.mjs';
 import {copyWorkingTree} from '../working-tree-copy.mjs';
+import {assertContentRoundTrip} from '../archive-content.mjs';
 
 const execute=promisify(execFile);
 const freePort=()=>new Promise((resolve,reject)=>{const server=createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const {port}=server.address();server.close(()=>resolve(port));});});
@@ -64,9 +65,7 @@ export async function roundTrip(installation){
  await step('restore-reset',()=>installation.run('reset','--yes'));
  await step('restore-import',()=>installation.run('import','--input','exports/pilot.rer','--yes'));
  await step('restore-reexport',()=>installation.run('export','--output','exports/pilot-restored.rer'));
- const digest=async name=>JSON.parse((await readFile(join(installation.directory,'exports',name),'utf8')).trim().split('\n').at(-1)).contentHash;
- const before=await digest('pilot.rer'),after=await digest('pilot-restored.rer');
- assert.ok(before,'export carries a content hash');assert.equal(after,before,'fresh empty restore reexports identical private data and media');
+ const comparison=await assertContentRoundTrip(join(installation.directory,'exports/pilot.rer'),join(installation.directory,'exports/pilot-restored.rer'));
  pilotPhase('restore-identical-content-complete');
- return {commands:['rer export','rer reset --yes','rer import --yes','rer export'],contentHash:after,identical:true};
+ return {commands:['rer export','rer reset --yes','rer import --yes','rer export'],...comparison,identical:true};
 }

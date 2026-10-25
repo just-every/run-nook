@@ -1,8 +1,10 @@
 import { all, quote, insist } from './storage.mjs';
 import { canonicalJson } from './hash.mjs';
 import { tokens, identifier, folded } from './generated.mjs';
-import { changesData, reachingTables } from './migration-statements.mjs';
-import { destinationLedger } from './ledgers.mjs';
+import { laterData } from './backfills.mjs';
+import { destinationLedger, matchMigrationLedger } from './ledgers.mjs';
+import { checkRebuild } from './rebuilds.mjs';
+import { schemaSQL } from './schema-identity.mjs';
 
 // Applied product migrations in the ledger's own order (ledgers.mjs). A
 // state-bearing ledger may hold an unacknowledged migration whose effects are
@@ -18,11 +20,18 @@ export async function appliedMigrations(db) {
 // migrations it records or, for archives that predate that record, of those
 // its own migration ledger records or, without one, of an earlier prefix.
 // Restored rows never pass through a later migration, so one that writes or
-// rewrites restorable data is refused, whether or not it changes the schema.
-async function placement(manifest,cat,replay,ledger,history) {
-  const applied=ledger.map(m=>m.name);
+// rewrites restorable data is refused, whether or not it changes the schema,
+// unless its statement is replayed at finalize (backfills.mjs).
+async function placement(db,manifest,cat,replay,ledger,history) {
+  const files=replay.names.map(name=>({name,sha256:replay.sha256?.(name),aliases:replay.aliases?.(name)}));
+  // An aligned replayer keeps its existing contract: hashes are optional.
+  // Resolve destination aliases only when its ledger uses different names.
+  let applied=ledger.map(m=>m.name);
+  if(canonicalJson(replay.names)!==canonicalJson(applied))applied=matchMigrationLedger(ledger,files,replay);
   insist(canonicalJson(replay.names)===canonicalJson(applied) && await replay.schemaAfter(applied)===cat.identity,'schema_mismatch');
-  const recorded=manifest.migrations ?? archivedApplied(history?.(),ledger,replay);
+  const archived=history?.();
+  const historyEntries=manifest.migrations?.map(name=>archived?.find(entry=>entry.name===name) ?? {name}) ?? archived;
+  const recorded=historyEntries && matchMigrationLedger(historyEntries,files,replay);
   let earlier,unapplied;
   if(recorded) {
     earlier=applied.filter(name=>recorded.includes(name));
@@ -30,7 +39,7 @@ async function placement(manifest,cat,replay,ledger,history) {
     unapplied=applied.filter(name=>!earlier.includes(name));
   }else{
     // Unrecorded: the latest matching prefix. Migrations that change no archived
-    // table (indexes, excluded tables, data-only changes) cannot be told apart
+    // definition (excluded tables or data-only changes) cannot be told apart
     // and count as later. The source may have stopped at any matching prefix,
     // so every migration after the earliest one may be missing from its rows.
     const matching=[];
@@ -44,29 +53,17 @@ async function placement(manifest,cat,replay,ledger,history) {
   // such tables (a newly added module's own) change no restored row, unless a
   // trigger from any applied migration carries their writes into one that is
   // restorable. Trigger DDL itself changes no row, nor does an UPDATE or DELETE
-  // of a table the archive holds no rows of (migration-statements.mjs).
-  const restorable=cat.tables.map(t=>t.name).filter(name=>manifest.tables.some(t=>t.name===name));
-  const reached=reachingTables(applied.flatMap(name=>replay.statements(name)),restorable);
-  const empty=restorable.filter(name=>!manifest.tables.find(t=>t.name===name).count);
-  for(const name of unapplied)insist(!replay.statements(name).some(sql=>changesData(sql,reached,empty)),'schema_mismatch:migration_data:'+name);
-  return {earlier};
-}
-// An archive without a migration record that carries its source's migration
-// ledger (an old archive from before that ledger became bookkeeping) records
-// exactly which migrations its rows passed through. Each must be one the
-// destination applied, with the same file hash where the ledger records one:
-// the destination ledger's, else the replayed file's. The ledger itself is
-// never restored (bookkeeping.mjs). history: [{name,sha256?}] from
-// ledgers.mjs archivedHistory, undefined when the archive carries no ledger.
-function archivedApplied(history,ledger,replay) {
-  for(const m of history??[]) {
-    const applied=ledger.find(x=>x.name===m.name);
-    insist(applied && (m.sha256===undefined || m.sha256===(applied.sha256??replay.sha256?.(m.name))),'schema_mismatch:migration_history:'+m.name);
-  }
-  return history?.map(m=>m.name);
+  // of a table the archive holds no rows of (migration-statements.mjs). A data
+  // statement that writes only tables outside the catalogue is admitted
+  // whatever it reads; eligible catalogue backfills are replayed.
+  const catalogue=cat.tables.map(t=>t.name),archivedTables=catalogue.filter(name=>manifest.tables.some(t=>t.name===name));
+  const empty=archivedTables.filter(name=>!manifest.tables.find(t=>t.name===name).count);
+  const tables=(await all(db,"SELECT name FROM sqlite_master WHERE type IN ('table','view')")).map(t=>t.name);
+  const {replays,rebuilt}=laterData({applied,unapplied,replay,catalogue,archived:archivedTables,empty,tables,secrets:manifest.excludedColumns??{},manifest:manifest.tables});
+  return {applied,earlier,replays,rebuilt};
 }
 // An archive with the destination's schema identity can still predate later
-// migrations that changed only data (a purge or a backfill) or added an index.
+// migrations that changed only data (a purge or a backfill).
 // Those that change restorable data are refused like any other. Without a
 // replayer the statements cannot be read, so an archive whose recorded
 // migrations the destination's ledger has outgrown is refused. An archive that
@@ -75,32 +72,40 @@ function archivedApplied(history,ledger,replay) {
 export async function sameSchemaMigrations(db,manifest,cat,migrations,history) {
   const ledger=await destinationLedger(db),applied=ledger?.map(m=>m.name);
   if(!applied)return;
-  insist(!manifest.migrations || manifest.migrations.every(name=>applied.includes(name)),'schema_mismatch:migrations');
-  if(!migrations){insist(!manifest.migrations || applied.every(name=>manifest.migrations.includes(name)),'schema_mismatch:migrations');return;}
-  await placement(manifest,cat,await migrations(),ledger,history);
+  if(!migrations){
+    if(manifest.migrations)matchMigrationLedger(manifest.migrations.map(name=>({name})),ledger);
+    insist(!manifest.migrations || applied.every(name=>manifest.migrations.includes(name)),'schema_mismatch:migrations');return;
+  }
+  // A data-only migration leaves the schema unchanged but still needs its
+  // carried-table replay plan retained for finalize.
+  const bridge=await additiveBridge(db,manifest,cat,migrations,history);
+  return bridge.replays?.length?bridge:undefined;
 }
 // An archive made before later migrations restores only when those migrations
-// are additive: new tables, new columns that take a default, or indexes (which
-// archives never carry). Anything else stays a schema_mismatch refusal.
+// are additive, or a proven row-preserving CHECK rebuild: new tables, new
+// columns that take a default, or later schema objects established by replay.
+// Anything else stays a schema_mismatch refusal.
 export async function additiveBridge(db,manifest,cat,migrations,history) {
   insist(migrations,'schema_mismatch');
-  const replay=await migrations(),ledger=await destinationLedger(db)??[],applied=ledger.map(m=>m.name);
-  insist(!manifest.migrations || manifest.migrations.every(name=>applied.includes(name)),'schema_mismatch:migrations');
-  const {earlier}=await placement(manifest,cat,replay,ledger,history);
+  const replay=await migrations(),ledger=await destinationLedger(db)??[];
+  const {applied,earlier,replays,rebuilt}=await placement(db,manifest,cat,replay,ledger,history);
   const columns={};
   for(const table of manifest.tables) {
     const target=cat.tables.find(t=>t.name===table.name),label=':'+table.name;
     insist(target,'schema_mismatch:table'+label);
     const kept=target.columns.slice(0,table.columns.length),added=target.columns.slice(table.columns.length);
     insist(canonicalJson(kept)===canonicalJson(table.columns) && table.rowidAlias===target.rowidAlias && table.dependencies.every(d=>target.dependencies.includes(d)),'schema_mismatch:columns'+label);
-    if(!added.length){insist(table.sql===target.sql,'schema_mismatch:definition'+label);continue;}
+    const rebuiltChecks=rebuilt.has(folded(table.name)) && checkRebuild(table.sql,target.sql);
+    if(!added.length){insist(schemaSQL(table.sql)===schemaSQL(target.sql) || rebuiltChecks,'schema_mismatch:definition'+label);continue;}
     const declared=await all(db,`PRAGMA table_xinfo(${quote(table.name)})`);
     insist(added.every(c=>!c.pk && !c.generated && (!c.notnull || declared.find(d=>d.name===c.name)?.dflt_value!=null)),'schema_mismatch:column_default'+label);
     insist(appended(table.sql,target.sql,added.map(c=>c.name)),'schema_mismatch:definition'+label);
     columns[table.name]=added.map(c=>c.name);
   }
+  // replays: the statements finalize runs (backfills.mjs); replayed: the job's record of them.
   return {fromSchema:manifest.schema,toSchema:cat.identity,migrations:applied.filter(name=>!earlier.includes(name)),
-    tables:cat.tables.filter(t=>!manifest.tables.some(x=>x.name===t.name)).map(t=>t.name),columns};
+    tables:cat.tables.filter(t=>!manifest.tables.some(x=>x.name===t.name)).map(t=>t.name),columns,
+    ...(replays.length?{replays,replayed:replays.map(({migration,statement,table})=>({migration,statement,table,rows:null}))}:{})};
 }
 // The destination definition is the archived one with only the added column
 // definitions inserted, as ALTER TABLE ADD COLUMN writes it: no other column,

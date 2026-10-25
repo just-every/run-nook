@@ -54,7 +54,43 @@ You can also call Nook's existing `scripts/local/remote-export.mjs` helper from 
 
 The file is a working owner sign-in, so delete it when you are done, or sign out in the browser to end that session. Only an active owner's session can export, and the export waits for pending uploads, deletions and imports to finish (it answers `reconcile_pending_object_work_before_export` until they have). A hosted Nook cannot be restored remotely: restore the archive into a new local checkout that has not run setup, with `rer import --input exports/nook-hosted.rer --yes`.
 
-Slack imports travel in the genuine archive with their immutable source history, supplied file bytes, provenance, destination membership and guarded import job. The automated pilot stops the local app, exports, resets it to an empty stopped installation, imports the archive and reexports it; it checks that the restored content hash matches the original. The journey uses synthetic Slack-shaped data and makes no claim about a real export, provider account or source parity.
+Slack imports travel in the genuine archive with their immutable source history, supplied file bytes, provenance, destination membership and guarded import job. The automated pilot stops the local app, exports, resets it to an empty stopped installation, imports the archive and reexports it; it compares the content identity described below and verifies the retained audit history. The journey uses synthetic Slack-shaped data and makes no claim about a real export, provider account or source parity.
+
+## Compare restored content
+
+Restore is itself audited. Its `archive.import.complete` row is marked
+`restore-origin` in the reason and retains the importing actor id, commit time,
+source archive's verified `contentHash`, and table, row, object, payload and byte
+counts. The offline filesystem operator's service actor id is `direct`; no
+restored person is impersonated. Acknowledged legacy recovery uses service actor
+`legacy-v1`. Erasing a person still anonymizes their actor
+field. The event and the content publication commit together. The source digest
+covers the complete source archive content, including its audit rows; it is not
+the content comparison identity below.
+
+To compare an export with its reexport immediately after a stopped restore,
+before starting the app or changing data, run:
+
+```sh
+node scripts/local/archive-content.mjs exports/nook.rer exports/after-import.rer
+```
+
+The command first verifies each complete archive's manifest binding, all part
+checksums, whole `contentHash`, and actual object and payload bytes. Content
+identity includes every row and rowid of every exported table except
+`nook_audit`, every private object's bytes and metadata, every extra payload,
+the schema and schema objects, migration history, product and source identity,
+required configuration names, exclusion declarations, epoch and erasure journal.
+Only audit history, export time, part boundaries and the excluded
+`rer_portability_*` scratch/recovery table inventory are excluded; those Base
+bookkeeping tables export no rows. Audit's table definition remains included.
+No archive member is deleted or modified.
+
+Separately, the comparison requires every original audit row to survive unchanged
+and exactly one additional restore-origin row with actor, time, source digest and
+counts. Consequently, identical content has a different whole-archive
+`contentHash` after restore. Neither hash is a fixed expected value. The README
+journey, pilot, and hosted-export-to-local-restore checks use this comparison.
 
 ## Keep earlier archives private
 

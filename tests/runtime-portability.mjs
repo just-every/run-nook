@@ -8,6 +8,7 @@ import {makePart,ArchiveVerifier,ContentVerifier,readArchive} from '@runeditrun/
 import {recoverNormalizedFixture,normalizedFixtureOwner} from './recovery-support.mjs';
 import {signIn} from './auth-support.mjs';
 import {sourceDoor} from './import-fixture.mjs';
+import {assertContentRoundTrip} from './archive-content.mjs';
 
 // Actual local bindings and the product policy, invoked only by the native runtime suite.
 // Only the Base owner imports history; the proof's first actor authors it and the second reads it.
@@ -42,7 +43,7 @@ export async function runPortabilityWorkflow({root,state,states,proof,ownerEmail
  // normal import, and Base's acknowledged backup-only recovery restores it into this empty installation.
  const v1=resolve(directory,'earlier-build.rer');await writeFile(v1,records.map(record=>JSON.stringify(record===records[0]?{...record,version:1}:record.kind==='closing'?{kind:'closing',partCount:record.partCount,contentHash:record.contentHash}:record)).join('\n')+'\n',{mode:0o600});
  await assert.rejects(()=>transfer('import',v1,{root}),error=>error.code==='legacy_archive_unverifiable');
- const recovered=await transfer('import',v1,{root,legacyOutput:resolve(directory,'recovered-v2.rer')});assert.equal(recovered.restoredContentHash,exported.contentHash);assert.equal(recovered.contentHash,exported.contentHash);assert.equal(recovered.legacyRecovery,true);
+ const recovered=await transfer('import',v1,{root,legacyOutput:resolve(directory,'recovered-v2.rer')});assert.equal(recovered.restoredContentHash,exported.contentHash);await assertContentRoundTrip(archive,resolve(directory,'recovered-v2.rer'));assert.equal(recovered.legacyRecovery,true);
  await assert.rejects(()=>transfer('import',v1,{root,legacyOutput:resolve(directory,'second.rer')}),error=>/legacy_target_not_empty/.test(error.code));
  await rename(state,resolve(directory,'legacy-state'));await command(['d1','migrations','apply','DB','--local','--persist-to',state,'--config','dist/server/wrangler.json']);
  const imported=await transfer('import',archive,{root});assert.equal(imported.contentHash,exported.contentHash);

@@ -10,7 +10,7 @@ import {pathToFileURL} from 'node:url'
 const root=resolve(import.meta.dirname,'..')
 // The clone is a different checkout: it takes its own local operation, not verify's.
 const {RER_LOCAL_OPERATION:_,...cloneEnvironment}={...process.env,CI:'true'}
-const owner={OWNER_EMAIL:'owner@example.test',MAIL_FROM:'nook@example.test',SENDGRID_API_KEY:'test-only-sendgrid-key'}
+const owner={OWNER_EMAIL:'owner@example.test',MAIL_FROM:'auth@mail.runeditrun.com',SENDGRID_API_KEY:'test-only-sendgrid-key'}
 
 test('rer deploy builds the committed source, applies every migration to a new D1 and checks health on the owner account',{timeout:20*60_000},async t=>{
  const clone=await mkdtemp(join(tmpdir(),'nook-owner-deploy-'));t.after(()=>rm(clone,{recursive:true,force:true}))

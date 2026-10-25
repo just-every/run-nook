@@ -7,6 +7,7 @@ import {join,resolve} from 'node:path'
 import {chromium} from '@playwright/test'
 import {readmeTeamFlow} from './readme-team-flow.mjs'
 import {copyWorkingTree} from './working-tree-copy.mjs'
+import {assertContentRoundTrip} from './archive-content.mjs'
 
 // Run README's "Run it on your computer" commands in a fresh clone, in order.
 // These lines are not executed literally: `verify` (this test is part of it),
@@ -87,8 +88,7 @@ try{
  assert.equal((await stat(join(clone,'exports/nook.rer'))).mode&0o077,0,'the archive is owner-only')
  // Export again after reset and import: the restored installation holds the same records.
  run('rer export --output exports/after-import.rer')
- const digest=async name=>JSON.parse((await readFile(join(clone,'exports',name),'utf8')).trim().split('\n').at(-1)).contentHash
- assert.equal(await digest('after-import.rer'),await digest('nook.rer'),'export, import and export again carry identical content')
+ await assertContentRoundTrip(join(clone,'exports/nook.rer'),join(clone,'exports/after-import.rer'))
  console.log('README-JOURNEY passed: fresh clone, zero-setup dev opened signed in, personas, key-gated owner entry, /setup and local teammate replies at 1440 and 390, stop, export, reset, import and deploy dry run.')
 }finally{
  await browser?.close()
