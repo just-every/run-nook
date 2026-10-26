@@ -43,7 +43,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - if: inputs.browser
-        # ubuntu-latest already supplies Chrome's shared libraries. Avoid the
+        # ubuntu-24.04 already supplies Chrome's shared libraries. Avoid the
         # redundant apt/font upgrades that consumed 10+ minutes of a job cap.
         run: |
           pnpm exec playwright install chromium
