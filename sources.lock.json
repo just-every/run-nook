@@ -2061,7 +2061,7 @@
       "executable": false
     },
     "src/app-style/phone.css": {
-      "sha256": "8e4d17b41507747eff15b4804583efbe43685662f86c2b3db29430469c529c8f",
+      "sha256": "ff421f853a59e08e84ad374c5ccc8f11f37e6da0d669ce5a22692e8d6fdc6356",
       "executable": false
     },
     "src/app-style/quick-navigation.css": {
@@ -4057,7 +4057,7 @@
       "executable": false
     },
     "src/brand/controls.css": {
-      "sha256": "c516cc71cca577de1e5523c1ee7e4614aa1dc3cd08139148f7f555ee99eadf7e",
+      "sha256": "4e828876e198a6b092644a90571ee89104585e7800ff7456234963e864342e13",
       "executable": false
     },
     "src/brand/frame.css": {
@@ -4137,7 +4137,7 @@
       "executable": false
     },
     "src/broadcast/PolicySettings.tsx": {
-      "sha256": "4b8b247db5cae2c9d107d9c501638d375b0fc8298ab40eaedc7b18a153a12f38",
+      "sha256": "232e617503b4ee8b6c4b639e6b438fbe6d458640415345662b4bd02888df0a97",
       "executable": false
     },
     "src/broadcast/presence.ts": {
@@ -4257,7 +4257,7 @@
       "executable": false
     },
     "src/chat/Navigation.tsx": {
-      "sha256": "4f54432239b045587403ffa6df7004f9b8942953aed4ecebf18695bfa872f87a",
+      "sha256": "7afb7b65bdd607f7743a48bb41547f043ba7f6c87d68c7a4a8969b01eff17576",
       "executable": false
     },
     "src/chat/NewMessage.tsx": {
@@ -6477,7 +6477,7 @@
       "executable": false
     },
     "src/team/TeamPanel.tsx": {
-      "sha256": "d05cd826959bfc04df61dc0ef10efd1a2d9f487f22f807b7c6491a23c66beda3",
+      "sha256": "6e3082d1786568b1519b5bcb18026988c6013a51c41b9043551458c80adf2c73",
       "executable": false
     },
     "src/team/types.ts": {
