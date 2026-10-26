@@ -5,5 +5,5 @@ export function Avatar({person,small=false,size}:{person:Person;small?:boolean;s
  const words=person.name.trim().split(/[\s_-]+/),initials=words.length>1?words.slice(-2).map(w=>w[0]).join(''):words[0].slice(0,2)
  let hash=0;for(const char of person.id)hash=(hash*31+char.charCodeAt(0))|0
  const [background,color]=colors[Math.abs(hash)%colors.length]
- return <span className={'avatar'+(small?' small':'')} aria-hidden="true" style={{background,color,...(size?{width:size,height:size,fontSize:size<=24?11:12}:{})}}>{initials.toUpperCase()}</span>
+ return <span className={'avatar'+(small?' small':'')} aria-hidden="true" style={{background,color,...(size?{width:size,height:size}:{})}}>{initials.toUpperCase()}</span>
 }
