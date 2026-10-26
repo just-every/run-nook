@@ -23,7 +23,7 @@ export async function previewBroadcast(c:Context,id:string,body:string){
  if(!await c.one(`SELECT 1 FROM nook_conversations WHERE id=? AND kind<>'dm'`,[id],id))fail(400,'Channel-wide mentions are available in channels only')
  if(!await c.one(`SELECT 1 WHERE ${canBroadcast(conversation,sender)}`,[],id))throw new BroadcastDenied('You cannot broadcast under this channel’s policy')
  if(kind==='everyone'&&!await c.one(`SELECT 1 WHERE ${everyoneAllowed(conversation)}`,[],id))throw new BroadcastDenied('@everyone is only available in the designated organization-wide default channel; use @channel here')
- const row=await c.one(`SELECT count(*) AS recipients,COALESCE(sum(COALESCE((SELECT dnd_until FROM nook_settings WHERE user=r.user),0)>CAST(unixepoch('subsec')*1000 AS INTEGER)),0) AS quiet,COALESCE(sum(COALESCE((SELECT zone FROM nook_broadcast_choices WHERE user=r.user),'UTC')<>COALESCE((SELECT zone FROM nook_broadcast_choices WHERE user=${sender}),'UTC')),0) AS otherZones FROM (${audience(conversation,sender,kind)}) r`,[],id)
+ const row=await c.one(`SELECT count(*) AS recipients,COALESCE(sum(COALESCE((SELECT dnd_until FROM nook_settings WHERE user=r.user),0)>CAST(unixepoch('subsec')*1000 AS INTEGER)),0) AS quiet,COALESCE(sum((SELECT zone FROM nook_broadcast_choices WHERE user=r.user)<>COALESCE((SELECT zone FROM nook_broadcast_choices WHERE user=${sender}),'UTC')),0) AS otherZones FROM (${audience(conversation,sender,kind)}) r`,[],id)
  return {kind,...row} as {kind:BroadcastKind;recipients:number;quiet:number;otherZones:number}
 }
 // Called intrinsically by messageStatements, including durable scheduled sends.
@@ -32,7 +32,7 @@ export function broadcastStatements(c:MessageWriter,id:string,mid:string,kind:Br
  const conversation=literal(id),sender=literal(c.uid),message=literal(mid)
  return [
   c.sql(`INSERT INTO nook_broadcast_recipients SELECT ${message},user FROM (${audience(conversation,sender,kind)})`),
-  c.sql(`INSERT INTO nook_broadcasts SELECT ${message},?,count(*),COALESCE(sum(COALESCE((SELECT dnd_until FROM nook_settings WHERE user=r.user),0)>CAST(unixepoch('subsec')*1000 AS INTEGER)),0),COALESCE(sum(COALESCE((SELECT zone FROM nook_broadcast_choices WHERE user=r.user),'UTC')<>COALESCE((SELECT zone FROM nook_broadcast_choices WHERE user=${sender}),'UTC')),0) FROM nook_broadcast_recipients r WHERE r.message=${message}`,kind),
+  c.sql(`INSERT INTO nook_broadcasts SELECT ${message},?,count(*),COALESCE(sum(COALESCE((SELECT dnd_until FROM nook_settings WHERE user=r.user),0)>CAST(unixepoch('subsec')*1000 AS INTEGER)),0),COALESCE(sum((SELECT zone FROM nook_broadcast_choices WHERE user=r.user)<>COALESCE((SELECT zone FROM nook_broadcast_choices WHERE user=${sender}),'UTC')),0) FROM nook_broadcast_recipients r WHERE r.message=${message}`,kind),
  ]
 }
 export const broadcastRecipient=(message:string,user:string)=>`EXISTS(SELECT 1 FROM nook_broadcast_recipients br WHERE br.message=${message} AND br.user=${user})`
