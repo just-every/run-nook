@@ -2101,7 +2101,7 @@
       "executable": false
     },
     "src/audit/AuditLog.tsx": {
-      "sha256": "912c64a0b035f3b17716b001b56dcdae88dd08c415c6ceeb7ef7641f30373509",
+      "sha256": "789d6196907f6a1f06af4c9b66525a25cde9a554b2f119fec65b4877c71407b6",
       "executable": false
     },
     "src/audit/database.ts": {
@@ -2109,7 +2109,7 @@
       "executable": false
     },
     "src/audit/event-words.ts": {
-      "sha256": "cef3ad29373522eb892f7634d2dc6f43dfecb95e0deb2f89c36fbd0f52662cc2",
+      "sha256": "c3b17685b927420eff724ff469a96cf182db758f2ec8500c5e54958de652cd5e",
       "executable": false
     },
     "src/audit/restore.mjs": {
@@ -2117,7 +2117,7 @@
       "executable": false
     },
     "src/audit/server.ts": {
-      "sha256": "79af13571bf86c4365c40d3e0f45ed384cdb2e8fb202b51108d5bc92ff4fc379",
+      "sha256": "fa01d69d23c4ed49bd0b817be45671898ab5ed0d7a765e0072816817c7d4d518",
       "executable": false
     },
     "src/base/contract-filter.ts": {
