@@ -14,7 +14,7 @@
 @media(min-width:601px){.nook-app .nook-files .nook-file-action{opacity:0}.nook-app .nook-files .search-result:is(:hover,:focus-within) .nook-file-action{opacity:1}}
 .nook-app .nook-files .search-meta{font-size:13px}
 @media(max-width:600px){
- .nook-app :is(.nook-list-filters,.nook-tips)>summary{display:flex;align-items:center;min-height:44px}
+ .nook-app :is(.nook-list-filters,.nook-tips)>summary{min-height:44px;line-height:44px}
  .nook-app .empty-state .soft-button,.nook-app .nook-scheduler-close{min-height:44px}
  .nook-app .nook-scheduler-close{min-width:44px}
 }
