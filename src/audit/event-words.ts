@@ -9,3 +9,5 @@ const channel:Record<string,string>={'membership.join':'Joined a channel','membe
 const direct:Record<string,string>={'membership.join':'Joined a direct conversation','membership.leave':'Left a direct conversation','membership.baseline':'Direct conversation membership recorded'}
 export function eventWords(kind:string,scopeKind?:string|null){const words=kind.replace(/[._-]+/g,' ');return (scopeKind&&(scopeKind==='dm'?direct:channel)[kind])||events[kind]||words.charAt(0).toUpperCase()+words.slice(1)}
 export const eventKinds=Object.keys(events)
+// The stored reason of a direct conversation's membership row says "Channel"; the row names its own kind.
+export function reasonWords(reason:string,scopeKind?:string|null){return scopeKind==='dm'?reason.replace(/^Channel membership/,'Conversation membership'):reason}
