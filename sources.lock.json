@@ -4225,7 +4225,7 @@
       "executable": false
     },
     "src/chat/ConversationView.tsx": {
-      "sha256": "96d25f3b2d2a0e0e9fd3b163ac447ad581eb05eec22d1b3107ed7e472bbc93bd",
+      "sha256": "51efeac730f7261795ff33d2d7b629c7e5648a7015f68b2246b54c1b39ea0fc1",
       "executable": false
     },
     "src/chat/dialog-focus.ts": {
@@ -5729,7 +5729,7 @@
       "executable": false
     },
     "src/platform/storage/history.ts": {
-      "sha256": "e8ffd79679b186c7d9cf953253ad5d62492d093b7747b7cc3e2a7c9e6efcd12e",
+      "sha256": "59e5d262fe70af52437c5d584bd8bd5072b1aa6b314e831e18b6c40770649efa",
       "executable": false
     },
     "src/platform/storage/imports.ts": {
@@ -5785,7 +5785,7 @@
       "executable": false
     },
     "src/platform/storage/workspace-projection.ts": {
-      "sha256": "36c52cf0ddf2c12f3938e0182412f641206a8b1133599f4d391e9e31cf8cda7b",
+      "sha256": "c4e338a4917ada9fd49f131e4891c201570162595c9e6b52a640625cb090e944",
       "executable": false
     },
     "src/platform/storage/workspace-signature.ts": {
@@ -7309,7 +7309,7 @@
       "executable": false
     },
     "tests/unreads-browser.mjs": {
-      "sha256": "fc0170d5ea3a63c9c944e40927ef770e2985134c7a9fc53b5307249b9a158713",
+      "sha256": "057c4a0df59f3b68021e9cdd8269dbcb0e358bb2e7e1796a6bdef6eeb08500d8",
       "executable": false
     },
     "tests/unreads.mjs": {

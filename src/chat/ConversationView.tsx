@@ -80,8 +80,8 @@ export function ConversationView({request,user,conversation:c,data,route,private
  },[c.id,route.thread,route.before,conversationCurrent])
  useEffect(()=>{
   const target=data.rootWindow.target
-  if(target?.parent&&(!route.thread||route.landing&&(route.thread!==target.root||route.focus!==target.id)))navigate({thread:target.root,focus:target.id,landing:route.landing},true)
-  else if(route.landing&&route.thread&&!target?.parent)navigate({thread:null,focus:null,landing:true},true)
+  if(!route.landing&&target?.parent&&!route.thread)navigate({thread:target.root,focus:target.id},true)
+  else if(route.landing&&route.thread)navigate({thread:null,focus:null,landing:true},true)
  },[route.thread,route.focus,route.landing,data.rootWindow.target,navigate])
  useEffect(()=>{if(route.focus&&data.outcomes.some(o=>o.id===route.focus)){if(route.panel!=='outcomes')navigate({panel:'outcomes'},true);requestAnimationFrame(()=>{const card=document.getElementById('outcome-'+route.focus);card?.scrollIntoView({block:'start'});card?.focus({preventScroll:true})})}},[route.focus,data.outcomes])
  const sent=async()=>{if(!isCurrent())return;requestAnimationFrame(()=>{const container=activeLog.current;if(isCurrent()&&container)container.scrollTop=container.scrollHeight})}
