@@ -60,7 +60,6 @@ export function RemindersView({revision,privateSignal,userId,onError,onOpen,refr
   finally{if(current())setBusy(false)}
  }
  return <section className="page-content threads-page"><div className="page-column">
-  <p className="muted">Personal and channel reminders, with their current delivery status. Review the time and audience before confirming a new reminder.</p>
   <button className="soft-button" disabled={busy} onClick={()=>setEditor({})}>Create reminder</button>
   {!page&&<p role="status" className="muted">Loading reminders…</p>}
   {page?.items.map(item=>{

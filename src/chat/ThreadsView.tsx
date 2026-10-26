@@ -21,10 +21,9 @@ export function ThreadsView(props:Props){
  useEffect(()=>{let cancelled=false;setBusy(true);void api<ThreadPage>('threads').then(next=>{if(!cancelled&&current())setPage(next)}).catch(error=>{if(!cancelled&&current())onError(error)}).finally(()=>{if(!cancelled&&current())setBusy(false)});return()=>{cancelled=true}},[revision,current,onError])
  const more=async()=>{if(!page?.cursor||busy||!current())return;setBusy(true);try{const next=await api<ThreadPage>('threads?after='+encodeURIComponent(page.cursor));if(current())setPage({...next,items:[...page.items,...next.items.filter(item=>!page.items.some(old=>old.root.id===item.root.id))]})}catch(error){if(current())onError(error)}finally{if(current())setBusy(false)}}
  return <section className="page-content threads-page"><div className="page-column">
-  <p className="muted threads-intro">Replies to conversations you’re part of, together in one place.</p>
   <div role="status" className="sr-only">{busy?'Loading threads':`${page?.items.length??0} followed threads`}</div>
   {page?.items.filter(item=>props.conversations.some(c=>c.id===item.root.conversation)).map(item=><ThreadCard key={item.root.id} {...props} item={item} expanded={expanded===item.root.id} toggle={()=>setExpanded(expanded===item.root.id?null:item.root.id)}/>)}
-  {page&&!page.items.length&&<div className="empty-state"><NookMark/><h2>A place for the replies</h2><p>Threads you start, reply to, follow or are mentioned in appear here. Muted conversations show only threads you explicitly follow.</p></div>}
+  {page&&!page.items.length&&<div className="empty-state"><NookMark/><h2>A place for the replies</h2><p>Follow a thread to keep its replies here.</p></div>}
   {page?.hasMore&&<button className="soft-button" disabled={busy} onClick={()=>void more()}>Load more threads</button>}
  </div></section>
 }

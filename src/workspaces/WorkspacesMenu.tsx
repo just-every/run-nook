@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react'
 import {useDismiss} from '../chat/useDismiss'
 import {acceptHandoff,addOrigin,handoffUrl,host,installationOrigin,readList,receiveHandoff,recordCurrent,removeOrigin,type DeviceList,type Handoff} from './device-list'
 import './workspaces.css'
+import './workspace-note.css'
 export type DeviceWorkspaces={list:DeviceList;pending:Handoff|null;open:(origin:string)=>void;add:(address:string)=>boolean;remove:(origin:string)=>void;accept:()=>void;dismiss:()=>void}
 // Links saved on the account by earlier Nook versions join this device's list once.
 export function useDeviceWorkspaces(account:string,saved:string[]):DeviceWorkspaces{
@@ -18,7 +19,7 @@ export function useDeviceWorkspaces(account:string,saved:string[]):DeviceWorkspa
 function WorkspaceList({device}:{device:DeviceWorkspaces}){
  const [address,setAddress]=useState(''),[error,setError]=useState('')
  return <div className="workspaces-list">
-  <p className="workspaces-note">Kept on this device. Each workspace has its own sign-in, drafts and notifications.</p>
+  <p className="workspaces-note">Saved on this device.</p>
   <ul aria-label="Your workspaces">{device.list.entries.map(e=>{const current=e.origin===location.origin;return <li key={e.origin} className={current?'current':''}>
    {current?<span className="workspace-entry" aria-current="page"><strong>{host(e.origin)}</strong><small>This workspace{e.account?' · '+e.account:''}</small></span>
    :<a className="workspace-entry" href={e.origin+'/app'} onClick={event=>{event.preventDefault();device.open(e.origin)}}><strong>{host(e.origin)}</strong><small>{e.account?'Signed in as '+e.account:'Added on this device'}</small></a>}
