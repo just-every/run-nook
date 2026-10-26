@@ -7,7 +7,7 @@
 .nook-app .integration-list article { padding: 10px 12px; border-radius: 12px; background: var(--surface-raised); }
 .nook-app .integration-list h3 { margin: 0 0 4px; font-size: 15px; }
 .nook-app .integration-list p { margin: 0 0 8px; overflow-wrap: anywhere; }
-.nook-app .integration-state { margin-left: 6px; font-size: 12px; font-weight: 500; }
+.nook-app .integration-state { margin-left: 6px; font-size: var(--fs-meta); font-weight: 500; }
 .nook-app .integration-state.revoked { color: #b04451; }
 .nook-app .integration-audit { overflow-x: auto; }
 .nook-app .integration-audit table { width: 100%; border-collapse: collapse; font-size: 13px; }

@@ -32,9 +32,10 @@
 .nook-app .message-routing { display: flex; flex-wrap: wrap; gap: 2px var(--s2); margin-top: 4px; color: var(--ink-soft); font-size: var(--fs-meta); overflow-wrap: anywhere; }
 .nook-app .message-routing strong { color: var(--ink); }
 .nook-app .message-urgent-reason { flex-basis: 100%; }
-/* A continued row has no avatar or name; its time waits in the gutter. */
+/* A continued row has no avatar or name; its time waits in the gutter, ending just before the text and growing
+   left into the row's margin, so a longer time never wraps or meets the message. */
 .nook-app .message.continued { padding-block: 2px; }
-.nook-app .message.continued .message-meta time { position: absolute; top: 9px; left: 0; width: 45px; font-size: 11.5px; line-height: 1.4; text-align: right; }
+.nook-app .message.continued .message-meta time { position: absolute; top: 9px; right: calc(100% - 46px); line-height: 1.4; white-space: nowrap; }
 
 /* The tray: the verbs of one message, on a small raised bar at its top right */
 .nook-app .message-tools { position: absolute; top: -14px; right: var(--s2); z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface-raised); box-shadow: var(--shadow-pop); }

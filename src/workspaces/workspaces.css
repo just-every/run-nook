@@ -7,7 +7,7 @@
 .nook-app .workspaces-list li.current { background: var(--surface-rail); }
 .nook-app .workspace-entry { display: grid; flex: 1; min-width: 0; color: var(--ink); text-decoration: none; }
 .nook-app .workspace-entry strong, .nook-app .workspace-entry small { overflow-wrap: anywhere; }
-.nook-app .workspace-entry small, .nook-app .workspaces-note { color: var(--ink-soft, inherit); font-size: 12px; }
+.nook-app .workspace-entry small, .nook-app .workspaces-note { color: var(--ink-soft, inherit); font-size: var(--fs-meta); }
 .nook-app .workspace-add { display: flex; align-items: end; gap: 8px; }
 .nook-app .workspace-add .field { flex: 1; min-width: 0; }
 .nook-app .workspaces-error:empty { display: none; }

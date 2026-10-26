@@ -10,9 +10,9 @@
 .nook-app .notes-list,.nook-app .notes-checklist,.nook-app .notes-history ol { list-style:none; margin:0; padding:0; }
 .nook-app .notes-list>li { border-bottom:1px solid var(--line); }
 .nook-app .notes-choice { display:block; width:100%; padding:14px 4px; background:transparent; text-align:left; color:var(--ink); overflow-wrap:anywhere; }
-.nook-app .notes-choice>span:last-child { display:block; margin-top:4px; color:var(--ink-soft); font-size:12px; }
+.nook-app .notes-choice>span:last-child { display:block; margin-top:4px; color:var(--ink-soft); font-size:var(--fs-meta); }
 .nook-app .notes-choice:hover { background:var(--wash-select); }
-.nook-app .notes-pin { color:var(--accent); font-size:12px; }
+.nook-app .notes-pin { color:var(--accent); font-size:var(--fs-meta); }
 .nook-app .notes-detail h3 { font-size:18px; margin:16px 0 4px; overflow-wrap:anywhere; }
 .nook-app .notes-detail h4,.nook-app .notes-editor h4,.nook-app .notes-history h4 { font-size:14px; margin:18px 0 6px; }
 .nook-app .notes-body { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; }
