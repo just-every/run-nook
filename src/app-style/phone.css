@@ -27,6 +27,9 @@
   .nook-app .search-form .field input { font-size: 17px; }
   .nook-app dialog { width: 100%; max-width: none; max-height: 88dvh; margin: auto 0 0; padding: 20px var(--s4) calc(20px + env(safe-area-inset-bottom, 0px)); border-radius: 18px 18px 0 0; }
 }
-/* The tabs are fixed tracks (the first, Attention, wider for its count), so the selected tab's weight never moves
-   a neighbour. Below 360px they take their labels' widths, so the last tab stays on screen. */
-@media (max-width: 359px) { .nook-app .mobile-tabs { grid-template-columns: repeat(5, auto); justify-content: space-between; } }
+/* Narrow tabs reserve the bold label width and a 44px target, so selection keeps every track in place. */
+@media (max-width: 359px) {
+  .nook-app .mobile-tabs { grid-template-columns: auto repeat(4, minmax(44px, auto)); justify-content: normal; }
+  .nook-app .mobile-tab-label { display: block; }
+  .nook-app .mobile-tab-label::after { content: attr(data-label); display: block; height: 0; visibility: hidden; font-weight: 600; }
+}
