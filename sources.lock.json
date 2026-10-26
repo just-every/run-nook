@@ -4253,7 +4253,7 @@
       "executable": false
     },
     "src/chat/MessageRow.tsx": {
-      "sha256": "fce2ba6b7fba38c0b66e7beaee9c2c5efb76d1650d5e72aa6ed48c05c64359ac",
+      "sha256": "dd761ecce7ffa4d99738d33606e86869acf92462b3f6b8b301878640fbe11311",
       "executable": false
     },
     "src/chat/Navigation.tsx": {
