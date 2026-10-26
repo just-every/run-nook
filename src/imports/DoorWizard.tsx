@@ -56,7 +56,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
         const next = await inspectLocal(file, kind, initial.users);
         setSource({ ...next, owner: initial.owner, users: initial.users });
         setReview({ ...emptyReview(kind), actors: kind === 'slack' ? {} : Object.fromEntries(next.actors.map((actor: any) => [actor.sourceId, null])) });
-        setStatus(kind === 'slack' ? 'Select channels, audiences, and actor decisions. The export is still on your computer.' : 'Map every participant to an existing Nook member and review the original audiences. The export is still on your computer.');
+        setStatus(kind === 'slack' ? 'Select channels, audiences, and people. The export is still on your computer.' : 'Map every participant to an existing Nook member and review the original audiences. The export is still on your computer.');
     });
     const reviewedSource = async (next: any) => {
         if (kind !== 'slack' || !catchup) { const { delta, ...ordinary } = next; return ordinary; }
@@ -67,7 +67,7 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
         setReview((current: any) => ({ ...current, delta }));
         return { ...next, delta };
     };
-    const preview = () => work('Checking local historical import', async () => {
+    const preview = () => work('Checking import', async () => {
         const stated = attestedRange(range.from || range.to ? range : undefined);
         const result = await prepareLocal(source.handle, await reviewedSource({ ...review, acceptedOmissions: [] }), initial.owner, initial.users);
         setSummary({...result.summary, ...(stated ? {attestation: recordAttestation(stated, {id: initial.owner, name: initial.users.find(user => user.id === initial.owner).name}, Date.now())} : {})}); setStale(false); setPlan(null); setAccepted(false); setCurrentJob(null);
@@ -99,10 +99,10 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
         try {
             const result = await continueJob(kind, 'apply', { planId: plan!.planId, reviewedFingerprint: plan!.fingerprint }, progress, review.namespace,
                 (done, total) => { setBusy(`Preparing source files: ${done} of ${total}`); setStatus(`Source files prepared: ${done} of ${total}. Apply reviewed plan continues the next batch.`); });
-            if (result.job?.state === 'completed') setStatus('Historical import completed. Reconcile it below to check the native records.');
+            if (result.job?.state === 'completed') setStatus('Historical import completed. Check the imported records below.');
         } finally { await refresh(); }
     });
-    const action = (item: ImportHistory, verb: 'apply' | 'undo' | 'reconcile' | 'status') => work(`${verb === 'undo' ? 'Undoing guarded' : 'Checking'} ${vendor} import`, async () => {
+    const action = (item: ImportHistory, verb: 'apply' | 'undo' | 'reconcile' | 'status') => work(`${verb === 'undo' ? 'Undoing' : 'Checking'} ${vendor} import`, async () => {
         const historyProgress = (job: DoorJob) => {
             if (item.planId && item.planId === plan?.planId) setCurrentJob(job);
             setStatus(`Import ${job.state}: ${job.checkpoint} of ${job.total} source entries.`);
@@ -136,20 +136,20 @@ export function DoorWizard({ initial, kind }: { initial: Initial; kind: ImportSo
                 <label>Attested from (UTC)<input type="date" min="1970-01-01" max={new Date(now).toISOString().slice(0,10)} value={range.from} onChange={event => {setRange({...range, from: event.target.value}); change(review);}} /></label>
                 <label>Attested to (UTC)<input type="date" min="1970-01-01" max={new Date(now).toISOString().slice(0,10)} value={range.to} onChange={event => {setRange({...range, to: event.target.value}); change(review);}} /></label>
             </fieldset>}
-            {kind === 'slack' && <label className="import-check"><input type="checkbox" checked={catchup} disabled={!!busy} onChange={event => { setCatchup(event.target.checked); change(review); }} />Delta pass over existing history</label>}
+            {kind === 'slack' && <label className="import-check"><input type="checkbox" checked={catchup} disabled={!!busy} onChange={event => { setCatchup(event.target.checked); change(review); }} />Update previously imported history</label>}
             {kind === 'slack' && catchup && <label>Overlap in days<input type="number" min={1} max={12000000} step={1} required value={Number.isNaN(overlapDays) ? '' : overlapDays} disabled={!!busy} onChange={event => { setOverlapDays(event.target.valueAsNumber); change(review); }} /><small>Recheck an overlap up to the full source history. Changed source records are reviewed before applying.</small></label>}
             {summary?.delta && <DeltaReport delta={summary.delta} />}
             {summary?.attestation && <AttestationReport attestation={summary.attestation} />}
             {summary?.cutover && <CutoverInvitations cutover={summary.cutover} />}
-            {summary?.delta && deltaBaseline && <p>The preview is bound to the current imported baseline. Creating a dry run checks it again.</p>}
+            {summary?.delta && deltaBaseline && <p>Creating a dry run checks the previous import again.</p>}
             {summary && <fieldset disabled={!!busy}><ReviewPanel kind={kind} preview={summary} accepted={accepted} onAccept={(value: boolean) => { setAccepted(value); setPlan(null); }} withoutMissingFiles={review.importWithoutMissingFiles === true} onMissingFiles={chooseMissingFiles} /></fieldset>}
             <button type="submit" className={summary ? '' : 'import-primary'} disabled={!!busy || !mappingReady(kind, source, review)}>Preview exact import</button>
-            {kind !== 'slack' && summary && !summary.blocked && <label className="import-check"><input type="checkbox" checked={catchup} disabled={!!busy} onChange={event => { setCatchup(event.target.checked); setPlan(null); }} />Compare with the previous import in this source namespace</label>}
+            {kind !== 'slack' && summary && !summary.blocked && <label className="import-check"><input type="checkbox" checked={catchup} disabled={!!busy} onChange={event => { setCatchup(event.target.checked); setPlan(null); }} />Compare with the previous import from this workspace</label>}
             {summary && !summary.blocked && !stale && (!plan || expired || currentJob?.state === 'failed') && <button type="button" className="import-primary" disabled={!!busy || hasOmissions && !accepted} onClick={() => void createPlan()}>Create dry run</button>}
             {plan && <><DoorPlanPanel plan={plan} expired={expired} /><button type="button" className="import-primary" disabled={!!busy || expired || !!currentJob && ['completed', 'failed', 'undone', 'rolled_back'].includes(currentJob.state)} onClick={() => void apply()}>Apply reviewed plan</button></>}
         </form>}
         {report && <ReconciliationPanel report={report} onClose={() => setReport(null)} />}
-        <ImportJobs jobs={jobs} busy={!!busy} onAction={action} onSaveCutover={(item, choices) => work('Saving invitation choices', async () => { await doorRequest('slack', 'cutover-choices', { planId: item.planId, choices }, item.sourceNamespace); await refresh(); setStatus('Invitation choices saved. Nothing was sent.'); })} onRefresh={() => work('Refreshing jobs', refresh)} onCleanup={() => work('Finishing file cleanup', async () => { await doorRequest(kind, 'cleanup'); await refresh(); setStatus('Durable file cleanup checked.'); })} />
-        <BusinessImports business={business} busy={!!busy} onEnable={enabled => work('Updating Business import access', async () => { await doorRequest(kind, 'settings', { enabled }); await refresh(); })} onRevoke={kid => work('Revoking Business signing key', async () => { await doorRequest(kind, 'revocations', { kid }); await refresh(); })} />
+        <ImportJobs jobs={jobs} busy={!!busy} onAction={action} onSaveCutover={(item, choices) => work('Saving invitation choices', async () => { await doorRequest('slack', 'cutover-choices', { planId: item.planId, choices }, item.sourceNamespace); await refresh(); setStatus('Invitation choices saved. Nothing was sent.'); })} onRefresh={() => work('Refreshing jobs', refresh)} onCleanup={() => work('Finishing file cleanup', async () => { await doorRequest(kind, 'cleanup'); await refresh(); setStatus('File cleanup checked.'); })} />
+        <BusinessImports business={business} busy={!!busy} onEnable={enabled => work('Updating import access', async () => { await doorRequest(kind, 'settings', { enabled }); await refresh(); })} onRevoke={kid => work('Revoking import key', async () => { await doorRequest(kind, 'revocations', { kid }); await refresh(); })} />
     </main>;
 }

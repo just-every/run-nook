@@ -1,6 +1,8 @@
 // NOOK-017 "Your workspaces": two local installations on separate origins
 // (127.0.0.1 and localhost, so their cookies stay apart as on real hosts).
 import assert from 'node:assert/strict'
+import {readFile} from 'node:fs/promises'
+const workspaceName=JSON.parse(await readFile(new URL('../src/branding.json',import.meta.url),'utf8')).name
 import {spawn} from 'node:child_process'
 import {mkdtemp,mkdir,rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
@@ -48,12 +50,12 @@ try{
    await page.getByRole('textbox',{name:'Message acme-launch',exact:true}).fill(draftA)
    let list=await menu()
    // Account-carried links arrive after mount; composer readiness is unrelated.
-   await expect(list.getByRole('link').filter({hasText:'legacy.example.com'})).toBeVisible()
-   assert.deepEqual(await entries(list),[a.host,'legacy.example.com'],'this installation and the carried account link')
+   await expect(list.getByRole('link').filter({hasText:'Another workspace'})).toBeVisible()
+   assert.deepEqual(await entries(list),[workspaceName,'Another workspace'],'this installation and the carried account link')
    await expect(list.getByText('This workspace · Ana Rivera',{exact:true})).toBeVisible()
    await shot('a-menu')
    // Add the second installation by address: it opens on its own origin.
-   await list.getByLabel('Add a workspace',{exact:true}).fill(b.origin)
+   await list.getByLabel('Workspace URL',{exact:true}).fill(b.origin)
    await list.getByRole('button',{name:'Open',exact:true}).click()
    await page.waitForURL(url=>url.origin===b.origin&&url.pathname==='/app')
    const prompt=page.getByRole('region',{name:'Add workspaces'})
@@ -63,7 +65,7 @@ try{
    await prompt.getByRole('button',{name:'Add',exact:true}).click()
    await expect(prompt).toHaveCount(0)
    list=await menu()
-   assert.deepEqual(await entries(list),[b.host,a.host,'legacy.example.com'])
+   assert.deepEqual(await entries(list),[workspaceName,workspaceName,'Another workspace'])
    await expect(list.getByText('Signed in as Ana Rivera',{exact:true})).toBeVisible()
    await shot('b-menu')
    // Drafts stay with their installation.
@@ -73,17 +75,17 @@ try{
    await page.getByRole('textbox',{name:'Message beta-launch',exact:true}).fill('Beta notes stay here.')
    // Open the first installation from the second one's menu.
    list=await menu()
-   await list.getByRole('link',{name:new RegExp(a.host.replace(/[.:]/g,'\\$&'))}).click()
+   await list.getByRole('link').filter({hasText:'Signed in as Ana Rivera'}).click()
    await page.waitForURL(url=>url.origin===a.origin&&url.pathname==='/app')
    await expect(page.getByRole('region',{name:'Add workspaces'})).toHaveCount(0)
    list=await menu()
-   assert.deepEqual(await entries(list),[a.host,b.host,'legacy.example.com'])
+   assert.deepEqual(await entries(list),[workspaceName,workspaceName,'Another workspace'])
    await expect(list.getByText('Signed in as Ana R.',{exact:true})).toBeVisible()
    // Removing forgets one entry on this device, across a reload.
-   await list.getByRole('button',{name:`Remove ${b.host}`,exact:true}).click()
-   assert.deepEqual(await entries(list),[a.host,'legacy.example.com'])
+   await list.getByRole('button',{name:`Remove ${workspaceName}`,exact:true}).click()
+   assert.deepEqual(await entries(list),[workspaceName,'Another workspace'])
    await page.reload();list=await menu()
-   assert.deepEqual(await entries(list),[a.host,'legacy.example.com'],'removal survives reload')
+   assert.deepEqual(await entries(list),[workspaceName,'Another workspace'],'removal survives reload')
    await shot('a-removed')
    await page.goto(a.origin+'/app?conversation='+a.channel.id)
    await expect(page.getByRole('textbox',{name:'Message acme-launch',exact:true})).toHaveValue(draftA)

@@ -2,7 +2,7 @@ import type {Context} from '../platform/storage/context'
 import {authority} from '../platform/storage/context'
 import {fail} from '../family/team-chat/domain'
 const manager=`EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access access ON access.user=o.id WHERE o.id=? AND o.status='active' AND o.role IN ('owner','admin') AND access.active=1 AND access.mode='member')`
-const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'Anonymous / service' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,l.version,l.reason,l.outcome,l.count FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope`
+const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'System' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,l.version,l.reason,l.outcome,l.count FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope`
 const allowed=['actor','kind','scope','outcome','from','until','cursor','format']
 function filters(params:URLSearchParams){
  if([...params.keys()].some(key=>!allowed.includes(key)))fail(400,'Unknown audit filter')

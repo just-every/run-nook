@@ -21,7 +21,7 @@ export async function deltaBrowser({app,owner,monday,friday,door}){
    for(const name of ['release','handoff'])await page.getByLabel(name+' public source').check();
    await page.getByLabel('New channel name',{exact:true}).nth(0).fill(roomName);await page.getByLabel('New channel name',{exact:true}).nth(1).fill('Handoff planning '+width);
    for(const select of await page.locator('select:visible').all())await select.selectOption('external');
-   await page.getByLabel('Delta pass over existing history',{exact:true}).check();
+   await page.getByLabel('Update previously imported history',{exact:true}).check();
    const range={from:new Date(Date.now()-7*86400000).toISOString().slice(0,10),to:new Date().toISOString().slice(0,10)};
    await page.getByLabel('Attested from (UTC)',{exact:true}).fill(range.to);await page.getByLabel('Attested to (UTC)',{exact:true}).fill(range.from);await page.getByRole('button',{name:'Preview exact import',exact:true}).click();await expect(page.getByRole('alert')).toContainText(/date range|before|past/i);await page.getByRole('alert').scrollIntoViewIfNeeded();await shot('attestation-refused');
    await page.getByLabel('Attested from (UTC)',{exact:true}).fill(range.from);await page.getByLabel('Attested to (UTC)',{exact:true}).fill(range.to);
