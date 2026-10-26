@@ -625,7 +625,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "e335d930e73317d8a283be0a994fe7004602282875cc4f8bf8ec605dce17d244",
+      "sha256": "86e0d401389d2db6cd6f03313d58660840c763e5fcdf5e8c3563ee2fc1f749b1",
       "executable": false
     },
     "AGENTS.md": {
@@ -649,7 +649,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "c5dfa10978c25b10784c440022dc94901e4b740bb4be8936b76f6cf6b34a4684",
+      "sha256": "83bc9144840c5772bd4666efdcfee25af3cd1896fd023bbb66810d2e0f3e9136",
       "executable": false
     },
     "DEMO.md": {
@@ -717,7 +717,7 @@
       "executable": false
     },
     "docs/integration-tokens.md": {
-      "sha256": "69b80831f3c2eceb65135ef7f8391ace9688b4eff30ece3831f37b56cced9d60",
+      "sha256": "076bc1d39696e6e912384c2047ab679e2fd366417bda5fa554b0ef6f73344a18",
       "executable": false
     },
     "docs/mattermost-import.md": {
@@ -5524,6 +5524,10 @@
       "sha256": "ff21d26bed7ce91eb25265582c5a4fa4de01bf91a9fdf1ddd1c23c2c187a4b39",
       "executable": false
     },
+    "src/notification-apps/body.ts": {
+      "sha256": "bc2efeb6ff5e43326001e0d9e3728c3e17b801581952da73674bb370db472676",
+      "executable": false
+    },
     "src/notification-apps/context.ts": {
       "sha256": "2eac730cad2f0eb67132693044c864afea25716d59e76b1fbe76918598a328a0",
       "executable": false
@@ -5537,7 +5541,7 @@
       "executable": false
     },
     "src/notification-apps/NotificationApps.tsx": {
-      "sha256": "7cab77b5b8a28c4db7f1af4b67fbbc88037753836ec91c13d48477124495c5af",
+      "sha256": "39ad208ab4bbe1f311b518de565cecdc2146e83bd4057799be9e463be957d82f",
       "executable": false
     },
     "src/notification-apps/receipts.ts": {
@@ -5548,8 +5552,12 @@
       "sha256": "6af64d0ff6c9b8393280ff68d78685f04f3dbb9d2f0d3dc7dbeba3ca8226781a",
       "executable": false
     },
+    "src/notification-apps/web-api.ts": {
+      "sha256": "a3d38c07897a0b2105e93581e028d306c1fe9972a7bddac7ee0b16678281f4ec",
+      "executable": false
+    },
     "src/notification-apps/webhook.ts": {
-      "sha256": "3c8e0689057d9f468ed24b4b142dd0eb9980ba7b860073d83b75becce78ecc19",
+      "sha256": "dddb1dacfed74351c55c6c519ec309d31e9656c81397c2166c8a9906ab2457f9",
       "executable": false
     },
     "src/notify/compose.ts": {
@@ -6853,7 +6861,7 @@
       "executable": false
     },
     "tests/notification-webhooks.mjs": {
-      "sha256": "109370dd3bf0449b2916729dff0715bbb4da5b6da5981ef89d0695632239fba1",
+      "sha256": "7ab41935dd2726fcf9072235a2b043447d48e65a873cffdab6fe7886e1bd4ab4",
       "executable": false
     },
     "tests/notify-journey.mjs": {

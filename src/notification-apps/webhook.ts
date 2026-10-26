@@ -3,23 +3,24 @@ import {authBindings} from '../platform/operator-auth.server'
 import {sameHash,sealToken} from '../integrations/secret'
 import {appRequest} from './door'
 import {formatSlackPayload,UNSUPPORTED_NOTICE} from './slack-format'
-// Slack-compatible incoming webhooks: `/hooks/slack/<token>` is one approved app's channel token in URL form. It posts through
-// the same approval, identity, posting fence, rate limit and audit as the notification-destination door, and answers in Slack's words.
-export const isWebhookRequest=(request:Request)=>new URL(request.url).pathname.startsWith('/hooks/slack/')
+import {readText} from './body'
+import {WEB_API,webApiRequest} from './web-api'
+// Slack-compatible entry: incoming webhooks, where `/hooks/slack/<token>` is one approved app's channel token in URL form, and the
+// Web API at `/api/slack/<method>` (web-api.ts). Both post through the same approval, identity, posting fence, rate limit and audit
+// as the notification-destination door, and answer in Slack's words.
+export const isWebhookRequest=(request:Request)=>{const path=new URL(request.url).pathname;return path.startsWith('/hooks/slack/')||path.startsWith(WEB_API)}
 const MAX_BYTES=100*1024
 const answer=(code:string,status:number,extra:Record<string,string>={})=>new Response(code,{status,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff',...extra}})
 async function payload(request:Request){
- const type=request.headers.get('content-type')?.split(';')[0].trim().toLowerCase()
- const reader=request.body?.getReader(),chunks:Uint8Array[]=[];let size=0
- if(reader)for(;;){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>MAX_BYTES){await reader.cancel();return null}chunks.push(value)}
- const bytes=new Uint8Array(size);let at=0;for(const chunk of chunks){bytes.set(chunk,at);at+=chunk.length}
+ const type=request.headers.get('content-type')?.split(';')[0].trim().toLowerCase(),text=await readText(request,MAX_BYTES)
+ if(text===null)return null
  try{
-  const text=new TextDecoder('utf-8',{fatal:true}).decode(bytes)
   const value=type==='application/json'?JSON.parse(text):type==='application/x-www-form-urlencoded'?JSON.parse(new URLSearchParams(text).get('payload')??'null'):null
   return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:null
  }catch{return null}
 }
 export async function webhookRequest(bindings:StorageBindings,request:Request):Promise<Response>{
+ if(new URL(request.url).pathname.startsWith(WEB_API))return webApiRequest(bindings,request)
  const env={...bindings,...authBindings(bindings)},token=decodeURIComponent(new URL(request.url).pathname.slice('/hooks/slack/'.length))
  const bearer=/^(nookapp_([0-9a-f-]{36})\.[A-Za-z0-9_-]{43})$/.exec(token)
  if(request.method!=='POST'||!bearer)return answer('no_service',404)

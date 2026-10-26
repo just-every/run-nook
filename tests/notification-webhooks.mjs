@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {stringify} from 'node:querystring';
 
 // Slack-compatible incoming webhooks through the real Worker: the exact request shapes the slackapi/slack-github-action step and a
 // curl post produce (JSON, and the form `payload=` body), rendering, threads, every Slack error string with nothing committed, and
@@ -43,4 +44,66 @@ export async function notificationWebhooks({call,db,ownerCookie,origin}){
  const live=await count();await call(`/api/notification-apps/${approval.id}/revoke`,'POST',{},ownerCookie);
  await refused(token,{text:'After revoke'},404,'no_service');await refused('nookapp_00000000-0000-0000-0000-000000000000.'+'A'.repeat(43),{text:'Unknown'},404,'no_service');assert.equal(await count(),live);
  const listed=JSON.stringify(await call('/api/notification-apps','GET',undefined,ownerCookie));assert.ok(!listed.includes(token.split('.')[1]),'the URL secret is shown once and never listed');
+ await slackWebApi({call,db,ownerCookie,origin},room);
+}
+
+// The Slack Web API at /api/slack/<method> through the real Worker. Requests are shaped exactly as @slack/web-api sends them (POST,
+// form-encoded, objects as JSON strings, the token only in Authorization); a slack_sdk-style JSON body and GET are sent too. Writes
+// go through the notification-destination door. No Slack SDK runs and no outbound call is made.
+async function slackWebApi({call,db,ownerCookie,origin},elsewhere){
+ const counts=async()=>await db.prepare('SELECT (SELECT count(*) FROM nook_messages) AS messages,(SELECT total(version) FROM nook_messages) AS versions,(SELECT count(*) FROM nook_audit) AS audit').first();
+ const audited=async kind=>(await db.prepare('SELECT count(*) AS n FROM nook_audit WHERE kind=?').bind('notification-app.'+kind).first()).n;
+ const row=async id=>await db.prepare('SELECT body,deleted,version,parent FROM nook_messages WHERE id=?').bind(id).first();
+ const api=(method,options,token)=>fetch(`${origin}/api/slack/${method}`,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded',...(token?{authorization:'Bearer '+token}:{}),'user-agent':'@slack:web-api/7.9.1 node/22.20.0'},body:stringify(Object.fromEntries(Object.entries(options).map(([k,v])=>[k,typeof v==='object'?JSON.stringify(v):v])))});
+ const json=(method,payload,token)=>fetch(`${origin}/api/slack/${method}`,{method:'POST',headers:{'content-type':'application/json;charset=utf-8',authorization:'Bearer '+token},body:JSON.stringify(payload)});
+ const ok=async response=>{response=await response;const body=await response.json();assert.equal(response.status,200);assert.equal(body.ok,true,JSON.stringify(body));return body};
+ const refused=async(error,request)=>{const before=await counts(),response=await request();assert.deepEqual(await response.json(),{ok:false,error});const after=await counts();assert.deepEqual([after.messages,after.versions],[before.messages,before.versions],error+' commits nothing');return {before,after}};
+ const room=await call('/api/conversations','POST',{name:'Web API alerts',kind:'private'},ownerCookie);
+ const approve=async(name,channel=room)=>(await call('/api/notification-apps','POST',{name,channels:[channel.id]},ownerCookie)).approvals[0];
+ const app=await approve('Deploy bot'),token=app.token,other=(await approve('Other bot')).token;
+ // auth.test names the app identity and the workspace, and nobody's personal data.
+ const identity=await ok(api('auth.test',{},token));
+ assert.equal(identity.user,'Deploy bot');assert.equal(identity.user_id,identity.bot_id);assert.equal(identity.url,origin+'/');assert.ok(identity.team&&identity.team_id);assert.ok(!JSON.stringify(identity).includes('@'),'no email');
+ // chat.postMessage then chat.update edits that one message, shown as the app and audited by the door.
+ const writes=await audited('write'),posted=await ok(api('chat.postMessage',{channel:room.id,text:'Deploy *started*',blocks:[{type:'section',text:{type:'mrkdwn',text:'*main* deploying'}}],unfurl_links:false},token));
+ assert.equal(posted.channel,room.id);assert.equal(posted.message.bot_id,identity.bot_id);assert.equal(await audited('write'),writes+1);
+ const shown=(await call(`/api/conversations/${room.id}/messages`,'GET',undefined,ownerCookie)).find(m=>m.id===posted.ts);
+ assert.equal(shown.authorName,'Deploy bot');assert.equal(shown.app,1);assert.ok(shown.body.includes('Deploy **started**')&&shown.body.includes('**main** deploying'));
+ const updated=await ok(api('chat.update',{channel:room.id,ts:posted.ts,text:'Deploy *finished*'},token));
+ assert.equal(updated.ts,posted.ts);assert.equal(updated.text,'Deploy **finished**');assert.deepEqual([(await row(posted.ts)).body,(await row(posted.ts)).version],['Deploy **finished**',2]);
+ // chat.getPermalink links into Nook, where it opens under the reader's current membership.
+ const link=new URL((await ok(api('chat.getPermalink',{channel:room.id,message_ts:posted.ts},token))).permalink);
+ assert.equal(link.origin+link.pathname,origin+'/app');assert.deepEqual(Object.fromEntries(link.searchParams),{conversation:room.id,focus:posted.ts});
+ // chat.delete erases it through the door's delete; it can then be neither edited nor linked.
+ await ok(api('chat.delete',{channel:room.id,ts:posted.ts},token));assert.equal(await row(posted.ts),null);
+ await refused('message_not_found',()=>api('chat.update',{channel:room.id,ts:posted.ts,text:'Too late'},token));await refused('message_not_found',()=>api('chat.getPermalink',{channel:room.id,message_ts:posted.ts},token));
+ // A slack_sdk JSON body with an unsupported block keeps the text, shows the notice and reports a warning; a thread reply links into its thread.
+ const fallback=await ok(json('chat.postMessage',{channel:room.id,text:'Chart attached',blocks:[{type:'image',image_url:'https://example.test/chart.png',alt_text:'chart'}]},token));
+ assert.deepEqual(fallback.response_metadata.warnings,['unsupported_formatting']);const kept=(await row(fallback.ts)).body;assert.ok(kept.includes('Chart attached')&&kept.includes('Nook does not support')&&!kept.includes('chart.png'));
+ const threaded=await ok(api('chat.postMessage',{channel:room.id,text:'Retrying the chart',thread_ts:fallback.ts},token));assert.equal(threaded.message.thread_ts,fallback.ts);assert.equal((await row(threaded.ts)).parent,fallback.ts);
+ const replyLink=new URL((await ok(fetch(`${origin}/api/slack/chat.getPermalink?${new URLSearchParams({channel:room.id,message_ts:threaded.ts})}`,{headers:{authorization:'Bearer '+token}}))).permalink);
+ assert.deepEqual(Object.fromEntries(replyLink.searchParams),{conversation:room.id,thread:fallback.ts,focus:threaded.ts});
+ // Another app's message in the same channel can be neither edited nor deleted.
+ const foreign=await ok(api('chat.postMessage',{channel:room.id,text:'Other app status'},other));
+ await refused('cant_update_message',()=>api('chat.update',{channel:room.id,ts:foreign.ts,text:'Rewritten'},token));await refused('cant_delete_message',()=>api('chat.delete',{channel:room.id,ts:foreign.ts},token));assert.equal((await row(foreign.ts)).body,'Other app status');
+ // A conversation outside the grant answers channel_not_found whether or not it exists.
+ for(const channel of [elsewhere.id,'C0000000000',''])await refused('channel_not_found',()=>api('chat.postMessage',{channel,text:'Wrong room'},token));
+ await refused('channel_not_found',()=>api('chat.getPermalink',{channel:elsewhere.id,message_ts:foreign.ts},token));
+ await refused('no_text',()=>api('chat.postMessage',{channel:room.id},token));await refused('invalid_arguments',()=>api('chat.postMessage',{channel:room.id,text:'x',blocks:'not json'},token));
+ await refused('msg_too_long',()=>api('chat.postMessage',{channel:room.id,text:'x'.repeat(40_001)},token));
+ // The posting fence refuses the app in Slack's words, and the door audits the refusal.
+ const posting=async level=>{const details=await call('/api/channels/'+room.id+'/details','GET',undefined,ownerCookie);await call('/api/channels/'+room.id+'/posting','PATCH',{version:details.version,level,replies:'everyone',people:[]},ownerCookie)};
+ await posting('admins');const refusals=await audited('refuse');await refused('restricted_action',()=>api('chat.postMessage',{channel:room.id,text:'Blocked by the posting fence'},token));assert.equal(await audited('refuse'),refusals+1);await posting('everyone');
+ // The channel's burst of twenty is spent, then 429 ratelimited with Retry-After.
+ const burst=await call('/api/conversations','POST',{name:'Web API burst',kind:'private'},ownerCookie),fast=(await approve('Burst bot',burst)).token,statuses=[];
+ for(let n=0;n<24;n++)statuses.push(await api('chat.postMessage',{channel:burst.id,text:'burst '+n},fast));
+ assert.ok(statuses.slice(0,20).every(r=>r.status===200));const limited=statuses.find(r=>r.status===429);assert.ok(limited);assert.deepEqual(await limited.json(),{ok:false,error:'ratelimited'});assert.ok(Number(limited.headers.get('retry-after'))>=1);
+ // Every other method the clause lists, and any unknown name, answers unknown_method and writes nothing, audit included.
+ const quiet=await counts();
+ for(const method of ['chat.postEphemeral','chat.unfurl','chat.scheduleMessage','reactions.add','conversations.open','conversations.create','conversations.history','users.info','views.open','files.getUploadURLExternal','no.such.method']){const response=await api(method,{channel:room.id,text:'Never posted',name:'inc-123'},token);assert.equal(response.status,200);assert.deepEqual(await response.json(),{ok:false,error:'unknown_method'},method)}
+ assert.deepEqual(await counts(),quiet);
+ // A missing, unknown or revoked token is refused and commits nothing.
+ await refused('not_authed',()=>api('chat.postMessage',{channel:room.id,text:'No token'}));await refused('invalid_auth',()=>api('chat.postMessage',{channel:room.id,text:'Unknown token'},'nookapp_00000000-0000-0000-0000-000000000000.'+'A'.repeat(43)));
+ await call(`/api/notification-apps/${app.id}/revoke`,'POST',{},ownerCookie);
+ await refused('invalid_auth',()=>api('auth.test',{},token));await refused('invalid_auth',()=>api('chat.postMessage',{channel:room.id,text:'After revoke'},token));
 }
