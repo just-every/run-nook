@@ -43,14 +43,13 @@ export function PeopleDirectory({revision,privateSignal,onSelect}:Props){
  }
  if(privateSignal?.aborted)return null
  return <section className="page-content team-page"><div className="page-column team-surface people-directory">
-  <p className="muted">Find people by name or the profile fields you can see.</p>
   <form onSubmit={event=>{event.preventDefault();const params=new URLSearchParams();if(q.trim())params.set('q',q.trim());if(field){params.set('field',field);if(value.trim())params.set('value',value.trim())}setQuery(params.toString());setReload(prior=>prior+1)}}>
    <label className="field">Search people<input type="search" maxLength={200} value={q} placeholder="Name, department, location…" onChange={event=>setQ(event.target.value)}/></label>
    <div className="field-row"><label className="field">Filter by field<select aria-label="Filter by field" value={field} onChange={event=>{setField(event.target.value);setValue('')}}><option value="">All fields</option>{fields?.fields.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</select></label>{field&&<label className="field">Field contains<input maxLength={500} value={value} onChange={event=>setValue(event.target.value)} placeholder="Any non-empty value"/></label>}</div>
    <button className="soft-button" disabled={busy}>Search people</button>
   </form>
   {error&&<p role="alert">{error}</p>}
-  {page?<><p className="dialog-note" role="status">{page.items.length} {page.items.length===1?'person':'people'} shown{page.hasMore?' · More available':''}</p>
+  {page?<><span className="sr-only" role="status">{page.items.length} people loaded{page.hasMore?', more available':''}</span>
    <ul className="team-people">{page.items.map(person=><li key={person.id}><div className="team-person"><strong>{person.name}</strong>{person.status&&<span>{person.status.emoji} {person.status.text}</span>}<small>{person.zone}</small>
     {person.fields.some(item=>item.value)&&<dl>{person.fields.filter(item=>item.value).map(item=><div key={item.id}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>}
    </div>{onSelect&&<button className="soft-button" onClick={()=>onSelect(person)}>Open {person.name}</button>}</li>)}</ul>

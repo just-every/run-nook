@@ -97,7 +97,7 @@ async function attention(c:Context,input:Record<string,any>){
   for(const {payload,...m} of messageRows)messages.set(m.id,{...m,urgentReason:m.deleted?null:JSON.parse(payload).urgentReason??null})
   for(const o of outcomeRows)outcomes.set(o.id,o)
  }))
- for(const a of visible){if(a.outcome&&!outcomes.has(a.outcome))fail(404,'Outcome unavailable');items.push({...a,explanation:a.notificationLevel==='nothing'?'Device and email alerts suppressed by your level':'Delivered to Attention; device and email alerts follow your choices',message:messages.get(a.message)??null,outcome:outcomes.get(a.outcome)??null})}
+ for(const a of visible){if(a.outcome&&!outcomes.has(a.outcome))fail(404,'Outcome unavailable');items.push({...a,explanation:a.notificationLevel==='nothing'?'Device and email alerts suppressed by your level':'',message:messages.get(a.message)??null,outcome:outcomes.get(a.outcome)??null})}
 
  const heldItems=rows.filter(a=>!visible.includes(a)).map(a=>({id:a.id,conversation:a.conversation,explanation:vacationUntil>now&&a.reason!=='urgent-request'?'Held until '+new Date(vacationUntil).toISOString()+' by your vacation':scheduleUntil>now&&a.reason!=='urgent-request'?'Held until '+new Date(scheduleUntil).toISOString()+' by your quiet schedule':a.state==='snoozed'&&a.snooze_until>now?'Held until '+new Date(a.snooze_until).toISOString()+' by your item snooze':'Held until '+new Date(manualUntil).toISOString()+' by your quiet snooze'}))
  const deadlines=[settings?.next_change,wake?.deadline,dndUntil,reminders.nextWakeAt].filter((value):value is number=>typeof value==='number'&&value>now);

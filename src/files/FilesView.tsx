@@ -37,7 +37,6 @@ export function FilesView({conversations,users,user,conversation,revision,privat
   }catch(reason){if(current()&&epoch===generation.current){setError('More files could not be loaded.');onError(reason)}}finally{if(current()&&epoch===generation.current)setLoading(false)}
  }
  return <section className="page-content"><div className="page-column">
-  <p className="search-help muted">Shared files, newest first. File contents are not searched.</p>
   <div className="search-filter-fields">
    {!conversation&&<div className="field"><label htmlFor={id+'-conversation'}>Conversation</label><select id={id+'-conversation'} value={selected} onChange={e=>setSelected(e.target.value)}><option value="">Any conversation</option>{conversations.map(room=><option key={room.id} value={room.id}>{room.kind==='dm'?'':'# '}{conversationName(room,user)}</option>)}</select></div>}
    <div className="field"><label htmlFor={id+'-person'}>Person</label><select id={id+'-person'} value={person} onChange={e=>setPerson(e.target.value)}><option value="">Anyone</option><option value="me">Me</option>{users.filter(p=>p.id!==user.id).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
@@ -48,7 +47,7 @@ export function FilesView({conversations,users,user,conversation,revision,privat
   {page?.items.map(file=>{
    const room=conversations.find(room=>room.id===file.conversation)
    return <article className="search-result" aria-label={'File '+file.name} key={file.id}>
-    <p className="search-meta">{room?(room.kind==='dm'?'':'# ')+conversationName(room,user)+' · ':''}{file.authorName} · {file.source==='imported'?'Imported':'Native'} · <time dateTime={file.created}>{new Date(file.created).toLocaleString()}</time></p>
+    <p className="search-meta">{room?(room.kind==='dm'?'':'# ')+conversationName(room,user)+' · ':''}{file.authorName}{file.source==='imported'?' · Imported':''} · <time dateTime={file.created}>{new Date(file.created).toLocaleString()}</time></p>
     <a className="collection-download" href={`/api/${file.source==='imported'?'import-files':'attachments'}/${encodeURIComponent(file.id)}/download`} download={file.name}>{file.name}</a>
     <p className="collection-meta">{Math.max(1,Math.round(file.size/1024))} KB · {file.mime}</p>
     <InertPreview attachment={file} accessEpoch={key+':'+revision} onDenied={denied}/>

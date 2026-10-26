@@ -2,7 +2,7 @@
 // keeps storage per origin, so each installation holds its own copy of the list.
 // Opening another installation from the menu carries this copy in the URL fragment,
 // which browsers never send to a server, and the receiver merges it.
-export type WorkspaceEntry={origin:string;account:string;seen:number}
+export type WorkspaceEntry={origin:string;account:string;seen:number;name?:string}
 export type DeviceList={entries:WorkspaceEntry[];removed:Record<string,number>}
 export type Handoff={from:string}&DeviceList
 const KEY='nook:workspaces:v1',FRAGMENT='nook-workspaces=',MAX=20
@@ -19,9 +19,9 @@ export function installationOrigin(value:string):string|null{
 }
 const entry=(value:unknown):WorkspaceEntry|null=>{
  if(!value||typeof value!=='object')return null
- const {origin,account,seen}=value as Record<string,unknown>
+ const {origin,account,seen,name}=value as Record<string,unknown>
  if(typeof origin!=='string'||installationOrigin(origin)!==origin||typeof account!=='string'||account.length>120||!Number.isSafeInteger(seen))return null
- return {origin,account,seen:seen as number}
+ return {origin,account,seen:seen as number,...(typeof name==='string'&&name.trim()&&name.length<=120?{name:name.trim()}:{})}
 }
 function decodeList(value:unknown):DeviceList{
  const raw=value&&typeof value==='object'?value as Record<string,unknown>:{}
@@ -42,7 +42,7 @@ const upsert=(list:DeviceList,item:WorkspaceEntry):DeviceList=>{
  return {entries:[item,...list.entries.filter(e=>e.origin!==item.origin)],removed}
 }
 // The installation the browser is signed in to right now records itself.
-export const recordCurrent=(account:string)=>writeList(upsert(readList(),{origin:location.origin,account,seen:Date.now()}))
+export const recordCurrent=(account:string,name:string)=>writeList(upsert(readList(),{origin:location.origin,account,name,seen:Date.now()}))
 // A typed address, or a link saved on the account by an earlier Nook version.
 export function addOrigin(origin:string,{unlessRemoved=false}={}){
  const list=readList()
@@ -73,7 +73,7 @@ export function receiveHandoff():{list:DeviceList;pending:Handoff|null}{
  for(const item of incoming.entries){
   if(item.origin===location.origin)continue
   const known=list.entries.find(e=>e.origin===item.origin)
-  if(known){if(item.seen>known.seen)list=upsert(list,{...item,account:item.account||known.account})}
+  if(known){if(item.seen>known.seen)list=upsert(list,{...item,account:item.account||known.account,name:item.name||known.name})}
   else if((list.removed[item.origin]??-1)<item.seen)fresh.push(item)
  }
  for(const [origin,at] of Object.entries(incoming.removed)){
