@@ -1,0 +1,15 @@
+.nook-app .nook-filter-chips button{font-size:13px;min-height:36px}
+.nook-app .nook-filter-chips:empty{display:none}
+.nook-app .nook-list-filters{margin-block:12px}
+.nook-app .nook-person-open,.nook-app .nook-unread-open{position:relative;display:block;width:100%;min-width:0;padding:12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.nook-app .nook-person-open{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nook-app .nook-person-open .team-person{min-width:0}
+.nook-app .nook-person-meta{font-size:13px;color:var(--ink-soft);white-space:normal;overflow-wrap:anywhere}
+.nook-app .nook-unread-open .message-body{display:block;margin-block:8px}
+.nook-app .nook-row-action{opacity:0;font-size:13px;color:var(--ink-soft)}
+.nook-app :is(.nook-person-open,.nook-unread-open):is(:hover,:focus-visible){background:var(--paper-deep,#f3eae4)}
+.nook-app :is(.nook-person-open,.nook-unread-open):focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.nook-app :is(.nook-person-open,.nook-unread-open):is(:hover,:focus-visible) .nook-row-action{opacity:1}
+@media(max-width:600px){.nook-app .nook-row-action{display:none}.nook-app .nook-filter-chips button{min-height:44px}.nook-app .nook-person-open,.nook-app .nook-unread-open{min-height:44px}}
+@media(min-width:601px){.nook-app .nook-files .nook-file-action{opacity:0}.nook-app .nook-files .search-result:is(:hover,:focus-within) .nook-file-action{opacity:1}}
+.nook-app .nook-files .search-meta{font-size:13px}
