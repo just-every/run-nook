@@ -2101,7 +2101,7 @@
       "executable": false
     },
     "src/audit/AuditLog.tsx": {
-      "sha256": "2518b008c9c8af6884784809c42c06119392eeda278ffc4a403f4019c0a56bf2",
+      "sha256": "912c64a0b035f3b17716b001b56dcdae88dd08c415c6ceeb7ef7641f30373509",
       "executable": false
     },
     "src/audit/database.ts": {
@@ -2109,7 +2109,7 @@
       "executable": false
     },
     "src/audit/event-words.ts": {
-      "sha256": "c03cddac1b69474ff59d4e24cfc5f046050be8aa4120e15e074ddbfb01a2ebb9",
+      "sha256": "cef3ad29373522eb892f7634d2dc6f43dfecb95e0deb2f89c36fbd0f52662cc2",
       "executable": false
     },
     "src/audit/restore.mjs": {
@@ -2117,7 +2117,7 @@
       "executable": false
     },
     "src/audit/server.ts": {
-      "sha256": "ac851d3a7eda4575126dbddb4b50b94297f3f91abdb03f140091bf59844978a2",
+      "sha256": "79af13571bf86c4365c40d3e0f45ed384cdb2e8fb202b51108d5bc92ff4fc379",
       "executable": false
     },
     "src/base/contract-filter.ts": {
@@ -4257,7 +4257,7 @@
       "executable": false
     },
     "src/chat/list-controls.css": {
-      "sha256": "9cbb4335b9dff4bff6c1432d14ac7b908a632cf5272fd98b4f65b1c1cd2ed020",
+      "sha256": "a13f0ca111ee9361cee3552266b8a5c35a44b9cd3d19e7141b134efff1fadb45",
       "executable": false
     },
     "src/chat/LiveMessageNotice.tsx": {
@@ -5997,7 +5997,7 @@
       "executable": false
     },
     "src/reminders/ReminderEditor.tsx": {
-      "sha256": "f0caa076f95f3908ec9d09135f0665510595418fe19a1f763249b3a973297fec",
+      "sha256": "6982fd7caa2ce6339d38b36c31e7698b40127a93a830ba283cfaa9faf18c3b6d",
       "executable": false
     },
     "src/reminders/RemindersView.tsx": {
@@ -6573,7 +6573,7 @@
       "executable": false
     },
     "src/workspaces/WorkspacesMenu.tsx": {
-      "sha256": "1599146f16e944a5a3be48fb5451607c787b2513bb57ad953943c32e32d25e84",
+      "sha256": "c3bcd91cebd7fbdcd16a13089aa754318cf8eec4266d7da772326987d1ea0407",
       "executable": false
     },
     "TARGET.md": {
