@@ -13,7 +13,7 @@
 .nook-app .erasure-dialog label { display: grid; gap: 6px; margin: var(--s4) 0; font-size: var(--fs-ui); font-weight: 500; }
 .nook-app .erasure-dialog input { width: 100%; min-width: 0; padding: 9px 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background: var(--surface-raised); color: var(--ink); font-weight: 400; }
 .nook-app .erasure-dialog input:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-.nook-app .erasure-dialog code { font-size: 12.5px; overflow-wrap: anywhere; }
+.nook-app .erasure-dialog code { font-size: var(--fs-meta); overflow-wrap: anywhere; }
 .nook-app .erasure-dialog [role=status] p { color: var(--ink); }
 .nook-app .erasure-dialog [role=alert] { margin: var(--s3) 0; padding: 8px 12px; border-left: 3px solid var(--brand-rose); }
 .nook-app .erasure-dialog > .danger-button { display: flex; align-items: center; justify-content: center; margin: var(--s4) 0 0 auto; }

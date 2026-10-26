@@ -66,4 +66,4 @@
 .nook-app .notice-error > span { min-width: 0; }
 @starting-style { .nook-app .notice-error { opacity: 0; } }
 
-.composer .schedule-draft{font-size:12px;white-space:nowrap;padding:6px 8px}
+.composer .schedule-draft{font-size:var(--fs-meta);white-space:nowrap;padding:6px 8px}
