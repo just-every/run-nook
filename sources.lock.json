@@ -625,7 +625,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "86e0d401389d2db6cd6f03313d58660840c763e5fcdf5e8c3563ee2fc1f749b1",
+      "sha256": "83973af0ea090b3d9973a8363d418948d4be1388ca04cb15a0a451e6c2684332",
       "executable": false
     },
     "AGENTS.md": {
@@ -649,7 +649,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "49f69a05c10c8aa24ef7db36ad7fac6f134e5884698aea48251d4ce5141f19a7",
+      "sha256": "e5ba61253d40e0dd9935dca8317e645644c959579ec1e196e51db758e5a3a76b",
       "executable": false
     },
     "DEMO.md": {
@@ -717,7 +717,7 @@
       "executable": false
     },
     "docs/integration-tokens.md": {
-      "sha256": "076bc1d39696e6e912384c2047ab679e2fd366417bda5fa554b0ef6f73344a18",
+      "sha256": "eb30df69a48dc8f282f2df2526fa7b99ac760d9de40aa04fd25b1b4f772726a7",
       "executable": false
     },
     "docs/mattermost-import.md": {
