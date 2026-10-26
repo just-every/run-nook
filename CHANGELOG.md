@@ -10,7 +10,7 @@ Nook 0.5.0 packages the work on main since 0.4.0 with rer 0.2.80.
 
 The README journey covers a fresh checkout, local owner setup, independent teammates in a private channel at 1440 and 390, and export/reset/import with identical re-exported content. The deployment dry run uses a valid sender address. Local development sends and stores no email.
 
-Opening a channel on a phone when its only unread message is a thread reply now shows the channel, with the reply still unread behind its reply count. Messages no longer show a stray "0" beside the author's name and time, under the message or before the reply count. An approved notification app can use its channel token with Slack's Web API at /api/slack/ for auth.test, chat.postMessage, chat.update, chat.delete and chat.getPermalink.
+Opening a channel on a phone when its only unread message is a thread reply now shows the channel, with the reply still unread behind its reply count. Messages no longer show a stray "0" beside the author's name and time, under the message or before the reply count. An approved notification app can use its channel token with Slack's Web API at /api/slack/ for auth.test, chat.postMessage, chat.update, chat.delete and chat.getPermalink; the address is shown with the new token when the app is approved.
 
 ### Updating
 
