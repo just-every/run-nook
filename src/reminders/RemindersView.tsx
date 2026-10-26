@@ -1,3 +1,4 @@
+import {formatTime} from '../chat/format-time'
 import {useEffect,useId,useRef,useState} from 'react'
 import {api} from '../chat/api'
 import {usePrivateScope} from '../chat/usePrivateScope'
@@ -71,7 +72,7 @@ export function RemindersView({revision,privateSignal,userId,onError,onOpen,refr
     <div className="thread-context"><h2>{name}</h2><strong>{status[item.delivery]}</strong></div>
     {!item.unavailable&&<p className="message-body">{item.text}</p>}
     {item.unavailable&&<p className="muted">The source is no longer available. Its content is hidden.</p>}
-    <p>{new Date(item.next_due).toLocaleString('en-US',{timeZone:item.zone,dateStyle:'medium',timeStyle:'short'})} · {item.zone} · {repeats[item.recurrence]}</p>
+    <p>{formatTime(item.next_due,{timeZone:item.zone})} · {item.zone} · {repeats[item.recurrence]}</p>
     <p className="dialog-note">Owner: {owner?'You':item.ownerName??'Former member'}{!item.schedule?' · Recipient: '+(recipient?'You':item.recipientName??'Former member'):''}</p>
     {item.reason&&<p className="warning" role="status">{item.reason}</p>}
     <div className="thread-actions">

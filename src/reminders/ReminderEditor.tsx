@@ -1,3 +1,5 @@
+import {formatTime} from '../chat/format-time'
+import {TimeZonePicker} from '../profiles/TimeZonePicker'
 import {ScheduledBroadcast} from '../broadcast/ScheduledBroadcast'
 import {useEffect,useId,useRef,useState} from 'react'
 import type {FormEvent} from 'react'
@@ -68,13 +70,13 @@ export function ReminderEditor({conversation,source,sourceKind,initialPhrase,exi
   {!!members.length&&!existing&&!source&&<label className="field">Choose a participant<select defaultValue="" disabled={!!busy} onChange={event=>{if(!event.target.value)return;clearPreview();setPhrase(value=>/^(\/remind\s+)?(?:me|[@#][^\s]+)\s*/i.test(value)?value.replace(/^(\/remind\s+)?(?:me|[@#][^\s]+)\s*/i,'/remind @'+event.target.value+' '):'/remind @'+event.target.value+' '+value)}}><option value="">Keep the target in your phrase</option>{members.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label>}
   <div className="field"><label htmlFor={fieldId+'-phrase'}>Reminder</label><textarea id={fieldId+'-phrase'} name="phrase" value={phrase} onChange={event=>{clearPreview();setPhrase(event.target.value)}} placeholder={'/remind me "Call Ana" in 20 minutes'} required readOnly={!!busy} rows={4} autoFocus/></div>
   <details><summary>Reminder tips</summary><p>Use me, @person or #channel, a time, and your reminder text.</p><p>Try /remind #standup "Post your update" every weekday at 9am.</p><p>Date-only reminders use 9am.</p></details>
-  <label className="field">Time zone<input name="zone" value={zone} onChange={event=>{clearPreview();setZone(event.target.value)}} required readOnly={!!busy} placeholder="Australia/Brisbane"/></label>
+  <label className="field">Time zone<TimeZonePicker value={zone} onChange={value=>{clearPreview();setZone(value)}} disabled={!!busy}/></label>
   <button className="soft-button" type="submit" disabled={!!busy||!phrase.trim()||!zone.trim()}>{busy==='preview'?'Checking…':'Preview reminder'}</button>
   {preview&&<div className="schedule-preview" aria-label="Reminder preview" role="status">
    <h3>Review reminder</h3>
    <p className="message-body">{preview.text}</p>
    <p>Audience: {preview.audience}</p>
-   <p>Due: {new Date(preview.due).toLocaleString('en-US',{timeZone:preview.zone,dateStyle:'medium',timeStyle:'short'})} · {preview.zone}</p>
+   <p>Due: {formatTime(preview.due,{timeZone:preview.zone})} · {preview.zone}</p>
    <p>Local time: {preview.localAt.replace('T',' ')} · {repeats[preview.recurrence]}</p>
    <button className="text-button" type="button" disabled={!!busy} onClick={clearPreview}>Clear preview</button>
   </div>}

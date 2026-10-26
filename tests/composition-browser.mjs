@@ -103,7 +103,7 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await page.goto(base+'/app?view=you')
     const profile=page.getByRole('region',{name:'Your profile',exact:true})
     await profile.getByLabel('Display name',{exact:true}).fill('Elena Rivera')
-    await profile.getByLabel('Time zone',{exact:true}).fill('America/Los_Angeles')
+    await profile.getByLabel('Time zone',{exact:true}).selectOption('America/Los_Angeles')
     await profile.getByLabel('Phone',{exact:true}).fill('+1 415 555 0198')
     await profile.getByLabel('Title',{exact:true}).fill('Customer Success Lead');await profile.getByLabel('Department',{exact:true}).fill('Customer Success')
     await profile.getByLabel('Share active presence',{exact:true}).uncheck();await profile.getByLabel('Show when I am typing',{exact:true}).uncheck()
