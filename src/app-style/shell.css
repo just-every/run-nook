@@ -21,6 +21,8 @@ body:has(.nook-app) { margin: 0; overflow: hidden; background: var(--brand-paper
 .nook-app :is(p, h2, h3, label, legend) { text-wrap: pretty; }
 .nook-app h2 { font: 600 var(--fs-body)/1.35 var(--brand-font-text); }
 .nook-app h3 { font-size: var(--fs-body); font-weight: 600; }
+/* The browser's small text falls under the 13px floor; it takes the meta size unless a rule sets its own. */
+:where(.nook-app small) { font-size: var(--fs-meta); }
 
 .nook-app .app { height: 100dvh; display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); overflow: hidden; background: var(--surface-page); }
 
@@ -45,13 +47,13 @@ body:has(.nook-app) { margin: 0; overflow: hidden; background: var(--brand-paper
 .nook-app .conversation-link.unread > span:not(.avatar):not(.channel-prefix):not(.count) { font-weight: 600; }
 .nook-app .channel-prefix { width: 17px; flex: none; color: var(--ink-faint); font-size: 17px; font-weight: 500; line-height: 1; text-align: center; }
 .nook-app .conversation-link.selected .channel-prefix { color: var(--brand-rose); }
-.nook-app .count { min-width: 18px; height: 18px; margin-left: auto; padding: 0 6px; border-radius: var(--r-pill); background: var(--accent); color: var(--accent-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center; }
+.nook-app .count { min-width: 18px; height: 18px; margin-left: auto; padding: 0 6px; border-radius: var(--r-pill); background: var(--accent); color: var(--accent-text); font-size: var(--fs-meta); font-weight: 600; line-height: 18px; text-align: center; }
 .nook-app .conversation-link .count { background: var(--wash-select); color: var(--ink); }
 .nook-app .conversation-link.selected .count { background: var(--surface-raised); }
 .nook-app .profile { display: flex; width: calc(100% - 24px); min-height: 44px; align-items: center; gap: 10px; margin: 8px 12px 12px; padding: 0 10px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
 .nook-app .profile > span:not(.sr-only) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nook-app .avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 12px; font-weight: 500; letter-spacing: .01em; }
-.nook-app .avatar.small { width: 24px; height: 24px; font-size: 11px; }
+.nook-app .avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: var(--fs-meta); font-weight: 500; letter-spacing: .01em; }
+.nook-app .avatar.small { width: 24px; height: 24px; }
 
 /* The header and the grid under it */
 
@@ -64,7 +66,7 @@ body:has(.nook-app) { margin: 0; overflow: hidden; background: var(--brand-paper
 .nook-app .header-actions { display: flex; flex: none; align-items: center; gap: var(--s2); }
 .nook-app .decisions-toggle { gap: 0; }
 .nook-app .decisions-toggle[aria-expanded=true] { background: var(--wash); color: var(--ink); }
-.nook-app .header-count { margin-left: 6px; color: var(--ink-soft); font-size: 12px; font-weight: 600; }
+.nook-app .header-count { margin-left: 6px; color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 600; }
 .nook-app .needs-you-dot { width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: var(--accent); }
 .nook-app .header-members { display: flex; min-height: 32px; align-items: center; padding: 0 8px 0 14px; border-radius: var(--r-pill); }
 .nook-app .header-members:hover { background: var(--wash); }
