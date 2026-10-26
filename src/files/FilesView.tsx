@@ -1,3 +1,4 @@
+import {formatTime} from '../chat/format-time'
 import {InertPreview} from './InertPreview'
 import {useCallback,useEffect,useId,useRef,useState} from 'react'
 import {api,ApiError} from '../chat/api'
@@ -50,7 +51,7 @@ export function FilesView({conversations,users,user,conversation,revision,privat
    const room=conversations.find(room=>room.id===file.conversation)
    return <article className="search-result" aria-label={'File '+file.name} key={file.id}>
     <a className="collection-download" href={`/api/${file.source==='imported'?'import-files':'attachments'}/${encodeURIComponent(file.id)}/download`} download={file.name}>{file.name}</a>
-    <p className="search-meta">{room?(room.kind==='dm'?'':'# ')+conversationName(room,user)+' · ':''}{file.authorName}{file.source==='imported'?' · Imported':''} · <time dateTime={file.created}>{new Date(file.created).toLocaleString()}</time> · {Math.max(1,Math.round(file.size/1024))} KB · {file.mime}</p>
+    <p className="search-meta">{room?(room.kind==='dm'?'':'# ')+conversationName(room,user)+' · ':''}{file.authorName}{file.source==='imported'?' · Imported':''} · <time dateTime={file.created}>{formatTime(file.created)}</time> · {Math.max(1,Math.round(file.size/1024))} KB · {file.mime}</p>
     <InertPreview attachment={file} accessEpoch={key+':'+revision} onDenied={denied}/>
     <ImagePreview attachment={file} accessEpoch={key+':'+revision} onDenied={denied}/>
     <button className="soft-button nook-file-action" onClick={()=>{if(current())onOpen(file.conversation,file.message,file.parent)}}>Open in conversation</button>

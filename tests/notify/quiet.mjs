@@ -63,7 +63,7 @@ export async function quietJourney({installation,rowan,sam,room,say,browser,evid
    const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:900}}),at=rowan.cookie.indexOf('=')
    try{
     await context.addCookies([{name:rowan.cookie.slice(0,at),value:rowan.cookie.slice(at+1),url:installation.origin}]);const page=await context.newPage();await page.goto(installation.origin+'/app?view=you')
-    const section=page.getByRole('region',{name:'Your quiet schedule',exact:true});await section.getByLabel('Quiet time zone',{exact:true}).fill('America/New_York');await section.getByLabel('Friday quiet enabled',{exact:true}).uncheck();await section.getByRole('button',{name:'Save quiet schedule',exact:true}).click();await expect(section.getByRole('status')).toContainText('saved')
+    const section=page.getByRole('region',{name:'Your quiet schedule',exact:true});await section.getByLabel('Quiet time zone',{exact:true}).selectOption('America/New_York');await section.getByLabel('Friday quiet enabled',{exact:true}).uncheck();await section.getByRole('button',{name:'Save quiet schedule',exact:true}).click();await expect(section.getByRole('status')).toContainText('saved')
     await section.getByRole('heading',{name:'Your quiet schedule',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:join(evidence,`quiet-${width}.png`)})
     await section.getByRole('group',{name:'Friday',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:join(evidence,`quiet-weekday-${width}.png`)})
     await section.getByRole('button',{name:'Snooze alerts for one hour',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:join(evidence,`quiet-exceptions-${width}.png`)})

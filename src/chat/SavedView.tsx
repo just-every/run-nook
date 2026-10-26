@@ -1,3 +1,4 @@
+import {formatTime} from './format-time'
 import {SavedReminder} from './SavedReminder'
 import {useEffect,useId,useRef,useState} from 'react'
 import {api} from './api'
@@ -46,7 +47,7 @@ export function SavedView({user,conversations,revision,privateSignal,onOpen,onEr
     {item.kind==='link'&&<a className="collection-url" href={item.url} target="_blank" rel="noopener noreferrer">{item.url}<span className="sr-only"> (opens in new tab)</span></a>}
    </>}
    {!item.unavailable&&<SavedReminder id={item.id} reminder={item.reminder??null} disabled={busy!==null} current={current} onChanged={()=>setReload(value=>value+1)} onError={onError}/>}
-   <div className="collection-footer"><span className="collection-meta">Saved <time dateTime={item.created}>{new Date(item.created).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}</time></span><button className="text-button" disabled={busy!==null} onClick={()=>void remove(item.id)}>{busy===item.id?'Removing…':'Remove from Saved'}</button></div>
+   <div className="collection-footer"><span className="collection-meta">Saved <time dateTime={item.created}>{formatTime(item.created)}</time></span><button className="text-button" disabled={busy!==null} onClick={()=>void remove(item.id)}>{busy===item.id?'Removing…':'Remove from Saved'}</button></div>
   </li>)}</ol>}
   {loading&&!page&&<p className="muted">Loading saved items…</p>}
   {page&&!page.items.length&&!conversations.length&&<div className="empty-state"><h2>Save something for later</h2><a className="soft-button" href="/app?view=channels">Browse channels</a></div>}
