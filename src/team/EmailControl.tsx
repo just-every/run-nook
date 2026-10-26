@@ -1,3 +1,4 @@
+import {formatTime} from '../chat/format-time'
 import {VacationSettings} from '../notify/VacationSettings';
 import {DigestSettings} from '../digests/DigestSettings'
 import {QuietSettings} from '../notify/QuietSettings'
@@ -7,8 +8,7 @@ import type {TeamRequest} from './types'
 type Problem={error:string;retrying?:boolean;at:number}
 type Settings={awayEmail:boolean;awayInterval:number;broadcasts:boolean;mentions:boolean;urgent:boolean;urgentQuiet:boolean;address:string;problem:Problem|null;notDelivered:(Problem&{recipient:string})[];workspace:{sending:'suppressed'|'provider'|'not-set-up';notDelivered:(Problem&{count:number})|null}|null}
 const reasons:Record<string,string>={'not-set-up':'email sending is not set up','refused':'the mail service refused it','rate-limited':'the mail service asked Nook to slow down','uncertain':'the mail service did not confirm it'}
-const when=(at:number)=>new Date(at).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
-const why=(p:Problem)=>`${reasons[p.error]??'it could not be sent'}, ${when(p.at)}${p.retrying?'; trying again':''}`
+const why=(p:Problem)=>`${reasons[p.error]??'it could not be sent'}, ${formatTime(p.at)}${p.retrying?'; trying again':''}`
 // C14: email is off until the member turns it on. Choices save as they change.
 export function EmailControl({request,initial,localDevelopment=false}:{request:TeamRequest;initial?:Settings;localDevelopment?:boolean}){
  const [settings,setSettings]=useState<Settings|null>(initial??null),[notice,setNotice]=useState('')

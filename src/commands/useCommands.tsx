@@ -1,3 +1,4 @@
+import {formatTime} from '../chat/format-time'
 import {commandIntent} from './intents'
 import {useEffect,useRef,useState} from 'react'
 import type {Conversation,Person} from '../chat/types'
@@ -49,7 +50,7 @@ export function useCommands(p:Props){
    if(name==='dnd'){
     const time=/^\d+\s+(minute|hour|day)s?$/i.test(args)?'in '+args:args,profile=await call<{profile:Person}>('profile'),zone=profileTimeZone(profile.profile)
     const parsed=parseReminder('me '+time+' to pause notifications',zone),due=parsed.due
-    confirm('Pause notifications','Pause until '+new Date(due).toLocaleString([],{timeZone:zone})+' ('+zone+')?',()=>call('settings',{dndUntil:due},'PATCH'),saved);return true
+    confirm('Pause notifications','Pause until '+formatTime(due,{timeZone:zone})+' ('+zone+')?',()=>call('settings',{dndUntil:due},'PATCH'),saved);return true
    }
    if(name==='status'){
     const emoji=/^(:[^: ]+:|[^\p{L}\p{N}\s]+)\s*/u.exec(args),text=emoji?args.slice(emoji[0].length):args
