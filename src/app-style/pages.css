@@ -11,7 +11,7 @@
 .nook-app .search-form { display: flex; align-items: center; gap: var(--s3); margin: 0 0 var(--s4); }
 .nook-app .search-form .field { flex: 1; margin: 0; }
 .nook-app .search-form .field input { height: 44px; padding: 0 2px; border: 0; border-bottom: 1px solid var(--line-field); border-radius: 0; background: transparent; font-size: 17px; }
-.nook-app .search-form .field input:focus-visible { border-bottom-color: var(--ink); box-shadow: 0 1px 0 0 var(--ink); }
+.nook-app .search-form .field input:focus-visible { border-bottom: 2px solid var(--ink); box-shadow: none; }
 .nook-app .search-form .field input::placeholder { color: var(--ink-soft); opacity: 1; }
 .nook-app .search-result { padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
 .nook-app .search-meta { margin: 0 0 2px; color: var(--ink-soft); font-size: var(--fs-meta); }

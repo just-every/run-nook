@@ -29,5 +29,5 @@
 .nook-app .long-message-actions { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-block: 6px; }
 .nook-app .composer .builtin-suggestions { grid-area: commands; }
 
-.nook-app .composer{max-height:72dvh;overflow-y:auto}.nook-app .composer textarea{max-height:25dvh}.nook-app .composition-pickers input{border:1px solid var(--line-field);border-radius:var(--r-control);padding:8px 10px;background:var(--surface-raised);font:inherit}.nook-app .builtin-suggestions .soft-button{justify-content:flex-start;flex-wrap:wrap;text-align:left}@media(max-width:600px){.nook-app .composer{max-height:65dvh}}
+.nook-app .composer{max-height:72dvh;overflow-y:auto}.nook-app .composer textarea{max-height:25dvh}.nook-app .composition-pickers input{border:0;border-radius:var(--r-control);padding:8px 10px;background:var(--wash);color:var(--ink);font:inherit}.nook-app .composition-pickers input:focus-visible{outline:none;background:var(--wash-select)}.nook-app .builtin-suggestions .soft-button{justify-content:flex-start;flex-wrap:wrap;text-align:left}@media(max-width:600px){.nook-app .composer{max-height:65dvh}}
 .nook-app .composer{grid-template-rows:repeat(9,max-content);align-content:start}

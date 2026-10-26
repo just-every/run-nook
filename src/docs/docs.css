@@ -1,6 +1,6 @@
 /* The Nook guides in the homepage's look (brand-nook-s3 docs pick A): paper, the
-   homepage header and footer, Nook Display titles, a rose-wash current page with a
-   berry rule, and the nook arch tucked into the next-page card. */
+   homepage header and footer, Nook Display titles, a rose-wash current page, and
+   the nook arch tucked into the next-page card. */
 
 .nook-docs {
   min-height: 100vh;
@@ -55,15 +55,14 @@ body:has(.nook-docs) { margin: 0; background: var(--brand-paper); }
 .docs-nav-group ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
 .docs-nav-group li a {
   display: block;
-  padding: 7px 12px;
-  border-left: 3px solid transparent;
-  border-radius: 0 12px 12px 0;
+  padding: 7px 12px 7px 15px;
+  border-radius: 12px;
   color: var(--brand-ink);
   font-size: 16px;
   line-height: 1.4;
 }
 .docs-nav-group li a:hover { background: #f5ebe4; }
-.docs-nav-group li a[aria-current="page"] { border-left-color: var(--brand-berry); background: var(--brand-rose-wash); font-weight: 600; }
+.docs-nav-group li a[aria-current="page"] { background: var(--brand-rose-wash); font-weight: 600; }
 
 /* The page */
 
@@ -115,7 +114,7 @@ body:has(.nook-docs) { margin: 0; background: var(--brand-paper); }
   tab-size: 2;
 }
 .docs-prose pre code { color: inherit; font: inherit; white-space: pre; }
-.docs-prose blockquote { margin: 24px 0; padding: 14px 20px; border-radius: 0 14px 14px 0; border-left: 3px solid var(--brand-rose); background: #fbefe9; }
+.docs-prose blockquote { margin: 24px 0; padding: 14px 20px; border-radius: 14px; background: #fbefe9; }
 .docs-prose blockquote p:last-child { margin-bottom: 0; }
 .docs-prose hr { height: 1px; margin: 36px 0; border: 0; background: var(--brand-hairline); }
 .docs-prose .docs-table { max-width: 100%; margin: 22px 0; overflow: auto; border: 1.5px solid var(--brand-hairline); border-radius: 14px; background: var(--brand-card); }
