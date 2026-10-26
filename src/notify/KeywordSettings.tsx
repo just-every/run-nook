@@ -10,7 +10,7 @@ export function KeywordSettings({request}:{request:TeamRequest}){
  return <section className="team-notifications email-notifications" aria-labelledby="keywords-title"><strong id="keywords-title">Keywords</strong>
   <p>Get a notification when someone else writes one of your words or phrases in a conversation you can read. Only you can see this list. Matching is case-insensitive and by whole word; up to 20 keywords of 64 characters each.</p>
   <form onSubmit={e=>{e.preventDefault();const word=draft.trim();if(word){void save({keywords:[...state.keywords,word]},'Keyword added.').then(()=>setDraft(''))}}}>
-   <label>New keyword<input value={draft} maxLength={64} onChange={e=>setDraft(e.target.value)}/></label>
+   <label className="field">New keyword<input value={draft} maxLength={64} onChange={e=>setDraft(e.target.value)}/></label>
    <button className="soft-button" disabled={busy||!draft.trim()||state.keywords.length>=20}>Add keyword</button></form>
   {state.keywords.length>0&&<ul aria-label="Your keywords">{state.keywords.map(word=><li key={word}>{word} <button className="soft-button" disabled={busy} onClick={()=>void save({keywords:state.keywords.filter(w=>w!==word)},'Keyword removed.')}>Remove {word}</button></li>)}</ul>}
   <label><input type="checkbox" checked={state.keywordsInMuted} disabled={busy} onChange={e=>void save({keywordsInMuted:e.target.checked},'Keyword choice saved.')}/>Also notify me for keywords in muted conversations</label>

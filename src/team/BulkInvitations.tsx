@@ -22,8 +22,8 @@ export function BulkInvitations({request}:{request:TeamRequest}){
  const flagged=preview?preview.rows.filter(r=>r.status!=='ok'):[]
  return <div className="team-section"><h2>Invite many people</h2>
   <p>Paste one person per line as <code>email, name, role, channels</code> (role is member or guest; separate channels with a semicolon), or upload a CSV. Up to {1000} rows. Nothing is sent until you review the preview.</p>
-  <label>Paste rows or upload a CSV<textarea rows={6} value={csv} onChange={e=>{setCsv(e.target.value);setPreview(null)}} maxLength={262144}/></label>
-  <label>Upload a CSV file<input type="file" accept=".csv,text/csv,text/plain" onChange={async e=>{const file=e.target.files?.[0];if(file){setCsv(await file.text());setPreview(null)}e.target.value=''}}/></label>
+  <label className="field">Paste rows or upload a CSV<textarea rows={6} value={csv} onChange={e=>{setCsv(e.target.value);setPreview(null)}} maxLength={262144}/></label>
+  <label className="field">Upload a CSV file<input type="file" accept=".csv,text/csv,text/plain" onChange={async e=>{const file=e.target.files?.[0];if(file){setCsv(await file.text());setPreview(null)}e.target.value=''}}/></label>
   <button className="soft-button" disabled={busy||!csv.trim()} onClick={()=>void review()}>Preview invitations</button>
   {preview&&<section aria-label="Invitation preview"><p>{preview.counts.total} rows: {preview.counts.sendable} ready to send, {flagged.length} flagged.</p>
    {flagged.length>0&&<ul className="team-people">{flagged.map(r=><li key={r.line}><div className="team-person"><strong>Line {r.line}: {r.email||'(no address)'}</strong><small>{r.reason}</small></div></li>)}</ul>}
