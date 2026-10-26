@@ -65,7 +65,7 @@ export function ReminderEditor({conversation,source,sourceKind,initialPhrase,exi
   finally{if(current())setBusy(null)}
  }
  return <form onSubmit={event=>void inspect(event)}>
-  {existing&&<div className="schedule-preview"><h3>Current reminder</h3><p className="message-body">{existing.text}</p><p>{existing.local_at.replace('T',' ')} · {existing.zone} · {repeats[existing.recurrence]}</p></div>}
+  {existing&&<div className="schedule-preview"><h3>Current reminder</h3><p className="message-body">{existing.text}</p><p>{formatTime(existing.next_due,{timeZone:existing.zone})} · {existing.zone} · {repeats[existing.recurrence]}</p></div>}
   {source&&<p className="dialog-note">Linked to the {sourceKind==='attachment'?'file':'message'} while you have access.</p>}
   {!!members.length&&!existing&&!source&&<label className="field">Choose a participant<select defaultValue="" disabled={!!busy} onChange={event=>{if(!event.target.value)return;clearPreview();setPhrase(value=>/^(\/remind\s+)?(?:me|[@#][^\s]+)\s*/i.test(value)?value.replace(/^(\/remind\s+)?(?:me|[@#][^\s]+)\s*/i,'/remind @'+event.target.value+' '):'/remind @'+event.target.value+' '+value)}}><option value="">Keep the target in your phrase</option>{members.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label>}
   <div className="field"><label htmlFor={fieldId+'-phrase'}>Reminder</label><textarea id={fieldId+'-phrase'} name="phrase" value={phrase} onChange={event=>{clearPreview();setPhrase(event.target.value)}} placeholder={'/remind me "Call Ana" in 20 minutes'} required readOnly={!!busy} rows={4} autoFocus/></div>
@@ -77,7 +77,7 @@ export function ReminderEditor({conversation,source,sourceKind,initialPhrase,exi
    <p className="message-body">{preview.text}</p>
    <p>Audience: {preview.audience}</p>
    <p>Due: {formatTime(preview.due,{timeZone:preview.zone})} · {preview.zone}</p>
-   <p>Local time: {preview.localAt.replace('T',' ')} · {repeats[preview.recurrence]}</p>
+   <p>{repeats[preview.recurrence]}</p>
    <button className="text-button" type="button" disabled={!!busy} onClick={clearPreview}>Clear preview</button>
   </div>}
   {preview?.broadcast&&preview.conversation&&<ScheduledBroadcast conversation={preview.conversation} body={'Reminder: '+preview.text} confirmed={confirmBroadcast} onConfirm={setConfirmBroadcast} signal={privateSignal}/>}
