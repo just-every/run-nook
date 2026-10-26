@@ -110,7 +110,7 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     await profile.getByRole('button',{name:'Save profile',exact:true}).click();await expect(profile.getByRole('status')).toContainText('Profile saved')
     assert.equal((await call('/api/profile',undefined,member)).profile.typingEnabled,false)
     await profile.scrollIntoViewIfNeeded();if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`profile-${width}.png`)})
-    await page.goto(base+'/app?view=people');await page.getByLabel('Search people',{exact:true}).fill('Customer Success');await page.getByRole('button',{name:'Search people',exact:true}).click()
+    await page.goto(base+'/app?view=people');await page.getByLabel('Search people',{exact:true}).fill('Customer Success');await page.getByLabel('Search people',{exact:true}).press('Enter')
     await expect(page.locator('.people-directory .team-people>li')).toHaveCount(1)
     await expect(page.locator('.people-directory .team-person').filter({hasText:'Elena Rivera'})).toBeVisible()
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`people-${width}.png`)})

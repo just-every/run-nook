@@ -63,7 +63,7 @@ export async function filesBrowser({origin,owner,member,destination,sql}){
     await page.goto(base+'/app?view=you');await expect(page.locator('.nook-app')).toHaveAttribute('data-live-connected','true');if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`you-${width}.png`)});await page.locator('.profile-page').getByRole('button',{name:'Files',exact:true}).click()
     const textCard=page.getByRole('article',{name:'File '+document.name,exact:true}),imageCard=page.getByRole('article',{name:'File '+image.name,exact:true})
     await expect(textCard).toBeVisible();await expect(imageCard.getByRole('img',{name:image.name,exact:true})).toBeVisible()
-    await page.getByLabel('Conversation',{exact:true}).selectOption(room.id)
+    await page.getByText('Filters',{exact:true}).click();await page.getByLabel('Conversation',{exact:true}).selectOption(room.id)
     await expect(textCard).toBeVisible();await expect(imageCard).toBeVisible()
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`files-${width}.png`)})
     await page.getByLabel('Conversation',{exact:true}).selectOption('')
@@ -98,7 +98,7 @@ export async function filesBrowser({origin,owner,member,destination,sql}){
     await call(`/api/conversations/${room.id}/members`,{user:member.user.id,remove:true});await call(`/api/conversations/${imported.conversation}/members`,{user:member.user.id,remove:true})
     await page.goto(protectedFilesURL);await expect(textCard).toHaveCount(0);await expect(imageCard).toHaveCount(0);await expect(page.getByRole('navigation',{name:'Conversation content',exact:true})).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`unavailable-${width}.png`)})
-    await page.goto(base+'/app?view=files');await expect(page.getByLabel('File type',{exact:true})).toBeVisible()
+    await page.goto(base+'/app?view=files');await page.getByText('Filters',{exact:true}).click();await expect(page.getByLabel('File type',{exact:true})).toBeVisible()
     await expect(textCard).toHaveCount(0);await expect(imageCard).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`revoked-${width}.png`)})
     // Separately prove live withdrawal without reloading the protected view.
