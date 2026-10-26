@@ -108,6 +108,10 @@
 .nook-app .composer-routing { grid-area: routing; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); padding: 6px 8px 10px 0; }
 .nook-app .composer-routing .field { min-width: 0; margin: 0; gap: var(--s1); font-size: var(--fs-meta); }
 .nook-app .composer-routing .field:last-child { grid-column: 1 / -1; }
+/* Fields inside the composer (the mention finder, routing, clip upload) sit on a quiet wash with no border of their
+   own: the composer's one border carries focus, and the focused field takes the rose wash. */
+.nook-app .composer :is(.field :is(input, textarea, select), .composition-pickers input, input[type=file]:not(.attach-button *)) { border-color: transparent; background-color: var(--wash); }
+.nook-app .composer :is(.field :is(input, textarea, select), .composition-pickers input, input[type=file]:not(.attach-button *)):focus-visible { outline: none; border-color: transparent; box-shadow: none; background-color: var(--wash-select); }
 .nook-app .staged-files { grid-area: staged; display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 8px 6px 0; }
 .nook-app .staged-files > span { display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 10px; border: 1px solid var(--line); border-radius: var(--s2); font-size: 13px; overflow-wrap: anywhere; }
 .nook-app .staged-files .icon-button { width: 24px; height: 24px; }
