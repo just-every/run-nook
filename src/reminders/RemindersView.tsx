@@ -22,17 +22,18 @@ const repeats={none:'Once',daily:'Every day',weekdays:'Every weekday',weekly:'Ev
 
 export function RemindersView({revision,privateSignal,userId,onError,onOpen,refresh,conversations}:Props){
  const [page,setPage]=useState<ReminderPage|null>(null),[editor,setEditor]=useState<{existing?:Reminder}|null>(null),[busy,setBusy]=useState(false)
- const readEpoch=useRef(0),writing=useRef(false)
+ const readEpoch=useRef(0),writing=useRef(false),emptyOpened=useRef(false)
  const current=usePrivateScope(privateSignal,'reminders'),dialog=useRef<HTMLDialogElement>(null),titleId=useId()
  useEffect(()=>{
   let cancelled=false;const epoch=++readEpoch.current
   void api<ReminderPage>('reminders').then(next=>{if(!cancelled&&current()&&!writing.current&&epoch===readEpoch.current)setPage(next)}).catch(error=>{if(!cancelled&&current())onError(error)})
   return()=>{cancelled=true}
  },[revision,current,onError])
+ useEffect(()=>{if(!page)return;if(page.items.length){emptyOpened.current=false;return}if(!emptyOpened.current){emptyOpened.current=true;setEditor({})}},[page])
  useEffect(()=>{
   if(!editor)return
   const trigger=document.activeElement as HTMLElement|null
-  dialog.current?.showModal()
+  dialog.current?.showModal();dialog.current?.querySelector<HTMLTextAreaElement>('textarea[name="phrase"]')?.focus()
   return()=>{if(trigger?.isConnected)trigger.focus({preventScroll:true})}
  },[editor])
  const act=async(item:Reminder,action:'complete'|'snooze'|'cancel')=>{
@@ -86,7 +87,6 @@ export function RemindersView({revision,privateSignal,userId,onError,onOpen,refr
     </div>
    </article>
   })}
-  {page&&!page.items.length&&<div className="empty-state"><h2>A reminder at the right time</h2><p>Create one from plain text, or choose Remind me on a message or file.</p></div>}
   {page?.hasMore&&<button className="soft-button" disabled={busy} onClick={()=>void more()}>More reminders</button>}
  </div>{editor&&<dialog ref={dialog} aria-labelledby={titleId} onKeyDown={containDialogFocus} onCancel={event=>{event.preventDefault();setEditor(null)}}>
   <div className="dialog-heading"><h2 id={titleId}>{editor.existing?'Edit reminder':'Create reminder'}</h2><button className="icon-button" aria-label="Close" onClick={()=>setEditor(null)}><IconClose/></button></div>
