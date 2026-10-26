@@ -1,3 +1,4 @@
+import {profileTimeZone} from './profiles/time-zone'
 import {openDirect} from './chat/open-direct'
 import {NotificationDefaults} from './team/NotificationDefaults';
 import {EmailOffer} from './notify/EmailOffer';
@@ -75,7 +76,7 @@ export function ChatScreen({initial}:{initial?:InitialWorkspace}) {
 }
 function Workspace({initial}:{initial:InitialWorkspace}) {
  const {route,navigate}=useLocation(initial.route),w=useWorkspace(initial,route,navigate),[dialog,setDialog]=useState<DialogState|null>(null)
- useBroadcastPresence(w.user.id,w.privateSignal,w.user.zone,w.user.presenceEnabled!==false)
+ useBroadcastPresence(w.user.id,w.privateSignal,profileTimeZone(w.user),w.user.presenceEnabled!==false)
  useProfileExpiry(w.user.status?.expiresAt,w.snapshot?.attention.observedAt,()=>void w.refresh())
  const [showUnreads,setShowUnreads]=useState(true)
  useEffect(()=>{setShowUnreads(localStorage.getItem('nook:unreads:'+w.user.id)!=='hidden')},[w.user.id])

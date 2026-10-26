@@ -1,3 +1,4 @@
+import {profileTimeZone} from './time-zone'
 import {useEffect,useRef,useState} from 'react'
 import {api} from '../chat/api'
 import {useProfileExpiry} from './useExpiry'
@@ -54,7 +55,7 @@ export function PeopleDirectory({userId,revision,privateSignal,onSelect}:Props){
   {field&&<div className="search-chips nook-filter-chips"><button className="soft-button" aria-label="Remove field filter" onClick={()=>{setField('');setValue('')}}>{fields?.fields.find(item=>item.id===field)?.label}{value?': '+value:''}<span aria-hidden="true"> ×</span></button></div>}
   {error&&<p role="alert">{error}</p>}
   {page?<><span className="sr-only" role="status">{page.items.length} people loaded{page.hasMore?', more available':''}</span>
-   <ul className="team-people">{page.items.map(person=><li key={person.id} className="nook-person-row">{onSelect?<button className="nook-person-open" onClick={()=>onSelect(person)} aria-label={(person.id===userId?'View profile for ':'Message ')+person.name}><span className="team-person"><strong>{person.name}</strong><span className="nook-person-meta">{[person.status?[person.status.emoji,person.status.text].filter(Boolean).join(' '):'',person.zone,...person.fields.filter(item=>item.value).map(item=>item.label+': '+item.value)].filter(Boolean).join(' · ')}</span></span><span className="nook-row-action">{person.id===userId?'Profile':'Message'}</span></button>:<span className="team-person"><strong>{person.name}</strong><span>{person.status?.text}</span></span>}</li>)}</ul>
+   <ul className="team-people">{page.items.map(person=><li key={person.id} className="nook-person-row">{onSelect?<button className="nook-person-open" onClick={()=>onSelect(person)} aria-label={(person.id===userId?'View profile for ':'Message ')+person.name}><span className="team-person"><strong>{person.name}</strong><span className="nook-person-meta">{[person.status?[person.status.emoji,person.status.text].filter(Boolean).join(' '):'',person.id===userId?profileTimeZone(person):person.zone,...person.fields.filter(item=>item.value).map(item=>item.label+': '+item.value)].filter(Boolean).join(' · ')}</span></span><span className="nook-row-action">{person.id===userId?'Profile':'Message'}</span></button>:<span className="team-person"><strong>{person.name}</strong><span>{person.status?.text}</span></span>}</li>)}</ul>
    {!page.items.length&&<p className="muted">No people match your search.</p>}
    {page.hasMore&&<button className="soft-button" disabled={busy} onClick={()=>void more()}>{busy?'Loading…':'Load more people'}</button>}
   </>:busy&&<p role="status">Loading people…</p>}
