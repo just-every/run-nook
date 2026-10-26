@@ -51,8 +51,8 @@ export function useCommands(p:Props){
     confirm('Pause notifications','Pause until '+new Date(due).toLocaleString([],{timeZone:profile.profile.zone})+' ('+profile.profile.zone+')?',()=>call('settings',{dndUntil:due},'PATCH'),saved);return true
    }
    if(name==='status'){
-    const profile=await call<{profile:{zone:string}}>('profile'),emoji=/^(:[^: ]+:|[^\p{L}\p{N}\s]+)\s*/u.exec(args),text=emoji?args.slice(emoji[0].length):args
-    confirm('Set status',args||'Clear your status?',()=>call('profile',{zone:profile.profile.zone,status:args?{emoji:({'palm_tree':'🌴','smile':'😀','calendar':'📅','house':'🏠'} as Record<string,string>)[emoji?.[1].replaceAll(':','')??'']??emoji?.[1]??'',text,clearAfter:'never'}:null}),saved);return true
+    const emoji=/^(:[^: ]+:|[^\p{L}\p{N}\s]+)\s*/u.exec(args),text=emoji?args.slice(emoji[0].length):args
+    confirm('Set status',args||'Clear your status?',()=>call('profile',{status:args?{emoji:({'palm_tree':'🌴','smile':'😀','calendar':'📅','house':'🏠'} as Record<string,string>)[emoji?.[1].replaceAll(':','')??'']??emoji?.[1]??'',text,clearAfter:'never'}:null}),saved);return true
    }
    if(['topic','rename','leave'].includes(name)){
     const c=room(),details=await call<{version:number;canManage:boolean;canLeave:boolean;leaveReason:string|null}>(`channels/${c.id}/details`)
