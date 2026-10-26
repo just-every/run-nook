@@ -1,5 +1,6 @@
 /* Checkboxes and file pickers wherever Nook draws its own forms (the app and the Slack
-   import page), in the accent from the installer's brand colour (berry by default). */
+   import page), in the accent from the installer's brand colour (berry by default).
+   A file picker is one field border with its choose button as plain text inside it. */
 
 :is(.nook-app, .imports-page) input[type=checkbox] {
   display: inline-grid;
@@ -38,18 +39,26 @@
   :is(.nook-app, .imports-page) input[type=checkbox]::after { display: none; }
 }
 
-:is(.nook-app, .imports-page) input[type=file] { min-height: 0; padding: 6px 10px; }
+:is(.nook-app, .imports-page) input[type=file]:not(.attach-button *) {
+  width: 100%;
+  min-height: 40px;
+  padding: 3px 12px 3px 3px;
+  border: 1px solid var(--line-field, #b3a19a);
+  border-radius: 10px;
+  background-color: var(--brand-card);
+}
+:is(.nook-app, .imports-page) input[type=file]:not(.attach-button *):focus-visible { outline: none; border-color: var(--brand-ink); box-shadow: 0 0 0 1px var(--brand-ink); }
 :is(.nook-app, .imports-page) input[type=file]::file-selector-button {
-  margin-right: 14px;
-  padding: 6px 16px;
-  border: 1.5px solid var(--brand-ink);
-  border-radius: var(--brand-radius-pill);
+  min-height: 32px;
+  margin-right: 10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
   background: transparent;
   color: var(--brand-ink);
   font: inherit;
-  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }
-:is(.nook-app, .imports-page) input[type=file]::file-selector-button:hover { background: var(--brand-rose-wash); }
+:is(.nook-app, .imports-page) input[type=file]:not(:disabled):hover::file-selector-button { background: var(--brand-rose-wash); }
 :is(.nook-app, .imports-page) input[type=file]:disabled::file-selector-button { opacity: 0.55; cursor: not-allowed; }
