@@ -34,7 +34,7 @@ export function SavedView({user,conversations,revision,privateSignal,onOpen,onEr
   catch(reason){if(current()){setError('This item could not be removed.');onError(reason)}}finally{if(current())setBusy(null)}
  }
  return <section className="page-content saved-page"><div className="page-column">
-  <div className="collection-intro"><p className="muted">Only you can see your Saved list. Items appear newest saved first. Sources you can no longer access appear as unavailable.</p><button className="soft-button" aria-expanded={showForm} disabled={!conversations.length} onClick={()=>setShowForm(value=>!value)}>{showForm?'Cancel':'Save a link'}</button></div>
+  <div className="collection-intro"><p className="muted">Only you can see your Saved list.</p><button className="soft-button" aria-expanded={showForm} disabled={!conversations.length} onClick={()=>setShowForm(value=>!value)}>{showForm?'Cancel':'Save a link'}</button></div>
   {showForm&&<SaveLinkForm conversations={conversations} user={user} current={current} onError={onError} onSaved={()=>{setShowForm(false);setReload(value=>value+1)}}/>}
   {error&&<p className="warning" role="alert">{error} <button className="text-button" onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
   <div role="status" className="sr-only">{loading?'Loading saved items':page?`${page.items.length} saved items loaded`:''}</div>
@@ -64,5 +64,5 @@ function SaveLinkForm({conversations,user,current,onSaved,onError}:{conversation
   try{await api('saved',{conversation:form.get('conversation'),url});if(current())onSaved()}
   catch(reason){if(current()){setError(reason instanceof Error?reason.message:'The link could not be saved.');onError(reason)}}finally{if(current())setBusy(false)}
  }
- return <form className="save-link-form" onSubmit={event=>void submit(event)}><div className="field"><label htmlFor={fieldId+'-conversation'}>Conversation</label><select id={fieldId+'-conversation'} name="conversation" required disabled={busy}>{conversations.map(c=><option value={c.id} key={c.id}>{c.kind==='dm'?'':'# '}{conversationName(c,user)}</option>)}</select></div><label className="field">Link<input name="url" type="url" placeholder="https://" maxLength={2048} required disabled={busy}/></label><p className="muted">The link stays private to you and is available while you can access this conversation.</p>{error&&<p className="warning" role="alert">{error}</p>}<button className="send" disabled={busy}>{busy?'Saving…':'Save link'}</button></form>
+ return <form className="save-link-form" onSubmit={event=>void submit(event)}><div className="field"><label htmlFor={fieldId+'-conversation'}>Conversation</label><select id={fieldId+'-conversation'} name="conversation" required disabled={busy}>{conversations.map(c=><option value={c.id} key={c.id}>{c.kind==='dm'?'':'# '}{conversationName(c,user)}</option>)}</select></div><label className="field">Link<input name="url" type="url" placeholder="https://" maxLength={2048} required disabled={busy}/></label>{error&&<p className="warning" role="alert">{error}</p>}<button className="send" disabled={busy}>{busy?'Saving…':'Save link'}</button></form>
 }
