@@ -2,6 +2,7 @@ import {commandIntent} from './intents'
 import {useEffect,useRef,useState} from 'react'
 import type {Conversation,Person} from '../chat/types'
 import {builtinNames} from './catalog'
+import {profileTimeZone} from '../profiles/time-zone'
 import {parseReminder} from '../reminders/parse.mjs'
 import {ApiError} from '../chat/api'
 type Prompt={title:string;text:string;confirm?:()=>Promise<void>;confirmLabel?:string}
@@ -46,9 +47,9 @@ export function useCommands(p:Props){
    if(name==='away'||name==='active'){confirm('Change availability',name==='away'?'Set yourself away?':'Set yourself active?',()=>call('broadcast/presence',{page:'availability-command',visible:document.visibilityState==='visible',zone:Intl.DateTimeFormat().resolvedOptions().timeZone,away:name==='away'}),saved);return true}
    if(name==='mute'){const c=room(),old=await call<{muted:boolean}>(`conversations/${c.id}/preferences`);confirm('Conversation notifications',`${old.muted?'Unmute':'Mute'} ${c.name}?`,()=>call(`conversations/${c.id}/preferences`,{muted:!old.muted},'PATCH'),saved);return true}
    if(name==='dnd'){
-    const time=/^\d+\s+(minute|hour|day)s?$/i.test(args)?'in '+args:args,profile=await call<{profile:{zone:string}}>('profile')
-    const parsed=parseReminder('me '+time+' to pause notifications',profile.profile.zone),due=parsed.due
-    confirm('Pause notifications','Pause until '+new Date(due).toLocaleString([],{timeZone:profile.profile.zone})+' ('+profile.profile.zone+')?',()=>call('settings',{dndUntil:due},'PATCH'),saved);return true
+    const time=/^\d+\s+(minute|hour|day)s?$/i.test(args)?'in '+args:args,profile=await call<{profile:Person}>('profile'),zone=profileTimeZone(profile.profile)
+    const parsed=parseReminder('me '+time+' to pause notifications',zone),due=parsed.due
+    confirm('Pause notifications','Pause until '+new Date(due).toLocaleString([],{timeZone:zone})+' ('+zone+')?',()=>call('settings',{dndUntil:due},'PATCH'),saved);return true
    }
    if(name==='status'){
     const emoji=/^(:[^: ]+:|[^\p{L}\p{N}\s]+)\s*/u.exec(args),text=emoji?args.slice(emoji[0].length):args
