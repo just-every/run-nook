@@ -1,3 +1,4 @@
+import {formatTime} from './format-time'
 import {useEffect,useState} from 'react'
 import {api,messageWindow} from './api'
 import type {Conversation,FollowSource,Message,MessageWindow,Person} from './types'
@@ -38,7 +39,7 @@ function ThreadCard({item,expanded,toggle,user,conversations,privateSignal,refre
  const name=conversationName(conversation,user)
  return <article className="thread-card" aria-label={'Thread in '+name}>
   <div className="thread-context"><button className="text-button" onClick={()=>onOpen(item.root.conversation,item.root.id,item.root.id)}>{conversation.kind==='dm'?'':'# '}{name}</button>{item.unread>0&&<span className="count">{item.unread} unread {item.unread===1?'reply':'replies'}</span>}</div>
-  <div className="thread-author"><Avatar person={{id:item.root.author??'former',name:item.root.authorName}} size={28}/><strong>{item.root.authorName}</strong><time dateTime={item.root.created}>{new Date(item.root.created).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</time></div>
+  <div className="thread-author"><Avatar person={{id:item.root.author??'former',name:item.root.authorName}} size={28}/><strong>{item.root.authorName}</strong><time dateTime={item.root.created}>{formatTime(item.root.created)}</time></div>
   <p className="message-body thread-excerpt">{item.root.deleted?'Message deleted':excerpt(item.root.body)}</p>
   <p className="thread-source">{sourceText[item.source]}</p>
   <div className="thread-actions"><button className="soft-button" aria-expanded={expanded} onClick={toggle}>{expanded?'Close replies':conversation.archived?'View replies':'Reply in thread'}</button>{item.unread>0&&<button className="soft-button" disabled={busy} onClick={()=>void act(`messages/${item.root.id}/read`,{seq:item.lastSequence,conversation:item.root.conversation})}>Mark thread read</button>}<button className="text-button" disabled={busy} onClick={()=>void act(`messages/${item.root.id}/follow`,{follow:false})}>Unfollow thread</button></div>

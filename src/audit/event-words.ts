@@ -5,3 +5,4 @@ const events:Record<string,string>={
  'import.approved':'Approved an import','import.failed':'Import failed','import.withdrawn':'Withdrew an import','archive.import.complete':'Restored a backup','export.cancelled':'Cancelled an export','report.export':'Downloaded a report','bookmark.add':'Added a bookmark','bookmark.remove':'Removed a bookmark','bookmark.reorder':'Reordered bookmarks','forward.policy':'Changed forwarding permissions'
 }
 export function eventWords(kind:string){const words=kind.replace(/[._-]+/g,' ');return events[kind]??words.charAt(0).toUpperCase()+words.slice(1)}
+export const eventKinds=Object.keys(events)

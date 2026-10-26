@@ -1,3 +1,4 @@
+import {formatTime} from './format-time'
 import {SavedReminder} from './SavedReminder'
 import {useEffect,useId,useRef,useState} from 'react'
 import {api} from './api'
@@ -5,13 +6,12 @@ import type {Conversation,Person} from './types'
 import type {CollectionPage,SavedItem} from './collection-types'
 import {conversationName} from './Navigation'
 import {usePrivateScope} from './usePrivateScope'
-import {NookMark} from '../brand/NookMark'
 import '../app-style/collections.css'
 
 type Props={user:Person;conversations:Conversation[];revision:number;privateSignal:AbortSignal;onOpen:(conversation:string,focus:string,thread:string|null)=>void;onError:(error:unknown)=>void}
 export function SavedView({user,conversations,revision,privateSignal,onOpen,onError}:Props){
  const [page,setPage]=useState<CollectionPage<SavedItem>|null>(null),[loading,setLoading]=useState(false),[busy,setBusy]=useState<string|null>(null),[error,setError]=useState(''),[reload,setReload]=useState(0),[showForm,setShowForm]=useState(false)
- const current=usePrivateScope(privateSignal,'saved'),generation=useRef(0)
+ const current=usePrivateScope(privateSignal,'saved'),generation=useRef(0),emptyOpened=useRef(false)
  useEffect(()=>{const refresh=()=>setReload(value=>value+1);window.addEventListener('focus',refresh);return()=>window.removeEventListener('focus',refresh)},[])
  useEffect(()=>{
   let cancelled=false;const epoch=++generation.current,active=()=>!cancelled&&current()&&epoch===generation.current
@@ -22,6 +22,7 @@ export function SavedView({user,conversations,revision,privateSignal,onOpen,onEr
   void api<CollectionPage<SavedItem>>('saved').then(next=>{if(active())setPage(next)}).catch(reason=>{if(active()){setError('Saved items could not be loaded.');onError(reason)}}).finally(()=>{if(active())setLoading(false)})
   return()=>{cancelled=true;generation.current++;privateSignal.removeEventListener('abort',clear)}
  },[revision,reload,current,onError,privateSignal])
+ useEffect(()=>{if(!page)return;if(page.items.length){emptyOpened.current=false;return}if(!emptyOpened.current&&conversations.length){emptyOpened.current=true;setShowForm(true)}},[page,conversations.length])
  const more=async()=>{
   if(!page?.cursor||loading||busy||!current())return
   const epoch=generation.current;setLoading(true);setError('')
@@ -46,10 +47,10 @@ export function SavedView({user,conversations,revision,privateSignal,onOpen,onEr
     {item.kind==='link'&&<a className="collection-url" href={item.url} target="_blank" rel="noopener noreferrer">{item.url}<span className="sr-only"> (opens in new tab)</span></a>}
    </>}
    {!item.unavailable&&<SavedReminder id={item.id} reminder={item.reminder??null} disabled={busy!==null} current={current} onChanged={()=>setReload(value=>value+1)} onError={onError}/>}
-   <div className="collection-footer"><span className="collection-meta">Saved <time dateTime={item.created}>{new Date(item.created).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}</time></span><button className="text-button" disabled={busy!==null} onClick={()=>void remove(item.id)}>{busy===item.id?'Removing…':'Remove from Saved'}</button></div>
+   <div className="collection-footer"><span className="collection-meta">Saved <time dateTime={item.created}>{formatTime(item.created)}</time></span><button className="text-button" disabled={busy!==null} onClick={()=>void remove(item.id)}>{busy===item.id?'Removing…':'Remove from Saved'}</button></div>
   </li>)}</ol>}
   {loading&&!page&&<p className="muted">Loading saved items…</p>}
-  {page&&!page.items.length&&<div className="empty-state"><NookMark/><h2>Keep something for later</h2><p>Save a message or file from its conversation, or save a link here.</p></div>}
+  {page&&!page.items.length&&!conversations.length&&<div className="empty-state"><h2>Save something for later</h2><a className="soft-button" href="/app?view=channels">Browse channels</a></div>}
   {page?.cursor&&<button className="soft-button" disabled={loading||busy!==null} onClick={()=>void more()}>{loading?'Loading…':'Load more saved items'}</button>}
  </div></section>
 }
@@ -64,5 +65,5 @@ function SaveLinkForm({conversations,user,current,onSaved,onError}:{conversation
   try{await api('saved',{conversation:form.get('conversation'),url});if(current())onSaved()}
   catch(reason){if(current()){setError(reason instanceof Error?reason.message:'The link could not be saved.');onError(reason)}}finally{if(current())setBusy(false)}
  }
- return <form className="save-link-form" onSubmit={event=>void submit(event)}><div className="field"><label htmlFor={fieldId+'-conversation'}>Conversation</label><select id={fieldId+'-conversation'} name="conversation" required disabled={busy}>{conversations.map(c=><option value={c.id} key={c.id}>{c.kind==='dm'?'':'# '}{conversationName(c,user)}</option>)}</select></div><label className="field">Link<input name="url" type="url" placeholder="https://" maxLength={2048} required disabled={busy}/></label>{error&&<p className="warning" role="alert">{error}</p>}<button className="send" disabled={busy}>{busy?'Saving…':'Save link'}</button></form>
+ return <form className="save-link-form" onSubmit={event=>void submit(event)}><div className="field"><label htmlFor={fieldId+'-conversation'}>Conversation</label><select id={fieldId+'-conversation'} name="conversation" required disabled={busy} autoFocus>{conversations.map(c=><option value={c.id} key={c.id}>{c.kind==='dm'?'':'# '}{conversationName(c,user)}</option>)}</select></div><label className="field">Link<input name="url" type="url" placeholder="https://" maxLength={2048} required disabled={busy}/></label>{error&&<p className="warning" role="alert">{error}</p>}<button className="send" disabled={busy}>{busy?'Saving…':'Save link'}</button></form>
 }

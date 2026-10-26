@@ -32,7 +32,7 @@ export async function personalBrowser({origin,owner,member,destination='evidence
    await page.getByRole('button',{name:'Save vacation',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Vacation saved.'})).toBeVisible();
    await page.addScriptTag({content:await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await page.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);
    await page.screenshot({path:resolve(destination,`vacation-settings-${width}.png`),fullPage:true});
-   await page.goto(origin+'/app?view=attention');await expect(page.getByText(/Your vacation holds device and email alerts/)).toBeVisible();await page.screenshot({path:resolve(destination,`vacation-attention-${width}.png`),fullPage:true});
+   await page.goto(origin+'/app?view=attention');await expect(page.getByText(/Vacation holds alerts until/)).toBeVisible();await page.screenshot({path:resolve(destination,`vacation-attention-${width}.png`),fullPage:true});
    await page.goto(origin+'/app?view=you');await page.getByRole('button',{name:'End vacation',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Vacation ended.'})).toBeVisible();
    await page.goto(origin+'/app?conversation='+room.id);
    const draft='Before the Thursday rollout, ask Ana to confirm the West Coast support rotation.'

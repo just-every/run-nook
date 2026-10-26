@@ -71,7 +71,7 @@ export async function filesBrowser({origin,owner,member,destination,sql}){
     await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});assert.deepEqual(await page.evaluate(async()=>{const r=await window.axe.run(document.querySelector('.page-content'));return r.violations.filter(v=>['serious','critical'].includes(v.impact))}),[]);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.equal(await page.evaluate(()=>window.__rerHydration?.count??0),0)
     const zipCard=page.getByRole('article',{name:'File synthetic-nook-archive.zip',exact:true});await zipCard.scrollIntoViewIfNeeded();if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`inert-previews-${width}.png`)})
     await page.getByLabel('Conversation',{exact:true}).selectOption(room.id)
-    await page.getByLabel('File type',{exact:true}).selectOption('text')
+    await page.getByText('Filters',{exact:true}).click();await page.getByLabel('File type',{exact:true}).selectOption('text')
     await expect(textCard).toBeVisible();await expect(imageCard).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`text-${width}.png`)})
     const downloaded=page.waitForEvent('download');await textCard.getByRole('link',{name:document.name,exact:true}).click()

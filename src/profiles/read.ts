@@ -4,7 +4,7 @@ import {bounded,fieldVisible,profileIdentity,viewerSql} from './policy'
 import type {PeoplePage,Profile,ProfileResult} from './types'
 
 function projection(viewer:string,now:number){
- return `COALESCE(p.presence_enabled,1) AS presence_enabled,COALESCE(p.typing_enabled,1) AS typing_enabled,o.id,o.display_name AS name,COALESCE(p.zone,'UTC') AS zone,COALESCE(p.version,0) AS version,
+ return `COALESCE(p.presence_enabled,1) AS presence_enabled,COALESCE(p.typing_enabled,1) AS typing_enabled,o.id,o.display_name AS name,COALESCE(p.zone,'') AS zone,COALESCE(p.version,0) AS version,
  CASE WHEN p.status_expires IS NULL OR p.status_expires>${now} THEN p.status_emoji ELSE '' END AS emoji,
  CASE WHEN p.status_expires IS NULL OR p.status_expires>${now} THEN p.status_text ELSE '' END AS status_text,
  CASE WHEN p.status_expires>${now} THEN p.status_expires END AS expires,
@@ -20,6 +20,8 @@ export async function readProfile(c:Context,user=c.uid):Promise<ProfileResult>{
  const row=await c.one(`SELECT ${projection(viewer,now)} FROM oa_operators o LEFT JOIN nook_profiles p ON p.user=o.id WHERE o.id=? AND o.status='active' AND ${profileIdentity(viewer,'o.id')}`,[id])
  if(!row)fail(404,'Person unavailable')
  const item=profile(row)
+ // Own-profile callers use a concrete zone for status and scheduling operations.
+ if(!item.zone)item.zone='UTC'
  return {profile:item,nextExpiry:expiry([item]),observedAt:now}
 }
 
