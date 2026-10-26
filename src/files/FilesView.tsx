@@ -58,6 +58,6 @@ export function FilesView({conversations,users,user,conversation,revision,privat
   })}
   {page?.hasMore&&<button className="soft-button" disabled={loading} onClick={()=>void more()}>Load more files</button>}
   {loading&&<p className="muted">Loading files…</p>}
-  {page&&!page.items.length&&<p className="empty-state">No shared files match these filters.</p>}
+  {page&&!page.items.length&&<div className="empty-state">{selected||person||type?<p>No shared files match these filters.</p>:<><h2>No shared files yet</h2>{conversation?<button className="soft-button" onClick={()=>onOpen(conversation,'',null)}>Share a file</button>:<a className="soft-button" href="/app?view=channels">Share a file in a channel</a>}</>}</div>}
  </div></section>
 }
