@@ -1,8 +1,11 @@
 const events:Record<string,string>={
- 'session.started':'Signed in','session.revoked':'Revoked a session','membership.join':'Joined a channel','membership.leave':'Left a channel','membership.baseline':'Channel membership recorded','membership.access':'Changed workspace access','authority.role-status':'Changed a member’s role or status',
+ 'session.started':'Signed in','session.revoked':'Revoked a session','membership.join':'Joined a channel or conversation','membership.leave':'Left a channel or conversation','membership.baseline':'Channel or conversation membership recorded','membership.access':'Changed workspace access','authority.role-status':'Changed a member’s role or status',
  'channel.created':'Created a conversation','channel.converted':'Converted a group conversation','invitation.cancelled':'Cancelled an invitation','post.admin-override':'Posted with admin permission',
  'policy.posting':'Changed posting permissions','policy.default-channels':'Changed default channels','policy.broadcast':'Changed channel mention permissions','policy.profile-fields':'Changed profile fields','policy.export':'Changed export permissions','policy.channels':'Changed channel permissions','policy.files':'Changed file permissions','policy.notifications':'Changed notification defaults','policy.notifications.adopt':'Applied notification defaults','policy.import-door':'Changed import access','policy.import-key-revoked':'Revoked an import key',
  'import.approved':'Approved an import','import.failed':'Import failed','import.withdrawn':'Withdrew an import plan','archive.import.complete':'Restored a backup','export.cancelled':'Cancelled an export','report.export':'Downloaded a report','bookmark.add':'Added a bookmark','bookmark.remove':'Removed a bookmark','bookmark.reorder':'Reordered bookmarks','forward.policy':'Changed forwarding permissions'
 }
-export function eventWords(kind:string){const words=kind.replace(/[._-]+/g,' ');return events[kind]??words.charAt(0).toUpperCase()+words.slice(1)}
+// A membership row names the kind of conversation it belongs to; the Kind filter spans both, so it names both.
+const channel:Record<string,string>={'membership.join':'Joined a channel','membership.leave':'Left a channel','membership.baseline':'Channel membership recorded'}
+const direct:Record<string,string>={'membership.join':'Joined a direct conversation','membership.leave':'Left a direct conversation','membership.baseline':'Direct conversation membership recorded'}
+export function eventWords(kind:string,scopeKind?:string|null){const words=kind.replace(/[._-]+/g,' ');return (scopeKind&&(scopeKind==='dm'?direct:channel)[kind])||events[kind]||words.charAt(0).toUpperCase()+words.slice(1)}
 export const eventKinds=Object.keys(events)
