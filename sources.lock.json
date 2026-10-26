@@ -4137,7 +4137,7 @@
       "executable": false
     },
     "src/broadcast/PolicySettings.tsx": {
-      "sha256": "232e617503b4ee8b6c4b639e6b438fbe6d458640415345662b4bd02888df0a97",
+      "sha256": "4446446ce32505f11db6e1d4a77e26bf327dc316b35b4703a74b13208c307f1d",
       "executable": false
     },
     "src/broadcast/presence.ts": {
@@ -4153,7 +4153,7 @@
       "executable": false
     },
     "src/broadcast/settings.ts": {
-      "sha256": "4b92f2d45ac0c7a40ceff71b96370b01244f6d5d5d946d8ff23403d7e84138d0",
+      "sha256": "881d96da9b7bb1af937118180fe475441e45300cf82ae6cea98f3cbde818cbb0",
       "executable": false
     },
     "src/broadcast/usePresence.ts": {
