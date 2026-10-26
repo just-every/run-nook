@@ -3,11 +3,9 @@ import assert from 'node:assert/strict';
 import { readSlackZip } from '../src/imports/zip.mjs';
 import { inspectSlackArchive, captureSlackArchive } from '../src/imports/slack.mjs';
 import { zipFixture, slackFixture, fixtureUsers, fixtureReview } from './slack-import/fixture.mjs';
-test('ordinary stored, deflate and descriptor ZIPs preserve bytes without extraction', () => {
+test('ZIP admission preserves ordinary stored, deflate and descriptor bytes without extraction and rejects malicious names, aliases, symlinks, overlaps and format hazards', () => {
     for (const options of [{}, { deflate: true }, { deflate: true, descriptor: true }, { deflate: true, descriptor: true, descriptorSignature: false }])
         assert.equal(readSlackZip(zipFixture([['a/', ''], ['a/b.txt', 'café 👋']], options)).files.get('a/b.txt').toString(), 'café 👋');
-});
-test('ZIP admission rejects malicious names, aliases, symlinks, overlaps and format hazards', () => {
     for (const path of ['../escape', '/absolute', 'a\\b', 'a/../b', 'C:/x', 'a//b', 'cafe\u0301', 'a\0b', 'a／..／b', 'a\u200eb'])
         assert.throws(() => readSlackZip(zipFixture([[path, 'x']])), /ZIP_REJECTED/);
     for (const names of [['a', 'a'], ['A', 'a'], ['Ｋ', 'K'], ['a', 'a/b']])

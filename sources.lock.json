@@ -7197,7 +7197,7 @@
       "executable": false
     },
     "tests/slack-import.test.mjs": {
-      "sha256": "70e34ac4dc84d311a6167962f0b8c16c4dd5ec899394c1069f55ba9098af1a50",
+      "sha256": "fa138dc8de1bb100eae0df5fb76843bcc37c2867b8182f7b7b271ff20c1a8fdf",
       "executable": false
     },
     "tests/slack-import/archive-roundtrip.mjs": {
