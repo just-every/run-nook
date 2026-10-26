@@ -120,7 +120,7 @@ try {
             await page.goto(origin + '/imports');
             await page.reload();
             await page.getByRole('heading', { name: 'Import jobs' }).waitFor();
-            await page.getByRole('heading',{name:'Business import access',exact:true}).scrollIntoViewIfNeeded();await shot('business');
+            await page.getByRole('heading',{name:'Import access',exact:true}).scrollIntoViewIfNeeded();await shot('business');
             assert.ok(await page.getByRole('button', { name: 'Undo this import', exact: true }).count());
             const job = page.locator('.import-job').filter({ hasText: planned.planId });
             if (width === 390) {
@@ -132,12 +132,12 @@ try {
                 await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'evidence/nook-1/slack-undo-guard-1440.png',fullPage:true,animations:'disabled'});await page.setViewportSize({width:390,height:844});
             } else { await job.getByRole('button', { name: 'Undo this import', exact: true }).click(); await page.getByRole('status').filter({ hasText: 'undone' }).waitFor(); }
 
-            const business=page.locator('section').filter({has:page.getByRole('heading',{name:'Business import access',exact:true})});
-            await business.getByRole('checkbox',{name:'Allow Business imports',exact:true}).click();
-            await expect(business.getByRole('checkbox',{name:'Allow Business imports',exact:true})).toBeChecked();
-            const kid='retired-migration-key-'+width;await business.getByLabel('Revoke a Business signing key',{exact:true}).fill(kid);await business.getByRole('button',{name:'Revoke key',exact:true}).click();
+            const business=page.locator('section').filter({has:page.getByRole('heading',{name:'Import access',exact:true})});
+            await business.getByRole('checkbox',{name:'Allow connected imports',exact:true}).click();
+            await expect(business.getByRole('checkbox',{name:'Allow connected imports',exact:true})).toBeChecked();
+            const kid='retired-migration-key-'+width;await business.getByLabel('Key to revoke',{exact:true}).fill(kid);await business.getByRole('button',{name:'Revoke key',exact:true}).click();
             await expect(business.getByText(kid,{exact:true})).toBeVisible();await business.screenshot({path:`evidence/nook-1/business-revoked-${width}.png`,animations:'disabled'});
-            await business.getByRole('checkbox',{name:'Allow Business imports',exact:true}).click();await expect(business.getByRole('checkbox',{name:'Allow Business imports',exact:true})).not.toBeChecked();
+            await business.getByRole('checkbox',{name:'Allow connected imports',exact:true}).click();await expect(business.getByRole('checkbox',{name:'Allow connected imports',exact:true})).not.toBeChecked();
             await expect(business.getByText(kid,{exact:true})).toBeVisible();await business.screenshot({path:`evidence/nook-1/business-disabled-${width}.png`,animations:'disabled'});
         }
         finally {
