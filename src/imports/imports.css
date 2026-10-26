@@ -29,14 +29,6 @@ body:has(.imports-page){margin:0;background:var(--brand-paper)}
 :is(.nook-app, .imports-page) select:not([multiple],[size]:not([size="1"])):focus-visible { --rer-select-ink: var(--rer-text); }
 :is(.nook-app, .imports-page) select:not([multiple],[size]:not([size="1"])):disabled { --rer-select-ink: color-mix(in srgb, var(--rer-muted) 55%, transparent); }
 
-/* File pickers, shared the same way: the field's one border, with the choose button as a plain text button inside
-   it (a rose wash on hover), never a pill inside the border. The composer's paperclip keeps its hidden input. */
-:is(.nook-app, .imports-page) input[type=file]:not(.attach-button *) { width: 100%; min-height: 40px; padding: 3px 12px 3px 3px; border: 1px solid var(--line-field, #b3a19a); border-radius: 10px; background-color: var(--brand-card); }
-:is(.nook-app, .imports-page) input[type=file]:not(.attach-button *)::file-selector-button { min-height: 32px; margin-right: 10px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--brand-ink); font: inherit; font-weight: 600; cursor: pointer; }
-:is(.nook-app, .imports-page) input[type=file]:not(.attach-button *):not(:disabled):hover::file-selector-button { background: var(--brand-rose-wash); }
-:is(.nook-app, .imports-page) input[type=file]:not(.attach-button *):focus-visible { outline: none; border-color: var(--brand-ink); box-shadow: 0 0 0 1px var(--brand-ink); }
-:is(.nook-app, .imports-page) input[type=file]:not(.attach-button *):disabled { opacity: .5; }
-
 .imports-page input:not([type=checkbox]):focus-visible,.imports-page select:focus-visible{outline:none;border-color:var(--brand-ink);box-shadow:0 0 0 1px var(--brand-ink)}
 .imports-page small{color:var(--brand-ink-soft);font-size:13px;font-weight:400;overflow-wrap:anywhere}.imports-page fieldset{min-width:0;margin:24px 0;padding:0;border:0}.imports-page legend{margin-bottom:4px;padding:0;font-size:15px;font-weight:600}
 .imports-page fieldset fieldset{margin:12px 0 8px 0;padding-left:16px;border-left:2px solid rgb(42 29 33 / .10)}.imports-page fieldset fieldset legend{color:var(--brand-ink-soft);font-size:13px;font-weight:500}

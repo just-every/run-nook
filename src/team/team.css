@@ -72,6 +72,8 @@
 .nook-app .email-notifications .email-problem { color: #8a2c0d; }
 .nook-app .email-notifications .email-setup a { color: var(--ink); }
 .nook-app .email-notifications .email-notice:empty { display: none; }
+.nook-app .email-notifications select { min-height: 40px; padding: 0 12px; border: 1px solid var(--line-field); border-radius: var(--r-control); background-color: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
+.nook-app .email-notifications select:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 
 @media (max-width: 850px) {
   .nook-app .team-invite { grid-template-columns: minmax(0, 1fr); }
