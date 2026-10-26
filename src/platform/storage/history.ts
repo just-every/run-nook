@@ -13,7 +13,7 @@ export async function historyPage(c:Context,id:string,where:string,values:unknow
  return rows.map(({files,broadcast_json,via,poll,...m})=>({...m,...(poll?{poll:true}:{}),...(via?{via}:{}),broadcast:broadcast_json?JSON.parse(broadcast_json):null,...(m.retained_body?{immutable:true,retainedSource:'native'}:{}),attachments:JSON.parse(files)}))
 }
 export async function firstUnreadMessage(c:Context,id:string,readSeq:number){
- return c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND m.sequence>? AND m.author<>? AND m.deleted=0 AND ${countedMessage(literal(c.uid))} AND NOT (${threadSeen('?')}) ORDER BY m.sequence LIMIT 1`,[id,readSeq,c.uid,c.uid],id)
+ return c.one(`SELECT m.id FROM nook_message_history m WHERE m.conversation=? AND m.parent IS NULL AND m.sequence>? AND m.author<>? AND m.deleted=0 AND ${countedMessage(literal(c.uid))} AND NOT (${threadSeen('?')}) ORDER BY m.sequence LIMIT 1`,[id,readSeq,c.uid,c.uid],id)
 }
 export async function historyWindow(c:Context,id:string,input:Record<string,any>){
  const snapshot=await c.one('SELECT c.seq AS frontier,COALESCE(r.seq,0) AS readSeq FROM nook_conversations c LEFT JOIN nook_reads r ON r.conversation=c.id AND r.user=? WHERE c.id=?',[c.uid,id],id)
