@@ -25,7 +25,7 @@ async function installation(host,name,channel){
  const owner=await signIn(origin,ownerEmail)
  const setup=await fetch(origin+'/setup',{method:'POST',redirect:'manual',headers:{cookie:owner.cookie,origin,'content-type':'application/x-www-form-urlencoded'},body:'confirm=yes'});assert.equal(setup.status,303,'first run finished')
  const room=await fetch(origin+'/api/conversations',{method:'POST',headers:{cookie:owner.cookie,origin,'content-type':'application/json'},body:JSON.stringify({name:channel,kind:'channel'})});assert.equal(room.status,200)
- return {origin,host:new URL(origin).host,owner,name,channel:await room.json(),worker}
+ return {origin,owner,name,channel:await room.json(),worker}
 }
 const cookieFor=(origin,session)=>{const at=session.indexOf('=');return {name:session.slice(0,at),value:session.slice(at+1),url:origin}}
 
@@ -59,7 +59,7 @@ try{
    await list.getByRole('button',{name:'Open',exact:true}).click()
    await page.waitForURL(url=>url.origin===b.origin&&url.pathname==='/app')
    const prompt=page.getByRole('region',{name:'Add workspaces'})
-   await expect(prompt).toContainText(`from ${a.host}`)
+   await expect(prompt).toContainText(`from ${workspaceName}`)
    assert.equal(new URL(page.url()).hash,'','the handoff fragment is removed from the address')
    await shot('b-handoff')
    await prompt.getByRole('button',{name:'Add',exact:true}).click()

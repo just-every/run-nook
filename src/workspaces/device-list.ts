@@ -87,4 +87,3 @@ export function acceptHandoff(pending:Handoff){
  for(const item of pending.entries)list=upsert(list,item)
  return writeList(list)
 }
-export const host=(origin:string)=>new URL(origin).host

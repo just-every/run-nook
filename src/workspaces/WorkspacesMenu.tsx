@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react'
 import {useDismiss} from '../chat/useDismiss'
-import {acceptHandoff,addOrigin,handoffUrl,host,installationOrigin,readList,receiveHandoff,recordCurrent,removeOrigin,type DeviceList,type Handoff} from './device-list'
+import {acceptHandoff,addOrigin,handoffUrl,installationOrigin,readList,receiveHandoff,recordCurrent,removeOrigin,type DeviceList,type Handoff} from './device-list'
 import branding from '../branding.json'
 import './workspaces.css'
 import './workspace-note.css'
@@ -43,6 +43,7 @@ export function WorkspacesSection({device}:{device:DeviceWorkspaces}){
 }
 // A fragment can come from any link, so installations this device never listed wait for the member.
 export function WorkspaceHandoffPrompt({device}:{device:DeviceWorkspaces}){
- if(!device.pending)return null
- return <div className="workspace-handoff" role="region" aria-label="Add workspaces"><p>Add {device.pending.entries.length===1?'this workspace':'these workspaces'} from {host(device.pending.from)} to Your workspaces on this device?</p><ul>{device.pending.entries.map(e=><li key={e.origin}><strong>{e.name||'Another workspace'}</strong>{e.account&&<small> · {e.account}</small>}</li>)}</ul><div className="workspace-handoff-actions"><button className="soft-button" onClick={device.accept}>Add</button><button className="text-button" onClick={device.dismiss}>Not now</button></div></div>
+ const pending=device.pending
+ if(!pending)return null
+ return <div className="workspace-handoff" role="region" aria-label="Add workspaces"><p>Add {pending.entries.length===1?'this workspace':'these workspaces'} from {pending.entries.find(e=>e.origin===pending.from)?.name ?? 'another workspace'} to Your workspaces on this device?</p><ul>{pending.entries.map(e=><li key={e.origin}><strong>{e.name||'Another workspace'}</strong>{e.account&&<small> · {e.account}</small>}</li>)}</ul><div className="workspace-handoff-actions"><button className="soft-button" onClick={device.accept}>Add</button><button className="text-button" onClick={device.dismiss}>Not now</button></div></div>
 }
