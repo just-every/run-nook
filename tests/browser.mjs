@@ -107,7 +107,7 @@ export async function runBrowser(origin,destination){
     await bob.getByRole('heading',{name:'Thread',exact:true}).waitFor()
     await auditComposerRouting(bob,bob.locator('.decisions .composer'),destination,`${label}-thread`)
     await expect(bob.locator('.thread-log').getByText(messages[5].body,{exact:true})).toBeInViewport()
-    if(label==='mobile')assert.equal(await bob.locator('textarea:visible').count(),1,'phone thread has one composer')
+    if(label==='mobile'){assert.equal(await bob.locator('textarea:visible').count(),1,'phone thread has one composer');await expect(bob.locator('.conversation-menu > summary .needs-you-dot')).toBeVisible();await bob.locator('.conversation-menu > summary').click();await expect(bob.locator('.conversation-menu').getByRole('button',{name:/Decisions & requests.*open.*waiting on you/})).toBeVisible();await bob.locator('.conversation-menu > summary').click()}
     await bob.getByLabel('Reply in thread',{exact:true}).fill('I can send them after the review.')
     await bob.getByLabel('Reply in thread',{exact:true}).press('Enter')
     await bob.getByText('I can send them after the review.',{exact:true}).waitFor();await shot(bob,'thread')
