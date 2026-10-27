@@ -15,7 +15,7 @@
  .nook-app .header .icon-button, .nook-app .header .quick-nav-trigger { min-width:44px; min-height:44px; }
  .nook-app .message { flex-wrap:wrap; }
  .nook-app .message > .message-content { flex:1 0 calc(100% - 44px); }
- .nook-app .message > .message-tools { position:relative; top:auto; right:auto; margin:4px 0 0 auto; max-width:100%; flex-wrap:wrap; }
+ .nook-app .message > .message-tools { position:absolute; top:auto; bottom:0; right:var(--s2); margin:0; max-width:100%; flex-wrap:wrap; pointer-events:none; }
+ .nook-app .message:is(:hover,:focus-within,[data-open],:has(details[open])) > .message-tools { position:relative; bottom:auto; right:auto; margin:4px 0 0 auto; pointer-events:auto; }
  .nook-app .message-tools :is(button,summary) { min-width:44px; min-height:44px; }
- @media (hover:none) { .nook-app .message:not(:focus-within):not(:has(details[open])) > .message-tools { display:none; } }
 }

@@ -1,3 +1,4 @@
+import {clickMessageAction} from './conversation-details.mjs'
 import {createBrowserPlan,reconcileBrowserJob} from './import-browser-support.mjs';
 import {browserEmailSignIn} from './auth-support.mjs';
 // Parent runtime/browser lane: existing local Worker with native owner setup.
@@ -107,7 +108,7 @@ try {
             assert.equal(await imported.locator('.message-body').textContent(), '  Exact café 日本語 👋\n');
             assert.equal(await imported.getByRole('button', { name: 'Ask someone', exact: true }).count(), 0);
             assert.equal(await imported.getByRole('button', { name: 'Remove file', exact: true }).count(), 0);
-            await imported.getByRole('button', { name: 'Open thread', exact: true }).click();
+            await clickMessageAction(imported.getByRole('button', { name: 'Open thread', exact: true }));
             await page.locator('.thread-log .message[data-immutable="true"]').nth(1).waitFor();
             await expect(page.getByRole('textbox', { name: 'Reply in thread', exact: true })).toBeVisible();
             await page.screenshot({ path: `evidence/nook-1/slack-history-thread-${width}.png`, fullPage: true });

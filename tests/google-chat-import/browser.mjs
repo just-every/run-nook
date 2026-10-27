@@ -1,3 +1,4 @@
+import {clickMessageAction} from '../conversation-details.mjs'
 import assert from 'node:assert/strict';
 import {chromium,expect} from '@playwright/test';
 import {keyed} from '../dev-key.mjs';
@@ -34,7 +35,7 @@ export async function googleChatBrowser({origin}){
    const rooms=await(await context.request.get(origin+'/api/conversations')).json(),room=rooms.filter(c=>c.id.startsWith('gchat-')&&c.name==='synthetic-nook-space').at(-1);assert.ok(room);
    await page.goto(origin+'/app?conversation='+room.id);
    await expect(page.locator('.message-body').filter({hasText:'synthetic-nook Google Chat root'})).toBeVisible();
-   await page.getByRole('button',{name:'Open thread',exact:true}).first().click();
+   await clickMessageAction(page.getByRole('button',{name:'Open thread',exact:true}).first());
    await expect(page.locator('.thread-log .message-body').filter({hasText:'synthetic-nook Google Chat reply'})).toBeVisible();
    await page.screenshot({path:directory+'/gchat-thread-'+width+'.png',fullPage:true});
   }finally{await context.close()}

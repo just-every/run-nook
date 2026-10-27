@@ -1,3 +1,4 @@
+import {clickMessageAction} from './conversation-details.mjs'
 import assert from 'node:assert/strict'
 import {createHash} from 'node:crypto'
 import {chromium,expect} from '@playwright/test'
@@ -59,7 +60,7 @@ export async function runBrowser(origin,destination){
      const action=alice.locator('[data-message="'+messages[5].id+'"]').getByRole('button',{name:'Ask someone',exact:true})
      await action.focus();await expect(alice.getByRole('tooltip',{name:'Ask someone',exact:true})).toBeVisible();await alice.keyboard.press('Escape');await expect(alice.getByRole('tooltip')).toHaveCount(0)
     }
-    await alice.locator('[data-message="'+messages[5].id+'"]').getByRole('button',{name:'Ask someone',exact:true}).click()
+    await clickMessageAction(alice.locator('[data-message="'+messages[5].id+'"]').getByRole('button',{name:'Ask someone',exact:true}))
     await alice.getByLabel('What needs to happen?',{exact:true}).fill('Send the launch notes to the team')
     await alice.getByLabel('Ask a person',{exact:true}).selectOption(bobUser.id)
     await alice.getByLabel('Do by',{exact:true}).fill('2026-10-30')

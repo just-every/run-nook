@@ -1,3 +1,4 @@
+import {clickMessageAction} from '../conversation-details.mjs'
 import {createBrowserPlan,reconcileBrowserJob} from '../import-browser-support.mjs';
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
@@ -96,7 +97,7 @@ export async function importHistory({owner,member,ownerContext,memberContext,ori
  }
  const rootRecord=history.find(m=>m.provenance?.timestamp===fixture.markers.threadRoot.ts);
  await member.goto(`${origin}/app?conversation=${shared.id}&focus=${rootRecord.id}`);
- const root=member.locator('.message[data-immutable="true"]').filter({hasText:'THREAD_ROOT_CANARY_NOOK_R1'});await root.getByRole('button',{name:'Open thread',exact:true}).click();
+ const root=member.locator('.message[data-immutable="true"]').filter({hasText:'THREAD_ROOT_CANARY_NOOK_R1'});await clickMessageAction(root.getByRole('button',{name:'Open thread',exact:true}));
  await expect(member.locator('.thread-log .message').filter({hasText:fixture.markers.threadReply.text})).toBeVisible();
  // Imported history stays read only; members continue an imported thread natively (NOOK-072, NOOK-077).
  const importedRows=member.locator('.thread-log .message[data-immutable="true"]');assert.ok(await importedRows.count()>=2,'imported root and reply are in the thread');
