@@ -6665,7 +6665,7 @@
       "executable": false
     },
     "tests/browser.mjs": {
-      "sha256": "fb5a24e96a1937d95503a1f53479978521d70757fedccb2b3d232465a89b4ca2",
+      "sha256": "d0e669bb6742a8dce16724a289f4328ace4b7b842e2a17b8309fc09ed220a417",
       "executable": false
     },
     "tests/campfire-import/browser.mjs": {
