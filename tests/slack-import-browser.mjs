@@ -10,6 +10,35 @@ import {createRequire} from 'node:module';
 import {readFile} from 'node:fs/promises';
 import { slackFixture, zipFixture } from './slack-import/fixture.mjs';
 import {pathToFileURL} from 'node:url';
+async function guardedUndo(page, context, origin, planId, channel, live, width) {
+    // A cold navigation can show the server-rendered job before its handlers
+    // exist. Hold only script delivery; the page, import and API remain real.
+    let releaseScripts;
+    const scripts = new Promise(resolve => { releaseScripts = resolve; });
+    const holdScripts = async route => {
+        if (route.request().resourceType() === 'script') await scripts;
+        await route.continue();
+    };
+    await page.route('**/*', holdScripts);
+    const job = page.locator('.import-job').filter({ hasText: planId });
+    const undo = job.getByRole('button', { name: 'Undo this import', exact: true });
+    try {
+        await page.goto(origin + '/imports', { waitUntil: 'commit' });
+        await expect(undo).toBeVisible();
+        await expect(undo).toBeDisabled();
+    } finally { releaseScripts(); }
+    try {
+        const response = page.waitForResponse(r => new URL(r.url()).pathname === '/api/operator/import/undo' && r.request().method() === 'POST');
+        await undo.click();
+        assert.equal((await response).status(), 409, 'browser undo refuses later live work');
+        await expect(page.getByRole('alert')).toBeVisible();
+        const retained = await context.request.get(origin + `/api/conversations/${channel.id}/messages`);
+        assert.equal(retained.status(), 200);
+        assert.ok((await retained.json()).some(message => message.body === live), 'refused undo preserves live work');
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'guarded undo fits the viewport');
+        await page.screenshot({ path: `evidence/nook-1/slack-undo-guard-${width}.png`, fullPage: true, animations: 'disabled' });
+    } finally { await page.unroute('**/*', holdScripts); }
+}
 export async function runSlackBrowser(origin){
 const browser = await keyed(chromium).launch({ headless: true });
 try {
@@ -124,13 +153,11 @@ try {
             assert.ok(await page.getByRole('button', { name: 'Undo this import', exact: true }).count());
             const job = page.locator('.import-job').filter({ hasText: planned.planId });
             if (width === 390) {
-                await job.getByRole('button', { name: 'Undo this import', exact: true }).click();
-                await expect(page.getByRole('alert')).toBeVisible();
-                const response=await context.request.get(origin+`/api/conversations/${channel.id}/messages`),retained=await response.json();assert.equal(response.status(),200,JSON.stringify(retained));
-                assert.ok(retained.some(m=>m.body==='Later native work survives import undo'));
-                await page.screenshot({ path: 'evidence/nook-1/slack-undo-guard-390.png', fullPage: true });
-                await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'evidence/nook-1/slack-undo-guard-1440.png',fullPage:true,animations:'disabled'});await page.setViewportSize({width:390,height:844});
-            } else { await job.getByRole('button', { name: 'Undo this import', exact: true }).click(); await page.getByRole('status').filter({ hasText: 'undone' }).waitFor(); }
+                await guardedUndo(page, context, origin, planned.planId, channel, 'Later native work survives import undo', width);
+            } else {
+                await job.getByRole('button', { name: 'Undo this import', exact: true }).click(); await page.getByRole('status').filter({ hasText: 'undone' }).waitFor();
+                await guardedUndo(page, context, origin, privatePlan.planId, mappedWebhook, webhookText, width);
+            }
 
             const business=page.locator('section').filter({has:page.getByRole('heading',{name:'Business import access',exact:true})});
             await business.getByRole('checkbox',{name:'Allow Business imports',exact:true}).click();

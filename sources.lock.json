@@ -625,7 +625,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "83973af0ea090b3d9973a8363d418948d4be1388ca04cb15a0a451e6c2684332",
+      "sha256": "c3489b6cebe9f3ac810d2a0060a6207d48f8c2bc399afbb346ea3287d39eed37",
       "executable": false
     },
     "AGENTS.md": {
@@ -5121,7 +5121,7 @@
       "executable": false
     },
     "src/imports/DoorWizard.tsx": {
-      "sha256": "5d52059dac9a075bb79772aab9428ddb56d42775d8343057dda19d4911c402e7",
+      "sha256": "cef16295652f71d52a5b4dd5934cb3e1687bd65af18c19b63f83cf451b456cdc",
       "executable": false
     },
     "src/imports/formats.d.mts": {
@@ -7193,7 +7193,7 @@
       "executable": false
     },
     "tests/slack-import-browser.mjs": {
-      "sha256": "e5d717ad634af4d005ea1878596c2cc957424a74cad8c637c7089f9949c5c3e2",
+      "sha256": "667ae9fe0984adaf1fc87f52fe407bb8e54caa6f53af98bd597e69bc021b68b0",
       "executable": false
     },
     "tests/slack-import-history.test.mjs": {
