@@ -22,13 +22,13 @@ import {TextPreview} from './TextPreview'
 import {PollCard} from '../team/PollCard'
 import {useInlinePreviews} from './composition/useInlinePreviews'
 type Props={message:Message;user:Person;canErase?:boolean;thread?:boolean;continued?:boolean;outcomes?:Outcome[];onOutcome?:(o:Outcome)=>void;onThread:(m:Message)=>void;onAsk:(m:Message)=>void;onDecision:(m:Message)=>void;onEdit:(m:Message)=>void;onDelete:(m:Message)=>void;onRemove:(id:string)=>void}
-const tool=(label:string,icon:ReactNode,onClick:()=>void)=><button type="button" className="icon-button" title={label} onClick={onClick}>{icon}<span className="sr-only">{label}</span></button>
+const tool=(label:string,icon:ReactNode,onClick:()=>void)=><button type="button" className="icon-button" data-tooltip={label} aria-label={label} onClick={onClick}>{icon}<span className="sr-only">{label}</span></button>
 // The less common verbs sit behind one menu. It stays open while Edit or Delete is up so focus can return to the item.
 // The menu stays within the viewport, including a narrow thread pane or phone.
 function MoreMenu({message,canEdit,canErase,eraseTrigger,onEdit,onDelete,onErase,onForward}:{message:Message;canEdit:boolean;canErase:boolean;eraseTrigger:React.RefObject<HTMLButtonElement|null>;onEdit:()=>void;onDelete:()=>void;onErase:()=>void;onForward:()=>void}) {
  const menu=useRef<HTMLDetailsElement>(null),[open,setOpen]=useState(false),[position,setPosition]=useState({top:64,right:16})
  useDismiss(menu)
- return <details className="message-more menu" ref={menu} onToggle={e=>{setOpen(e.currentTarget.open);if(e.currentTarget.open){const box=e.currentTarget.getBoundingClientRect();setPosition({top:Math.max(64,Math.min(box.bottom+6,window.innerHeight-320)),right:Math.max(16,Math.min(window.innerWidth-box.right,window.innerWidth-236))})}}}><summary className="icon-button" title="More" aria-label={'More actions for message by '+message.authorName}><IconMore/></summary><div className="popover inline" style={{'--more-top':position.top+'px','--more-right':position.right+'px'} as React.CSSProperties}>{open&&<CollectionActions message={message}/>} <button type="button" onClick={onForward}>Forward</button>{canEdit&&<><button type="button" onClick={onEdit}>Edit</button><button type="button" onClick={onDelete}>Delete</button></>}{canErase&&<button type="button" className="erase-item" ref={eraseTrigger} onClick={onErase}>Erase message</button>}</div></details>
+ return <details className="message-more menu" ref={menu} onToggle={e=>{setOpen(e.currentTarget.open);if(e.currentTarget.open){const box=e.currentTarget.getBoundingClientRect();setPosition({top:Math.max(64,Math.min(box.bottom+6,window.innerHeight-320)),right:Math.max(16,Math.min(window.innerWidth-box.right,window.innerWidth-236))})}}}><summary className="icon-button" data-tooltip="More actions" aria-label="More actions"><IconMore/></summary><div className="popover inline" style={{'--more-top':position.top+'px','--more-right':position.right+'px'} as React.CSSProperties}>{open&&<CollectionActions message={message}/>} <button type="button" onClick={onForward}>Forward</button>{canEdit&&<><button type="button" onClick={onEdit}>Edit</button><button type="button" onClick={onDelete}>Delete</button></>}{canErase&&<button type="button" className="erase-item" ref={eraseTrigger} onClick={onErase}>Erase message</button>}</div></details>
 }
 // A tap on the message itself (not a control, not a text selection) focuses it, which opens the tray on touch screens.
 const focusRow=(event:MouseEvent<HTMLElement>)=>{
@@ -42,7 +42,7 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
  const mine=!m.immutable&&m.author===user.id
  const previews=useInlinePreviews(user.id,m.conversation)
  const time=new Date(m.created)
- return <article className={'message reveal-host'+(continued?' continued':'')+(m.deleted?' deleted':'')} id={(thread?'thread-message-':'message-')+m.id} data-message={m.id} data-immutable={m.immutable?'true':undefined} data-sequence={m.sequence} tabIndex={-1} onClick={focusRow}>
+ return <article aria-label={'Message by '+m.authorName} className={'message reveal-host'+(continued?' continued':'')+(m.deleted?' deleted':'')} id={(thread?'thread-message-':'message-')+m.id} data-message={m.id} data-immutable={m.immutable?'true':undefined} data-sequence={m.sequence} tabIndex={-1} onClick={focusRow}>
   {forwarding&&<ForwardDialog message={m} onClose={()=>setForwarding(false)}/>}
   {erasing&&<ErasureDialog kind={m.retainedSource==='native'?'message':m.immutable?'imported-message':'message'} target={m.id} returnFocus={eraseTrigger.current} request={team.request} onClose={()=>setErasing(false)} onChanged={()=>{}}/>}
   {continued?<span className="avatar-gutter" aria-hidden="true"/>:<Avatar person={{id:m.author??m.id,name:m.authorName}}/>}

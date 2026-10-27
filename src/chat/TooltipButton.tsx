@@ -1,13 +1,33 @@
-import {useEffect,useId,useRef,useState,type ButtonHTMLAttributes} from 'react'
+import {useEffect,useId,useLayoutEffect,useRef,useState,type ButtonHTMLAttributes} from 'react'
+import {createPortal} from 'react-dom'
 import './tooltip.css'
 
-// One tooltip behaviour for icon controls, including controls in modal dialogs.
+// A single event surface also supports summary, file labels and disabled buttons,
+// without inserting wrappers into the header or message tray layout.
+export function TooltipSurface(){
+ const id=useId(),tip=useRef<HTMLSpanElement>(null)
+ const [active,setActive]=useState<HTMLElement|null>(null),[position,setPosition]=useState({left:8,top:8})
+ useEffect(()=>{
+  let timer:ReturnType<typeof setTimeout>|undefined,shown:HTMLElement|null=null,touch=false
+  const hide=()=>{clearTimeout(timer);if(shown){const values=(shown.getAttribute('aria-describedby')??'').split(' ').filter(value=>value&&value!==id);if(values.length)shown.setAttribute('aria-describedby',values.join(' '));else shown.removeAttribute('aria-describedby')}shown=null;setActive(null)}
+  const trigger=(event:Event)=>event.target instanceof Element?event.target.closest<HTMLElement>('[data-tooltip]'):null
+  const show=(element:HTMLElement)=>{hide();if(!element.isConnected)return;shown=element;const values=(element.getAttribute('aria-describedby')??'').split(' ').filter(Boolean);element.setAttribute('aria-describedby',[...values,id].join(' '));setActive(element)}
+  const enter=(event:PointerEvent)=>{if(event.pointerType==='touch')return;const element=trigger(event);if(!element||element.contains(event.relatedTarget as Node))return;hide();timer=setTimeout(()=>show(element),300)}
+  const leave=(event:PointerEvent)=>{const element=trigger(event);if(element&&!element.contains(event.relatedTarget as Node))hide()}
+  const focus=(event:FocusEvent)=>{const element=trigger(event);if(element&&!touch)show(element)}
+  const down=(event:PointerEvent)=>{touch=event.pointerType==='touch';hide();const element=trigger(event);if(touch&&element)timer=setTimeout(()=>show(element),300)}
+  const up=()=>{if(touch)hide()}
+  const context=(event:MouseEvent)=>{if(touch&&shown)event.preventDefault()}
+  const key=(event:KeyboardEvent)=>{touch=false;if(event.key==='Escape')hide()}
+  const scroll=()=>hide()
+  document.addEventListener('pointerover',enter,true);document.addEventListener('pointerout',leave,true);document.addEventListener('focusin',focus,true);document.addEventListener('focusout',hide,true);document.addEventListener('pointerdown',down,true);document.addEventListener('pointerup',up,true);document.addEventListener('pointercancel',up,true);document.addEventListener('contextmenu',context,true);document.addEventListener('keydown',key,true);window.addEventListener('scroll',scroll,true);window.addEventListener('resize',hide)
+  return()=>{hide();document.removeEventListener('pointerover',enter,true);document.removeEventListener('pointerout',leave,true);document.removeEventListener('focusin',focus,true);document.removeEventListener('focusout',hide,true);document.removeEventListener('pointerdown',down,true);document.removeEventListener('pointerup',up,true);document.removeEventListener('pointercancel',up,true);document.removeEventListener('contextmenu',context,true);document.removeEventListener('keydown',key,true);window.removeEventListener('scroll',scroll,true);window.removeEventListener('resize',hide)}
+ },[id])
+ useLayoutEffect(()=>{if(!active||!tip.current)return;const rect=active.getBoundingClientRect(),box=tip.current.getBoundingClientRect(),margin=8;const above=rect.top-box.height-margin>=margin;setPosition({left:Math.max(margin,Math.min(innerWidth-box.width-margin,rect.left+(rect.width-box.width)/2)),top:above?rect.top-box.height-margin:rect.bottom+margin})},[active])
+ if(!active)return null
+ // A dialog is in the top layer: its tooltip must live there too.
+ return createPortal(<span ref={tip} id={id} role="tooltip" className="action-tooltip" style={position}>{active.dataset.tooltip}</span>,active.closest('dialog')??document.body)
+}
 export function TooltipButton({label,children,...props}:ButtonHTMLAttributes<HTMLButtonElement>&{label:string}){
- const id=useId(),button=useRef<HTMLButtonElement>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null)
- const [point,setPoint]=useState<{left:number;top:number;above:boolean}|null>(null)
- const hide=()=>{if(timer.current)clearTimeout(timer.current);timer.current=null;setPoint(null)}
- const show=()=>{const rect=button.current?.getBoundingClientRect();if(rect)setPoint({left:Math.max(8,Math.min(innerWidth-248,rect.left+rect.width/2-120)),top:rect.top>=48?rect.top-10:rect.bottom+10,above:rect.top>=48})}
- const later=()=>{hide();timer.current=setTimeout(show,300)}
- useEffect(()=>{const dismiss=(event:Event)=>{if(event.type==='scroll'||(event as KeyboardEvent).key==='Escape')hide()};window.addEventListener('scroll',dismiss,true);window.addEventListener('keydown',dismiss);return()=>{if(timer.current)clearTimeout(timer.current);window.removeEventListener('scroll',dismiss,true);window.removeEventListener('keydown',dismiss)}},[])
- return <span className="tooltip-control"><button {...props} type={props.type??'button'} ref={button} aria-label={label} aria-describedby={point?id:undefined} onPointerEnter={event=>{if(event.pointerType!=='touch')later()}} onPointerLeave={hide} onFocus={show} onBlur={hide} onPointerDown={event=>{if(event.pointerType==='touch')later()}} onPointerUp={event=>{if(event.pointerType==='touch')hide()}} onPointerCancel={hide} onContextMenu={event=>{if(point)event.preventDefault()}}>{children}</button>{point&&<span id={id} role="tooltip" className="action-tooltip" style={{left:point.left,top:point.top,transform:point.above?'translateY(-100%)':undefined}}>{label}</span>}</span>
+ return <button {...props} title={undefined} type={props.type??'button'} aria-label={label} data-tooltip={label}>{children}</button>
 }

@@ -55,7 +55,7 @@ export async function postingBrowser({origin,owner,member,destination='evidence/
     await settings.getByRole('button',{name:'Save posting permissions'}).click();assert.equal((await selected).status(),200)
     await expect(settings.getByRole('button',{name:'Save posting permissions'})).toBeEnabled()
     await settings.scrollIntoViewIfNeeded();await manager.screenshot({animations:'disabled',path:resolve(destination,`named-${width}.png`)})
-    await manager.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click()
+    await manager.getByRole('dialog').getByRole('button',{name:'Close dialog',exact:true}).click()
     await manager.goto(url+'&focus='+root.id)
     await manager.getByRole('button',{name:'Post with admin override'}).click()
     const box=manager.getByRole('textbox',{name:'Message Company announcements '+width,exact:true})

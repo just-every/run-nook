@@ -1,2 +1,1 @@
-.tooltip-control{display:inline-flex}
-.action-tooltip{position:fixed;z-index:10000;width:240px;max-width:calc(100vw - 16px);box-sizing:border-box;padding:6px 10px;border-radius:6px;background:var(--ink,#252c27);color:var(--paper,#fff);font-size:13px;line-height:1.4;text-align:center;pointer-events:none;box-shadow:0 2px 8px #0002}
+.action-tooltip{position:fixed;z-index:10000;width:max-content;max-width:calc(100vw - 16px);box-sizing:border-box;padding:6px 10px;border-radius:6px;background:var(--ink,#252c27);color:var(--paper,#fff);font-size:13px;line-height:1.4;text-align:center;pointer-events:none;box-shadow:0 2px 8px #0002}

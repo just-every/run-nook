@@ -32,7 +32,7 @@ export async function mattermostBrowser({origin,owner,journey,destination='evide
     const memberCookie=journey.people.maya.cookie,memberAt=memberCookie.indexOf('=');await context.addCookies([{name:memberCookie.slice(0,memberAt),value:memberCookie.slice(memberAt+1),url:origin}])
     await page.goto(origin+'/app?conversation='+root.conversation)
     await expect(page.getByText(root.body,{exact:true}).last()).toBeVisible();await expect(page.getByLabel('Imported Mattermost reactions · read only').first()).toBeVisible();await expect.poll(()=>page.getByLabel('Imported Mattermost reactions · read only').locator('img').first().evaluate(image=>image.complete&&image.naturalWidth>0)).toBe(true);await shot('history')
-    await page.getByTitle('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Pinned messages',exact:true}).click();await expect(page.getByRole('dialog')).toContainText(root.body);await shot('pins')
+    await page.getByLabel('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Pinned messages',exact:true}).click();await expect(page.getByRole('dialog')).toContainText(root.body);await shot('pins')
     // The imported private save is visible through the existing product collection.
     await page.goto(origin+'/app?view=saved')
     await expect(page.getByRole('heading',{name:'Saved',exact:true}).first()).toBeVisible();await shot('saved')

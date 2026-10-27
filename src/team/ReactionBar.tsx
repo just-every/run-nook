@@ -18,7 +18,7 @@ export function useReactions(message:string,request:TeamRequest,refresh:number|s
  return {rows,busy,error,toggle,more}
 }
 export type Reactions=ReturnType<typeof useReactions>
-const attrs=(reactions:Reactions,emoji:string,row?:Reaction)=>({type:'button' as const,disabled:reactions.busy,'aria-pressed':row?.mine??false,'aria-label':`${row?.mine?'Remove':'Add'} ${emoji} reaction${row?': '+names(row):''}`,title:names(row)||`React ${emoji}`,onClick:()=>void reactions.toggle(emoji)})
+const attrs=(reactions:Reactions,emoji:string,row?:Reaction)=>({type:'button' as const,disabled:reactions.busy,'aria-pressed':row?.mine??false,'aria-label':`${row?.mine?'Remove':'Add'} ${emoji} reaction`,'data-tooltip':`${row?.mine?'Remove':'Add'} ${emoji} reaction`,onClick:()=>void reactions.toggle(emoji)})
 const counted=(reactions:Reactions)=>choices.flatMap(emoji=>{const row=reactions.rows.find(r=>r.emoji===emoji);return row&&row.count>0?[row]:[]})
 // Emoji that someone used appear here as count chips; "Who reacted" ends the row.
 export function ReactionChips({reactions}:{reactions:Reactions}){
@@ -34,6 +34,6 @@ export function ReactionPicker({reactions}:{reactions:Reactions}){
  const pick=(emoji:string)=>{void reactions.toggle(emoji);if(menu.current){menu.current.open=false;menu.current.querySelector<HTMLElement>('summary')?.focus()}}
  return <>
   {!used.has('👍')&&<button className="icon-button" {...attrs(reactions,'👍')}>👍</button>}
-  {others.length>0&&<details className="react-menu menu" ref={menu}><summary className="icon-button" title="Add reaction"><IconReact/><span className="sr-only">Add reaction</span></summary><div className="popover strip end">{others.map(emoji=>{const props=attrs(reactions,emoji);return <button key={emoji} {...props} onClick={()=>pick(emoji)}>{emoji}</button>})}</div></details>}
+  {others.length>0&&<details className="react-menu menu" ref={menu}><summary className="icon-button" data-tooltip="Add reaction" aria-label="Add reaction"><IconReact/><span className="sr-only">Add reaction</span></summary><div className="popover strip end">{others.map(emoji=>{const props=attrs(reactions,emoji);return <button key={emoji} {...props} onClick={()=>pick(emoji)}>{emoji}</button>})}</div></details>}
  </>
 }

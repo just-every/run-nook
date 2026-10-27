@@ -73,11 +73,11 @@ async function browserJourney({origin,person,room}){
    await page.goto(origin+'/app?view=you')
    const badge=page.getByRole('checkbox',{name:'Count thread replies only when they mention me'});await expect(badge).toBeChecked();await badge.click();await expect(badge).not.toBeChecked();await badge.click();await expect(badge).toBeChecked()
    await page.getByLabel('This device',{exact:true}).selectOption(width===390?'mobile':'desktop');await badge.scrollIntoViewIfNeeded();await page.screenshot({animations:'disabled',path:`evidence/thread-delivery/counting-${width}.png`})
-   await page.goto(origin+'/app?conversation='+room.id);await page.getByTitle('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Notification settings',exact:true}).click()
+   await page.goto(origin+'/app?conversation='+room.id);await page.getByLabel('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Notification settings',exact:true}).click()
    const threads=page.getByLabel('Phone and tablet thread replies',{exact:true});await threads.selectOption('all');await expect(threads).toHaveValue('all');await expect(threads).toBeEnabled();await threads.scrollIntoViewIfNeeded();await page.screenshot({animations:'disabled',path:`evidence/thread-delivery/mobile-${width}.png`})
-   await page.reload();await page.getByTitle('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Notification settings',exact:true}).click();await expect(page.getByLabel('Phone and tablet thread replies',{exact:true})).toHaveValue('all')
+   await page.reload();await page.getByLabel('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Notification settings',exact:true}).click();await expect(page.getByLabel('Phone and tablet thread replies',{exact:true})).toHaveValue('all')
    await page.getByRole('button',{name:'Reset to defaults',exact:true}).click();await expect(page.getByLabel('Phone and tablet thread replies',{exact:true})).toHaveValue('')
-   await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click()
+   await page.getByRole('dialog').getByRole('button',{name:'Close dialog',exact:true}).click()
    await page.goto(origin+'/app?view=threads');await expect(page.getByRole('heading',{name:'Threads',exact:true})).toBeVisible();await expect(page.getByText('@channel Please review the Thursday rollout checklist.',{exact:true})).toBeVisible();await page.screenshot({animations:'disabled',path:`evidence/thread-delivery/threads-${width}.png`})
   }finally{await context.close()}
  }}finally{await browser.close()}

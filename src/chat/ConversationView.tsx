@@ -114,7 +114,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
   <div className="panel-bar">
    {route.thread&&<button className="soft-button" onClick={()=>navigate({panel:null})}>Back to thread</button>}
    <h2>Decisions & requests</h2>
-   <button className="panel-close icon-button" title="Back to messages" onClick={()=>setShowOutcomes(false)}><span className="icon-close"><IconClose/></span><span className="icon-chevron"><IconBack/></span><span className="sr-only">Back to messages</span></button>
+   <button className="panel-close icon-button" data-tooltip="Back to messages" aria-label="Back to messages" onClick={()=>setShowOutcomes(false)}><span className="icon-close"><IconClose/></span><span className="icon-chevron"><IconBack/></span><span className="sr-only">Back to messages</span></button>
    <div className="panel-actions"><button className="soft-button" onClick={()=>openDialog({kind:'outcome',source:null,outcomeKind:'decision'})}><IconPlus/>Record decision</button><button className="soft-button" onClick={()=>openDialog({kind:'outcome',source:null,outcomeKind:'commitment'})}><IconPlus/>Ask someone</button></div>
   </div>
   <div className="panel-scroll">
@@ -144,7 +144,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&recap}
    {showNotes?<NotesPanel conversation={c.id} thread={route.thread} request={request} people={data.members} onClose={()=>navigate({panel:null})}/>:route.thread&&root&&!showOutcomes?<>
-    <div className="panel-bar thread-bar"><button className="icon-button" title="Back" onClick={back}><IconBack/><span className="sr-only">Back</span></button><h2>Thread</h2>{(!root.immutable||Boolean(root.provenance))&&<button className="soft-button" onClick={()=>void mutate(`messages/${root.id}/follow`,{follow:!followed}).catch(()=>{})}><IconBell/>{followed?'Unfollow thread':'Follow thread'}</button>}</div>
+    <div className="panel-bar thread-bar"><button className="icon-button" data-tooltip="Back to conversation" aria-label="Back to conversation" onClick={back}><IconBack/><span className="sr-only">Back</span></button><h2>Thread</h2>{(!root.immutable||Boolean(root.provenance))&&<button className="soft-button" onClick={()=>void mutate(`messages/${root.id}/follow`,{follow:!followed}).catch(()=>{})}><IconBell/>{followed?'Unfollow thread':'Follow thread'}</button>}</div>
     <div className="log-frame">
      <div className="message-log thread-log" ref={threadLog} role="region" aria-label="Thread messages" tabIndex={0}>
       <div className="history-controls">{data.threadWindow?.hasMore&&data.threadWindow.cursor&&<button className="text-button" onClick={()=>navigate({threadBefore:data.threadWindow!.cursor,focus:null})}>Load earlier replies</button>}</div>

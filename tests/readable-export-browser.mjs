@@ -67,7 +67,7 @@ export async function readableExportBrowser({origin,owner,member,outsider,destin
     assert.deepEqual(selected.records.filter(r=>r.type==='conversations').map(r=>r.data.id),[room.id])
     await scoped.getByRole('heading',{name:'Completeness report',exact:true}).scrollIntoViewIfNeeded()
     await page.screenshot({animations:'disabled',path:resolve(destination,`conversation-${width}.png`)})
-    await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click()
+    await page.getByRole('dialog').getByRole('button',{name:'Close dialog',exact:true}).click()
     await page.goto(origin+'/app?view=you')
     const region=page.getByRole('region',{name:'Readable export',exact:true})
     await expect(region.getByRole('heading',{name:'Readable export',exact:true})).toBeVisible()

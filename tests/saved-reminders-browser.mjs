@@ -16,7 +16,7 @@ export async function savedRemindersBrowser({origin,owner,member,destination='ev
    try{
     const [name,...value]=member.cookie.split('=');await context.addCookies([{name,value:value.join('='),url:origin}]);const page=await context.newPage()
     await page.goto(origin+'/app?conversation='+room.id+'&focus='+root.id)
-    await page.locator('[data-message="'+root.id+'"]').getByLabel('More actions for message by '+owner.user.name,{exact:true}).click()
+    await page.locator('[data-message="'+root.id+'"]').getByLabel('More actions',{exact:true}).click()
     await page.getByRole('button',{name:'Save for later',exact:true}).click()
     await expect(page.getByRole('button',{name:'Remove from Saved',exact:true})).toBeVisible()
     await page.goto(origin+'/app?view=saved')

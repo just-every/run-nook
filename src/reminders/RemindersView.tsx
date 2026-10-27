@@ -90,7 +90,7 @@ export function RemindersView({revision,privateSignal,userId,onError,onOpen,refr
   })}
   {page?.hasMore&&<button className="soft-button" disabled={busy} onClick={()=>void more()}>More reminders</button>}
  </div>{editor&&<dialog ref={dialog} aria-labelledby={titleId} onKeyDown={containDialogFocus} onCancel={event=>{event.preventDefault();setEditor(null)}}>
-  <div className="dialog-heading"><h2 id={titleId}>{editor.existing?'Edit reminder':'Create reminder'}</h2><button className="icon-button" aria-label="Close" onClick={()=>setEditor(null)}><IconClose/></button></div>
+  <div className="dialog-heading"><h2 id={titleId}>{editor.existing?'Edit reminder':'Create reminder'}</h2><button className="icon-button" data-tooltip="Close dialog" aria-label="Close dialog" onClick={()=>setEditor(null)}><IconClose/></button></div>
   <ReminderEditor existing={editor.existing} conversation={editor.existing?.conversation??undefined} privateSignal={privateSignal} onSaved={()=>{setEditor(null);void refresh().catch(onError)}}/>
  </dialog>}</section>
 }

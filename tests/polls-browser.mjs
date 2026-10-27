@@ -8,7 +8,7 @@ export async function pollsBrowser({origin,owner,member,room,destination=evidenc
   const errors=[],manager=await open({cookie:owner.cookie,origin},{errors}),reader=await open({cookie:member.cookie,origin}),url=origin+'/app?conversation='+room.id
   try{
    const {page}=manager,mine=reader.page,named='Which day for the launch review? '+width,anonymous='Which rooms should we book? '+width
-   const openPoll=async()=>{await page.getByTitle('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Create poll',exact:true}).click()};
+   const openPoll=async()=>{await page.getByLabel('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Create poll',exact:true}).click()};
    await page.goto(url);await openPoll()
    const form=page.getByRole('form',{name:'Create a poll'});await form.getByLabel('Question',{exact:true}).fill(named);await form.getByLabel('Option 1',{exact:true}).fill('Tuesday');await form.getByLabel('Option 2',{exact:true}).fill('Wednesday')
    await form.getByRole('button',{name:'Add option',exact:true}).click();await form.getByLabel('Option 3',{exact:true}).fill('Thursday');await form.getByRole('button',{name:'Remove option 3',exact:true}).click()

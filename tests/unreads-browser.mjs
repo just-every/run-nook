@@ -22,7 +22,7 @@ export async function unreadsBrowser({origin,owner,member,outsider,destination='
    await page.getByRole('button',{name:'Undo mark read'}).click();await expect(card).toBeVisible()
    await page.goto(origin+'/app?view=you');await expect(page.getByRole('checkbox',{name:'Show All unreads in the sidebar'})).toBeChecked();await page.getByRole('checkbox',{name:'Show All unreads in the sidebar'}).uncheck();await page.screenshot({animations:'disabled',path:resolve(destination,`profile-${width}.png`)});await page.getByRole('checkbox',{name:'Show All unreads in the sidebar'}).check()
    await page.keyboard.press('Control+Shift+A');await expect(page.getByRole('heading',{name:'All unreads',exact:true})).toBeVisible()
-   await page.keyboard.press('Control+/');await expect(page.getByRole('heading',{name:'Keyboard shortcuts',exact:true})).toBeVisible();await page.screenshot({animations:'disabled',path:resolve(destination,`shortcuts-${width}.png`)});await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click()
+   await page.keyboard.press('Control+/');await expect(page.getByRole('heading',{name:'Keyboard shortcuts',exact:true})).toBeVisible();await page.screenshot({animations:'disabled',path:resolve(destination,`shortcuts-${width}.png`)});await page.getByRole('dialog').getByRole('button',{name:'Close dialog',exact:true}).click()
    await call('/api/unreads',{action:'read',conversation:room.id})
    const root=await call(`/api/conversations/${room.id}/messages`,{body:'Please review the workshop handover.',intent:crypto.randomUUID()})
    const reply=await call(`/api/conversations/${room.id}/messages`,{body:'The workshop sketches are ready.',parent:root.id,intent:crypto.randomUUID()},member)
@@ -55,7 +55,7 @@ export async function unreadsBrowser({origin,owner,member,outsider,destination='
    await page.getByLabel('Channel name',{exact:true}).waitFor({state:'attached'})
    await page.getByRole('heading',{name:'Original group participants',exact:true}).scrollIntoViewIfNeeded()
    await page.screenshot({animations:'disabled',path:resolve(destination,`roster-${width}.png`)})
-   await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click()
+   await page.getByRole('dialog').getByRole('button',{name:'Close dialog',exact:true}).click()
    await page.goto(origin+'/app?conversation='+dm.id);await expect(page.getByRole('button',{name:'Open private channel',exact:true})).toBeVisible();await expect(page.getByRole('textbox',{name:/Message /})).toHaveCount(0);await page.screenshot({animations:'disabled',path:resolve(destination,`source-${width}.png`)})
   }finally{await context.close().catch(()=>{})}
  }}finally{await browser.close().catch(()=>{})}

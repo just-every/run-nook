@@ -54,6 +54,10 @@ export async function runBrowser(origin,destination){
      await alice.locator('.conversation-menu > summary').click();await expect(alice.locator('.conversation-menu').getByRole('button',{name:'Members and details',exact:true})).toBeVisible();await alice.locator('.conversation-menu > summary').click()
     }
     await writeFile(resolve(destination,`${label}-geometry.json`),JSON.stringify(geometry,null,2))
+    if(label==='desktop'){
+     const action=alice.locator('[data-message="'+messages[5].id+'"]').getByRole('button',{name:'Ask someone',exact:true})
+     await action.focus();await expect(alice.getByRole('tooltip',{name:'Ask someone',exact:true})).toBeVisible();await alice.keyboard.press('Escape');await expect(alice.getByRole('tooltip')).toHaveCount(0)
+    }
     await alice.locator('[data-message="'+messages[5].id+'"]').getByRole('button',{name:'Ask someone',exact:true}).click()
     await alice.getByLabel('What needs to happen?',{exact:true}).fill('Send the launch notes to the team')
     await alice.getByLabel('Ask a person',{exact:true}).selectOption(bobUser.id)
@@ -105,7 +109,7 @@ export async function runBrowser(origin,destination){
     await bob.getByLabel('Reply in thread',{exact:true}).fill('I can send them after the review.')
     await bob.getByLabel('Reply in thread',{exact:true}).press('Enter')
     await bob.getByText('I can send them after the review.',{exact:true}).waitFor();await shot(bob,'thread')
-    await bob.getByRole('button',{name:'Back',exact:true}).click();await bob.goBack();await bob.getByRole('heading',{name:'Thread',exact:true}).waitFor();await bob.goForward()
+    await bob.getByRole('button',{name:'Back to conversation',exact:true}).click();await bob.goBack();await bob.getByRole('heading',{name:'Thread',exact:true}).waitFor();await bob.goForward()
     await nav(bob,'Attention').click();await bob.getByRole('button',{name:'Report done',exact:true}).click();await bob.getByText('Reported done',{exact:true}).waitFor()
     await nav(alice,'Attention').click();await alice.getByText('Reported done',{exact:true}).first().waitFor();await shot(alice,'reported-done')
     await expect(alice.locator('.attention-card').filter({hasText:'Send the launch notes to the team'}),'one current card per commitment, not one per event').toHaveCount(1)
@@ -162,7 +166,7 @@ export async function runBrowser(origin,destination){
     checks.push(`${label}: quiet-time urgent bypass, persistent snooze and triage independent of responsibility`)
 
     // A delivered response is deliberately lost at the network edge; retry keeps exact intent.
-    await alice.getByRole('button',{name:'Back',exact:true}).click()
+    await alice.getByRole('button',{name:'Back to conversation',exact:true}).click()
     await composer.fill(hostileMessage)
     // Exercise the supported maximum through the real file picker and private
     // binary route, then verify those same bytes after the message retry.
@@ -209,13 +213,13 @@ export async function runBrowser(origin,destination){
     await expect(alice.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled()
     assert.equal(uploadIntents.length,1,'reselection verifies bytes without an automatic retry')
     await alice.getByRole('button',{name:'Retry upload',exact:true}).click()
-    await alice.getByRole('button',{name:'Discard handover.txt',exact:true}).waitFor()
+    await alice.getByRole('button',{name:'Discard file',exact:true}).waitFor()
     await alice.unroute('**/api/conversations/*/uploads');await alice.unroute('**/api/uploads/*/parts/*');await alice.unroute('**/api/uploads/*/complete')
     assert.equal(uploadedBytes,handoverBytes.length,'lost completion acknowledgement never repeats stored chunks')
     assert.equal(uploadIntents.length,2,'one initial upload and one explicit retry')
     assert.equal(uploadIntents[1],uploadIntents[0],'upload intent survives the lost acknowledgement and reload')
     assert.equal(uploadedFiles[1].id,uploadedFiles[0].id,'retry reuses the same private upload reservation')
-    await expect(alice.getByRole('button',{name:'Discard handover.txt',exact:true})).toHaveCount(1)
+    await expect(alice.getByRole('button',{name:'Discard file',exact:true})).toHaveCount(1)
     await composer.fill(hostileMessage)
     let lost=false
     const messageSend=url=>url.pathname===`/api/conversations/${channel.id}/messages`
