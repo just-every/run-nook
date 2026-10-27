@@ -68,6 +68,12 @@ try{
    assert.deepEqual(await entries(list),[workspaceName,workspaceName,'Another workspace'])
    await expect(list.getByText('Signed in as Ana Rivera',{exact:true})).toBeVisible()
    await shot('b-menu')
+   // A known source can hand off a new entry without repeating its own name.
+   const incoming={from:a.origin,entries:[{origin:a.origin,account:'',seen:Date.now()+1},{origin:'https://synthetic-nook-workspace.test',name:'Customer notes',account:'',seen:Date.now()}],removed:{}}
+   await page.goto(b.origin+'/app?view=people')
+   await page.goto(b.origin+'/app#nook-workspaces='+encodeURIComponent(JSON.stringify(incoming)))
+   await expect(prompt).toContainText(`from ${workspaceName}`)
+   await prompt.getByRole('button',{name:'Not now',exact:true}).click()
    // Drafts stay with their installation.
    await page.goto(b.origin+'/app?conversation='+b.channel.id)
    await expect(page.getByRole('textbox',{name:'Message beta-launch',exact:true})).toHaveValue('')

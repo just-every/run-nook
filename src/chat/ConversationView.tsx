@@ -1,3 +1,5 @@
+import {FilesView} from '../files/FilesView'
+import './conversation-files.css'
 import {RecapPanel} from '../recaps/RecapPanel'
 import {NotesPanel} from '../notes/NotesPanel'
 import {BookmarksBar} from '../team/BookmarksBar'
@@ -12,10 +14,10 @@ import {OutcomeCard} from './OutcomeCard'
 import {useReadVisibility} from './useReadVisibility'
 import {conversationName} from './Navigation'
 import {IconBack,IconBell,IconClose,IconPlus} from './icons'
-type Props={request:TeamRequest;user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
-export function ConversationView({request,user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,sendMessage,onRead,mutate,onError,onAction,onDiscuss}:Props) {
+type Props={users:Person[];conversations:Conversation[];filesRevision:number;recapOpened:boolean;closeRecap:()=>void;request:TeamRequest;user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
+export function ConversationView({users,conversations,filesRevision,recapOpened,closeRecap,request,user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,sendMessage,onRead,mutate,onError,onAction,onDiscuss}:Props) {
  const log=useRef<HTMLDivElement>(null),threadLog=useRef<HTMLDivElement>(null)
- const showNotes=route.panel==='notes',showOutcomes=route.panel==='outcomes',[peek,setPeek]=useState<string|null>(null)
+ const showFiles=route.panel==='files',showNotes=route.panel==='notes',showOutcomes=route.panel==='outcomes',[peek,setPeek]=useState<string|null>(null)
  useEffect(()=>{if(!showOutcomes)setPeek(null)},[showOutcomes])
  useEffect(()=>{if(!peek||!showOutcomes)return;const frame=requestAnimationFrame(()=>{const card=document.getElementById('outcome-'+peek);card?.scrollIntoView({block:'start'});card?.focus({preventScroll:true})});return()=>cancelAnimationFrame(frame)},[peek,showOutcomes])
  // A conversation opened at its landing keeps that landing while the panel opens and closes: changing it would reset the window and blank the chat.
@@ -29,7 +31,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
  const landingTarget=route.landing?data.rootWindow.target?.id:null
  const isCurrent=threadCurrent
  // The panel is a companion on wide screens, so reading continues behind it; on a phone it replaces the log (mirrors api.ts).
- const reading=!((showOutcomes||showNotes)&&typeof window!=='undefined'&&window.matchMedia('(max-width: 850px)').matches)
+ const reading=!((showOutcomes||showNotes||showFiles)&&typeof window!=='undefined'&&window.matchMedia('(max-width: 850px)').matches)
  useReadVisibility(activeLog,c.id,activeWindow,user.id,reading,isCurrent,onRead,onError,route.thread?{thread:route.thread,onRead:refresh}:undefined)
  const scrollKey=`nook:scroll:${user.id}:${c.id}:${route.thread||'root'}:${route.thread?route.threadBefore||'latest':route.before||'latest'}:${route.landing?'landing':'default'}`,focusKey=`nook:focus:${user.id}:${c.id}:${route.thread||'root'}:${route.thread?route.threadBefore||'latest':route.before||'latest'}:${route.landing?'landing':'default'}`
  // Parent private-scope layout effects commit before this initialization.
@@ -126,8 +128,8 @@ export function ConversationView({request,user,conversation:c,data,route,private
  const followed=data.preferences.threads.includes(root?.id||'')
  const showLatest=Boolean(data.rootWindow.hasNewer||route.before||route.focus&&route.focus!==route.thread&&!data.outcomes.some(o=>o.id===route.focus)||route.landing&&data.rootWindow.target)
  const showLatestReplies=Boolean(data.threadWindow?.hasNewer||route.threadBefore||route.landing&&data.rootWindow.target?.parent)
- const recap=<RecapPanel conversation={c.id} thread={route.thread} revision={c.seq} privateSignal={privateSignal} onOpen={(focus,thread)=>navigate({view:'chat',conversation:c.id,focus,thread:thread??focus,panel:null,before:null,threadBefore:null})}/>
- return <div className={'body-grid'+(route.thread?' has-thread':'')+(showOutcomes||showNotes?' showing-outcomes':'')}>
+ const recap=recapOpened&&<RecapPanel onClose={closeRecap} conversation={c.id} thread={route.thread} revision={c.seq} privateSignal={privateSignal} onOpen={(focus,thread)=>navigate({view:'chat',conversation:c.id,focus,thread:thread??focus,panel:null,before:null,threadBefore:null})}/>
+ return <div className={'body-grid'+(route.thread?' has-thread':'')+(showOutcomes||showNotes||showFiles?' showing-outcomes':'')}>
   <section className="chat" aria-label={name}>
    {!route.thread&&c.kind!=='dm'&&<BookmarksBar conversation={c.id}/>}
    {!route.thread&&recap}
@@ -143,7 +145,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
   </section>
   <aside className="decisions" id="decisions-panel" aria-label={route.thread?'Thread':'Decisions and requests'}>
    {route.thread&&recap}
-   {showNotes?<NotesPanel conversation={c.id} thread={route.thread} request={request} people={data.members} onClose={()=>navigate({panel:null})}/>:route.thread&&root&&!showOutcomes?<>
+   {showFiles?<section className="conversation-files-panel" aria-label="Conversation files"><div className="panel-bar"><h2>Files</h2><button className="text-button" onClick={()=>navigate({panel:null})}>Close files</button></div><FilesView conversations={conversations} users={users} user={user} conversation={c.id} revision={filesRevision} privateSignal={privateSignal} onError={onError} onOpen={(conversation,focus,thread)=>navigate({view:'chat',conversation,focus:focus||null,thread:thread||focus||null,panel:null,before:null,threadBefore:null})}/></section>:showNotes?<NotesPanel conversation={c.id} thread={route.thread} request={request} people={data.members} onClose={()=>navigate({panel:null})}/>:route.thread&&root&&!showOutcomes?<>
     <div className="panel-bar thread-bar"><button className="icon-button" data-tooltip="Back to conversation" aria-label="Back to conversation" onClick={back}><IconBack/><span className="sr-only">Back</span></button><h2>Thread</h2>{(!root.immutable||Boolean(root.provenance))&&<button className="soft-button" onClick={()=>void mutate(`messages/${root.id}/follow`,{follow:!followed}).catch(()=>{})}><IconBell/>{followed?'Unfollow thread':'Follow thread'}</button>}</div>
     <div className="log-frame">
      <div className="message-log thread-log" ref={threadLog} role="region" aria-label="Thread messages" tabIndex={0}>

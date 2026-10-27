@@ -18,7 +18,7 @@ export async function showRecap(c:Context,receipt:Receipt,token:string){
  // No old response body is authoritative: this projection is rebuilt on every
  // display, including for a different recipient, under their own read doors.
  await authorize(c,receipt.range.conversation)
- return {state:claims.length?'answered':'abstain',receipt:token,range:receipt.range,created:receipt.created,claims,outcomes:current.outcomes,corrections,omissions:current.omissions,omitted:current.omitted+receipt.points.length-claims.length,more:current.more,notice:'Quoted source reports may conflict or be incomplete. Only recorded decisions and accepted obligations below describe outcomes. Shared and external conversations are excluded, including omission counts. No recap cache or embeddings.'}
+ return {state:claims.length?'answered':'abstain',receipt:token,range:receipt.range,created:receipt.created,claims,outcomes:current.outcomes,corrections,omissions:current.omissions,omitted:current.omitted+receipt.points.length-claims.length,more:current.more,notice:'Quoted source reports may conflict or be incomplete. Only recorded decisions and accepted obligations below describe outcomes. Shared and external conversations are excluded, including omission counts.'}
 }
 export async function requestRecap(c:Context,input:Record<string,unknown>,authorizedRange?:Range,now=Date.now()){
  const range=authorizedRange??await rangeInput(c,input),cfg=await configuration(c),credential=await c.one<{sealed:string}>('SELECT sealed FROM nook_ai_secrets WHERE id=1')

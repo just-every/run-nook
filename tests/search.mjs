@@ -146,7 +146,7 @@ export async function aiSearchJourney(app,edge,t){
  const audit=(await call('/api/team/audit','GET',undefined,ownerCookie)).items;assert.ok(audit.some(a=>a.kind==='ai-search.settings'));assert.ok(!JSON.stringify(audit).includes(key)&&!JSON.stringify(audit).includes(replacement)&&!JSON.stringify(audit).includes(raw.sealed));
  let job=await call('/api/readable-exports','POST',{scope:'conversation',conversationId:room.id,custodyAccepted:true},member.cookie);for(let n=0;!job.complete&&n<100;n++)job=await call('/api/readable-exports/'+job.id+'/step','POST',{},member.cookie);assert.ok(job.complete);const index=await call('/api/readable-exports/'+job.id+'/index','GET',undefined,member.cookie),records=[];for(const page of index.items)records.push(...(await call(`/api/readable-exports/${job.id}/pages/${page.ordinal}`,'GET',undefined,member.cookie)).records);assert.ok(records.some(r=>r.type==='ai_search_feedback'&&r.data.id===feedback.id));for(const secret of [key,replacement,raw.sealed])assert.ok(!JSON.stringify(records).includes(secret));
  t.diagnostic('S1-S6: permission-aware message/thread/text/PDF retrieval; exact citations, conflicts/stale sources, abstention, hostile provider output, live revocation, owner controls/cap, separate feedback and credential omission passed. Live provider NOT RUN.');
- return {room,member,revokedFilename:png.name,owner:{cookie:ownerCookie,user:app.owner},secrets:[key,replacement,raw.sealed]};
+ return {room,member,first,revokedFilename:png.name,owner:{cookie:ownerCookie,user:app.owner},secrets:[key,replacement,raw.sealed]};
 }
 
 export async function recapJourney(app,edge){

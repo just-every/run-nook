@@ -1,7 +1,8 @@
+import {refreshPages} from './refresh-pages'
 import {profileTimeZone} from '../profiles/time-zone'
 import {formatTime} from './format-time'
 import {AiAsk} from '../ai-search/Ask'
-import {useEffect,useId,useState} from 'react'
+import {useEffect,useId,useRef,useState} from 'react'
 import {api} from './api'
 import type {Conversation,Message,Page,Person} from './types'
 import {conversationName} from './Navigation'
@@ -17,11 +18,12 @@ function highlight(text:string,query:string) {
 type Props={conversations:Conversation[];users:Person[];user:Person;query:string;revision:number;privateSignal:AbortSignal;onQuery:(q:string)=>void;onOpen:(conversation:string,focus:string,thread:string|null)=>void;onError:(e:unknown)=>void}
 export function SearchView({query,revision,privateSignal,conversations,users,user,onQuery,onOpen,onError}:Props) {
  const zone=profileTimeZone(user),searchUrl='search?timeZone='+encodeURIComponent(zone)+'&q='
- const fieldId=useId(),[input,setInput]=useState(queryParts(query).filter(part=>!isModifier(part)).join(' ')),[filters,setFilters]=useState<SearchFilters>(emptyFilters),[page,setPage]=useState<SearchPage|null>(null),[loading,setLoading]=useState(false)
- const current=usePrivateScope(privateSignal,'search:'+query)
+ const fieldId=useId(),[input,setInput]=useState(queryParts(query).filter(part=>!isModifier(part)).join(' ')),[filters,setFilters]=useState<SearchFilters>(emptyFilters),[result,setResult]=useState<{query:string;page:SearchPage}|null>(null),[loading,setLoading]=useState(false)
+ const current=usePrivateScope(privateSignal,'search:'+query),pages=useRef(1),page=result?.query===query?result.page:null
+ useEffect(()=>{pages.current=1;setResult(null)},[query,current])
  useEffect(()=>{setInput(queryParts(query).filter(part=>!isModifier(part)).join(' '))},[query])
- useEffect(()=>{let cancelled=false;setPage(null);if(!query.trim()){setLoading(false);return}setLoading(true);void api<SearchPage>(searchUrl+encodeURIComponent(query)).then(value=>{if(!cancelled&&current())setPage(value)}).catch(error=>{if(!cancelled&&current())onError(error)}).finally(()=>{if(!cancelled&&current())setLoading(false)});return()=>{cancelled=true}},[query,revision,current,onError])
- const more=async()=>{if(!page?.hasMore||loading)return;setLoading(true);try{const value=await api<SearchPage>(searchUrl+encodeURIComponent(query)+'&after='+encodeURIComponent(page.cursor));if(current())setPage({...value,items:[...page.items,...value.items.filter(item=>!page.items.some(old=>old.id===item.id))]})}catch(error){if(current())onError(error)}finally{if(current())setLoading(false)}}
+ useEffect(()=>{let cancelled=false;if(!query.trim()){setLoading(false);return}setLoading(true);void refreshPages(after=>api<SearchPage>(searchUrl+encodeURIComponent(query)+(after?'&after='+encodeURIComponent(after):'')),pages.current).then(value=>{if(!cancelled&&current())setResult({query,page:value})}).catch(error=>{if(!cancelled&&current())onError(error)}).finally(()=>{if(!cancelled&&current())setLoading(false)});return()=>{cancelled=true}},[query,revision,current,onError])
+ const more=async()=>{if(!page?.hasMore||loading)return;setLoading(true);try{const value=await api<SearchPage>(searchUrl+encodeURIComponent(query)+'&after='+encodeURIComponent(page.cursor));if(current()){pages.current++;setResult({query,page:{...value,items:[...page.items,...value.items.filter(item=>!page.items.some(old=>old.id===item.id))]}})}}catch(error){if(current())onError(error)}finally{if(current())setLoading(false)}}
  const parts=queryParts(query),chips=parts.filter(isModifier)
  const label=(part:string)=>part.replace(/^in:#?(.+)$/i,(_,id)=>'in:#'+(conversations.some(c=>c.id===id)?conversationName(conversations.find(c=>c.id===id)!,user):id)).replace(/^from:@?(.+)$/i,(_,id)=>'from:@'+(users.find(p=>p.id===id)?.name??id))
  const change=(name:keyof SearchFilters,value:string)=>setFilters({...filters,[name]:value})
@@ -34,11 +36,11 @@ export function SearchView({query,revision,privateSignal,conversations,users,use
   <AiAsk key={query} query={query} revision={revision} privateSignal={privateSignal} onOpen={onOpen}/>
   {!!chips.length&&<div className="search-chips" aria-label="Active search filters">{chips.map((part,index)=><button className="soft-button" key={part+index} aria-label={'Remove filter '+label(part)} onClick={()=>onQuery(parts.filter((_,i)=>i!==parts.indexOf(part)).join(' '))}>{label(part)}<span aria-hidden="true"> ×</span></button>)}</div>}
   {page?.hints.map(hint=><p className="muted" key={hint}>{hint}</p>)}
-  <p className="sr-only" role="status">{loading?'Searching…':page?`${page.items.length} results loaded${page.hasMore?', more available':''}`:''}</p>
+  <p className="sr-only" role="status">{loading&&!page?'Searching…':page?`${page.items.length} results loaded${page.hasMore?', more available':''}`:''}</p>
   {!!page?.unsearchedFiles.length&&<details><summary>Files whose contents were not searched in this page ({page.unsearchedFiles.length})</summary>{page.unsearchedFiles.map(file=><p key={file.attachment}>{file.name} · {file.status==='unsupported'?'This file type has no text extractor':'Text could not be extracted (encrypted, scanned, invalid or beyond 100 pages / 1 MiB of text)'}</p>)}</details>}
   {page?.items.map(m=>{const where=conversations.find(c=>c.id===m.conversation);return <article className="search-result reveal-host" key={m.id}><p className="search-meta">{where?(where.kind==='dm'?'':'# ')+conversationName(where,user)+' · ':''}{m.authorName}{m.source==='imported'?' · Imported':''} · <time dateTime={m.created}>{formatTime(m.created)}</time></p><p className="search-snippet">{highlight(m.displayBody??m.body,page.filters.text)}</p>{m.files?.map(file=><div className="search-file" key={file.attachment}><strong>{file.name}</strong> · {file.status==='indexed'?'File text searched':'Contents not searched'}{file.excerpt&&file.matches&&<p className="search-snippet">{file.excerpt}</p>}</div>)}<button className="soft-button" onClick={()=>onOpen(m.conversation,m.id,m.parent)}>Open in conversation</button></article>})}
   {page?.hasMore&&<button className="soft-button" disabled={loading} onClick={()=>void more()}>Load more search results</button>}
-  {loading&&<p className="muted">Searching…</p>}
+  {loading&&!page&&<p className="muted">Searching…</p>}
   {query&&page&&!page.items.length&&!page.hasMore&&<p className="empty-state">No matching messages in your conversations.</p>}
   {query&&page&&!page.items.length&&page.hasMore&&<p className="muted">No matches in this page. Continue to search later messages.</p>}
  </div></section>

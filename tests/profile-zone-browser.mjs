@@ -1,3 +1,4 @@
+import {signIn} from './auth-support.mjs'
 import assert from 'node:assert/strict'
 import {chromium,expect} from '@playwright/test'
 
@@ -30,6 +31,18 @@ export async function profileZoneBrowser({origin,registered,post,get,owner}){
    await page.getByLabel('Command result').getByRole('button',{name:'Confirm',exact:true}).click();await expect(page.getByLabel('Command result')).toHaveCount(0)
    await page.goto(base+'/app?view=you');await expect(zone).toHaveValue('UTC')
    assert.equal((await get('/api/profile',actor.cookie)).data.profile.zoneChosen,true)
+   if(width===390){
+    const email='synthetic-nook-profile-guest@example.test'
+    await post('/api/team/invitations',{email,role:'member',mode:'guest',scopes:[room.id]})
+    await post('/auth/invite',{email,displayName:'Customer guest',role:'member'},owner.cookie,202)
+    const guest=await signIn(base,email,{requestLink:false}),at=guest.cookie.indexOf('=')
+    await context.clearCookies();await context.addCookies([{name:guest.cookie.slice(0,at),value:guest.cookie.slice(at+1),url:base}])
+    await page.goto(base+'/app?view=you');await profile.getByLabel('Display name',{exact:true}).fill('Customer guest profile')
+    await profile.getByRole('button',{name:'Save profile',exact:true}).click()
+    await expect(profile.getByRole('button',{name:'Save profile',exact:true})).toBeEnabled()
+    await page.reload();await expect(profile.getByLabel('Display name',{exact:true})).toHaveValue('Customer guest profile')
+   }
+
   }finally{await context.close()}
  }}finally{await browser.close()}
 }

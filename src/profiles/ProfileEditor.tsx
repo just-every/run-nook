@@ -20,13 +20,13 @@ export function ProfileEditor({revision,privateSignal,onSaved}:Props){
  const [record,setRecord]=useState<ProfileResult|null>(null),[name,setName]=useState(''),[zone,setZone]=useState(browserTimeZone),[values,setValues]=useState<Record<string,string>>({}),[status,setStatus]=useState<StatusInput>({emoji:'',text:'',clearAfter:'never'})
  const [notice,setNotice]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[reload,setReload]=useState(0)
  const [presenceEnabled,setPresenceEnabled]=useState(true),[typingEnabled,setTypingEnabled]=useState(true)
- const dirty=useRef(false),statusDirty=useRef(false),zoneDirty=useRef(false),formVersion=useRef(0),alive=useRef(true),generation=useRef(0)
+ const dirty=useRef(false),statusDirty=useRef(false),zoneDirty=useRef(false),formVersion=useRef(0),alive=useRef(true),generation=useRef(0),saving=useRef<symbol|null>(null)
  const apply=(result:ProfileResult)=>{
   setRecord(result);setPresenceEnabled(result.profile.presenceEnabled);setTypingEnabled(result.profile.typingEnabled);setName(result.profile.name);setZone(profileTimeZone(result.profile));setValues(Object.fromEntries(result.profile.fields.map(field=>[field.id,field.value])));setStatus(statusForm(result));formVersion.current=result.profile.version;dirty.current=false;statusDirty.current=false;zoneDirty.current=false
  }
  useEffect(()=>{
-  alive.current=true
-  const clear=()=>{alive.current=false;generation.current++;setRecord(null);setValues({});setName('');setStatus({emoji:'',text:'',clearAfter:'never'});setNotice('');setError('')}
+  alive.current=true;saving.current=null;setBusy(false)
+  const clear=()=>{alive.current=false;generation.current++;saving.current=null;setBusy(false);setRecord(null);setValues({});setName('');setStatus({emoji:'',text:'',clearAfter:'never'});setNotice('');setError('')}
   privateSignal?.addEventListener('abort',clear,{once:true})
   if(privateSignal?.aborted)clear()
   return()=>{alive.current=false;generation.current++;privateSignal?.removeEventListener('abort',clear)}
@@ -44,13 +44,13 @@ export function ProfileEditor({revision,privateSignal,onSaved}:Props){
  })
  const save=async(clear=false)=>{
   if(!record||busy)return
-  const run=generation.current;setBusy(true);setError('');setNotice('')
+  const run=generation.current,operation=Symbol();saving.current=operation;setBusy(true);setError('');setNotice('')
   try{
    const result=await api<ProfileResult>('profile',clear?{status:null}:{name,...(zoneDirty.current?{zone}:{}),presenceEnabled,typingEnabled,fields:values,version:formVersion.current,...(statusDirty.current?{status,statusTimeZone:zone}: {})})
    if(!alive.current||run!==generation.current)return
    if(clear&&dirty.current){setRecord(result);setStatus({emoji:'',text:'',clearAfter:'never'});statusDirty.current=false;formVersion.current=result.profile.version}else apply(result)
    setNotice(clear?'Status cleared.':'Profile saved.');onSaved?.(result)
-  }catch(cause){if(alive.current&&run===generation.current)setError(cause instanceof Error?cause.message:'Could not save your profile')}finally{if(alive.current&&run===generation.current)setBusy(false)}
+  }catch(cause){if(alive.current&&run===generation.current)setError(cause instanceof Error?cause.message:'Could not save your profile')}finally{if(saving.current===operation){saving.current=null;if(alive.current)setBusy(false)}}
  }
  if(privateSignal?.aborted)return null
  return <section className="team-section profile-editor" aria-label="Your profile"><h3>Your profile</h3>{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}

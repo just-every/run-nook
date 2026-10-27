@@ -152,6 +152,8 @@ export default withDemo({
   if(lobby) return lobby
   const url = new URL(request.url),repository=new Repository(env)
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
+  const aliases:Record<string,string>={'/settings':'/app?view=you','/app/settings':'/app?view=you','/app/channels':'/app?view=channels','/app/people':'/app?view=people','/login':'/signin','/sign-in':'/signin'}
+  if((request.method==='GET'||request.method==='HEAD')&&aliases[url.pathname])return new Response(null,{status:307,headers:{Location:aliases[url.pathname],'Cache-Control':'no-store'}})
   if(url.pathname==='/signin')return await signInRoute(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/notify/off') return unsubscribeRoute(env,request)
   if(isWebhookRequest(request)) return webhookRequest(env,request)

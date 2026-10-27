@@ -78,7 +78,7 @@ Notification post receipts are stable across later edits: replaying a live key r
 
 ## Recap one conversation
 
-Open **Recap this conversation** above its messages. Choose the conversation, the open thread, or unread messages since your current read marker, and optionally a time range. **Ask for recap** uses the owner's existing AI search setting, sealed key and installation daily call cap. It is off by default. The same configured provider is a subprocessor receiving the range and quoted passages. No second key, counter, tools or web access are added.
+Open **Conversation options > Recap conversation** above its messages. Choose the conversation, the open thread, or unread messages since your current read marker, and optionally a time range. **Ask for recap** uses the owner's existing AI search setting, sealed key and installation daily call cap. It is off by default. The same configured provider is a subprocessor receiving the range and quoted passages. No second key, counter, tools or web access are added.
 
 A request scans at most the first 100 current-authorized messages in the chosen range, in time order. Plain-text and text-bearing PDF files on its first 8 message candidates may contribute. At most 8 complete passages totaling 32 KiB of UTF-8 text reach one provider call. Oversized passages, unsupported files and later candidates are omitted and disclosed; a range may be incomplete. Empty ranges make no call. Shared or external channels are excluded entirely, including from omission counts, until NOOK-031 is available. Inaccessible conversations are never named. Imported history must already be published under its normal rules. Imported history is inert and does not enter the native unread period.
 
