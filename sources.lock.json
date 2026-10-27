@@ -4249,7 +4249,7 @@
       "executable": false
     },
     "src/chat/conversation-files.css": {
-      "sha256": "41f23c9c71f1f9db74e18f6fd6e559e88bdf54e2bfce31e277fbdbc30f3fa99f",
+      "sha256": "7d448ed3ef7c1c093d69f115d4083b051a998501d4837bd225357fa1c4acc69f",
       "executable": false
     },
     "src/chat/ConversationNotifications.tsx": {
