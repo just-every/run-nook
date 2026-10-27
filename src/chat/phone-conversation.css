@@ -1,3 +1,5 @@
+.nook-app .header-member-portrait::before { content:attr(data-initials); }
+.nook-app .members-more::before { content:"+" attr(data-count); }
 .nook-app .conversation-menu .phone-conversation-entry, .nook-app .channel-body-actions { display:none; }
 .nook-app .channel-header-actions { display:flex; gap:var(--s2); }
 @media (max-width:850px) {

@@ -6,6 +6,15 @@ import {IconMore,IconPlus} from './icons'
 import {useDismiss} from './useDismiss'
 import {NookMark} from '../brand/NookMark'
 export function conversationName(c:Conversation,user:Person){return c.kind==='dm'&&c.participants?c.participants.filter(p=>p.id!==user.id).map(p=>p.name).join(', ')||c.name:c.name}
+// In this icon control the portraits are decoration, rather than its text label.
+// Match Avatar's palette and initials without adding those letters to the button's visible label.
+function MemberPortrait({person}:{person:Person}){
+ const words=person.name.trim().split(/[\s_-]+/),initials=(words.length>1?words.slice(-2).map(w=>w[0]).join(''):words[0].slice(0,2)).toUpperCase()
+ const colors=[['#f6e6e0','#7a3a3f'],['#f3e7da','#6a4a24'],['#efe4e6','#664054'],['#ece6df','#51443d'],['#f1e4dc','#5e3b30']]
+ let hash=0;for(const char of person.id)hash=(hash*31+char.charCodeAt(0))|0
+ const [background,color]=colors[Math.abs(hash)%colors.length]
+ return <span className="avatar header-member-portrait" aria-hidden="true" data-initials={initials} style={{background,color,width:24,height:24}}/>
+}
 type Create={channel:()=>void;dm:()=>void}
 // The rail passes onCreate: each group heading then carries a "+" that appears on hover or focus (and is always there for keyboards).
 export function ConversationList({conversations,user,current,onSelect,onCreate}:{conversations:Conversation[];user:Person;current:string|null;onSelect:(c:Conversation)=>void;onCreate?:Create}) {
@@ -37,7 +46,7 @@ export function ChatActions({user,data,route,navigate,onDetails,onPreference,onP
  const showing=route.panel==='outcomes'
  return <>
   <button className="decisions-toggle soft-button" aria-expanded={showing} aria-controls={data?'decisions-panel':undefined} onClick={()=>navigate({panel:showing?null:'outcomes',landing:route.landing,...(showing?{focus:null}:{})})}><span className="decisions-label">Decisions &amp; requests</span>{open>0&&<><span className="header-count" aria-hidden="true">{open}</span><span className="sr-only">, {open} open</span></>}{waiting&&<><span className="needs-you-dot" aria-hidden="true"/><span className="sr-only">, waiting on you</span></>}</button>
-  <button className="header-members" data-tooltip="Members and details" aria-label="Members and details" onClick={onDetails}>{members.slice(0,3).map(p=><Avatar key={p.id} person={p} size={24}/>)}{members.length>3&&<span className="members-more" aria-hidden="true">+{members.length-3}</span>}<span className="sr-only">Details</span></button>
+  <button className="header-members" data-tooltip="Members and details" aria-label="Members and details" onClick={onDetails}>{members.slice(0,3).map(p=><MemberPortrait key={p.id} person={p}/>)}{members.length>3&&<span className="members-more" aria-hidden="true" data-count={members.length-3}/>}<span className="sr-only">Details</span></button>
   {data&&<ConversationMenu open={open} waiting={waiting} onDetails={onDetails} onOutcomes={()=>navigate({panel:showing?null:'outcomes',landing:route.landing,...(showing?{focus:null}:{})})} onUnread={onUnread} onSchedule={onSchedule} preferences={data.preferences} onPreference={onPreference} onPins={onPins} onBookmarks={onBookmarks} onPoll={onPoll} onNotifications={onNotifications}/>}
  </>
 }

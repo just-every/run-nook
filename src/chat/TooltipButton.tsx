@@ -9,9 +9,10 @@ export function TooltipSurface(){
  const [active,setActive]=useState<HTMLElement|null>(null),[position,setPosition]=useState({left:8,top:8})
  useEffect(()=>{
   let timer:ReturnType<typeof setTimeout>|undefined,shown:HTMLElement|null=null,touch=false
-  const hide=()=>{clearTimeout(timer);if(shown){const values=(shown.getAttribute('aria-describedby')??'').split(' ').filter(value=>value&&value!==id);if(values.length)shown.setAttribute('aria-describedby',values.join(' '));else shown.removeAttribute('aria-describedby')}shown=null;setActive(null)}
+  const descriptionTarget=(element:HTMLElement)=>element instanceof HTMLLabelElement?element.control??element:element
+  const hide=()=>{clearTimeout(timer);if(shown){const target=descriptionTarget(shown),values=(target.getAttribute('aria-describedby')??'').split(' ').filter(value=>value&&value!==id);if(values.length)target.setAttribute('aria-describedby',values.join(' '));else target.removeAttribute('aria-describedby')}shown=null;setActive(null)}
   const trigger=(event:Event)=>event.target instanceof Element?event.target.closest<HTMLElement>('[data-tooltip]'):null
-  const show=(element:HTMLElement)=>{hide();if(!element.isConnected)return;shown=element;const values=(element.getAttribute('aria-describedby')??'').split(' ').filter(Boolean);element.setAttribute('aria-describedby',[...values,id].join(' '));setActive(element)}
+  const show=(element:HTMLElement)=>{hide();if(!element.isConnected)return;shown=element;const target=descriptionTarget(element),values=(target.getAttribute('aria-describedby')??'').split(' ').filter(Boolean);target.setAttribute('aria-describedby',[...values,id].join(' '));setActive(element)}
   const enter=(event:PointerEvent)=>{if(event.pointerType==='touch')return;const element=trigger(event);if(!element||element.contains(event.relatedTarget as Node))return;hide();timer=setTimeout(()=>show(element),300)}
   const leave=(event:PointerEvent)=>{const element=trigger(event);if(element&&!element.contains(event.relatedTarget as Node))hide()}
   const focus=(event:FocusEvent)=>{const element=trigger(event);if(element&&!touch)show(element)}
@@ -26,7 +27,7 @@ export function TooltipSurface(){
  useLayoutEffect(()=>{if(!active||!tip.current)return;const rect=active.getBoundingClientRect(),box=tip.current.getBoundingClientRect(),margin=8;const above=rect.top-box.height-margin>=margin;setPosition({left:Math.max(margin,Math.min(innerWidth-box.width-margin,rect.left+(rect.width-box.width)/2)),top:above?rect.top-box.height-margin:rect.bottom+margin})},[active])
  if(!active)return null
  // A dialog is in the top layer: its tooltip must live there too.
- return createPortal(<span ref={tip} id={id} role="tooltip" className="action-tooltip" style={position}>{active.dataset.tooltip}</span>,active.closest('dialog')??document.body)
+ return createPortal(<span ref={tip} id={id} role="tooltip" className="action-tooltip" style={position}>{active.dataset.tooltip}</span>,active.closest('dialog')??active.closest('.nook-app')??document.body)
 }
 export function TooltipButton({label,children,...props}:ButtonHTMLAttributes<HTMLButtonElement>&{label:string}){
  return <button {...props} title={undefined} type={props.type??'button'} aria-label={label} data-tooltip={label}>{children}</button>
