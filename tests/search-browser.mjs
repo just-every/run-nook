@@ -1,3 +1,4 @@
+import {retainedRefresh} from './refresh-browser-support.mjs'
 import {chromium,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
 import {resolve} from 'node:path'
@@ -30,10 +31,11 @@ export async function searchBrowser({origin,owner,member,destination}){
     }
 
     await expect(page.getByRole('button',{name:'Remove filter has:file',exact:true})).toBeVisible()
+    if(width===1440)await retainedRefresh(page,{path:'/api/search',target:result,mutate:()=>call(`/api/conversations/${room.id}/messages`,{body:'Customer rollout status update',intent:crypto.randomUUID()})})
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`file-text-${width}.png`)})
     await page.getByRole('button',{name:'Remove filter has:file',exact:true}).click();await expect(result).toBeVisible()
     await page.getByLabel('Search conversations',{exact:true}).fill('HR Q3 -draft')
-    await page.getByText('Filters',{exact:true}).click()
+    if(!await page.locator('details.search-advanced').first().evaluate(e=>e.open))await page.getByText('Filters',{exact:true}).click()
     await page.getByLabel('Conversation type',{exact:true}).selectOption('private')
     await page.locator('.search-form').getByRole('button',{name:'Search',exact:true}).click()
     await expect(result).toBeVisible()

@@ -1,3 +1,4 @@
+import {refreshPages} from '../chat/refresh-pages'
 import {formatTime} from '../chat/format-time'
 import {InertPreview} from './InertPreview'
 import {useCallback,useEffect,useId,useRef,useState} from 'react'
@@ -21,12 +22,13 @@ export function FilesView({conversations,users,user,conversation,revision,privat
  const id=useId(),[selected,setSelected]=useState(''),[person,setPerson]=useState(''),[type,setType]=useState<FileType>('')
  const [result,setResult]=useState<{key:string;page:FilesPage}|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState(''),[reload,setReload]=useState(0)
  const query=new URLSearchParams({conversation:conversation??selected,person,type}).toString(),key=user.id+':'+query
- const current=usePrivateScope(privateSignal,'files:'+key),generation=useRef(0),page=result?.key===key&&!privateSignal.aborted?result.page:null
+ const current=usePrivateScope(privateSignal,'files:'+key),generation=useRef(0),pages=useRef(1),page=result?.key===key&&!privateSignal.aborted?result.page:null
+ useEffect(()=>{pages.current=1},[key,current])
  useEffect(()=>{
   let cancelled=false;const epoch=++generation.current,active=()=>!cancelled&&current()&&epoch===generation.current
   const clear=()=>{setResult(null);setError('')}
   privateSignal.addEventListener('abort',clear,{once:true});setLoading(true);setError('')
-  void api<FilesPage>('files?'+query).then(value=>{if(active())setResult({key,page:value})}).catch(reason=>{if(active()){setError('Files could not be loaded.');onError(reason)}}).finally(()=>{if(active())setLoading(false)})
+  void refreshPages(after=>api<FilesPage>('files?'+query+(after?'&after='+encodeURIComponent(after):'')),pages.current).then(value=>{if(active())setResult({key,page:value})}).catch(reason=>{if(active()){setError('Files could not be loaded.');onError(reason)}}).finally(()=>{if(active())setLoading(false)})
   return()=>{cancelled=true;generation.current++;privateSignal.removeEventListener('abort',clear)}
  },[query,key,revision,reload,current,onError,privateSignal])
  const denied=useCallback(()=>{if(current()){setResult(null);onError(new ApiError(403,'Conversation access denied'))}},[current,onError])
@@ -35,7 +37,7 @@ export function FilesView({conversations,users,user,conversation,revision,privat
   const epoch=generation.current;setLoading(true);setError('')
   try{
    const next=await api<FilesPage>('files?'+query+'&after='+encodeURIComponent(page.cursor))
-   if(current()&&epoch===generation.current)setResult({key,page:{...next,items:[...page.items,...next.items.filter(item=>!page.items.some(old=>old.id===item.id))]}})
+   if(current()&&epoch===generation.current){pages.current++;setResult({key,page:{...next,items:[...page.items,...next.items.filter(item=>!page.items.some(old=>old.id===item.id))]}})}
   }catch(reason){if(current()&&epoch===generation.current){setError('More files could not be loaded.');onError(reason)}}finally{if(current()&&epoch===generation.current)setLoading(false)}
  }
  return <section className="page-content nook-files"><div className="page-column">
@@ -46,7 +48,7 @@ export function FilesView({conversations,users,user,conversation,revision,privat
   </div></details>
   <div className="search-chips nook-filter-chips">{!conversation&&selected&&<button className="soft-button" aria-label="Remove conversation filter" onClick={()=>setSelected('')}>{conversations.find(c=>c.id===selected)?.name??'Conversation'}<span aria-hidden="true"> ×</span></button>}{person&&<button className="soft-button" aria-label="Remove person filter" onClick={()=>setPerson('')}>{person==='me'?'Me':users.find(p=>p.id===person)?.name??'Person'}<span aria-hidden="true"> ×</span></button>}{type&&<button className="soft-button" aria-label="Remove file type filter" onClick={()=>setType('')}>{{image:'Images',pdf:'PDFs',text:'Text',other:'Other files'}[type]}<span aria-hidden="true"> ×</span></button>}</div>
   {error&&<p className="warning" role="alert">{error} <button className="text-button" onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
-  <p className="sr-only" role="status">{loading?'Loading files':page?`${page.items.length} files loaded${page.hasMore?', more available':''}`:''}</p>
+  <p className="sr-only" role="status">{loading&&!page?'Loading files':page?`${page.items.length} files loaded${page.hasMore?', more available':''}`:''}</p>
   {page?.items.map(file=>{
    const room=conversations.find(room=>room.id===file.conversation)
    return <article className="search-result" aria-label={'File '+file.name} key={file.id}>
@@ -58,7 +60,7 @@ export function FilesView({conversations,users,user,conversation,revision,privat
    </article>
   })}
   {page?.hasMore&&<button className="soft-button" disabled={loading} onClick={()=>void more()}>Load more files</button>}
-  {loading&&<p className="muted">Loading files…</p>}
+  {loading&&!page&&<p className="muted">Loading files…</p>}
   {page&&!page.items.length&&<div className="empty-state">{selected||person||type?<p>No shared files match these filters.</p>:<><h2>No shared files yet</h2>{conversation?<button className="soft-button" onClick={()=>onOpen(conversation,'',null)}>Share a file</button>:<a className="soft-button" href="/app?view=channels">Share a file in a channel</a>}</>}</div>}
  </div></section>
 }

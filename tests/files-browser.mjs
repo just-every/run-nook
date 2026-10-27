@@ -1,3 +1,4 @@
+import {retainedRefresh} from './refresh-browser-support.mjs'
 import {importedPreviewFiles} from './file-preview-fixture.mjs'
 import {createRequire} from 'node:module'
 import {zipFixture} from './slack-import/fixture.mjs'
@@ -65,6 +66,7 @@ export async function filesBrowser({origin,owner,member,destination,sql}){
     await expect(textCard).toBeVisible();await expect(imageCard.getByRole('img',{name:image.name,exact:true})).toBeVisible()
     await page.getByText('Filters',{exact:true}).click();await page.getByLabel('Conversation',{exact:true}).selectOption(room.id)
     await expect(textCard).toBeVisible();await expect(imageCard).toBeVisible()
+    if(width===1440)await retainedRefresh(page,{path:'/api/files',target:textCard,mutate:()=>call(`/api/conversations/${room.id}/messages`,{body:'Customer rollout status update',intent:crypto.randomUUID()})})
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`files-${width}.png`)})
     await page.getByLabel('Conversation',{exact:true}).selectOption('')
     for(const file of [document,...inert]){const card=page.getByRole('article',{name:'File '+file.name,exact:true});await card.getByText('Preview '+file.name,{exact:true}).click();await expect(card.getByRole('textbox')).toHaveCount(0);await expect(card.getByLabel('Preview of '+file.name,{exact:true})).toBeVisible();if(file.name.endsWith('.csv')||file.name.endsWith('.zip')){await expect(card.getByLabel('Preview of '+file.name,{exact:true})).toContainText('<img src=x onerror=alert(1)>');await expect(card.locator('img')).toHaveCount(0)}if(file.name==='synthetic-nook-long.txt')await expect(card.getByRole('status')).toContainText('Truncated preview')}
