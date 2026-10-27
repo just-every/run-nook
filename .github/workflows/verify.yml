@@ -79,9 +79,12 @@ jobs:
         include:
           # Independent commands have isolated runtime stores and ports. Pair
           # clock/IO waits within a runner; do not remove or filter assertions.
-          - stage: unit
+          - stage: unit portability
+            browser: false
+            command: node scripts/ci-unit.mjs portability
+          - stage: unit public doors
             browser: true
-            command: node scripts/ci-stage.mjs 'node --test --test-concurrency=4 tests/*.test.mjs'
+            command: node scripts/ci-unit.mjs remaining
           - stage: product API
             browser: false
             command: node scripts/ci-stage.mjs 'pnpm test:runtime --suite=core-api-product'
@@ -97,12 +100,9 @@ jobs:
           - stage: integrations and composition
             browser: true
             command: node scripts/ci-stage.mjs 'node --test tests/notification-apps.mjs' 'pnpm test:runtime --suite=integrations && pnpm test:runtime --suite=composition'
-          - stage: notifications and notes
+          - stage: notifications and clocks
             browser: true
-            command: node scripts/ci-stage.mjs 'pnpm test:notify' 'pnpm test:notes'
-          - stage: contracts and clocks
-            browser: true
-            command: node scripts/ci-stage.mjs 'pnpm test:base && pnpm integration:check && pnpm typecheck && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" . && pnpm test:runtime --suite=search' 'node --test --test-concurrency=1 tests/push-clock.mjs'
+            command: node scripts/ci-stage.mjs 'pnpm test:notify && pnpm test:notes' 'pnpm test:base && pnpm integration:check && pnpm typecheck && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" . && pnpm test:runtime --suite=search && node --test --test-concurrency=1 tests/push-clock.mjs'
     uses: ./.github/workflows/verify-stage.yml
     with:
       command: ${{ matrix.command }}
