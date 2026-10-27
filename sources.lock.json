@@ -6945,7 +6945,7 @@
       "executable": false
     },
     "tests/notify/quiet.mjs": {
-      "sha256": "298dc5280ed073e74f875ab4737f4a7fe0679df34115e5af449582bf088ddfa8",
+      "sha256": "256779df9842a23c4efcfbf5f1371ab01057e81c134c6b6a6f0d543635c9a55e",
       "executable": false
     },
     "tests/operator-auth.test.mjs": {

@@ -68,6 +68,8 @@ export async function quietJourney({installation,rowan,sam,room,say,browser,evid
     await section.getByRole('group',{name:'Friday',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:join(evidence,`quiet-weekday-${width}.png`)})
     await section.getByRole('button',{name:'Snooze alerts for one hour',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:join(evidence,`quiet-exceptions-${width}.png`)})
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
+    // The weekday rule is active from 22:00 to 07:00 New York time, so on the wall clock it would hold this item instead of the level suppressing it.
+    const idle=(await rowan.get('/api/notify')).quietSchedule;delete idle.until;delete idle.next;await rowan.patch('/api/notify',{quietSchedule:{...idle,enabled:false}})
     await page.goto(installation.origin+'/app?view=attention');await expect(page.getByText(/suppressed by your level/).first()).toBeVisible();await page.screenshot({path:join(evidence,`quiet-attention-${width}.png`)})
     await rowan.patch('/api/settings',{dndUntil:Date.now()+3600000});await page.reload();await expect(page.getByText(/Held until/).first()).toBeVisible();await expect(page.getByRole('heading',{name:"You're all caught up",exact:true})).toHaveCount(0);await page.screenshot({path:join(evidence,`quiet-held-${width}.png`)});await rowan.patch('/api/settings',{dndUntil:null})
    }finally{await context.close()}
