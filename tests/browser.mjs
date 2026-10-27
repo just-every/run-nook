@@ -45,6 +45,14 @@ export async function runBrowser(origin,destination){
     await auditComposerRouting(alice,alice.locator('.chat .composer'),destination,`${label}-channel`)
     const geometry=await alice.evaluate(()=>({title:document.querySelector('.heading h1').getBoundingClientRect().toJSON(),messages:[...document.querySelectorAll('.chat .message')].map(e=>e.getBoundingClientRect().toJSON()),composer:document.querySelector('.chat .composer').getBoundingClientRect().toJSON(),width:innerWidth,scrollWidth:document.documentElement.scrollWidth}))
     assert.ok(geometry.scrollWidth<=geometry.width,'conversation fits viewport')
+    if(label==='mobile'){
+     const title=alice.locator('.heading h1');assert.equal(await title.evaluate(el=>el.scrollWidth),await title.evaluate(el=>el.clientWidth),'phone conversation name fits')
+     await expect(alice.locator('.header .decisions-toggle')).toBeHidden();await expect(alice.locator('.header .header-members')).toBeHidden()
+     await alice.getByText(messages[5].body,{exact:true}).click()
+     const bounds=await alice.locator('[data-message="'+messages[5].id+'"]').evaluate(el=>{const meta=el.querySelector('.message-meta').getBoundingClientRect(),tray=el.querySelector('.message-tools').getBoundingClientRect();return {clear:tray.top>=meta.bottom,inside:tray.left>=0&&tray.right<=innerWidth,targets:[...el.querySelectorAll('.message-tools > button,.message-tools > details > summary')].map(e=>e.getBoundingClientRect().height)}})
+     assert.ok(bounds.clear&&bounds.inside,'phone message tray clears metadata and stays in view');assert.ok(bounds.targets.every(height=>height>=44),'phone tray actions remain tappable')
+     await alice.locator('.conversation-menu > summary').click();await expect(alice.locator('.conversation-menu').getByRole('button',{name:'Members and details',exact:true})).toBeVisible();await alice.locator('.conversation-menu > summary').click()
+    }
     await writeFile(resolve(destination,`${label}-geometry.json`),JSON.stringify(geometry,null,2))
     await alice.locator('[data-message="'+messages[5].id+'"]').getByRole('button',{name:'Ask someone',exact:true}).click()
     await alice.getByLabel('What needs to happen?',{exact:true}).fill('Send the launch notes to the team')

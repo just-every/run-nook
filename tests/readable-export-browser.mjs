@@ -1,3 +1,4 @@
+import {openConversationDetails} from './conversation-details.mjs'
 import {chromium,expect} from '@playwright/test'
 import assert from 'node:assert/strict'
 import {createHash} from 'node:crypto'
@@ -56,7 +57,7 @@ export async function readableExportBrowser({origin,owner,member,outsider,destin
    try{
     await context.addCookies([cookie(owner)])
     const page=await context.newPage();await page.goto(origin+'/app?conversation='+room.id)
-    await page.getByRole('button',{name:'Details',exact:true}).click()
+    await openConversationDetails(page)
     const scoped=page.getByRole('dialog').getByRole('region',{name:'Readable export',exact:true})
     await scoped.getByRole('checkbox',{name:/I will keep downloaded copies private/}).check()
     await scoped.getByRole('button',{name:'Prepare conversation',exact:true}).click()

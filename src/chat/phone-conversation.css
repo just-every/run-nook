@@ -1,0 +1,18 @@
+.nook-app .phone-conversation-entry, .nook-app .channel-body-actions { display:none; }
+.nook-app .channel-header-actions { display:flex; gap:var(--s2); }
+@media (max-width:850px) {
+ .nook-app .header { gap:4px; }
+ .nook-app .heading { flex:1; gap:4px; }
+ .nook-app .heading h1 { min-width:0; }
+ .nook-app .heading .title-tag, .nook-app .header-actions > .decisions-toggle, .nook-app .header-actions > .header-members, .nook-app .channel-header-actions { display:none; }
+ .nook-app .conversation-menu .phone-conversation-entry { display:flex; align-items:center; }
+ .nook-app .conversation-menu > summary { position:relative; }
+ .nook-app .conversation-menu > summary .needs-you-dot { position:absolute; top:5px; right:5px; margin:0; }
+ .nook-app .channel-body-actions { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+ .nook-app .header .icon-button, .nook-app .header .quick-nav-trigger { min-width:44px; min-height:44px; }
+ .nook-app .message { flex-wrap:wrap; }
+ .nook-app .message > .message-content { flex:1 0 calc(100% - 44px); }
+ .nook-app .message > .message-tools { position:relative; top:auto; right:auto; margin:4px 0 0 auto; max-width:100%; flex-wrap:wrap; }
+ .nook-app .message-tools :is(button,summary) { min-width:44px; min-height:44px; }
+ @media (hover:none) { .nook-app .message:not(:focus-within):not(:has(details[open])) > .message-tools { display:none; } }
+}

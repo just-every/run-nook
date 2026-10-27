@@ -1,3 +1,4 @@
+import {openConversationDetails} from './conversation-details.mjs'
 import assert from 'node:assert/strict';
 
 // Same-browser local identities are the owner-facing README workflow.
@@ -17,7 +18,7 @@ export async function readmeTeamFlow(page,origin,width,{capture=async()=>{}}={})
  const me=await page.evaluate(async()=>(await fetch('/api/me')).json());assert.equal(me.name,'Dev member');assert.equal(me.role,'member');
  await page.goto(`${origin}/auth/dev/enter?as=owner&returnTo=/app`);await page.waitForURL(origin+'/app');await page.goto(channelUrl);
  await page.locator('.nook-app[data-live-connected="true"]').waitFor();
- await page.getByRole('button',{name:'Details',exact:true}).click();
+ await openConversationDetails(page);
  await page.getByRole('dialog').getByRole('button',{name:'Add Dev member',exact:true}).click();
  await page.getByRole('dialog').getByRole('button',{name:'Remove Dev member',exact:true}).waitFor();
  await page.goto(`${origin}/auth/dev/enter?as=member&returnTo=/app`);await page.waitForURL(origin+'/app');await page.goto(channelUrl);

@@ -1,3 +1,4 @@
+import {openConversationDetails} from './conversation-details.mjs'
 import assert from 'node:assert/strict'
 import {chromium,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
@@ -39,7 +40,7 @@ export async function broadcastBrowser({origin,owner,member,people,destination='
     await ignore.click();await expect(ignore).toBeChecked()
     await recipient.screenshot({animations:'disabled',path:resolve(destination,`ignore-${width}.png`)})
     await recipient.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click()
-    await sender.getByRole('button',{name:'Details',exact:true}).click()
+    await openConversationDetails(sender)
     const policy=sender.getByRole('region',{name:'Channel broadcasts'})
     await policy.getByLabel('Who can use @channel, @here and @everyone?').selectOption('admins')
     const changed=sender.waitForResponse(response=>response.url().endsWith('/broadcast')&&response.request().method()==='PATCH')

@@ -1,3 +1,4 @@
+import {openConversationDetails} from '../conversation-details.mjs'
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
 import {expect} from '@playwright/test';
@@ -53,7 +54,7 @@ export async function pilotBrowser({browser,installation,width,destination}){
   await exerciseUndo({owner,ownerContext,origin,stamp,name,imported,width,destination});
   pilotPhase('revocation-start',{width});
   await member.goto(`${origin}/app?conversation=${imported.shared.id}&focus=${imported.markerId}`);await expect(member.locator(`.message[data-message="${imported.markerId}"]`)).toBeVisible();
-  await owner.goto(`${origin}/app?conversation=${imported.shared.id}`);await expect(owner.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await owner.getByRole('button',{name:'Details',exact:true}).click();await owner.getByRole('dialog').getByRole('button',{name:'Remove '+name,exact:true}).click();await expect(owner.getByRole('dialog').getByRole('button',{name:'Add '+name,exact:true})).toBeVisible();
+  await owner.goto(`${origin}/app?conversation=${imported.shared.id}`);await expect(owner.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await openConversationDetails(owner);await owner.getByRole('dialog').getByRole('button',{name:'Remove '+name,exact:true}).click();await expect(owner.getByRole('dialog').getByRole('button',{name:'Add '+name,exact:true})).toBeVisible();
   await expect(member.locator('.message[data-immutable="true"]')).toHaveCount(0,{timeout:30_000});
   await member.screenshot({path:join(destination,`pilot-member-cleared-${width}.png`),fullPage:true});
   assert.equal((await memberContext.request.get(`${origin}/api/conversations/${imported.shared.id}/messages`)).status(),403,'removed audience cannot read history');

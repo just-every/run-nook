@@ -1,3 +1,4 @@
+import {openConversationDetails} from './conversation-details.mjs'
 import {invite} from './auth-support.mjs'
 import {chromium,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
@@ -41,13 +42,13 @@ export async function unreadsBrowser({origin,owner,member,outsider,destination='
    const dm=await call('/api/conversations',{name:'Autumn planning '+width,kind:'dm',participants:[owner.user.id,member.user.id]},former)
    await call(`/api/conversations/${dm.id}/messages`,{body:'Please keep the launch discussion together when this becomes a private channel.',intent:crypto.randomUUID()},member)
    await call('/auth/operator/status',{operatorId:former.user.id,status:'inactive'})
-   await page.goto(origin+'/app?conversation='+dm.id);await page.getByRole('button',{name:'Details',exact:true}).click()
+   await page.goto(origin+'/app?conversation='+dm.id);await openConversationDetails(page)
    await page.getByLabel('Private channel name').fill('autumn-planning-'+width)
    await page.screenshot({animations:'disabled',path:resolve(destination,`convert-${width}.png`)})
    await page.getByRole('button',{name:'Convert to private channel',exact:true}).click()
    await expect(page.getByRole('heading',{name:'autumn-planning-'+width,exact:true})).toBeVisible();await expect(page.getByText(/Please keep the launch discussion together/)).toBeVisible()
    await page.screenshot({animations:'disabled',path:resolve(destination,`channel-${width}.png`)})
-   await page.getByRole('button',{name:'Details',exact:true}).click()
+   await openConversationDetails(page)
    await expect(page.getByRole('heading',{name:'Original group participants',exact:true})).toBeVisible()
    await expect(page.getByRole('dialog').getByText(former.user.name,{exact:true})).toBeVisible()
    await expect(page.getByRole('dialog').getByText('Inactive',{exact:true})).toBeVisible()
