@@ -88,6 +88,11 @@ export async function filesBrowser({origin,owner,member,destination,sql}){
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`message-context-${width}.png`)})
     await page.getByRole('navigation',{name:'Conversation content',exact:true}).getByRole('button',{name:'Files',exact:true}).click()
     await expect(textCard).toBeVisible();await expect(imageCard).toBeVisible()
+    await expect(page).toHaveURL(new RegExp('view=chat&conversation='+room.id+'&panel=files'))
+    await expect(page.getByRole('heading',{name:room.name,exact:true})).toBeVisible()
+    await expect(page.getByRole('navigation',{name:'Conversation content',exact:true}).getByRole('button',{name:'Files',exact:true})).toHaveAttribute('aria-pressed','true')
+    await expect(page.getByRole('navigation',{name:'Conversation content',exact:true}).getByRole('button',{name:'Messages',exact:true})).toHaveAttribute('aria-pressed','false')
+    await page.reload();await expect(textCard).toBeVisible();await expect(imageCard).toBeVisible()
     await expect(page.getByLabel('Conversation',{exact:true})).toHaveCount(0)
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`conversation-${width}.png`)})
     const viewport=await page.evaluate(()=>({width:innerWidth,content:document.documentElement.scrollWidth}))
@@ -107,7 +112,16 @@ export async function filesBrowser({origin,owner,member,destination,sql}){
     const liveFile=await call(`/api/conversations/${liveRoom.id}/attachments`,{name:'synthetic-nook-live-access-'+width+'.txt',mime:'text/plain',data:Buffer.from('Synthetic live file custody').toString('base64'),intent:crypto.randomUUID()})
     await call(`/api/conversations/${liveRoom.id}/messages`,{body:'Synthetic live file access control',attachments:[liveFile.id],intent:crypto.randomUUID()})
     const livePage=await context.newPage();livePage.on('pageerror',error=>errors.push(error.message))
-    try{await livePage.goto(base+'/app?view=files&conversation='+liveRoom.id);const liveCard=livePage.getByRole('article',{name:'File '+liveFile.name,exact:true});await expect(liveCard).toBeVisible();await expect(livePage.locator('.nook-app')).toHaveAttribute('data-live-connected','true');await call(`/api/conversations/${liveRoom.id}/members`,{user:member.user.id,remove:true});await expect(liveCard).toHaveCount(0);if(destination)await livePage.screenshot({animations:'disabled',path:resolve(destination,`live-revoked-${width}.png`)})}finally{await livePage.close()}
+    try{await livePage.goto(base+'/app?view=files&conversation='+liveRoom.id);const liveCard=livePage.getByRole('article',{name:'File '+liveFile.name,exact:true});await expect(liveCard).toBeVisible();await expect(livePage).toHaveURL(new RegExp('view=chat&conversation='+liveRoom.id+'&panel=files'));await expect(livePage.locator('.nook-app')).toHaveAttribute('data-live-connected','true');await call(`/api/conversations/${liveRoom.id}/members`,{user:member.user.id,remove:true});await expect(liveCard).toHaveCount(0);if(destination)await livePage.screenshot({animations:'disabled',path:resolve(destination,`live-revoked-${width}.png`)})}finally{await livePage.close()}
+    if(width===1440){
+     for(const [path,target] of [['/settings','/app?view=you'],['/app/settings','/app?view=you'],['/app/channels','/app?view=channels'],['/app/people','/app?view=people'],['/login','/signin'],['/sign-in','/signin']]){
+      const response=await page.request.get(base+path,{maxRedirects:0});assert.equal(response.status(),307);assert.equal(response.headers().location,target)
+     }
+     for(const path of ['/x','/app/x'])assert.equal((await page.request.get(base+path)).status(),404)
+     const signedOut=await browser.newContext({serviceWorkers:'block'})
+     try{for(const path of ['/settings','/app/settings','/app/channels','/app/people']){const response=await signedOut.request.get(base+path);assert.equal(new URL(response.url()).pathname,'/signin','aliases retain the sign-in gate')}}finally{await signedOut.close()}
+
+    }
     assert.deepEqual(errors,[])
    }finally{await context.close()}
   }
