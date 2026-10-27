@@ -134,7 +134,8 @@ export async function exerciseUndo({owner,ownerContext,origin,stamp,name,importe
  const response=await ownerContext.request.get(origin+'/api/operator/import/history?source=slack',{headers:{'X-Import-Source':'slack'}});assert.equal(response.status(),200);
  const jobs=await response.json(),saved=jobs.jobs.find(j=>j.summary.channels.some(c=>c.name===imported.shared.name));assert.ok(saved);
  const refused=await ownerContext.request.post(origin+'/api/operator/import/undo',{headers:{Origin:origin,'X-Import-Source':'slack'},data:{planId:saved.planId}});assert.equal(refused.status(),409,'public undo endpoint refuses later live work too');
- await job.getByRole('button',{name:'Undo this import',exact:true}).click();await expect(owner.getByRole('alert')).toBeVisible();
+ const browserRefusal=owner.waitForResponse(response=>response.request().method()==='POST'&&new URL(response.url()).pathname==='/api/operator/import/undo');
+ await job.getByRole('button',{name:'Undo this import',exact:true}).click();assert.equal((await browserRefusal).status(),409,'the browser Undo request refuses later live work');await expect(owner.getByRole('alert')).toBeVisible();
  assert.ok((await read(ownerContext,origin,`/api/conversations/${imported.shared.id}/messages/window?limit=50`)).items.some(m=>m.body===live),'refused undo preserves live work');
  await owner.screenshot({path:join(destination,`pilot-undo-guard-${width}.png`),fullPage:true});
  pilotPhase('guarded-undo-complete',{width});
