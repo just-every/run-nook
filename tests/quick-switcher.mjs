@@ -10,7 +10,7 @@ export async function quickSwitcherGaps({origin,page,owner,member,call,send,dest
  await expect(page.getByLabel('Reply in thread',{exact:true})).toBeVisible()
  await page.goto(origin+'/app?view=channels')
  const switcher=page.getByRole('dialog',{name:'Jump to a conversation',exact:true})
- const open=async(query)=>{await page.locator('.nook-app[data-live-connected=true]').waitFor();await page.keyboard.press('Control+k');if(page.viewportSize().width===1440){await expect(switcher.getByRole('combobox')).toBeFocused();await page.keyboard.type(query)}else await switcher.getByRole('combobox').fill(query);await expect(switcher.getByRole('status')).not.toContainText('loading')}
+ const open=async(query)=>{await page.locator('.nook-app[data-live-connected=true]').waitFor();await page.keyboard.press(page.viewportSize().width===1440?'Meta+k':'Control+k');if(page.viewportSize().width===1440){await expect(switcher.getByRole('combobox')).toBeFocused();await page.keyboard.type(query)}else await switcher.getByRole('combobox').fill(query);await expect(switcher.getByRole('status')).not.toContainText('loading')}
  await open(root.body)
  await expect(switcher.getByRole('option',{name:/Review the Q4 onboarding schedule/})).toBeVisible()
  await switcher.getByRole('combobox').press('Enter');await expect(page.getByLabel('Reply in thread',{exact:true})).toBeVisible()
