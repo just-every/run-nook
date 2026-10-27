@@ -12,6 +12,7 @@ import {IconClose,IconSearch} from './icons'
 type Props={markAll:()=>void;user:Person;users:Person[];conversations:Conversation[];route:LocationState;request:TeamRequest;signal:AbortSignal;modalOpen:boolean;select:(c:Conversation)=>void;nav:(view:Screen)=>void;open:(conversation:string,focus?:string|null,thread?:string|null)=>Promise<void>;search:()=>void;refresh:()=>Promise<void>;error:(e:unknown)=>void}
 export function QuickNavigation(props:Props){
  const {route,conversations,select,nav,request,signal,error}=props,[panel,setPanel]=useState<'switch'|'dm'|'help'|null>(null)
+ const switcherOrigin=useRef<HTMLElement|null>(null)
  const [mac,setMac]=useState(false)
  useEffect(()=>setMac(/Mac|iPhone|iPad/.test(navigator.platform)),[])
  useEffect(()=>{if(signal.aborted||route.view!=='chat'||!route.conversation)return;try{recordVisit(props.user.id,{key:'c:'+route.conversation});if(route.thread)recordVisit(props.user.id,{key:'t:'+route.thread,conversation:route.conversation})}catch(e){error(e)}},[props.user.id,route.view,route.conversation,route.thread,signal,error])
@@ -24,7 +25,7 @@ export function QuickNavigation(props:Props){
   const keydown=(event:KeyboardEvent)=>{
    if(event.isComposing||event.defaultPrevented||props.modalOpen||panel||document.querySelector('dialog[open]'))return
    const modifier=event.metaKey||event.ctrlKey,key=event.key.toLowerCase(),target=event.target as HTMLElement,editing=target.matches('input,textarea,select,[contenteditable=true]')
-   if(modifier&&!event.altKey&&key==='k'){event.preventDefault();setPanel(event.shiftKey?'dm':'switch');return}
+   if(modifier&&!event.altKey&&key==='k'){event.preventDefault();switcherOrigin.current=event.target as HTMLElement;setPanel(event.shiftKey?'dm':'switch');return}
    if(modifier&&!event.shiftKey&&!event.altKey&&key==='/'){event.preventDefault();setPanel('help');return}
    if(modifier&&event.shiftKey&&key==='a'){event.preventDefault();nav('unreads');return}
    if(key==='escape'&&event.shiftKey&&!editing){event.preventDefault();props.markAll();return}
@@ -36,7 +37,7 @@ export function QuickNavigation(props:Props){
   }
   document.addEventListener('keydown',keydown);return()=>document.removeEventListener('keydown',keydown)
  })
- return <><TooltipButton className="soft-button quick-nav-trigger" aria-keyshortcuts="Meta+K Control+K" label="Jump to…" onClick={()=>setPanel('switch')}><IconSearch/><span className="quick-nav-label">Jump to…</span></TooltipButton><TooltipButton className="icon-button quick-help" label="Keyboard shortcuts" onClick={()=>setPanel('help')}>?</TooltipButton>{(panel==='switch'||panel==='dm')&&<QuickSwitcher dmOnly={panel==='dm'} onHelp={()=>setPanel('help')} key={props.user.id+':'+signal.aborted} {...props} close={()=>setPanel(null)} person={person=>{void openDirect(person,{conversations,request,signal,refresh:props.refresh,select}).catch(error)}} thread={(conversation,root)=>{void props.refresh().then(()=>props.open(conversation,root||null,root||null))}} error={error}/ >}{panel==='help'&&<ShortcutSheet actions={actions} close={()=>setPanel(null)} command={command}/>}</>
+ return <><TooltipButton className="soft-button quick-nav-trigger" aria-keyshortcuts="Meta+K Control+K" label="Jump to…" onClick={event=>{switcherOrigin.current=event.currentTarget;setPanel('switch')}}><IconSearch/><span className="quick-nav-label">Jump to…</span></TooltipButton><TooltipButton className="icon-button quick-help" label="Keyboard shortcuts" onClick={()=>setPanel('help')}>?</TooltipButton>{(panel==='switch'||panel==='dm')&&<QuickSwitcher returnFocus={switcherOrigin.current} dmOnly={panel==='dm'} onHelp={()=>setPanel('help')} key={props.user.id+':'+signal.aborted} {...props} close={()=>setPanel(null)} person={person=>{void openDirect(person,{conversations,request,signal,refresh:props.refresh,select}).catch(error)}} thread={(conversation,root)=>{void props.refresh().then(()=>props.open(conversation,root||null,root||null))}} error={error}/ >}{panel==='help'&&<ShortcutSheet actions={actions} close={()=>setPanel(null)} command={command}/>}</>
 }
 function ShortcutSheet({actions,close,command}:{actions:{label:string;keys:string;run:()=>void}[];close:()=>void;command:string}){
  const dialog=useRef<HTMLDialogElement>(null)

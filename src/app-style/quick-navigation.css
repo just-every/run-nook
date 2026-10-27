@@ -15,3 +15,5 @@
  .nook-app .header-actions .quick-nav-trigger { width: 32px; min-width: 32px; padding: 0; }
  .nook-app dialog.quick-switcher { width: 100%; max-width: none; }
 }
+
+@media (max-width:850px), (hover:none) { .nook-app .quick-switcher-hint { display:none; } }
