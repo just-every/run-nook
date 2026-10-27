@@ -12,8 +12,8 @@ import {OutcomeCard} from './OutcomeCard'
 import {useReadVisibility} from './useReadVisibility'
 import {conversationName} from './Navigation'
 import {IconBack,IconBell,IconClose,IconPlus} from './icons'
-type Props={request:TeamRequest;user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
-export function ConversationView({request,user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,sendMessage,onRead,mutate,onError,onAction,onDiscuss}:Props) {
+type Props={recapOpened:boolean;closeRecap:()=>void;request:TeamRequest;user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
+export function ConversationView({recapOpened,closeRecap,request,user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,sendMessage,onRead,mutate,onError,onAction,onDiscuss}:Props) {
  const log=useRef<HTMLDivElement>(null),threadLog=useRef<HTMLDivElement>(null)
  const showNotes=route.panel==='notes',showOutcomes=route.panel==='outcomes',[peek,setPeek]=useState<string|null>(null)
  useEffect(()=>{if(!showOutcomes)setPeek(null)},[showOutcomes])
@@ -126,7 +126,7 @@ export function ConversationView({request,user,conversation:c,data,route,private
  const followed=data.preferences.threads.includes(root?.id||'')
  const showLatest=Boolean(data.rootWindow.hasNewer||route.before||route.focus&&route.focus!==route.thread&&!data.outcomes.some(o=>o.id===route.focus)||route.landing&&data.rootWindow.target)
  const showLatestReplies=Boolean(data.threadWindow?.hasNewer||route.threadBefore||route.landing&&data.rootWindow.target?.parent)
- const recap=<RecapPanel conversation={c.id} thread={route.thread} revision={c.seq} privateSignal={privateSignal} onOpen={(focus,thread)=>navigate({view:'chat',conversation:c.id,focus,thread:thread??focus,panel:null,before:null,threadBefore:null})}/>
+ const recap=recapOpened&&<RecapPanel onClose={closeRecap} conversation={c.id} thread={route.thread} revision={c.seq} privateSignal={privateSignal} onOpen={(focus,thread)=>navigate({view:'chat',conversation:c.id,focus,thread:thread??focus,panel:null,before:null,threadBefore:null})}/>
  return <div className={'body-grid'+(route.thread?' has-thread':'')+(showOutcomes||showNotes?' showing-outcomes':'')}>
   <section className="chat" aria-label={name}>
    {!route.thread&&c.kind!=='dm'&&<BookmarksBar conversation={c.id}/>}
