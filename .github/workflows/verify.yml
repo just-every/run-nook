@@ -77,38 +77,32 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Independent commands have isolated runtime stores and ports. Pair
+          # clock/IO waits within a runner; do not remove or filter assertions.
           - stage: unit
             browser: true
-            # Retains: unit.
-            command: pnpm test
-          - stage: storage and product API
+            command: node scripts/ci-stage.mjs 'node --test --test-concurrency=4 tests/*.test.mjs'
+          - stage: product API
             browser: false
-            # Retains: storage and security API, product API.
-            command: pnpm test:runtime --suite=core-api-storage && pnpm test:runtime --suite=core-api-product
+            command: node scripts/ci-stage.mjs 'pnpm test:runtime --suite=core-api-product'
           - stage: runtime browser and exit
             browser: true
-            # Retains: runtime browser, readable exit, group conversion.
-            command: pnpm test:runtime --suite=core-browser && pnpm test:runtime --suite=readable-export && pnpm test:runtime --suite=conversion
-          - stage: push and audit
+            command: node scripts/ci-stage.mjs 'pnpm test:runtime --suite=core-browser' 'pnpm test:runtime --suite=readable-export && pnpm test:runtime --suite=conversion'
+          - stage: push and storage
             browser: true
-            # Retains: push notifications, thread delivery, admin audit.
-            command: node --test --test-concurrency=1 tests/push-journey.mjs && node --test --test-concurrency=1 tests/thread-delivery.mjs && node --test tests/audit-runtime.mjs
+            command: node scripts/ci-stage.mjs 'node --test --test-concurrency=1 tests/push-journey.mjs' 'pnpm test:runtime --suite=core-api-storage && node --test --test-concurrency=1 tests/thread-delivery.mjs && node --test tests/audit-runtime.mjs'
           - stage: imports and navigation
             browser: true
-            # Retains: mattermost import, campfire import, workspaces menu, keyboard navigation.
-            command: pnpm test:runtime --suite=mattermost-imports && pnpm test:runtime --suite=campfire-imports && node tests/workspaces-browser.mjs && pnpm test:runtime --suite=keyboard
+            command: node scripts/ci-stage.mjs 'pnpm test:runtime --suite=mattermost-imports' 'pnpm test:runtime --suite=campfire-imports && node tests/workspaces-browser.mjs && pnpm test:runtime --suite=keyboard'
           - stage: integrations and composition
             browser: true
-            # Retains: integration tokens, composition.
-            command: pnpm test:runtime --suite=integrations && node --test tests/notification-apps.mjs && pnpm test:runtime --suite=composition
+            command: node scripts/ci-stage.mjs 'node --test tests/notification-apps.mjs' 'pnpm test:runtime --suite=integrations && pnpm test:runtime --suite=composition'
           - stage: notifications and notes
             browser: true
-            # Retains: email notifications, conversation notes.
-            command: pnpm test:notify && pnpm test:notes
+            command: node scripts/ci-stage.mjs 'pnpm test:notify' 'pnpm test:notes'
           - stage: contracts and clocks
             browser: true
-            # Retains: contracts, search, push real clocks.
-            command: pnpm test:base && pnpm integration:check && pnpm typecheck && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" . && pnpm test:runtime --suite=search && node --test --test-concurrency=1 tests/push-clock.mjs
+            command: node scripts/ci-stage.mjs 'pnpm test:base && pnpm integration:check && pnpm typecheck && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" . && pnpm test:runtime --suite=search' 'node --test --test-concurrency=1 tests/push-clock.mjs'
     uses: ./.github/workflows/verify-stage.yml
     with:
       command: ${{ matrix.command }}
