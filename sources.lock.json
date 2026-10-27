@@ -7165,7 +7165,7 @@
       "executable": false
     },
     "tests/quick-switcher.mjs": {
-      "sha256": "7ca84cd964c43f97cfe0d39121219b5181bc6b2050b39d7aa91172797696d9c1",
+      "sha256": "2e33af8d12cd31fa6e803ee77560bdab066b07f6e46b5bfae4e9d16a526ad00b",
       "executable": false
     },
     "tests/readable-export-archive.test.mjs": {
