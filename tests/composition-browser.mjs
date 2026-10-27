@@ -61,7 +61,7 @@ export async function compositionBrowser({origin,owner,member,outsider,destinati
     const remote=[];page.on('request',r=>{if(r.url().includes('never-fetch.invalid'))remote.push(r.url())})
     await field.fill(formatted);await expect(composer.locator('.composition-preview ul')).toBeVisible();await expect(composer.locator('.composition-preview ol')).toBeVisible();await expect(composer.locator('.composition-preview blockquote')).toBeVisible();await expect(composer.locator('.composition-preview pre code')).toContainText('const ready')
     await composer.getByText('Format, mention or emoji',{exact:true}).click()
-    await composer.getByRole('button',{name:'@Priya Chen',exact:true}).click();await composer.getByRole('button',{name:'Celebrate',exact:true}).click()
+    await composer.getByRole('button',{name:'@Priya Chen',exact:true}).click();await composer.getByRole('button',{name:'Insert celebrate',exact:true}).click()
     if(destination)await page.screenshot({animations:'disabled',path:resolve(destination,`rich-composer-${width}.png`)})
     await composer.getByText('Format, mention or emoji',{exact:true}).click();await composer.getByRole('button',{name:'Send',exact:true}).click();await expect(field).toHaveValue('')
     assert.deepEqual(remote,[]);assert.equal(await page.evaluate(()=>window.bad),undefined)
