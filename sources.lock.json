@@ -4257,7 +4257,7 @@
       "executable": false
     },
     "src/chat/ConversationView.tsx": {
-      "sha256": "fae959527fd369c9ea5aa7d162b3a0a0f93de84e43b0c1d21a3be7901b15db62",
+      "sha256": "3fbf6855c73ad59896940eb614ca1cfd3636740dd53b51811af9f0ad42dab65d",
       "executable": false
     },
     "src/chat/dialog-focus.ts": {
@@ -4297,7 +4297,7 @@
       "executable": false
     },
     "src/chat/Navigation.tsx": {
-      "sha256": "688fe3632cbe61fcc621e005a8a73f5fd15508f9b7390076dbe07a9499ac6ffa",
+      "sha256": "673f3363ded7f84ca09141e7525818039fccb8b112a15ed20945952658ed8dfa",
       "executable": false
     },
     "src/chat/NewMessage.tsx": {
@@ -4425,7 +4425,7 @@
       "executable": false
     },
     "src/ChatScreen.tsx": {
-      "sha256": "9cc17b4d4896a62742b6d3d067ead4da8e8150a02fde38c5a3938f12be517c51",
+      "sha256": "7534f5b9e9bef35afe51950ffad762358d5846b8961e239f71033a93fe630947",
       "executable": false
     },
     "src/client.tsx": {
@@ -6005,7 +6005,7 @@
       "executable": false
     },
     "src/recaps/recaps.css": {
-      "sha256": "65a033e7b56db8d73368905e08c774c37372fc240f35f3941492127e93df2297",
+      "sha256": "53e2ce7cc78138325f3821c8ac14422c70e2c67702d6e66754098a8bc80f07a4",
       "executable": false
     },
     "src/recaps/receipt.ts": {
