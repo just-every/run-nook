@@ -3,73 +3,123 @@ on:
   push:
   pull_request:
   schedule:
-    # Nightly at 02:17 Australia/Brisbane (UTC+10).
-    - cron: '17 16 * * *'
+    # Twice weekly, within the fleet's 02:00-08:00 UTC window.
+    - cron: '17 3 * * 1,4'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      skip: ${{ steps.reuse.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - id: reuse
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          WF_REF: ${{ github.workflow_ref }}
+        run: |
+          set -euo pipefail
+          wf="${WF_REF%@*}"; wf="${wf##*/}"
+          # Only the newest same-repository push of this workflow is evidence.
+          # PR merge refs, subset dispatches and this run cannot authorize reuse.
+          newest_push() {
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$wf/runs?head_sha=$1&event=push&per_page=100" \
+              --jq "[.workflow_runs[] | select(.head_repository.full_name == \"$GITHUB_REPOSITORY\" and .id != $GITHUB_RUN_ID)] | max_by(.id) | select(. != null) | \"\(.status) \(.conclusion)\"" || true
+          }
+          green() { [ "$(newest_push "$1")" = "completed success" ]; }
+          skip=false
+          if [ "$EVENT" = push ] && [ "$REF" = refs/heads/main ] && green "$GITHUB_SHA"; then skip=true; fi
+          # Tag doors must still run the release/installer journeys, even on an unchanged tree.
+          if [ "$skip" = false ] && [ "$EVENT" = push ] && [[ "$REF" == refs/heads/* ]] && parent=$(git rev-parse -q --verify HEAD~1) \
+             && [ "$(git rev-parse 'HEAD^{tree}')" = "$(git rev-parse 'HEAD~1^{tree}')" ] && green "$parent"; then skip=true; fi
+          if [ "$EVENT" = pull_request ] && [ "$SAME_REPO" = true ]; then
+            for _ in $(seq 1 50); do
+              state=$(newest_push "$PR_HEAD")
+              case "$state" in
+                'completed success') skip=true; break ;;
+                ''|completed\ *) break ;;
+                *) sleep 30 ;;
+              esac
+            done
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.skip != 'true' && (github.event_name == 'push' || github.event_name == 'pull_request')
+    uses: ./.github/workflows/verify-stage.yml
+    with:
+      browser: false
+      command: pnpm build:app && pnpm exec rer build --site
+      upload-build: true
+
   fast:
+    needs: [plan, build]
     name: verify (${{ matrix.stage }})
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    if: needs.plan.outputs.skip != 'true' && (github.event_name == 'push' || github.event_name == 'pull_request')
     strategy:
       fail-fast: false
       matrix:
         include:
-          - stage: contracts
-            command: pnpm test:base && pnpm build:app && pnpm integration:check && pnpm typecheck && pnpm exec rer build --site && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" .
           - stage: unit
+            browser: true
+            # Retains: unit.
             command: pnpm test
-          - stage: storage and security API
-            # Keep ordered storage, media and migration fixtures with their restarts.
-            command: pnpm build:app && pnpm test:runtime --suite=core-api-storage
-          - stage: product API
-            # Independent product journeys keep their existing order and assertions.
-            command: pnpm build:app && pnpm test:runtime --suite=core-api-product
-          - stage: runtime browser
-            # Both widths, Slack import, installed app and homepage remain on every push.
-            command: pnpm build:app && pnpm exec rer build --site && pnpm test:runtime --suite=core-browser
-          - stage: mattermost import
-            command: pnpm build:app && pnpm test:runtime --suite=mattermost-imports
-          - stage: campfire import
-            command: pnpm build:app && pnpm test:runtime --suite=campfire-imports
-          - stage: admin audit
-            command: pnpm build:app && node --test tests/audit-runtime.mjs
-          - stage: readable exit
-            command: pnpm build:app && pnpm test:runtime --suite=readable-export
-          - stage: thread delivery
-            command: pnpm build:app && node --test --test-concurrency=1 tests/thread-delivery.mjs
-          - stage: group conversion
-            command: pnpm build:app && pnpm test:runtime --suite=conversion
-          - stage: keyboard navigation
-            command: pnpm build:app && pnpm test:runtime --suite=keyboard
-          - stage: composition
-            command: pnpm build:app && pnpm test:runtime --suite=composition
-          - stage: search
-            command: pnpm build:app && pnpm test:runtime --suite=search
-          - stage: integration tokens
-            command: pnpm build:app && pnpm test:runtime --suite=integrations && node --test tests/notification-apps.mjs
-          - stage: workspaces menu
-            command: pnpm build:app && node tests/workspaces-browser.mjs
-          - stage: email notifications
-            command: pnpm build:app && pnpm test:notify
-          - stage: conversation notes
-            command: pnpm build:app && pnpm test:notes
-          - stage: push notifications
-            # The ordered record chain; pnpm test:push runs it and the real-clock shard in turn.
-            command: pnpm build:app && node --test --test-concurrency=1 tests/push-journey.mjs
-          - stage: push real clocks
-            # Real 45-second expiry and five-minute delay waits, alone on a fresh installation.
-            command: pnpm build:app && node --test --test-concurrency=1 tests/push-clock.mjs
+          - stage: storage and product API
+            browser: false
+            # Retains: storage and security API, product API.
+            command: pnpm test:runtime --suite=core-api-storage && pnpm test:runtime --suite=core-api-product
+          - stage: runtime browser and exit
+            browser: true
+            # Retains: runtime browser, readable exit, group conversion.
+            command: pnpm test:runtime --suite=core-browser && pnpm test:runtime --suite=readable-export && pnpm test:runtime --suite=conversion
+          - stage: push and audit
+            browser: true
+            # Retains: push notifications, thread delivery, admin audit.
+            command: node --test --test-concurrency=1 tests/push-journey.mjs && node --test --test-concurrency=1 tests/thread-delivery.mjs && node --test tests/audit-runtime.mjs
+          - stage: imports and navigation
+            browser: true
+            # Retains: mattermost import, campfire import, workspaces menu, keyboard navigation.
+            command: pnpm test:runtime --suite=mattermost-imports && pnpm test:runtime --suite=campfire-imports && node tests/workspaces-browser.mjs && pnpm test:runtime --suite=keyboard
+          - stage: integrations and composition
+            browser: true
+            # Retains: integration tokens, composition.
+            command: pnpm test:runtime --suite=integrations && node --test tests/notification-apps.mjs && pnpm test:runtime --suite=composition
+          - stage: notifications and notes
+            browser: true
+            # Retains: email notifications, conversation notes.
+            command: pnpm test:notify && pnpm test:notes
+          - stage: contracts and clocks
+            browser: true
+            # Retains: contracts, search, push real clocks.
+            command: pnpm test:base && pnpm integration:check && pnpm typecheck && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" . && pnpm test:runtime --suite=search && node --test --test-concurrency=1 tests/push-clock.mjs
     uses: ./.github/workflows/verify-stage.yml
     with:
       command: ${{ matrix.command }}
-      # These suites never launch Chromium.
-      browser: ${{ matrix.stage != 'storage and security API' && matrix.stage != 'product API' }}
+      browser: ${{ matrix.browser }}
+      download-build: true
+      timeout: 30
 
   slow:
+    needs: plan
     name: verify (${{ matrix.stage }})
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    if: needs.plan.outputs.skip != 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v'))
     strategy:
       fail-fast: false
       matrix:
@@ -88,8 +138,39 @@ jobs:
       timeout: 120
 
   installer:
+    needs: plan
     name: verify (installer)
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    if: needs.plan.outputs.skip != 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v'))
     uses: ./.github/workflows/verify-stage.yml
     with:
       command: pnpm build:app && pnpm test:runtime --suite=installer
+
+
+  verify:
+    needs: [plan, build, fast, slow, installer]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Require the plan and every applicable stage
+        env:
+          PLAN: ${{ needs.plan.result }}
+          SKIP: ${{ needs.plan.outputs.skip }}
+          BUILD: ${{ needs.build.result }}
+          FAST: ${{ needs.fast.result }}
+          SLOW: ${{ needs.slow.result }}
+          INSTALLER: ${{ needs.installer.result }}
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          test "$PLAN" = success
+          if [ "$SKIP" = true ]; then exit 0; fi
+          if [ "$EVENT" = push ] || [ "$EVENT" = pull_request ]; then
+            test "$BUILD" = success
+            test "$FAST" = success
+          fi
+          if [ "$EVENT" = schedule ] || [ "$EVENT" = workflow_dispatch ] || [[ "$REF" == refs/tags/v* ]]; then
+            test "$SLOW" = success
+            test "$INSTALLER" = success
+          fi

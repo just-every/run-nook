@@ -605,11 +605,11 @@
       "executable": false
     },
     ".github/workflows/verify-stage.yml": {
-      "sha256": "fb58b57b2331389cdfd2231036694402fc7f420f174cbfee43a68b1995e96469",
+      "sha256": "c30d02ac172f99a6fb2733d42867989195441495f924c26f4439bddc299eaed3",
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "6fb67afa7e224ad3ef063345088c3999c19b7140aa2e36ff45bcc7595cc05584",
+      "sha256": "9cb80bd904573783f80b8b58478141b66b8fc159bf8b0f92df5cf98adfd36705",
       "executable": false
     },
     ".gitignore": {
@@ -1664,6 +1664,10 @@
       "sha256": "82844104c1f5302fdac5b006822711d44e00dab243f2bbe9fb6633721a9a6319",
       "executable": false
     },
+    "scripts/chromium-probe.mjs": {
+      "sha256": "f07c6a8d268f44e3e1d8709181eaa1ad83300ec388a6a8039b04fe051c328417",
+      "executable": false
+    },
     "scripts/delivery/base/artifact.mjs": {
       "sha256": "129f210f1556e816ba94ffe74359ac553cd26466aaf8c6c299765e9cea29aa07",
       "executable": false
@@ -1846,6 +1850,10 @@
     },
     "scripts/import-preview.mjs": {
       "sha256": "8833bb14840902affb3cfd212fed9a65b3aead113c909ec22ac31157c7b1a6e5",
+      "executable": false
+    },
+    "scripts/install-chromium-deps.py": {
+      "sha256": "5cba58f6a7ca52380c0a6dfbb7a49cacd5f8f1dc55139c9d13f41d7b2ef4bfbc",
       "executable": false
     },
     "scripts/install.mjs": {

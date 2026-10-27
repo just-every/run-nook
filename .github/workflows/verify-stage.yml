@@ -8,6 +8,12 @@ on:
       browser:
         type: boolean
         default: true
+      upload-build:
+        type: boolean
+        default: false
+      download-build:
+        type: boolean
+        default: false
       timeout:
         type: number
         default: 15
@@ -21,19 +27,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Prepare hosted runner disk capacity
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
-          nook_available_kib=$(df -Pk "$GITHUB_WORKSPACE" | awk 'NR==2 {print $4}')
-          # Keep fixture headroom; deleting toolchains took 3–5 minutes even
-          # on hosted runners with 86 GiB already free.
-          if (( nook_available_kib < 15 * 1024 * 1024 )); then
-            sudo rm -rf --one-file-system -- /usr/local/lib/android/sdk /usr/share/dotnet /usr/local/.ghcup
-            df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP" /tmp
-          fi
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
@@ -42,12 +35,23 @@ jobs:
           node-version: 22.20.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - if: inputs.browser
-        # ubuntu-24.04 already supplies Chrome's shared libraries. Avoid the
-        # redundant apt/font upgrades that consumed 10+ minutes of a job cap.
+      - name: Install Chromium
+        if: inputs.browser
         run: |
+          set -euo pipefail
           pnpm exec playwright install chromium
-          node --input-type=module -e 'import {chromium} from "@playwright/test"; const browser=await chromium.launch({headless:true,args:["--use-mock-keychain","--password-store=basic"]}); await browser.close()'
+          pnpm exec node scripts/chromium-probe.mjs || \
+            sudo env "PATH=$PATH" "APT_ARCHIVES=$RUNNER_TEMP/rer-apt/archives" python3 scripts/install-chromium-deps.py
+          pnpm exec node scripts/chromium-probe.mjs
+      - name: Restore shared application and site build
+        if: inputs.download-build
+        uses: actions/download-artifact@v4
+        with:
+          name: verify-build-${{ github.sha }}
+          path: ${{ runner.temp }}/verify-build
+      - name: Unpack shared build
+        if: inputs.download-build
+        run: tar -xf "$RUNNER_TEMP/verify-build/verify-build.tar"
       - name: Prepare canonical temporary directory
         run: |
           mkdir -p ../scratch/tmp
@@ -58,3 +62,15 @@ jobs:
           WRANGLER_SEND_METRICS: 'false'
           # Migration progress tables can overflow fresh-clone CLI captures.
           WRANGLER_LOG: warn
+      - name: Pack shared build
+        if: inputs.upload-build
+        run: tar -cf "$RUNNER_TEMP/verify-build.tar" dist
+      - name: Share application and site build
+        if: inputs.upload-build
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-build-${{ github.sha }}
+          path: ${{ runner.temp }}/verify-build.tar
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
