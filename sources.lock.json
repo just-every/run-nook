@@ -7049,7 +7049,7 @@
       "executable": false
     },
     "tests/pilot/imports.mjs": {
-      "sha256": "2de4029d94bbebbe288494d07758444a5503a6bb06709fc65f731850ea9c460a",
+      "sha256": "1a00dc27013aafcc975deb140bf82c2c1ca6305170ab6b93625361d4e3d2dfe8",
       "executable": false
     },
     "tests/pilot/progress.mjs": {
