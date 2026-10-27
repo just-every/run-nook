@@ -8,6 +8,7 @@
 .nook-app .team-surface .team-section + .team-section, .nook-app .team-surface > section { margin-top: var(--s6); padding-top: var(--s5); border-top: 1px solid var(--line); }
 .nook-app .team-surface .team-quiet { margin: var(--s3) 0 0; font-size: 13px; }
 .nook-app .team-surface .team-status { margin: var(--s3) 0 0; padding: 2px 0 2px var(--s3); border-left: 2px solid var(--line-field); font-size: var(--fs-ui); line-height: 1.5; }
+.nook-app .team-surface .team-status:empty { display: none; border: 0; }
 .nook-app .team-surface .team-blocked { margin: 0; color: var(--ink-soft); font-size: 13px; }
 
 /* Invite someone */
