@@ -1,1 +1,3 @@
 .recap-door{padding:8px 16px;border-bottom:1px solid var(--line);min-width:0}.recap-panel{max-height:65vh;overflow:auto;overflow-wrap:anywhere;padding:8px 0;min-width:0}.recap-panel h2{font-size:1.1rem}.recap-panel blockquote{margin:12px 0;padding-left:12px;border-left:2px solid var(--line)}.recap-dates{display:flex;flex-wrap:wrap;gap:12px}.recap-dates .field{flex:1 1 180px;min-width:0}.recap-panel input,.recap-panel select,.recap-panel textarea{max-width:100%;min-width:0;box-sizing:border-box}.recap-panel .search-result{padding:12px 0}
+
+@media(max-width:850px){.nook-app .recap-panel>.text-button,.nook-app .conversation-menu .recap-menu-item{min-height:44px}}
