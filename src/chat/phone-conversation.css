@@ -1,4 +1,4 @@
-.nook-app .phone-conversation-entry, .nook-app .channel-body-actions { display:none; }
+.nook-app .conversation-menu .phone-conversation-entry, .nook-app .channel-body-actions { display:none; }
 .nook-app .channel-header-actions { display:flex; gap:var(--s2); }
 @media (max-width:850px) {
  .nook-app .header { gap:4px; }
@@ -9,6 +9,7 @@
  .nook-app .conversation-menu > summary { position:relative; }
  .nook-app .conversation-menu > summary .needs-you-dot { position:absolute; top:5px; right:5px; margin:0; }
  .nook-app .channel-body-actions { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+ .nook-app .channel-body-actions .soft-button, .nook-app .conversation-menu .popover > button { min-height:44px; }
  .nook-app .header .icon-button, .nook-app .header .quick-nav-trigger { min-width:44px; min-height:44px; }
  .nook-app .message { flex-wrap:wrap; }
  .nook-app .message > .message-content { flex:1 0 calc(100% - 44px); }
