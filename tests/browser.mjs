@@ -107,7 +107,7 @@ export async function runBrowser(origin,destination){
     await bob.getByRole('heading',{name:'Thread',exact:true}).waitFor()
     await auditComposerRouting(bob,bob.locator('.decisions .composer'),destination,`${label}-thread`)
     await expect(bob.locator('.thread-log').getByText(messages[5].body,{exact:true})).toBeInViewport()
-    if(label==='mobile'){assert.equal(await bob.locator('textarea:visible').count(),1,'phone thread has one composer');await expect(bob.locator('.conversation-menu > summary .needs-you-dot')).toBeVisible();await bob.locator('.conversation-menu > summary').click();await expect(bob.locator('.conversation-menu').getByRole('button',{name:/Decisions & requests.*open.*waiting on you/})).toBeVisible();await bob.locator('.conversation-menu > summary').click()}
+    if(label==='mobile'){assert.equal(await bob.locator('textarea:visible').count(),1,'phone thread has one composer');const options=bob.locator('.conversation-menu'),trigger=options.locator(':scope > summary');await expect(trigger.locator('.needs-you-dot')).toBeVisible();assert.ok(await trigger.getAttribute('aria-describedby'),'waiting state retains accessible context');await trigger.click();const entry=options.getByRole('button',{name:/^Decisions & requests/});await expect(entry.locator('.needs-you-dot')).toBeVisible();assert.ok(Number.parseInt(await entry.locator('.header-count').textContent(),10)>0,'open requests remain counted in the menu');await trigger.click()}
     await bob.getByLabel('Reply in thread',{exact:true}).fill('I can send them after the review.')
     await bob.getByLabel('Reply in thread',{exact:true}).press('Enter')
     await bob.getByText('I can send them after the review.',{exact:true}).waitFor();await shot(bob,'thread')
