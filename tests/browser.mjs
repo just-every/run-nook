@@ -209,7 +209,7 @@ export async function runBrowser(origin,destination){
     await expect(alice.getByRole('alert')).toBeVisible()
     await expect(alice.getByRole('button',{name:'Retry upload',exact:true})).toBeDisabled()
     assert.equal(uploadIntents.length,1,'a different file does not issue a retry')
-    await alice.getByRole('alert').getByRole('button',{name:'Dismiss',exact:true}).click()
+    await alice.getByRole('alert').getByRole('button',{name:'Dismiss notice',exact:true}).click()
     await fileInput.setInputFiles({name:'handover.txt',mimeType:'text/plain',buffer:handoverBytes})
     await expect(alice.getByRole('button',{name:'Retry upload',exact:true})).toBeEnabled()
     assert.equal(uploadIntents.length,1,'reselection verifies bytes without an automatic retry')
