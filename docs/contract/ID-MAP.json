@@ -111,15 +111,21 @@
       ]
     },
     "NOOK-017": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-017"
+        "NOOK-017",
+        "NOOK-090",
+        "NOOK-091",
+        "NOOK-092"
       ]
     },
     "NOOK-018": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-018"
+        "NOOK-018",
+        "NOOK-093",
+        "NOOK-094",
+        "NOOK-095"
       ]
     },
     "NOOK-019": {
@@ -135,9 +141,11 @@
       ]
     },
     "NOOK-021": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-021"
+        "NOOK-021",
+        "NOOK-096",
+        "NOOK-097"
       ]
     },
     "NOOK-022": {
@@ -159,9 +167,11 @@
       ]
     },
     "NOOK-025": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-025"
+        "NOOK-025",
+        "NOOK-098",
+        "NOOK-099"
       ]
     },
     "NOOK-026": {
@@ -201,9 +211,11 @@
       ]
     },
     "NOOK-032": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-032"
+        "NOOK-032",
+        "NOOK-100",
+        "NOOK-101"
       ]
     },
     "NOOK-033": {
@@ -255,9 +267,14 @@
       ]
     },
     "NOOK-041": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-041"
+        "NOOK-041",
+        "NOOK-102",
+        "NOOK-103",
+        "NOOK-104",
+        "NOOK-105",
+        "NOOK-106"
       ]
     },
     "NOOK-042": {
@@ -303,15 +320,17 @@
       ]
     },
     "NOOK-049": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-049"
+        "NOOK-049",
+        "NOOK-107"
       ]
     },
     "NOOK-050": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-050"
+        "NOOK-050",
+        "NOOK-108"
       ]
     },
     "NOOK-051": {
@@ -333,27 +352,33 @@
       ]
     },
     "NOOK-060": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-060"
+        "NOOK-060",
+        "NOOK-109"
       ]
     },
     "NOOK-061": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-061"
+        "NOOK-061",
+        "NOOK-110"
       ]
     },
     "NOOK-062": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-062"
+        "NOOK-062",
+        "NOOK-111"
       ]
     },
     "NOOK-063": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-063"
+        "NOOK-063",
+        "NOOK-112",
+        "NOOK-113",
+        "NOOK-114"
       ]
     },
     "NOOK-064": {
@@ -387,51 +412,67 @@
       ]
     },
     "NOOK-069": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-069"
+        "NOOK-069",
+        "NOOK-115"
       ]
     },
     "NOOK-070": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-070"
+        "NOOK-070",
+        "NOOK-116",
+        "NOOK-117",
+        "NOOK-118",
+        "NOOK-119"
       ]
     },
     "NOOK-071": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-071"
+        "NOOK-071",
+        "NOOK-120",
+        "NOOK-121"
       ]
     },
     "NOOK-072": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-072"
+        "NOOK-072",
+        "NOOK-122",
+        "NOOK-123"
       ]
     },
     "NOOK-073": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-073"
+        "NOOK-073",
+        "NOOK-124"
       ]
     },
     "NOOK-074": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-074"
+        "NOOK-074",
+        "NOOK-125",
+        "NOOK-126",
+        "NOOK-127",
+        "NOOK-128"
       ]
     },
     "NOOK-075": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-075"
+        "NOOK-075",
+        "NOOK-129"
       ]
     },
     "NOOK-076": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-076"
+        "NOOK-076",
+        "NOOK-130"
       ]
     },
     "NOOK-077": {
@@ -441,9 +482,12 @@
       ]
     },
     "NOOK-078": {
-      "how": "kept",
+      "how": "split",
       "to": [
-        "NOOK-078"
+        "NOOK-078",
+        "NOOK-131",
+        "NOOK-132",
+        "NOOK-133"
       ]
     },
     "NOOK-079": {

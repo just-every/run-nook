@@ -180,6 +180,22 @@
     {
       "source": "IMPORT-DOOR.md",
       "reason": "Maintainer adoption and exact Base divergence record; source-specific moving-in guides cover the product flow."
+    },
+    {
+      "source": "RULINGS.md",
+      "reason": "Recorded product policy decisions for maintainers; current behavior is described by the public guides."
+    },
+    {
+      "source": "docs/contract/DONE-AUDIT.md",
+      "reason": "Clause-by-clause assertion references and unresolved proof for contract maintainers."
+    },
+    {
+      "source": "docs/contract/mechanism.md",
+      "reason": "Wire protocols and legacy compatibility details for maintainers."
+    },
+    {
+      "source": "docs/verify.md",
+      "reason": "Maintainer verification scope and recovery notes; user instructions remain in the public guides."
     }
   ]
 }

@@ -59,3 +59,11 @@ mail and has no mail viewer. Never commit `.dev.vars`,
 their values. Deploys, provider calls and publication need the owner's approval.
 Tests use isolated synthetic workspaces; do not weaken an assertion to make a
 change pass.
+
+## Contract regeneration
+
+Lander-Regenerate: node src/base/contract-docs.mjs write
+
+Lander-Regenerate: node scripts/edition-authoring/cli.mjs lock
+
+Run `node src/base/contract-docs.mjs check` after generation, then the source-lock check. CONTRACT.md owns acceptance text and status; never resolve the generated views by hand.

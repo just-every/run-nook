@@ -1,4 +1,4 @@
-// NOOK-017 "Your workspaces": two local installations on separate origins
+// NOOK-092 "Your workspaces": two local installations on separate origins
 // (127.0.0.1 and localhost, so their cookies stay apart as on real hosts).
 import assert from 'node:assert/strict'
 import {readFile} from 'node:fs/promises'
@@ -102,10 +102,10 @@ try{
    const signedOut=await page.request.get(b.origin+'/api/me');assert.equal(signedOut.status(),401)
    await page.goto(a.origin+'/app');await expect(page.locator('.workspace#primary')).toBeVisible()
    assert.equal((await page.request.get(a.origin+'/api/me')).status(),200,'the other installation stays signed in')
-   console.log(`PASS NOOK-017 Your workspaces menu across two installations at ${width}`)
+   console.log(`PASS NOOK-092 Your workspaces menu across two installations at ${width}`)
   }finally{await context.close()}
  }}finally{await browser.close()}
- console.log('PASS NOOK-017 Your workspaces menu lists, opens, forgets and isolates two local installations at 1440 and 390')
+ console.log('PASS NOOK-092 Your workspaces menu lists, opens, forgets and isolates two local installations at 1440 and 390')
 }finally{
  for(const worker of workers)await worker.close()
  for(const state of states)await rm(state,{recursive:true,force:true})

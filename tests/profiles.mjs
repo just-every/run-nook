@@ -7,7 +7,7 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
  await post('/api/team/invitations',{email,role:'member',mode:'guest',scopes:[room.id]})
  await post('/auth/invite',{email,displayName:'Customer guest',role:'member'},owner.cookie,202)
  const guest=await signIn(base,email,{requestLink:false})
- await check('NOOK-017 profiles, time-zone status expiry, field visibility and guest-scoped directory survive restart',async()=>{
+ await check('NOOK-090 profiles, time-zone status expiry, field visibility and guest-scoped directory survive restart',async()=>{
   const fields=(await get('/api/profile/fields')).data.fields
   for(const id of ['title','phone','manager','department'])assert.ok(fields.some(f=>f.id===id))
   const phone=fields.find(f=>f.id==='phone')
@@ -37,7 +37,7 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
   assert.ok(!(await get('/api/people?q=Elena',guest.cookie)).data.items.some(p=>p.id===member.user.id))
   await get('/api/profile?user='+outsider.user.id,guest.cookie,404)
  })
- await check('NOOK-017 directory pages beyond 5,000 people without leaking hidden fields',async()=>{
+ await check('NOOK-090 directory pages beyond 5,000 people without leaking hidden fields',async()=>{
   await sql(`WITH RECURSIVE n(value) AS (VALUES(1) UNION ALL SELECT value+1 FROM n WHERE value<5001) INSERT INTO oa_operators(id,email,display_name,role,status,version,created_at) SELECT 'directory-'||printf('%05d',value),'directory-'||value||'@example.test','Directory Colleague '||value,'member','active',1,${Date.now()} FROM n`)
   await sql("INSERT INTO nook_access(user,mode,active,generation) SELECT id,'member',1,1 FROM oa_operators WHERE id LIKE 'directory-%'")
   const seen=new Set();let after=''
@@ -46,7 +46,7 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
   assert.deepEqual((await get('/api/people?q=Directory%20Colleague%205001')).data.items.map(p=>p.id),['directory-05001'])
   assert.equal((await get('/api/people?q=Directory',guest.cookie)).data.items.length,0)
  })
- await check('NOOK-017 typing expires, respects membership and disabling clears ephemeral presence',async()=>{
+ await check('NOOK-090 typing expires, respects membership and disabling clears ephemeral presence',async()=>{
   const c=(await post('/api/conversations',{name:'Typing privacy',kind:'private',participants:[member.user.id]})).data
   const path='/api/conversations/'+c.id+'/typing'
   const before=(await get('/api/conversations',member.cookie)).data.find(i=>i.id===c.id)
@@ -69,7 +69,7 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
   const after=(await get('/api/conversations')).data.find(i=>i.id===c.id)
   assert.equal(after.unread,before.unread)
  })
- await check('NOOK-017 sidebar sections, installation boundaries and explicit mark unread preserve attention',async()=>{
+ await check('NOOK-090 sidebar sections, installation boundaries and explicit mark unread preserve attention',async()=>{
   const c=(await post('/api/conversations',{name:'Partner renewal',kind:'private',participants:[member.user.id]})).data
   const message=(await post('/api/conversations/'+c.id+'/messages',{body:'Please review the renewal',intent:crypto.randomUUID(),mentions:[member.user.id]})).data
   await post('/api/conversations/'+c.id+'/read',{seq:message.sequence},member.cookie)
@@ -80,7 +80,7 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
   await post('/api/personal/workspace',{conversation:c.id,section:'Customers',position:2},member.cookie)
   assert.equal((await get('/api/conversations',member.cookie)).data.find(i=>i.id===c.id).section,'Customers')
   assert.ok(!(await get('/api/personal/workspace')).data.sections.some(i=>i.conversation===c.id))
-  // Installation links now live on the device (NOOK-017 "Your workspaces"); the account no longer stores new ones.
+  // Installation links now live on the device (NOOK-090 "Your workspaces"); the account no longer stores new ones.
   await post('/api/personal/workspace',{origin:'https://work.example.com',label:'Acme workspace'},member.cookie,400)
   await restart()
   assert.deepEqual((await get('/api/personal/workspace',member.cookie)).data.installations,[])

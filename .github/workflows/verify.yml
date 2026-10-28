@@ -102,7 +102,7 @@ jobs:
             command: node scripts/ci-stage.mjs 'node --test tests/notification-apps.mjs' 'pnpm test:runtime --suite=integrations && pnpm test:runtime --suite=composition'
           - stage: notifications and clocks
             browser: true
-            command: node scripts/ci-stage.mjs 'pnpm test:notify && pnpm test:notes' 'pnpm test:base && pnpm integration:check && pnpm typecheck && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" . && pnpm test:runtime --suite=search && node --test --test-concurrency=1 tests/push-clock.mjs'
+            command: node scripts/ci-stage.mjs 'pnpm test:notify && pnpm test:notes' 'node src/base/contract-docs.mjs check && pnpm test:base && pnpm integration:check && pnpm typecheck && node "$(realpath node_modules/@runeditrun/rer/cli/hosted-output.mjs)" . owner-deployment.json && node "$(realpath node_modules/@runeditrun/rer/cli/hydration/check.mjs)" . && pnpm test:runtime --suite=search && node --test --test-concurrency=1 tests/push-clock.mjs'
     uses: ./.github/workflows/verify-stage.yml
     with:
       command: ${{ matrix.command }}
