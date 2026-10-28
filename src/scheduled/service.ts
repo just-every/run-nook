@@ -49,7 +49,7 @@ export async function createSchedule(c:Context,conversation:string,input:Record<
  const d=await definition(c,conversation,input,!!old)
  if(old){if(old.definition!==d.definition)fail(409,'Schedule intent changed');await arm(c);return {id:old.id}}
  const id=crypto.randomUUID(),now=Date.now(),files=await prepareScheduleFiles(c,id,conversation,JSON.parse(d.payload).attachments)
- await c.writeBatch([c.sql("INSERT INTO nook_schedules SELECT ?,?,?,?, ?,?,?,?,?,?,?,'active',1,?,generation,NULL,?,? FROM nook_access WHERE user=?",id,c.uid,conversation,intent,d.definition,d.payload,d.time.localAt,d.time.zone,d.time.recurrence,d.time.endDate,d.due,c.session.operator.version,now,now,c.uid),...files.statements,...forwardAudit(c,d.payload)],conversation,`${d.permission} AND ${files.fence}`,[...d.values,...files.values])
+ await c.writeBatch([c.sql("INSERT INTO nook_schedules SELECT ?,?,?,?, ?,?,?,?,?,?,?,'active',1,?,generation,NULL,?,? FROM nook_access WHERE user=?",id,c.uid,conversation,intent,d.definition,d.payload,d.time.localAt,d.time.zone,d.time.recurrence,d.time.endDate,d.due,c.operator.version,now,now,c.uid),...files.statements,...forwardAudit(c,d.payload)],conversation,`${d.permission} AND ${files.fence}`,[...d.values,...files.values])
  await arm(c);await c.hint();return {id}
 }
 export async function changeSchedule(c:Context,id:string,input:Record<string,any>){
@@ -65,7 +65,7 @@ export async function changeSchedule(c:Context,id:string,input:Record<string,any
  }else if(input.action==='edit'){
   if(old.state==='cancelled'||old.state==='complete')fail(409,'Create a new schedule for a completed or cancelled message')
   const d=await definition(c,old.conversation,input),files=await prepareScheduleFiles(c,id,old.conversation,JSON.parse(d.payload).attachments)
-  await c.writeBatch([c.sql("UPDATE nook_schedules SET payload=?,local_at=?,zone=?,recurrence=?,end_date=?,next_due=?,state='active',version=version+1,operator_version=?,access_generation=(SELECT generation FROM nook_access WHERE user=?),reason=NULL,updated=? WHERE id=?",d.payload,d.time.localAt,d.time.zone,d.time.recurrence,d.time.endDate,d.due,c.session.operator.version,c.uid,now,id),...files.statements,...forwardAudit(c,d.payload)],old.conversation,`${version} AND ${d.permission} AND ${files.fence}`,[...values,...d.values,...files.values])
+  await c.writeBatch([c.sql("UPDATE nook_schedules SET payload=?,local_at=?,zone=?,recurrence=?,end_date=?,next_due=?,state='active',version=version+1,operator_version=?,access_generation=(SELECT generation FROM nook_access WHERE user=?),reason=NULL,updated=? WHERE id=?",d.payload,d.time.localAt,d.time.zone,d.time.recurrence,d.time.endDate,d.due,c.operator.version,c.uid,now,id),...files.statements,...forwardAudit(c,d.payload)],old.conversation,`${version} AND ${d.permission} AND ${files.fence}`,[...values,...d.values,...files.values])
  }else if(input.action==='arm'){await arm(c);return {id}}
  else fail(400,'Choose edit, pause, cancel or arm. To resume, review a future time and save it.')
  await arm(c);await c.hint();return {id}
@@ -84,5 +84,5 @@ export async function scheduleAudience(c:Context,conversation:string){
  await c.check(conversation)
  const people=await c.rows(`SELECT a.id,a.name FROM nook_members m JOIN nook_actors a ON a.id=m.user WHERE m.conversation=? AND a.active=1 AND ${allowedGrant('m.user','m.conversation')} ORDER BY a.name,a.id LIMIT 20`,[conversation],conversation)
  const total=(await c.one(`SELECT count(*) AS n FROM nook_members m JOIN nook_actors a ON a.id=m.user WHERE m.conversation=? AND a.active=1 AND ${allowedGrant('m.user','m.conversation')}`,[conversation],conversation)).n
- return {owner:c.session.operator.displayName,people,total}
+ return {owner:c.operator.displayName,people,total}
 }

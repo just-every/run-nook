@@ -12,7 +12,7 @@ import {keywordList,keywordStatements} from './keywords.server'
 // its recipient, to the person whose message caused it and to the owner for a week.
 const PROBLEM_MS=7*86400_000,problem="q.channel='email' AND q.state IN ('retrying','failed') AND q.updated>?"
 export async function notifySettings(c:Context){
- const since=Date.now()-PROBLEM_MS,owner=c.session.operator.role==='owner'
+ const since=Date.now()-PROBLEM_MS,owner=c.operator.role==='owner'
  const [p,mine,caused,notDelivered,push]=await Promise.all([
   c.one('SELECT mentions,urgent,urgent_quiet,keywords,keywords_in_muted,away_email,away_interval,email_offer_seen FROM nook_notify_preferences WHERE user=?',[c.uid]),
   c.one(`SELECT q.error,q.state,q.updated FROM nook_notify_queue q WHERE q.user=? AND ${problem} ORDER BY q.updated DESC LIMIT 1`,[c.uid,since]),
@@ -22,7 +22,7 @@ export async function notifySettings(c:Context){
  ])
  const workspace=owner?{sending:sendingSetup(c.env),notDelivered}:null
  const broadcasts=!!(await c.one(`SELECT ${emailBroadcastChoice('?')} AS enabled`,[c.uid,c.uid]))?.enabled
- return {awayEmail:!!p?.away_email,awayInterval:p?.away_interval??15,emailOffer:p?.email_offer_seen===0&&!p.mentions&&!p.urgent&&!p.away_email&&!broadcasts,vacation:await c.one('SELECT starts,ends FROM nook_vacations WHERE user=?',[c.uid]),quietSchedule:await quietSettings(c),...await mobileSettings(c),push,broadcasts,mentions:!!p?.mentions,urgent:!!p?.urgent,urgentQuiet:!!p?.urgent_quiet,keywords:await keywordList(c),keywordsInMuted:!!p?.keywords_in_muted,keywordEmail:!!p?.keywords,address:c.session.operator.email,
+ return {awayEmail:!!p?.away_email,awayInterval:p?.away_interval??15,emailOffer:p?.email_offer_seen===0&&!p.mentions&&!p.urgent&&!p.away_email&&!broadcasts,vacation:await c.one('SELECT starts,ends FROM nook_vacations WHERE user=?',[c.uid]),quietSchedule:await quietSettings(c),...await mobileSettings(c),push,broadcasts,mentions:!!p?.mentions,urgent:!!p?.urgent,urgentQuiet:!!p?.urgent_quiet,keywords:await keywordList(c),keywordsInMuted:!!p?.keywords_in_muted,keywordEmail:!!p?.keywords,address:c.operator.email,
   problem:mine?{error:mine.error,retrying:mine.state==='retrying',at:mine.updated}:null,
   notDelivered:caused.map(r=>({recipient:r.recipient,error:r.error,retrying:r.state==='retrying',at:r.updated})),
   workspace:workspace&&{sending:workspace.sending,notDelivered:workspace.notDelivered?.count?{count:workspace.notDelivered.count,error:workspace.notDelivered.error,at:workspace.notDelivered.latest}:null}}

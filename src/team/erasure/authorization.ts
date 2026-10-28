@@ -17,7 +17,7 @@ export async function authorize(c:Context,kind:string,target:string,author=false
   const row=await c.one('SELECT * FROM oa_operators WHERE id=?',[target]);if(!row)fail(404,'Teammate unavailable')
   if(protectEveryOwnerFromErasure&&row.role==='owner')fail(403,'Transfer or demote this owner before erasure')
   if(target===c.uid)fail(403,'You cannot erase yourself')
-  if(c.session.operator.role!=='owner'&&row.role!=='member')fail(403,'Only an owner can erase privileged teammates')
+  if(c.operator.role!=='owner'&&row.role!=='member')fail(403,'Only an owner can erase privileged teammates')
   if(row.role==='owner'&&row.status==='active'&&(await c.one("SELECT count(*) AS n FROM oa_operators WHERE role='owner' AND status='active'")).n<=1)fail(403,'The last active owner cannot be erased')
   return {row,conversation:undefined,condition:`${manager} AND ?<>? AND EXISTS(SELECT 1 FROM oa_operators t JOIN oa_operators a ON a.id=? WHERE t.id=? AND (${protectEveryOwnerFromErasure?"t.role<>'owner'":'1'}) AND (a.role='owner' OR t.role='member') AND (t.role<>'owner' OR t.status<>'active' OR (SELECT count(*) FROM oa_operators WHERE role='owner' AND status='active')>1))`,params:[c.uid,c.uid,target,c.uid,c.uid,target]}
  }

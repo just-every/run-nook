@@ -14,7 +14,7 @@ export async function readClip(c:Context,attachment:string){
  const file=await source(c,attachment)
  const row=await c.one(`SELECT h.*,a.name AS actorName FROM nook_attachments source LEFT JOIN nook_clips clip ON clip.attachment=source.id LEFT JOIN nook_clip_transcripts h ON h.attachment=clip.attachment AND h.version=clip.version LEFT JOIN nook_actor_history a ON a.id=h.actor WHERE source.id=? AND ${liveSource}`,[attachment,attachment,file.message,file.conversation,file.mime],file.conversation)
  if(!row)fail(404,'Clip unavailable')
- const cfg=await configuration(c),offered=!!cfg.enabled&&!!await c.one('SELECT 1 FROM nook_transcript_secrets WHERE id=1'),mayRequest=file.author===c.uid||['owner','admin'].includes(c.session.operator.role)
+ const cfg=await configuration(c),offered=!!cfg.enabled&&!!await c.one('SELECT 1 FROM nook_transcript_secrets WHERE id=1'),mayRequest=file.author===c.uid||['owner','admin'].includes(c.operator.role)
  // The disclosure names only the provider's host; the key and every other setting stay with the owner.
  return {...(row.version?project(row):{version:0,created:null,actor:null,actorName:null,format:'typed',language:'en',source:'human',cues:[]}),attachment,message:file.message,conversation:file.conversation,mime:file.mime,policy,provider:{version:cfg.version,available:offered,canRequest:offered&&mayRequest,host:offered?new URL(cfg.base_url).hostname:null}}
 }
