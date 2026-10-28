@@ -1,0 +1,14 @@
+import { createAgentDoor, type Trust } from '../base/modules/agent-door/index.ts'
+import { authBindings } from '../platform/operator-auth.server'
+import type { StorageBindings } from '../platform/storage/context'
+import { nookPeople } from './people'
+import { nookTools } from './tools'
+import { nookResources } from './resources'
+export type AgentBindings=StorageBindings&{RER_OWNER_CLAIM_ISSUER?:string;RER_OWNER_CLAIM_INSTALLATION_ID?:string;RER_OWNER_CLAIM_PUBLIC_KEYS?:string;RER_BUSINESS_TRUST?:string}
+export const notTools=[{clauses:['NOOK-021'],reason:'device' as const},{clauses:['NOOK-041','NOOK-042','NOOK-043','NOOK-044','NOOK-045','NOOK-046'],reason:'import-door' as const},{clauses:['NOOK-079','NOOK-089'],reason:'connector' as const},{clauses:['NOOK-009'],reason:'installation' as const}]
+export function nookAgentDoor(bindings:AgentBindings){
+ const env={...bindings,...authBindings(bindings)},issuer=env.RER_OWNER_CLAIM_ISSUER,installationId=env.RER_OWNER_CLAIM_INSTALLATION_ID,keys=env.RER_OWNER_CLAIM_PUBLIC_KEYS
+ let trust:Trust|null=null
+ if(issuer||installationId||keys){if(!issuer||!installationId||!keys)throw new Error('Incomplete agent trust');trust={issuer,installationId,appOrigin:env.AUTH_ORIGIN,publicKeys:JSON.parse(keys)}}
+ return createAgentDoor({seed:'nook',name:'Nook',specialist:'conversation clerk',db:env.DB,origin:env.AUTH_ORIGIN,trust,people:nookPeople(env),tools:nookTools(env),resources:nookResources(env),notTools,prompts:[{name:"conversation_week",description:"Prepare a cited conversation-clerk week from currently permitted messages, notes and outcome versions.",clauses:["NOOK-004","NOOK-017","NOOK-053"],messages:()=>[{role:"user",content:{type:"text",text:"Inspect current permitted conversations, source messages, notes and outcomes. Propose a small checklist and commitment candidates, preserving uncertain evidence and named assignee agreement. Do not claim scheduled follow-through or external delivery."}}]},{name:"conversation_recap",title:"Conversation recap",description:"Read the current permitted source messages; distinguish claims from decisions and accepted work.",clauses:["NOOK-035"],messages:()=>[{role:"user",content:{type:"text",text:"Use nook.conversations.list and nook.messages.list to prepare a source-cited recap. Report missing evidence and access refusals."}}]},{name:"commitment_followthrough",description:"Inspect proposals and exact native outcome versions without accepting on behalf of a person.",clauses:["NOOK-055"],messages:()=>[{role:"user",content:{type:"text",text:"Read permitted outcomes and original messages. Suggest a cited next step; keep proposed, accepted and reported-complete states distinct."}}]}]})
+}
