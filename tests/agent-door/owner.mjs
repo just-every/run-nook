@@ -11,6 +11,7 @@ export default async function initialize({request,origin,email,claim,displayName
  if(!channelResponse.ok)throw new Error('Native channel setup failed');
  const channel=await channelResponse.json();
  const teammate=await reviewers.initialize('teammate',{cookie});
+ await reviewers.initialize('second-teammate',{cookie});
  const me=await (await call('/api/me',undefined,cookie)).json();
  const sent=await call(`/api/conversations/${channel.id}/messages`,{body:'Ari asks the owner to inspect the launch note.',intent:'verification-attention',mentions:[me.id]},teammate.cookie);
  if(!sent.ok)throw new Error('Native attention setup failed');

@@ -1,5 +1,5 @@
 /** Native invitation and confirmation using Base's recipient-scoped mailbox. */
-export default async function initialize({request,origin,email,owner,mail}){
+export default async function initialize({request,origin,email,owner,mail,label}){
  const call=(path,body,cookie)=>request(new URL(path,origin).href,{method:body===undefined?'GET':'POST',redirect:'manual',headers:{Origin:origin,'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{})},...(body===undefined?{}:{body:JSON.stringify(body)})});
  const channels=await (await call('/api/conversations',undefined,owner.cookie)).json();
  const channel=channels.find(room=>room.name==='Verification welcome');
@@ -8,7 +8,7 @@ export default async function initialize({request,origin,email,owner,mail}){
  console.log('NOOK-AGENT native invitation preparation HTTP='+prepared.status);
  if(!prepared.ok)throw new Error('Native scoped invitation preparation failed');
  const since=Date.now();
- const invited=await call('/auth/invite',{email,displayName:'Ari Teammate',role:'member',returnTo:'/app'},owner.cookie);
+ const invited=await call('/auth/invite',{email,displayName:label==='teammate'?'Ari Teammate':'Rowan Teammate',role:'member',returnTo:'/app'},owner.cookie);
  console.log('NOOK-AGENT native invitation delivery HTTP='+invited.status);
  if(invited.status!==202)throw new Error('Native invitation send failed');
  await invited.body?.cancel();

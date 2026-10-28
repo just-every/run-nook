@@ -1,4 +1,5 @@
 import { type Spec,read,outcome,write,channelDetails,updateChannel,archiveChannel,leaveChannel,transferChannel,changeChannelMember,createNote,reviseNote,revertNote,getNote,listNotes,noteHistory,noteProposals,proposeNoteItem,react,reactions,reactionActors,save,listSaved,deleteSaved,pins,pin,messageCollections,personalWorkspace,updatePersonalWorkspace,str,body,number,bool,list,input,noteFields,payload,standard,membershipRisk,conversationVersion,messageVersion } from './tool-native'
+import {personalSnapshot} from './snapshot'
 
 export const workspaceTools:Spec[]=[
  {name:'attention.history',clauses:['NOOK-005','NOOK-013'],read:true,schema:input({}),run:c=>c.rows('SELECT a.id,a.state,a.snooze_until,a.conversation FROM nook_attention a JOIN nook_members m ON m.conversation=a.conversation AND m.user=a.user JOIN oa_operators o ON o.id=m.user JOIN nook_access x ON x.user=o.id WHERE a.user=? AND o.status=\'active\' AND x.active=1 AND (x.mode=\'member\' OR EXISTS(SELECT 1 FROM nook_guest_grants g WHERE g.user=m.user AND g.conversation=m.conversation)) ORDER BY a.id LIMIT 1000',[c.uid])},
@@ -17,7 +18,7 @@ export const workspaceTools:Spec[]=[
    const id=room.id
    records.push({conversation:await channelDetails(c,id),members:await read(c,'members',id),messages:await read(c,'messages',id),outcomes:await read(c,'outcomes',id),notes:await listNotes(c,id),preferences:await read(c,'preferences',id),...(room.kind!=='dm'?{pins:await pins(c,id)}:{})})
   }
-  return {records,saved:await listSaved(c),workspace:await personalWorkspace(c),threads:await read(c,'threads'),settings:await read(c,'settings'),attention:await c.rows('SELECT id,state,snooze_until FROM nook_attention WHERE user=? ORDER BY id',[c.uid])}
+  return {records,personal:await personalSnapshot(c),saved:await listSaved(c),workspace:await personalWorkspace(c),threads:await read(c,'threads'),settings:await read(c,'settings'),attention:await c.rows('SELECT id,state,snooze_until FROM nook_attention WHERE user=? ORDER BY id',[c.uid])}
  }},
  {name:'workspace.read',clauses:['NOOK-017'],read:true,schema:input({}),run:c=>personalWorkspace(c)},
 ]

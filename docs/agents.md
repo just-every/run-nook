@@ -35,6 +35,11 @@ ownership or administrator status does not open an unrelated DM. Imported and
 message text is untrusted. A file resource returns metadata, not storage keys or
 credentials.
 
+Durable queued effects need separate once-only admissions for each delivery.
+The current shared continuation cannot complete a second effect of the same tool
+under one originating admission. Agent scheduling and notification fanout are not
+claimed as supported.
+
 This candidate does not yet expose scheduled execution, forwarding, provider
 transcription, AI retrieval, invitation provisioning, credential changes,
 erasure, external connectors, calls or native device operations through the

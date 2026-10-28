@@ -2380,6 +2380,11 @@
         "label": "teammate",
         "email": "synthetic-nook-teammate@example.com",
         "initializer": "tests/agent-door/teammate.mjs"
+      },
+      {
+        "label": "second-teammate",
+        "email": "synthetic-nook-second@example.com",
+        "initializer": "tests/agent-door/teammate.mjs"
       }
     ],
     "replayAdmission": {
