@@ -937,7 +937,7 @@ Core · target · **partial** · Cites BASE-DATA-001, BASE-ROLE-001, BASE-DATA-0
 
 Core · target · **partial** · Rules D-1
 
-**Requirement.** Authorized admins see membership/guest/app inventory, channel growth/activity, storage, retention jobs, client health, notification delivery classes, failed workflows and connector health over chosen time ranges. Team leaders see accepted/overdue/blocked commitments and unresolved decisions only within their authorized conversations, with drill-through to source and CSV export. Reports disclose denominator, time zone, freshness and missing data; aggregate trends cannot expose private-channel names or DM bodies and do not turn presence/message counts into employee performance scores. RL-9 records the carried policy decision.
+**Requirement.** Authorized admins see membership/guest/app inventory, channel growth/activity, storage, retention jobs, client health, notification delivery classes, failed workflows and connector health over chosen time ranges. Team leaders see accepted/overdue/blocked commitments and unresolved decisions only within their authorized conversations, with drill-through to source and CSV export. Reports disclose denominator, time zone, freshness and missing data; aggregate trends cannot expose private-channel names or DM bodies and do not turn presence/message counts into employee performance scores. RL-9 records the carried policy decision. Team leaders are current full-member channel managers, owners or admins, limited to conversations they can read. Unreadable private channels, DMs and group DMs form one anonymous bucket, suppressed below five conversations in the page, JSON and CSV under RL-9.
 
 **Acceptance.**
 1. Populate a US 35-person team with guests, a private management channel, missed notifications and overdue linked work.
@@ -1142,7 +1142,7 @@ Core · target · **partial** · From NOOK-063 · Cites BASE-OPS-003, BASE-ROLE-
 
 Core · target · **partial** · From NOOK-063 · Cites BASE-OPS-003, BASE-ROLE-001 · Rules D-1
 
-**Requirement.** Slack SDK apps move by changing only base URL and token. The [compatibility protocol](docs/contract/mechanism.md#nook-063) retains every promised method for identity, messages, reactions, conversations, people, profiles, app DMs, channel management, files, scheduled messages and modal views. Mapped Slack identities resolve imported records. Missing scopes, blocked app DMs and out-of-grant conversations disclose no extra authority. The company's policy decides any accountable agent call's computed classes; service-app scope conveys no person's confirmation. Rulings RL-4 to RL-7 state the degraded metadata, formatting and failure conventions; they waive no required method or journey.
+**Requirement.** Slack SDK apps move by changing only base URL and token. The [compatibility protocol](docs/contract/mechanism.md#nook-063) retains every promised method for identity, messages, reactions, conversations, people, profiles, app DMs, channel management, files, scheduled messages and modal views. Mapped Slack identities resolve imported records. Missing scopes, blocked app DMs and out-of-grant conversations disclose no extra authority. The company's policy decides any accountable agent call's computed classes; service-app scope conveys no person's confirmation. Rulings RL-4 to RL-7 state the degraded metadata, formatting and failure conventions; they waive no required method or journey. An app cannot edit or delete another app identity’s message. Native branding and origin metadata are degraded locators, not mapped Slack identities or a durable installation identifier across host changes.
 
 **Acceptance.**
 1. The same Bolt app calls `conversations.open` for a user and `chat.postMessage` into the result: that person receives one app DM showing the app identity.
@@ -1168,7 +1168,7 @@ Core · target · **missing** · From NOOK-063 · Cites BASE-OPS-003, BASE-ROLE-
 
 Core · target · **partial** · From NOOK-063 · Cites BASE-OPS-003, BASE-ROLE-001
 
-**Requirement.** Render the complete contracted Block Kit and text-format subset. Unsupported content has a visible text fallback and warning; publish an exhaustive supported, degraded or unsupported matrix for methods, events, fields and blocks. The recorded Web API rulings preserve cross-app refusals, native metadata limits and truthful error outcomes. Rulings RL-4 to RL-7 state the degraded metadata, formatting and failure conventions; they waive no required method or journey.
+**Requirement.** Render the complete contracted Block Kit and text-format subset. Unsupported content has a visible text fallback and warning; publish an exhaustive supported, degraded or unsupported matrix for methods, events, fields and blocks. The recorded Web API rulings preserve cross-app refusals, native metadata limits and truthful error outcomes. Rulings RL-4 to RL-7 state the degraded metadata, formatting and failure conventions; they waive no required method or journey. Unsupported formatting keeps the text fallback and visible notice, and its Nook-specific warning claims no Slack validation equivalence. Transport acknowledgment does not establish application success; operation failures and rate refusals retain their distinct truthful outcomes.
 
 **Acceptance.**
 1. Post an unsupported block and see the text fallback, visible notice and warning.
@@ -1763,7 +1763,7 @@ Core · target · **missing**
 
 Core · target · **partial** · Cites BASE-SECRET-001, BASE-DATA-004 · Register R-10
 
-**Requirement.** Call recordings, consent records and transcripts remain scoped private files with retention, export and hold policy. Provider-generated transcript requests use the owner-configured provider; the provider is disclosed before audio leaves the installation, and returned cues enter the versioned private transcript. The reproducible provider fixture gates acceptance; live-provider receipts are recorded in R-10. RL-8 records the carried policy decision.
+**Requirement.** Call recordings, consent records and transcripts remain scoped private files with retention, export and hold policy. Provider-generated transcript requests use the owner-configured provider; the provider is disclosed before audio leaves the installation, and returned cues enter the versioned private transcript. The reproducible provider fixture gates acceptance; live-provider receipts are recorded in R-10. RL-8 records the carried policy decision. The clip author and owners or admins who can currently read it may request transcription; wider member requests are a separate owner-controlled capability. The request binds the disclosed provider version and rechecks source authority before audio leaves; a returned transcript appends only if no human revision arrived meanwhile.
 
 **Acceptance.**
 1. Reject an outsider, simulate failed processing, correct a transcript and export/delete or hold the artifact without losing policy state.
