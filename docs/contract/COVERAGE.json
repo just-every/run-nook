@@ -2431,6 +2431,14 @@
       "to": "clause",
       "ids": [
         "NOOK-087"
+      ],
+      "also": [
+        {
+          "to": "register",
+          "ids": [
+            "R-10"
+          ]
+        }
       ]
     },
     {
