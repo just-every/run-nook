@@ -196,6 +196,10 @@
     {
       "source": "docs/verify.md",
       "reason": "Maintainer verification scope and recovery notes; user instructions remain in the public guides."
+    },
+    {
+      "source": "docs/contract/DONE-POINTS.md",
+      "reason": "Supporting per-outcome assertion census for the clause-level carried-done journey audit."
     }
   ]
 }

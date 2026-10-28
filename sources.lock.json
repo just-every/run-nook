@@ -689,7 +689,11 @@
       "executable": false
     },
     "docs/contract/DONE-AUDIT.md": {
-      "sha256": "35bf61348b9e59c238d82cbdc4546988af97dd739700c6490eaa63bb8dd12404",
+      "sha256": "98b02dfde44150672c244a5763994be899ba0cd5e5f6423b959211fae434f72e",
+      "executable": false
+    },
+    "docs/contract/DONE-POINTS.md": {
+      "sha256": "db11beacb1045d7c83973c1c2138da0507af3cb04d49a6ab2df6d446d7ca10d8",
       "executable": false
     },
     "docs/contract/ID-MAP.json": {
@@ -761,7 +765,7 @@
       "executable": false
     },
     "docs/site.json": {
-      "sha256": "40b7c86104cb6dfa5339e225444ed9d689e0a79f0c8795d93dbee75c2eb07b42",
+      "sha256": "7378544ff55aa03cb20e165eb9254fe7bc97260c445c02a563f53d219632549f",
       "executable": false
     },
     "docs/updating.md": {
