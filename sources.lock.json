@@ -6212,6 +6212,14 @@
       "sha256": "c291e66a1fb048d962f010a12e928a64efb1ea031efca043571e8bfa51511932",
       "executable": false
     },
+    "src/site/contract-context.ts": {
+      "sha256": "bbcd5ee480417775b2358c547ec0e14de50b50f83346ff76f1304ccf5a70a59f",
+      "executable": false
+    },
+    "src/site/markdown.d.ts": {
+      "sha256": "9ff180e9174a448653b8d6daa26547295476f2c882e0be6f35c871e41f95e563",
+      "executable": false
+    },
     "src/site/pages.tsx": {
       "sha256": "356ae4528a0ea47e1f49bf2ec90e6881971231a1c9bbefadfd37b266d3e6aedd",
       "executable": false
