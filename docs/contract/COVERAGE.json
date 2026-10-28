@@ -873,7 +873,23 @@
     {
       "file": "CONTRACT.md",
       "line": 150,
-      "text": "**Acceptance evidence:** Run pnpm test:push through subscription, preferences, emitted Worker and real alarm; independently decrypt the RFC 8291 packet and verify VAPID, revocation, quiet/read cancellation, per-device folding and visible failure. Separately demonstrate foreground/background/locked-device visible notification, tap authentication and badge reconciliation on supported Safari, Chromium and Firefox devices. **Defaults:** a newly invited member grants browser permission in a fresh profile without opening settings, and a DM, a mention and a keyword hit each show exactly one notification; a channel set to `all new messages` notifies on a colleague's plain message and a channel left at `mentions` does not. **Defaults include automatic follows:** a reply in a thread the member started in a `mentions` channel shows one notification without any explicit follow. **Cross-device routing:** with the member's Chrome page focused and in use, a DM shows on that page and no Web Push reaches their phone's installed PWA; after the page is idle 10 minutes the phone notifies (NOOK-073).",
+      "text": "**Acceptance evidence:** ",
+      "to": "clause",
+      "ids": [
+        "NOOK-015"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 150,
+      "text": "Run pnpm test:push ",
+      "to": "docs",
+      "path": "docs/contract/mechanism.md"
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 150,
+      "text": "through subscription, preferences, emitted Worker and real alarm; independently decrypt the RFC 8291 packet and verify VAPID, revocation, quiet/read cancellation, per-device folding and visible failure. Separately demonstrate foreground/background/locked-device visible notification, tap authentication and badge reconciliation on supported Safari, Chromium and Firefox devices. **Defaults:** a newly invited member grants browser permission in a fresh profile without opening settings, and a DM, a mention and a keyword hit each show exactly one notification; a channel set to `all new messages` notifies on a colleague's plain message and a channel left at `mentions` does not. **Defaults include automatic follows:** a reply in a thread the member started in a `mentions` channel shows one notification without any explicit follow. **Cross-device routing:** with the member's Chrome page focused and in use, a DM shows on that page and no Web Push reaches their phone's installed PWA; after the page is idle 10 minutes the phone notifies (NOOK-073).",
       "to": "clause",
       "ids": [
         "NOOK-015"
