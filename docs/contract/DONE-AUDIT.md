@@ -543,8 +543,8 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-122 | 3 | mobile-only all thread follows | `tests/thread-delivery.mjs:42` | asserted |
 | NOOK-122 | 3 | unfollow removes preference entry | none | none |
 | NOOK-122 | 3 | unfollow removes Threads entry | none | none |
-| NOOK-123 | 1 | phone badge unchanged | `tests/thread-delivery.mjs:33` | asserted |
-| NOOK-123 | 1 | desktop badge unchanged | `tests/thread-delivery.mjs:33` | asserted |
+| NOOK-123 | 1 | phone badge unchanged | none | none |
+| NOOK-123 | 1 | desktop badge unchanged | none | none |
 | NOOK-123 | 1 | reply remains in Threads | `tests/thread-delivery.mjs:30` | asserted |
 | NOOK-079 | 1 | owner creates and copies once at both widths | none | none |
 | NOOK-079 | 1 | retry has one message | `tests/integration-tokens.mjs:29` | asserted |

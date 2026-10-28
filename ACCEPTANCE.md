@@ -8,10 +8,10 @@ The primary journey: Install Nook, invite the team, review and import their hist
 
 | Tier | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
-| Core | 1 | 80 | 54 | 135 |
+| Core | 0 | 81 | 54 | 135 |
 | Agent surface | 0 | 0 | 6 | 6 |
 | Later | 0 | 0 | 0 | 0 |
-| Full target | 1 | 80 | 60 | 141 |
+| Full target | 0 | 81 | 60 | 141 |
 
 Judged from the code and tests at commit `9f42ce1ef9193fc3fa2115b7c16164aa16067070` (26 October 2026). Field proof register: 11 rows; 0 passed, 0 failed, 11 not run.
 
@@ -1411,7 +1411,7 @@ Core · target · **partial** · From NOOK-072 · Rules D-1
 
 #### NOOK-123 — Mentions-only thread badge choice
 
-Core · target · **done** · From NOOK-072
+Core · target · **partial** · From NOOK-072
 
 **Requirement.** Thread badge choice: followed-thread replies count toward unread and every device's badge by default; a member may choose "Count thread replies only when they mention me", applied identically to the native (NOOK-021) and Web Push (NOOK-015) badges, and those replies still appear in the Threads view.
 
@@ -1419,7 +1419,7 @@ Core · target · **done** · From NOOK-072
 1. With the mentions-only thread badge chosen, a non-mentioning followed reply leaves phone and desktop badges unchanged while remaining in Threads.
 
 **Evidence.** `src/platform/storage/threads.ts`; `src/platform/storage/thread-badge.ts`; `src/team/conversation-notify.server.ts`; `src/push/devices.ts`; `src/push/queue.ts`; `src/push/snapshot.ts`; `public/sw.js`; `tests/threads.mjs`; `tests/thread-delivery.mjs`; `tests/push-service-worker.test.mjs`; `tests/push/archive.mjs`
-**Gap.** None.
+**Gap.** The cited fixture asserts a zero computed badge and zero badge values in both encrypted packets, and keeps the reply unread in Threads. It does not assert that the phone and desktop displayed badges remain unchanged after that reply.
 
 #### NOOK-073 — Active-elsewhere alert routing
 
