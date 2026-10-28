@@ -104,7 +104,7 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-011 | 1 | missed delete restored on reconnect | none | none |
 | NOOK-011 | 2 | revoked cached retry denied before lookup | none | none |
 | NOOK-011 | 2 | no missing durable history | none | none |
-| NOOK-011 | 2 | no duplicate durable history | `tests/storage-flows.mjs:7` | asserted |
+| NOOK-011 | 2 | no duplicate durable history | none | none |
 | NOOK-012 | 1 | ordered file binding in app | `tests/storage-flows.mjs:38` | asserted |
 | NOOK-012 | 1 | private image preview | none | none |
 | NOOK-012 | 1 | authorized exact-byte download | `tests/storage-flows.mjs:38` | asserted |
@@ -314,7 +314,7 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-035 | 1 | private correction | none | none |
 | NOOK-035 | 1 | dismissal | none | none |
 | NOOK-035 | 1 | source messages unchanged | none | none |
-| NOOK-035 | 1 | no private snippet | `tests/search.mjs:170` | asserted |
+| NOOK-035 | 1 | no private snippet | `tests/search.mjs:192` | asserted |
 | NOOK-035 | 1 | no invented acceptance | `tests/search.mjs:185` | asserted |
 | NOOK-035 | 2 | current-authorized range | none | none |
 | NOOK-035 | 2 | omission count | `tests/search.mjs:171` | asserted |
@@ -540,7 +540,7 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-122 | 2 | follow source all | none | none |
 | NOOK-122 | 2 | Threads source all | `tests/threads.mjs:74` | asserted |
 | NOOK-122 | 2 | existing stored source unchanged | none | none |
-| NOOK-122 | 3 | mobile-only all thread follows | `tests/thread-delivery.mjs:42` | asserted |
+| NOOK-122 | 3 | mobile-only all thread follows | `tests/thread-delivery.mjs:43` | asserted |
 | NOOK-122 | 3 | unfollow removes preference entry | none | none |
 | NOOK-122 | 3 | unfollow removes Threads entry | none | none |
 | NOOK-123 | 1 | phone badge unchanged | none | none |
@@ -591,7 +591,7 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-089 | 3 | withdrawn channel authority refused | none | none |
 | NOOK-089 | 4 | edit attributed to app in audit | none | none |
 | NOOK-089 | 5 | original body-free receipt | `tests/notification-extension.mjs:35` | asserted |
-| NOOK-089 | 5 | explicit non-acceptance | `tests/notification-extension.mjs:25` | asserted |
+| NOOK-089 | 5 | explicit non-acceptance | none | none |
 | NOOK-089 | 5 | explicit tombstone | `tests/notification-extension.mjs:52` | asserted |
 | NOOK-089 | 5 | no duplicate effect | `tests/notification-extension.mjs:24` | asserted |
 | NOOK-035 | old 2 | Provider network-edge substitution is a reproducible proof boundary in the mechanism notes. | `docs/contract/mechanism.md` | moved |

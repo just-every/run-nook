@@ -625,7 +625,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "46d6a1f1c47de79e973057ea81ed4012782206dd9186cad3195a1017f9a3279b",
+      "sha256": "366479b98ac9c0762fee79345545da06dadd80c7637d552365c5407e26a02060",
       "executable": false
     },
     "AGENTS.md": {
@@ -649,7 +649,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "9dea27b6b13c8e670e9a40e302bd8735e4c9f74e0eaf728b5dcf9e88512702b7",
+      "sha256": "b5e2e553a60233817a06d96ec8ec88bd3b91ff148872c7bee1952463e67d1e33",
       "executable": false
     },
     "DEMO.md": {
@@ -689,7 +689,7 @@
       "executable": false
     },
     "docs/contract/DONE-AUDIT.md": {
-      "sha256": "fe67fd974ab1468c41e7bb0094ed3b08b5432ad8d29a4cde6275bc0dfef5f924",
+      "sha256": "f7d0536d4d89e6d0418df28595ce73937db6904da861fa87fdc618e6d3d3118a",
       "executable": false
     },
     "docs/contract/ID-MAP.json": {

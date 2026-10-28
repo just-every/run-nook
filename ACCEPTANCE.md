@@ -163,7 +163,7 @@ Core · published · **partial** · Cites BASE-ROLE-001 · Rules D-1
 2. Repeat a previously successful intent after membership revocation; it must be denied before cached response lookup, with no missing or duplicated durable history.
 
 **Evidence.** `src/platform/storage/history.ts`; `src/platform/storage/commands.ts`; `src/platform/storage/live.ts`; `tests/storage-flows.mjs`; `tests/browser.mjs`
-**Gap.** Carried-done audit has no cited asserting line for Point 1: missed delete restored on reconnect. Point 2: revoked cached retry denied before lookup, no missing durable history. Cited assertions establish complete paged history, missed edit restored on reconnect, no duplicate durable history.
+**Gap.** Carried-done audit has no cited asserting line for Point 1: missed delete restored on reconnect. Point 2: revoked cached retry denied before lookup, no missing durable history. Cited assertions establish complete paged history, missed edit restored on reconnect. The revoked-retry condition also lacks a no-duplicate-history assertion; the cited census precedes that retry condition.
 
 #### NOOK-012 — Private attachments (C12)
 
@@ -1804,7 +1804,7 @@ Core · target · **partial** · Rules D-1
 5. Client-key lookup returns the original body-free acceptance receipt, or an explicit non-acceptance/tombstone state; it creates no second effect.
 
 **Evidence.** `tests/notification-apps.mjs`; `tests/notification-extension.mjs`
-**Gap.** Carried-done audit has no cited asserting line for Point 1: lost-reply receipt lookup. Point 2: other app refused. Point 3: immutable app-name/channel identity, other pair refused, revoked token refused, withdrawn channel authority refused. Point 4: edit attributed to app in audit. Cited assertions establish approved-channel thread post, one accepted receipt, no second post, replacement approval edits earlier post, original body-free receipt, explicit non-acceptance, explicit tombstone, no duplicate effect.
+**Gap.** Carried-done audit has no cited asserting line for Point 1: lost-reply receipt lookup. Point 2: other app refused. Point 3: immutable app-name/channel identity, other pair refused, revoked token refused, withdrawn channel authority refused. Point 4: edit attributed to app in audit. Cited assertions establish approved-channel thread post, one accepted receipt, no second post, replacement approval edits earlier post, original body-free receipt, explicit tombstone, no duplicate effect. An explicit non-acceptance response is not asserted: equality to the never-accepted response proves indistinguishability, but not its non-acceptance field.
 
 ### Push further: accountable agents in the conversation
 
