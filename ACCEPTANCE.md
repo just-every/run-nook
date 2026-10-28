@@ -1910,12 +1910,12 @@ Agent surface · target · **missing** · From new · Cites BASE-AGENT-002, BASE
 
 Agent surface · target · **missing** · From new · Cites BASE-AGENT-006
 
-**Requirement.** Nook computes exposure from the current conversation roster, external-participant status and connector destination, and sensitivity from current labels and returned fields.
+**Requirement.** Nook computes exposure from the current conversation roster, external-participant status and connector destination, and sensitivity from regulated-data labels and returned fields.
 
 **Acceptance.**
 1. A reversible internal message or note action carries standard, with its item count.
 2. A share, forward, connector send or retrieval that newly exposes content outside the company adds external, with recipient count and internal, known, new or public counterparty.
-3. A regulated record or labeled attachment adds sensitive with record count and data kind; a passage claiming another label changes neither fact.
+3. A regulated personal record or an attachment labeled as containing regulated personal data adds sensitive with record count and data kind; a passage claiming another label changes neither fact.
 
 **Evidence.** None.
 **Gap.** No complete Nook MCP registry, risk classifier and two-policy conformance journey proves these outcomes.

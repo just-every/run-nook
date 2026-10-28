@@ -1483,7 +1483,7 @@ Inherits BASE-AGENT-001 to BASE-AGENT-013. The company's policy decides every ca
 - access: membership, device, role or app-grant changes; people and widening/narrowing direction come from the change.
 - security: factor, credential, scanning and protection settings, naming the changed setting.
 - destructive: irreversible erasure or purge, with affected item count.
-- sensitive: regulated fields and classified files, with record count and data kind.
+- sensitive: regulated personal fields and files labeled as holding them, with record count and data kind.
 - money: a change to what the business pays, with amount, currency and counterparty.
 - accounts: an outside account or paid resource, naming its provider.
 - gated: the provider's hosted consent, verification or checkout step that it keeps for a person, naming provider and step.
@@ -1654,12 +1654,12 @@ Inherits BASE-AGENT-001 to BASE-AGENT-013. The company's policy decides every ca
 
 *Tier:* Agent surface · *From:* new · *Cites:* BASE-AGENT-006
 
-**Requirement.** Nook computes exposure from the current conversation roster, external-participant status and connector destination, and sensitivity from current labels and returned fields.
+**Requirement.** Nook computes exposure from the current conversation roster, external-participant status and connector destination, and sensitivity from regulated-data labels and returned fields.
 
 **Acceptance.**
 1. A reversible internal message or note action carries standard, with its item count.
 2. A share, forward, connector send or retrieval that newly exposes content outside the company adds external, with recipient count and internal, known, new or public counterparty.
-3. A regulated record or labeled attachment adds sensitive with record count and data kind; a passage claiming another label changes neither fact.
+3. A regulated personal record or an attachment labeled as containing regulated personal data adds sensitive with record count and data kind; a passage claiming another label changes neither fact.
 
 #### SURFACE-003 — Authority and irreversible decisions
 
