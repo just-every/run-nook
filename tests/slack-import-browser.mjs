@@ -16,9 +16,14 @@ async function guardedUndo(page, context, origin, planId, channel, live) {
     // exist. Hold only script delivery; the page, import and API remain real.
     let releaseScripts;
     const scripts = new Promise(resolve => { releaseScripts = resolve; });
+    const deliveries = new Set();
     const holdScripts = async route => {
-        if (route.request().resourceType() === 'script') await scripts;
-        await route.continue();
+        const delivery = (async () => {
+            if (route.request().resourceType() === 'script') await scripts;
+            await route.continue();
+        })();
+        deliveries.add(delivery);
+        try { await delivery; } finally { deliveries.delete(delivery); }
     };
     await page.route('**/*', holdScripts);
     const job = page.locator('.import-job').filter({ hasText: planId });
@@ -36,7 +41,11 @@ async function guardedUndo(page, context, origin, planId, channel, live) {
         assert.equal(retained.status(), 200);
         assert.ok((await retained.json()).some(message => message.body === live), 'refused undo preserves live work');
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'guarded undo fits the viewport');
-    } finally { releaseScripts(); await page.unroute('**/*', holdScripts); }
+    } finally {
+        releaseScripts();
+        await Promise.all(deliveries);
+        await page.unroute('**/*', holdScripts);
+    }
 }
 export async function runSlackBrowser(origin){
 const browser = await keyed(chromium).launch({ headless: true });

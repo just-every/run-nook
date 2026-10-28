@@ -5173,7 +5173,7 @@
       "executable": false
     },
     "src/imports/DoorWizard.tsx": {
-      "sha256": "5910b37e85acdee73716684330da46999db9d613ea3be8077b96a6cf6d3a7220",
+      "sha256": "6c9edfca6caf808460e706da6d9a3558f673226c7ce8a3d91cc0ec7780acfd3d",
       "executable": false
     },
     "src/imports/formats.d.mts": {
@@ -7277,7 +7277,7 @@
       "executable": false
     },
     "tests/slack-import-browser.mjs": {
-      "sha256": "29f122c267c98360f7c0ae1c657c70ced7f1405ed91cd2a883df81138a084fb8",
+      "sha256": "c7878ef2d2d0ff4c972f2c243931d43e28b14d10c605c9b13574c07f0408cb82",
       "executable": false
     },
     "tests/slack-import-history.test.mjs": {
