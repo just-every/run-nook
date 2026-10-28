@@ -92,7 +92,25 @@
     {
       "file": "CONTRACT.md",
       "line": 24,
-      "text": "**Acceptance evidence:** Through signed-in HTTP, SSR, search, replay and generated loaders, revoke or expire a session and remove a participant; every subsequent private read/write is refused, including a workspace admin attempting another person\u2019s DM.",
+      "text": "**Acceptance evidence:** Through signed-in HTTP, SSR, search, replay and generated loaders, ",
+      "to": "clause",
+      "ids": [
+        "NOOK-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 24,
+      "text": "revoke or expire a session and ",
+      "to": "base",
+      "ids": [
+        "BASE-ACCESS-002"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 24,
+      "text": "remove a participant; every subsequent private read/write is refused, including a workspace admin attempting another person\u2019s DM.",
       "to": "clause",
       "ids": [
         "NOOK-001"
@@ -209,7 +227,70 @@
     {
       "file": "CONTRACT.md",
       "line": 41,
-      "text": "**NOOK-007 \u2014 Safe rendering and local binding (C7).** Human text renders inertly. No message, plugin, link or AI output can trigger arbitrary code, client-side or credentialed fetching, or provider effects; the only server-side link fetch is NOOK-068's bounded, SSRF-safe preview service. Authorized app/agent/meeting effects require the explicit scoped doors in NOOK-022\u2013030 and NOOK-054\u2013059, not ambient conversation authority. Bounded bodies, session expiry, origin validation for mutations and loopback-only development binding remain required; production requires HTTPS. New sign-in uses invited Base magic links; legacy password hashes remain offline recovery inputs only.",
+      "text": "**NOOK-007 \u2014 Safe rendering and local binding (C7).** ",
+      "to": "clause",
+      "ids": [
+        "NOOK-007"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 41,
+      "text": "Human text renders inertly. ",
+      "to": "base",
+      "ids": [
+        "BASE-INPUT-002"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 41,
+      "text": "No message, plugin, link or AI output can trigger arbitrary code, client-side or credentialed fetching, or provider effects; the only server-side link fetch is NOOK-068's bounded, SSRF-safe preview service. Authorized app/agent/meeting effects require the explicit scoped doors in NOOK-022\u2013030 and NOOK-054\u2013059, not ambient conversation authority. ",
+      "to": "clause",
+      "ids": [
+        "NOOK-007"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 41,
+      "text": "Bounded bodies, ",
+      "to": "base",
+      "ids": [
+        "BASE-INPUT-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 41,
+      "text": "session expiry, ",
+      "to": "base",
+      "ids": [
+        "BASE-ACCESS-002"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 41,
+      "text": "origin validation for mutations and loopback-only development binding remain required; production requires HTTPS. ",
+      "to": "clause",
+      "ids": [
+        "NOOK-007"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 41,
+      "text": "New sign-in uses invited Base magic links; ",
+      "to": "base",
+      "ids": [
+        "BASE-ACCESS-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 41,
+      "text": "legacy password hashes remain offline recovery inputs only.",
       "to": "clause",
       "ids": [
         "NOOK-007"
@@ -218,7 +299,35 @@
     {
       "file": "CONTRACT.md",
       "line": 42,
-      "text": "**Acceptance evidence:** Post active markup and malformed/oversized bodies through public APIs; markup stays inert and invalid input fails without writes. Cross-origin mutations, foreign sessions and unsafe local origins fail; production output excludes dev admission.",
+      "text": "**Acceptance evidence:** Post active markup and malformed/oversized bodies through public APIs; markup stays inert and invalid input fails without writes. ",
+      "to": "base",
+      "ids": [
+        "BASE-INPUT-001",
+        "BASE-INPUT-002"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 42,
+      "text": "Cross-origin mutations, ",
+      "to": "clause",
+      "ids": [
+        "NOOK-007"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 42,
+      "text": "foreign sessions ",
+      "to": "base",
+      "ids": [
+        "BASE-ACCESS-002"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 42,
+      "text": "and unsafe local origins fail; production output excludes dev admission.",
       "to": "clause",
       "ids": [
         "NOOK-007"
@@ -1238,7 +1347,25 @@
     {
       "file": "CONTRACT.md",
       "line": 251,
-      "text": "**Acceptance evidence:** Use test tenants for all three IdPs, enforce SSO, rotate signing keys and reject wrong audience/issuer/replayed/expired assertions. SCIM-create a group/member, map one channel, suspend/delete and replay the event; every client and grant loses access without deleting preserved evidence. Exercise audited owner recovery without a blanket bypass.",
+      "text": "**Acceptance evidence:** Use test tenants for all three IdPs, enforce SSO, rotate signing keys ",
+      "to": "clause",
+      "ids": [
+        "NOOK-037"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 251,
+      "text": "and reject wrong audience/issuer/replayed/expired assertions. ",
+      "to": "base",
+      "ids": [
+        "BASE-SIGNIN-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 251,
+      "text": "SCIM-create a group/member, map one channel, suspend/delete and replay the event; every client and grant loses access without deleting preserved evidence. Exercise audited owner recovery without a blanket bypass.",
       "to": "clause",
       "ids": [
         "NOOK-037"
@@ -1536,7 +1663,26 @@
     {
       "file": "CONTRACT.md",
       "line": 301,
-      "text": "**NOOK-050 \u2014 Owned installation and Base replacements.** Keep Base operator-auth, signed owner claim, portability/erasure journal, mail, editor authority and rer lifecycle guarantees, with Nook\u2019s documented identity mapping, current-membership privacy and private R2 replacements. Setup/doctor name missing configuration without values; dev remains loopback and production excludes development identities. Install, upgrade, export/reset/import and owner-account deployment remain available with Cloudflare Workers/D1/R2/Durable Objects, and current SendGrid, Resend or RER mail configuration. Owners choose the data location for D1/R2 at installation (US by default; EU or another platform-enforced jurisdiction where available), shown by setup and doctor with every subprocessor's region disclosed. Setup, doctor and `/docs` publish the subprocessor list: Cloudflare (Workers, D1, R2, Durable Objects), the configured mail provider, LiveKit Cloud or Twilio where media is configured, Apple APNs/PushKit, Google FCM, the browser push services and the publisher-operated Nook Push Gateway (NOOK-078), each with its region, what it sees, its price and its terms, and owner-credential mode removes the gateway from that list; changing it is a documented export/restore migration. Expose US-first USD operating costs for hosting, storage, mail, media, AI and push/provider accounts without invented capacity or subscription promises. Publish a dated reference monthly USD operating-cost estimate for 50 and 300 active members, with its stated message, storage, media-minute, push, mail and AI assumptions (push includes the NOOK-078 gateway's published price as its own line, and owner-credential mode adds the dated Apple Developer Program and Google Play developer account fees) and computed from measured unit costs each release, beside the dated Slack Pro and Business+ per-seat list prices it compares with; the installation shows its actual monthly cost per active member against that estimate. Stable user guides and supportable recovery accompany native-client/provider setup; no shared family code merges Nook into a sibling product.",
+      "text": "**NOOK-050 \u2014 Owned installation and Base replacements.** Keep Base operator-auth, signed owner claim, portability/erasure journal, mail, editor authority and rer lifecycle guarantees, with Nook\u2019s documented identity mapping, current-membership privacy and private R2 replacements. ",
+      "to": "clause",
+      "ids": [
+        "NOOK-050"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 301,
+      "text": "Setup/doctor name missing configuration without values; ",
+      "to": "base",
+      "ids": [
+        "BASE-SECRET-001",
+        "BASE-SECRET-002"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 301,
+      "text": "dev remains loopback and production excludes development identities. Install, upgrade, export/reset/import and owner-account deployment remain available with Cloudflare Workers/D1/R2/Durable Objects, and current SendGrid, Resend or RER mail configuration. Owners choose the data location for D1/R2 at installation (US by default; EU or another platform-enforced jurisdiction where available), shown by setup and doctor with every subprocessor's region disclosed. Setup, doctor and `/docs` publish the subprocessor list: Cloudflare (Workers, D1, R2, Durable Objects), the configured mail provider, LiveKit Cloud or Twilio where media is configured, Apple APNs/PushKit, Google FCM, the browser push services and the publisher-operated Nook Push Gateway (NOOK-078), each with its region, what it sees, its price and its terms, and owner-credential mode removes the gateway from that list; changing it is a documented export/restore migration. Expose US-first USD operating costs for hosting, storage, mail, media, AI and push/provider accounts without invented capacity or subscription promises. Publish a dated reference monthly USD operating-cost estimate for 50 and 300 active members, with its stated message, storage, media-minute, push, mail and AI assumptions (push includes the NOOK-078 gateway's published price as its own line, and owner-credential mode adds the dated Apple Developer Program and Google Play developer account fees) and computed from measured unit costs each release, beside the dated Slack Pro and Business+ per-seat list prices it compares with; the installation shows its actual monthly cost per active member against that estimate. Stable user guides and supportable recovery accompany native-client/provider setup; no shared family code merges Nook into a sibling product.",
       "to": "clause",
       "ids": [
         "NOOK-050",
@@ -1546,7 +1692,44 @@
     {
       "file": "CONTRACT.md",
       "line": 303,
-      "text": "**Acceptance evidence:** Follow README installation, first-run setup and invited sign-in; upgrade existing data, run doctor, export/reset/recover and use the configured hosted owner claim. Check invalid config and missing secrets fail closed, operator disk custody is disclosed and no private value reaches logs/builds. Reproduce on a real supported owner account and inspect actual USD provider usage separately from local/fake-account tests. Install with an explicit data jurisdiction and confirm setup and doctor show it. Open the published reference cost for 50 and 300 members, check its unit costs and assumptions against the measured release figures, and compare the installation's actual cost per active member with it. Open the subprocessor list in `/docs` and doctor: it names the NOOK-078 Nook Push Gateway with its region, what it sees, availability objective, price and terms, and the reference estimate shows the gateway's price as its own line; switch to owner-credential mode and see the gateway leave the list and the developer account fees appear.",
+      "text": "**Acceptance evidence:** Follow README installation, first-run setup and invited sign-in; upgrade existing data, run doctor, export/reset/recover and use the configured hosted owner claim. ",
+      "to": "clause",
+      "ids": [
+        "NOOK-050"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 303,
+      "text": "Check invalid config and missing secrets fail closed, ",
+      "to": "base",
+      "ids": [
+        "BASE-INPUT-001",
+        "BASE-SECRET-002"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 303,
+      "text": "operator disk custody is disclosed ",
+      "to": "clause",
+      "ids": [
+        "NOOK-050"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 303,
+      "text": "and no private value reaches logs/builds. ",
+      "to": "base",
+      "ids": [
+        "BASE-SECRET-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 303,
+      "text": "Reproduce on a real supported owner account and inspect actual USD provider usage separately from local/fake-account tests. Install with an explicit data jurisdiction and confirm setup and doctor show it. Open the published reference cost for 50 and 300 members, check its unit costs and assumptions against the measured release figures, and compare the installation's actual cost per active member with it. Open the subprocessor list in `/docs` and doctor: it names the NOOK-078 Nook Push Gateway with its region, what it sees, availability objective, price and terms, and the reference estimate shows the gateway's price as its own line; switch to owner-credential mode and see the gateway leave the list and the developer account fees appear.",
       "to": "clause",
       "ids": [
         "NOOK-050",
@@ -1556,7 +1739,44 @@
     {
       "file": "CONTRACT.md",
       "line": 305,
-      "text": "**NOOK-051 \u2014 Auditable authority and actions.** Keep a durable, access-controlled audit of sign-in/session changes, invitations, roles, membership, app/agent grants, workflow runs, exports, holds, policy changes and destructive actions, including actor/service, time, scope, version, reason and outcome without private bodies or secrets. Audit cannot be edited by the subject; erasure anonymizes attribution without destroying count/time facts or policy-required preservation. Authorized admins filter/export the log, and automation links each proposed/performed action to its source, grant and human approval. Failed/uncertain actions remain distinct from confirmed effects. It inherits the labeled admin-override posts and channel posting-permission changes of NOOK-066 into this log.",
+      "text": "**NOOK-051 \u2014 Auditable authority and actions.** Keep a durable, access-controlled audit of sign-in/session changes, invitations, roles, membership, app/agent grants, workflow runs, exports, holds, policy changes and destructive actions, ",
+      "to": "clause",
+      "ids": [
+        "NOOK-051"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 305,
+      "text": "including actor/service, time, scope, version, reason and outcome ",
+      "to": "base",
+      "ids": [
+        "BASE-AUDIT-001",
+        "BASE-AGENT-009"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 305,
+      "text": "without private bodies or secrets. Audit cannot be edited by the subject; erasure anonymizes attribution without destroying count/time facts or policy-required preservation. Authorized admins filter/export the log, and automation links each proposed/performed action to its source, grant and human approval. ",
+      "to": "clause",
+      "ids": [
+        "NOOK-051"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 305,
+      "text": "Failed/uncertain actions remain distinct from confirmed effects. ",
+      "to": "base",
+      "ids": [
+        "BASE-AUDIT-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 305,
+      "text": "It inherits the labeled admin-override posts and channel posting-permission changes of NOOK-066 into this log.",
       "to": "clause",
       "ids": [
         "NOOK-051"
@@ -1565,7 +1785,25 @@
     {
       "file": "CONTRACT.md",
       "line": 307,
-      "text": "Web semantics: owners and admins read, filter by actor, kind, scope, outcome and time range, and export CSV or JSON; the owner alone reads when no admin exists, and members and guests never read it. A direct-conversation event shows only \u201ca direct conversation\u201d and counts; a private channel uses the label already shown in channel action history. No message body, DM content, credential or token value is copied. Integration tokens are named by their label; tokens and bindings are excluded from archives and reissued after restore (NOOK-079). An accepted export starts uncertain and stays uncertain if interrupted or cancelled; only a committed complete job confirms completion. Failed source actions remain failed. The reason names the operation or policy choice; versions use the recorded source version or generation, export revision plus one, and audit format version 1 for versionless sources. Older mutable records carry their recorded creation or preparation time, never a reconstructed transition time; rows without a timestamp use migration observation time. The subject has no log-edit door. Erasure sets actor to null while counts, time, scope, version, reason and outcome survive, including readable workspace exports and operational archive restore. Existing web writes carry their human actor or named service and source record; NOOK-080 notification apps now link their channel approval and app identity in the same write batch. Other app, agent and workflow execution linkage remains under the named clauses. App and agent grants and runs (NOOK-025/054/059), workflow runs (NOOK-026), legal holds (NOOK-038), SSO/provisioning (NOOK-037), two-factor changes (NOOK-069), native client sessions (NOOK-021) and connected-system actions (NOOK-027/028/029/030) each inherit: writes one audit row in the same batch, with the grant, source and human approval it links to.",
+      "text": "Web semantics: owners and admins read, filter by actor, kind, scope, outcome and time range, and export CSV or JSON; the owner alone reads when no admin exists, and members and guests never read it. A direct-conversation event shows only \u201ca direct conversation\u201d and counts; a private channel uses the label already shown in channel action history. No message body, DM content, credential or token value is copied. Integration tokens are named by their label; tokens and bindings are excluded from archives and reissued after restore (NOOK-079). ",
+      "to": "clause",
+      "ids": [
+        "NOOK-051"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 307,
+      "text": "An accepted export starts uncertain and stays uncertain if interrupted or cancelled; only a committed complete job confirms completion. Failed source actions remain failed. ",
+      "to": "base",
+      "ids": [
+        "BASE-AUDIT-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 307,
+      "text": "The reason names the operation or policy choice; versions use the recorded source version or generation, export revision plus one, and audit format version 1 for versionless sources. Older mutable records carry their recorded creation or preparation time, never a reconstructed transition time; rows without a timestamp use migration observation time. The subject has no log-edit door. Erasure sets actor to null while counts, time, scope, version, reason and outcome survive, including readable workspace exports and operational archive restore. Existing web writes carry their human actor or named service and source record; NOOK-080 notification apps now link their channel approval and app identity in the same write batch. Other app, agent and workflow execution linkage remains under the named clauses. App and agent grants and runs (NOOK-025/054/059), workflow runs (NOOK-026), legal holds (NOOK-038), SSO/provisioning (NOOK-037), two-factor changes (NOOK-069), native client sessions (NOOK-021) and connected-system actions (NOOK-027/028/029/030) each inherit: writes one audit row in the same batch, with the grant, source and human approval it links to.",
       "to": "clause",
       "ids": [
         "NOOK-051"
@@ -1574,7 +1812,25 @@
     {
       "file": "CONTRACT.md",
       "line": 309,
-      "text": "**Acceptance evidence:** Exercise membership revocation, export, erasure, an admin-override post and a posting-permission change, then filter and export CSV/JSON through owner/admin doors. Deny members, guests and an erased actor; anonymize attribution and retain the action facts through archive restore. Interrupt an export job mid-run and see uncertainty without a completion. App, agent and workflow actions inherit the linked grant/source/human-approval proof under NOOK-025/054/059/026.",
+      "text": "**Acceptance evidence:** Exercise membership revocation, export, erasure, an admin-override post and a posting-permission change, then filter and export CSV/JSON through owner/admin doors. Deny members, guests and an erased actor; anonymize attribution and retain the action facts through archive restore. ",
+      "to": "clause",
+      "ids": [
+        "NOOK-051"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 309,
+      "text": "Interrupt an export job mid-run and see uncertainty without a completion. ",
+      "to": "base",
+      "ids": [
+        "BASE-AUDIT-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 309,
+      "text": "App, agent and workflow actions inherit the linked grant/source/human-approval proof under NOOK-025/054/059/026.",
       "to": "clause",
       "ids": [
         "NOOK-051"

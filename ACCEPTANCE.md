@@ -26,10 +26,10 @@ Core · published · **partial** · Cites BASE-ROLE-001, BASE-ACCESS-002, BASE-A
 **Requirement.** Conversation scope is the fixed DM roster or current channel membership, including search, replay and outcome views. A workspace administrative role adds no DM participant.
 
 **Acceptance.**
-1. Through signed-in HTTP, SSR, search, replay and generated loaders, revoke or expire a session and remove a participant; every subsequent private read/write is refused, including a workspace admin attempting another person’s DM.
+1. Through signed-in HTTP, SSR, search, replay and generated loaders, remove a conversation participant; subsequent reads and writes to that conversation are refused, including a workspace admin attempting another person’s DM.
 
 **Evidence.** `src/platform/request.server.ts`; `src/platform/storage/context.ts`; `tests/operator-security.mjs`; `tests/storage-guards.mjs`
-**Gap.** Carried-done audit has no cited asserting line for Point 1: HTTP refusal after session revoke, SSR refusal after session revoke, search refusal after session revoke, replay refusal after session revoke, generated-loader refusal after session revoke, session-expiry private-read refusal, session-expiry private-write refusal, participant-removal private-read refusal, participant-removal private-write refusal, unrelated-admin DM refusal. Existing evidence supplies workflows or helper calls, but this audit establishes no complete point from a cited assertion.
+**Gap.** Carried-done audit has no cited asserting line for Point 1: participant-removal private-read and private-write refusal through HTTP, SSR, search, replay and generated loaders, and unrelated-admin DM refusal. Existing evidence supplies workflows or helper calls, but this audit establishes no complete point from a cited assertion.
 
 #### NOOK-002 — Atomic messages, retries and replay (C2)
 
@@ -101,14 +101,14 @@ Core · published · **partial** · Cites BASE-DATA-001 · Rules D-1
 
 Core · published · **partial** · Cites BASE-INPUT-002, BASE-INPUT-001, BASE-SECRET-001, BASE-ACCESS-002, BASE-AGENT-005 · Rules D-1
 
-**Requirement.** Conversation text and imported or model-supplied content have no ambient authority to start a provider action. Authorized app, specialist and meeting effects use their scoped doors; the company's policy decides an agent call's computed classes. Link previews use NOOK-068's bounded service. Legacy credentials are offline recovery inputs only.
+**Requirement.** Conversation text and imported or model-supplied content have no ambient authority to start a provider action. Authorized app, specialist and meeting effects use their scoped doors; the company's policy decides an agent call's computed classes. Link previews use NOOK-068's bounded service. Legacy credentials are offline recovery inputs only. Local Nook development binds only to loopback; production uses HTTPS and excludes dev admission.
 
 **Acceptance.**
-1. Post active markup and malformed/oversized bodies through public APIs; markup stays inert and invalid input fails without writes.
-2. Cross-origin mutations, foreign sessions and unsafe local origins fail; production output excludes dev admission.
+1. Post conversation, imported and model-supplied content requesting code, client-side or credentialed fetches or provider effects; no ambient conversation authority starts them outside the scoped app, specialist and meeting doors.
+2. Cross-origin mutations and unsafe local origins fail; production output excludes dev admission.
 
 **Evidence.** `src/platform/operator-auth-runtime.mjs`; `src/platform/request.server.ts`; `src/chat/MessageRow.tsx`; `tests/team-security.test.mjs`; `tests/operator-security.mjs`
-**Gap.** Carried-done audit has no cited asserting line for Point 1: active markup inert, malformed body refused, oversized body refused, invalid body commits no writes. Point 2: cross-origin mutation refused, foreign session refused, unsafe local origin refused, production has no dev admission. Existing evidence supplies workflows or helper calls, but this audit establishes no complete point from a cited assertion.
+**Gap.** Carried-done audit has no cited asserting line for Point 1: conversation/import/model content cannot use ambient authority for code, client-side or credentialed fetches or provider effects outside scoped doors. Point 2: cross-origin mutation refused, unsafe local origin refused, production has no dev admission. Existing evidence supplies workflows or helper calls, but this audit establishes no complete point from a cited assertion.
 
 #### NOOK-008 — Evidence limits (C8)
 
@@ -716,7 +716,7 @@ Core · target · **missing** · Cites BASE-SIGNIN-001, BASE-ROLE-001 · Rules D
 **Requirement.** Map standards-provider groups and identities to Nook roles and channel grants without granting DMs. Preview collisions and external identities; just-in-time admission retains invitation, domain and organization policy. Offboarding ends Nook app/specialist grants and device access while retained work keeps its custody. Support Okta, Microsoft Entra ID and Google Workspace, with verified domains, provider MFA, key rotation and audited owner recovery. Native clients use the system authentication browser with PKCE under NOOK-074.
 
 **Acceptance.**
-1. Use run-auth as the standards provider for SAML and OIDC, enforce Nook SSO, rotate signing keys and reject wrong audience/issuer/replayed/expired assertions.
+1. Enforce Nook SSO and rotate provider signing keys while preserving explicit group-to-role and channel mapping, invitation/domain policy and the absence of any DM grant.
 2. SCIM-create a group/member, map one channel, suspend/delete and replay the event; every client and grant loses access without deleting preserved evidence.
 3. Exercise audited owner recovery without a blanket bypass.
 
@@ -977,8 +977,8 @@ Core · target · **partial** · From NOOK-050 · Cites BASE-INSTALL-001, BASE-O
 **Requirement.** Nook retains its private conversation identity mapping, private file custody, signed owner claim and editor authority across install and recovery. Owners choose the data location for D1/R2 at installation (US by default; EU or another platform-enforced jurisdiction where available), shown by setup and doctor with every subprocessor's region disclosed. Setup, doctor and `/docs` publish the subprocessor list: Cloudflare (Workers, D1, R2, Durable Objects), the configured mail provider, LiveKit Cloud or Twilio where media is configured, Apple APNs/PushKit, Google FCM, the browser push services and the publisher-operated Nook Push Gateway (NOOK-078, NOOK-133), each with its region, what it sees, its price and its terms, and owner-credential mode removes the gateway from that list; changing it is a documented export/restore migration.
 
 **Acceptance.**
-1. Follow README installation, first-run setup and invited sign-in; upgrade existing data, run doctor, export/reset/recover and use the configured hosted owner claim.
-2. Check invalid config and missing secrets fail closed, operator disk custody is disclosed and no private value reaches logs/builds.
+1. Follow README installation, first-run setup and invited sign-in with the configured hosted owner claim; upgrade, run doctor, export/reset/recover and inspect Nook’s conversation identity mapping, private file custody and erasure journal.
+2. Inspect the disclosure of operator disk custody for Nook’s private conversations and files.
 3. Install with an explicit data jurisdiction and confirm setup and doctor show it.
 4. Open the subprocessor list in `/docs` and doctor: it names the NOOK-078, NOOK-133 Nook Push Gateway with its region, what it sees, availability objective, price and terms, and the reference estimate shows the gateway's price as its own line; switch to owner-credential mode and see the gateway leave the list and the developer account fees appear.
 
@@ -1002,16 +1002,15 @@ Core · target · **partial** · From NOOK-050 · Cites BASE-INSTALL-001, BASE-O
 
 Core · target · **partial** · Cites BASE-AUDIT-001, BASE-AGENT-009 · Rules D-1
 
-**Requirement.** Nook's authority trail joins sign-in/session, invitations, roles, membership, app and specialist grants, workflow runs, exports, holds, policy and erasure events to their conversation scope and source version. Owners/admins see the trail; members and guests do not. Direct-conversation events disclose only a direct-conversation label and counts; private-channel labels match channel action history, with no copied bodies or credentials. Token labels and notification-app approvals identify their sources. Recorded creation/preparation times and explicitly labeled migration-observation times are never invented transition times. Admin override and posting-permission changes join the same log. An agent's action records its computed classes and the company's policy decision; an approval link exists when that policy called for one. [Audit source mapping](docs/contract/mechanism.md#nook-051) defines the record fields. Workflow, app and specialist actions link their source and grant, with an approval record only when the company’s policy called for one.
+**Requirement.** Nook's authority trail joins sign-in/session, invitations, roles, membership, app and specialist grants, workflow runs, exports, holds, policy and erasure events to their conversation scope and source version. Owners/admins see the trail; members and guests do not. Direct-conversation events disclose only a direct-conversation label and counts; private-channel labels match channel action history, with no copied bodies or credentials. Token labels and notification-app approvals identify their sources. Recorded creation/preparation times and explicitly labeled migration-observation times are never invented transition times. Admin override and posting-permission changes join the same log. [Audit source mapping](docs/contract/mechanism.md#nook-051) defines the record fields. Workflow, app and specialist actions link their source and grant, with an approval record only when the company’s policy called for one.
 
 **Acceptance.**
 1. Exercise membership revocation, export, erasure, an admin-override post and a posting-permission change, then filter and export CSV/JSON through owner/admin doors.
 2. Deny members, guests and an erased actor; anonymize attribution and retain the action facts through archive restore.
-3. Interrupt an export job mid-run and see uncertainty without a completion.
-4. NOOK-084 inherits: member digest-schedule enable/disable writes body-free `digest.enable` / `digest.disable` rows in the same batch.
+3. NOOK-084 inherits: member digest-schedule enable/disable writes body-free `digest.enable` / `digest.disable` rows in the same batch.
 
 **Evidence.** `migrations/0071_admin_audit.sql`; `src/audit/`; `src/team/erasure/graph.ts`; `src/exit/catalog.ts`; `tests/audit-runtime.mjs`; `tests/audit-journey.mjs`; `tests/audit-browser.mjs`; `tests/digests.mjs`
-**Gap.** Carried-done audit has no cited asserting line for Point 1: membership action in filtered audit, export action in audit, erasure action in audit, admin override in audit, owner CSV export, admin JSON export. Point 2: member denial, guest denial, erased-actor denial, action facts survive archive restore. Point 3: interrupted export uncertain, no false completion. Point 4: digest-enable event, digest-disable event, body-free digest audit, same-batch digest audit. Cited assertions establish posting-permission action in audit, anonymized attribution.
+**Gap.** Carried-done audit has no cited asserting line for Point 1: membership action in filtered audit, export action in audit, erasure action in audit, admin override in audit, owner CSV export, admin JSON export. Point 2: member denial, guest denial, erased-actor denial, action facts survive archive restore. Point 3: digest-enable event, digest-disable event, body-free digest audit, same-batch digest audit. Cited assertions establish posting-permission action in audit, anonymized attribution.
 
 #### NOOK-052 — Accessible, responsive daily use
 

@@ -6,13 +6,13 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 
 | Clause | Point | Outcome | Asserting test | Result |
 | --- | --- | --- | --- | --- |
-| NOOK-001 | 1 | HTTP refusal after session revoke | none | none |
-| NOOK-001 | 1 | SSR refusal after session revoke | none | none |
-| NOOK-001 | 1 | search refusal after session revoke | none | none |
-| NOOK-001 | 1 | replay refusal after session revoke | none | none |
-| NOOK-001 | 1 | generated-loader refusal after session revoke | none | none |
-| NOOK-001 | 1 | session-expiry private-read refusal | none | none |
-| NOOK-001 | 1 | session-expiry private-write refusal | none | none |
+| NOOK-001 | old 1 | HTTP refusal after session revoke (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-001 | old 1 | SSR refusal after session revoke (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-001 | old 1 | search refusal after session revoke (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-001 | old 1 | replay refusal after session revoke (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-001 | old 1 | generated-loader refusal after session revoke (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-001 | old 1 | session-expiry private-read refusal (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-001 | old 1 | session-expiry private-write refusal (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
 | NOOK-001 | 1 | participant-removal private-read refusal | none | none |
 | NOOK-001 | 1 | participant-removal private-write refusal | none | none |
 | NOOK-001 | 1 | unrelated-admin DM refusal | none | none |
@@ -62,12 +62,12 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-006 | 2 | invalid graph refused | none | none |
 | NOOK-006 | 2 | old delivery not revived | none | none |
 | NOOK-006 | 2 | old session not revived | `tests/recovery.test.mjs:32` | asserted |
-| NOOK-007 | 1 | active markup inert | none | none |
-| NOOK-007 | 1 | malformed body refused | none | none |
-| NOOK-007 | 1 | oversized body refused | none | none |
-| NOOK-007 | 1 | invalid body commits no writes | none | none |
+| NOOK-007 | old 1 | active markup inert (shared duty BASE-INPUT-001/002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-007 | old 1 | malformed body refused (shared duty BASE-INPUT-001/002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-007 | old 1 | oversized body refused (shared duty BASE-INPUT-001/002) | `CONTRACT.md` Shared duties | moved |
+| NOOK-007 | old 1 | invalid body commits no writes (shared duty BASE-INPUT-001/002) | `CONTRACT.md` Shared duties | moved |
 | NOOK-007 | 2 | cross-origin mutation refused | none | none |
-| NOOK-007 | 2 | foreign session refused | none | none |
+| NOOK-007 | old 2 | foreign session refused (shared duty BASE-ACCESS-002) | `CONTRACT.md` Shared duties | moved |
 | NOOK-007 | 2 | unsafe local origin refused | none | none |
 | NOOK-007 | 2 | production has no dev admission | none | none |
 | NOOK-009 | 1 | stopped local command restore | none | none |
@@ -396,12 +396,12 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-051 | 2 | erased-actor denial | none | none |
 | NOOK-051 | 2 | anonymized attribution | `tests/audit-journey.mjs:35` | asserted |
 | NOOK-051 | 2 | action facts survive archive restore | none | none |
-| NOOK-051 | 3 | interrupted export uncertain | none | none |
-| NOOK-051 | 3 | no false completion | none | none |
-| NOOK-051 | 4 | digest-enable event | none | none |
-| NOOK-051 | 4 | digest-disable event | none | none |
-| NOOK-051 | 4 | body-free digest audit | none | none |
-| NOOK-051 | 4 | same-batch digest audit | none | none |
+| NOOK-051 | old 3 | interrupted export uncertain (shared duty BASE-AUDIT-001) | `CONTRACT.md` Shared duties | moved |
+| NOOK-051 | old 3 | no false completion (shared duty BASE-AUDIT-001) | `CONTRACT.md` Shared duties | moved |
+| NOOK-051 | 3 | digest-enable event | none | none |
+| NOOK-051 | 3 | digest-disable event | none | none |
+| NOOK-051 | 3 | body-free digest audit | none | none |
+| NOOK-051 | 3 | same-batch digest audit | none | none |
 | NOOK-053 | 1 | private note created | `tests/notes-journey.mjs:22` | asserted |
 | NOOK-053 | 1 | checklist revised with history | `tests/notes-journey.mjs:24` | asserted |
 | NOOK-053 | 1 | provider link stays separate | none | none |
@@ -609,3 +609,5 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-135 | 1 | draft survives navigation and restart | none | none |
 | NOOK-136 | 1 | channel and DM sections organized | none | none |
 | NOOK-136 | 1 | work acceptance unchanged | none | none |
+| NOOK-007 | 1 | no ambient code or client-side/credentialed fetch from conversation/import/model content | none | none |
+| NOOK-007 | 1 | provider effects use the scoped app/specialist/meeting door | none | none |
