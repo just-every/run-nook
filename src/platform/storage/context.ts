@@ -10,8 +10,9 @@ export const authority=`(SELECT authority FROM nook_storage WHERE id=1)='normali
 export const authFence=`EXISTS(SELECT 1 FROM oa_sessions s JOIN oa_operators o ON o.id=s.operator_id WHERE s.id=? AND s.operator_id=? AND s.operator_version=? AND o.version=s.operator_version AND o.status='active' AND ${productAccess('o.id')} AND s.revoked_at IS NULL AND s.expires_at>CAST(unixepoch('subsec')*1000 AS INTEGER))`
 // Unpublished imported history stays hidden, except a source import from the owner applying it.
 export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=? AND mf.user=? AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-' AND substr(j.id,1,6)<>'gchat-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
-export type AgentIdentity={kind:'agent';operator:Operator;agentId:string;consent?:string;policy:string|null;localRevision:number}
+export type AgentIdentity={kind:'agent';operator:Operator;agentId:string;consent?:string;policy:string|null;localRevision:number;operationId:string;label:string;approvers:readonly {id:string;name:string}[]}
 export class Context {
+ private personEvents:{type:string;uri:string}[]=[]
  constructor(readonly env:StorageBindings,private readonly identity:Session|AgentIdentity){}
  get session():Session{if(this.identity.kind==='agent')fail(403,'A native person session is required');return this.identity as Session}
  get operator(){return this.identity.operator}
@@ -37,15 +38,22 @@ export class Context {
  }
  async one<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T|null>{return (await this.rows<T>(sql,values,conversation))[0]??null}
  async batch(statements:D1PreparedStatement[],conversation?:string,condition='1',values:any[]=[]){
-  const key=crypto.randomUUID();
+  const key=crypto.randomUUID(),events=this.personEvents.splice(0);
   try{await this.db.batch([this.sql('INSERT OR REPLACE INTO nook_audit_context VALUES(1,?)',this.uid),this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${this.fence}${conversation?' AND '+memberFence:''} AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,...(conversation?[conversation,this.uid]:[]),...values),...statements,this.sql('DELETE FROM nook_guard WHERE id=?',key),this.sql('DELETE FROM nook_audit_context WHERE id=1')])}catch(error){await this.check(conversation);if(String(error).includes('CHECK constraint')||String(error).includes('UNIQUE constraint'))fail(409,'Concurrent change or invalid command; reload and retry the same intent');throw error}
+  if(events.length){const {emitPersonChanges}=await import('../../agent-door/person-events');await emitPersonChanges(this.env,this.operator,events)}
  }
  async writable(conversation:string){if(!await this.one(`SELECT 1 WHERE ${channelWritable('?')}`,[conversation],conversation))fail(409,'Conversation is read-only; open its private channel or restore it before posting')}
  async writeBatch(statements:D1PreparedStatement[],conversation:string,condition='1',values:any[]=[]){
   await this.writable(conversation)
   try{await this.batch(statements,conversation,`${channelWritable('?')} AND (${condition})`,[conversation,...values])}catch(error){await this.writable(conversation);throw error}
  }
- event(conversation:string,kind:string,object:string){return [this.sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',conversation),this.sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,this.uid,conversation)]}
+ event(conversation:string,kind:string,object:string){
+  const actor=this.identity
+  const uriKind={message:'messages',outcome:'outcomes',note:'notes'}[kind]
+  const prepared=actor.kind==='agent'?[this.sql('INSERT OR IGNORE INTO nook_audit VALUES(?,?,?,?,?,?,?,?,?,?)',`${object}:agent:${actor.operationId}`,this.uid,'agent',Date.now(),`agent.${kind}`,conversation,1,actor.label+(actor.approvers.length?`; approved by ${actor.approvers.map(p=>p.name).join(', ')}`:''),'confirmed',1)]:[]
+  if(actor.kind!=='agent'&&uriKind)this.personEvents.push({type:`nook.${kind}.changed`,uri:`nook://${uriKind}/${encodeURIComponent(object)}`})
+  return [this.sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',conversation),this.sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,this.uid,conversation),...prepared]
+ }
  async hint(){await this.env.CHAT_HUB.get(this.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/hint',{method:'POST'}).catch(()=>undefined)}
 }
 export async function context(bindings:StorageBindings,headers:Headers,identity?:Promise<Session|null>){const env={...bindings,...authBindings(bindings)};const session=await(identity??operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers})))??fail(401,'Sign in required');const c=new Context(env,session);await c.check();await initializeDefaultChannels(c);return c}

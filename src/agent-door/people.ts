@@ -26,6 +26,6 @@ export function nookPeople(env:StorageBindings):PeopleAdapter{
    const row=await env.DB.prepare("SELECT business_id,business_role FROM bs_team WHERE operator_id=? AND state<>'conflict' AND business_id IS NOT NULL").bind(person.id).first<{business_id:string;business_role:string}>()
    return row?{id:row.business_id,role:row.business_role==='admin'?'editor':null}:null
   },
-  businessRole:person=>person.role==='owner'?'owner':person.role==='admin'?'editor':null,
+  businessRole:person=>person.role==='owner'?'owner':null,
  }
 }

@@ -1,11 +1,10 @@
 # Agent access
 
-Nook's shared agent door is an adoption candidate. Its conformance journey is
-blocked on the verifier's native teammate invitation lifecycle and main's
-missing inherited Base event clause. The pinned shared door also replays retained
-mutation results before rechecking the native resource, so conversation revocation
-can leave a cached result readable. This candidate must remain unlanded; this is not a
-completed agent-surface or production-readiness claim.
+Nook's shared agent door is an adoption candidate. The native teammate invitation
+and post-revocation replay probes pass on the combined Base door. Normal
+conformance still requires the inherited Base clauses to land in Nook's contract.
+Business teammate reconciliation and durable queued admission remain adoption work;
+this candidate is not a completed agent-surface or production-readiness claim.
 
 An installation with signed Business settings binds the claimed owner's
 Business ID to the current native operator. A token email cannot choose an
@@ -18,6 +17,9 @@ The candidate registry supports reading permitted conversations and messages;
 posting and editing messages; channel membership and management; native decision
 and commitment proposals; notes and checklist proposals; reactions, thread
 follows, read markers, attention, saved items, pins and private workspace views.
+It also supports native anonymous polls, channel bookmarks, profiles, sidebar
+organization, per-conversation notification choices, quiet time, sent messages,
+file metadata lists and conversation replay.
 MCP discovery describes each tool's scope, clauses, schema and possible classes.
 No agent acceptance or completion is exposed as a person's agreement.
 
@@ -36,8 +38,9 @@ credentials.
 This candidate does not yet expose scheduled execution, forwarding, provider
 transcription, AI retrieval, invitation provisioning, credential changes,
 erasure, external connectors, calls or native device operations through the
-agent registry. Business teammate reconciliation, native agent-for-person
-attribution and person-UI event emission remain adoption work. Existing person,
+agent registry. Business teammate reconciliation remains adoption work. Agent message writes
+retain an agent-for-person label in the native audit and message reader. Native
+message, outcome and note changes emit person events through the shared door. Existing person,
 service, import and installation doors keep their native responsibilities.
 Provider spend caps are not enforced by the shared door; no spend guarantee is
 made. Normal verification must pass before adoption is considered ready.
