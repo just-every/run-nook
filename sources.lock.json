@@ -6637,7 +6637,7 @@
       "executable": false
     },
     "src/workspaces/device-list.ts": {
-      "sha256": "1353ddf1f0cdefff5cfd4409730bb83ec3d43816659f00501d4d87cd6dd5b5e1",
+      "sha256": "8f06390a09f5a83e4d4bccf989753dd5003573a8dce57f897a0fc93fd8074e6f",
       "executable": false
     },
     "src/workspaces/workspace-note.css": {
@@ -6753,7 +6753,7 @@
       "executable": false
     },
     "tests/channel-lifecycle.mjs": {
-      "sha256": "9da3c286bc876b7fc19053031c49dbf9ae1a8025a90c0e22e3f341e2ac031dcb",
+      "sha256": "8c2182090938336136aec50b73997f8f293581636bbf417b2fd7328f86a0caf4",
       "executable": false
     },
     "tests/cloudflare-account.mjs": {
@@ -7077,7 +7077,7 @@
       "executable": false
     },
     "tests/personal.mjs": {
-      "sha256": "b39cc32d3da6695dc08914dc0c77988ffd0d1b3a52ab65229be18d8de421623f",
+      "sha256": "43e87f9cabf1727d9577d90803f90582488b8355d27f4bf5943ae5b8c9689c8a",
       "executable": false
     },
     "tests/pilot-journey.mjs": {
@@ -7133,7 +7133,7 @@
       "executable": false
     },
     "tests/profiles.mjs": {
-      "sha256": "31b8643ea2179b55bb8cfd17cdc3645082b7926f6b025ce49465888c2bd563ba",
+      "sha256": "960503b96df26cfc61452c1823e6d852a59dbc497279f56dc442cf522b8f134d",
       "executable": false
     },
     "tests/push-clock.mjs": {
@@ -7141,7 +7141,7 @@
       "executable": false
     },
     "tests/push-journey.mjs": {
-      "sha256": "3a3cea6cc1135ad5d797a79369acb8eed224d76e86e0345db7b208a440a0a742",
+      "sha256": "8800c10626001a92d98f9071a802f5bdf788682ae8bb12cc1246a5dcc0988f05",
       "executable": false
     },
     "tests/push-service-worker.test.mjs": {
@@ -7269,7 +7269,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "38301c74c267fca24c5fcb243b7229fef6e8458a90d9cc8e400c917b8bf809a8",
+      "sha256": "c38614eda5f1aa6ea5538dd5cc46a637a4cd14232d8e83fba41e3aadddf7189a",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
@@ -7429,11 +7429,11 @@
       "executable": false
     },
     "tests/thread-delivery.mjs": {
-      "sha256": "dabad9ed3cda2d0c2b2c8db792e08734a7939f31e4c8ec3008cd13d6d39ae56d",
+      "sha256": "acd80b8ef073148e16486c4f8eb0c5bcf274ef913f834f014fb5649738365d41",
       "executable": false
     },
     "tests/threads.mjs": {
-      "sha256": "c04ec58c6a17f30efbcdaf1536a797ecda6ec7d877798926dc6b002f8775f2e1",
+      "sha256": "612641168395efb65625ac5db392e62c23e4e17818165ef7eb4a67982827dfe8",
       "executable": false
     },
     "tests/unreads-browser.mjs": {
@@ -7441,7 +7441,7 @@
       "executable": false
     },
     "tests/unreads.mjs": {
-      "sha256": "802a46b3807c530967920934a94a801a6af11c7e42bb4c4743b72a3f3cffce04",
+      "sha256": "735b6a2181bdabaf5029196ef420a6da89ffa982db0db6b058a42a78d3dd780c",
       "executable": false
     },
     "tests/worker-environment.mjs": {

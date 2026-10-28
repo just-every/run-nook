@@ -2,7 +2,7 @@ import {withRestoredArchive} from './archive-roundtrip.mjs'
 import assert from 'node:assert/strict'
 export async function personalJourney({owner,registered,post,get,request,check,restart,sql,validateArchive}){
  const member=await registered('PersonalSender'),outsider=await registered('PersonalOutside')
- await check('NOOK-032 first-sign-in defaults, member choices and dated vacation preserve notification ownership',async()=>{
+ await check('NOOK-101 [NOOK-032] first-sign-in defaults, member choices and dated vacation preserve notification ownership',async()=>{
   const defaults=(await get('/api/team/notification-defaults')).data,defaultChannels=(await get('/api/team/default-channels')).data;
   await get('/api/team/notification-defaults',member.cookie,403);
   const publicRoom=(await post('/api/conversations',{name:'synthetic-nook default alerts',kind:'channel',participants:[]})).data;

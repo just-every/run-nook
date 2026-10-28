@@ -80,7 +80,7 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
   await post('/api/personal/workspace',{conversation:c.id,section:'Customers',position:2},member.cookie)
   assert.equal((await get('/api/conversations',member.cookie)).data.find(i=>i.id===c.id).section,'Customers')
   assert.ok(!(await get('/api/personal/workspace')).data.sections.some(i=>i.conversation===c.id))
-  // Installation links now live on the device (NOOK-090 "Your workspaces"); the account no longer stores new ones.
+  // Installation links now live on the device (NOOK-092 "Your workspaces"); the account no longer stores new ones.
   await post('/api/personal/workspace',{origin:'https://work.example.com',label:'Acme workspace'},member.cookie,400)
   await restart()
   assert.deepEqual((await get('/api/personal/workspace',member.cookie)).data.installations,[])

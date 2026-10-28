@@ -8,7 +8,7 @@ export async function threadJourney({post,patch,get,request,owner,registered,che
  const prefs=async actor=>(await get(`/api/conversations/${room.id}/preferences`,actor.cookie)).data
  const source=async(actor,id)=>(await prefs(actor)).threadFollows.find(f=>f.message===id)?.source
  const list=async actor=>(await get('/api/threads',actor.cookie)).data.items
- await check('NOOK-070 one thread broadcast shares channel history, edit, delete and notification identity',async()=>{
+ await check('NOOK-117 one thread broadcast shares channel history, edit, delete and notification identity',async()=>{
   const root=await send(a,'synthetic-nook broadcast root');
   const payload={body:'synthetic-nook broadcast reply',parent:root.id,channelBroadcast:true,intent:crypto.randomUUID()};
   const broadcast=(await post(`/api/conversations/${room.id}/messages`,payload,b.cookie)).data;
@@ -55,7 +55,7 @@ export async function threadJourney({post,patch,get,request,owner,registered,che
   assert.equal((await get(`/api/conversations/${dm.id}/preferences`,b.cookie)).data.threadFollows.find(f=>f.message===dmRoot.id)?.source,'dm')
   assert.equal((await get(`/api/conversations/${dm.id}/preferences`,b.cookie)).data.threads.filter(id=>id===dmRoot.id).length,1)
  })
- await check('NOOK-032 web levels, all-thread replies, reset, quiet triage and current ACL',async()=>{
+ await check('NOOK-100 [NOOK-122, NOOK-032] web levels, all-thread replies, reset, quiet triage and current ACL',async()=>{
   const room=(await post('/api/conversations',{name:'Incident policy',kind:'private',participants:[b.user.id,c.user.id]},a.cookie)).data
   const path=`/api/conversations/${room.id}/notify`
   const send=async(body,parent=null,mentions=[]) => (await post(`/api/conversations/${room.id}/messages`,{body,parent,mentions,intent:crypto.randomUUID()},b.cookie)).data

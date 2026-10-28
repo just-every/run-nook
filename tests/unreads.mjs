@@ -31,7 +31,7 @@ export async function unreadsJourney({post,get,request,owner,member,outsider,che
   await post(`/api/conversations/${room.id}/members`,{user:member.user.id,remove:true})
   await get('/api/unreads?conversation='+room.id,member.cookie,403)
  })
- await check('NOOK-120 group DM conversion moves full history once and fences the fixed source',async()=>{
+ await check('NOOK-121 group DM conversion moves full history once and fences the fixed source',async()=>{
   const third=(await post('/api/conversations',{name:'Migration planning',kind:'dm',participants:[member.user.id,outsider.user.id]})).data
   const message=(await post(`/api/conversations/${third.id}/messages`,{body:'Migrate the three-person planning conversation without widening its audience.',intent:crypto.randomUUID()})).data
   const reply=(await post(`/api/conversations/${third.id}/messages`,{body:'Keep the discussion and the decision together.',parent:message.id,intent:crypto.randomUUID()},member.cookie)).data

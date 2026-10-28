@@ -6,7 +6,7 @@ import {installation,until} from './push/fixture.mjs'
 import {subscriber,packet} from './push/packet.mjs'
 
 // NOOK-072: real Worker/D1/alarms; only the push vendor is substituted.
-test('NOOK-072 thread counting, broadcast follows and device overrides through the product',async()=>{
+test('NOOK-072 [NOOK-122, NOOK-123] thread counting, broadcast follows and device overrides through the product',async()=>{
  const recipients=new Map(),packets=[];let key
  const app=await installation(async request=>{const sub=recipients.get(request.url);assert.ok(sub);packets.push({endpoint:request.url,value:await packet(request,sub,key)});return new Response(null,{status:201})},{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}})
  try{

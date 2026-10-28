@@ -34,7 +34,7 @@ export async function channelLifecycleJourney(h){
   const dm=(await post('/api/conversations',{name:'Fixed participants',kind:'dm',participants:[b.user.id]},a.cookie)).data
   await post(`/api/channels/${dm.id}/leave`,{version:1},a.cookie,403)
  })
- await check('NOOK-060 versioned channel details, archive/restore and archived write refusal',async()=>{
+ await check('NOOK-109 versioned channel details, archive/restore and archived write refusal',async()=>{
   const before=await details(publicRoom.id)
   await patch(`/api/channels/${publicRoom.id}`,{version:before.version,name:'Launch readiness',topic:'Support handoff and rollout windows',description:'Synthetic channel description'},a.cookie)
   await patch(`/api/channels/${publicRoom.id}`,{version:before.version,topic:'Stale overwrite'},a.cookie,409)
@@ -174,7 +174,7 @@ async function workspaceChannelPolicyJourney(h,manager,describedRoom){
 
 async function publicChannelJourney(h,manager,member,outsider){
  const {post,patch,get,sql,check}=h
- await check('NOOK-060 private channel conversion confirms current history and preserves custody',async()=>{
+ await check('NOOK-109 private channel conversion confirms current history and preserves custody',async()=>{
   const room=(await post('/api/conversations',{name:'Synthetic public conversion',kind:'private',participants:[member.user.id]},manager.cookie)).data,path=`/api/channels/${room.id}`
   const send=async(body,parent,attachments=[])=>(await post(`/api/conversations/${room.id}/messages`,{body,parent,attachments,intent:crypto.randomUUID()},manager.cookie)).data
   const file=(await post(`/api/conversations/${room.id}/attachments`,{name:'synthetic-nook-history.txt',mime:'text/plain',data:Buffer.from('Synthetic history').toString('base64'),intent:crypto.randomUUID()},manager.cookie)).data
