@@ -1302,10 +1302,19 @@
     {
       "file": "CONTRACT.md",
       "line": 261,
-      "text": "Encrypt transport and stored credentials, disclose hosting/subprocessors and AI retention/training policy, and keep customer content out of model training unless explicitly opted in by the organization.",
-      "to": "base",
+      "text": "Encrypt transport and stored credentials, ",
+      "to": "clause",
       "ids": [
-        "BASE-SECRET-001"
+        "NOOK-040"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 261,
+      "text": "disclose hosting/subprocessors and AI retention/training policy, and keep customer content out of model training unless explicitly opted in by the organization.",
+      "to": "clause",
+      "ids": [
+        "NOOK-040"
       ]
     },
     {
