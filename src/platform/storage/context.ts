@@ -4,20 +4,23 @@ import {channelWritable} from '../../team/channel-policy'
 import {initializeDefaultChannels} from '../../team/default-channels.server'
 import {fail} from '../../family/team-chat/domain'
 import {operatorAuth,authBindings,type Bindings as AuthBindings} from '../operator-auth.server'
-import type {Session} from '../../base/modules/operator-auth/index.mjs'
+import type {Session, Operator} from '../../base/modules/operator-auth/index.mjs'
 export type StorageBindings=AuthBindings & {FILES:R2Bucket;CHAT_HUB:DurableObjectNamespace;ASSETS?:Fetcher;RER_DEPLOY_SOURCE?:string;RER_DEPLOY_FINGERPRINT?:string;RER_VERSION?:{id:string}}
 export const authority=`(SELECT authority FROM nook_storage WHERE id=1)='normalized'`
 export const authFence=`EXISTS(SELECT 1 FROM oa_sessions s JOIN oa_operators o ON o.id=s.operator_id WHERE s.id=? AND s.operator_id=? AND s.operator_version=? AND o.version=s.operator_version AND o.status='active' AND ${productAccess('o.id')} AND s.revoked_at IS NULL AND s.expires_at>CAST(unixepoch('subsec')*1000 AS INTEGER))`
 // Unpublished imported history stays hidden, except a source import from the owner applying it.
 export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=? AND mf.user=? AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-' AND substr(j.id,1,6)<>'gchat-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
+export type AgentIdentity={kind:'agent';operator:Operator;agentId:string;consent?:string;policy:string|null;localRevision:number}
 export class Context {
- constructor(readonly env:StorageBindings,readonly session:Session){}
+ constructor(readonly env:StorageBindings,private readonly identity:Session|AgentIdentity){}
+ get session():Session{if(this.identity.kind==='agent')fail(403,'A native person session is required');return this.identity as Session}
+ get operator(){return this.identity.operator}
  get memberBroadcasts(){return true}
  get db(){return this.env.DB}
- get uid(){return this.session.operatorId}
- get credentials(){return [this.session.id,this.uid,this.session.operator.version]}
+ get uid(){return this.identity.kind==='agent'?this.identity.operator.id:(this.identity as Session).operatorId}
+ get credentials():any[]{return this.identity.kind==='agent'?[this.uid,this.operator.version,this.identity.agentId,this.identity.policy,this.identity.localRevision,this.identity.consent??null,this.identity.consent??null]:[this.session.id,this.uid,this.operator.version]}
  // The caller's authority, bound to `credentials`: a live session here, an integration token in IntegrationContext.
- get fence(){return authFence}
+ get fence(){return this.identity.kind==='agent'?`EXISTS(SELECT 1 FROM oa_operators o WHERE o.id=? AND o.version=? AND o.status='active' AND ${productAccess('o.id')}) AND EXISTS(SELECT 1 FROM agent_door_agents a WHERE a.id=? AND a.revoked=0) AND EXISTS(SELECT 1 FROM agent_door_state p WHERE p.id=1 AND p.envelope IS ? AND p.local_revision=? AND p.local_paused=0 AND COALESCE(json_extract(p.envelope,'$.paused'),0)=0 AND (? IS NULL OR NOT EXISTS(SELECT 1 FROM json_each(p.envelope,'$.revoked.consents') WHERE value=?)))`:authFence}
  sql(sql:string,...values:any[]){return this.db.prepare(sql).bind(...values)}
  async check(conversation?:string){const row=await this.sql(`SELECT 1 AS ok WHERE ${authority} AND ${this.fence}${conversation?' AND '+memberFence:''}`,...this.credentials,...(conversation?[conversation,this.uid]:[])).first();if(!row){const state=await this.db.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>();if(state?.authority!=='normalized')fail(503,'Offline normalized storage conversion required');const active=await this.sql(`SELECT 1 WHERE ${this.fence}`,...this.credentials).first();fail(active?403:401,active?'Conversation access denied':'Sign in required')}}
  async rows<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T[]>{

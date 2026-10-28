@@ -112,6 +112,11 @@
           "slug": "directories",
           "source": "docs/directories.md",
           "label": "Finding people and channels"
+        },
+        {
+          "slug": "agents",
+          "source": "docs/agents.md",
+          "label": "Agent access"
         }
       ]
     }
