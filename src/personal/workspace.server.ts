@@ -2,7 +2,7 @@ import type {Context} from '../platform/storage/context'
 import {fail} from '../family/team-chat/domain'
 import {allowedGrant} from '../team/access'
 // Installation links saved on the account by earlier versions are read only:
-// the client carries them into its device-kept "Your workspaces" list (NOOK-092).
+// the client carries them into its device-kept "Your workspaces" list (NOOK-137).
 export async function personalWorkspace(c:Context){
  const [sections,installations]=await Promise.all([
   c.rows(`SELECT p.conversation,p.section,p.position FROM nook_personal_conversations p JOIN nook_members m ON m.conversation=p.conversation AND m.user=p.user WHERE p.user=? AND ${allowedGrant('m.user','m.conversation')} ORDER BY p.position,p.conversation`,[c.uid]),

@@ -62,6 +62,6 @@ export async function retentionClock(c){
   assert.equal((await db.prepare('SELECT count(*) AS n FROM nook_push_delivery_records WHERE device=?').bind(phone.id).first()).n,0,'all 105 source-linked storage records removed');
   c.removedRecords.push(...caused);
   for(const witness of c.holdWitnesses)assert.deepEqual(after.find(r=>r.id===witness.id).holds,witness.holds,'quiet and snooze history survives pruning and unrelated actor erasure');
-  c.t.diagnostic(`NOOK-073 retention: 105 held phone alerts canceled by a read; view 100, export ${exported}; after a 31-day push-run clock the queue and view drop them and the export keeps all with reasons.`);
+  c.t.diagnostic(`NOOK-124 retention: 105 held phone alerts canceled by a read; view 100, export ${exported}; after a 31-day push-run clock the queue and view drop them and the export keeps all with reasons.`);
  }finally{await rm(temp,{recursive:true,force:true})}
 }

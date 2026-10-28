@@ -30,11 +30,11 @@
     },
     "NOOK-017": {
       "change": "changed",
-      "summary": "Updated Composition and personal workspace; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Composition and personal workspace; current acceptance and evidence limits are in NOOK-017, NOOK-090, NOOK-091, NOOK-092, NOOK-134, NOOK-135, NOOK-136, NOOK-137 in CONTRACT.md."
     },
     "NOOK-021": {
       "change": "changed",
-      "summary": "Updated Native clients and dependable device catch-up; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Native clients and dependable device catch-up; current acceptance and evidence limits are in NOOK-021, NOOK-096, NOOK-097 in CONTRACT.md."
     },
     "NOOK-022": {
       "change": "changed",
@@ -50,7 +50,7 @@
     },
     "NOOK-025": {
       "change": "changed",
-      "summary": "Updated App and bot platform; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated App and bot platform; current acceptance and evidence limits are in NOOK-025, NOOK-098, NOOK-099 in CONTRACT.md."
     },
     "NOOK-026": {
       "change": "changed",
@@ -70,7 +70,7 @@
     },
     "NOOK-032": {
       "change": "changed",
-      "summary": "Updated Recurring quiet schedules and notification policy; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Recurring quiet schedules and notification policy; current acceptance and evidence limits are in NOOK-032, NOOK-100, NOOK-101 in CONTRACT.md."
     },
     "NOOK-035": {
       "change": "changed",
@@ -94,19 +94,19 @@
     },
     "NOOK-060": {
       "change": "changed",
-      "summary": "Updated Organization policy and channel lifecycle; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Organization policy and channel lifecycle; current acceptance and evidence limits are in NOOK-060, NOOK-109 in CONTRACT.md."
     },
     "NOOK-061": {
       "change": "changed",
-      "summary": "Updated Any office file, large uploads, previews and malware scanning; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Any office file, large uploads, previews and malware scanning; current acceptance and evidence limits are in NOOK-061, NOOK-110 in CONTRACT.md."
     },
     "NOOK-062": {
       "change": "changed",
-      "summary": "Updated Notification previews and actionable replies; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Notification previews and actionable replies; current acceptance and evidence limits are in NOOK-062, NOOK-111 in CONTRACT.md."
     },
     "NOOK-063": {
       "change": "changed",
-      "summary": "Updated Slack-compatible webhooks and Web API; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Slack-compatible webhooks and Web API; current acceptance and evidence limits are in NOOK-063, NOOK-112, NOOK-113, NOOK-114 in CONTRACT.md."
     },
     "NOOK-065": {
       "change": "changed",
@@ -122,27 +122,27 @@
     },
     "NOOK-069": {
       "change": "changed",
-      "summary": "Updated Two-factor authentication without SSO; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Two-factor authentication without SSO; current acceptance and evidence limits are in NOOK-069, NOOK-115 in CONTRACT.md."
     },
     "NOOK-070": {
       "change": "changed",
-      "summary": "Updated Polls, GIFs, thread broadcast, bookmarks and translation; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Polls, GIFs, thread broadcast, bookmarks and translation; current acceptance and evidence limits are in NOOK-070, NOOK-116, NOOK-117, NOOK-118, NOOK-119 in CONTRACT.md."
     },
     "NOOK-072": {
       "change": "changed",
-      "summary": "Updated Automatic thread following and channel-wide thread replies; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Automatic thread following and channel-wide thread replies; current acceptance and evidence limits are in NOOK-072, NOOK-122, NOOK-123 in CONTRACT.md."
     },
     "NOOK-073": {
       "change": "changed",
-      "summary": "Updated Active-elsewhere device routing; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Active-elsewhere device routing; current acceptance and evidence limits are in NOOK-073, NOOK-124 in CONTRACT.md."
     },
     "NOOK-074": {
       "change": "changed",
-      "summary": "Updated Native sign-in and finding the installation; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Native sign-in and finding the installation; current acceptance and evidence limits are in NOOK-074, NOOK-125, NOOK-126, NOOK-127, NOOK-128 in CONTRACT.md."
     },
     "NOOK-075": {
       "change": "changed",
-      "summary": "Updated External participants without a Nook installation; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated External participants without a Nook installation; current acceptance and evidence limits are in NOOK-075, NOOK-129 in CONTRACT.md."
     },
     "NOOK-077": {
       "change": "changed",
@@ -150,7 +150,7 @@
     },
     "NOOK-078": {
       "change": "changed",
-      "summary": "Updated Push from owned installations to the store apps; current acceptance and evidence limits remain in CONTRACT.md."
+      "summary": "Updated Push from owned installations to the store apps; current acceptance and evidence limits are in NOOK-078, NOOK-131, NOOK-132, NOOK-133 in CONTRACT.md."
     },
     "NOOK-079": {
       "change": "added",
