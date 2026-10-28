@@ -13,7 +13,7 @@ export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversa
 export type AgentIdentity={kind:'agent';operator:Operator;agentId:string;consent?:string;policy:string|null;localRevision:number;operationId:string;label:string;approvers:readonly {id:string;name:string}[]}
 export class Context {
  private personEvents:{type:string;uri:string}[]=[]
- constructor(readonly env:StorageBindings,private readonly identity:Session|AgentIdentity){}
+ constructor(readonly env:StorageBindings,private readonly identity:Session|AgentIdentity,private readonly onPersonChange?:(events:{type:string;uri:string}[])=>Promise<void>){}
  get session():Session{if(this.identity.kind==='agent')fail(403,'A native person session is required');return this.identity as Session}
  get operator(){return this.identity.operator}
  get memberBroadcasts(){return true}
@@ -40,7 +40,7 @@ export class Context {
  async batch(statements:D1PreparedStatement[],conversation?:string,condition='1',values:any[]=[]){
   const key=crypto.randomUUID(),events=this.personEvents.splice(0);
   try{await this.db.batch([this.sql('INSERT OR REPLACE INTO nook_audit_context VALUES(1,?)',this.uid),this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${this.fence}${conversation?' AND '+memberFence:''} AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,...(conversation?[conversation,this.uid]:[]),...values),...statements,this.sql('DELETE FROM nook_guard WHERE id=?',key),this.sql('DELETE FROM nook_audit_context WHERE id=1')])}catch(error){await this.check(conversation);if(String(error).includes('CHECK constraint')||String(error).includes('UNIQUE constraint'))fail(409,'Concurrent change or invalid command; reload and retry the same intent');throw error}
-  if(events.length){const {emitPersonChanges}=await import('../../agent-door/person-events');await emitPersonChanges(this.env,this.operator,events)}
+  if(events.length&&this.onPersonChange)await this.onPersonChange(events)
  }
  async writable(conversation:string){if(!await this.one(`SELECT 1 WHERE ${channelWritable('?')}`,[conversation],conversation))fail(409,'Conversation is read-only; open its private channel or restore it before posting')}
  async writeBatch(statements:D1PreparedStatement[],conversation:string,condition='1',values:any[]=[]){
@@ -56,6 +56,6 @@ export class Context {
  }
  async hint(){await this.env.CHAT_HUB.get(this.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/hint',{method:'POST'}).catch(()=>undefined)}
 }
-export async function context(bindings:StorageBindings,headers:Headers,identity?:Promise<Session|null>){const env={...bindings,...authBindings(bindings)};const session=await(identity??operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers})))??fail(401,'Sign in required');const c=new Context(env,session);await c.check();await initializeDefaultChannels(c);return c}
+export async function context(bindings:StorageBindings,headers:Headers,identity?:Promise<Session|null>){const env={...bindings,...authBindings(bindings)};const session=await(identity??operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers})))??fail(401,'Sign in required');const c=new Context(env,session,async events=>{const {emitPersonChanges}=await import('../../agent-door/person-events');await emitPersonChanges(env,session.operator,events)});await c.check();await initializeDefaultChannels(c);return c}
 export type MessageWriter=Pick<Context,'uid'|'sql'|'event'>
 export function indexMessage(c:Pick<Context,'sql'>,id:string,conversation:string,body:string,source='native'){return c.sql('INSERT INTO nook_search(message,conversation,source,scope,body_lower) VALUES(?,?,?,?,?)',id,conversation,source,'|'+conversation+'|',body.toLowerCase())}
