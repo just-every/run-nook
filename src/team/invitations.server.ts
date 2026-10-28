@@ -6,8 +6,8 @@ import {Context} from '../platform/storage/context'
 import {normalizeEmail} from '../base/modules/operator-auth/policy.mjs'
 import {fullMember} from './access'
 const manager=`EXISTS(SELECT 1 FROM oa_operators WHERE id=? AND status='active' AND role IN ('owner','admin'))`
-function requireManager(c:Context,role='member'){if(c.session.operator.role!=='owner'&&(c.session.operator.role!=='admin'||role!=='member'))fail(403,'Team management is restricted to an authorized owner or admin')}
-async function targetAuthority(c:Context,user:string){requireManager(c);const target=await c.one('SELECT role FROM oa_operators WHERE id=?',[user]);if(!target)fail(404,'Teammate unavailable');if(c.session.operator.role!=='owner'&&target.role!=='member')fail(403,'Only an owner can manage privileged teammates')}
+function requireManager(c:Context,role='member'){if(c.operator.role!=='owner'&&(c.operator.role!=='admin'||role!=='member'))fail(403,'Team management is restricted to an authorized owner or admin')}
+async function targetAuthority(c:Context,user:string){requireManager(c);const target=await c.one('SELECT role FROM oa_operators WHERE id=?',[user]);if(!target)fail(404,'Teammate unavailable');if(c.operator.role!=='owner'&&target.role!=='member')fail(403,'Only an owner can manage privileged teammates')}
 function configuration(input:Record<string,any>){
  const role=input.role??'member',mode=input.mode??'member';
  if(!['owner','admin','member'].includes(role)||!['member','guest'].includes(mode)||mode==='guest'&&role!=='member')fail(400,'Guests use the member role')
@@ -19,12 +19,12 @@ export async function prepareInvitation(c:Context,input:Record<string,any>){
  const selected=await c.rows("SELECT c.id FROM nook_conversations c JOIN nook_members m ON m.conversation=c.id WHERE c.id IN (SELECT value FROM json_each(?)) AND c.kind<>'dm' AND NOT EXISTS(SELECT 1 FROM nook_channel_settings WHERE conversation=c.id AND archived=1) AND m.user=? AND (SELECT count(*) FROM nook_members cap WHERE cap.conversation=c.id)<1000",[scopes,c.uid]);if(selected.length!==cfg.scopes.length)fail(400,'Choose current channels you can access')
  const current=await c.one("SELECT * FROM nook_invite_plans WHERE email=? AND state<>'cancelled'",[email]);
  if(current){
-  if(current.state==='accepted'||current.role!==cfg.role||current.mode!==cfg.mode||current.scopes!==scopes||current.issuer!==c.uid||current.issuer_version!==c.session.operator.version)fail(409,'Cancel the pending invitation before changing its scope')
-  await c.batch([],undefined,`${manager} AND ${fullMember('?')} AND EXISTS(SELECT 1 FROM nook_invite_plans WHERE id=? AND state='prepared' AND issuer=? AND issuer_version=?)`,[c.uid,c.uid,current.id,c.uid,c.session.operator.version]);
+  if(current.state==='accepted'||current.role!==cfg.role||current.mode!==cfg.mode||current.scopes!==scopes||current.issuer!==c.uid||current.issuer_version!==c.operator.version)fail(409,'Cancel the pending invitation before changing its scope')
+  await c.batch([],undefined,`${manager} AND ${fullMember('?')} AND EXISTS(SELECT 1 FROM nook_invite_plans WHERE id=? AND state='prepared' AND issuer=? AND issuer_version=?)`,[c.uid,c.uid,current.id,c.uid,c.operator.version]);
   return {prepared:true,email,role:cfg.role,generation:current.generation}
  }
  const id=crypto.randomUUID();
- await c.batch([c.sql(`INSERT INTO nook_invite_plans(id,email,role,mode,scopes,generation,issuer,issuer_version,issuer_session,state) SELECT ?,?,?,?,?,COALESCE(max(generation),0)+1,?,?,?,'prepared' FROM nook_invite_plans WHERE email=?`,id,email,cfg.role,cfg.mode,scopes,c.uid,c.session.operator.version,c.session.id,email)],undefined,`${manager} AND ${fullMember('?')} AND NOT EXISTS(SELECT 1 FROM oa_operators WHERE email=? AND (status='active' OR status='inactive' AND NOT EXISTS(SELECT 1 FROM oa_invitation_cancellations WHERE operator_id=oa_operators.id))) AND NOT EXISTS(SELECT 1 FROM json_each(?) j JOIN nook_channel_settings s ON s.conversation=j.value WHERE s.archived=1)`,[c.uid,c.uid,email,scopes]);
+ await c.batch([c.sql(`INSERT INTO nook_invite_plans(id,email,role,mode,scopes,generation,issuer,issuer_version,issuer_session,state) SELECT ?,?,?,?,?,COALESCE(max(generation),0)+1,?,?,?,'prepared' FROM nook_invite_plans WHERE email=?`,id,email,cfg.role,cfg.mode,scopes,c.uid,c.operator.version,c.session.id,email)],undefined,`${manager} AND ${fullMember('?')} AND NOT EXISTS(SELECT 1 FROM oa_operators WHERE email=? AND (status='active' OR status='inactive' AND NOT EXISTS(SELECT 1 FROM oa_invitation_cancellations WHERE operator_id=oa_operators.id))) AND NOT EXISTS(SELECT 1 FROM json_each(?) j JOIN nook_channel_settings s ON s.conversation=j.value WHERE s.archived=1)`,[c.uid,c.uid,email,scopes]);
  return {prepared:true,email,role:cfg.role,generation:(await c.one('SELECT generation FROM nook_invite_plans WHERE id=?',[id])).generation}
 }
 export async function teamDirectory(c:Context){

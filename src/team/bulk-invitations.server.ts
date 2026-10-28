@@ -28,7 +28,7 @@ export function parseRows(input:Record<string,any>):Row[]{
  return lines.map(({text,line}:{text:string;line:number})=>{const [email='',name='',role='member',channels='',expiry='']=cells(text);return {line,email,name:name.slice(0,120),role:(role||'member').toLowerCase(),channels:channels.split(';').map(s=>s.trim()).filter(Boolean),expiry}})
 }
 async function check(c:Context,rows:Row[]):Promise<Checked[]>{
- const inviter=c.session.operator.role
+ const inviter=c.operator.role
  if(inviter!=='owner'&&inviter!=='admin')fail(403,'Bulk invitations are restricted to an authorized owner or admin')
  const normalized=rows.map(r=>{try{return address.test(r.email)?normalizeEmail(r.email) as string:''}catch{return ''}})
  const emails=JSON.stringify(normalized.filter(Boolean))

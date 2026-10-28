@@ -106,7 +106,7 @@ function Workspace({initial}:{initial:InitialWorkspace}) {
  const push=usePush(w.user.id,request,w.snapshot,w.privateSignal)
  const [savedInstallations,setSavedInstallations]=useState<string[]>([])
  useEffect(()=>{let live=true;void request<{installations:{origin:string}[]}>('/api/personal/workspace').then(r=>{if(live)setSavedInstallations(r.installations.map(i=>i.origin))}).catch(()=>{});return()=>{live=false}},[request])
- const device=useDeviceWorkspaces(w.user.name,savedInstallations)
+ const device=useDeviceWorkspaces(w.user.name,savedInstallations,initial.businessName)
  useTitleBadge(w.user.id,w.attention.items.length+(w.attention.reminders?.items.length??0)+(w.attention.personalReminders?.length??0),w.attentionLoaded&&w.connected,`${title} · Nook`)
  const canCreate=w.user.mode==='member',canManage=canCreate&&['owner','admin'].includes(w.user.role??'')
  const discuss=(o:Outcome)=>{if(o.source)void open(o.conversation,o.source);else navigate({view:'chat',conversation:o.conversation,thread:null,focus:o.id,panel:'outcomes',before:null,threadBefore:null})}

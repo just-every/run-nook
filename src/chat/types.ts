@@ -17,7 +17,7 @@ export type LocationState = { view: Screen; conversation: string|null; thread: s
 export type MessageWindow = {items:Message[];root:Message|null;target:{id:string;parent:string|null;root:string}|null;cursor:string|null;freezeCursor?:string|null;hasMore:boolean;hasNewer:boolean;readSeq:number;threadReadSeq?:number;threadReadThrough?:number;readBarrierSeq:number|null;readThrough:number;frontier:number}
 export type Projection = { key:string; conversation: string; rootWindow:MessageWindow; threadWindow:MessageWindow|null; outcomes: Outcome[]; members: Person[]; roster:Person[]; preferences: Preferences; frontier: number; newMessageCount:number }
 // Local development uses key-gated personas and silently suppresses default mail.
-export type InitialWorkspace = {user: Person; conversations: Conversation[]; route?:LocationState; snapshot?:WorkspaceSnapshot; localDevelopment?: boolean}
+export type InitialWorkspace = {user: Person; conversations: Conversation[]; route?:LocationState; snapshot?:WorkspaceSnapshot; localDevelopment?: boolean; businessName?: string|null}
 export type DialogState = {kind:'reminder';phrase?:string;source?:string;sourceKind?:'message'|'attachment';onSaved?:()=>void}|{kind:'new-message'}|{kind:'new-channel'}|{kind:'details'}|{kind:'pins'}|{kind:'bookmarks'}|{kind:'poll'}|{kind:'notifications'}|{kind:'schedule';draft?:{body:string;parent:string|null;mentions:string[];urgent:boolean;urgentReason:string|null;files:FileRecord[]};onScheduled?:()=>void}|{kind:'edit';message:Message}|{kind:'delete';message:Message}|{kind:'outcome';source:string|null;outcomeKind:'decision'|'commitment'}|{kind:'revise';outcome:Outcome}
 
 export type Page<T> = {items:T[];cursor:string;hasMore:boolean}

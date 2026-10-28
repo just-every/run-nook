@@ -4,20 +4,24 @@ import {channelWritable} from '../../team/channel-policy'
 import {initializeDefaultChannels} from '../../team/default-channels.server'
 import {fail} from '../../family/team-chat/domain'
 import {operatorAuth,authBindings,type Bindings as AuthBindings} from '../operator-auth.server'
-import type {Session} from '../../base/modules/operator-auth/index.mjs'
+import type {Session, Operator} from '../../base/modules/operator-auth/index.mjs'
 export type StorageBindings=AuthBindings & {FILES:R2Bucket;CHAT_HUB:DurableObjectNamespace;ASSETS?:Fetcher;RER_DEPLOY_SOURCE?:string;RER_DEPLOY_FINGERPRINT?:string;RER_VERSION?:{id:string}}
 export const authority=`(SELECT authority FROM nook_storage WHERE id=1)='normalized'`
 export const authFence=`EXISTS(SELECT 1 FROM oa_sessions s JOIN oa_operators o ON o.id=s.operator_id WHERE s.id=? AND s.operator_id=? AND s.operator_version=? AND o.version=s.operator_version AND o.status='active' AND ${productAccess('o.id')} AND s.revoked_at IS NULL AND s.expires_at>CAST(unixepoch('subsec')*1000 AS INTEGER))`
 // Unpublished imported history stays hidden, except a source import from the owner applying it.
 export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=? AND mf.user=? AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-' AND substr(j.id,1,6)<>'gchat-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
+export type AgentIdentity={kind:'agent';operator:Operator;agentId:string;consent?:string;policy:string|null;localRevision:number;operationId:string;label:string;approvers:readonly {id:string;name:string}[]}
 export class Context {
- constructor(readonly env:StorageBindings,readonly session:Session){}
+ private personEvents:{type:string;uri:string}[]=[]
+ constructor(readonly env:StorageBindings,private readonly identity:Session|AgentIdentity,private readonly onPersonChange?:(events:{type:string;uri:string}[])=>Promise<void>){}
+ get session():Session{if(this.identity.kind==='agent')fail(403,'A native person session is required');return this.identity as Session}
+ get operator(){return this.identity.operator}
  get memberBroadcasts(){return true}
  get db(){return this.env.DB}
- get uid(){return this.session.operatorId}
- get credentials(){return [this.session.id,this.uid,this.session.operator.version]}
+ get uid(){return this.identity.kind==='agent'?this.identity.operator.id:(this.identity as Session).operatorId}
+ get credentials():any[]{return this.identity.kind==='agent'?[this.uid,this.operator.version,this.identity.agentId,this.identity.policy,this.identity.localRevision,this.identity.consent??null,this.identity.consent??null]:[this.session.id,this.uid,this.operator.version]}
  // The caller's authority, bound to `credentials`: a live session here, an integration token in IntegrationContext.
- get fence(){return authFence}
+ get fence(){return this.identity.kind==='agent'?`EXISTS(SELECT 1 FROM oa_operators o WHERE o.id=? AND o.version=? AND o.status='active' AND ${productAccess('o.id')}) AND EXISTS(SELECT 1 FROM agent_door_agents a WHERE a.id=? AND a.revoked=0) AND EXISTS(SELECT 1 FROM agent_door_state p WHERE p.id=1 AND p.envelope IS ? AND p.local_revision=? AND p.local_paused=0 AND COALESCE(json_extract(p.envelope,'$.paused'),0)=0 AND (? IS NULL OR NOT EXISTS(SELECT 1 FROM json_each(p.envelope,'$.revoked.consents') WHERE value=?)))`:authFence}
  sql(sql:string,...values:any[]){return this.db.prepare(sql).bind(...values)}
  async check(conversation?:string){const row=await this.sql(`SELECT 1 AS ok WHERE ${authority} AND ${this.fence}${conversation?' AND '+memberFence:''}`,...this.credentials,...(conversation?[conversation,this.uid]:[])).first();if(!row){const state=await this.db.prepare('SELECT authority FROM nook_storage WHERE id=1').first<{authority:string}>();if(state?.authority!=='normalized')fail(503,'Offline normalized storage conversion required');const active=await this.sql(`SELECT 1 WHERE ${this.fence}`,...this.credentials).first();fail(active?403:401,active?'Conversation access denied':'Sign in required')}}
  async rows<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T[]>{
@@ -34,17 +38,24 @@ export class Context {
  }
  async one<T=any>(sql:string,values:any[]=[],conversation?:string):Promise<T|null>{return (await this.rows<T>(sql,values,conversation))[0]??null}
  async batch(statements:D1PreparedStatement[],conversation?:string,condition='1',values:any[]=[]){
-  const key=crypto.randomUUID();
+  const key=crypto.randomUUID(),events=this.personEvents.splice(0);
   try{await this.db.batch([this.sql('INSERT OR REPLACE INTO nook_audit_context VALUES(1,?)',this.uid),this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${this.fence}${conversation?' AND '+memberFence:''} AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,...(conversation?[conversation,this.uid]:[]),...values),...statements,this.sql('DELETE FROM nook_guard WHERE id=?',key),this.sql('DELETE FROM nook_audit_context WHERE id=1')])}catch(error){await this.check(conversation);if(String(error).includes('CHECK constraint')||String(error).includes('UNIQUE constraint'))fail(409,'Concurrent change or invalid command; reload and retry the same intent');throw error}
+  if(events.length&&this.onPersonChange)await this.onPersonChange(events)
  }
  async writable(conversation:string){if(!await this.one(`SELECT 1 WHERE ${channelWritable('?')}`,[conversation],conversation))fail(409,'Conversation is read-only; open its private channel or restore it before posting')}
  async writeBatch(statements:D1PreparedStatement[],conversation:string,condition='1',values:any[]=[]){
   await this.writable(conversation)
   try{await this.batch(statements,conversation,`${channelWritable('?')} AND (${condition})`,[conversation,...values])}catch(error){await this.writable(conversation);throw error}
  }
- event(conversation:string,kind:string,object:string){return [this.sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',conversation),this.sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,this.uid,conversation)]}
+ event(conversation:string,kind:string,object:string){
+  const actor=this.identity
+  const uriKind={message:'messages',outcome:'outcomes',note:'notes'}[kind]
+  const prepared=actor.kind==='agent'?[this.sql('INSERT OR IGNORE INTO nook_audit VALUES(?,?,?,?,?,?,?,?,?,?)',`${object}:agent:${actor.operationId}`,this.uid,'agent',Date.now(),`agent.${kind}`,conversation,1,actor.label+(actor.approvers.length?`; approved by ${actor.approvers.map(p=>p.name).join(', ')}`:''),'confirmed',1)]:[]
+  if(actor.kind!=='agent'&&uriKind)this.personEvents.push({type:`nook.${kind}.changed`,uri:`nook://${uriKind}/${encodeURIComponent(object)}`})
+  return [this.sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',conversation),this.sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,this.uid,conversation),...prepared]
+ }
  async hint(){await this.env.CHAT_HUB.get(this.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/hint',{method:'POST'}).catch(()=>undefined)}
 }
-export async function context(bindings:StorageBindings,headers:Headers,identity?:Promise<Session|null>){const env={...bindings,...authBindings(bindings)};const session=await(identity??operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers})))??fail(401,'Sign in required');const c=new Context(env,session);await c.check();await initializeDefaultChannels(c);return c}
+export async function context(bindings:StorageBindings,headers:Headers,identity?:Promise<Session|null>){const env={...bindings,...authBindings(bindings)};const session=await(identity??operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers})))??fail(401,'Sign in required');const c=new Context(env,session,async events=>{const {emitPersonChanges}=await import('../../agent-door/person-events');await emitPersonChanges(env,session.operator,events)});await c.check();await initializeDefaultChannels(c);return c}
 export type MessageWriter=Pick<Context,'uid'|'sql'|'event'>
 export function indexMessage(c:Pick<Context,'sql'>,id:string,conversation:string,body:string,source='native'){return c.sql('INSERT INTO nook_search(message,conversation,source,scope,body_lower) VALUES(?,?,?,?,?)',id,conversation,source,'|'+conversation+'|',body.toLowerCase())}

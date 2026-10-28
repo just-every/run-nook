@@ -73,4 +73,4 @@ export class ChatHub extends DurableObject<StorageBindings>{
  async webSocketClose(socket:WebSocket){const info=socket.deserializeAttachment() as Subscriber;await this.ctx.storage.delete(info.key)}
  async webSocketError(socket:WebSocket){const info=socket.deserializeAttachment() as Subscriber;await this.ctx.storage.delete(info.key);closeSocket(socket,1011,'Reconnect required')}
 }
-export async function connect(c:Context,request:Request){const headers=new Headers(request.headers);headers.set('x-nook-subscriber',JSON.stringify({id:c.session.id,uid:c.uid,version:c.session.operator.version}));return c.env.CHAT_HUB.get(c.env.CHAT_HUB.idFromName('workspace')).fetch(new Request('https://hub/connect',{headers}))}
+export async function connect(c:Context,request:Request){const headers=new Headers(request.headers);headers.set('x-nook-subscriber',JSON.stringify({id:c.session.id,uid:c.uid,version:c.operator.version}));return c.env.CHAT_HUB.get(c.env.CHAT_HUB.idFromName('workspace')).fetch(new Request('https://hub/connect',{headers}))}
