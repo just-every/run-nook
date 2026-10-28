@@ -8,10 +8,10 @@ The primary journey: Install Nook, invite the team, review and import their hist
 
 | Tier | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
-| Core | 1 | 78 | 56 | 135 |
+| Core | 1 | 80 | 54 | 135 |
 | Agent surface | 0 | 0 | 6 | 6 |
 | Later | 0 | 0 | 0 | 0 |
-| Full target | 1 | 78 | 62 | 141 |
+| Full target | 1 | 80 | 60 | 141 |
 
 Judged from the code and tests at commit `9f42ce1ef9193fc3fa2115b7c16164aa16067070` (26 October 2026). Field proof register: 11 rows; 0 passed, 0 failed, 11 not run.
 
@@ -786,7 +786,7 @@ Core · target · **partial** · From NOOK-041 · Rules D-1, D-2 · Register R-8
 
 #### NOOK-102 — Slack integration cutover checklist
 
-Core · target · **missing** · From NOOK-041
+Core · target · **partial** · From NOOK-041
 
 **Requirement.** The preview lists every app, bot, incoming webhook, slash command and workflow found in the export (the integration log, bot messages and bot profiles, and workflow data where supplied) with its Nook disposition: repoint to a NOOK-063, NOOK-113 Slack-compatible webhook or app (issuing the new URL/token), replace with a named first-party connector (NOOK-027–030), replace with a NOOK-064 Zapier/Make/n8n path, rebuild as a NOOK-026 workflow, or unsupported with its reason. Third-party-hosted Marketplace apps the buyer cannot repoint get a named Nook replacement where one exists: Polly and Simple Poll map to NOOK-070 polls, Geekbot and Standuply to the NOOK-026 stand-up template, Donut to the NOOK-026 intro-pairing template, and reminder and birthday apps to NOOK-033 reminders or a NOOK-026 template. Cutover yields an owner checklist and no integration is silently dropped. Source export-plan restrictions are shown, never solved by making private content public.
 
@@ -794,8 +794,8 @@ Core · target · **missing** · From NOOK-041
 1. The preview lists every integration in the export with its disposition, and repointing one incoming webhook delivers to the mapped channel.
 2. The integration checklist for Polly, Geekbot and Donut names the polls, stand-up and intro-pairing replacements.
 
-**Evidence.** None.
-**Gap.** Integration census, named replacement dispositions and the complete cutover checklist are absent.
+**Evidence.** `src/imports/archive-plan.mjs`; `src/imports/history.ts`; `src/imports/DoorWizard.tsx`; `src/imports/slack.mjs`; `tests/slack-import/journey.mjs`; `tests/pilot-journey.mjs`; `tests/slack-import/cutover.mjs`; `tests/slack-delta-browser.mjs`; `tests/slack-import-browser.mjs`; `tests/slack-private-fixture.mjs`
+**Gap.** Integration logs and bot profiles have non-executing dispositions, and existing incoming-webhook inventory has a mapped notification-app path. The complete integration replacement checklist, all named replacement dispositions and complete real-SDK cutover proof remain absent.
 
 #### NOOK-103 — Consented Slack member history
 
@@ -839,15 +839,15 @@ Core · target · **missing** · From NOOK-041 · Rules D-1, D-2
 
 #### NOOK-106 — Slack links after cutover
 
-Core · target · **missing** · From NOOK-041 · Rules D-1
+Core · target · **partial** · From NOOK-041 · Rules D-1
 
 **Requirement.** Slack links in imported history: every Slack message permalink (`https://<workspace>.slack.com/archives/<channel>/p<ts>`, with or without `thread_ts`), `slack://` link and `<#C…>`/`<@U…>` reference in imported messages, pins, bookmarks, topics and purposes is resolved through the import's Slack-ID map and rendered as the Nook permalink of the imported message, thread, channel or person; the original URL stays in provenance and the imported revision is unchanged. A link whose target was not imported, or whose target the reader cannot currently read, renders as "Slack message not imported" (or "Not available to you") with the original URL and never reveals the target's content, name or audience. A Slack permalink pasted into Nook after cutover resolves the same way under the reader's current ACL, and the cutover report counts resolved and unresolved links.
 
 **Acceptance.**
 1. an imported message linking to another imported thread opens that Nook thread; a link to a private channel that was not imported, or that the reader is not in, shows "Slack message not imported" or "Not available to you" with the original URL and no content; a Slack permalink pasted after cutover opens the mapped Nook message; the cutover report counts resolved and unresolved links.
 
-**Evidence.** None.
-**Gap.** Imported and newly pasted Slack-permalink resolution and resolved/unresolved counts are absent.
+**Evidence.** `src/imports/archive-plan.mjs`; `src/imports/history.ts`; `src/imports/DoorWizard.tsx`; `src/imports/slack.mjs`; `tests/slack-import/journey.mjs`; `tests/pilot-journey.mjs`; `tests/slack-import/cutover.mjs`; `tests/slack-delta-browser.mjs`; `tests/slack-import-browser.mjs`; `tests/slack-private-fixture.mjs`
+**Gap.** Same-pass imported permalinks resolve only under current membership. Native pasted and cross-pass permalink resolution, complete source-reference parity and resolved/unresolved cutover counts remain gaps.
 
 #### NOOK-042 — Microsoft Teams migration
 
