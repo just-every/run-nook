@@ -974,3 +974,9 @@ Current code/test coverage is recorded per clause below and mirrored in ACCEPTAN
 | Published | 15 | 2 | 0 | 17 |
 | Target and push further | 20 | 24 | 30 | 74 |
 | All | 35 | 26 | 30 | 91 |
+
+## 28 October 2026 — Main import-guard evidence
+
+Main `32c80e44c0e2ebb7648b2cd16f3e17dbc8faf92f` carries the following NOOK-041 evidence update without advancing its partial status. The cited evidence remains `tests/slack-import-browser.mjs` and `tests/pilot-journey.mjs`.
+
+The existing browser journey holds script delivery on a cold import-page navigation: job actions stay disabled until hydration, then guarded Undo receives HTTP 409, shows the real refusal alert and preserves later live work (390; the realistic pilot journey covers 1440).

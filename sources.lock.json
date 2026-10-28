@@ -641,7 +641,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "04e5c8a43dce822189e8af9038dce65374ae54a548dc32bd7eb35bc70d7fab49",
+      "sha256": "a05ea71c0d35cfe7faf56d0c07a116c124629792a7cc110c3baf9d2b7e90ca4e",
       "executable": false
     },
     "CLAUDE.md": {
@@ -685,11 +685,11 @@
       "executable": false
     },
     "docs/contract/COVERAGE.json": {
-      "sha256": "2325562c9c73139621d48990675f1cb2b7c73d51462a1c02856a31a2f7dcafa8",
+      "sha256": "fc364f789c81698404e1e8ab2617ab9d51a7aa445e078940b3cf145a268d94f1",
       "executable": false
     },
     "docs/contract/DONE-AUDIT.md": {
-      "sha256": "ba1229ef99aa3c2468428587cf64c7df61678444b25d9597e070f3b6fcf28dd1",
+      "sha256": "4a4758030272f025e4695157a9a1e733b7cb2eb5e5b7784faf56285dcc68573b",
       "executable": false
     },
     "docs/contract/DONE-POINTS.md": {
@@ -697,7 +697,7 @@
       "executable": false
     },
     "docs/contract/ID-MAP.json": {
-      "sha256": "3e1d2a91780fe161b2d70b8b12193298f20258b5881ebc96efcef7da92b841b4",
+      "sha256": "27953685d36cb292c07fd2e432797ee315cab7a484ff94dc03feadeb90d7c4ca",
       "executable": false
     },
     "docs/contract/mechanism.md": {
@@ -5205,7 +5205,7 @@
       "executable": false
     },
     "src/imports/DoorWizard.tsx": {
-      "sha256": "5910b37e85acdee73716684330da46999db9d613ea3be8077b96a6cf6d3a7220",
+      "sha256": "6c9edfca6caf808460e706da6d9a3558f673226c7ce8a3d91cc0ec7780acfd3d",
       "executable": false
     },
     "src/imports/formats.d.mts": {
@@ -7317,7 +7317,7 @@
       "executable": false
     },
     "tests/slack-import-browser.mjs": {
-      "sha256": "2c66627010f2257e88da9af84e32bd5956ef20a2b833c5d7ecc0ef09f2b43f15",
+      "sha256": "c7878ef2d2d0ff4c972f2c243931d43e28b14d10c605c9b13574c07f0408cb82",
       "executable": false
     },
     "tests/slack-import-history.test.mjs": {

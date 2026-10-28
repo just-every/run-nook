@@ -2,7 +2,7 @@
   "schema": 1,
   "seed": "nook",
   "old": {
-    "commit": "74380c56f0f5ae57106250e7343ba1c546f33c39",
+    "commit": "32c80e44c0e2ebb7648b2cd16f3e17dbc8faf92f",
     "files": [
       "CONTRACT.md",
       "ACCEPTANCE.md",
@@ -5550,7 +5550,19 @@
     {
       "file": "ACCEPTANCE.md",
       "line": 290,
-      "text": "Current evidence: `tests/slack-import/journey.mjs` \u2014 imported incoming-webhook inventory, explicit owner app approval, native app delivery to its mapped imported channel and revoked-URL refusal (Verify, verify (product API)); `tests/slack-import-browser.mjs` \u2014 app approval and the repointed URL delivering to the mapped imported channel at 1440/390 with zero serious/critical axe findings (Verify, verify (runtime browser)). `tests/slack-import/journey.mjs` \u2014 privateHistoryJourney inside \u201cSlack ZIP review, immutable native history, search, resume and guarded undo\u201d (verify (product API)); `tests/slack-import-browser.mjs` \u2014 supplied private/DM mapping, omission, inventory and mapped-thread link at 1440/390 (verify (runtime browser)); `tests/slack-private-fixture.mjs`. Remaining: Supplied private channels and DMs now require exact injective mapped audiences, including a non-member importing owner. Unmapped histories stay unpublished and listed. Integration logs and bot profiles have non-executing dispositions; imported same-pass permalinks resolve only under current membership. Shared histories remain a listed omission. Member-token acquisition/consent/revocation, custom emoji, user groups (NOOK-060), real Pro cutover/live grants (NOOK-088), native pasted/cross-pass permalink resolution and resolved/unresolved cutover counts remain gaps. Personal reminder/star import and complete metadata parity remain gaps; NOOK-077/088 are not advanced. The same journey proves private-file participant downloads, non-member readable-export refusal and operational archive custody.",
+      "text": "Current evidence: `tests/slack-import/journey.mjs` \u2014 imported incoming-webhook inventory, explicit owner app approval, native app delivery to its mapped imported channel and revoked-URL refusal (Verify, verify (product API)); `tests/slack-import-browser.mjs` \u2014 app approval and the repointed URL delivering to the mapped imported channel at 1440/390 with zero serious/critical axe findings (Verify, verify (runtime browser)). `tests/slack-import/journey.mjs` \u2014 privateHistoryJourney inside \u201cSlack ZIP review, immutable native history, search, resume and guarded undo\u201d (verify (product API)); `tests/slack-import-browser.mjs` \u2014 supplied private/DM mapping, omission, inventory and mapped-thread link at 1440/390 (verify (runtime browser)); `tests/slack-private-fixture.mjs`.",
+      "to": "changelog"
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "line": 290,
+      "text": "The existing browser journey holds script delivery on a cold import-page navigation: job actions stay disabled until hydration, then guarded Undo receives HTTP 409, shows the real refusal alert and preserves later live work (390; the realistic pilot journey covers 1440).",
+      "to": "changelog"
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "line": 290,
+      "text": "Remaining: Supplied private channels and DMs now require exact injective mapped audiences, including a non-member importing owner. Unmapped histories stay unpublished and listed. Integration logs and bot profiles have non-executing dispositions; imported same-pass permalinks resolve only under current membership. Shared histories remain a listed omission. Member-token acquisition/consent/revocation, custom emoji, user groups (NOOK-060), real Pro cutover/live grants (NOOK-088), native pasted/cross-pass permalink resolution and resolved/unresolved cutover counts remain gaps. Personal reminder/star import and complete metadata parity remain gaps; NOOK-077/088 are not advanced. The same journey proves private-file participant downloads, non-member readable-export refusal and operational archive custody.",
       "to": "changelog"
     },
     {
