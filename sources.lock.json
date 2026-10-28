@@ -669,7 +669,7 @@
       "executable": false
     },
     "docs/agents.md": {
-      "sha256": "9036a31fd151d4ceff3e5b55361dedd5eadb8c83de3f5ed87c1f9312efc0d18e",
+      "sha256": "584d09020754fa5591669956501f4a76dfea40589cabe4a137574321c7e2cc15",
       "executable": false
     },
     "docs/attention.md": {
@@ -2048,6 +2048,10 @@
       "sha256": "c1e5a9056d23a655fd5e0703200b868969d277accd83d554424c8821e386415e",
       "executable": false
     },
+    "src/agent-door/admission.ts": {
+      "sha256": "91060136fd438243409655f610cc5a6828f54c13a13ac647434da8d92546923a",
+      "executable": false
+    },
     "src/agent-door/business.ts": {
       "sha256": "fba105c1e01c1304f9cda68db54e2f31237ec8cca0c0421a42e37a5c57599f36",
       "executable": false
@@ -2065,7 +2069,7 @@
       "executable": false
     },
     "src/agent-door/resources.ts": {
-      "sha256": "f2d988b447db73ec9c0e1eddb0fa0ee457018f59f45bbef1028912901887a194",
+      "sha256": "6a3b7279d79ccb352073692d6aefb176fd0a4da8f3093b5ae19824cab077d88f",
       "executable": false
     },
     "src/agent-door/summary.ts": {
@@ -2093,7 +2097,7 @@
       "executable": false
     },
     "src/agent-door/tools.ts": {
-      "sha256": "51d9229e49d56188817877a4df801f504532f74e92694f1b1f64ec9a0f3cb888",
+      "sha256": "3978159b04a20824838ce67d0b3698731510fe617fe9f70664b54ac5b1d86cdd",
       "executable": false
     },
     "src/ai-search/AiSettings.tsx": {

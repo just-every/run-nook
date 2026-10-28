@@ -2,7 +2,9 @@
 
 Nook's shared agent door is an adoption candidate. Its conformance journey is
 blocked on the verifier's native teammate invitation lifecycle and main's
-missing inherited Base event clause; this is not a
+missing inherited Base event clause. The pinned shared door also replays retained
+mutation results before rechecking the native resource, so conversation revocation
+can leave a cached result readable. This candidate must remain unlanded; this is not a
 completed agent-surface or production-readiness claim.
 
 An installation with signed Business settings binds the claimed owner's

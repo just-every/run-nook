@@ -3,6 +3,7 @@ import type { StorageBindings } from '../platform/storage/context'
 import { nativeContext, nativeCall } from './context'
 import { standard } from './tool-native'
 import { nativeSummary } from './summary'
+import { admitNativeArguments } from './admission'
 import { conversationsTools } from './tools-conversations'
 import { messagesTools } from './tools-messages'
 import { notesTools } from './tools-notes'
@@ -11,7 +12,7 @@ const specs=[...conversationsTools,...messagesTools,...notesTools,...workspaceTo
 
 export function nookTools(env:StorageBindings):ToolDefinition[]{return specs.map(spec=>({
  name:'nook.'+spec.name,title:spec.name.replaceAll('.',' '),description:`Nook native ${spec.name}; current sponsor and conversation authority required.`,scope:spec.read?'nook:read':'nook:write',readOnly:!!spec.read,inputSchema:spec.schema,outputSchema:{anyOf:[{type:'object'},{type:'array'}]},classes:spec.classes??['standard'],clauses:spec.clauses,untrusted:!!spec.read,
- classify:async(a,who)=>nativeCall(async()=>{const c=await nativeContext(env,who);return spec.risk?spec.risk(c,a):standard()}),
+ classify:async(a,who)=>nativeCall(async()=>{const c=await nativeContext(env,who);await admitNativeArguments(spec.name,a,c);return spec.risk?spec.risk(c,a):standard()}),
  ...(!spec.read?{summary:async(a:Record<string,unknown>,who:ToolContext)=>nativeCall(async()=>nativeSummary(spec,a,who,await nativeContext(env,who)))}:{}),
  ...(spec.revision?{revision:async(a:Record<string,unknown>,who:ToolContext)=>nativeCall(async()=>spec.revision!(await nativeContext(env,who),a))}:{}),
  ...(spec.authority?{authority:spec.authority}:{}),

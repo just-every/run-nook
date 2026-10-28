@@ -20,12 +20,14 @@ export function nookResources(env:StorageBindings):ResourceDefinition[]{
      const table={files:'nook_attachment_history',notes:'nook_notes',schedules:'nook_schedules',audit:'nook_audit'}[url.hostname]
      if(!table)return null
      if(url.hostname==='audit'&&(!['owner','admin'].includes(c.operator.role)||!await c.one("SELECT 1 FROM nook_access WHERE user=? AND mode='member' AND active=1",[c.uid])))return null
-     const row=await c.one(`SELECT ${url.hostname==='files'?'id,conversation,author,message,name,mime,size,state,created':url.hostname==='audit'?'id,scope AS conversation,actor,kind,at,outcome,version,reason,count':url.hostname==='schedules'?'id,conversation,user,state,version,local_at,zone,next_due,reason':'id,conversation'} FROM ${table} WHERE id=?`,[id])
+     const row=await c.one(`SELECT ${url.hostname==='files'?'id,conversation,author,message,name,mime,size,state,expires,created':url.hostname==='audit'?'id,scope AS conversation,actor,kind,at,outcome,version,reason,count':url.hostname==='schedules'?'id,conversation,user,state,version,local_at,zone,next_due,reason':'id,conversation'} FROM ${table} WHERE id=?`,[id])
      if(!row)return null
      await c.check(row.conversation)
+     if(url.hostname==='files'&&row.state==='staged'&&(row.author!==c.uid||row.expires<=Date.now()))return null
      if(url.hostname==='schedules'&&row.user!==c.uid)return null
      json=url.hostname==='notes'?await getNote(c,row.conversation,id):row
     }
+    if(json&&typeof json==='object'&&('deleted' in json&&json.deleted||'erased' in json&&json.erased))return null
     return {json,untrusted:true}
    }).catch(()=>null)
   },
