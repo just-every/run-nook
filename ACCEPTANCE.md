@@ -8,10 +8,10 @@ The primary journey: Install Nook, invite the team, review and import their hist
 
 | Tier | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
-| Core | 0 | 81 | 54 | 135 |
+| Core | 0 | 85 | 54 | 139 |
 | Agent surface | 0 | 0 | 6 | 6 |
 | Later | 0 | 0 | 0 | 0 |
-| Full target | 0 | 81 | 60 | 141 |
+| Full target | 0 | 85 | 60 | 145 |
 
 Judged from the code and tests at commit `9f42ce1ef9193fc3fa2115b7c16164aa16067070` (26 October 2026). Field proof register: 11 rows; 0 passed, 0 failed, 11 not run.
 
@@ -273,26 +273,25 @@ Core · target · **partial** · From NOOK-017 · Rules D-1
 **Requirement.** The composer supports accessible rich text, lists, code blocks, safe links, emoji, explicit person/channel mentions and ordered attachments, with consistent plain-text export. Length and typed markup: a message holds up to 40,000 characters, Slack's limit. The composer shows the remaining count from 36,000, and pasting or typing beyond the limit offers to post the text as a snippet (a NOOK-061 text attachment with an inline preview) or to split it, never truncating silently. Every write door (send, edit, API, and NOOK-063's `chat.postMessage`, which answers Slack's `msg_too_long`) refuses over-length text with `message_too_long` and writes nothing. As typed, `*bold*`, `_italic_`, `~strike~`, `` `code` ``, triple-backtick blocks, `>` quotes and `- `/`1. ` list starts convert to formatting; one undo restores the literal characters, and each member can turn the conversion off.
 
 **Acceptance.**
-1. Compose formatted text/code and an attachment, leave and resume a draft on each supported client, deliberately interrupt a send and reconcile it once.
+1. Compose formatted text/code and an attachment, deliberately interrupt a send and reconcile it once. Private draft resumption is NOOK-135.
 2. Paste 50,000 characters: the composer offers a snippet or a split, and posting as a snippet yields one message with a previewable text attachment; an API post of 40,001 characters is refused with `message_too_long`, and one of 40,000 posts whole.
 3. Type `*bold*`, `_italic_`, `~strike~`, `` `code` ``, a fenced block, `> quote` and `- item`: each converts as typed, one undo restores the literal text, and the plain-text export keeps the content.
 
 **Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
 **Gap.** Carried-done audit has no cited asserting line for Point 1: formatted text and code, attachment composition, draft resumes on each supported client, interrupted send has one effect. Point 2: 50000-character snippet-or-split choice, 40001-character API refusal, 40000-character API message whole. Point 3: bold conversion, italic conversion, inline-code conversion, fenced-code conversion, list conversion, one undo restores literal characters, plain-text export retains content. Cited assertions establish one previewable snippet message, strike conversion, quote conversion.
 
-#### NOOK-090 — Personal profile and workspace state
+#### NOOK-090 — Personal profile, status and presence
 
 Core · target · **partial** · From NOOK-017 · Rules D-1
 
-**Requirement.** Private drafts survive navigation and account-isolated restart; editing, pending send and failed send are distinct states. People set profile, time zone, presence and a custom status (emoji and text) with Clear after: never, 30 minutes, 1 hour, 4 hours, today, this week or a chosen date and time in their time zone, clearing at that moment on every client, organize channel/DM sections, mark unread, and switch workspaces without mixing drafts, caches or notifications. Typing/presence are advisory and may be disabled. Admins define custom profile fields (title, department, phone, manager, location, pronouns, start date) with per-field visibility; a searchable people directory filters by name and those fields, pages completely at NOOK-049 capacity, honors guest scope and never exposes a hidden field.
+**Requirement.** People set their profile, time zone, presence and a custom status (emoji and text) with Clear after: never, 30 minutes, 1 hour, 4 hours, today, this week or a chosen date and time in their time zone, clearing at that moment on every client. Typing and presence are advisory and may be disabled.
 
 **Acceptance.**
-1. Switch accounts/workspaces and inspect draft isolation; mark unread and change status/time zone without changing work acceptance.
+1. Change status and time zone without changing work acceptance.
 2. Set a status to clear after 30 minutes and see it disappear on another client at that time, across a restart.
-3. Define title, phone and manager fields, fill them and find a person by department in the people directory at 1440 and 390; a guest sees only people in their granted channels and no hidden field.
 
 **Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
-**Gap.** Carried-done audit has no cited asserting line for Point 1: account-isolated drafts, mark unread, status and time-zone change, work acceptance unchanged. Point 2: thirty-minute status expiry, expiry visible on another client, expiry survives restart. Point 3: title field definition and value, phone field definition and value, manager field definition and value, department-filter result at both widths, guest people scope. Cited assertions establish workspace-isolated drafts, hidden field absent.
+**Gap.** Delivered web profile, time-zone, status and presence workflows remain evidenced. The carried-done audit does not establish a complete journey for status/time-zone changes without changing work acceptance, or thirty-minute expiry on another client across restart.
 
 #### NOOK-091 — Built-in conversation commands
 
@@ -307,18 +306,17 @@ Core · target · **partial** · From NOOK-017 · Rules D-1
 **Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
 **Gap.** Carried-done audit has no cited asserting line for Point 1: built-in commands precede app commands. Point 2: remind command equals menu action, invite command equals menu action, topic command equals menu action, rename command equals menu action, mute command equals menu action, quiet command equals menu action, status command equals menu action, DM command equals menu action, huddle command equals menu action, GIF command equals menu action, shrug command equals menu action, collapse command equals menu action, leave command equals menu action, each command same permission check, each command same audit, unknown command offers send-as-text. Cited assertions establish forbidden rename private reason, unknown command posts nothing.
 
-#### NOOK-092 — Drafts, sent messages and workspace switching
+#### NOOK-092 — Drafts and sent messages view
 
 Core · target · **partial** · From NOOK-017 · Rules D-1
 
-**Requirement.** Drafts & sent: one view lists the member's unsent drafts across conversations, their NOOK-034 scheduled messages and the messages they sent in the last 30 days, each opening in its conversation; editing or canceling a scheduled message there changes it under NOOK-034. Inheritance and web semantics: on the web a member switches workspaces from a "Your workspaces" menu that lists the installations this browser has signed in to; the list is kept on the device, each entry opens that installation's own origin, any entry other than the current workspace can be removed (removing forgets it on this device and signs nothing out), and sign-in, drafts, caches and notifications stay separate per installation. Each installation records itself when this browser is signed in there; opening or adding another installation from the menu carries the list to it in the URL fragment, which no server receives, and an installation that list has never held joins only after the member confirms it. A native workspace picker is NOOK-074's and NOOK-021's. NOOK-021 inherits the native draft, status and workspace-switch journeys; NOOK-022 and NOOK-070, NOOK-116 the effects of `/huddle` and `/gif`, which until then answer privately that the service is unavailable and create nothing; NOOK-025 the rule that no app registers a built-in name or reorders built-ins; and NOOK-063 the Slack-format `msg_too_long` answer (the server already refuses with `message_too_long`).
+**Requirement.** Drafts & sent: one view lists the member's unsent drafts across conversations, their NOOK-034 scheduled messages and the messages they sent in the last 30 days, each opening in its conversation; editing or canceling a scheduled message there changes it under NOOK-034.
 
 **Acceptance.**
 1. Open Drafts & sent and find an unsent draft from another channel, a scheduled message, change its time there, and yesterday’s sent message.
-2. Switch accounts and workspaces; each installation retains its own drafts, cached state and notifications. A new installation joins the device list only after confirmation, and forgetting another installation signs nothing out.
 
 **Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
-**Gap.** Carried-done audit has no cited asserting line for Point 1: scheduled message visible, scheduled time editable there, yesterday sent message visible. Point 2: installation-isolated cached state, installation-isolated notifications. Cited assertions establish unsent draft visible across conversations, installation-isolated drafts, new installation confirmation, forgetting another installation keeps sessions.
+**Gap.** Delivered web Drafts & sent includes an asserted unsent draft from another conversation. Complete carried proof for the scheduled message, its edited time and yesterday’s sent message is absent.
 
 #### NOOK-018 — Invitation and offboarding journeys
 
@@ -432,7 +430,7 @@ Core · target · **missing** · From NOOK-021 · Rules D-1 · Register R-2
 
 Core · target · **missing** · From NOOK-021 · Rules D-1 · Register R-2
 
-**Requirement.** Delivery bar, measured and published: for events eligible to alert after NOOK-032 schedules, NOOK-062 previews and NOOK-065 broadcast policy (mentions, DMs, keyword hits, broadcast mentions, call invites) to a device reachable by APNs or FCM (or a running/at-login desktop app) and routed to that device by NOOK-073, NOOK-124, at least 99.5% are displayed; the bar is measured against that routed device set, and a release after a NOOK-073, NOOK-124 hold is timed from the release; commit-to-display is p95 ≤ 5 s and p99 ≤ 30 s; a call invite rings a locked phone (CallKit/PushKit on iOS, a full-screen call notification on Android) within 5 s at p95; and every device's badge equals the authoritative unread plus Attention count (followed-thread replies included unless the member chose NOOK-072, NOOK-123's mentions-only thread badge) within 10 s of reconnect, foreground or a read on another device. Every eligible event not displayed is recorded under NOOK-008's distinct facts as `provider-unconfirmed` (the NOOK-078 gateway, APNs or FCM did not accept or acknowledge it) or `device-unobserved` (accepted, but no display receipt from the device within 60 s), shown in the member's device delivery view and the owner's delivery report (NOOK-048); none goes missing silently. A mobile alert held because the member was active on desktop and then canceled by a read or done is recorded as `held-active-elsewhere`, counted neither as displayed nor as a miss. The delivery bar is an obligation of every customer installation on its own Cloudflare account, never met only by a publisher-operated installation. It also inherits the native halves of NOOK-017, NOOK-090, NOOK-092 (draft, status and workspace-switch journeys), NOOK-053 (conversation notes and checklists with history, revert, pins, saved links, proposals and the erased-member display), NOOK-065 (broadcast delivery), NOOK-066 (native writes under the posting fence), NOOK-072, NOOK-123 (thread-follow alerts, mentions-only badges and device receipt) and NOOK-073, NOOK-124 (the signed, session-bound `{id, page, visible, lastInputAt, locked}` heartbeat from every native app, inactivity one minute after an OS lock or sleep, macOS, Windows and Linux desktop-app routing, the per-device "Always send to mobile, even when I'm active" choice on each native device, and native held, released and canceled routing records retained with their reasons, restored, exported and erased as on the web).
+**Requirement.** Delivery bar, measured and published: for events eligible to alert after NOOK-032 schedules, NOOK-062 previews and NOOK-065 broadcast policy (mentions, DMs, keyword hits, broadcast mentions, call invites) to a device reachable by APNs or FCM (or a running/at-login desktop app) and routed to that device by NOOK-073, NOOK-124, at least 99.5% are displayed; the bar is measured against that routed device set, and a release after a NOOK-073, NOOK-124 hold is timed from the release; commit-to-display is p95 ≤ 5 s and p99 ≤ 30 s; a call invite rings a locked phone (CallKit/PushKit on iOS, a full-screen call notification on Android) within 5 s at p95; and every device's badge equals the authoritative unread plus Attention count (followed-thread replies included unless the member chose NOOK-072, NOOK-123's mentions-only thread badge) within 10 s of reconnect, foreground or a read on another device. Every eligible event not displayed is recorded under NOOK-008's distinct facts as `provider-unconfirmed` (the NOOK-078 gateway, APNs or FCM did not accept or acknowledge it) or `device-unobserved` (accepted, but no display receipt from the device within 60 s), shown in the member's device delivery view and the owner's delivery report (NOOK-048); none goes missing silently. A mobile alert held because the member was active on desktop and then canceled by a read or done is recorded as `held-active-elsewhere`, counted neither as displayed nor as a miss. The delivery bar is an obligation of every customer installation on its own Cloudflare account, never met only by a publisher-operated installation. It also inherits the native halves of NOOK-135, NOOK-090, NOOK-137 (draft, status and workspace-switch journeys), NOOK-053 (conversation notes and checklists with history, revert, pins, saved links, proposals and the erased-member display), NOOK-065 (broadcast delivery), NOOK-066 (native writes under the posting fence), NOOK-072, NOOK-123 (thread-follow alerts, mentions-only badges and device receipt) and NOOK-073, NOOK-124 (the signed, session-bound `{id, page, visible, lastInputAt, locked}` heartbeat from every native app, inactivity one minute after an OS lock or sleep, macOS, Windows and Linux desktop-app routing, the per-device "Always send to mobile, even when I'm active" choice on each native device, and native held, released and canceled routing records retained with their reasons, restored, exported and erased as on the web).
 
 **Acceptance.**
 1. On declared CI hardware, run a seeded 500-event device-protocol fixture across foreground, background, force-closed and locked states, with mentions, DMs, keyword hits, broadcast mentions and call invites and the published supported-OS fixtures.
@@ -1510,7 +1508,7 @@ Core · target · **missing** · From NOOK-074
 
 Core · target · **missing** · From NOOK-074 · Register R-5
 
-**Requirement.** Personal sign-in providers: owners may enable Continue with Google, Microsoft or Apple without configuring organization SSO. The provider's verified email must exactly match an existing member's confirmed mailbox, a pending invitation's address, or an approved domain under NOOK-018, so it is one more way to confirm a mailbox and never a fifth join door; an Apple private-relay address matches only an address already recorded for that member. SSO and passkeys in native apps: under NOOK-037 enforced SSO, native apps sign in through the IdP in the system authentication browser (ASWebAuthenticationSession on iOS and macOS, Custom Tabs on Android, the default browser with a claimed HTTPS or loopback redirect on Windows and Linux) using PKCE (S256) and state, never an embedded web view. While SSO is enforced, email codes, magic links and personal providers are disabled apart from NOOK-037's audited recovery route, and QR sign-in stays available only when the owner allows it, with the phone session bound to the IdP session policy. Enrolled members can sign in with a platform passkey (NOOK-069) on every native client. Second factor and lifecycle: every path above yields at most a NOOK-069 pending session when a second factor is required; deactivation (NOOK-018), session sign-out (NOOK-069) and SCIM offboarding (NOOK-037) end native sessions the same way. After first sign-in the device continues to NOOK-021's notification permission step. Its native workspace picker is the native half of NOOK-017, NOOK-092's workspace switching.
+**Requirement.** Personal sign-in providers: owners may enable Continue with Google, Microsoft or Apple without configuring organization SSO. The provider's verified email must exactly match an existing member's confirmed mailbox, a pending invitation's address, or an approved domain under NOOK-018, so it is one more way to confirm a mailbox and never a fifth join door; an Apple private-relay address matches only an address already recorded for that member. SSO and passkeys in native apps: under NOOK-037 enforced SSO, native apps sign in through the IdP in the system authentication browser (ASWebAuthenticationSession on iOS and macOS, Custom Tabs on Android, the default browser with a claimed HTTPS or loopback redirect on Windows and Linux) using PKCE (S256) and state, never an embedded web view. While SSO is enforced, email codes, magic links and personal providers are disabled apart from NOOK-037's audited recovery route, and QR sign-in stays available only when the owner allows it, with the phone session bound to the IdP session policy. Enrolled members can sign in with a platform passkey (NOOK-069) on every native client. Second factor and lifecycle: every path above yields at most a NOOK-069 pending session when a second factor is required; deactivation (NOOK-018), session sign-out (NOOK-069) and SCIM offboarding (NOOK-037) end native sessions the same way. After first sign-in the device continues to NOOK-021's notification permission step. Its native workspace picker is the native half of NOOK-137's workspace switching.
 
 **Acceptance.**
 1. With 2FA enforced every native route reaches only second-factor entry or enrollment. With SSO enforced, iOS signs in through run-auth in the system browser with PKCE and email-code/magic-link options are absent.
@@ -1805,6 +1803,57 @@ Core · target · **partial** · Rules D-1
 
 **Evidence.** `tests/notification-apps.mjs`; `tests/notification-extension.mjs`
 **Gap.** Carried-done audit has no cited asserting line for Point 1: lost-reply receipt lookup. Point 2: other app refused. Point 3: immutable app-name/channel identity, other pair refused, revoked token refused, withdrawn channel authority refused. Point 4: edit attributed to app in audit. Cited assertions establish approved-channel thread post, one accepted receipt, no second post, replacement approval edits earlier post, original body-free receipt, explicit tombstone, no duplicate effect. An explicit non-acceptance response is not asserted: equality to the never-accepted response proves indistinguishability, but not its non-acceptance field.
+
+### Personal workspace capabilities
+
+#### NOOK-134 — Custom profile fields and people directory
+
+Core · target · **partial** · From NOOK-017 · Rules D-1
+
+**Requirement.** Admins define custom profile fields (title, department, phone, manager, location, pronouns, start date) with per-field visibility. A searchable people directory filters by name and those fields, pages completely at NOOK-049 capacity, honors guest scope and never exposes a hidden field.
+
+**Acceptance.**
+1. Define title, phone and manager fields, fill them and find a person by department in the people directory at 1440 and 390; a guest sees only people in their granted channels and no hidden field.
+
+**Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
+**Gap.** Delivered web field privacy and directory workflows remain evidenced. The carried-done audit cites hidden-field absence; title, phone and manager values, department filtering at both widths and guest scope lack complete carried proof.
+
+#### NOOK-135 — Private draft state
+
+Core · target · **partial** · From NOOK-017 · Rules D-1
+
+**Requirement.** Private drafts survive navigation and account-isolated restart; editing, pending send and failed send are distinct states. Drafts stay separate when a person switches accounts or workspaces. Native draft resumption belongs to NOOK-021.
+
+**Acceptance.**
+1. Leave and resume a draft on each supported client, across navigation and restart.
+2. Switch accounts and workspaces and inspect draft isolation.
+
+**Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
+**Gap.** Delivered web draft resumption and workspace-isolated drafts remain evidenced. Account isolation and resumption on every supported native client across restart lack complete carried proof.
+
+#### NOOK-136 — Personal sidebar organization
+
+Core · target · **partial** · From NOOK-017 · Rules D-1
+
+**Requirement.** People organize channel and DM sections in their own sidebar and mark conversations unread without changing work acceptance.
+
+**Acceptance.**
+1. Organize channel and DM sections and mark a conversation unread; work acceptance stays unchanged.
+
+**Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
+**Gap.** Delivered web sidebar and mark-unread workflows remain evidenced. Complete carried proof for channel/DM section organization and unchanged work acceptance is absent.
+
+#### NOOK-137 — Device-held workspace picker
+
+Core · target · **partial** · From NOOK-017 · Rules D-1
+
+**Requirement.** on the web a member switches workspaces from a "Your workspaces" menu that lists the installations this browser has signed in to; the list is kept on the device, each entry opens that installation's own origin, any entry other than the current workspace can be removed (removing forgets it on this device and signs nothing out), and sign-in, drafts, caches and notifications stay separate per installation. Each installation records itself when this browser is signed in there; opening or adding another installation from the menu carries the list to it in the URL fragment, which no server receives, and an installation that list has never held joins only after the member confirms it. A native workspace picker is NOOK-074's and NOOK-021's. NOOK-021 inherits the native draft, status and workspace-switch journeys; NOOK-022 and NOOK-070, NOOK-116 the effects of `/huddle` and `/gif`, which until then answer privately that the service is unavailable and create nothing; NOOK-025 the rule that no app registers a built-in name or reorders built-ins; and NOOK-063 the Slack-format `msg_too_long` answer (the server already refuses with `message_too_long`).
+
+**Acceptance.**
+1. Switch accounts and workspaces; each installation retains its own drafts, cached state and notifications. A new installation joins the device list only after confirmation, and forgetting another installation signs nothing out.
+
+**Evidence.** `src/chat/Composer.tsx`; `src/chat/composition/useCompositionDelivery.ts`; `src/commands/useCommands.tsx`; `src/profiles/server.ts`; `src/personal/workspace.server.ts`; `src/personal/typing.server.ts`; `src/workspaces/device-list.ts`; `src/workspaces/WorkspacesMenu.tsx`; `tests/composition-browser.mjs`; `src/profiles/FieldSettings.tsx`; `tests/profile-fields-ordering.mjs`; `tests/profiles.mjs`; `tests/personal.mjs`; `tests/personal-browser.mjs`; `tests/workspaces-browser.mjs`; `tests/team-portability.test.mjs`; `tests/storage-flows.mjs`
+**Gap.** Delivered web workspace picking, isolated drafts, new-installation confirmation and forgetting without sign-out have cited assertions. Complete carried proof for installation-isolated caches and notifications is absent; no native picker is claimed.
 
 ### Push further: accountable agents in the conversation
 

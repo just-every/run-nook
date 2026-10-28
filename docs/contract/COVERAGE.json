@@ -797,7 +797,11 @@
         "NOOK-017",
         "NOOK-090",
         "NOOK-091",
-        "NOOK-092"
+        "NOOK-092",
+        "NOOK-134",
+        "NOOK-135",
+        "NOOK-136",
+        "NOOK-137"
       ]
     },
     {
@@ -809,7 +813,11 @@
         "NOOK-017",
         "NOOK-090",
         "NOOK-091",
-        "NOOK-092"
+        "NOOK-092",
+        "NOOK-134",
+        "NOOK-135",
+        "NOOK-136",
+        "NOOK-137"
       ]
     },
     {
@@ -2635,7 +2643,11 @@
         "NOOK-017",
         "NOOK-090",
         "NOOK-091",
-        "NOOK-092"
+        "NOOK-092",
+        "NOOK-134",
+        "NOOK-135",
+        "NOOK-136",
+        "NOOK-137"
       ],
       "also": [
         {
@@ -4688,7 +4700,11 @@
         "NOOK-017",
         "NOOK-090",
         "NOOK-091",
-        "NOOK-092"
+        "NOOK-092",
+        "NOOK-134",
+        "NOOK-135",
+        "NOOK-136",
+        "NOOK-137"
       ]
     },
     {
@@ -4703,10 +4719,8 @@
       "text": "Profile-field response ordering: `tests/profile-fields-ordering.mjs`, called by `tests/composition-browser.mjs`, delays actual public responses without replacing their bodies. At 390 a pre-save field read arrives after the save-state commit while the final team-roster page is released during creation; the original exact save and Edit assertions remain. At 1440 and 390, the Profile fields section exposes `aria-busy` and `data-save=\"idle|saving|saved\"`, settling with its result and notice. An aged synthetic native sign-in proof produces a real step-up refusal while a committed save response is held; the save then reads under the current session and reports that the list was reloaded, independently of workspace refreshes. `src/profiles/FieldSettings.tsx` invalidates reads started before or during a write and does not adopt a retired scope\u2019s result. The status-command read still waits for its public confirmation dialog to close.",
       "to": "clause",
       "ids": [
-        "NOOK-017",
-        "NOOK-090",
-        "NOOK-091",
-        "NOOK-092"
+        "NOOK-134",
+        "NOOK-091"
       ]
     },
     {
@@ -6132,7 +6146,11 @@
         "NOOK-017",
         "NOOK-090",
         "NOOK-091",
-        "NOOK-092"
+        "NOOK-092",
+        "NOOK-134",
+        "NOOK-135",
+        "NOOK-136",
+        "NOOK-137"
       ],
       "also": [
         {

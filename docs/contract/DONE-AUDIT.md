@@ -189,7 +189,7 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-016 | 3 | mandatory-channel leave refused | none | none |
 | NOOK-017 | 1 | formatted text and code | none | none |
 | NOOK-017 | 1 | attachment composition | none | none |
-| NOOK-017 | 1 | draft resumes on each supported client | none | none |
+| NOOK-135 | 1 | draft resumes on each supported client | none | none |
 | NOOK-017 | 1 | interrupted send has one effect | none | none |
 | NOOK-017 | 2 | 50000-character snippet-or-split choice | none | none |
 | NOOK-017 | 2 | one previewable snippet message | `tests/composition-browser.mjs:76` | asserted |
@@ -204,20 +204,20 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-017 | 3 | list conversion | none | none |
 | NOOK-017 | 3 | one undo restores literal characters | none | none |
 | NOOK-017 | 3 | plain-text export retains content | none | none |
-| NOOK-090 | 1 | account-isolated drafts | none | none |
-| NOOK-090 | 1 | workspace-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
-| NOOK-090 | 1 | mark unread | none | none |
+| NOOK-135 | 2 | account-isolated drafts | none | none |
+| NOOK-135 | 2 | workspace-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
+| NOOK-136 | 1 | mark unread | none | none |
 | NOOK-090 | 1 | status and time-zone change | none | none |
 | NOOK-090 | 1 | work acceptance unchanged | none | none |
 | NOOK-090 | 2 | thirty-minute status expiry | none | none |
 | NOOK-090 | 2 | expiry visible on another client | none | none |
 | NOOK-090 | 2 | expiry survives restart | none | none |
-| NOOK-090 | 3 | title field definition and value | none | none |
-| NOOK-090 | 3 | phone field definition and value | none | none |
-| NOOK-090 | 3 | manager field definition and value | none | none |
-| NOOK-090 | 3 | department-filter result at both widths | none | none |
-| NOOK-090 | 3 | guest people scope | none | none |
-| NOOK-090 | 3 | hidden field absent | `tests/profiles.mjs:22` | asserted |
+| NOOK-134 | 1 | title field definition and value | none | none |
+| NOOK-134 | 1 | phone field definition and value | none | none |
+| NOOK-134 | 1 | manager field definition and value | none | none |
+| NOOK-134 | 1 | department-filter result at both widths | none | none |
+| NOOK-134 | 1 | guest people scope | none | none |
+| NOOK-134 | 1 | hidden field absent | `tests/profiles.mjs:22` | asserted |
 | NOOK-091 | 1 | built-in commands precede app commands | none | none |
 | NOOK-091 | 2 | remind command equals menu action | none | none |
 | NOOK-091 | 2 | invite command equals menu action | none | none |
@@ -241,11 +241,11 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-092 | 1 | scheduled message visible | none | none |
 | NOOK-092 | 1 | scheduled time editable there | none | none |
 | NOOK-092 | 1 | yesterday sent message visible | none | none |
-| NOOK-092 | 2 | installation-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
-| NOOK-092 | 2 | installation-isolated cached state | none | none |
-| NOOK-092 | 2 | installation-isolated notifications | none | none |
-| NOOK-092 | 2 | new installation confirmation | `tests/workspaces-browser.mjs:62` | asserted |
-| NOOK-092 | 2 | forgetting another installation keeps sessions | `tests/workspaces-browser.mjs:104` | asserted |
+| NOOK-137 | 1 | installation-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
+| NOOK-137 | 1 | installation-isolated cached state | none | none |
+| NOOK-137 | 1 | installation-isolated notifications | none | none |
+| NOOK-137 | 1 | new installation confirmation | `tests/workspaces-browser.mjs:62` | asserted |
+| NOOK-137 | 1 | forgetting another installation keeps sessions | `tests/workspaces-browser.mjs:104` | asserted |
 | NOOK-019 | 1 | imported reply found | `tests/search.mjs:69` | asserted |
 | NOOK-019 | 1 | PDF phrase found | none | none |
 | NOOK-019 | 1 | text-file phrase found | none | none |
@@ -602,3 +602,6 @@ Old reference: `74380c56f0f5ae57106250e7343ba1c546f33c39`.
 | NOOK-089 | old 4 | No-new-durable-category and migration statements describe mechanism, not a user outcome. | `docs/contract/mechanism.md` | moved |
 | NOOK-044 | old 1 | Live Campfire account receipt moved to R-8; genuine upstream fixture migration still gates. | `CONTRACT.md` | moved |
 | NOOK-046 | old 1 | Live Mattermost account receipt moved to R-8; genuine upstream fixture migration still gates. | `CONTRACT.md` | moved |
+| NOOK-135 | 1 | draft survives navigation and restart | none | none |
+| NOOK-136 | 1 | channel and DM sections organized | none | none |
+| NOOK-136 | 1 | work acceptance unchanged | none | none |
