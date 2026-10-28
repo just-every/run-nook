@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { contractPageHtml } from '../base/contract-page'
+import { withContractContext } from './contract-context'
+import contractSource from '../../CONTRACT.md?raw'
 import { runPageHtml, siteNotFoundHtml, type SiteBuild, type SiteContext } from '../base/run-site'
 import { fontLinks } from '../base/font-head'
 import { productIdentity } from '../brand/product'
@@ -28,7 +30,7 @@ export async function sitePages({ styles, contract }: SiteContext): Promise<Site
     pages: [
       { path: '/', html: document('Nook — Talk it through. Get it done.', '100% free, open source alternative to Slack and Microsoft Teams. Turn a message into a decision or a request. Everyone can see who’s on it.', <Homepage variant="site" />) },
       { path: '/run', html: runPageHtml(identity, run, contract) },
-      ...(contract ? [{ path: '/contract', html: contractPageHtml(identity, run, contract) }] : []),
+      ...(contract ? [{ path: '/contract', html: withContractContext(contractPageHtml(identity, run, contract), contractSource, contract) }] : []),
       ...docs,
       { path: '/404', html: siteNotFoundHtml(identity, run, contract) },
     ],

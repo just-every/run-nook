@@ -688,8 +688,16 @@
       "sha256": "2854e2a05d94970aba129adae42b9fd5b9142e68231d1540fedeb87b1bc1cbe8",
       "executable": false
     },
+    "docs/contract/DONE-AUDIT.md": {
+      "sha256": "f7a23fe39bca6bd40d439fc3377790f54532c1eceb0bf4eff2950664bb7ce42d",
+      "executable": false
+    },
     "docs/contract/ID-MAP.json": {
       "sha256": "5204230d42d496598bfa4b601b19e94ff10c27714b2d785168917e437cb44c7f",
+      "executable": false
+    },
+    "docs/contract/mechanism.md": {
+      "sha256": "9cd32512bb3236767b99eca202d51b330339496e6e505c8c40414c7d7b7ed861",
       "executable": false
     },
     "docs/conversations.md": {
@@ -758,6 +766,10 @@
     },
     "docs/updating.md": {
       "sha256": "0a20a68ae438feb853e10b76f4a71827b5f80c7450b5b76a14d20586f96c1a9e",
+      "executable": false
+    },
+    "docs/verify.md": {
+      "sha256": "45e0b429ccc199dd73b236083df89b36593c12b962249075d8330574e7e5c71f",
       "executable": false
     },
     "docs/your-team.md": {
@@ -1650,6 +1662,10 @@
     },
     "rer-setup.json": {
       "sha256": "8e0f379455f3ca5ca84170e4fa12f3d7134e724ca5768524404bd23b1b4347d5",
+      "executable": false
+    },
+    "RULINGS.md": {
+      "sha256": "c4cba266ada82daaec8b19335d5c2dc93b640e382e7f5fc206e5e78255f05c4e",
       "executable": false
     },
     "RUN-LOCALLY.md": {
@@ -6197,7 +6213,7 @@
       "executable": false
     },
     "src/site/pages.tsx": {
-      "sha256": "0f7a0e107b9b74cf62d9bee513f70f0032573d357ebafe0b746f3b1ae7f6cc85",
+      "sha256": "356ae4528a0ea47e1f49bf2ec90e6881971231a1c9bbefadfd37b266d3e6aedd",
       "executable": false
     },
     "src/site/run.ts": {
