@@ -37,7 +37,7 @@ The primary journey: Install Nook, invite the team, review and import their hist
 | BASE-INPUT-001 | Validation | NOOK-007, NOOK-013 | not run |
 | BASE-INPUT-002 | HTML | NOOK-007, DOCS-001 | not run |
 | BASE-INPUT-003 | Uploads | NOOK-012, NOOK-024, NOOK-061, NOOK-110 | not run |
-| BASE-SECRET-001 | No leakage | NOOK-007, NOOK-015, NOOK-025, NOOK-098, NOOK-099, NOOK-036, NOOK-040, NOOK-050, NOOK-108, NOOK-079, NOOK-087 | not run |
+| BASE-SECRET-001 | No leakage | NOOK-007, NOOK-015, NOOK-098, NOOK-036, NOOK-040, NOOK-050, NOOK-108, NOOK-079, NOOK-087 | not run |
 | BASE-SECRET-002 | Startup | NOOK-050, NOOK-108 | not run |
 | BASE-DATA-001 | Export and import | NOOK-006, NOOK-009, NOOK-012, NOOK-013, NOOK-047 | not run |
 | BASE-DATA-002 | Retention | NOOK-038 | not run |
@@ -433,13 +433,13 @@ The primary journey: Install Nook, invite the team, review and import their hist
 
 #### NOOK-025 — App platform and scoped event delivery
 
-*Tier:* Core · *From:* NOOK-025 · *Cites:* BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008, BASE-SECRET-001 · *Rules:* D-1
+*Tier:* Core · *From:* NOOK-025 · *Cites:* BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008 · *Rules:* D-1
 
 **Requirement.** Owners install/revoke scoped apps with visible publisher, permissions and egress. Provide versioned REST/events APIs, incoming and outgoing signed webhooks, slash commands, interactive message buttons/forms and bot identities; the Slack-compatible webhook, Web API, Events API, slash-command and Block Kit surface with its published compatibility matrix is NOOK-063, NOOK-112, NOOK-114, NOOK-113, Zapier/Make/n8n connectors are NOOK-064 and app link unfurls are NOOK-068. Event cursors, signatures, replay protection, idempotency, rate limits, subscription filters and delivery/failure logs are public contracts. Bots do not impersonate people or gain private conversation membership without a grant. An accountable agent's own commitment action carries commitment under the company's policy, with truthful attribution.
 
 **Acceptance.**
 1. Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval.
-2. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty with secrets redacted.
+2. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty.
 
 #### NOOK-098 — App direct messages and home
 
@@ -453,9 +453,9 @@ The primary journey: Install Nook, invite the team, review and import their hist
 
 #### NOOK-099 — App channel management
 
-*Tier:* Core · *From:* NOOK-025 · *Cites:* BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008, BASE-SECRET-001 · *Rules:* D-1
+*Tier:* Core · *From:* NOOK-025 · *Cites:* BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008 · *Rules:* D-1
 
-**Requirement.** Channel management: creating, inviting into, renaming, setting topic/purpose and archiving channels requires the app's install-time channel-management scope, follows the org's channel-creation policy (NOOK-060), invites only people the org permits, and every use is audited with the app identity and the installing person. Outgoing actions bind actor, conversation, destination and consent; secrets stay server-side, rotated/revoked grants stop new work and untrusted links cannot cause arbitrary fetch/SSRF. Apps inherit NOOK-066's posting fence and NOOK-065's broadcast policy atomically as membership (a refused write commits nothing), and no app may register a built-in command name or reorder built-ins (NOOK-017, NOOK-091).
+**Requirement.** Channel management: creating, inviting into, renaming, setting topic/purpose and archiving channels requires the app's install-time channel-management scope, follows the org's channel-creation policy (NOOK-060), invites only people the org permits, and every use is audited with the app identity and the installing person. Outgoing actions bind actor, conversation, destination and consent; rotated/revoked grants stop new work and untrusted links cannot cause arbitrary fetch/SSRF. Apps inherit NOOK-066's posting fence and NOOK-065's broadcast policy atomically as membership (a refused write commits nothing), and no app may register a built-in command name or reorder built-ins (NOOK-017, NOOK-091).
 
 **Acceptance.**
 1. An app without the channel-management scope cannot create a channel.
@@ -654,7 +654,7 @@ The primary journey: Install Nook, invite the team, review and import their hist
 
 **Acceptance.**
 1. Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning.
-2. Exercise an approved override and revoke it; inspect policy history, secret redaction and deletion of derived content after source erasure.
+2. Exercise an approved override and revoke it; inspect policy history and deletion of derived content after source erasure.
 
 #### NOOK-041 — Slack export import and guarded undo
 

@@ -486,13 +486,13 @@ Core · target · **partial** · Cites BASE-INPUT-003, BASE-DATA-006
 
 #### NOOK-025 — App platform and scoped event delivery
 
-Core · target · **missing** · From NOOK-025 · Cites BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008, BASE-SECRET-001 · Rules D-1
+Core · target · **missing** · From NOOK-025 · Cites BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008 · Rules D-1
 
 **Requirement.** Owners install/revoke scoped apps with visible publisher, permissions and egress. Provide versioned REST/events APIs, incoming and outgoing signed webhooks, slash commands, interactive message buttons/forms and bot identities; the Slack-compatible webhook, Web API, Events API, slash-command and Block Kit surface with its published compatibility matrix is NOOK-063, NOOK-112, NOOK-114, NOOK-113, Zapier/Make/n8n connectors are NOOK-064 and app link unfurls are NOOK-068. Event cursors, signatures, replay protection, idempotency, rate limits, subscription filters and delivery/failure logs are public contracts. Bots do not impersonate people or gain private conversation membership without a grant. An accountable agent's own commitment action carries commitment under the company's policy, with truthful attribution.
 
 **Acceptance.**
 1. Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval.
-2. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty with secrets redacted.
+2. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty.
 
 **Evidence.** None.
 **Gap.** No implementing source/test; acceptance journey above is pending.
@@ -512,9 +512,9 @@ Core · target · **missing** · From NOOK-025 · Cites BASE-AGENT-005, BASE-AGE
 
 #### NOOK-099 — App channel management
 
-Core · target · **missing** · From NOOK-025 · Cites BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008, BASE-SECRET-001 · Rules D-1
+Core · target · **missing** · From NOOK-025 · Cites BASE-AGENT-005, BASE-AGENT-007, BASE-AGENT-008 · Rules D-1
 
-**Requirement.** Channel management: creating, inviting into, renaming, setting topic/purpose and archiving channels requires the app's install-time channel-management scope, follows the org's channel-creation policy (NOOK-060), invites only people the org permits, and every use is audited with the app identity and the installing person. Outgoing actions bind actor, conversation, destination and consent; secrets stay server-side, rotated/revoked grants stop new work and untrusted links cannot cause arbitrary fetch/SSRF. Apps inherit NOOK-066's posting fence and NOOK-065's broadcast policy atomically as membership (a refused write commits nothing), and no app may register a built-in command name or reorder built-ins (NOOK-017, NOOK-091).
+**Requirement.** Channel management: creating, inviting into, renaming, setting topic/purpose and archiving channels requires the app's install-time channel-management scope, follows the org's channel-creation policy (NOOK-060), invites only people the org permits, and every use is audited with the app identity and the installing person. Outgoing actions bind actor, conversation, destination and consent; rotated/revoked grants stop new work and untrusted links cannot cause arbitrary fetch/SSRF. Apps inherit NOOK-066's posting fence and NOOK-065's broadcast policy atomically as membership (a refused write commits nothing), and no app may register a built-in command name or reorder built-ins (NOOK-017, NOOK-091).
 
 **Acceptance.**
 1. An app without the channel-management scope cannot create a channel.
@@ -764,7 +764,7 @@ Core · target · **partial** · Cites BASE-SECRET-001, BASE-DATA-004, BASE-AGEN
 
 **Acceptance.**
 1. Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning.
-2. Exercise an approved override and revoke it; inspect policy history, secret redaction and deletion of derived content after source erasure.
+2. Exercise an approved override and revoke it; inspect policy history and deletion of derived content after source erasure.
 
 **Evidence.** `src/platform/storage/context.ts`; `src/platform/storage/files.ts`; `src/push/crypto.ts`; `tests/team-security.test.mjs`
 **Gap.** Current-membership private-message/file access and encrypted push exist; labels, DLP, organization AI policy and cross-tool enforcement are missing.

@@ -1101,7 +1101,27 @@
     {
       "file": "CONTRACT.md",
       "line": 195,
-      "text": "**NOOK-025 \u2014 App and bot platform.** Owners install/revoke scoped apps with visible publisher, permissions and egress. Provide versioned REST/events APIs, incoming and outgoing signed webhooks, slash commands, interactive message buttons/forms and bot identities; the Slack-compatible webhook, Web API, Events API, slash-command and Block Kit surface with its published compatibility matrix is NOOK-063, Zapier/Make/n8n connectors are NOOK-064 and app link unfurls are NOOK-068. Event cursors, signatures, replay protection, idempotency, rate limits, subscription filters and delivery/failure logs are public contracts. Bots never impersonate people, accept commitments or gain a private conversation without a grant. **App DMs and app home:** an app whose install-time permission screen lists the `im:write`-style scope may open exactly one app DM per person and app (NOOK-063 `conversations.open`), labeled with the app identity, publisher and an App badge, holding only that app's messages and the person's replies; owners allow app DMs per app or require admin approval. The person can mute the app DM, leave it (hiding it until the app next posts) or block the app, after which opens and posts are refused and nothing is delivered until they unblock; every app DM and its scopes are listed in the person's Apps settings. An optional app home (`views.publish`) shows app-supplied blocks to that person only. An app's token reads only its own app DMs and conversations it is a member of; it never reads or lists another DM, group DM or private channel. A person grants an app a private channel only by adding it as a member (`/invite @app` or channel details), which members see and NOOK-051 audits; removing it revokes access immediately. **Channel management:** creating, inviting into, renaming, setting topic/purpose and archiving channels requires the app's install-time channel-management scope, follows the org's channel-creation policy (NOOK-060), invites only people the org permits, and every use is audited with the app identity and the installing person. Outgoing actions bind actor, conversation, destination and consent; secrets stay server-side, rotated/revoked grants stop new work and untrusted links cannot cause arbitrary fetch/SSRF. Apps inherit NOOK-066's posting fence and NOOK-065's broadcast policy in the same D1 batch as membership (a refused write commits nothing), and no app may register a built-in command name or reorder built-ins (NOOK-017).",
+      "text": "**NOOK-025 \u2014 App and bot platform.** Owners install/revoke scoped apps with visible publisher, permissions and egress. Provide versioned REST/events APIs, incoming and outgoing signed webhooks, slash commands, interactive message buttons/forms and bot identities; the Slack-compatible webhook, Web API, Events API, slash-command and Block Kit surface with its published compatibility matrix is NOOK-063, Zapier/Make/n8n connectors are NOOK-064 and app link unfurls are NOOK-068. Event cursors, signatures, replay protection, idempotency, rate limits, subscription filters and delivery/failure logs are public contracts. Bots never impersonate people, accept commitments or gain a private conversation without a grant. **App DMs and app home:** an app whose install-time permission screen lists the `im:write`-style scope may open exactly one app DM per person and app (NOOK-063 `conversations.open`), labeled with the app identity, publisher and an App badge, holding only that app's messages and the person's replies; owners allow app DMs per app or require admin approval. The person can mute the app DM, leave it (hiding it until the app next posts) or block the app, after which opens and posts are refused and nothing is delivered until they unblock; every app DM and its scopes are listed in the person's Apps settings. An optional app home (`views.publish`) shows app-supplied blocks to that person only. An app's token reads only its own app DMs and conversations it is a member of; it never reads or lists another DM, group DM or private channel. A person grants an app a private channel only by adding it as a member (`/invite @app` or channel details), which members see and NOOK-051 audits; removing it revokes access immediately. **Channel management:** creating, inviting into, renaming, setting topic/purpose and archiving channels requires the app's install-time channel-management scope, follows the org's channel-creation policy (NOOK-060), invites only people the org permits, and every use is audited with the app identity and the installing person. Outgoing actions bind actor, conversation, destination and consent;",
+      "to": "clause",
+      "ids": [
+        "NOOK-025",
+        "NOOK-098",
+        "NOOK-099"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 195,
+      "text": "secrets stay server-side,",
+      "to": "base",
+      "ids": [
+        "BASE-SECRET-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 195,
+      "text": "rotated/revoked grants stop new work and untrusted links cannot cause arbitrary fetch/SSRF. Apps inherit NOOK-066's posting fence and NOOK-065's broadcast policy in the same D1 batch as membership (a refused write commits nothing), and no app may register a built-in command name or reorder built-ins (NOOK-017).",
       "to": "clause",
       "ids": [
         "NOOK-025",
@@ -1112,7 +1132,27 @@
     {
       "file": "CONTRACT.md",
       "line": 197,
-      "text": "**Acceptance evidence:** Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty with secrets redacted. An app with the DM scope opens one app DM with a member; the member mutes, blocks and unblocks it, and posts are refused while blocked. The member adds the app to a private channel and removes it, and the audit log shows both; the app's token cannot list or read any other DM, group DM or private channel. An app without the channel-management scope cannot create a channel.",
+      "text": "**Acceptance evidence:** Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty",
+      "to": "clause",
+      "ids": [
+        "NOOK-025",
+        "NOOK-098",
+        "NOOK-099"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 197,
+      "text": "with secrets redacted",
+      "to": "base",
+      "ids": [
+        "BASE-SECRET-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 197,
+      "text": ". An app with the DM scope opens one app DM with a member; the member mutes, blocks and unblocks it, and posts are refused while blocked. The member adds the app to a private channel and removes it, and the audit log shows both; the app's token cannot list or read any other DM, group DM or private channel. An app without the channel-management scope cannot create a channel.",
       "to": "clause",
       "ids": [
         "NOOK-025",
@@ -1480,7 +1520,25 @@
     {
       "file": "CONTRACT.md",
       "line": 263,
-      "text": "**Acceptance evidence:** Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning. Exercise an approved override and revoke it; inspect policy history, secret redaction and deletion of derived content after source erasure.",
+      "text": "**Acceptance evidence:** Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning. Exercise an approved override and revoke it; inspect policy history,",
+      "to": "clause",
+      "ids": [
+        "NOOK-040"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 263,
+      "text": "secret redaction and",
+      "to": "base",
+      "ids": [
+        "BASE-SECRET-001"
+      ]
+    },
+    {
+      "file": "CONTRACT.md",
+      "line": 263,
+      "text": "deletion of derived content after source erasure.",
       "to": "clause",
       "ids": [
         "NOOK-040"
@@ -5142,7 +5200,27 @@
     {
       "file": "ACCEPTANCE.md",
       "line": 221,
-      "text": "**NOOK-025 \u2014 App and bot platform.** **Status: missing.** Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty with secrets redacted. An app with the DM scope opens one app DM with a member; the member mutes, blocks and unblocks it, and posts are refused while blocked. The member adds the app to a private channel and removes it, and the audit log shows both; the app's token cannot list or read any other DM, group DM or private channel. An app without the channel-management scope cannot create a channel. Inherited: an app write in a restricted channel and an app command named like a built-in are refused, per NOOK-066, NOOK-065 and NOOK-017.",
+      "text": "**NOOK-025 \u2014 App and bot platform.** **Status: missing.** Install an app as owner, subscribe only one channel, post a signed incoming event, invoke a slash command and click an interactive approval. Replay/forge payloads, exceed a rate limit, copy a private event ID and revoke the app: deny escalation, avoid duplicate effects and show delivery/uncertainty",
+      "to": "clause",
+      "ids": [
+        "NOOK-025",
+        "NOOK-098",
+        "NOOK-099"
+      ]
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "line": 221,
+      "text": "with secrets redacted",
+      "to": "base",
+      "ids": [
+        "BASE-SECRET-001"
+      ]
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "line": 221,
+      "text": ". An app with the DM scope opens one app DM with a member; the member mutes, blocks and unblocks it, and posts are refused while blocked. The member adds the app to a private channel and removes it, and the audit log shows both; the app's token cannot list or read any other DM, group DM or private channel. An app without the channel-management scope cannot create a channel. Inherited: an app write in a restricted channel and an app command named like a built-in are refused, per NOOK-066, NOOK-065 and NOOK-017.",
       "to": "clause",
       "ids": [
         "NOOK-025",
@@ -5380,7 +5458,25 @@
     {
       "file": "ACCEPTANCE.md",
       "line": 284,
-      "text": "**NOOK-040 \u2014 Information protection and data handling.** **Status: partial.** Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning. Exercise an approved override and revoke it; inspect policy history, secret redaction and deletion of derived content after source erasure.",
+      "text": "**NOOK-040 \u2014 Information protection and data handling.** **Status: partial.** Label a private channel, attempt a restricted external share, connector post, export and AI retrieval, and observe the configured block/warning. Exercise an approved override and revoke it; inspect policy history,",
+      "to": "clause",
+      "ids": [
+        "NOOK-040"
+      ]
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "line": 284,
+      "text": "secret redaction and",
+      "to": "base",
+      "ids": [
+        "BASE-SECRET-001"
+      ]
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "line": 284,
+      "text": "deletion of derived content after source erasure.",
       "to": "clause",
       "ids": [
         "NOOK-040"
