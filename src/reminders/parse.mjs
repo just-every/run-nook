@@ -77,8 +77,20 @@ function separateText(value) {
         if (rest) return fail('Put the complete time before or after the quoted reminder text');
         return { text, time: value.slice(0, start.index) };
     }
-    if (delimiter) return { time: value.slice(0, delimiter.index), text: value.slice(delimiter.index + delimiter[0].length) };
-    return fail('Add reminder text in quotes or after “to”, for example: me in 20 minutes to call Ana');
+    if (delimiter) return { time: value.slice(0, delimiter.index), text: value.slice(delimiter.index + delimiter[0].length), loose: true };
+    return null;
+}
+
+// Plain words: the reminder is its text followed by when, as in "Water the basil tomorrow at 9am". The earliest split
+// whose tail reads as a time wins, so the longest time expression is taken.
+function trailingTime(value, readTime) {
+    const words = value.split(/\s+/);
+    for (let index = 1; index < words.length; index++) {
+        const time = words.slice(index).join(' ');
+        try { readTime(time); } catch (error) { if (error instanceof Fault) continue; throw error; }
+        return { text: words.slice(0, index).join(' '), time };
+    }
+    return fail('Say when, for example: Water the basil tomorrow at 9am');
 }
 
 function ordinal(value) {
@@ -171,16 +183,21 @@ function parseTime(expression, local, zone, now) {
 }
 
 /** Parse a bounded, explicit reminder grammar; never infer unknown phrases.
- * Date-only phrases use 09:00. A bare clock rolls to tomorrow when needed;
- * a named date without a year chooses its next future occurrence. */
+ * A phrase that names no one is a reminder for me. Date-only phrases use 09:00. A bare clock rolls to tomorrow when
+ * needed; a named date without a year chooses its next future occurrence. */
 export function parseReminder(phrase, zone, now = Date.now()) {
-    if (typeof phrase !== 'string' || !phrase.trim()) return fail('Enter a reminder with a target, time and text');
+    if (typeof phrase !== 'string' || !phrase.trim()) return fail('Enter a reminder with a time and text');
     if (typeof now !== 'number' || !Number.isFinite(now) || Math.abs(now) > 8.64e15) return fail('Choose a valid current time');
     const input = phrase.trim().replace(/^\/remind\s+/i, '');
     const match = /^(me|[@#][\p{L}\p{N}_.-]+)\s+(.+)$/isu.exec(input);
-    if (!match) return fail('Start the reminder with me, @person or #channel');
-    const target = match[1].toLowerCase() === 'me' ? 'me' : match[1];
-    const { time, text } = separateText(match[2].trim());
+    const target = match ? (match[1].toLowerCase() === 'me' ? 'me' : match[1]) : 'me';
+    const rest = match ? match[2].trim() : input;
+    const read = time => { const current = localClock(now, zone); return parseTime(time, current.local, current.zone, now); };
+    let split = separateText(rest), refused = null;
+    // “to” may be a word of the text itself (“Go to the shop tomorrow at 9am”), so a tail that is no time is read as plain words.
+    if (split?.loose) try { read(split.time); } catch (error) { if (!(error instanceof Fault)) throw error; refused = error; split = null; }
+    if (!split) try { split = trailingTime(rest, read); } catch (error) { throw refused ?? error; }
+    const { time, text } = split;
     if (!text.trim()) return fail('Add some reminder text');
     if (!time.trim()) return fail('Add a reminder time');
     const current = localClock(now, zone);

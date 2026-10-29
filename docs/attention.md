@@ -51,8 +51,9 @@ Reply inline or open the full discussion. **Mark thread read** clears that threa
 
 Open **Reminders** in the sidebar or **You → Reminders** on a phone. You can also type `/remind` in a conversation, choose **Remind me** from a message’s menu, or **Remind me about file** beside a file.
 
-Enter a target, text and time, then choose **Preview reminder**. For example:
+Write what and when, then choose **Preview reminder**. A reminder that names no one is for you; start with `@person` or `#channel` to remind someone else. For example:
 
+- `Water the basil tomorrow at 9am`
 - `/remind me in 20 minutes to call Ana`
 - `/remind #standup "Post your update" every weekday at 9am`
 - `/remind me tomorrow at 9am to send the deck`
