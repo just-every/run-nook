@@ -24,6 +24,10 @@ export async function afterStep({phase,step,result,request,origin,cookie,databas
 }
 export default async function({database}){
  const db=await database('DB')
+ const binding=await db.prepare('SELECT b.claim_id,s.owner_id FROM oa_bootstrap b JOIN bs_settings s ON s.singleton=b.singleton WHERE b.singleton=1').first()
+ if(!binding?.owner_id)throw Error('Signed owner binding missing')
+ const moved=await db.prepare('SELECT 1 FROM nook_agent_activity WHERE sponsor<>? LIMIT 1').bind(binding.claim_id).first()
+ if(moved)throw Error('Native sponsor binding moved')
  const approved=await db.prepare("SELECT sponsor,approvers FROM nook_agent_activity WHERE json_array_length(approvers)>0 ORDER BY at DESC LIMIT 1").first()
  if(!approved)throw Error('Native approval witness missing')
  for(const person of JSON.parse(approved.approvers)){

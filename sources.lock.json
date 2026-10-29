@@ -2113,7 +2113,7 @@
       "executable": false
     },
     "src/agent-door/people.server.ts": {
-      "sha256": "6ccf58e553d3f135c568308f9e540366235df1d4e151479ed6b1610f87912f67",
+      "sha256": "7f5609e9939266dcec025aac58a2cf637b98ecb87e89bb39e5d43c0578b0c688",
       "executable": false
     },
     "src/agent-door/registry.server.ts": {
@@ -7213,7 +7213,7 @@
       "executable": false
     },
     "tests/agent-native-journey.mjs": {
-      "sha256": "4c95b48ae9ad00cf614a464a0803f77c146ec99a811c0323a1a12a319b08d402",
+      "sha256": "9cc707a9c0c3d97ad03eae8fab9e4000f3363a07afa0a65710aa672c3568f0d8",
       "executable": false
     },
     "tests/agent-phase-fixtures.mjs": {
