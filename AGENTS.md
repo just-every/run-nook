@@ -60,6 +60,12 @@ their values. Deploys, provider calls and publication need the owner's approval.
 Tests use isolated synthetic workspaces; do not weaken an assertion to make a
 change pass.
 
+The complete `pnpm test:runtime` journey runs the existing storage, product API,
+browser, export, keyboard, conversion and installer suites in separate native
+installations, followed by thread delivery. This keeps directory/scale fixtures
+out of later workspace exports while retaining every assertion. Use the existing
+`--suite=...` option for a touched flow.
+
 ## Contract regeneration
 
 Lander-Regenerate: node src/base/foundation/runtime/contract-docs.mjs write

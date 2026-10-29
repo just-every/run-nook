@@ -17,6 +17,19 @@ import {mailEdge} from './mail-edge.mjs'
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
 assert.ok(['all','core','core-api','core-api-storage','core-api-product','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
+if(suite==='all'){
+ // Keep the complete normal journey on the same isolated installations as CI.
+ // Storage's directory/scale fixtures must not become the input of a later
+ // workspace export or browser journey. Every existing assertion still runs.
+ const options=process.argv.slice(2).filter(arg=>!arg.startsWith('--suite='));
+ const commands=['core-api-storage','core-api-product','core-browser','readable-export','keyboard','conversion','installer'].map(name=>['tests/runtime.mjs','--suite='+name,...options]);
+ commands.push(['--test','--test-concurrency=1','tests/thread-delivery.mjs']);
+ for(const args of commands){
+  const code=await new Promise((resolve,reject)=>{const child=spawn(process.execPath,args,{cwd:process.cwd(),env:process.env,stdio:'inherit'});child.once('error',reject);child.once('exit',code=>resolve(code??1))});
+  if(code)process.exit(code);
+ }
+ process.exit(0);
+}
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']

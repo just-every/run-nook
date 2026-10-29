@@ -633,7 +633,7 @@
       "executable": false
     },
     "AGENTS.md": {
-      "sha256": "14fe4fef5e284972369b95f72836ee803407714c24d9bdd7ad9f0a54eb5fbd08",
+      "sha256": "34607230d40da493fd3d453d6ef4da4cbd1c63053c42ed2774c6334dd6edd018",
       "executable": false
     },
     "base-copies.json": {
@@ -7749,7 +7749,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "fb6c463da3d5cdca92404b5ba21ae8d344a7ca22751b834929aadd735c3654d5",
+      "sha256": "742193a3af1732b5f351be8797ff2938059e25a597f1b975284c31909926c092",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
