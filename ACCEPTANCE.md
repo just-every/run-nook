@@ -1371,7 +1371,7 @@ Core · push-further · **partial**
 3. Run the official MCP Inspector against Nook's MCP server and pass its tool-listing and tool-call checks; connect two independent standard MCP clients, one authorized as a member and one as an agent, and see each return only its own permitted messages; an agent's call to an MCP server the owner has not approved is refused.
 
 **Evidence.** `src/agent-door/index.server.ts`; `tests/agent-door/adoption-journey.mjs` — native signed owner and teammate binding, same-email unknown-subject refusal, inactive-person refusal, post-revocation replay and queued consent.
-**Gap.** No implementing source/test; acceptance journey above is pending. Gap: multi-sponsor and owner-native administration not declared (Base subset door, rer 0.2.87/0.2.88).
+**Gap.** No implementing source/test; acceptance journey above is pending. Gap: multi-sponsor and owner-native administration not declared (Base subset door pending after rer 0.2.87).
 
 #### NOOK-055 — Accountable commitment assistant
 
@@ -1385,7 +1385,7 @@ Core · push-further · **partial**
 3. Accept, revise a due date and close linked work: require renewed agreement and assignee completion, then pause the agent and verify no further chase or external write.
 
 **Evidence.** `src/platform/storage/outcomes.ts`; `src/family/team-chat/attention.ts`; `tests/storage-flows.mjs`; `tests/browser.mjs`
-**Gap.** Human proposals, exact assignee acceptance, revision and completion reports ship; agent extraction, evidence tracking and controls are missing. Gap: timed lifecycle and queued lifecycle not declared (Base subset door, rer 0.2.87/0.2.88; G-op-fanout operation.ts:18-21,33).
+**Gap.** Human proposals, exact assignee acceptance, revision and completion reports ship; agent extraction, evidence tracking and controls are missing. Gap: timed lifecycle and queued lifecycle not declared (Base subset door pending; per-effect fanout fixed in rer 0.2.87).
 
 #### NOOK-056 — Decisions that stay current
 
@@ -1398,7 +1398,7 @@ Core · push-further · **partial**
 2. Make one source private and one stale, dismiss a false positive and revise the decision as its author; deny automatic/foreign revision and any wider audience leak.
 
 **Evidence.** `src/platform/storage/outcomes.ts`; `src/platform/storage/outcome-history.ts`; `tests/storage-flows.mjs`
-**Gap.** Human versioned decisions and source links ship; contradiction monitoring and proposed agent resolution are missing. Gap: resource refresh and timed lifecycle not declared (Base subset door, rer 0.2.87/0.2.88).
+**Gap.** Human versioned decisions and source links ship; contradiction monitoring and proposed agent resolution are missing. Gap: resource refresh and timed lifecycle not declared (Base subset door pending after rer 0.2.87).
 
 #### NOOK-057 — Calm follow-through across linked systems
 
@@ -1411,7 +1411,7 @@ Core · push-further · **partial**
 2. Receive one calm evidence-linked update, an accurate blocked/unknown status and a proposed resolution; deny unauthorized writes and preserve assignee-only completion.
 
 **Evidence.** `src/notify/run.ts`; `src/family/team-chat/attention.ts`; `src/platform/storage/outcomes.ts`; `tests/notify-journey.mjs`; `tests/attention.mjs`
-**Gap.** Human obligations and calm routing ship; connected-system reconciliation, batched agent updates and external-action grants are missing. Gap: subscriptions, mail edges and queued lifecycle not declared (Base subset door, rer 0.2.87/0.2.88; G-op-fanout operation.ts:18-21,33).
+**Gap.** Human obligations and calm routing ship; connected-system reconciliation, batched agent updates and external-action grants are missing. Gap: subscriptions, mail edges and queued lifecycle not declared (Base subset door pending; per-effect fanout fixed in rer 0.2.87).
 
 #### NOOK-058 — Stale handoffs and proposed resolution
 
@@ -1424,7 +1424,7 @@ Core · push-further · **partial**
 2. The agent separates those states, proposes a cited resolution to the permitted people, stops after resolution/pause and requires the new assignee’s own acceptance.
 
 **Evidence.** `src/agent-door/index.server.ts`; `agent-surface.json` — permitted source inspection and proposals; timed handoff monitoring is undeclared.
-**Gap.** No implementing source/test; acceptance journey above is pending. Gap: timed lifecycle not declared (Base subset door, rer 0.2.87/0.2.88).
+**Gap.** No implementing source/test; acceptance journey above is pending. Gap: timed lifecycle not declared (Base subset door pending after rer 0.2.87).
 
 #### NOOK-059 — Visible and controllable agent execution
 
@@ -1437,7 +1437,7 @@ Core · push-further · **partial**
 2. The owner sees a durable failed/uncertain state and exact remaining action; no duplicate write, resumed revoked access or unapproved commitment appears.
 
 **Evidence.** `src/agent-door/queued-consent.ts`; `tests/agent-door/adoption-journey.mjs` — persisted native notification consent and final admission; scheduled agent runs remain undeclared.
-**Gap.** No implementing source/test; acceptance journey above is pending. Gap: queued lifecycle, timed lifecycle and dual host not declared (Base subset door, rer 0.2.87/0.2.88; G-op-fanout operation.ts:18-21,33).
+**Gap.** No implementing source/test; acceptance journey above is pending. Gap: queued lifecycle, timed lifecycle and dual host not declared (Base subset door pending; per-effect fanout fixed in rer 0.2.87).
 
 #### NOOK-090 — Public events, interactivity and app-token message reads
 
@@ -1631,7 +1631,7 @@ Agent surface · target · **partial**
 6. `approval.pending`, `approval.decided`, `review.flagged` and `policy.adopted` carry the class and decision and nothing the subscriber may not read.
 
 **Evidence.** `src/agent-door/person-events.ts`; `src/agent-door/resources.ts`; `tests/agent-door/adoption-journey.mjs` — retained conversation events disappear after membership revocation; complete optional events and subscriptions remain undeclared.
-**Gap.** Not yet judged through this seed's own doors. Gap: events and subscriptions not declared (Base subset door, rer 0.2.87/0.2.88).
+**Gap.** Not yet judged through this seed's own doors. Gap: events and subscriptions not declared (Base subset door pending after rer 0.2.87).
 
 #### BASE-AGENT-011 — Limits are policy, and Pause stops everything
 

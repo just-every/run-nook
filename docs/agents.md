@@ -4,10 +4,10 @@ Nook's agent door is an adoption candidate for the CORE capabilities: tools,
 policy, pause, audit and idempotency. Principal authorization and owner-bound
 consent are mandatory for every call, including native notification delivery.
 
-Base pin: f96363bf919ea3e7ed1837daba6894810a50e4a6 (rer-v0.2.86).
-CLI: @runeditrun/rer 0.2.86 (released).
+Base pin: 5381ab872b5ab4de80e811bcb4b1a803dd713e0f (rer-v0.2.87).
+CLI: @runeditrun/rer 0.2.87 (released).
 
-The 0.2.86 loader has no capability-subset contract. This intended declaration
+The 0.2.87 loader has no capability-subset contract. This intended declaration
 is documented here until a released Base subset door can enforce it. Normal
 verification retains every check and its failure exit.
 
@@ -20,7 +20,7 @@ verification retains every check and its failure exit.
 | Resource refresh | Undeclared | Current resource readers enforce membership; proactive refresh is not offered. |
 | Timed lifecycle | Undeclared | Agent scheduling and timed follow-through are not exposed. |
 | Dual host | Undeclared | No complete dual-host agent lifecycle is offered. |
-| Queued lifecycle | Undeclared | The shared continuation still lacks distinct identities for repeated deliveries under one originating operation. |
+| Queued lifecycle | Undeclared | Native queued notifications retain consent; a complete queued agent lifecycle is not offered. The 0.2.87 runtime includes per-effect continuation identities. |
 | Owner-native administration | Undeclared | Native invitation, account administration and scoped regrant remain person operations. |
 
 Signed Business settings bind the claimed owner's Business ID to the immutable

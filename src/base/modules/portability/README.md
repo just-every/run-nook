@@ -67,8 +67,11 @@ belong to the current runtime or environment and never travel:
 | `rer_erasure_blobs`, `rer_erasure_guard`, `rer_erasure_scope`, `rer_erasure_rates` | Erasure work queues, transaction guards, working scope and local rate limits. |
 | `rer_demo` | Local demo setup markers. |
 
-`excludedTables` combines this list with the default identity exclusions `oa_%`
-and `oc_%`. Policy may override those identity exclusions through `includeTables`,
+`excludedTables` combines this list with `oa_%` and the exact Base owner-claim
+identities `oc_owner_claims` and `oc_idp_grants`. Other `oc_` names must be
+explicitly declared in `includeTables` or `excludeTables`; transfers refuse
+`identity_table_undeclared:<name>` rather than silently dropping product rows.
+Policy may override identity exclusions through `includeTables`,
 but naming a mandatory platform table there refuses construction with
 `platform_table:<name>` and a message identifying the table.
 `excludedTable(name, policy)` always returns true for mandatory platform tables,
