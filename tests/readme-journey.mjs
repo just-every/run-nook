@@ -34,7 +34,9 @@ await writeFile(join(bin,'rer'),`#!/bin/sh\nexec node ${join(root,'node_modules/
 // The clone is a different checkout: it takes its own local operation, not verify's.
 const {RER_LOCAL_OPERATION:_,...env}={...process.env,PATH:bin+':'+process.env.PATH,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'}
 const run=(line,expectCredentialRefusal=false)=>{let result,error
- try{result=execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})}catch(failure){error=failure}
+ // A fresh restore applies the whole additive history. Keep its complete
+ // diagnostic transcript; the default 1 MiB buffer terminates a valid import.
+ try{result=execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000,maxBuffer:8*1024*1024})}catch(failure){error=failure}
  if(expectCredentialRefusal){
   assert.equal(error?.status,3,'credential-free README dry run refuses with exit 3')
   const output=String(error.stdout??'')+String(error.stderr??'')
