@@ -59,7 +59,7 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
     {!!m.immutable&&<SlackHistory history={m.slack} messageId={m.id} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/>}
     {!m.immutable&&<ReactionChips reactions={reactions}/>}
    </>}
-   {!m.parent&&!thread&&((m.replyCount??0)>0||!!m.deleted)&&<button type="button" className="reply-button text-button" onClick={()=>onThread(m)}><IconReply/>{m.replyCount?`${m.replyCount} ${m.replyCount===1?'reply':'replies'}`:'View thread'}</button>}
+   {!m.parent&&!thread&&(m.replyCount??0)>0&&<button type="button" className="reply-button text-button" onClick={()=>onThread(m)}><IconReply/>{`${m.replyCount} ${m.replyCount===1?'reply':'replies'}`}</button>}
   </div>
   {!m.deleted&&<div className="message-tools reveal reveal-tap" role="group" aria-label="Message actions">
    {!m.immutable&&<ReactionPicker reactions={reactions}/>}
