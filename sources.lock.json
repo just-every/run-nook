@@ -593,7 +593,7 @@
       "executable": false
     },
     ".github/workflows/rer-managed.yml": {
-      "sha256": "d3466696dd70fa4c5fd75b1e6d55c9217daacc01d1e7d7306577431e845d021b",
+      "sha256": "3e6a8d10e3ab4bc238baadace920bf3aa2a284de09874cdc4e179520741a4533",
       "executable": false
     },
     ".github/workflows/run-demo.yml": {
@@ -1805,7 +1805,7 @@
       "executable": false
     },
     "scripts/delivery/base/packaging.json": {
-      "sha256": "4a0c96871cfd7aab7ad5067de89b953a29a81e3bb8894dcebeca373d1a515c9f",
+      "sha256": "9db9930e416ee16b7ef39c48643825da68d99f11e8680f693dfede903996a6e7",
       "executable": false
     },
     "scripts/delivery/base/paths.mjs": {
@@ -7713,7 +7713,7 @@
       "executable": false
     },
     "tests/push/archive.mjs": {
-      "sha256": "15901af20346a01e2f50e511e543ffe241536332dd6f19ef282ac12a87131749",
+      "sha256": "00965823de28a6b342dc2491894474cf960e46abe8463fc92acc5f0461496b2b",
       "executable": false
     },
     "tests/push/broadcast.mjs": {
