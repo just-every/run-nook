@@ -2,7 +2,7 @@
 .nook-app .team-channel-list>li>.soft-button{flex-shrink:0;max-width:110px}
 
 .nook-app .team-channels form{display:flex;align-items:end;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s4)}
-.nook-app .team-channels form label{display:grid;gap:var(--s1);flex:1;min-width:180px}
-.nook-app .team-channels form input{width:100%;min-width:0}
+.nook-app .team-channels form .field{flex:1;min-width:180px;margin:0}
+.nook-app .channels-page .team-channels{margin-top:var(--s5)}
 
 .nook-app .channel-browser-description{font-size:13px}
