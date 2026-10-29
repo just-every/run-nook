@@ -7397,7 +7397,7 @@
       "executable": false
     },
     "tests/mail-runtime.mjs": {
-      "sha256": "2e41f29e95d7e355528642557ba29b66ccf931104a515c63c1418aa1a048e8d2",
+      "sha256": "711ad5528f037bfd378070dfa35925360fe15f03dab0dfbd6cf837371f417de7",
       "executable": false
     },
     "tests/managed-mail.test.mjs": {
@@ -7749,7 +7749,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "38301c74c267fca24c5fcb243b7229fef6e8458a90d9cc8e400c917b8bf809a8",
+      "sha256": "fb6c463da3d5cdca92404b5ba21ae8d344a7ca22751b834929aadd735c3654d5",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
@@ -7869,7 +7869,7 @@
       "executable": false
     },
     "tests/storage-hint-loss.mjs": {
-      "sha256": "bf0a64a1700005ad266eddec4939f0fbe2a15f2edcabc3326167eedd190c6fa9",
+      "sha256": "1e3215062b6436029aec92d3b9606e6a242e8e89c488d60e02ae0bc60e340d8b",
       "executable": false
     },
     "tests/storage-migration.mjs": {
