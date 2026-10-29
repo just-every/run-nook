@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createServer} from 'node:http';
+import {freePort} from './worker-ports.mjs';
 import {mkdtemp,mkdir,writeFile,readdir,symlink,rm,cp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
@@ -16,19 +16,21 @@ import {opaqueToken} from '../src/base/modules/operator-auth/crypto.mjs';
 import {ownerSigninDigest} from '../src/base/modules/operator-auth/owner-signin-grant.mjs';
 import {archiveContent} from '../scripts/local/archive-content.mjs';
 import {assertRestoreAudit} from './archive-content.mjs';
+import {mailRuntime} from './mail-runtime.mjs';
 
 // One public hosted-export -> offline import journey. D1 and R2 are real local
 // Cloudflare bindings. No application, archive, search or file implementation is replaced.
 test('an owner can export a hosted workspace and restore messages, files, search and replay into a fresh installation',{timeout:120_000},async()=>{
  const directory=await mkdtemp(join(tmpdir(),'nook-exit-')),root=process.cwd();
- let proxy,server;
+ let proxy,hosted;
+ const buildConfig=JSON.parse(await readFile(resolve(root,'dist/server/wrangler.json'),'utf8'));
  try{
   const require=createRequire(import.meta.url),{build}=createRequire(require.resolve('wrangler'))('esbuild'),bundle=join(directory,'routes.mjs');
   await build({stdin:{contents:"export {portabilityRoute} from './src/platform/portability.server';export {authRoute} from './src/platform/operator-auth.server';export {context} from './src/platform/storage/context';export {write} from './src/platform/storage/commands';export {read} from './src/platform/storage/read';export {upload,download} from './src/platform/storage/files';export {createSchedule} from './src/scheduled/service';export {createReminder,reminderPreview} from './src/reminders/service'",resolveDir:root},bundle:true,platform:'node',format:'esm',outfile:bundle,logLevel:'silent'});
   const app=await import(bundle);
   async function installation(name,migrate=true){
    const path=join(directory,name);await mkdir(path);await symlink(join(root,'migrations'),join(path,'migrations'));
-   await writeFile(join(path,'wrangler.jsonc'),JSON.stringify({name:'nook-exit',compatibility_date:'2026-09-08',d1_databases:[{binding:'DB',database_name:'nook-exit',database_id:'00000000-0000-0000-0000-000000000001',migrations_dir:'migrations'}],r2_buckets:[{binding:'FILES',bucket_name:'nook-exit-files'}]}));
+   await writeFile(join(path,'wrangler.jsonc'),JSON.stringify({name:'nook-exit',compatibility_date:'2026-09-08',d1_databases:[{binding:'DB',database_name:'nook-exit',database_id:'00000000-0000-0000-0000-000000000001',migrations_dir:'migrations'}],r2_buckets:[{binding:'FILES',bucket_name:buildConfig.r2_buckets.find(bucket=>bucket.binding==='FILES').bucket_name}]}));
    if(migrate){
     // The hosted verifier's production migration runner keeps one real D1
     // binding open. Wrangler's CLI reopens workerd for each of 102 files.
@@ -47,11 +49,7 @@ test('an owner can export a hosted workspace and restore messages, files, search
   // The remote hint transport carries no product data; the restored replay is checked below.
   const hub={idFromName:()=> 'workspace',get:()=>({fetch:async()=>new Response(null,{status:204})})};
   let env;
-  server=createServer(async(req,res)=>{
-   try{const chunks=[];for await(const chunk of req)chunks.push(chunk);const request=new Request(env.AUTH_ORIGIN+req.url,{method:req.method,headers:req.headers,...(chunks.length?{body:Buffer.concat(chunks)}:{})}),response=await app.portabilityRoute(env,request);res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()))}
-   catch{res.writeHead(500);res.end()}
-  });
-  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));const origin='http://127.0.0.1:'+server.address().port;
+  const origin='http://127.0.0.1:'+await freePort();
   const settings={AUTH_LOCAL:'true',AUTH_ORIGIN:origin,OWNER_EMAIL:'owner@example.test',SESSION_SECRET:crypto.randomUUID()+crypto.randomUUID(),SETUP_TOKEN:crypto.randomUUID()+crypto.randomUUID(),MAIL_PROVIDER:'development',MAIL_FROM:'nook@localhost.test'};
   env={...proxy.env,...settings,CHAT_HUB:hub};
   const authRequest=(path,body,cookie)=>new Request(origin+path,{method:'POST',headers:{Host:new URL(origin).host,Origin:origin,'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{})},body:JSON.stringify(body)});
@@ -66,12 +64,15 @@ test('an owner can export a hosted workspace and restore messages, files, search
   const schedule=await app.createSchedule(c,channel.id,{body:'Send the weekly room-booking prompt after review.',attachments:[scheduleFile.id],localAt:scheduleTime,zone:'UTC',recurrence:'weekly',endDate:new Date(Date.now()+21*86400000).toISOString().slice(0,10),intent:'export-schedule'});
   const snapshot=async()=>({messages:await app.read(c,'messages',channel.id),search:await app.read(c,'search','',{q:'room'}),replay:await app.read(c,'replay',channel.id,{after:0}),file:Buffer.from(await new Response((await app.download(c,file.id)).body).arrayBuffer())});
   const before=await snapshot();assert.ok(before.search.items.length);assert.deepEqual(before.file,bytes);
+  // Run the hosted export in the emitted Worker. Executing this route in Node
+  // turns every prepare/bind into synchronous cross-process Miniflare RPC.
+  await proxy.dispose();proxy=null;hosted=await mailRuntime({root,state:join(source,'.wrangler/state'),origin,bindings:settings});env={...env,DB:hosted.db};
   assert.equal((await fetch(origin+'/api/portability/exports',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'})).status,401);
   const sessionFile=join(directory,'owner.session'),archive=join(directory,'workspace.rer');await writeFile(sessionFile,cookie,{mode:0o600});
   const exported=await remoteExport({root:source,path:archive,origin,sessionFile,store:{report:message=>assert.fail(message)}});
   assert.ok(exported.tables.some(t=>t.name==='nook_messages'&&t.count===2));
   assert.equal((await env.DB.prepare('SELECT count(*) AS n FROM rer_portability_segments').first()).n,0);
-  await proxy.dispose();proxy=null;
+  await hosted.close();hosted=null;
   const started=Date.now(),imported=await transfer('import',archive,{root:fresh}),finished=Date.now();assert.equal(imported.contentHash,exported.contentHash);
   const sourceArchive=await archiveContent(archive);
   const folder=join(fresh,'.wrangler/state/v3/d1/miniflare-D1DatabaseObject'),database=join(folder,(await readdir(folder)).find(n=>n.endsWith('.sqlite')&&!n.startsWith('metadata')));
@@ -90,5 +91,5 @@ test('an owner can export a hosted workspace and restore messages, files, search
   const restoredTemplate=await env.DB.prepare('SELECT object_key FROM nook_schedule_files WHERE schedule=? AND attachment=?').bind(schedule.id,scheduleFile.id).first();assert.ok(restoredTemplate);assert.deepEqual(Buffer.from(await (await env.FILES.get(restoredTemplate.object_key)).arrayBuffer()),bytes);
   assert.equal((await env.DB.prepare('SELECT count(*) AS n FROM nook_schedule_occurrences').first()).n,0,'restore sends no old scheduled occurrence');
   assert.equal((await env.DB.prepare('SELECT count(*) AS n FROM oa_sessions').first()).n,1,'old sessions do not travel');
- }finally{if(server)await new Promise(ok=>server.close(ok));await proxy?.dispose();await rm(directory,{recursive:true,force:true})}
+ }finally{await proxy?.dispose();await hosted?.close();await rm(directory,{recursive:true,force:true})}
 });

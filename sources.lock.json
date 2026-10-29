@@ -7093,7 +7093,7 @@
       "executable": false
     },
     "tests/agent-door/adoption-journey.mjs": {
-      "sha256": "5e2e810e4f190e30cb86b059478c47c61e3d304ab6f6a641eff56f5258ad9460",
+      "sha256": "2b5de3625825f13413b65a92c6f38fa83034e1a3025f754ea283068a51565f95",
       "executable": false
     },
     "tests/agent-door/installation.mjs": {
@@ -7102,6 +7102,10 @@
     },
     "tests/agent-door/owner.mjs": {
       "sha256": "b883a86a56dd3514d7c53edf97cd954e02b6d0070327cde3c5a10d7cc13d5a42",
+      "executable": false
+    },
+    "tests/agent-door/push-edge.mjs": {
+      "sha256": "8b1e2c968485a6c290969334638d9990f2adfcdb92179097ba8489f72ab3ebd2",
       "executable": false
     },
     "tests/agent-door/teammate.mjs": {
@@ -7245,7 +7249,7 @@
       "executable": false
     },
     "tests/exit-export.test.mjs": {
-      "sha256": "8701b9e3b13498c13f3f72312a7a11c8245f5e77066b4bdd2c420b34d6187d59",
+      "sha256": "147c36b945ad4a832e157bcd058721bf1c6f6c5f5fd43a1813386e041d3e6b5a",
       "executable": false
     },
     "tests/fake-account.mjs": {

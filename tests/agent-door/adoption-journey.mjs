@@ -49,16 +49,16 @@ try{
  await call('notes.propose',{conversation:queuedRoom.id,id:note.id,version:note.version,item:'review',assignee:ari.id});
  await personCall('/api/conversations/'+queuedRoom.id+'/notify',{level:'all'},f.roster[0].cookie,'PATCH');
  await call('polls.create',{conversation:queuedRoom.id,question:'Which review time?',options:['Morning','Afternoon'],multiple:false,anonymous:true});
- const queue=await f.database.prepare('SELECT id,channel,agent_context,due FROM nook_notify_queue WHERE conversation=?').bind(queuedRoom.id).all();assert.ok(queue.results.length>=9);
+ const queue=await f.database.prepare('SELECT id,channel,agent_context,due,state,error FROM nook_notify_queue WHERE conversation=?').bind(queuedRoom.id).all();assert.ok(queue.results.length>=9);
  const operations=new Set(queue.results.map(row=>JSON.parse(row.agent_context).operationId));assert.equal(operations.size,5);
  for(const item of queue.results){const origin=JSON.parse(item.agent_context);assert.equal(origin.consent,c.consent);assert.equal(origin.person,me.id);assert.ok(origin.operationId&&origin.scopes.length)}
  const effectsBefore=f.outbound.length;
  await c.adopt(autonomousPolicy(),{revoked:{agents:[],consents:[c.consent]}});
  await new Promise(resolve=>setTimeout(resolve,Math.max(...queue.results.map(row=>row.due))-Date.now()+2000));
- const cancelled=await f.database.prepare('SELECT state,error FROM nook_notify_queue WHERE conversation=?').bind(queuedRoom.id).all();
+ const cancelled=await f.database.prepare('SELECT id,state,error FROM nook_notify_queue WHERE conversation=?').bind(queuedRoom.id).all();
  assert.equal(f.outbound.length,effectsBefore);
- assert.ok(cancelled.results.every(row=>row.state==='cancelled'&&row.error==='consent_revoked'));
- console.log('NOOK_QUEUED_CONSENT '+JSON.stringify({queued:queue.results.length,tools:['messages.post','outcomes.propose','outcomes.revise','notes.propose','polls.create'],persisted_consent:true,refusal:'consent_revoked',effects_after_revocation:0,states:cancelled.results}));
+ for(const row of cancelled.results){const before=queue.results.find(item=>item.id===row.id);if(['pending','retrying'].includes(before.state))assert.deepEqual({state:row.state,error:row.error},{state:'cancelled',error:'consent_revoked'});else assert.deepEqual({state:row.state,error:row.error},{state:before.state,error:before.error})}
+ console.log('NOOK_QUEUED_CONSENT '+JSON.stringify({queued:queue.results.length,tools:['messages.post','outcomes.propose','outcomes.revise','notes.propose','polls.create'],persisted_consent:true,refusal:'consent_revoked',effects_after_revocation:0,cancelled_after_revocation:cancelled.results.filter(row=>row.error==='consent_revoked').length,already_superseded:cancelled.results.filter(row=>row.error==='seen').length}));
  // Business role derives from the signed roster, not a local admin promotion.
  await personCall('/auth/operator/role',{operatorId:ari.id,role:'admin'});
  const member=await b.tool('nook.identity.read',{});assert.equal(member.status,200);
