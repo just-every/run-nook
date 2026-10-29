@@ -25,6 +25,8 @@ import { dispatch } from './base/dispatch'
 import {AuthError} from './base/modules/operator-auth/index.mjs'
 import { Fault, fail } from './family/team-chat/domain'
 import { Repository, type Bindings } from './platform/repository.server'
+import {openSessionRedirect} from './platform/open-session'
+import {withoutRecoveryLine} from './platform/lobby-page'
 
 import {ownerClaim} from './platform/owner-claim.server'
 import {editorRoute,editorDocument} from './platform/editor.server'
@@ -148,9 +150,11 @@ export default withDemo({
   const publicEnv = authBindings(env)
   const state = await setupStateResponse(request,publicEnv)
   if(state) return state
-  const lobby = await lobbyResponse(request,publicEnv,identity,baseOwnerClaim)
-  if(lobby) return lobby
   const url = new URL(request.url),repository=new Repository(env)
+  const signedIn=await openSessionRedirect(request,env,repository)
+  if(signedIn)return signedIn
+  const lobby = await lobbyResponse(request,publicEnv,identity,baseOwnerClaim)
+  if(lobby) return withoutRecoveryLine(lobby)
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
   const aliases:Record<string,string>={'/settings':'/app?view=you','/app/settings':'/app?view=you','/app/channels':'/app?view=channels','/app/people':'/app?view=people','/login':'/signin','/sign-in':'/signin'}
   if((request.method==='GET'||request.method==='HEAD')&&aliases[url.pathname])return new Response(null,{status:307,headers:{Location:aliases[url.pathname],'Cache-Control':'no-store'}})

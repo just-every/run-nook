@@ -109,6 +109,8 @@ async function firstRun(origin,open){
  assert.equal((await fetch(origin+'/auth/dev/enter?as=owner',{redirect:'manual'})).status,404,'dev sign-in answers nothing without the dev key')
  const phoneContext=await browser.newContext({viewport:{width:390,height:844}}),phone=await phoneContext.newPage()
  await openOwner(phone,origin,open)
+ // An open session is sent on from /signin, so the persona page is reached signed out (the dev key stays).
+ await phoneContext.clearCookies({name:/^operator_session/})
  await phone.goto(origin+'/signin')
  await phone.getByRole('link',{name:'Sign in as Owner',exact:true}).click()
  await phone.waitForURL(origin+'/setup')

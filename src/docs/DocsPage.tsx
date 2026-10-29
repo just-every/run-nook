@@ -13,14 +13,14 @@ import '../brand/site-chrome.css'
 import './docs.css'
 
 /** Public Nook guides rendered from checked Markdown at build time, inside the homepage's header and footer. */
-export function DocsPage({ page, sections, repository, variant = 'instance' }: DocsView & {variant?: 'instance' | 'site'}) {
+export function DocsPage({ page, sections, repository, signedIn, variant = 'instance' }: DocsView & {variant?: 'instance' | 'site'}) {
   const order = sections.flatMap(section => section.pages.map(entry => ({ ...entry, section: section.title })))
   const index = order.findIndex(entry => entry.slug === page.slug)
   const current = order[index]
   if (!current) throw new Error(`Docs page "${page.slug}" is missing from its navigation`)
   return <DocsSiteVariant value={variant === 'site'}><div className="nook-docs nook-site">
     <a className="docs-skip" href="#docs-content">Skip to documentation</a>
-    <HydrationUnit><SiteHeader current="docs" variant={variant} /></HydrationUnit>
+    <HydrationUnit><SiteHeader current="docs" variant={variant} signedIn={signedIn} /></HydrationUnit>
     <div className="docs-shell">
       <HydrationUnit><DocsSidebar sections={sections} current={page.slug} /></HydrationUnit>
       <main id="docs-content" tabIndex={-1} className="docs-main">
@@ -30,6 +30,6 @@ export function DocsPage({ page, sections, repository, variant = 'instance' }: D
       </main>
       <HydrationUnit><DocsToc toc={page.toc} /></HydrationUnit>
     </div>
-    <HydrationUnit><SiteFooter variant={variant} /></HydrationUnit>
+    <HydrationUnit><SiteFooter variant={variant} signedIn={signedIn} /></HydrationUnit>
   </div></DocsSiteVariant>
 }

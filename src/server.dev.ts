@@ -10,6 +10,7 @@ import branding from './branding.json'
 import {devPersonas} from './dev/personas'
 import {admitPersona,reactivatePersona} from './dev/admit.server'
 import type {Bindings} from './platform/repository.server'
+import {openSessionRedirect} from './platform/open-session'
 export {ChatHub} from './platform/storage/live'
 
 const layered=withDevIdentity<Bindings,typeof worker>(worker,{bindings:authBindings,config:env=>authConfig(env,branding),personas:devPersonas})
@@ -18,6 +19,9 @@ export default {
  ...layered,
  async fetch(request,env,execution){
   const url=new URL(request.url),as=url.searchParams.get('as')
+  // The dev layer answers /signin itself, with its persona buttons; an open session is sent on before it does.
+  const signedIn=await openSessionRedirect(request,env)
+  if(signedIn)return signedIn
   const persona=url.pathname==='/auth/dev/enter'&&as&&devPersonas().some(person=>person.as===as)
   // Only a request the key gate admits touches a persona: an export suspends them, and entering as one again reactivates it.
   if(persona&&await keyed(env,request))await reactivatePersona(env.DB,as)

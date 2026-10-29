@@ -41,7 +41,10 @@ export async function editorProof(root,platformRoot,evidence) {
   const publicLobby=await (await native.request('/')).text();
   const assertLobby=async()=>{
    const editorRequests=edge.state.requests;
-   assert.equal(await (await native.request('/',{cookie})).text(),publicLobby,'owner and anonymous receive identical Lobby bytes');
+   // An open session is sent on to the workspace; every other visitor receives the same Lobby bytes.
+   const entry=await native.request('/',{cookie});
+   if(entry.status===307)assert.equal(entry.headers.get('location'),'/app','an open session is sent to the workspace');
+   else assert.equal(await entry.text(),publicLobby,'owner and anonymous receive identical Lobby bytes');
    await page.goto(native.origin+'/');
    assert.equal(await page.locator('[data-rer-editor],meta[name="nook-editor-owner"]').count(),0,'Lobby has no editor decoration');
    assert.equal(await page.getByRole('button',{name:'Open Run Edit Run',exact:true}).count(),0);

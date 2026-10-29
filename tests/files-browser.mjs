@@ -116,7 +116,7 @@ export async function filesBrowser({origin,owner,member,destination,sql}){
     const livePage=await context.newPage();livePage.on('pageerror',error=>errors.push(error.message))
     try{await livePage.goto(base+'/app?view=files&conversation='+liveRoom.id);const liveCard=livePage.getByRole('article',{name:'File '+liveFile.name,exact:true});await expect(liveCard).toBeVisible();await expect(livePage).toHaveURL(new RegExp('view=chat&conversation='+liveRoom.id+'&panel=files'));await expect(livePage.locator('.nook-app')).toHaveAttribute('data-live-connected','true');await call(`/api/conversations/${liveRoom.id}/members`,{user:member.user.id,remove:true});await expect(liveCard).toHaveCount(0);if(destination)await livePage.screenshot({animations:'disabled',path:resolve(destination,`live-revoked-${width}.png`)})}finally{await livePage.close()}
     if(width===1440){
-     for(const [path,target] of [['/settings','/app?view=you'],['/app/settings','/app?view=you'],['/app/channels','/app?view=channels'],['/app/people','/app?view=people'],['/login','/signin'],['/sign-in','/signin']]){
+     for(const [path,target] of [['/settings','/app?view=you'],['/app/settings','/app?view=you'],['/app/channels','/app?view=channels'],['/app/people','/app?view=people'],['/login','/app'],['/sign-in','/app']]){
       const response=await page.request.get(base+path,{maxRedirects:0});assert.equal(response.status(),307);assert.equal(response.headers().location,target)
      }
      for(const path of ['/x','/app/x'])assert.equal((await page.request.get(base+path)).status(),404)
