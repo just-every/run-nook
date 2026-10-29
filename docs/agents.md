@@ -79,12 +79,13 @@ and provider configuration retain their native person doors. Provider spend
 caps are not enforced by the shared door; no spend guarantee is made. Adoption
 remains pending the released Base subset door and complete verification.
 
-The held-policy verification currently reports a Base harness gap for the
-revoke-only `conversations.leave`: approval executes the native leave, then the
-harness retries through an account that no longer has conversation access. Nook
-refuses that retry without retained content. The same refusal is required by the
-current-authority replay contract; the harness must account for terminal
-self-revocation rather than weakening the native membership check.
+An approved `conversations.leave` removes the sponsor's membership immediately.
+The approval records that completed action. A subsequent tool retry returns
+`not_found` without retained conversation content, because every retry checks
+current native access. The 0.2.87 conformance harness still expects that retry to
+return an approval receipt and computed classes. Its held-policy leave checks
+therefore remain pending a Base contract for terminal self-revocation; granting
+old membership or returning private cached results would violate native access.
 
 The native conformance legs cover replay after membership loss, Business
 teammate identity and inactivity, a validated Web Push receipt, and queued
