@@ -23,7 +23,7 @@ export function EmailControl({request,initial,localDevelopment=false}:{request:T
   {choice('broadcasts','Someone uses @channel, @here or @everyone')}
   {choice('urgent','Someone sends me an urgent request')}
   {choice('urgentQuiet','Let urgent requests through quiet time',!settings.urgent,'email-sub')}
-  {localDevelopment?<p className="email-setup">Local development mail is silently suppressed. No email is sent or saved.</p>:<p>Email goes to <strong>{settings.address}</strong>, the address you sign in with. It names who and where, never message text.</p>}
+  {localDevelopment?<p className="email-setup">Local development mail is silently suppressed. No email is sent or saved.</p>:<p>Email goes to <span className="email-address">{settings.address}</span>, the address you sign in with, and never includes message text.</p>}
   {settings.problem&&<p className="email-problem">Email not delivered to you: {why(settings.problem)}.</p>}
   {settings.notDelivered.length>0&&<ul aria-label="Email about your messages that was not delivered">{settings.notDelivered.map((p,i)=><li key={i} className="email-problem">Email not delivered to {p.recipient}: {why(p)}.</li>)}</ul>}
   {settings.workspace?.sending==='not-set-up'&&<p className="email-setup">Email sending is not set up. <a href="/docs/updating#deploy-from-the-owners-cloudflare-account">Set up mail</a></p>}

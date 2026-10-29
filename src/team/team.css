@@ -60,6 +60,7 @@
 .nook-app .profile-row.team-notifications { gap: var(--s4); padding: var(--s3) 0; }
 .nook-app .team-notifications strong { display: block; font-size: var(--fs-body); font-weight: 500; }
 .nook-app .team-notifications p { margin: 2px 0 0; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
+.nook-app .team-notifications .email-address { color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
 .nook-app .profile-row.team-notifications .soft-button { flex: none; margin-left: 0; }
 .nook-app .profile-row.team-notifications .team-blocked { flex: none; max-width: 40%; margin: 0; text-align: right; }
 
