@@ -1078,6 +1078,14 @@
       "to": "clause",
       "ids": [
         "NOOK-020"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {

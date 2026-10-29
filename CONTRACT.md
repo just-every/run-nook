@@ -1558,8 +1558,8 @@ Each tool row lists its possible classes. A call carries every class that its cu
 | `nook.nook_015.run` | Web Push (C15) | NOOK-015 | standard or external | not implemented as MCP |
 | `nook.nook_016.run` | Everyday conversations | NOOK-016 | standard or access or external or destructive | not implemented as MCP |
 | `nook.nook_017.run` | Composition and typed markup | NOOK-017 | standard or external | not implemented as MCP |
-| `nook.nook_091.run` | Personal profile, status and presence | NOOK-091 | standard | not implemented as MCP |
-| `nook.nook_135.run` | Custom profile fields and people directory | NOOK-135 | standard or access | not implemented as MCP |
+| `nook.nook_091.run` | Personal profile, status and presence | NOOK-091 | standard or external | not implemented as MCP |
+| `nook.nook_135.run` | Custom profile fields and people directory | NOOK-135 | standard or access or external | not implemented as MCP |
 | `nook.nook_137.run` | Personal sidebar organization | NOOK-137 | standard | not implemented as MCP |
 | `nook.nook_092.run` | Built-in conversation commands | NOOK-092 | standard or access or external | not implemented as MCP |
 | `nook.nook_093.run` | Drafts and sent messages view | NOOK-093 | standard | not implemented as MCP |
@@ -1568,7 +1568,7 @@ Each tool row lists its possible classes. A call carries every class that its cu
 | `nook.nook_095.run` | Invitation links and requests | NOOK-095 | standard or access or external | not implemented as MCP |
 | `nook.nook_096.run` | Verified-domain joining | NOOK-096 | standard or access | not implemented as MCP |
 | `nook.nook_019.run` | Search conversations and files | NOOK-019 | standard or sensitive | not implemented as MCP |
-| `nook.nook_020.run` | Saved items and channel pins | NOOK-020 | standard | not implemented as MCP |
+| `nook.nook_020.run` | Saved items and channel pins | NOOK-020 | standard or external | not implemented as MCP |
 | `nook.nook_022.run` | In-context voice, video and screen sharing | NOOK-022 | standard or external | not implemented as MCP |
 | `nook.nook_023.run` | Zoom, Google Meet and Teams meetings | NOOK-023 | standard or external or accounts or gated | not implemented as MCP |
 | `nook.nook_024.run` | Asynchronous clips, transcripts and call artifacts | NOOK-024 | standard or external or sensitive or destructive | not implemented as MCP |
