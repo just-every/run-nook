@@ -171,6 +171,9 @@
 }
 
 .nook-app .composer .schedule-draft { grid-area: schedule; justify-self: start; }
+/* "Also send to #channel" in a thread: the box and its words on one line, across the composer. */
+.nook-app .composer .composer-broadcast { grid-column: 1 / -1; margin: var(--s1) 0; }
+@media (max-width: 850px) { .nook-app .composer .composer-broadcast { min-height: 44px; } }
 
 /* Long drafts and pending-upload controls remain reachable above mobile tabs. */
 .nook-app .chat > .composer { flex-shrink:1; min-height:0; overflow-y:auto; }
