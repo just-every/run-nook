@@ -123,6 +123,20 @@
       "to": "clause",
       "ids": [
         "NOOK-002"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        },
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
+        }
       ]
     },
     {
@@ -141,6 +155,14 @@
       "to": "clause",
       "ids": [
         "NOOK-003"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -177,6 +199,14 @@
       "to": "clause",
       "ids": [
         "NOOK-004"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -376,6 +406,14 @@
       "to": "clause",
       "ids": [
         "NOOK-010"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -412,6 +450,14 @@
       "to": "clause",
       "ids": [
         "NOOK-012"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -430,6 +476,14 @@
       "to": "clause",
       "ids": [
         "NOOK-013"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -902,6 +956,20 @@
       "to": "clause",
       "ids": [
         "NOOK-016"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        },
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
+        }
       ]
     },
     {
@@ -927,6 +995,14 @@
         "NOOK-136",
         "NOOK-137",
         "NOOK-138"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -955,6 +1031,14 @@
         "NOOK-094",
         "NOOK-095",
         "NOOK-096"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -1078,6 +1162,14 @@
       "to": "clause",
       "ids": [
         "NOOK-024"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
+        }
       ]
     },
     {
@@ -1107,6 +1199,14 @@
         "NOOK-025",
         "NOOK-099",
         "NOOK-100"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -1556,6 +1656,14 @@
         "NOOK-105",
         "NOOK-106",
         "NOOK-107"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -1944,6 +2052,14 @@
       "to": "clause",
       "ids": [
         "NOOK-053"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -1972,6 +2088,14 @@
       "ids": [
         "NOOK-060",
         "NOOK-110"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -1992,6 +2116,14 @@
       "ids": [
         "NOOK-061",
         "NOOK-111"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2034,6 +2166,20 @@
         "NOOK-113",
         "NOOK-114",
         "NOOK-115"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        },
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
+        }
       ]
     },
     {
@@ -2109,6 +2255,14 @@
       "to": "clause",
       "ids": [
         "NOOK-065"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2214,6 +2368,20 @@
         "NOOK-118",
         "NOOK-119",
         "NOOK-120"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        },
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
+        }
       ]
     },
     {
@@ -2238,6 +2406,14 @@
         "NOOK-071",
         "NOOK-121",
         "NOOK-122"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2337,6 +2513,14 @@
       "ids": [
         "NOOK-075",
         "NOOK-130"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2427,6 +2611,14 @@
       "to": "clause",
       "ids": [
         "NOOK-079"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2445,6 +2637,20 @@
       "to": "clause",
       "ids": [
         "NOOK-080"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        },
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
+        }
       ]
     },
     {
@@ -2490,6 +2696,14 @@
       "to": "clause",
       "ids": [
         "NOOK-055"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2508,6 +2722,14 @@
       "to": "clause",
       "ids": [
         "NOOK-056"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2650,6 +2872,14 @@
       "to": "clause",
       "ids": [
         "NOOK-081"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {
@@ -2776,6 +3006,20 @@
       "to": "clause",
       "ids": [
         "NOOK-085"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        },
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
+        }
       ]
     },
     {
@@ -2819,6 +3063,12 @@
           "ids": [
             "R-10"
           ]
+        },
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-003"
+          ]
         }
       ]
     },
@@ -2856,6 +3106,14 @@
       "to": "clause",
       "ids": [
         "NOOK-089"
+      ],
+      "also": [
+        {
+          "to": "clause",
+          "ids": [
+            "SURFACE-002"
+          ]
+        }
       ]
     },
     {

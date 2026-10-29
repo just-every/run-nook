@@ -1541,38 +1541,38 @@ Inherits BASE-AGENT-001 to BASE-AGENT-013. The company's policy decides every ca
 | Tool | Does | Core clauses | Risk class | Today |
 | --- | --- | --- | --- | --- |
 | `nook.nook_001.run` | Current identity and conversation membership (C1) | NOOK-001 | standard or access | not implemented as MCP |
-| `nook.nook_002.run` | Atomic messages, retries and replay (C2) | NOOK-002 | standard or destructive | not implemented as MCP |
-| `nook.nook_003.run` | Fixed DMs and channel membership (C3) | NOOK-003 | standard or access | not implemented as MCP |
-| `nook.nook_004.run` | Decisions and commitments (C4) | NOOK-004 | standard or commitment | not implemented as MCP |
+| `nook.nook_002.run` | Atomic messages, retries and replay (C2) | NOOK-002 | standard or destructive or external | not implemented as MCP |
+| `nook.nook_003.run` | Fixed DMs and channel membership (C3) | NOOK-003 | standard or access or external | not implemented as MCP |
+| `nook.nook_004.run` | Decisions and commitments (C4) | NOOK-004 | standard or commitment or external | not implemented as MCP |
 | `nook.nook_005.run` | Read cursors and attention (C5) | NOOK-005 | standard | not implemented as MCP |
 | `nook.nook_007.run` | Safe rendering and local binding (C7) | NOOK-007 | standard or security | not implemented as MCP |
 | `nook.nook_009.run` | Backup and export (C9) | NOOK-009 | standard or destructive | not implemented as MCP |
-| `nook.nook_010.run` | Commitment revision and cancellation (C10) | NOOK-010 | standard or commitment | not implemented as MCP |
+| `nook.nook_010.run` | Commitment revision and cancellation (C10) | NOOK-010 | standard or commitment or external | not implemented as MCP |
 | `nook.nook_011.run` | Cached retries, synchronization and complete history (C11) | NOOK-011 | standard | not implemented as MCP |
-| `nook.nook_012.run` | Private attachments (C12) | NOOK-012 | standard or destructive | not implemented as MCP |
-| `nook.nook_013.run` | Calm attention (C13) | NOOK-013 | standard | not implemented as MCP |
+| `nook.nook_012.run` | Private attachments (C12) | NOOK-012 | standard or destructive or external | not implemented as MCP |
+| `nook.nook_013.run` | Calm attention (C13) | NOOK-013 | standard or external | not implemented as MCP |
 | `nook.nook_014.run` | Email notifications (C14) | NOOK-014 | standard or external | not implemented as MCP |
 | `nook.erasure.run` | Member, message and imported-author erasure | ERASURE-001 | standard or destructive | not implemented as MCP |
 | `nook.nook_015.run` | Web Push (C15) | NOOK-015 | standard or external | not implemented as MCP |
-| `nook.nook_016.run` | Everyday conversations | NOOK-016 | standard or access | not implemented as MCP |
-| `nook.nook_017.run` | Composition and typed markup | NOOK-017 | standard | not implemented as MCP |
+| `nook.nook_016.run` | Everyday conversations | NOOK-016 | standard or access or external or destructive | not implemented as MCP |
+| `nook.nook_017.run` | Composition and typed markup | NOOK-017 | standard or external | not implemented as MCP |
 | `nook.nook_091.run` | Personal profile, status and presence | NOOK-091 | standard | not implemented as MCP |
 | `nook.nook_135.run` | Custom profile fields and people directory | NOOK-135 | standard or access | not implemented as MCP |
 | `nook.nook_137.run` | Personal sidebar organization | NOOK-137 | standard | not implemented as MCP |
-| `nook.nook_092.run` | Built-in conversation commands | NOOK-092 | standard or access | not implemented as MCP |
+| `nook.nook_092.run` | Built-in conversation commands | NOOK-092 | standard or access or external | not implemented as MCP |
 | `nook.nook_093.run` | Drafts and sent messages view | NOOK-093 | standard | not implemented as MCP |
-| `nook.nook_018.run` | Invitation and offboarding journeys | NOOK-018 | standard or access | not implemented as MCP |
-| `nook.nook_094.run` | Bulk team invitations | NOOK-094 | standard or access | not implemented as MCP |
-| `nook.nook_095.run` | Invitation links and requests | NOOK-095 | standard or access | not implemented as MCP |
+| `nook.nook_018.run` | Invitation and offboarding journeys | NOOK-018 | standard or access or external | not implemented as MCP |
+| `nook.nook_094.run` | Bulk team invitations | NOOK-094 | standard or access or external | not implemented as MCP |
+| `nook.nook_095.run` | Invitation links and requests | NOOK-095 | standard or access or external | not implemented as MCP |
 | `nook.nook_096.run` | Verified-domain joining | NOOK-096 | standard or access | not implemented as MCP |
 | `nook.nook_019.run` | Search conversations and files | NOOK-019 | standard or sensitive | not implemented as MCP |
 | `nook.nook_020.run` | Saved items and channel pins | NOOK-020 | standard | not implemented as MCP |
 | `nook.nook_022.run` | In-context voice, video and screen sharing | NOOK-022 | standard or external | not implemented as MCP |
 | `nook.nook_023.run` | Zoom, Google Meet and Teams meetings | NOOK-023 | standard or external or accounts or gated | not implemented as MCP |
-| `nook.nook_024.run` | Asynchronous clips, transcripts and call artifacts | NOOK-024 | standard or external or sensitive | not implemented as MCP |
-| `nook.nook_025.run` | App platform and scoped event delivery | NOOK-025 | standard or access or accounts or commitment | not implemented as MCP |
+| `nook.nook_024.run` | Asynchronous clips, transcripts and call artifacts | NOOK-024 | standard or external or sensitive or destructive | not implemented as MCP |
+| `nook.nook_025.run` | App platform and scoped event delivery | NOOK-025 | standard or access or accounts or commitment or external | not implemented as MCP |
 | `nook.nook_099.run` | App direct messages and home | NOOK-099 | standard or access or external | not implemented as MCP |
-| `nook.nook_100.run` | App channel management | NOOK-100 | standard or access | not implemented as MCP |
+| `nook.nook_100.run` | App channel management | NOOK-100 | standard or access or external | not implemented as MCP |
 | `nook.nook_026.run` | Workflow builder and durable scheduled work | NOOK-026 | standard or commitment or live or external | not implemented as MCP |
 | `nook.nook_027.run` | Engineering and project integrations | NOOK-027 | standard or external or gated or commitment | not implemented as MCP |
 | `nook.nook_028.run` | Support, sales and operational signals | NOOK-028 | standard or external or gated | not implemented as MCP |
@@ -1590,36 +1590,36 @@ Inherits BASE-AGENT-001 to BASE-AGENT-013. The company's policy decides every ca
 | `nook.nook_038.run` | Retention, legal hold and preservation | NOOK-038 | standard or destructive | not implemented as MCP |
 | `nook.nook_039.run` | Compliance search and controlled exports | NOOK-039 | standard or external or sensitive | not implemented as MCP |
 | `nook.nook_040.run` | Information protection and data handling | NOOK-040 | standard or security or sensitive or external | not implemented as MCP |
-| `nook.nook_105.run` | Slack cutover invitations | NOOK-105 | standard or access | not implemented as MCP |
+| `nook.nook_105.run` | Slack cutover invitations | NOOK-105 | standard or access or external | not implemented as MCP |
 | `nook.nook_047.run` | Readable portability and controlled exit | NOOK-047 | standard or sensitive | not implemented as MCP |
 | `nook.nook_048.run` | Team administration and reporting | NOOK-048 | standard or sensitive | not implemented as MCP |
 | `nook.nook_049.run` | Team capacity and complete directories | NOOK-049 | standard | not implemented as MCP |
 | `nook.nook_108.run` | Component health and measured recovery | NOOK-108 | standard | not implemented as MCP |
 | `nook.nook_051.run` | Auditable authority and actions | NOOK-051 | standard | not implemented as MCP |
-| `nook.nook_053.run` | Conversation notes and lightweight lists | NOOK-053 | standard or sensitive or destructive | not implemented as MCP |
+| `nook.nook_053.run` | Conversation notes and lightweight lists | NOOK-053 | standard or sensitive or destructive or external | not implemented as MCP |
 | `nook.nook_060.run` | Organization administration and delegated roles | NOOK-060 | standard or access or security or accounts or live or money | not implemented as MCP |
-| `nook.nook_110.run` | Channel lifecycle and history disclosure | NOOK-110 | standard or access | not implemented as MCP |
-| `nook.nook_061.run` | Large files, previews and admission policy | NOOK-061 | standard or destructive or security | not implemented as MCP |
-| `nook.nook_111.run` | Malware scanning and quarantine | NOOK-111 | standard or security | not implemented as MCP |
+| `nook.nook_110.run` | Channel lifecycle and history disclosure | NOOK-110 | standard or access or external | not implemented as MCP |
+| `nook.nook_061.run` | Large files, previews and admission policy | NOOK-061 | standard or destructive or security or external | not implemented as MCP |
+| `nook.nook_111.run` | Malware scanning and quarantine | NOOK-111 | standard or security or external | not implemented as MCP |
 | `nook.nook_062.run` | Private notification preview levels | NOOK-062 | standard | not implemented as MCP |
-| `nook.nook_112.run` | Notification reply and mark-read actions | NOOK-112 | standard | not implemented as MCP |
-| `nook.nook_063.run` | Slack-compatible incoming webhooks | NOOK-063 | standard | not implemented as MCP |
-| `nook.nook_113.run` | Slack-compatible Web API | NOOK-113 | standard or access | not implemented as MCP |
-| `nook.nook_114.run` | Slack event, command and interactive compatibility | NOOK-114 | standard | not implemented as MCP |
-| `nook.nook_115.run` | Block formatting and compatibility disclosure | NOOK-115 | standard | not implemented as MCP |
+| `nook.nook_112.run` | Notification reply and mark-read actions | NOOK-112 | standard or external | not implemented as MCP |
+| `nook.nook_063.run` | Slack-compatible incoming webhooks | NOOK-063 | standard or external | not implemented as MCP |
+| `nook.nook_113.run` | Slack-compatible Web API | NOOK-113 | standard or access or external or destructive | not implemented as MCP |
+| `nook.nook_114.run` | Slack event, command and interactive compatibility | NOOK-114 | standard or external | not implemented as MCP |
+| `nook.nook_115.run` | Block formatting and compatibility disclosure | NOOK-115 | standard or external | not implemented as MCP |
 | `nook.nook_064.run` | Zapier, Make and n8n connectors | NOOK-064 | standard or external or accounts or gated | not implemented as MCP |
-| `nook.nook_065.run` | Channel-wide mentions: @channel, @here and @everyone | NOOK-065 | standard | not implemented as MCP |
-| `nook.nook_066.run` | Channel posting permissions and announcement channels | NOOK-066 | standard or access | not implemented as MCP |
+| `nook.nook_065.run` | Channel-wide mentions: @channel, @here and @everyone | NOOK-065 | standard or external | not implemented as MCP |
+| `nook.nook_066.run` | Channel posting permissions and announcement channels | NOOK-066 | standard or access or external | not implemented as MCP |
 | `nook.nook_067.run` | Forwarding messages and email into conversations | NOOK-067 | standard or external | not implemented as MCP |
 | `nook.nook_068.run` | Safe link previews and app unfurls | NOOK-068 | standard or external | not implemented as MCP |
 | `nook.nook_069.run` | Organization second-factor enforcement | NOOK-069 | standard or security | not implemented as MCP |
 | `nook.nook_116.run` | Own sessions and device revocation | NOOK-116 | standard or access | not implemented as MCP |
-| `nook.nook_070.run` | Conversation polls | NOOK-070 | standard | not implemented as MCP |
+| `nook.nook_070.run` | Conversation polls | NOOK-070 | standard or external | not implemented as MCP |
 | `nook.nook_117.run` | GIF search and posting | NOOK-117 | standard or external | not implemented as MCP |
-| `nook.nook_118.run` | Thread replies also sent to channel | NOOK-118 | standard | not implemented as MCP |
-| `nook.nook_119.run` | Channel bookmarks | NOOK-119 | standard | not implemented as MCP |
+| `nook.nook_118.run` | Thread replies also sent to channel | NOOK-118 | standard or external or destructive | not implemented as MCP |
+| `nook.nook_119.run` | Channel bookmarks | NOOK-119 | standard or external | not implemented as MCP |
 | `nook.nook_120.run` | On-request message translation | NOOK-120 | standard or external | not implemented as MCP |
-| `nook.nook_071.run` | Followed Threads view | NOOK-071 | standard | not implemented as MCP |
+| `nook.nook_071.run` | Followed Threads view | NOOK-071 | standard or external | not implemented as MCP |
 | `nook.nook_121.run` | All unreads view | NOOK-121 | standard | not implemented as MCP |
 | `nook.nook_122.run` | Group-DM conversion to private channel | NOOK-122 | standard or access | not implemented as MCP |
 | `nook.nook_072.run` | Automatic thread follows | NOOK-072 | standard | not implemented as MCP |
@@ -1628,20 +1628,20 @@ Inherits BASE-AGENT-001 to BASE-AGENT-013. The company's policy decides every ca
 | `nook.nook_073.run` | Active-elsewhere alert routing | NOOK-073 | standard | not implemented as MCP |
 | `nook.nook_125.run` | Device delivery history and routing custody | NOOK-125 | standard | not implemented as MCP |
 | `nook.nook_075.run` | External-participant membership | NOOK-075 | standard or access or external | not implemented as MCP |
-| `nook.nook_130.run` | External-participant home migration | NOOK-130 | standard or access | not implemented as MCP |
-| `nook.nook_079.run` | Scoped integration tokens | NOOK-079 | standard or access or security | not implemented as MCP |
-| `nook.nook_080.run` | Notification destination door | NOOK-080 | standard or access or security | not implemented as MCP |
-| `nook.nook_081.run` | Inbound email into conversations | NOOK-081 | standard | not implemented as MCP |
+| `nook.nook_130.run` | External-participant home migration | NOOK-130 | standard or access or external | not implemented as MCP |
+| `nook.nook_079.run` | Scoped integration tokens | NOOK-079 | standard or access or security or external | not implemented as MCP |
+| `nook.nook_080.run` | Notification destination door | NOOK-080 | standard or access or security or external or destructive | not implemented as MCP |
+| `nook.nook_081.run` | Inbound email into conversations | NOOK-081 | standard or external | not implemented as MCP |
 | `nook.nook_082.run` | Scheduled forwarding | NOOK-082 | standard or external | not implemented as MCP |
 | `nook.nook_083.run` | External shared-channel forwarding | NOOK-083 | standard or external | not implemented as MCP |
 | `nook.nook_084.run` | Scheduled catch-up digests | NOOK-084 | standard or external | not implemented as MCP |
-| `nook.nook_085.run` | Call recordings and consent artifacts | NOOK-085 | standard or sensitive | not implemented as MCP |
+| `nook.nook_085.run` | Call recordings and consent artifacts | NOOK-085 | standard or sensitive or external or destructive | not implemented as MCP |
 | `nook.nook_086.run` | Suggested AI clip summaries | NOOK-086 | standard or external or commitment | not implemented as MCP |
-| `nook.nook_087.run` | Provider-generated transcripts | NOOK-087 | standard or external or sensitive | not implemented as MCP |
-| `nook.nook_089.run` | Notification destination door extension | NOOK-089 | standard or access | not implemented as MCP |
+| `nook.nook_087.run` | Provider-generated transcripts | NOOK-087 | standard or external or sensitive or destructive | not implemented as MCP |
+| `nook.nook_089.run` | Notification destination door extension | NOOK-089 | standard or access or external | not implemented as MCP |
 | `nook.nook_054.run` | Scoped company-context agents and MCP | NOOK-054 | standard or access or security or external or commitment | not implemented as MCP |
-| `nook.nook_055.run` | Accountable commitment assistant | NOOK-055 | standard or commitment | not implemented as MCP |
-| `nook.nook_056.run` | Decisions that stay current | NOOK-056 | standard or commitment | not implemented as MCP |
+| `nook.nook_055.run` | Accountable commitment assistant | NOOK-055 | standard or commitment or external | not implemented as MCP |
+| `nook.nook_056.run` | Decisions that stay current | NOOK-056 | standard or commitment or external | not implemented as MCP |
 | `nook.nook_057.run` | Calm follow-through across linked systems | NOOK-057 | standard or external | not implemented as MCP |
 | `nook.nook_058.run` | Stale handoffs and proposed resolution | NOOK-058 | standard or commitment or external | not implemented as MCP |
 | `nook.nook_059.run` | Visible and controllable agent execution | NOOK-059 | standard | not implemented as MCP |
