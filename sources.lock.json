@@ -4937,7 +4937,7 @@
       "executable": false
     },
     "src/homepage/Hero.tsx": {
-      "sha256": "3a4063774be62f53ba79f5fe38b5491cb5de1c59c2f4b3b63985fb4cbdc28da2",
+      "sha256": "fb07f21c65f327977ffcf879b223ea829642b11aadd55f43a4b8f3b9a1ca14fd",
       "executable": false
     },
     "src/homepage/HeroAlcove.tsx": {
@@ -4965,11 +4965,11 @@
       "executable": false
     },
     "src/homepage/sections/Free.tsx": {
-      "sha256": "39f334d47486603d257fddd0480ac41bc1d15abd15d88ca9c623a2a473421b23",
+      "sha256": "f1e57461173eb2c5bb9fb7740786f4938b72be64a44a733821d8457eeca585e2",
       "executable": false
     },
     "src/homepage/sections/GetStarted.tsx": {
-      "sha256": "342b5fe8a0be58a5d991273d7a0e1cc0425364893fb3beb6d7c3a9be682b5a11",
+      "sha256": "de1d7d7692582b67e7ee49e50f54b1add0be384f0225d9279047b3a4351c791c",
       "executable": false
     },
     "src/homepage/sections/MoveIn.tsx": {
@@ -6205,7 +6205,11 @@
       "executable": false
     },
     "src/site/pages.tsx": {
-      "sha256": "0f7a0e107b9b74cf62d9bee513f70f0032573d357ebafe0b746f3b1ae7f6cc85",
+      "sha256": "5a7a1d53604f8cd885fa85f1ef9417949a1f916f1b1686f1a0f84810de520f1f",
+      "executable": false
+    },
+    "src/site/run-copy.ts": {
+      "sha256": "f9edab9ed882cd8190e30b69542ea70593d8a8773cfdc12685d63ffe6f65dc50",
       "executable": false
     },
     "src/site/run.ts": {

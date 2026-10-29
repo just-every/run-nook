@@ -11,6 +11,7 @@ import { Homepage } from '../homepage/Homepage'
 import { DocsPage } from '../docs/DocsPage'
 import { pages, repository, sections, version } from 'virtual:nook-docs'
 import { run } from './run'
+import { withoutLeadingFree } from './run-copy'
 
 export async function sitePages({ styles, contract }: SiteContext): Promise<SiteBuild> {
   const document = (title: string, description: string, body: ReactElement) => '<!doctype html>' + renderToStaticMarkup(
@@ -26,8 +27,8 @@ export async function sitePages({ styles, contract }: SiteContext): Promise<Site
   }))
   return {
     pages: [
-      { path: '/', html: document('Nook — Talk it through. Get it done.', '100% free, open source alternative to Slack and Microsoft Teams. Turn a message into a decision or a request. Everyone can see who’s on it.', <Homepage variant="site" />) },
-      { path: '/run', html: runPageHtml(identity, run, contract) },
+      { path: '/', html: document('Nook — Talk it through. Get it done.', 'An open source alternative to Slack and Microsoft Teams. Turn a message into a decision or a request. Everyone can see who’s on it.', <Homepage variant="site" />) },
+      { path: '/run', html: withoutLeadingFree(runPageHtml(identity, run, contract)) },
       ...(contract ? [{ path: '/contract', html: contractPageHtml(identity, run, contract) }] : []),
       ...docs,
       { path: '/404', html: siteNotFoundHtml(identity, run, contract) },
