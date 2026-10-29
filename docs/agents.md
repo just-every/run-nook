@@ -65,7 +65,17 @@ agent-for-person label follows outbound notifications.
 Scheduling, forwarding, provider transcription, AI retrieval, invitation
 provisioning, credential changes, erasure, connectors, calls and device actions
 are not exposed as agent tools. The declared tools use no outbound provider
-beyond Base's built-in mail adapters and native Web Push. Device registration
+beyond Base's built-in mail adapters and native Web Push. The conformance network declaration uses only
+`https://web.push.apple.com` and validates the native VAPID signature and decrypted
+notification payload before returning a vendor receipt. Synthetic recipient keys
+exist only in the disposable fixture. Device registration
 and provider configuration retain their native person doors. Provider spend
 caps are not enforced by the shared door; no spend guarantee is made. Adoption
 remains pending the released Base subset door and complete verification.
+
+The held-policy verification currently reports a Base harness gap for the
+revoke-only `conversations.leave`: approval executes the native leave, then the
+harness retries through an account that no longer has conversation access. Nook
+refuses that retry without retained content. The same refusal is required by the
+current-authority replay contract; the harness must account for terminal
+self-revocation rather than weakening the native membership check.

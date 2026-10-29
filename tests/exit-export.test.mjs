@@ -4,10 +4,11 @@ import {createServer} from 'node:http';
 import {mkdtemp,mkdir,writeFile,readdir,symlink,rm,cp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
 import {createRequire} from 'node:module';
-import {getPlatformProxy} from 'wrangler';
+import {getPlatformProxy,unstable_splitSqlQuery} from 'wrangler';
+import {createHash} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+import {migrate as applyMigrations} from '@runeditrun/rer/internal/modules/container/migrations.mjs';
 import {remoteExport} from '../scripts/local/remote-export.mjs';
 import {transfer} from '../scripts/local/transfer.mjs';
 import {recoverNormalizedFixture} from './recovery-support.mjs';
@@ -19,7 +20,7 @@ import {assertRestoreAudit} from './archive-content.mjs';
 // One public hosted-export -> offline import journey. D1 and R2 are real local
 // Cloudflare bindings. No application, archive, search or file implementation is replaced.
 test('an owner can export a hosted workspace and restore messages, files, search and replay into a fresh installation',{timeout:120_000},async()=>{
- const directory=await mkdtemp(join(tmpdir(),'nook-exit-')),execute=promisify(execFile),root=process.cwd();
+ const directory=await mkdtemp(join(tmpdir(),'nook-exit-')),root=process.cwd();
  let proxy,server;
  try{
   const require=createRequire(import.meta.url),{build}=createRequire(require.resolve('wrangler'))('esbuild'),bundle=join(directory,'routes.mjs');
@@ -28,7 +29,12 @@ test('an owner can export a hosted workspace and restore messages, files, search
   async function installation(name,migrate=true){
    const path=join(directory,name);await mkdir(path);await symlink(join(root,'migrations'),join(path,'migrations'));
    await writeFile(join(path,'wrangler.jsonc'),JSON.stringify({name:'nook-exit',compatibility_date:'2026-09-08',d1_databases:[{binding:'DB',database_name:'nook-exit',database_id:'00000000-0000-0000-0000-000000000001',migrations_dir:'migrations'}],r2_buckets:[{binding:'FILES',bucket_name:'nook-exit-files'}]}));
-   if(migrate)await execute(process.execPath,[resolve('node_modules/wrangler/bin/wrangler.js'),'d1','migrations','apply','DB','--local','--config',join(path,'wrangler.jsonc'),'--persist-to',join(path,'.wrangler/state')],{env:{...process.env,CI:'true',WRANGLER_SEND_METRICS:'false'},maxBuffer:4*1024*1024});return path;
+   if(migrate){
+    // The hosted verifier's production migration runner keeps one real D1
+    // binding open. Wrangler's CLI reopens workerd for each of 102 files.
+    const binding=await getPlatformProxy({configPath:join(path,'wrangler.jsonc'),persist:{path:join(path,'.wrangler/state/v3')},remoteBindings:false});
+    try{const plan=[];for(const name of (await readdir(join(root,'migrations'))).filter(name=>name.endsWith('.sql')).sort()){const sql=await readFile(join(root,'migrations',name),'utf8');plan.push({name,sql,sha256:createHash('sha256').update(sql).digest('hex'),statements:unstable_splitSqlQuery(sql)})}await applyMigrations(binding.env.DB,plan)}finally{await binding.dispose()}
+   }return path;
   }
   async function open(path){return getPlatformProxy({configPath:join(path,'wrangler.jsonc'),persist:{path:join(path,'.wrangler/state/v3')},remoteBindings:false})}
   // Apply the real migration CLI once, then copy its stopped, still-empty

@@ -1110,7 +1110,7 @@
           "$from": "post",
           "pointer": "/id"
         },
-        "emoji": "\ud83d\udc4d",
+        "emoji": "👍",
         "add": true
       },
       "expect": [
@@ -1148,7 +1148,7 @@
           "$from": "post",
           "pointer": "/id"
         },
-        "emoji": "\ud83d\udc4d"
+        "emoji": "👍"
       },
       "expect": [
         {
@@ -2390,6 +2390,12 @@
     "replayAdmission": {
       "prepare": [
         "leave-room"
+      ]
+    },
+    "network": {
+      "module": "tests/agent-door/push-edge.mjs",
+      "origins": [
+        "https://web.push.apple.com"
       ]
     }
   },

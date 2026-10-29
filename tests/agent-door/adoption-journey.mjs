@@ -31,18 +31,34 @@ try{
  const events=await c.tool('nook.events.list',{});assert.ok(!JSON.stringify(events.result.structuredContent).includes(room.id));
  console.log('NOOK_REPLAY '+JSON.stringify({before,after_first:before+1,after_replay:after,replay_code:errorCode(replay),prior_body:false,retained_events:0,changed_arguments:errorCode(changed)}));
  // Native notifications inherit the originating agent consent in both queues.
- await personCall('/api/devices');
- await personCall('/api/devices',{transport:'webpush',subscription:subscriber('synthetic-nook-consent-'+randomUUID()).subscription},f.roster[0].cookie);
+ const device=await personCall('/api/devices'),recipient=subscriber('synthetic-nook-consent-'+randomUUID()),publicKey=recipient.key.getPublicKey();
+ f.network.fixtures.set('https://web.push.apple.com',{publicKey:device.publicKey,email:f.owner.email,label:'Agent door conformance for Casey Owner',recipient:{auth:Buffer.from(recipient.auth).toString('base64url'),publicKey:publicKey.toString('base64url'),privateKey:{kty:'EC',crv:'P-256',x:publicKey.subarray(1,33).toString('base64url'),y:publicKey.subarray(33).toString('base64url'),d:recipient.key.getPrivateKey().toString('base64url')}}});
+ await personCall('/api/devices',{transport:'webpush',subscription:recipient.subscription},f.roster[0].cookie);
  await personCall('/api/notify',{mentions:true,urgent:false,urgentQuiet:false,push:{mentions:true}},f.roster[0].cookie,'PATCH');
+ const deliveredRoom=await call('conversations.create',{name:'Accepted provider receipt',kind:'private',participants:[ari.id]});
+ const delivered=await call('messages.post',{conversation:deliveredRoom.id,body:'Ari, review the delivered source.',mentions:[ari.id]});
+ const live=await f.database.prepare('SELECT due FROM nook_notify_queue WHERE message=?').bind(delivered.id).all();
+ await new Promise(resolve=>setTimeout(resolve,Math.max(...live.results.map(row=>row.due))-Date.now()+2000));
+ const receipt=await f.database.prepare("SELECT state FROM nook_notify_queue WHERE message=? AND channel='push'").bind(delivered.id).first();assert.equal(receipt.state,'sent');assert.ok(f.outbound.some(r=>r.origin==='https://web.push.apple.com'&&r.status===201));
+ console.log('NOOK_PROVIDER_EDGE '+JSON.stringify({origin:'https://web.push.apple.com',native_vapid_and_encrypted_payload:true,receipt:201,attribution:true,state:receipt.state}));
  const queuedRoom=await call('conversations.create',{name:'Consent boundary',kind:'private',participants:[ari.id]});
  const message=await call('messages.post',{conversation:queuedRoom.id,body:'Ari, inspect the source.',mentions:[ari.id]});
- const queue=await f.database.prepare('SELECT id,channel,agent_context,due FROM nook_notify_queue WHERE message=?').bind(message.id).all();assert.equal(queue.results.length,2);assert.deepEqual(queue.results.map(row=>row.channel).sort(),['email','push']);
+ const proposed=await call('outcomes.propose',{conversation:queuedRoom.id,kind:'commitment',body:'Inspect the source proposal',assignee:ari.id});
+ await call('outcomes.revise',{id:proposed.id,version:proposed.version,body:'Inspect the revised source proposal'});
+ const note=await call('notes.create',{conversation:queuedRoom.id,title:'Source checklist',body:'Evidence to review',items:[{id:'review',text:'Inspect the checklist proposal',checked:false}],links:[],pinned:false});
+ await call('notes.propose',{conversation:queuedRoom.id,id:note.id,version:note.version,item:'review',assignee:ari.id});
+ await personCall('/api/conversations/'+queuedRoom.id+'/notify',{level:'all'},f.roster[0].cookie,'PATCH');
+ await call('polls.create',{conversation:queuedRoom.id,question:'Which review time?',options:['Morning','Afternoon'],multiple:false,anonymous:true});
+ const queue=await f.database.prepare('SELECT id,channel,agent_context,due FROM nook_notify_queue WHERE conversation=?').bind(queuedRoom.id).all();assert.ok(queue.results.length>=9);
+ const operations=new Set(queue.results.map(row=>JSON.parse(row.agent_context).operationId));assert.equal(operations.size,5);
  for(const item of queue.results){const origin=JSON.parse(item.agent_context);assert.equal(origin.consent,c.consent);assert.equal(origin.person,me.id);assert.ok(origin.operationId&&origin.scopes.length)}
+ const effectsBefore=f.outbound.length;
  await c.adopt(autonomousPolicy(),{revoked:{agents:[],consents:[c.consent]}});
  await new Promise(resolve=>setTimeout(resolve,Math.max(...queue.results.map(row=>row.due))-Date.now()+2000));
- const cancelled=await f.database.prepare('SELECT state,error FROM nook_notify_queue WHERE message=?').bind(message.id).all();
+ const cancelled=await f.database.prepare('SELECT state,error FROM nook_notify_queue WHERE conversation=?').bind(queuedRoom.id).all();
+ assert.equal(f.outbound.length,effectsBefore);
  assert.ok(cancelled.results.every(row=>row.state==='cancelled'&&row.error==='consent_revoked'));
- console.log('NOOK_QUEUED_CONSENT '+JSON.stringify({queued:queue.results.length,persisted_consent:true,refusal:'consent_revoked',effects_after_revocation:0,states:cancelled.results}));
+ console.log('NOOK_QUEUED_CONSENT '+JSON.stringify({queued:queue.results.length,tools:['messages.post','outcomes.propose','outcomes.revise','notes.propose','polls.create'],persisted_consent:true,refusal:'consent_revoked',effects_after_revocation:0,states:cancelled.results}));
  // Business role derives from the signed roster, not a local admin promotion.
  await personCall('/auth/operator/role',{operatorId:ari.id,role:'admin'});
  const member=await b.tool('nook.identity.read',{});assert.equal(member.status,200);
