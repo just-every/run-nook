@@ -9,6 +9,7 @@ import branding from '../branding.json'
 import {composeEmail} from './compose'
 import {afterFailure,foldedUntil,GATHER_MS,KEEP_MS,LEASE_MS,type Reason} from './queue'
 import type {Send} from './sender'
+import {queuedAgentLabel} from '../agent-door/queued-consent'
 type Row={id:string;user:string;conversation:string;actor:string|null;message:string|null;reason:Reason;state:string;attempts:number;due:number;created:number;cancel:string|null;snooze:number|null}
 const hex=(bytes:ArrayBuffer)=>[...new Uint8Array(bytes)].map(b=>b.toString(16).padStart(2,'0')).join('')
 export const tokenHash=async(token:string)=>hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token)))
@@ -50,8 +51,13 @@ export async function drainNotifications(env:any,send:Send,now=Date.now(),limit=
   if(!ready.length||!ready.some(r=>r.due<=now))continue
   const lead=ready[0],token=hex(crypto.getRandomValues(new Uint8Array(32)).buffer),hash=await tokenHash(token)
   await db.batch(ready.map(r=>sql("UPDATE nook_notify_queue SET state='sending',attempts=attempts+1,due=?,email=?,token_hash=?,updated=? WHERE id=?",now+LEASE_MS,lead.id,hash,now,r.id)))
-  const context=await sql('SELECT c.name,c.kind,(SELECT display_name FROM oa_operators WHERE id=?) AS actor FROM nook_conversations c WHERE c.id=?',lead.actor,lead.conversation).first<{name:string;kind:string;actor:string|null}>()
+  const context=await sql(`SELECT c.name,c.kind,COALESCE((SELECT ${queuedAgentLabel} FROM nook_notify_queue q WHERE q.id=?),(SELECT display_name FROM oa_operators WHERE id=?)) AS actor FROM nook_conversations c WHERE c.id=?`,lead.id,lead.actor,lead.conversation).first<{name:string;kind:string;actor:string|null}>()
   const email=composeEmail({workspace:branding.name,origin:authBindings(env).AUTH_ORIGIN,actor:context?.actor??'Someone',conversation:{id:lead.conversation,name:context?.name??'',kind:context?.kind??'channel'},reason:lead.reason,message:lead.message,count:ready.length,conversationCount:new Set(ready.map(row=>row.conversation)).size,token})
+  // Final admission follows composition and precedes the only outbound call.
+  const final=(await sql(`SELECT q.id,${cancelReason} AS cancel FROM nook_notify_queue q WHERE q.id IN (SELECT value FROM json_each(?)) AND q.state='sending'`,JSON.stringify(ready.map(row=>row.id))).all<{id:string;cancel:string|null}>()).results
+  if(final.length!==ready.length||final.some(row=>row.cancel)){
+   await db.batch(ready.map(row=>{const refused=final.find(item=>item.id===row.id)?.cancel;return sql("UPDATE nook_notify_queue SET state=?,error=?,attempts=attempts-1,email=NULL,updated=? WHERE id=? AND state='sending'",refused?'cancelled':'pending',refused??null,now,row.id)}));continue
+  }
   const result=await send({deliveryId:lead.id,to:person!.email,...email})
   if(result.ok){await db.batch([sql("UPDATE nook_notify_queue SET state='sent',error=NULL,updated=? WHERE id=?",now,lead.id),...ready.slice(1).map(r=>sql("UPDATE nook_notify_queue SET state='folded',error=NULL,updated=? WHERE id=?",now,r.id))]);continue}
   await db.batch(ready.map(r=>{const next=afterFailure(r.attempts+1,result.retryable,now);return sql('UPDATE nook_notify_queue SET state=?,due=?,error=?,email=NULL,updated=? WHERE id=?',next.state,next.due,result.error,now,r.id)}))

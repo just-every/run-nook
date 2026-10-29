@@ -38,6 +38,11 @@ async function checkManifestFields(m) {
   insist(Array.isArray(m.tables) && Array.isArray(m.objects) && Array.isArray(m.payloads) && Array.isArray(m.journal) && Array.isArray(m.requiredConfiguration),'manifest_inventory');
   // Applied product migrations, recorded by archives since additive restore.
   insist(m.migrations===undefined || (Array.isArray(m.migrations) && m.migrations.every(x=>typeof x==='string')),'manifest_inventory');
+  // The ledger an export from a RER Platform installation records, by migration identity.
+  const ledger=m.migrationLedger;
+  insist(ledger===undefined || (ledger && typeof ledger==='object' && Object.keys(ledger).sort().join()==='entries,origin' && ledger.origin==='rer_migrations' && Array.isArray(ledger.entries)
+    && ledger.entries.every(e=>e && typeof e==='object' && Object.keys(e).sort().join()==='name,sha256' && typeof e.name==='string' && /^[a-f0-9]{64}$/.test(e.sha256))
+    && canonicalJson(m.migrations)===canonicalJson(ledger.entries.map(e=>e.name)) && new Set(m.migrations).size===m.migrations.length),'manifest_inventory');
   insist(m.tables.every((t,i)=>typeof t.name==='string' && typeof t.sql==='string' && Array.isArray(t.columns) && Array.isArray(t.dependencies) && Number.isSafeInteger(t.count) && t.count>=0 && (!i || m.tables[i-1].name<t.name)),'table_inventory');
   insist(m.schemaObjects===undefined || (Array.isArray(m.schemaObjects) && m.schemaObjects.every((o,i)=>
     o && typeof o.name==='string' && ['index','view','trigger'].includes(o.type) && typeof o.table==='string' && typeof o.sql==='string'

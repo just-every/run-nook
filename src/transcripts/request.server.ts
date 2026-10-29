@@ -25,7 +25,7 @@ export function providerCues(body:any){
 export async function providerTranscript(c:Context,attachment:string,input:Record<string,unknown>){
  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['disclosed','providerVersion'].includes(k))||input.disclosed!==true)fail(400,'Confirm the disclosure before the clip audio is sent')
  const file=await source(c,attachment)
- if(file.author!==c.uid&&!['owner','admin'].includes(c.session.operator.role))fail(403,'Only the clip’s author or an owner or admin can request a provider transcript')
+ if(file.author!==c.uid&&!['owner','admin'].includes(c.operator.role))fail(403,'Only the clip’s author or an owner or admin can request a provider transcript')
  const posting=canPost('?','?','?'),postValues=[file.conversation,file.parent,c.uid]
  if(!await c.one(`SELECT 1 WHERE ${posting}`,postValues,file.conversation))fail(403,'Posting is restricted in this channel; ask a channel manager')
  const cfg=await configuration(c),credential=await c.one<{sealed:string}>('SELECT sealed FROM nook_transcript_secrets WHERE id=1')

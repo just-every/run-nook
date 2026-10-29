@@ -17,6 +17,19 @@ import {mailEdge} from './mail-edge.mjs'
 const withoutBrowser=process.argv.includes('--without-browser');
 const suite=process.argv.find(arg=>arg.startsWith('--suite='))?.slice('--suite='.length)??'all';
 assert.ok(['all','core','core-api','core-api-storage','core-api-product','core-browser','installer','unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite),'runtime suite must be all, core, core-api, core-browser or installer');
+if(suite==='all'){
+ // Keep the complete normal journey on the same isolated installations as CI.
+ // Storage's directory/scale fixtures must not become the input of a later
+ // workspace export or browser journey. Every existing assertion still runs.
+ const options=process.argv.slice(2).filter(arg=>!arg.startsWith('--suite='));
+ const commands=['core-api-storage','core-api-product','core-browser','readable-export','keyboard','conversion','installer'].map(name=>['tests/runtime.mjs','--suite='+name,...options]);
+ commands.push(['--test','--test-concurrency=1','tests/thread-delivery.mjs']);
+ for(const args of commands){
+  const code=await new Promise((resolve,reject)=>{const child=spawn(process.execPath,args,{cwd:process.cwd(),env:process.env,stdio:'inherit'});child.once('error',reject);child.once('exit',code=>resolve(code??1))});
+  if(code)process.exit(code);
+ }
+ process.exit(0);
+}
 const root = process.cwd();let state = await mkdtemp(resolve(tmpdir(),'team-chat-d1-'));const states=[state]
 const env = {...process.env,WRANGLER_LOG_PATH:resolve(state,'wrangler.log'),WRANGLER_SEND_METRICS:'false',X_LOCAL_EXPLORER:'false',CI:'true'}
 const cli = ['node_modules/wrangler/bin/wrangler.js']
@@ -41,7 +54,7 @@ async function start(port,{envFile}={}) {
  await released(port)
  origin=`http://127.0.0.1:${port}`; output=''
  const bindings=envFile?Object.fromEntries((await readFile(envFile,'utf8')).trim().split('\n').filter(line=>line.includes('=')).map(line=>{const at=line.indexOf('=');return [line.slice(0,at),line.slice(at+1)]})):{};
- worker=await mailRuntime({root,state,origin,bindings:{OWNER_EMAIL:'nativeowner@example.test',SESSION_SECRET:sessionSecret,SETUP_TOKEN:setupToken,RER_DEV_KEY:devKey,...bindings},configPath:lossConfig?.path,edge:provider});
+ worker=await mailRuntime({root,state,origin,bindings:{OWNER_EMAIL:'nativeowner@example.test',SESSION_SECRET:sessionSecret,SETUP_TOKEN:setupToken,RER_DEV_KEY:devKey,...bindings},fixture:lossConfig,edge:provider});
 }
 async function stop(){if(worker){const current=worker;worker=undefined;await current.close()}}
 async function request(path,{method='GET',body,cookie='',status=200,extra={}}={}) {
@@ -136,7 +149,7 @@ try {
  const patch=(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status})
  const get=(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status})
  if(suite!=='core-api-product')await (await import('./operator-security.mjs')).runOperatorSecurity({origin,owner,member,setupToken,request,post,get,sql,facts,check})
- const restart=async(options={})=>{await stop();if(Object.hasOwn(options,'transferFaults')){await lossConfig.close();lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root,options.transferFaults)}await start(port)}
+ const restart=async(options={})=>{await stop();if(Object.hasOwn(options,'transferFaults'))lossConfig=await(await import('./storage-hint-loss.mjs')).hintLossConfig(root,options.transferFaults);await start(port)}
  const reconcile=async()=>{await stop();await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/storage/reconcile.mjs','--paused','--persist='+resolve(state,'v3'),'--discard-expired'],{cwd:root,env,stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',value=>text+=value);child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error(text)))});await restart({transferFaults:null})}
  if(suite!=='core-api-product')await (await import('./storage-flows.mjs')).storageFlows({check,post,patch,get,request,sql,owner,member,outsider,c,origin:()=>origin,restart,reconcile,facts})
  const normalizedHarness={validateArchive,check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
@@ -191,7 +204,7 @@ try {
  if(suite==='all'||suite==='core')await new Promise((ok,bad)=>{const child=spawn(process.execPath,['tests/runtime.mjs','--suite=conversion'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Isolated group-conversion journey failed')))})
  if(suite!=='core-api-product'&&suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  if(['all','core','threads'].includes(suite))await new Promise((ok,bad)=>{const child=spawn(process.execPath,['--test','--test-concurrency=1','tests/thread-delivery.mjs'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Thread delivery journey failed')))})
- await lossConfig.close();lossConfig=null
+ lossConfig=null
  }
  if(suite==='all'||suite==='installer')await(await import('./installer-workflow.mjs')).runInstallerWorkflow({root,states,port,check,evidence,databasePath,stop,start,command,env,getState:()=>state,setState:value=>{state=value},getOrigin:()=>origin})
  console.log(`${checks} emitted Worker/D1 checks passed; suite=${suite}`)
@@ -199,7 +212,6 @@ try {
 } catch(error) {evidence.status='failed';evidence.error=error.stack;evidence.workerLog=output.slice(-50000);throw error}
 finally {
  await stop()
- await lossConfig?.close()
  const destination=process.env.TEAM_CHAT_EVIDENCE_DIR || resolve(root,'evidence/nook-1');await mkdir(destination,{recursive:true});await writeFile(resolve(destination,'worker-d1-results.json'),JSON.stringify(evidence,null,2)+'\n')
  for(const dir of states)await rm(dir,{recursive:true,force:true})
 }

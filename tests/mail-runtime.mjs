@@ -7,11 +7,11 @@ const {Miniflare,Log,LogLevel,convertV4MiniflareOptions}=createRequire(require.r
 
 // Emitted application and ordinary provider configuration. Only outbound mail is
 // substituted at the network boundary; local identity and every binding are real.
-export async function mailRuntime({root=process.cwd(),state,origin,bindings={},configPath,edge=mailEdge()}){
+export async function mailRuntime({root=process.cwd(),state,origin,bindings={},configPath,fixture,edge=mailEdge()}){
  const path=configPath??resolve(root,'dist/server/wrangler.json');
- const config=JSON.parse(await readFile(path,'utf8')),directory=dirname(path);
+ const config=fixture?.config??JSON.parse(await readFile(path,'utf8')),directory=dirname(path);
  const main=resolve(directory,config.main),assets=resolve(root,'dist/server/assets');
- const modules=[{type:'ESModule',path:main},...(await readdir(assets)).filter(name=>name.endsWith('.js')).map(name=>({type:'ESModule',path:resolve(assets,name)}))];
+ const modules=[fixture?.entry??{type:'ESModule',path:main},...(await readdir(assets)).filter(name=>name.endsWith('.js')).map(name=>({type:'ESModule',path:resolve(assets,name)}))];
  // Fault fixtures can import the emitted entry as a second module.
  const app=resolve(root,'dist/server/index.js');if(main!==app)modules.push({type:'ESModule',path:app});
  const options={name:config.name,host:'127.0.0.1',port:Number(new URL(origin).port),routes:['*/*'],modules,modulesRoot:resolve(root,'dist/server'),

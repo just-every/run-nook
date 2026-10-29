@@ -1,0 +1,2419 @@
+{
+  "schema": "rer-agent-surface/1",
+  "seed": "nook",
+  "specialist": "conversation clerk",
+  "tools": [
+    {
+      "name": "nook.identity.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-001"
+      ]
+    },
+    {
+      "name": "nook.conversations.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-001",
+        "NOOK-003"
+      ]
+    },
+    {
+      "name": "nook.conversations.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-001",
+        "NOOK-003"
+      ]
+    },
+    {
+      "name": "nook.conversations.create",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-003",
+        "NOOK-016"
+      ]
+    },
+    {
+      "name": "nook.conversations.update",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-060"
+      ]
+    },
+    {
+      "name": "nook.conversations.archive",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-060"
+      ]
+    },
+    {
+      "name": "nook.conversations.leave",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "access"
+      ],
+      "clauses": [
+        "NOOK-003"
+      ],
+      "widens": false,
+      "narrowing": {
+        "effect": "revoke",
+        "target": "id"
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "nook.conversations.members",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-003"
+      ]
+    },
+    {
+      "name": "nook.conversations.member",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "access"
+      ],
+      "clauses": [
+        "NOOK-003"
+      ]
+    },
+    {
+      "name": "nook.conversations.transfer",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "access"
+      ],
+      "clauses": [
+        "NOOK-060"
+      ]
+    },
+    {
+      "name": "nook.messages.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-002",
+        "NOOK-011"
+      ]
+    },
+    {
+      "name": "nook.messages.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-001",
+        "NOOK-002"
+      ]
+    },
+    {
+      "name": "nook.messages.post",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-002",
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.messages.edit",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-002"
+      ]
+    },
+    {
+      "name": "nook.messages.reactions",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-016"
+      ]
+    },
+    {
+      "name": "nook.messages.react",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-016"
+      ]
+    },
+    {
+      "name": "nook.messages.reaction_people",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-016"
+      ]
+    },
+    {
+      "name": "nook.messages.collections",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-020"
+      ]
+    },
+    {
+      "name": "nook.outcomes.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-004"
+      ]
+    },
+    {
+      "name": "nook.outcomes.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-004",
+        "NOOK-010"
+      ]
+    },
+    {
+      "name": "nook.outcomes.propose",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard",
+        "commitment"
+      ],
+      "clauses": [
+        "NOOK-004",
+        "NOOK-055"
+      ]
+    },
+    {
+      "name": "nook.outcomes.revise",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "commitment"
+      ],
+      "clauses": [
+        "NOOK-004",
+        "NOOK-010"
+      ]
+    },
+    {
+      "name": "nook.outcomes.cancel",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-010"
+      ]
+    },
+    {
+      "name": "nook.notes.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053"
+      ]
+    },
+    {
+      "name": "nook.notes.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053"
+      ]
+    },
+    {
+      "name": "nook.notes.create",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053"
+      ]
+    },
+    {
+      "name": "nook.notes.update",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053"
+      ]
+    },
+    {
+      "name": "nook.notes.revert",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053"
+      ]
+    },
+    {
+      "name": "nook.notes.history",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053"
+      ]
+    },
+    {
+      "name": "nook.notes.proposals",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053"
+      ]
+    },
+    {
+      "name": "nook.notes.propose",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-053",
+        "NOOK-055"
+      ]
+    },
+    {
+      "name": "nook.attention.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-005",
+        "NOOK-013"
+      ]
+    },
+    {
+      "name": "nook.attention.update",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-013"
+      ]
+    },
+    {
+      "name": "nook.conversations.mark_read",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-005"
+      ]
+    },
+    {
+      "name": "nook.conversations.preferences",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-013"
+      ]
+    },
+    {
+      "name": "nook.conversations.follow",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-013"
+      ]
+    },
+    {
+      "name": "nook.threads.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-072"
+      ]
+    },
+    {
+      "name": "nook.threads.follow",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-072"
+      ]
+    },
+    {
+      "name": "nook.search.messages",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-019"
+      ]
+    },
+    {
+      "name": "nook.saved.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-020"
+      ]
+    },
+    {
+      "name": "nook.saved.create",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-020"
+      ]
+    },
+    {
+      "name": "nook.saved.remove",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-020"
+      ]
+    },
+    {
+      "name": "nook.pins.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-020"
+      ]
+    },
+    {
+      "name": "nook.pins.update",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-020"
+      ]
+    },
+    {
+      "name": "nook.people.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.workspace.snapshot",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-001",
+        "NOOK-011",
+        "NOOK-051"
+      ]
+    },
+    {
+      "name": "nook.workspace.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.events.list",
+      "scope": "events:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "BASE-AGENT-010"
+      ]
+    },
+    {
+      "name": "nook.conversations.grants",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-001",
+        "NOOK-003"
+      ]
+    },
+    {
+      "name": "nook.attention.history",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-005",
+        "NOOK-013"
+      ]
+    },
+    {
+      "name": "nook.polls.create",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.polls.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.polls.vote",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.polls.close",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.bookmarks.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.bookmarks.add",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.bookmarks.reorder",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.bookmarks.remove",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-070"
+      ]
+    },
+    {
+      "name": "nook.files.list",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-012",
+        "NOOK-061"
+      ]
+    },
+    {
+      "name": "nook.conversations.replay",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-011"
+      ]
+    },
+    {
+      "name": "nook.conversations.roster",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-003"
+      ]
+    },
+    {
+      "name": "nook.profiles.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.profiles.update",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.profiles.fields",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.people.directory",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017",
+        "NOOK-049"
+      ]
+    },
+    {
+      "name": "nook.workspace.organize",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.messages.sent",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-017"
+      ]
+    },
+    {
+      "name": "nook.notification_choices.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-072"
+      ]
+    },
+    {
+      "name": "nook.notification_choices.update",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-072"
+      ]
+    },
+    {
+      "name": "nook.notification_choices.exceptions",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-072"
+      ]
+    },
+    {
+      "name": "nook.quiet.read",
+      "scope": "nook:read",
+      "readOnly": true,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-013"
+      ]
+    },
+    {
+      "name": "nook.quiet.update",
+      "scope": "nook:write",
+      "readOnly": false,
+      "classes": [
+        "standard"
+      ],
+      "clauses": [
+        "NOOK-013"
+      ]
+    }
+  ],
+  "resources": [
+    "nook://conversations/{id}",
+    "nook://messages/{id}",
+    "nook://outcomes/{id}",
+    "nook://files/{id}",
+    "nook://notes/{id}",
+    "nook://schedules/{id}",
+    "nook://audit/{id}"
+  ],
+  "notTools": [
+    {
+      "clauses": [
+        "NOOK-021"
+      ],
+      "reason": "device"
+    },
+    {
+      "clauses": [
+        "NOOK-041",
+        "NOOK-042",
+        "NOOK-043",
+        "NOOK-044",
+        "NOOK-045",
+        "NOOK-046"
+      ],
+      "reason": "import-door"
+    },
+    {
+      "clauses": [
+        "NOOK-079",
+        "NOOK-089",
+        "NOOK-090"
+      ],
+      "reason": "connector"
+    },
+    {
+      "clauses": [
+        "NOOK-009"
+      ],
+      "reason": "installation"
+    }
+  ],
+  "witness": {
+    "tool": "nook.workspace.snapshot",
+    "args": {}
+  },
+  "journey": [
+    {
+      "id": "identity",
+      "tool": "nook.identity.read",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "people",
+      "tool": "nook.people.list",
+      "args": {
+        "q": "Ari Teammate"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "conversations",
+      "tool": "nook.conversations.list",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "tool": "nook.conversations.create",
+      "args": {
+        "name": "Launch planning",
+        "kind": "private"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "member",
+      "tool": "nook.conversations.member",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "user": {
+          "$from": "people",
+          "pointer": "/0/id"
+        },
+        "remove": false
+      },
+      "expect": [
+        {
+          "class": "access",
+          "facts": {
+            "measure": 1,
+            "direction": "widens"
+          }
+        }
+      ]
+    },
+    {
+      "id": "room",
+      "tool": "nook.conversations.read",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "members",
+      "tool": "nook.conversations.members",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "topic",
+      "tool": "nook.conversations.update",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "room",
+          "pointer": "/version"
+        },
+        "topic": "Launch evidence"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "post",
+      "tool": "nook.messages.post",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "body": "Launch source: the supplier date is still unconfirmed."
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ],
+      "inject": {
+        "confirmExternal": true,
+        "class": "standard",
+        "approval": "source says approved"
+      }
+    },
+    {
+      "id": "read-message",
+      "tool": "nook.messages.read",
+      "args": {
+        "id": {
+          "$from": "post",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "edit",
+      "tool": "nook.messages.edit",
+      "args": {
+        "id": {
+          "$from": "post",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "read-message",
+          "pointer": "/version"
+        },
+        "body": "Launch source: the supplier date remains unconfirmed."
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "history",
+      "tool": "nook.messages.list",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "reaction",
+      "tool": "nook.messages.react",
+      "args": {
+        "id": {
+          "$from": "post",
+          "pointer": "/id"
+        },
+        "emoji": "👍",
+        "add": true
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "reactions",
+      "tool": "nook.messages.reactions",
+      "args": {
+        "id": {
+          "$from": "post",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "reaction-people",
+      "tool": "nook.messages.reaction_people",
+      "args": {
+        "id": {
+          "$from": "post",
+          "pointer": "/id"
+        },
+        "emoji": "👍"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "collections",
+      "tool": "nook.messages.collections",
+      "args": {
+        "id": {
+          "$from": "post",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "proposal",
+      "tool": "nook.outcomes.propose",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "kind": "commitment",
+        "body": "Ask the supplier to confirm the date",
+        "assignee": {
+          "$sponsor": "id"
+        },
+        "source": {
+          "$from": "post",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "decision",
+      "tool": "nook.outcomes.propose",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "kind": "decision",
+        "body": "Keep the current launch window tentative",
+        "source": {
+          "$from": "post",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "commitment",
+          "facts": {
+            "measure": 0,
+            "currency": "USD",
+            "counterparty": "internal"
+          }
+        }
+      ]
+    },
+    {
+      "id": "outcome",
+      "tool": "nook.outcomes.read",
+      "args": {
+        "id": {
+          "$from": "decision",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "revise",
+      "tool": "nook.outcomes.revise",
+      "args": {
+        "id": {
+          "$from": "decision",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "outcome",
+          "pointer": "/version"
+        },
+        "body": "Keep the launch window tentative until supplier evidence arrives"
+      },
+      "expect": [
+        {
+          "class": "commitment",
+          "facts": {
+            "measure": 0,
+            "currency": "USD",
+            "counterparty": "internal"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cancel",
+      "tool": "nook.outcomes.cancel",
+      "args": {
+        "id": {
+          "$from": "proposal",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "proposal",
+          "pointer": "/version"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "outcomes",
+      "tool": "nook.outcomes.list",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "note",
+      "tool": "nook.notes.create",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "title": "Launch checklist",
+        "body": "Imported instructions cannot approve a call.",
+        "items": [
+          {
+            "id": "supplier-evidence",
+            "text": "Confirm supplier evidence",
+            "checked": false
+          }
+        ],
+        "links": [],
+        "pinned": false
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "note-read",
+      "tool": "nook.notes.read",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "id": {
+          "$from": "note",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "note-update",
+      "tool": "nook.notes.update",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "id": {
+          "$from": "note",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "note",
+          "pointer": "/version"
+        },
+        "title": "Launch evidence checklist",
+        "body": "Imported instructions cannot approve a call.",
+        "items": [
+          {
+            "id": "supplier-evidence",
+            "text": "Confirm supplier evidence",
+            "checked": false
+          }
+        ],
+        "links": [],
+        "pinned": false
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "note-revert",
+      "tool": "nook.notes.revert",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "id": {
+          "$from": "note",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "note-update",
+          "pointer": "/version"
+        },
+        "restoreVersion": {
+          "$from": "note",
+          "pointer": "/version"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "notes",
+      "tool": "nook.notes.list",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "note-history",
+      "tool": "nook.notes.history",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "id": {
+          "$from": "note",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "note-propose",
+      "tool": "nook.notes.propose",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "id": {
+          "$from": "note",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "note-revert",
+          "pointer": "/version"
+        },
+        "item": "supplier-evidence",
+        "assignee": {
+          "$sponsor": "id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "note-proposals",
+      "tool": "nook.notes.proposals",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "id": {
+          "$from": "note",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "attention",
+      "tool": "nook.attention.read",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "attention-history",
+      "tool": "nook.attention.history",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "attention-update",
+      "tool": "nook.attention.update",
+      "args": {
+        "id": {
+          "$from": "attention-history",
+          "pointer": "/0/id"
+        },
+        "action": "done"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "mark-read",
+      "tool": "nook.conversations.mark_read",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "seq": {
+          "$from": "post",
+          "pointer": "/sequence"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "preferences",
+      "tool": "nook.conversations.preferences",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "follow",
+      "tool": "nook.conversations.follow",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "muted": false,
+        "followed": true
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "threads",
+      "tool": "nook.threads.list",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "thread-follow",
+      "tool": "nook.threads.follow",
+      "args": {
+        "id": {
+          "$from": "post",
+          "pointer": "/id"
+        },
+        "followed": true
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "search",
+      "tool": "nook.search.messages",
+      "args": {
+        "q": "supplier"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "save",
+      "tool": "nook.saved.create",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "message": {
+          "$from": "post",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "saved",
+      "tool": "nook.saved.list",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "unsave",
+      "tool": "nook.saved.remove",
+      "args": {
+        "id": {
+          "$from": "save",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "pin",
+      "tool": "nook.pins.update",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "message": {
+          "$from": "post",
+          "pointer": "/id"
+        },
+        "pinned": true
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "pins",
+      "tool": "nook.pins.list",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "workspace",
+      "tool": "nook.workspace.read",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "snapshot",
+      "tool": "nook.workspace.snapshot",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "poll-create",
+      "tool": "nook.polls.create",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "question": "Which evidence should we review first?",
+        "options": [
+          "Supplier date",
+          "Launch notes"
+        ],
+        "multiple": false,
+        "anonymous": true
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "poll-read",
+      "tool": "nook.polls.read",
+      "args": {
+        "id": {
+          "$from": "poll-create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "poll-vote",
+      "tool": "nook.polls.vote",
+      "args": {
+        "id": {
+          "$from": "poll-create",
+          "pointer": "/id"
+        },
+        "choices": [
+          1
+        ]
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "poll-close",
+      "tool": "nook.polls.close",
+      "args": {
+        "id": {
+          "$from": "poll-create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "bookmark-add",
+      "tool": "nook.bookmarks.add",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "kind": "link",
+        "title": "Evidence notes",
+        "url": "https://example.com/evidence"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "bookmarks",
+      "tool": "nook.bookmarks.list",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "bookmark-reorder",
+      "tool": "nook.bookmarks.reorder",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "bookmarks",
+          "pointer": "/version"
+        },
+        "parent": null,
+        "order": [
+          {
+            "$from": "bookmarks",
+            "pointer": "/items/0/id"
+          }
+        ]
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "bookmark-remove",
+      "tool": "nook.bookmarks.remove",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "id": {
+          "$from": "bookmarks",
+          "pointer": "/items/0/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "files",
+      "tool": "nook.files.list",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "native-replay",
+      "tool": "nook.conversations.replay",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "after": 0
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "roster",
+      "tool": "nook.conversations.roster",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "tool": "nook.profiles.read",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-update",
+      "tool": "nook.profiles.update",
+      "args": {
+        "version": {
+          "$from": "profile",
+          "pointer": "/profile/version"
+        },
+        "status": {
+          "emoji": "",
+          "text": "Reviewing launch evidence",
+          "clearAfter": "never"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-fields",
+      "tool": "nook.profiles.fields",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "directory",
+      "tool": "nook.people.directory",
+      "args": {
+        "q": "Ari Teammate"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "sidebar",
+      "tool": "nook.workspace.organize",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "section": "Launch evidence",
+        "position": 1
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "sent",
+      "tool": "nook.messages.sent",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "notify-choice",
+      "tool": "nook.notification_choices.read",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "notify-choice-update",
+      "tool": "nook.notification_choices.update",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "level": "mentions",
+        "threads": "followed"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "notify-exceptions",
+      "tool": "nook.notification_choices.exceptions",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "quiet",
+      "tool": "nook.quiet.read",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "quiet-clear",
+      "tool": "nook.quiet.update",
+      "args": {
+        "dndUntil": null
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "transfer",
+      "tool": "nook.conversations.transfer",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "user": {
+          "$from": "people",
+          "pointer": "/0/id"
+        },
+        "version": {
+          "$from": "topic",
+          "pointer": "/version"
+        }
+      },
+      "expect": [
+        {
+          "class": "access",
+          "facts": {
+            "measure": 1,
+            "direction": "widens"
+          }
+        }
+      ]
+    },
+    {
+      "id": "archive",
+      "tool": "nook.conversations.archive",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "transfer",
+          "pointer": "/version"
+        },
+        "archived": true
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "restore",
+      "tool": "nook.conversations.archive",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "version": {
+          "$from": "archive",
+          "pointer": "/version"
+        },
+        "archived": false
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "leave-room",
+      "tool": "nook.conversations.create",
+      "args": {
+        "name": "Temporary planning room",
+        "kind": "channel"
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "grants",
+      "tool": "nook.conversations.grants",
+      "args": {
+        "id": {
+          "$from": "leave-room",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "leave",
+      "tool": "nook.conversations.leave",
+      "args": {
+        "id": {
+          "$from": "leave-room",
+          "pointer": "/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "access",
+          "facts": {
+            "measure": 1,
+            "direction": "narrows"
+          }
+        }
+      ]
+    },
+    {
+      "id": "events",
+      "tool": "nook.events.list",
+      "args": {},
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    }
+  ],
+  "escalations": [
+    {
+      "id": "membership-self",
+      "tool": "nook.conversations.member",
+      "args": {
+        "id": {
+          "$from": "leave-room",
+          "pointer": "/id"
+        },
+        "user": {
+          "$sponsor": "id"
+        },
+        "remove": false
+      }
+    },
+    {
+      "id": "manager-self",
+      "tool": "nook.conversations.transfer",
+      "args": {
+        "id": {
+          "$from": "create",
+          "pointer": "/id"
+        },
+        "user": {
+          "$sponsor": "id"
+        },
+        "version": {
+          "$from": "restore",
+          "pointer": "/version"
+        }
+      }
+    }
+  ],
+  "verification": {
+    "owner": {
+      "initializer": "tests/agent-door/owner.mjs"
+    },
+    "reviewers": [
+      {
+        "label": "teammate",
+        "email": "synthetic-nook-teammate@example.com",
+        "initializer": "tests/agent-door/teammate.mjs"
+      },
+      {
+        "label": "second-teammate",
+        "email": "synthetic-nook-second@example.com",
+        "initializer": "tests/agent-door/teammate.mjs"
+      }
+    ],
+    "replayAdmission": {
+      "prepare": [
+        "leave-room"
+      ]
+    },
+    "network": {
+      "module": "tests/agent-door/push-edge.mjs",
+      "origins": [
+        "https://web.push.apple.com"
+      ]
+    }
+  },
+  "narrowings": [
+    {
+      "tool": "nook.conversations.leave",
+      "step": "leave",
+      "witness": {
+        "tool": "nook.conversations.grants",
+        "args": {
+          "id": {
+            "$from": "leave-room",
+            "pointer": "/id"
+          }
+        },
+        "pointer": "/grants"
+      }
+    }
+  ]
+}
