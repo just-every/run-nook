@@ -17,6 +17,7 @@ export function OutcomeHistory({outcome}: {outcome:Outcome}){
   void api<History>(`outcomes/${outcome.id}/versions?before=${before}`).then(value=>{if(current)setHistory(value)},e=>{if(current)setError(e instanceof Error?e.message:'History could not be loaded.')})
   return ()=>{current=false}
  },[open,before,outcome.id,outcome.version])
+ if(outcome.version<2)return null
  return <div className="outcome-history">
   <button className="text-button" aria-expanded={open} aria-controls={open?id:undefined} onClick={()=>setOpen(value=>!value)}>Version history · {outcome.version}</button>
   {open&&<div id={id}>
