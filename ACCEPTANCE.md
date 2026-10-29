@@ -471,7 +471,7 @@ The statuses and citations below match the Status table in this revision of CONT
 
   Current evidence: No implementing source/test; journey pending.
 
-**91 clauses: 35 done, 26 partial, 30 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
+**92 clauses: 35 done, 26 partial, 31 missing.** These counts describe source/test coverage, not a new claim that all target acceptance has run.
 
 - **NOOK-081 — Inbound email into conversations.** **Status: missing.** Email a PDF to a channel's address and see one attributed post; with allow-listing on, an unlisted sender is refused.
 
@@ -522,5 +522,9 @@ The statuses and citations below match the Status table in this revision of CONT
   Current evidence: `tests/notification-apps.mjs` — “NOOK-080 [NOOK-089] channel-scoped notification approvals, threads, receipt lookup, replacement edits, audience, rate, withdrawal and custody” (Verify, verify (integration tokens)); `tests/notification-extension.mjs` — notificationExtension (Verify 39871524529, integration job 120146845861; repeated by this landing's exact-head Verify, verify (integration tokens)): live same-channel thread/app badge and ordinary follows, same receipt and one message, key isolation/tombstones/no quota charge, replacement edit/CAS/history/audit, revoked and other-app refusal, current posting/archive/removal fences; existing export/credential-free restore case. API-only; approval screen unchanged.
 
   Ruled identity: Ruled default APPROVED by ct, 22 October 2026 21:55Z: app identity is the exact owner/admin-approved (app name, channel) pair read from immutable approval rows, never token text or a client claim; after replacement approval the replacement token may edit earlier posts of that same pair under current authority; no other pair and no revoked token can; a post into a channel the pair can no longer reach is refused; each edit is attributed to the app identity in the existing audit; no new identity table. No new durable category, migration, answer cache or credential export.
+
+- **NOOK-090 — Public events, interactivity and app-token message reads.** **Status: missing.** Nook offers a public events endpoint and a public interactivity endpoint that an installed chat app (such as Slack) can call. Each verifies the platform's request signature with the installation's signing secret and refuses an unsigned, stale or replayed request without effect. An app token scoped to a workspace reads messages only in channels the app was added to and only what the installing person could read. A channel the app is not in, or a revoked installation, reads nothing on the next call. Interactivity actions (buttons and shortcuts) act as the installing person with that person's current authority and write one audit entry each. One public-door journey proves a signed event delivered, a refused bad signature, an interactivity action with an allowed and a refused case, and an app-token read of an allowed and a non-member channel. Uninstalling removes the app token and further calls fail.
+
+  Current evidence: No implementing source/test; journey pending.
 
 One-off populated v0.4.0-shaped upgrade proof (23 October 2026): migrations 0077, 0078 and 0079 applied over the populated schema through 0076 preserved all rows of 204 pre-existing tables, including two native messages, private file bytes, two members, a read marker and a recorded decision; foreign-key checks and the public read/forward doors passed. This is not a permanent test registration.
