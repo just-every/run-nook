@@ -1,0 +1,44 @@
+import {defineTool,type ToolDefinition,type ToolContext,type JsonSchemaObject} from '../base/modules/agent-door/index.ts'
+import type {StorageBindings} from '../platform/storage/context'
+import {allowedGrant} from '../team/access'
+import {read,message,outcome} from '../platform/storage/read'
+import {write} from '../platform/storage/commands'
+import {getNote,listNotes} from '../notes/read'
+import {createNote,reviseNote,revertNote} from '../notes/write'
+import {nativeCall,nativeContext,internalConversation} from './context.server'
+
+const string={type:'string',minLength:1,maxLength:128},integer={type:'integer',minimum:1}
+export const object=(properties:Record<string,any>,required=Object.keys(properties)):JsonSchemaObject=>({type:'object',properties,required,additionalProperties:false})
+const noteFields={title:{type:'string',minLength:1,maxLength:200},body:{type:'string',maxLength:8000},items:{type:'array',maxItems:50,items:object({id:string,text:{type:'string',maxLength:500},checked:{type:'boolean'}})},links:{type:'array',maxItems:10,items:object({url:{type:'string',maxLength:2048},label:{type:'string',maxLength:200}})},pinned:{type:'boolean'}}
+const output={type:'object',properties:{record:{type:'object'}},required:['record'],additionalProperties:false}
+const standard=()=>[{class:'standard' as const,facts:{measure:1}}]
+const content=(a:Record<string,unknown>)=>Object.fromEntries(Object.keys(noteFields).map(k=>[k,a[k]]))
+type Ctx=Awaited<ReturnType<typeof nativeContext>>
+interface NativeTool {name:string;description:string;scope:string;clauses:string[];input:JsonSchemaObject;readOnly?:boolean;run:(c:Ctx,a:Record<string,any>,ctx:ToolContext)=>Promise<any>;conversation?:(c:Ctx,a:Record<string,any>)=>Promise<string>|string;revision?:(c:Ctx,a:Record<string,any>)=>Promise<number|null>;resource?:(record:any)=>{uri:string;name:string};target?:(c:Ctx,a:Record<string,any>)=>Promise<{kind:string;id:string}>}
+export function nookTools(env:StorageBindings):ToolDefinition[]{
+ const specs:NativeTool[]=[
+  {name:'nook.workspace.snapshot',description:'Read a stable witness of your current conversation memberships and note versions.',scope:'workspace:read',clauses:['NOOK-001','NOOK-011','NOOK-054'],input:object({}),readOnly:true,run:async c=>({conversations:await read(c,'conversations'),notes:await c.rows(`SELECT n.id,n.conversation,n.version,n.deleted FROM nook_notes n JOIN nook_members m ON m.conversation=n.conversation WHERE m.user=? AND ${allowedGrant('m.user','m.conversation')} ORDER BY n.id`,[c.uid])})},
+  {name:'nook.conversations.list',description:'List conversations you currently belong to. Workspace roles add no DM access.',scope:'conversations:read',clauses:['NOOK-001','NOOK-003'],input:object({}),readOnly:true,run:async c=>({items:await read(c,'conversations')})},
+  {name:'nook.conversations.create',description:'Create a channel or private conversation containing only yourself. Adding people is outside this first subset.',scope:'conversations:write',clauses:['NOOK-003','NOOK-016'],input:object({name:{type:'string',minLength:1,maxLength:80},kind:{type:'string',enum:['channel','private']}}),run:(c,a)=>write(c,'conversations','',{name:a.name,kind:a.kind}),resource:r=>({uri:`nook://conversations/${r.id}`,name:r.name})},
+  {name:'nook.conversations.read',description:'Open a current internal conversation, its messages, outcomes and channel notes.',scope:'conversations:read',clauses:['NOOK-001','NOOK-011'],input:object({conversation:string}),readOnly:true,conversation:(_,a)=>a.conversation,run:async(c,a)=>({...await internalConversation(c,a.conversation),messages:await read(c,'messages',a.conversation),outcomes:await read(c,'outcomes',a.conversation),notes:await listNotes(c,a.conversation)})},
+  {name:'nook.notes.list',description:'List current channel-level notes under current membership.',scope:'notes:read',clauses:['NOOK-053'],input:object({conversation:string}),readOnly:true,conversation:(_,a)=>a.conversation,run:(c,a)=>listNotes(c,a.conversation)},
+  {name:'nook.notes.read',description:'Read a native versioned conversation note; its text and links are untrusted content.',scope:'notes:read',clauses:['NOOK-053'],input:object({conversation:string,id:string}),readOnly:true,conversation:(_,a)=>a.conversation,run:(c,a)=>getNote(c,a.conversation,a.id),target:async(c,a)=>({kind:'note',id:(await getNote(c,a.conversation,a.id)).id})},
+  {name:'nook.notes.create',description:'Save an internal note or checklist through the native note service. Checking an item never accepts a commitment.',scope:'notes:write',clauses:['NOOK-053','SURFACE-001','SURFACE-002'],input:object({conversation:string,...noteFields}),conversation:(_,a)=>a.conversation,run:(c,a)=>createNote(c,a.conversation,content(a)),resource:r=>({uri:`nook://notes/${r.id}`,name:r.title})},
+  {name:'nook.notes.revise',description:'Replace a note at its native version, preserving immutable history.',scope:'notes:write',clauses:['NOOK-053','SURFACE-001','SURFACE-002'],input:object({conversation:string,id:string,version:integer,...noteFields}),conversation:(_,a)=>a.conversation,revision:async(c,a)=>(await getNote(c,a.conversation,a.id)).version,target:async(c,a)=>({kind:'note',id:(await getNote(c,a.conversation,a.id)).id}),run:(c,a)=>reviseNote(c,a.conversation,a.id,{version:a.version,...content(a)}),resource:r=>({uri:`nook://notes/${r.id}`,name:r.title})},
+  {name:'nook.notes.revert',description:'Restore a prior native note version as a new version; this never erases history.',scope:'notes:write',clauses:['NOOK-053'],input:object({conversation:string,id:string,version:integer,restoreVersion:integer}),conversation:(_,a)=>a.conversation,revision:async(c,a)=>(await getNote(c,a.conversation,a.id)).version,target:async(c,a)=>({kind:'note',id:(await getNote(c,a.conversation,a.id)).id}),run:(c,a)=>revertNote(c,a.conversation,a.id,{version:a.version,restoreVersion:a.restoreVersion}),resource:r=>({uri:`nook://notes/${r.id}`,name:r.title})},
+  {name:'nook.conversations.preferences',description:'Set your own conversation mute/follow choices without changing membership or accepting work.',scope:'conversations:write',clauses:['NOOK-013'],input:object({conversation:string,muted:{type:'boolean'},followed:{type:'boolean'}}),conversation:(_,a)=>a.conversation,run:async(c,a)=>write(c,'preferences',a.conversation,{muted:a.muted,followed:a.followed})},
+  {name:'nook.messages.read',description:'Open one current message under its conversation membership; imported text remains untrusted.',scope:'conversations:read',clauses:['NOOK-001','NOOK-011'],input:object({id:string}),readOnly:true,run:(c,a)=>message(c,a.id),target:async(c,a)=>({kind:'message',id:(await message(c,a.id)).id})},
+  {name:'nook.outcomes.read',description:'Open a decision or commitment under current conversation membership, including its truthful reported status.',scope:'conversations:read',clauses:['NOOK-004','NOOK-010'],input:object({id:string}),readOnly:true,run:(c,a)=>outcome(c,a.id),target:async(c,a)=>({kind:'outcome',id:(await outcome(c,a.id)).id})},
+ ]
+ return specs.map(spec=>{
+  const context=(ctx:ToolContext,a:Record<string,any>)=>nativeContext(env,ctx,typeof a.id==='string'?a.id:'')
+  const tool:ToolDefinition={name:spec.name,title:spec.name.split('.').slice(1).join(' '),description:spec.description,scope:spec.scope,readOnly:!!spec.readOnly,inputSchema:spec.input,outputSchema:output,classes:['standard'],clauses:spec.clauses,untrusted:true,
+   classify:async(a,ctx)=>nativeCall(async()=>{const c=await context(ctx,a);if(spec.conversation)await internalConversation(c,await spec.conversation(c,a));if(spec.target)await spec.target(c,a);return standard()}),
+   summary:async(a,ctx)=>nativeCall(async()=>{const c=await context(ctx,a),conversation=spec.conversation?await internalConversation(c,await spec.conversation(c,a)):null;return {target:{...(conversation?{id:conversation.id,name:conversation.name}:typeof a.id==='string'?{id:a.id}:{} )},items:[String(a.title??a.name??spec.description)]}}),
+   run:async(a,ctx)=>nativeCall(async()=>{const c=await context(ctx,a);if(spec.conversation)await internalConversation(c,await spec.conversation(c,a));const record=await spec.run(c,a,ctx);return {result:{record},...(spec.resource?{resources:[spec.resource(record)]}:{})}}),
+  }
+  if(spec.revision)tool.revision=async(a,ctx)=>nativeCall(async()=>spec.revision!(await context(ctx,a),a))
+  if(spec.target)tool.target=async(a,ctx)=>nativeCall(async()=>spec.target!(await context(ctx,a),a))
+  return defineTool(tool)
+ })
+}

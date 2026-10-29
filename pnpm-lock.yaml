@@ -57,8 +57,8 @@ importers:
         specifier: 1.64.1
         version: 1.64.1
       '@runeditrun/rer':
-        specifier: 0.2.80
-        version: 0.2.80
+        specifier: 0.2.91
+        version: 0.2.91
       '@types/node':
         specifier: 26.0.0
         version: 26.0.0
@@ -77,6 +77,9 @@ importers:
       highlight.js:
         specifier: 10.7.3
         version: 10.7.3
+      miniflare:
+        specifier: 5.20260907.0-alpha
+        version: 5.20260907.0-alpha(@types/node@26.0.0)
       react-markdown:
         specifier: 6.0.3
         version: 6.0.3(@types/react@19.2.18)(react@19.2.8)
@@ -712,8 +715,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@runeditrun/rer@0.2.80':
-    resolution: {integrity: sha512-ZyuCv5DFElXDn78EL03hTLzwoB7z7wDGsUDUd3WDSYE8C6BJODx4oj0nkZwqVa20/1G7h+cWwIQUku6z8Ngxlw==}
+  '@runeditrun/rer@0.2.91':
+    resolution: {integrity: sha512-1yM0BK4ooUl305uao6zYPC0Ho4VokGuGLcA2wGWCp2McYUTNmiyvvGnOWmQgdsTljmRoQgaAmtuh4yBAYD9ExA==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -2103,7 +2106,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@runeditrun/rer@0.2.80': {}
+  '@runeditrun/rer@0.2.91': {}
 
   '@sindresorhus/is@7.2.0': {}
 

@@ -3,7 +3,7 @@ import type {FormEvent} from 'react'
 import type {TeamRequest} from '../team/types'
 import type {NoteContent,NoteItem} from './input'
 
-type Note=NoteContent&{id:string;version:number;created:string;updated:string;pinnedBy:string|null;pinnedAt:string|null;deleted:boolean}
+type Note=NoteContent&{id:string;preparedBy?:string|null;version:number;created:string;updated:string;pinnedBy:string|null;pinnedAt:string|null;deleted:boolean}
 type Revision=NoteContent&{version:number;actorName:string|null;created:string;reverted_from:number|null;deleted:boolean}
 type Proposal={outcome:string;item:string;noteVersion:number;created:string}
 type Page<T>={items:T[];cursor:string|number|null}
@@ -72,7 +72,7 @@ function NotesScope({conversation,thread,request,people,onClose}:Props){
    {creating&&<NoteEditor key="new" initial={empty()} busy={busy} onCancel={()=>setCreating(false)} onSave={draft=>void mutate(base,'POST',{...draft,thread:thread??null},'Note created.')}/>}
    {selected&&editing&&<NoteEditor key={selected.id+':'+selected.version} initial={selected} busy={busy} onCancel={()=>setEditing(false)} onSave={draft=>void mutate(notePath,'PATCH',{...draft,version:selected.version},'New note version saved.')}/>}
    {selected&&!editing&&<>
-    <article className="notes-detail"><h3>{selected.title||'Deleted note'}</h3><p className="notes-meta">Version {selected.version} · {when(selected.updated)}</p>
+    <article className="notes-detail"><h3>{selected.title||'Deleted note'}</h3><p className="notes-meta">Version {selected.version} · {when(selected.updated)}{selected.preparedBy&&` · ${selected.preparedBy}`}</p>
      {selected.pinned&&<p className="notes-pin">Pinned by {people.find(p=>p.id===selected.pinnedBy)?.name??'a former member'}{selected.pinnedAt?' · '+when(selected.pinnedAt):''}</p>}
      {selected.deleted?<p>Note content was deleted.</p>:<>
       <p className="notes-body">{selected.body}</p>

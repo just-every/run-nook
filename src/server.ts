@@ -1,3 +1,5 @@
+import {nookAgentDoor} from './agent-door/index.server'
+import {businessSettings} from './agent-door/business.server'
 import {resumableRoute} from './files/resumable.server';
 import {clipRoute} from './clips/server'
 import {transcriptRoute} from './transcripts/route.server'
@@ -146,6 +148,10 @@ export default withDemo({
   const asset = await staticAssetResponse(request,env)
   if(asset) return asset
   const publicEnv = authBindings(env)
+  const businessResponse=await businessSettings({...env,...publicEnv}).handle(request)
+  if(businessResponse)return businessResponse
+  const agentResponse=await nookAgentDoor(env).handle(request)
+  if(agentResponse)return agentResponse
   const state = await setupStateResponse(request,publicEnv)
   if(state) return state
   const lobby = await lobbyResponse(request,publicEnv,identity,baseOwnerClaim)

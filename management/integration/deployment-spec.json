@@ -478,6 +478,42 @@
       "name": "0099_public_apps.sql",
       "sha256": "bb53206448f1bf19b5c912a68c596c14fa6f8d803e2d1c7d4558338f517dabac",
       "sql": "-- Optional public capabilities belong to the existing explicit channel approval.\n-- Credentials and replay receipts are operational state, never portable data.\nCREATE TABLE nook_notification_capabilities(\n app TEXT PRIMARY KEY,read_messages INTEGER NOT NULL CHECK(read_messages IN (0,1)),\n act_as_installer INTEGER NOT NULL CHECK(act_as_installer IN (0,1)),signing TEXT\n);\nCREATE TABLE nook_notification_requests(app TEXT NOT NULL,key TEXT NOT NULL,PRIMARY KEY(app,key));\nCREATE TRIGGER nook_notification_capability_exit AFTER UPDATE OF state,creator ON nook_notification_apps\n WHEN NEW.state<>'active' OR NEW.creator IS NULL BEGIN\n DELETE FROM nook_notification_secrets WHERE app=NEW.id AND EXISTS(SELECT 1 FROM nook_notification_capabilities WHERE app=NEW.id);\n DELETE FROM nook_notification_capabilities WHERE app=NEW.id;\n DELETE FROM nook_notification_requests WHERE app=NEW.id;\nEND;\nCREATE TRIGGER nook_notification_capability_delete AFTER DELETE ON nook_notification_apps BEGIN\n DELETE FROM nook_notification_capabilities WHERE app=OLD.id;\n DELETE FROM nook_notification_requests WHERE app=OLD.id;\nEND;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0100_business_settings.sql",
+      "sha256": "a16f736a781aa3fe02a2e090c993f8c360c904f9fb6d86126acdab6e1f24e773",
+      "sql": "CREATE TABLE bs_settings (\n  singleton INTEGER PRIMARY KEY CHECK(singleton=1),\n  rev INTEGER NOT NULL DEFAULT 0,\n  document TEXT,\n  applied_at TEXT,\n  stopped INTEGER NOT NULL DEFAULT 0 CHECK(stopped IN(0,1)),\n  token TEXT NOT NULL DEFAULT ''\n);\nCREATE TABLE bs_overrides (\n  field TEXT PRIMARY KEY CHECK(field IN('display_name','owner_name','brand_color','logo','timezone')),\n  value TEXT NOT NULL,\n  actor TEXT NOT NULL,\n  changed_at TEXT NOT NULL\n);\nCREATE TABLE bs_logo (\n  singleton INTEGER PRIMARY KEY CHECK(singleton=1),\n  sha256 TEXT NOT NULL,\n  type TEXT NOT NULL,\n  bytes BLOB NOT NULL\n);\nCREATE TABLE bs_team (\n  email TEXT PRIMARY KEY,\n  operator_id TEXT,\n  invite INTEGER NOT NULL,\n  state TEXT NOT NULL CHECK(state IN('invited','active','inactive','conflict'))\n);\nCREATE TABLE bs_audit (\n  id INTEGER PRIMARY KEY,\n  actor TEXT NOT NULL,\n  action TEXT NOT NULL,\n  field TEXT,\n  changed_at TEXT NOT NULL\n);\n-- An INSERT of NULL fails the transaction if a concurrent write invalidated its fence.\nCREATE TABLE bs_assert (value INTEGER NOT NULL);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0101_business_people.sql",
+      "sha256": "51aa39622d866b987d71b6e37c9a8300e7f24c54a55611edaab669ed051b01cd",
+      "sql": "ALTER TABLE bs_settings ADD COLUMN owner_id TEXT CHECK(owner_id IS NULL OR owner_id <> '');\nALTER TABLE bs_team ADD COLUMN business_id TEXT CHECK(business_id IS NULL OR business_id <> '');\nALTER TABLE bs_team ADD COLUMN business_role TEXT CHECK(business_role IS NULL OR business_role IN('admin','member'));\nCREATE UNIQUE INDEX bs_team_business_id ON bs_team(business_id) WHERE business_id IS NOT NULL;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0102_agent_door.sql",
+      "sha256": "016d8a98b964385f5c4a13447361c3c783910a76aaf4606b0e0081482bc819cc",
+      "sql": "CREATE TABLE IF NOT EXISTS agent_door_state (\n  id INTEGER PRIMARY KEY CHECK(id=1), envelope TEXT, local_document TEXT,\n  local_revision INTEGER NOT NULL DEFAULT 0, local_paused INTEGER NOT NULL DEFAULT 0,\n  decision_lock TEXT, decision_until INTEGER\n);\nCREATE TABLE IF NOT EXISTS agent_door_agents (\n  id TEXT PRIMARY KEY, name TEXT NOT NULL, specialist TEXT, sponsor TEXT NOT NULL,\n  sponsor_name TEXT NOT NULL, revoked INTEGER NOT NULL DEFAULT 0,\n  window INTEGER NOT NULL DEFAULT 0, requests INTEGER NOT NULL DEFAULT 0\n);\nCREATE TABLE IF NOT EXISTS agent_door_audit (\n  sequence INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE, at TEXT NOT NULL,\n  agent TEXT NOT NULL, classes TEXT NOT NULL, row TEXT NOT NULL, evidence TEXT\n);\nCREATE INDEX IF NOT EXISTS agent_door_audit_agent ON agent_door_audit(agent,sequence);\nCREATE TABLE IF NOT EXISTS agent_door_calls (\n  agent TEXT NOT NULL, key TEXT NOT NULL, digest TEXT NOT NULL, decision_id TEXT NOT NULL,\n  created_at INTEGER NOT NULL, state TEXT NOT NULL, outcome TEXT, PRIMARY KEY(agent,key)\n);\nCREATE TABLE IF NOT EXISTS agent_door_approvals (\n  id TEXT PRIMARY KEY, state TEXT NOT NULL, saved TEXT NOT NULL, approvals TEXT NOT NULL DEFAULT '[]',\n  result TEXT, version INTEGER NOT NULL DEFAULT 0\n);\nCREATE TABLE IF NOT EXISTS agent_door_reviews (\n  id TEXT PRIMARY KEY, state TEXT NOT NULL, saved TEXT NOT NULL, marked_by TEXT, marked_at TEXT\n);\nCREATE TABLE IF NOT EXISTS agent_door_events (\n  sequence INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE, uri TEXT NOT NULL, event TEXT NOT NULL\n);\nCREATE INDEX IF NOT EXISTS agent_door_events_uri ON agent_door_events(uri,sequence);\nCREATE TABLE IF NOT EXISTS agent_door_usage (\n  decision_id TEXT PRIMARY KEY, at INTEGER NOT NULL, seed TEXT NOT NULL, specialist TEXT, agent TEXT NOT NULL,\n  classes TEXT NOT NULL\n);\nCREATE INDEX IF NOT EXISTS agent_door_usage_day ON agent_door_usage(at);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0103_last_signin.sql",
+      "sha256": "289f99fd90e5263e9bb421f14887b0540e0686f7c7aa72110dd1ad20374bc945",
+      "sql": "-- Apply as a NEW numbered migration after any oa_sessions rebuild.\n-- Never infer inactivity from missing credentials: older sessions may have been\n-- pruned. Existing operators receive a full inactivity window from this upgrade.\nALTER TABLE oa_operators ADD COLUMN last_signin_at INTEGER;\nUPDATE oa_operators SET last_signin_at=MAX(\n created_at, CAST(strftime('%s','now') AS INTEGER)*1000+999,\n COALESCE((SELECT MAX(created_at) FROM oa_sessions WHERE operator_id=oa_operators.id),0)\n);\nCREATE TRIGGER oa_record_last_signin AFTER INSERT ON oa_sessions\n BEGIN UPDATE oa_operators SET last_signin_at=NEW.created_at\n WHERE id=NEW.operator_id AND (last_signin_at IS NULL OR last_signin_at<NEW.created_at); END;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0104_scheduled_policy.sql",
+      "sha256": "377fa07ed05a95b64385af865b66d695c127a1086c0d85fe093c3eb5bebf3ebe",
+      "sql": "-- Apply as a NEW numbered migration. Authority and audit are durable, not sessions.\nCREATE TABLE IF NOT EXISTS oa_policy_approvals (\n id TEXT PRIMARY KEY, policy_id TEXT NOT NULL, version_hash TEXT NOT NULL,\n definition TEXT NOT NULL, actions TEXT NOT NULL,\n owner_id TEXT NOT NULL REFERENCES oa_operators(id), owner_version INTEGER NOT NULL,\n approved_at INTEGER NOT NULL, revoked_at INTEGER,\n session_kind TEXT NOT NULL, revoke_reason TEXT\n);\nCREATE UNIQUE INDEX IF NOT EXISTS oa_policy_live ON oa_policy_approvals(policy_id) WHERE revoked_at IS NULL;\nCREATE TABLE IF NOT EXISTS oa_policy_runs (\n id TEXT PRIMARY KEY, policy_id TEXT NOT NULL, version_hash TEXT,\n approval_id TEXT REFERENCES oa_policy_approvals(id), approved_by TEXT,\n started_at INTEGER NOT NULL, finished_at INTEGER,\n status TEXT NOT NULL CHECK(status IN ('running','completed','refused','failed')), error TEXT,\n admitted INTEGER NOT NULL DEFAULT 0, repeats INTEGER NOT NULL DEFAULT 1, last_seen_at INTEGER\n);\nCREATE INDEX IF NOT EXISTS oa_policy_runs_time ON oa_policy_runs(started_at DESC);\nCREATE INDEX IF NOT EXISTS oa_policy_action_run ON oa_auth_audit(CASE WHEN json_valid(value) THEN json_extract(value,'$.runId') END,action);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0105_agent_activity.sql",
+      "sha256": "954f4986315706e0f37949c3a6e5f7647b82790c38cd69567dfea3a71b4444c5",
+      "sql": "-- Native attribution survives address changes. No credential or private note text.\nCREATE TABLE nook_agent_activity (\n operation TEXT NOT NULL, agent TEXT NOT NULL, agent_name TEXT NOT NULL,\n sponsor TEXT NOT NULL, sponsor_name TEXT NOT NULL, approvers TEXT NOT NULL,\n resource TEXT NOT NULL, version INTEGER NOT NULL, at TEXT NOT NULL,\n PRIMARY KEY(operation,resource)\n);\nCREATE INDEX nook_agent_activity_resource ON nook_agent_activity(resource,version);\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

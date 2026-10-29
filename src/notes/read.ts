@@ -15,7 +15,7 @@ export async function scope(c:Context,conversation:string,thread:string|null){
 }
 export async function getNote(c:Context,conversation:string,id:string){
  noteId(conversation);noteId(id)
- const row=await c.one(`SELECT ${noteColumns} FROM nook_notes WHERE id=? AND conversation=?`,[id,conversation],conversation)
+ const row=await c.one(`SELECT ${noteColumns},(SELECT agent_name||' for '||sponsor_name FROM nook_agent_activity e WHERE e.resource=nook_notes.id AND e.version=nook_notes.version ORDER BY at DESC LIMIT 1) AS preparedBy FROM nook_notes WHERE id=? AND conversation=?`,[id,conversation],conversation)
  if(!row)fail(404,'Note unavailable')
  return projectNote(row)
 }
@@ -30,7 +30,7 @@ export async function listNotes(c:Context,conversation:string,input:unknown={}){
 export async function noteHistory(c:Context,conversation:string,id:string,input:unknown={}){
  const query=exact(input,[],['before']),before=query.before===undefined?Number.MAX_SAFE_INTEGER:version(query.before)
  await getNote(c,conversation,id)
- const rows=await c.rows(`SELECT v.*,a.name AS actorName FROM nook_note_versions v LEFT JOIN nook_actor_history a ON a.id=v.actor WHERE v.note=? AND v.version<? ORDER BY v.version DESC LIMIT 51`,[id,before],conversation)
+ const rows=await c.rows(`SELECT v.*,COALESCE((SELECT agent_name||' for '||sponsor_name FROM nook_agent_activity e WHERE e.resource=v.note AND e.version=v.version ORDER BY at DESC LIMIT 1),a.name) AS actorName FROM nook_note_versions v LEFT JOIN nook_actor_history a ON a.id=v.actor WHERE v.note=? AND v.version<? ORDER BY v.version DESC LIMIT 51`,[id,before],conversation)
  return {items:rows.slice(0,50).map(projectNote),cursor:rows.length>50?rows[49].version:null}
 }
 /** Links are opaque source bindings. Read current outcome state through its
