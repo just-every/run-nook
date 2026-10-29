@@ -18,6 +18,7 @@ export class AppContext extends Context{
  override event(conversation:string,kind:string,object:string){this.source=object;return super.event(conversation,kind,object)}
  override async writable(conversation:string){this.scope(conversation);await super.writable(conversation);if(await this.one("SELECT 1 FROM nook_notification_sharing WHERE conversation=? AND state<>'local'",[conversation]))fail(409,'Destination is not local')}
 
+ protected get auditApp(){return this.uid}
  parent:string|null=null
  constructor(env:StorageBindings,readonly approval:Approval,actor=approval.id){super(env,{id:approval.id,operatorId:actor,operator:{version:1}} as unknown as Session)}
  override get credentials(){return [this.approval.id,this.approval.hash]}
@@ -31,7 +32,7 @@ export class AppContext extends Context{
  }
  override async batch(statements:D1PreparedStatement[],conversation?:string,condition='1',values:any[]=[]){
   this.scope(conversation);const key=crypto.randomUUID()
-  try{await this.db.batch([this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${this.fence} AND ${channelWritable('?')} AND NOT EXISTS(SELECT 1 FROM nook_notification_sharing share WHERE share.conversation=? AND share.state<>'local') AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,this.approval.conversation,this.approval.conversation,...values),...statements,audit(this,this.uid,this.approval.conversation,null,'write','confirmed',this.source),this.sql('DELETE FROM nook_guard WHERE id=?',key)])}
+  try{await this.db.batch([this.sql(`INSERT INTO nook_guard VALUES(?,CASE WHEN ${authority} AND ${this.fence} AND ${channelWritable('?')} AND NOT EXISTS(SELECT 1 FROM nook_notification_sharing share WHERE share.conversation=? AND share.state<>'local') AND (${condition}) THEN 1 ELSE 0 END)`,key,...this.credentials,this.approval.conversation,this.approval.conversation,...values),...statements,audit(this,this.auditApp,this.approval.conversation,null,'write','confirmed',this.source),this.sql('DELETE FROM nook_guard WHERE id=?',key)])}
   catch(error){await this.check(conversation);await this.writable(this.approval.conversation);if(String(error).includes('constraint'))fail(409,'Concurrent change; retry');throw error}
  }
  rate=false

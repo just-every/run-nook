@@ -1,3 +1,4 @@
+import {appMessages} from './message-reads'
 import type {StorageBindings} from '../platform/storage/context'
 import {authBindings} from '../platform/operator-auth.server'
 import {auditDatabase} from '../audit/database'
@@ -12,7 +13,7 @@ import {readText} from './body'
 // deletes are forwarded to the notification-destination door exactly as the webhook forwards its posts, so the approval, app
 // identity, posting fence, rate limit and audit are the door's. Answers use Slack's envelope and error names.
 export const WEB_API='/api/slack/'
-const reads=new Set(['auth.test','chat.getPermalink']),methods=new Set([...reads,'chat.postMessage','chat.update','chat.delete'])
+const reads=new Set(['auth.test','chat.getPermalink','conversations.history','conversations.replies']),methods=new Set([...reads,'chat.postMessage','chat.update','chat.delete'])
 const MAX_BYTES=1024*1024
 class Refusal extends Error{constructor(readonly error:string,readonly retry?:string){super(error)}}
 function no(error:string,retry?:string):never{throw new Refusal(error,retry)}
@@ -70,6 +71,10 @@ export async function webApiRequest(bindings:StorageBindings,request:Request):Pr
   }
   // Any conversation outside the token's grant reads as missing, never revealing whether it exists.
   if(a.channel!==app.conversation)no('channel_not_found')
+  if(method==='conversations.history'||method==='conversations.replies'){
+   if(!await env.DB.prepare('SELECT 1 FROM nook_notification_capabilities WHERE app=? AND read_messages=1').bind(app.id).first())return reply({ok:false,error:'missing_scope',needed:'channels:history',provided:''})
+   try{return reply(await appMessages(env,app,method,a))}catch(error){const status=(error as {status?:number}).status;no(status===400?'invalid_arguments':status===404&&(error as Error).message==='Message unavailable'?'message_not_found':'channel_not_found')}
+  }
   if(method==='chat.postMessage'){
    const {body,meta}=content(a),thread=a.thread_ts===undefined||a.thread_ts===''?undefined:typeof a.thread_ts==='string'?a.thread_ts:no('invalid_arguments')
    const response=await forward(bindings,request,app,bearer[1],'POST','',{body,...(thread?{thread}:{})})

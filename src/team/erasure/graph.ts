@@ -16,6 +16,8 @@ export const retained = [
  {table:'nook_transcript_secrets',reason:'Sealed installation provider key; excluded from archives and exports.'},
  {table:'nook_transcript_calls',reason:'Anonymous daily cost-control counts; excluded from archives.'},
  {table:'nook_notification_apps',reason:'App approval and app-authored channel history survive with approving member attribution anonymized. Restores need reissue.'},
+ {table:'nook_notification_capabilities',reason:'Optional app consent and sealed platform signing secrets are excluded from archives; revocation or installer erasure removes them.'},
+ {table:'nook_notification_requests',reason:'Body-free replay digests are excluded from archives and removed with their capability; an erased installer loses the token before receipts are cleared.'},
  {table:'nook_notification_secrets',reason:'Only installation-keyed hashes; excluded from every archive and removed at revocation.'},
  {table:'nook_notification_rates',reason:'Channel-level rate counters carry no member data and are excluded from archives.'},
  {table:'nook_notification_sharing',reason:'Channel sharing safety facts contain no person attribution.'},

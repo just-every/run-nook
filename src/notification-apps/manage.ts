@@ -1,3 +1,4 @@
+import {sealSigning} from './signing'
 import type {Context} from '../platform/storage/context'
 import {fail,text} from '../family/team-chat/domain'
 import {fullMember} from '../team/access'
@@ -13,9 +14,12 @@ export async function manageApps(c:Context,method:string,p:string[],input:Record
  }
  if(p.length===2&&method==='POST'){
   if(!await c.one(`SELECT 1 WHERE ${approver}`,[c.uid]))fail(403,'Only owners and admins approve apps')
-  if(Object.keys(input).some(k=>!['name','channels'].includes(k)))fail(400,'Unsupported approval field')
+  if(Object.keys(input).some(k=>!['name','channels','signingSecret','messageReads','interactivity'].includes(k)))fail(400,'Unsupported approval field')
   const name=text(input.name,80).trim()||fail(400,'Name the app'),channels=input.channels
   if(!Array.isArray(channels)||!channels.length||channels.length>20||channels.some(c=>typeof c!=='string')||new Set(channels).size!==channels.length)fail(400,'Choose named channels')
+  if(input.messageReads!==undefined&&typeof input.messageReads!=='boolean'||input.interactivity!==undefined&&typeof input.interactivity!=='boolean')fail(400,'Approve capabilities explicitly')
+  if(input.signingSecret!==undefined&&(typeof input.signingSecret!=='string'||input.signingSecret.length<8||input.signingSecret.length>256)||input.interactivity===true&&!input.signingSecret)fail(400,'Provide the platform signing secret')
+  const signing=typeof input.signingSecret==='string'?await sealSigning(input.signingSecret,c.env.SESSION_SECRET):null
   const approvals=[];const statements:D1PreparedStatement[]=[]
   for(const channel of channels as string[]){
    if(!await c.one(`SELECT 1 FROM nook_conversations WHERE id=? AND kind IN ('channel','private') AND ${channelWritable('id')}`,[channel],channel))fail(400,'Choose an available channel you belong to')
@@ -23,7 +27,8 @@ export async function manageApps(c:Context,method:string,p:string[],input:Record
    const previous=await c.rows("SELECT id FROM nook_notification_apps WHERE name=? AND conversation=? AND state='active'",[name,channel]);
    for(const old of previous)statements.push(c.sql("UPDATE nook_notification_apps SET state='revoked',ended=? WHERE id=?",now,old.id),c.sql('DELETE FROM nook_notification_secrets WHERE app=?',old.id),audit(c,old.id,channel,c.uid,'reissue'))
    statements.push(c.sql("INSERT INTO nook_notification_apps VALUES(?,?,?,?,?,'active',NULL)",id,name,channel,c.uid,now),c.sql('INSERT INTO nook_notification_secrets VALUES(?,?)',id,await sealToken(token,c.env.SESSION_SECRET)),audit(c,id,channel,c.uid,'approve'),audit(c,id,channel,c.uid,'issue'))
-   approvals.push({id,name,conversation:channel,token})
+   if(signing||input.messageReads===true)statements.push(c.sql('INSERT INTO nook_notification_capabilities VALUES(?,?,?,?)',id,input.messageReads===true?1:0,input.interactivity===true?1:0,signing))
+   approvals.push({id,name,conversation:channel,token,messageReads:input.messageReads===true,interactivity:input.interactivity===true,events:!!signing})
   }
   // Recheck every membership and lifecycle at the commit, not only while rendering options.
   await c.batch(statements,undefined,`${approver} AND NOT EXISTS(SELECT 1 FROM json_each(?) selected WHERE NOT EXISTS(SELECT 1 FROM nook_members m JOIN nook_conversations room ON room.id=m.conversation WHERE m.user=? AND m.conversation=selected.value AND room.kind IN ('channel','private') AND ${channelWritable('room.id')}))`,[c.uid,JSON.stringify(channels),c.uid])
