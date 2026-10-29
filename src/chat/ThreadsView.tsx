@@ -13,7 +13,7 @@ type ThreadItem={root:Message;conversation:Conversation;source:FollowSource;unre
 type ThreadPage={items:ThreadItem[];cursor:string|null;hasMore:boolean}
 const excerpt=(body:string)=>{const characters=Array.from(body);return characters.length>360?characters.slice(0,360).join('')+'…':body}
 const sourceText:Record<Exclude<FollowSource,'explicit'>,string>={authored:'You started this thread',replied:'You replied',mentioned:'You were mentioned',dm:'Direct conversation',all:'All thread replies in this conversation'}
-type Props={onEditLast?:(message:Message)=>void;user:Person;conversations:Conversation[];revision:number;privateSignal:AbortSignal;refresh:()=>Promise<void>;beginWrite:()=>()=>void;onOpen:(conversation:string,focus:string,thread:string)=>void;onError:(error:unknown)=>void}
+type Props={onBrowse:()=>void;onEditLast?:(message:Message)=>void;user:Person;conversations:Conversation[];revision:number;privateSignal:AbortSignal;refresh:()=>Promise<void>;beginWrite:()=>()=>void;onOpen:(conversation:string,focus:string,thread:string)=>void;onError:(error:unknown)=>void}
 
 export function ThreadsView(props:Props){
  const {revision,privateSignal,onError}=props
@@ -24,7 +24,7 @@ export function ThreadsView(props:Props){
  return <section className="page-content threads-page"><div className="page-column">
   <div role="status" className="sr-only">{busy?'Loading threads':`${page?.items.length??0} followed threads`}</div>
   {page?.items.filter(item=>props.conversations.some(c=>c.id===item.root.conversation)).map(item=><ThreadCard key={item.root.id} {...props} item={item} expanded={expanded===item.root.id} toggle={()=>setExpanded(expanded===item.root.id?null:item.root.id)}/>)}
-  {page&&!page.items.length&&<div className="empty-state"><NookMark/><h2>A place for the replies</h2><p>Follow a thread to keep its replies here.</p></div>}
+  {page&&!page.items.length&&<div className="empty-state"><NookMark/><h2>A place for the replies</h2><p>Follow a thread to keep its replies here.</p><button className="soft-button" onClick={props.onBrowse}>Browse channels</button></div>}
   {page?.hasMore&&<button className="soft-button" disabled={busy} onClick={()=>void more()}>Load more threads</button>}
  </div></section>
 }
