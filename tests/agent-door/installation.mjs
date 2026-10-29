@@ -8,6 +8,7 @@ import {verificationReviewers} from '../../node_modules/@runeditrun/rer/cli/agen
 import {signJws,seconds} from '../../src/base/modules/agent-door/conformance/crypto.mjs';
 import {createProtocol} from '../../src/base/modules/agent-door/conformance/protocol.mjs';
 import initialize from './owner.mjs';
+import {signIn,closeMailboxes} from './teammate.mjs';
 export async function installation(){
  const root=process.cwd(),surface=JSON.parse(await readFile('agent-surface.json','utf8'));
  const email='synthetic-nook-owner@example.com',sub=randomUUID(),kid=randomUUID(),installationId=randomUUID(),issuer='https://synthetic-nook-business.invalid',business='synthetic-nook-conformance';
@@ -28,6 +29,6 @@ export async function installation(){
   const pairBusiness=async(team=roster)=>{const settings=await signJws(pair.privateKey,kid,'rer-business-settings+jwt',{v:1,iss:issuer,aud:origin,sub:installationId,business,email,owner_id:sub,jti:randomUUID(),iat:seconds(),exp:seconds()+300,rev:++revision,values:{},logo:null,team:team.map(({id,email,name,role,invite})=>({id,email,name,role,invite}))});const paired=await request('/api/rer/business-settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({settings})});if(!paired.ok)throw Error('Native Business pairing HTTP '+paired.status);return paired.json()};
   await pairBusiness();
   const protocol=(person={email,cookie,sub})=>createProtocol({fetch:request,origin,surface,signer,person,business,consent:randomUUID(),agentId:randomUUID(),points:[],seq:0,revision:0,listed:new Map()});
-  return {hosted,request,origin,surface,network,outbound,protocol,pairBusiness,roster,owner:{email,cookie,sub},database:await hosted.database('DB'),close:async()=>{await hosted.close();await network.close?.()}};
- }catch(error){await hosted?.close();await network.close?.();throw error}
+  return {hosted,request,origin,surface,network,outbound,protocol,pairBusiness,roster,signIn:email=>signIn({request,origin,email}),owner:{email,cookie,sub},database:await hosted.database('DB'),close:async()=>{closeMailboxes();reviewers.close();await hosted.close();await network.close?.()}};
+ }catch(error){closeMailboxes();reviewers.close();await hosted?.close();await network.close?.();throw error}
 }

@@ -33,6 +33,12 @@ channel access without Nook's fresh scoped regrant. A locally promoted admin is
 not a Business policy editor. Unmapped, inactive and product-inadmissible people
 are refused. Service, import and installation credentials keep their own purpose.
 
+A signed Business team admin can approve requests addressed to `role:editor`.
+A native admin whose Business role is member cannot inspect or decide those
+requests. Removing the Business admin role removes that eligibility on the next
+request. Native role changes invalidate person sessions; sign in again before
+reviewing work. Agent sponsorship continues to use the durable Business ID.
+
 The registry supports permitted conversations and messages; posting and editing;
 channel membership and management; native decision and commitment proposals;
 notes and checklist proposals; reactions, thread follows, read markers,

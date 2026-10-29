@@ -669,7 +669,7 @@
       "executable": false
     },
     "docs/agents.md": {
-      "sha256": "8b39164dc8a21f663bd996148f518e6a0e23df224253814f8251178fcced9d87",
+      "sha256": "1e22416eaa64628cd60644405dfc529ea6b07df96df7b86ef4325cf37888f6a8",
       "executable": false
     },
     "docs/attention.md": {
@@ -7093,7 +7093,7 @@
       "executable": false
     },
     "tests/agent-door/adoption-journey.mjs": {
-      "sha256": "8285cc3c5cc854ac1bd7726cd24a8b1f6d074663d19bc8bae1ec8341d9e90db6",
+      "sha256": "41bea8a351776aa2f2fe0347a76999d521a1426677812521497abcdde94b9a09",
       "executable": false
     },
     "tests/agent-door/browser-proof.mjs": {
@@ -7101,7 +7101,7 @@
       "executable": false
     },
     "tests/agent-door/installation.mjs": {
-      "sha256": "d389a9f03dc427b37f3882ec89ca80966d4ec7ed58f33eb6bcbd5afbbfb5af07",
+      "sha256": "40e1fb1f52b4045e9e796c40b6fdc7851f343f3b2e8c1cd15fffd01e9cb2c1cf",
       "executable": false
     },
     "tests/agent-door/owner.mjs": {
@@ -7113,7 +7113,7 @@
       "executable": false
     },
     "tests/agent-door/teammate.mjs": {
-      "sha256": "95d8ff6a68e845293dcd1c5125c5c87c799e946b0e771f86d463e1c308da5244",
+      "sha256": "2d2e9e8086f1b9cde55ed9af2baa1af0880d242e11268449c147ccc94f70fd9a",
       "executable": false
     },
     "tests/archive-content.mjs": {
