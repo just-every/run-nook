@@ -8,10 +8,10 @@ The primary journey: Exercise the capabilities and acceptance journeys below.
 
 | Tier | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
-| Core | 35 | 29 | 27 | 91 |
+| Core | 35 | 29 | 28 | 92 |
 | Agent surface | 0 | 1 | 12 | 13 |
 | Later | 0 | 0 | 0 | 0 |
-| Full target | 35 | 30 | 39 | 104 |
+| Full target | 35 | 30 | 40 | 105 |
 
 Judged from the code and tests at commit `9f42ce1ef9193fc3fa2115b7c16164aa16067070` (26 October 2026). Field proof register: 0 rows; 0 passed, 0 failed, 0 not run.
 
@@ -1438,6 +1438,22 @@ Core · push-further · **partial**
 
 **Evidence.** `src/agent-door/queued-consent.ts`; `tests/agent-door/adoption-journey.mjs` — persisted native notification consent and final admission; scheduled agent runs remain undeclared.
 **Gap.** No implementing source/test; acceptance journey above is pending. Gap: queued lifecycle, timed lifecycle and dual host not declared (Base subset door, rer 0.2.87/0.2.88; G-op-fanout operation.ts:18-21,33).
+
+#### NOOK-090 — Public events, interactivity and app-token message reads
+
+Core · target · **missing**
+
+**Requirement.** Nook exposes public event and interactivity endpoints and app-token message reads for a chat app.
+
+**Acceptance.**
+1. Nook offers a public events endpoint and a public interactivity endpoint that an installed chat app (such as Slack) can call. Each verifies the platform's request signature with the installation's signing secret and refuses an unsigned, stale or replayed request without effect.
+2. An app token scoped to a workspace reads messages only in channels the app was added to and only what the installing person could read. A channel the app is not in, or a revoked installation, reads nothing on the next call.
+3. Interactivity actions (buttons and shortcuts) act as the installing person with that person's current authority and write one audit entry each.
+4. One public-door journey proves a signed event delivered, a refused bad signature, an interactivity action with an allowed and a refused case, and an app-token read of an allowed and a non-member channel.
+5. Uninstalling removes the app token and further calls fail.
+
+**Evidence.** None.
+**Gap.** Nook does not yet expose public events and interactivity endpoints or app-token message reads.
 
 ## Agent surface
 
