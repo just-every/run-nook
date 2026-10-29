@@ -25,6 +25,7 @@ import { dispatch } from './base/dispatch'
 import {AuthError} from './base/modules/operator-auth/index.mjs'
 import { Fault, fail } from './family/team-chat/domain'
 import { Repository, type Bindings } from './platform/repository.server'
+import {pathAlias} from './platform/path-aliases'
 import {openSessionRedirect} from './platform/open-session'
 import {withoutRecoveryLine} from './platform/lobby-page'
 
@@ -156,8 +157,8 @@ export default withDemo({
   const lobby = await lobbyResponse(request,publicEnv,identity,baseOwnerClaim)
   if(lobby) return withoutRecoveryLine(lobby)
   if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
-  const aliases:Record<string,string>={'/settings':'/app?view=you','/app/settings':'/app?view=you','/app/channels':'/app?view=channels','/app/people':'/app?view=people','/login':'/signin','/sign-in':'/signin'}
-  if((request.method==='GET'||request.method==='HEAD')&&aliases[url.pathname])return new Response(null,{status:307,headers:{Location:aliases[url.pathname],'Cache-Control':'no-store'}})
+  const alias=request.method==='GET'||request.method==='HEAD'?pathAlias(url):null
+  if(alias)return new Response(null,{status:307,headers:{Location:alias,'Cache-Control':'no-store'}})
   if(url.pathname==='/signin')return await signInRoute(env,request)??new Response('Not found',{status:404})
   if(url.pathname==='/notify/off') return unsubscribeRoute(env,request)
   if(isWebhookRequest(request)) return webhookRequest(env,request)
