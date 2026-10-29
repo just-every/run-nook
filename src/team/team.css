@@ -34,9 +34,17 @@
 .nook-app .team-person small { color: var(--ink-soft); font-size: var(--fs-meta); }
 .nook-app .team-people .team-actions { display: flex; flex: none; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s1); }
 .nook-app .team-actions label { display: inline-flex; align-items: center; gap: var(--s2); padding-left: 10px; color: var(--ink-soft); font-size: var(--fs-ui); font-weight: 500; }
-.nook-app .team-actions select { min-height: 32px; max-width: 160px; padding: 0 8px; border: 1px solid var(--line-field); border-radius: var(--r-control); background-color: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
+.nook-app .team-actions select { min-height: var(--tap); min-width: 12rem; max-width: 100%; padding: 0 8px; border: 1px solid var(--line-field); border-radius: var(--r-control); background-color: var(--surface-raised); color: var(--ink); font-size: var(--fs-ui); font-weight: 400; }
 /* Keep the native control's intrinsic width when its 16px arrow gutter becomes explicit padding. */
 .nook-app .team-actions select:not([multiple],[size]:not([size="1"])) { width: calc-size(max-content, size - 16px); }
+.nook-app .team-actions select:not([multiple],[size]:not([size="1"])) { min-width: 12rem; }
+/* At phone width the select takes its row's whole width, so its value is never cut (OC25). */
+@media (max-width: 850px) {
+  .nook-app .team-people .team-actions { flex: 1 1 auto; min-width: 0; justify-content: flex-start; }
+  .nook-app .team-people li { flex-wrap: wrap; }
+  .nook-app .team-people .team-actions label { display: flex; flex: 1 1 100%; flex-direction: column; align-items: stretch; gap: var(--s1); padding-left: 0; }
+  .nook-app .team-people .team-actions select:not([multiple],[size]:not([size="1"])) { width: 100%; }
+}
 .nook-app .team-actions select:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 .nook-app .team-about { margin-top: var(--s4); }
 .nook-app .team-about summary { width: max-content; cursor: pointer; color: var(--ink-soft); font-size: var(--fs-ui); font-weight: 500; }

@@ -106,7 +106,7 @@
 .nook-app .composer-options[open] > summary { background: var(--wash); color: var(--ink); }
 .nook-app .composer .send { grid-area: send; min-height: var(--tap); margin-left: var(--s1); }
 .nook-app .composer .send:disabled { background: transparent; color: var(--ink-soft); opacity: 1; }
-.nook-app .composer-routing { grid-area: routing; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); padding: 6px 8px 10px 0; }
+.nook-app .composer-routing { grid-area: routing; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, max(12rem, 40%)), 1fr)); gap: var(--s2) var(--s3); padding: 6px 8px 10px 0; }
 .nook-app .composer-routing .field { min-width: 0; margin: 0; gap: var(--s1); font-size: var(--fs-meta); }
 .nook-app .composer-routing .field:last-child { grid-column: 1 / -1; }
 /* Fields inside the composer (the mention finder, routing, clip upload) sit on a quiet wash with no border of their
