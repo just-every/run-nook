@@ -190,7 +190,10 @@
         "NOOK-044",
         "NOOK-045",
         "NOOK-046",
-        "NOOK-077"
+        "NOOK-077",
+        "NOOK-103",
+        "NOOK-076",
+        "NOOK-131"
       ],
       "reason": "import-door"
     },
@@ -200,9 +203,9 @@
         "NOOK-074",
         "NOOK-078",
         "NOOK-097",
-        "NOOK-116",
         "NOOK-136",
-        "NOOK-138"
+        "NOOK-138",
+        "NOOK-133"
       ],
       "reason": "device"
     },
@@ -211,14 +214,18 @@
         "NOOK-104",
         "NOOK-127",
         "NOOK-128",
-        "NOOK-129"
+        "NOOK-129",
+        "DOCS-001",
+        "NOOK-107",
+        "NOOK-052"
       ],
       "reason": "screen"
     },
     {
       "clauses": [
         "NOOK-088",
-        "NOOK-090"
+        "NOOK-090",
+        "NOOK-106"
       ],
       "reason": "connector"
     },

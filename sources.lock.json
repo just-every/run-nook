@@ -629,7 +629,7 @@
       "executable": false
     },
     "agent-surface.json": {
-      "sha256": "9075dce992d6187ee751b3fe050993a1af7e26516900844b19f5e329540ac25a",
+      "sha256": "c9b27e42b55dca9b1e73761c22bfb274917c474cd86036b0d17e571aa85f7db5",
       "executable": false
     },
     "AGENTS.md": {
@@ -2109,7 +2109,7 @@
       "executable": false
     },
     "src/agent-door/index.server.ts": {
-      "sha256": "5397d21442360a8ec3f390287b9ebdfe7f09be6b7650bcda39f5993e0df7b7c3",
+      "sha256": "5fa180a3d37556f2c512156b657426528dd4d89a9d1421f0127ad8489ad76349",
       "executable": false
     },
     "src/agent-door/people.server.ts": {
