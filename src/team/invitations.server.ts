@@ -4,7 +4,7 @@ import {fail,text} from '../family/team-chat/domain'
 import {Context} from '../platform/storage/context'
 // @ts-ignore Base's canonical mailbox normalization, unchanged.
 import {normalizeEmail} from '../base/modules/operator-auth/policy.mjs'
-import {fullMember} from './access'
+import {cancelledInvitation,fullMember} from './access'
 const manager=`EXISTS(SELECT 1 FROM oa_operators WHERE id=? AND status='active' AND role IN ('owner','admin'))`
 function requireManager(c:Context,role='member'){if(c.session.operator.role!=='owner'&&(c.session.operator.role!=='admin'||role!=='member'))fail(403,'Team management is restricted to an authorized owner or admin')}
 async function targetAuthority(c:Context,user:string){requireManager(c);const target=await c.one('SELECT role FROM oa_operators WHERE id=?',[user]);if(!target)fail(404,'Teammate unavailable');if(c.session.operator.role!=='owner'&&target.role!=='member')fail(403,'Only an owner can manage privileged teammates')}
@@ -29,7 +29,7 @@ export async function prepareInvitation(c:Context,input:Record<string,any>){
 }
 export async function teamDirectory(c:Context){
  requireManager(c);await c.batch([],undefined,manager,[c.uid]);
- return c.rows(`SELECT o.id,o.display_name AS name,o.email,o.role,o.status,COALESCE(a.mode,'unprovisioned') AS mode,COALESCE(a.active,0) AS productActive FROM oa_operators o LEFT JOIN nook_access a ON a.user=o.id ORDER BY o.created_at,o.id LIMIT 1000`)
+ return c.rows(`SELECT o.id,o.display_name AS name,o.email,o.role,o.status,COALESCE(a.mode,'unprovisioned') AS mode,COALESCE(a.active,0) AS productActive FROM oa_operators o LEFT JOIN nook_access a ON a.user=o.id WHERE NOT ${cancelledInvitation('o')} ORDER BY o.created_at,o.id LIMIT 1000`)
 }
 export async function regrant(c:Context,input:Record<string,any>){
  const user=text(input.user,128),cfg=configuration(input),scopes=JSON.stringify(cfg.scopes);await targetAuthority(c,user)

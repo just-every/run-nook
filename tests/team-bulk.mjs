@@ -41,6 +41,6 @@ export async function runBulkInvitations({origin,ownerCookie,call,json,launch,re
  // Resend re-issues the single-use link; revoking stops it. Neither is open to a member.
  await post('/api/team/invitations/resend',{email:email(11)},{cookie:member.cookie,status:403});await post('/api/team/invitations/resend',{email:email(10)},{status:404});
  await post('/api/team/invitations/resend',{email:email(11)});assert.ok(await signIn(origin,email(11),{requestLink:false}),'the resent link signs the person in');
- const revoked=(await people()).find(p=>p.email===email(12));await post('/auth/invite/cancel',{operatorId:revoked.id});assert.notEqual((await people()).find(p=>p.email===email(12)).status,'invited');
+ const revoked=(await people()).find(p=>p.email===email(12));await post('/auth/invite/cancel',{operatorId:revoked.id});assert.ok(!(await people()).some(p=>p.email===email(12)),'a cancelled invitation leaves the people list');
  await post('/api/team/invitations/resend',{email:email(12)},{status:404});
 }
