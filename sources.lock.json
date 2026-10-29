@@ -649,7 +649,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "48eea4562f313d4f2763ca9e2efff0658b510304899761cfae12b9d14d3e4038",
+      "sha256": "0e3289b22ef3e0d120bf5d7c7fd7a518b07740434d5090864a75ce8ed72f6d72",
       "executable": false
     },
     "DEMO.md": {
@@ -6204,8 +6204,16 @@
       "sha256": "c291e66a1fb048d962f010a12e928a64efb1ea031efca043571e8bfa51511932",
       "executable": false
     },
+    "src/site/header.tsx": {
+      "sha256": "d6c12df2d43de1b023c801453c5dc4b1021a3e11401522fa8333ba5a488a3c54",
+      "executable": false
+    },
     "src/site/pages.tsx": {
-      "sha256": "2e8061147a81c12a3e0383f12d37fdea7f5f25933d220b2b51b8bc69355c1013",
+      "sha256": "5579d5f1f81cc4ac0a15580d1b01e225fae06bf7872cf1be6f22ea26caf2f1ce",
+      "executable": false
+    },
+    "src/site/raw.d.ts": {
+      "sha256": "501a0af6b1f0bbf9f47bbc479c7d42355d293be7e444d1a2836e8646a205078e",
       "executable": false
     },
     "src/site/run.ts": {
