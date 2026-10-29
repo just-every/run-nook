@@ -19,7 +19,6 @@ export function BookmarksManager({conversation,refresh}:{conversation:Conversati
  if(!state)return error?<p className="warning" role="alert">{error}</p>:<p className="muted">Loading bookmarks…</p>
  const folders=state.items.filter(i=>i.kind==='folder'),ordered=state.items.filter(i=>!i.parent).sort((a,b)=>a.position-b.position).flatMap(i=>[i,...state.items.filter(c=>c.parent===i.id).sort((a,b)=>a.position-b.position)])
  return <div className="bookmark-manager">
-  <p className="muted">Bookmarks sit in a bar above this channel's messages for everyone in it. Links open in a new tab and Nook never fetches them; files open through their normal access check.</p>
   {!state.canManage&&<p className="dialog-note" role="status">{refusal}</p>}
   {error&&<p className="warning" role="alert">{error}</p>}
   {ordered.length>0?<ol className="bookmark-manager-list" aria-label="Bookmarks">{ordered.map(item=>{const group=siblings(item),at=group.findIndex(i=>i.id===item.id);return <li key={item.id}>
