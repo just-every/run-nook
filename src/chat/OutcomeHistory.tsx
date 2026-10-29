@@ -1,6 +1,7 @@
 import {useEffect,useId,useState} from 'react'
 import type {Outcome} from './types'
 import {api} from './api'
+import {dueDate} from './day'
 
 type Version={version:number;body:string;status:string;deadline:string|null;actorName:string|null}
 type History={items:Version[];cursor:number|null;hasMore:boolean}
@@ -21,7 +22,7 @@ export function OutcomeHistory({outcome}: {outcome:Outcome}){
   <button className="text-button" aria-expanded={open} aria-controls={open?id:undefined} onClick={()=>setOpen(value=>!value)}>Version history · {outcome.version}</button>
   {open&&<div id={id}>
    {error?<p role="alert">{error}</p>:!history?<p role="status">Loading versions…</p>:<>
-    <ol className="outcome-versions">{history.items.map(version=><li key={version.version}><p className="outcome-meta"><strong>Version {version.version}</strong>{version.version===outcome.version?' · Current':''} · {version.actorName||'Erased member'}</p><p>{version.body}</p><p className="outcome-meta">{status(version.status)}{version.deadline?' · Due '+version.deadline:''}</p></li>)}</ol>
+    <ol className="outcome-versions">{history.items.map(version=><li key={version.version}><p className="outcome-meta"><strong>Version {version.version}</strong>{version.version===outcome.version?' · Current':''} · {version.actorName||'Erased member'}</p><p>{version.body}</p><p className="outcome-meta">{status(version.status)}{version.deadline?' · Due '+dueDate(version.deadline):''}</p></li>)}</ol>
     {history.hasMore&&<button className="text-button" onClick={()=>setBefore(history.cursor!)}>Earlier versions</button>}
     {before>0&&<button className="text-button" onClick={()=>setBefore(0)}>Latest versions</button>}
    </>}
