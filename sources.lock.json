@@ -1825,7 +1825,7 @@
       "executable": false
     },
     "scripts/delivery/config.mjs": {
-      "sha256": "f9700b086e5c67a642ecadd478f767ea1cf83c2522635d905d84a0324d3057d0",
+      "sha256": "04db041227d0219c128da2ef4cdd5fe459068c00fc3e1155eb43a66416d7397d",
       "executable": false
     },
     "scripts/delivery/integration.mjs": {
@@ -1837,7 +1837,7 @@
       "executable": false
     },
     "scripts/delivery/managed-build.mjs": {
-      "sha256": "2fcc1edeae5b791c59ff4b797716af38741f542fbf8f71989c0b2e4acdb3fae7",
+      "sha256": "b480ceb78acc3a6bcee8f97d1be97f063bd2b6c012829b66efd916cf5851b610",
       "executable": false
     },
     "scripts/delivery/package.mjs": {
@@ -1845,7 +1845,11 @@
       "executable": false
     },
     "scripts/delivery/project.mjs": {
-      "sha256": "a51b19350c3cab75ea6bde9ee8511857c103f496db5ee70cbbeeb0fe70030c88",
+      "sha256": "6d9384f58f989b063a116a23f182de4edeca2a763666cc3dffc6c86f68a2d519",
+      "executable": false
+    },
+    "scripts/delivery/source-spec.mjs": {
+      "sha256": "f5851c080981935f818ebb333a6bbcf77259235c2615dce3640efd0815e9bd4e",
       "executable": false
     },
     "scripts/deployment/command.mjs": {
@@ -1973,7 +1977,7 @@
       "executable": false
     },
     "scripts/operations-config.mjs": {
-      "sha256": "066f7f889a1704397000a3467ab087cc7b0d8f7162c5f2e59d83107ed66aaba7",
+      "sha256": "e1cb48321417359b0d1fa0b73951ee7f002c5717835b43256048e1f7a1d0ec70",
       "executable": false
     },
     "scripts/operations.mjs": {
