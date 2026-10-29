@@ -23,7 +23,7 @@ export async function searchBrowser({origin,owner,member,destination}){
     await expect(result).toBeVisible();await expect(result).toContainText('PO 5k')
     await expect(page.getByRole('region',{name:'Ask with cited evidence',exact:true})).toHaveCount(0)
     if(width===1440){
-     await page.locator('.sidebar .profile').click()
+     await page.locator('.sidebar .profile').click();await page.getByRole('button',{name:'Your profile',exact:true}).click()
      await expect(page.getByRole('region',{name:'Your profile',exact:true}).getByLabel('Display name',{exact:true})).toBeVisible()
      await expect(page.getByRole('region',{name:'Unread digest',exact:true})).toHaveCount(0)
      await page.getByRole('navigation',{name:'Workspace',exact:true}).getByRole('button',{name:'Search',exact:true}).click()

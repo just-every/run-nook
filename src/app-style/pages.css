@@ -31,6 +31,7 @@
 .nook-app .profile-head { display: flex; align-items: center; gap: var(--s4); padding: var(--s2) 0 var(--s5); }
 .nook-app .profile-head h2 { margin: 0; font-size: var(--fs-title); }
 .nook-app .profile-head p { margin: 0; color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .profile-head .soft-button { min-height: 44px; margin-left: auto; flex: none; }
 .nook-app .profile-row { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: var(--s4); border-top: 1px solid var(--line); }
 .nook-app .profile-row .soft-button { margin-left: -10px; }
 .nook-app .profile-link { display: flex; width: 100%; min-height: 56px; padding: 0; align-items: center; justify-content: space-between; gap: var(--s3); color: var(--ink); font-size: var(--fs-body); font-weight: 500; text-align: left; text-decoration: none; }

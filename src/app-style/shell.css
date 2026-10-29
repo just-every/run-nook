@@ -52,6 +52,7 @@ body:has(.nook-app) { margin: 0; overflow: hidden; background: var(--brand-paper
 .nook-app .conversation-link.selected .count { background: var(--surface-raised); }
 .nook-app .profile { display: flex; width: calc(100% - 24px); min-height: 44px; align-items: center; gap: 10px; margin: 8px 12px 12px; padding: 0 10px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
 .nook-app .profile > span:not(.sr-only) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nook-app .profile-menu > .popover { right: 12px; left: 12px; min-width: 0; }
 .nook-app .avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: var(--fs-meta); font-weight: 500; letter-spacing: .01em; }
 .nook-app .avatar.small { width: 24px; height: 24px; }
 
