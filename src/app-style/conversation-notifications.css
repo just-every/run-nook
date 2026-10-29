@@ -10,4 +10,4 @@
 
 .nook-app .device-delivery .routing-choice { display:flex; align-items:flex-start; gap:8px; line-height:1.5; }
 .nook-app .device-delivery .routing-choice input { flex:none; margin-top:3px; }
-.nook-app .device-delivery .field select { width:100%; padding:10px 12px; border:1px solid var(--ink-soft); border-radius:10px; background:transparent; color:inherit; font:inherit; min-height:40px; }
+.nook-app .device-delivery .field select { width:100%; padding:10px 12px; border:1px solid var(--ink-soft); border-radius:10px; background:transparent; color:inherit; font:inherit; min-height:max(40px, var(--tap-field)); }

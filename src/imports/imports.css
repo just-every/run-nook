@@ -45,6 +45,8 @@ body:has(.imports-page){margin:0;background:var(--brand-paper)}
 @media(min-width:900px){.import-actors{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.imports-page{padding:20px 16px 48px}.imports-page .import-check{align-items:flex-start}.imports-page input:not([type=checkbox]),.imports-page select{font-size:16px}.imports-page button.import-primary{width:100%;margin-right:0}}
 @media(hover:none){.imports-page button{min-height:40px}}
+/* Phone tap targets: 44px, the app's --tap (tokens.css) mirrored by value like the other tokens on this page. */
+@media(max-width:850px){.imports-page :is(button,button.import-primary,input:not([type=checkbox]),select){min-height:44px}.imports-page :is(a.import-back,nav[aria-label="Other import sources"] a){display:inline-flex;align-items:center;min-height:44px;margin-bottom:0}.imports-page a.import-back{margin-bottom:12px}.imports-page .import-more summary{display:flex;align-items:center;min-height:44px}.imports-page label:has(>input[type=checkbox]){flex-direction:row;align-items:center;min-height:44px}}
 
 .imports-page nav[aria-label="Other import sources"]{display:flex;flex-wrap:wrap;gap:8px 20px}
 .imports-page .import-json{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.imports-page .import-approval{overflow-wrap:anywhere}.imports-page>form>fieldset{margin:24px 0}.imports-page>form>fieldset>section{margin-top:24px;padding-top:24px;border-top:1px solid rgb(42 29 33 / .10)}

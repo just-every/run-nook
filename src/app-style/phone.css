@@ -33,3 +33,12 @@
   .nook-app .mobile-tab-label { display: block; }
   .nook-app .mobile-tab-label::after { content: attr(data-label); display: block; height: 0; visibility: hidden; font-weight: 600; }
 }
+
+/* Tap targets (TMPL-001, OC16): at phone width every control, field and labelled row is at least --tap (44px, set once in
+   tokens.css) tall. A disclosure keeps its marker and gets the height from its padding; a checkbox's target is its row. */
+@media (max-width: 850px) {
+  .nook-app details:not(.menu) > summary { display: list-item; padding-block: calc((var(--tap) - 1lh) / 2); }
+  .nook-app :is(select, input:not([type=checkbox], [type=radio], [type=file], [type=range], [type=hidden])) { min-height: var(--tap); }
+  .nook-app :is(label, .check):has(> input:is([type=checkbox], [type=radio])) { display: flex; align-items: center; gap: 9px; min-height: var(--tap); }
+  .nook-app :is(.team-actions select, .team-surface > section select, .team-invite :is(input:not([type=checkbox]), select), .email-notifications select, .email-offer select, .notes-panel :is(button, select), .notes-propose select, .clip-recorder .clip-toolbar button, .nook-filter-chips button, .bookmark, .forward-destination) { min-height: var(--tap); }
+}

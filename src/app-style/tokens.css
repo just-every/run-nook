@@ -44,7 +44,12 @@
   --panel-w: 380px;
   --column: 720px;
   --header-h: 56px;
+  /* control heights: raised once for phones and touch (TMPL-001), never per screen */
+  --tap: 32px;
+  --tap-primary: 36px;
+  --tap-field: 0px;
 }
 @media (max-width: 1200px) and (min-width: 851px) { .nook-app { --rail-w: 220px; --panel-w: 340px; } }
 @media (max-width: 850px) { .nook-app { --header-h: 52px; } }
+@media (max-width: 850px), (hover: none) { .nook-app { --tap: 44px; --tap-primary: 44px; --tap-field: 44px; } }
 @media (prefers-reduced-motion: reduce) { .nook-app { --dur: 0ms; } }

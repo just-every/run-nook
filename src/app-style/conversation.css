@@ -27,7 +27,7 @@
 .nook-app :is(.message-meta time, .edited) { color: var(--ink-soft); font-size: var(--fs-meta); font-weight: 400; }
 .nook-app .message-body { margin: 0; font-size: var(--fs-body); line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .nook-app .message.deleted .message-body { color: var(--ink-soft); font-style: italic; }
-.nook-app .message .reply-button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin: 4px 0 0 -10px; font-size: 13px; font-weight: 600; }
+.nook-app .message .reply-button { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); margin: 4px 0 0 -10px; font-size: 13px; font-weight: 600; }
 .nook-app .message .reply-button svg { width: 16px; height: 16px; }
 .nook-app .message-routing { display: flex; flex-wrap: wrap; gap: 2px var(--s2); margin-top: 4px; color: var(--ink-soft); font-size: var(--fs-meta); overflow-wrap: anywhere; }
 .nook-app .message-routing strong { color: var(--ink); }
@@ -95,7 +95,7 @@
 .nook-app .composer:focus-within { border-color: rgb(42 29 33 / .45); }
 .nook-app .composer[data-urgent] { border-color: var(--brand-rose); }
 .nook-app .composer[data-urgent]:focus-within { border-color: var(--brand-berry); }
-.nook-app .composer textarea { grid-area: text; display: block; width: 100%; min-height: 36px; max-height: 40vh; padding: 7px 4px; border: 0; background: transparent; color: var(--ink); field-sizing: content; font-size: var(--fs-body); line-height: 22px; resize: none; }
+.nook-app .composer textarea { grid-area: text; display: block; width: 100%; min-height: max(36px, var(--tap-field)); max-height: 40vh; padding: 7px 4px; border: 0; background: transparent; color: var(--ink); field-sizing: content; font-size: var(--fs-body); line-height: 22px; resize: none; }
 .nook-app .composer textarea:focus-visible { outline: none; }
 .nook-app .composer textarea::placeholder { color: var(--ink-soft); }
 .nook-app .composer .attach-button { grid-area: attach; position: relative; }
@@ -104,7 +104,7 @@
 .nook-app .attach-button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 .nook-app .composer-options { grid-area: options; }
 .nook-app .composer-options[open] > summary { background: var(--wash); color: var(--ink); }
-.nook-app .composer .send { grid-area: send; min-height: 32px; margin-left: var(--s1); }
+.nook-app .composer .send { grid-area: send; min-height: var(--tap); margin-left: var(--s1); }
 .nook-app .composer .send:disabled { background: transparent; color: var(--ink-soft); opacity: 1; }
 .nook-app .composer-routing { grid-area: routing; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); padding: 6px 8px 10px 0; }
 .nook-app .composer-routing .field { min-width: 0; margin: 0; gap: var(--s1); font-size: var(--fs-meta); }
@@ -120,7 +120,7 @@
 .nook-app .composer-notes { grid-area: notes; padding: 2px 8px 4px 0; }
 .nook-app .composer-hint { color: var(--ink-soft); font-size: var(--fs-meta); }
 .nook-app .draft-note { margin: var(--s1) 0; padding-left: 10px; border-left: 2px solid var(--line-field); color: var(--ink); font-size: 13px; }
-.nook-app .draft-note .text-button { min-height: 28px; font-size: 13px; }
+.nook-app .draft-note .text-button { min-height: max(28px, var(--tap-field)); font-size: 13px; }
 
 /* The panel: decisions & requests, or a thread, opening beside the conversation */
 .nook-app .decisions { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0 20px var(--s4); border-left: 1px solid var(--line); background: var(--surface-page); }
@@ -155,12 +155,14 @@
   .nook-app .message-tools .react-menu { position: static; }
   .nook-app .message-tools .popover.strip { left: auto; right: 0; }
 }
+@media (max-width: 850px), (hover: none) {
+  .nook-app .message-tools > .icon-button, .nook-app .message-tools .menu > summary { width: var(--tap); height: var(--tap); }
+  .nook-app .message-tools .popover.inline > button { min-height: var(--tap); }
+}
 @media (hover: none) {
   /* A continued row's time is part of what a tap reveals. */
   .nook-app .message.continued .message-meta time { opacity: 0; }
   .nook-app .message.continued:focus-within .message-meta time { opacity: 1; }
-  .nook-app .message-tools > .icon-button, .nook-app .message-tools .menu > summary { width: 40px; height: 40px; }
-  .nook-app .message-tools .popover.inline > button { min-height: 40px; }
 }
 
 .nook-app .composer .schedule-draft { grid-area: schedule; justify-self: start; }

@@ -23,14 +23,11 @@
 
 .nook-app .card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); margin-top: var(--s1); }
 .nook-app .card-actions > .soft-button:first-child { margin-left: -10px; }
-.nook-app .card-actions .send { min-height: 32px; padding: 0 14px; background: var(--accent); color: var(--accent-text); font-size: var(--fs-ui); font-weight: 600; }
+.nook-app .card-actions .send { min-height: var(--tap); padding: 0 14px; background: var(--accent); color: var(--accent-text); font-size: var(--fs-ui); font-weight: 600; }
 .nook-app .card-more { margin-left: auto; }
-@media (hover: none) {
-  .nook-app .card-actions .send { min-height: 40px; }
-}
 
 .nook-app .outcome-history { margin-top: 8px; }
-.nook-app .outcome-history > .text-button { min-height: 32px; }
+
 .nook-app .outcome-versions { margin: 8px 0 0; padding: 0 0 0 12px; list-style: none; border-left: 2px solid var(--line); }
 .nook-app .outcome-versions li { padding: 4px 0 12px; }
 .nook-app .outcome-versions li p { margin-bottom: 4px; overflow-wrap: anywhere; white-space: pre-wrap; }
