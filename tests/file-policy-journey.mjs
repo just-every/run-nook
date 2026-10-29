@@ -9,6 +9,7 @@ import {browserWidths,checkScreen,evidenceDirectory} from './browser-support.mjs
 import {expect} from '@playwright/test'
 
 test('NOOK-061 owner file policy versions size and extensions before native, clip, import and scheduled byte storage, audits, exports, restores and exposes settings at both widths',{timeout:240000},async()=>{
+ await (await import('./agent-door/file-resources.mjs')).fileResourceJourney()
  const app=await installation(async()=>assert.fail('file policy sends nothing externally'),{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}});let restore
  try{
   const {call,db,origin,ownerCookie}=app,room=await call('/api/conversations','POST',{name:'Synthetic file policy',kind:'private'},ownerCookie),member=await app.invite('synthetic-nook-file-member',room.id),admin=await app.invite('synthetic-nook-file-admin',room.id)

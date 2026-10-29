@@ -4,6 +4,8 @@ import type { StorageBindings } from '../platform/storage/context'
 import { read, outcome } from '../platform/storage/read'
 import { channelDetails } from '../team/channel-lifecycle.server'
 import { getNote } from '../notes/read'
+import { uploadStatus } from '../files/resumable.server'
+import { download } from '../platform/storage/files'
 
 export const resourceTemplates=['conversations','messages','outcomes','files','notes','schedules','audit'].map(area=>`nook://${area}/{id}`)
 export function nookResources(env:StorageBindings):ResourceDefinition[]{
@@ -23,7 +25,13 @@ export function nookResources(env:StorageBindings):ResourceDefinition[]{
      const row=await c.one(`SELECT ${url.hostname==='files'?'id,conversation,author,message,name,mime,size,state,expires,created':url.hostname==='audit'?'id,scope AS conversation,actor,kind,at,outcome,version,reason,count':url.hostname==='schedules'?'id,conversation,user,state,version,local_at,zone,next_due,reason':'id,conversation'} FROM ${table} WHERE id=?`,[id])
      if(!row)return null
      await c.check(row.conversation)
-     if(url.hostname==='files'&&row.state==='staged'&&(row.author!==c.uid||row.expires<=Date.now()))return null
+     if(url.hostname==='files'){
+      // Native status owns unshared uploads, including reservations. Completed
+      // files also pass native download admission; discard its stream unread.
+      if(row.message||(await uploadStatus(c,id)).file){
+       const file=await download(c,id);await file.body.cancel()
+      }
+     }
      if(url.hostname==='schedules'&&row.user!==c.uid)return null
      json=url.hostname==='notes'?await getNote(c,row.conversation,id):row
     }

@@ -669,7 +669,7 @@
       "executable": false
     },
     "docs/agents.md": {
-      "sha256": "1eee64bdc45c7260c53a96f3936fc97616b37b69f265656481c8f5721f0967a7",
+      "sha256": "ebc10c3ff7124e8206f73dd8013c36f05b1a609eb01bf2f171673ad35de3a12b",
       "executable": false
     },
     "docs/attention.md": {
@@ -2109,7 +2109,7 @@
       "executable": false
     },
     "src/agent-door/resources.ts": {
-      "sha256": "6a3b7279d79ccb352073692d6aefb176fd0a4da8f3093b5ae19824cab077d88f",
+      "sha256": "ab91c9306e61927d770f09a3c8f52e7a6daeaed16942f53533bd058ff25d1b46",
       "executable": false
     },
     "src/agent-door/snapshot.ts": {
@@ -7152,6 +7152,10 @@
       "sha256": "00ff1e4406a36a9330092b02671e0a416893d2c4f0e3afe0093502a731bef4c4",
       "executable": false
     },
+    "tests/agent-door/file-resources.mjs": {
+      "sha256": "b88f52ab5ecf175573e35d4ccb8e72b1dfd09e41341b25d58c6020ad6400f536",
+      "executable": false
+    },
     "tests/agent-door/installation.mjs": {
       "sha256": "40e1fb1f52b4045e9e796c40b6fdc7851f343f3b2e8c1cd15fffd01e9cb2c1cf",
       "executable": false
@@ -7317,7 +7321,7 @@
       "executable": false
     },
     "tests/file-policy-journey.mjs": {
-      "sha256": "14ffcc5c3738f7822fc8b9522f6c85d903011cabeb9b34a13a85592d3da16308",
+      "sha256": "c6e265ef25394143e974455e7eeb5ed2982b261785f446341218ee840fc02ea6",
       "executable": false
     },
     "tests/file-preview-fixture.mjs": {

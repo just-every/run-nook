@@ -55,7 +55,11 @@ Resources cover conversations, messages, outcomes, files, notes, schedules and
 conversation-scoped audit. Every read checks current membership. Owner or admin
 status does not open an unrelated DM. Missing and restricted records have the
 same refusal. Imported and message text is untrusted. File resources return
-metadata without storage keys or credentials.
+metadata without storage keys or credentials. Unshared uploads use the native
+uploader-only status reader in every state; completed files also use native
+download admission without consuming file bytes. Reserved or staged uploads belonging to
+another member, expired reservations and deleted files have the same resource
+refusal as a missing file.
 
 Open `/agents` with a native person session to inspect policy, activity and
 pending approvals. Company policy chooses autonomous, review, approval or
