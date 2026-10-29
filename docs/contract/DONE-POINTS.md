@@ -193,7 +193,7 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-016 | 3 | mandatory-channel leave refused | none | none |
 | NOOK-017 | 1 | formatted text and code | none | none |
 | NOOK-017 | 1 | attachment composition | none | none |
-| NOOK-135 | 1 | draft resumes on each supported client | none | none |
+| NOOK-136 | 1 | draft resumes on each supported client | none | none |
 | NOOK-017 | 1 | interrupted send has one effect | none | none |
 | NOOK-017 | 2 | 50000-character snippet-or-split choice | none | none |
 | NOOK-017 | 2 | one previewable snippet message | `tests/composition-browser.mjs:76` | asserted |
@@ -208,48 +208,48 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-017 | 3 | list conversion | none | none |
 | NOOK-017 | 3 | one undo restores literal characters | none | none |
 | NOOK-017 | 3 | plain-text export retains content | none | none |
-| NOOK-135 | 2 | account-isolated drafts | none | none |
-| NOOK-135 | 2 | workspace-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
-| NOOK-136 | 1 | mark unread | none | none |
-| NOOK-090 | 1 | status and time-zone change | none | none |
-| NOOK-090 | 1 | work acceptance unchanged | none | none |
-| NOOK-090 | 2 | thirty-minute status expiry | none | none |
-| NOOK-090 | 2 | expiry visible on another client | none | none |
-| NOOK-090 | 2 | expiry survives restart | none | none |
-| NOOK-134 | 1 | title field definition and value | none | none |
-| NOOK-134 | 1 | phone field definition and value | none | none |
-| NOOK-134 | 1 | manager field definition and value | none | none |
-| NOOK-134 | 1 | department-filter result at both widths | none | none |
-| NOOK-134 | 1 | guest people scope | none | none |
-| NOOK-134 | 1 | hidden field absent | `tests/profiles.mjs:22` | asserted |
-| NOOK-091 | 1 | built-in commands precede app commands | none | none |
-| NOOK-091 | 2 | remind command equals menu action | none | none |
-| NOOK-091 | 2 | invite command equals menu action | none | none |
-| NOOK-091 | 2 | topic command equals menu action | none | none |
-| NOOK-091 | 2 | rename command equals menu action | none | none |
-| NOOK-091 | 2 | mute command equals menu action | none | none |
-| NOOK-091 | 2 | quiet command equals menu action | none | none |
-| NOOK-091 | 2 | status command equals menu action | none | none |
-| NOOK-091 | 2 | DM command equals menu action | none | none |
-| NOOK-091 | 2 | huddle command equals menu action | none | none |
-| NOOK-091 | 2 | GIF command equals menu action | none | none |
-| NOOK-091 | 2 | shrug command equals menu action | none | none |
-| NOOK-091 | 2 | collapse command equals menu action | none | none |
-| NOOK-091 | 2 | leave command equals menu action | none | none |
-| NOOK-091 | 2 | each command same permission check | none | none |
-| NOOK-091 | 2 | each command same audit | none | none |
-| NOOK-091 | 2 | forbidden rename private reason | `tests/composition-browser.mjs:88` | asserted |
-| NOOK-091 | 2 | unknown command posts nothing | `tests/composition-browser.mjs:91` | asserted |
-| NOOK-091 | 2 | unknown command offers send-as-text | none | none |
-| NOOK-092 | 1 | unsent draft visible across conversations | `tests/personal-browser.mjs:40` | asserted |
-| NOOK-092 | 1 | scheduled message visible | none | none |
-| NOOK-092 | 1 | scheduled time editable there | none | none |
-| NOOK-092 | 1 | yesterday sent message visible | none | none |
-| NOOK-137 | 1 | installation-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
-| NOOK-137 | 1 | installation-isolated cached state | none | none |
-| NOOK-137 | 1 | installation-isolated notifications | none | none |
-| NOOK-137 | 1 | new installation confirmation | `tests/workspaces-browser.mjs:62` | asserted |
-| NOOK-137 | 1 | forgetting another installation keeps sessions | `tests/workspaces-browser.mjs:104` | asserted |
+| NOOK-136 | 2 | account-isolated drafts | none | none |
+| NOOK-136 | 2 | workspace-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
+| NOOK-137 | 1 | mark unread | none | none |
+| NOOK-091 | 1 | status and time-zone change | none | none |
+| NOOK-091 | 1 | work acceptance unchanged | none | none |
+| NOOK-091 | 2 | thirty-minute status expiry | none | none |
+| NOOK-091 | 2 | expiry visible on another client | none | none |
+| NOOK-091 | 2 | expiry survives restart | none | none |
+| NOOK-135 | 1 | title field definition and value | none | none |
+| NOOK-135 | 1 | phone field definition and value | none | none |
+| NOOK-135 | 1 | manager field definition and value | none | none |
+| NOOK-135 | 1 | department-filter result at both widths | none | none |
+| NOOK-135 | 1 | guest people scope | none | none |
+| NOOK-135 | 1 | hidden field absent | `tests/profiles.mjs:22` | asserted |
+| NOOK-092 | 1 | built-in commands precede app commands | none | none |
+| NOOK-092 | 2 | remind command equals menu action | none | none |
+| NOOK-092 | 2 | invite command equals menu action | none | none |
+| NOOK-092 | 2 | topic command equals menu action | none | none |
+| NOOK-092 | 2 | rename command equals menu action | none | none |
+| NOOK-092 | 2 | mute command equals menu action | none | none |
+| NOOK-092 | 2 | quiet command equals menu action | none | none |
+| NOOK-092 | 2 | status command equals menu action | none | none |
+| NOOK-092 | 2 | DM command equals menu action | none | none |
+| NOOK-092 | 2 | huddle command equals menu action | none | none |
+| NOOK-092 | 2 | GIF command equals menu action | none | none |
+| NOOK-092 | 2 | shrug command equals menu action | none | none |
+| NOOK-092 | 2 | collapse command equals menu action | none | none |
+| NOOK-092 | 2 | leave command equals menu action | none | none |
+| NOOK-092 | 2 | each command same permission check | none | none |
+| NOOK-092 | 2 | each command same audit | none | none |
+| NOOK-092 | 2 | forbidden rename private reason | `tests/composition-browser.mjs:88` | asserted |
+| NOOK-092 | 2 | unknown command posts nothing | `tests/composition-browser.mjs:91` | asserted |
+| NOOK-092 | 2 | unknown command offers send-as-text | none | none |
+| NOOK-093 | 1 | unsent draft visible across conversations | `tests/personal-browser.mjs:40` | asserted |
+| NOOK-093 | 1 | scheduled message visible | none | none |
+| NOOK-093 | 1 | scheduled time editable there | none | none |
+| NOOK-093 | 1 | yesterday sent message visible | none | none |
+| NOOK-138 | 1 | installation-isolated drafts | `tests/workspaces-browser.mjs:80` | asserted |
+| NOOK-138 | 1 | installation-isolated cached state | none | none |
+| NOOK-138 | 1 | installation-isolated notifications | none | none |
+| NOOK-138 | 1 | new installation confirmation | `tests/workspaces-browser.mjs:62` | asserted |
+| NOOK-138 | 1 | forgetting another installation keeps sessions | `tests/workspaces-browser.mjs:104` | asserted |
 | NOOK-019 | 1 | imported reply found | `tests/search.mjs:69` | asserted |
 | NOOK-019 | 1 | PDF phrase found | none | none |
 | NOOK-019 | 1 | text-file phrase found | none | none |
@@ -489,34 +489,34 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-071 | 2 | replied thread listed | none | none |
 | NOOK-071 | 2 | mentioned thread listed | none | none |
 | NOOK-071 | 2 | unfollowed thread removed | none | none |
-| NOOK-120 | 1 | three unread conversations | none | none |
-| NOOK-120 | 1 | sidebar order | none | none |
-| NOOK-120 | 1 | mark-one-read removes conversation | none | none |
-| NOOK-120 | 1 | cross-session read | none | none |
-| NOOK-120 | 1 | mark-all clears remaining | none | none |
-| NOOK-120 | 1 | ten-second undo restores unread | none | none |
-| NOOK-120 | 1 | Attention unchanged | none | none |
-| NOOK-121 | 1 | three-person conversion | none | none |
-| NOOK-121 | 1 | exact channel membership | none | none |
-| NOOK-121 | 1 | full original history | none | none |
-| NOOK-121 | 1 | complete original roster read-only | none | none |
-| NOOK-121 | 1 | old DM read-only | none | none |
-| NOOK-121 | 1 | old DM links channel | none | none |
-| NOOK-121 | 1 | outsider cannot discover either | none | none |
-| NOOK-121 | 1 | conversion audit | none | none |
-| NOOK-121 | 2 | former participant kept in roster | `tests/group-conversion.mjs:15` | asserted |
-| NOOK-121 | 2 | former participant excluded from membership | `tests/group-conversion.mjs:17` | asserted |
-| NOOK-121 | 2 | creator-removal case | none | none |
-| NOOK-121 | 2 | converter manages channel | `tests/group-conversion.mjs:12` | asserted |
-| NOOK-121 | 3 | reactivation grants no private history | none | none |
-| NOOK-121 | 3 | explicit regrant enables history | `tests/group-conversion.mjs:32` | asserted |
-| NOOK-121 | 4 | pre-regrant archive roster | none | none |
-| NOOK-121 | 4 | pre-regrant archive membership | none | none |
-| NOOK-121 | 4 | pre-regrant archive refusal | none | none |
-| NOOK-121 | 4 | post-regrant archive roster | none | none |
-| NOOK-121 | 4 | post-regrant archive membership | none | none |
-| NOOK-121 | 4 | post-regrant archive access | none | none |
-| NOOK-121 | 4 | restart retains boundary | none | none |
+| NOOK-121 | 1 | three unread conversations | none | none |
+| NOOK-121 | 1 | sidebar order | none | none |
+| NOOK-121 | 1 | mark-one-read removes conversation | none | none |
+| NOOK-121 | 1 | cross-session read | none | none |
+| NOOK-121 | 1 | mark-all clears remaining | none | none |
+| NOOK-121 | 1 | ten-second undo restores unread | none | none |
+| NOOK-121 | 1 | Attention unchanged | none | none |
+| NOOK-122 | 1 | three-person conversion | none | none |
+| NOOK-122 | 1 | exact channel membership | none | none |
+| NOOK-122 | 1 | full original history | none | none |
+| NOOK-122 | 1 | complete original roster read-only | none | none |
+| NOOK-122 | 1 | old DM read-only | none | none |
+| NOOK-122 | 1 | old DM links channel | none | none |
+| NOOK-122 | 1 | outsider cannot discover either | none | none |
+| NOOK-122 | 1 | conversion audit | none | none |
+| NOOK-122 | 2 | former participant kept in roster | `tests/group-conversion.mjs:15` | asserted |
+| NOOK-122 | 2 | former participant excluded from membership | `tests/group-conversion.mjs:17` | asserted |
+| NOOK-122 | 2 | creator-removal case | none | none |
+| NOOK-122 | 2 | converter manages channel | `tests/group-conversion.mjs:12` | asserted |
+| NOOK-122 | 3 | reactivation grants no private history | none | none |
+| NOOK-122 | 3 | explicit regrant enables history | `tests/group-conversion.mjs:32` | asserted |
+| NOOK-122 | 4 | pre-regrant archive roster | none | none |
+| NOOK-122 | 4 | pre-regrant archive membership | none | none |
+| NOOK-122 | 4 | pre-regrant archive refusal | none | none |
+| NOOK-122 | 4 | post-regrant archive roster | none | none |
+| NOOK-122 | 4 | post-regrant archive membership | none | none |
+| NOOK-122 | 4 | post-regrant archive access | none | none |
+| NOOK-122 | 4 | restart retains boundary | none | none |
 | NOOK-072 | 1 | phone alert once | none | none |
 | NOOK-072 | 1 | desktop app alert once | none | none |
 | NOOK-072 | 1 | Threads row unread count | none | none |
@@ -536,20 +536,20 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-072 | 6 | import creates no follows | none | none |
 | NOOK-072 | 6 | import creates no alerts | none | none |
 | NOOK-072 | 6 | first native reply follows | none | none |
-| NOOK-122 | 1 | untouched all-thread reply alerts | none | none |
-| NOOK-122 | 1 | untouched thread listed | `tests/thread-delivery.mjs:43` | asserted |
-| NOOK-122 | 1 | exception list names conversation | `tests/thread-delivery.mjs:44` | asserted |
-| NOOK-122 | 2 | untouched root preference ID | none | none |
-| NOOK-122 | 2 | follow object message ID | none | none |
-| NOOK-122 | 2 | follow source all | none | none |
-| NOOK-122 | 2 | Threads source all | `tests/threads.mjs:74` | asserted |
-| NOOK-122 | 2 | existing stored source unchanged | none | none |
-| NOOK-122 | 3 | mobile-only all thread follows | `tests/thread-delivery.mjs:43` | asserted |
-| NOOK-122 | 3 | unfollow removes preference entry | none | none |
-| NOOK-122 | 3 | unfollow removes Threads entry | none | none |
-| NOOK-123 | 1 | phone badge unchanged | none | none |
-| NOOK-123 | 1 | desktop badge unchanged | none | none |
-| NOOK-123 | 1 | reply remains in Threads | `tests/thread-delivery.mjs:30` | asserted |
+| NOOK-123 | 1 | untouched all-thread reply alerts | none | none |
+| NOOK-123 | 1 | untouched thread listed | `tests/thread-delivery.mjs:43` | asserted |
+| NOOK-123 | 1 | exception list names conversation | `tests/thread-delivery.mjs:44` | asserted |
+| NOOK-123 | 2 | untouched root preference ID | none | none |
+| NOOK-123 | 2 | follow object message ID | none | none |
+| NOOK-123 | 2 | follow source all | none | none |
+| NOOK-123 | 2 | Threads source all | `tests/threads.mjs:74` | asserted |
+| NOOK-123 | 2 | existing stored source unchanged | none | none |
+| NOOK-123 | 3 | mobile-only all thread follows | `tests/thread-delivery.mjs:43` | asserted |
+| NOOK-123 | 3 | unfollow removes preference entry | none | none |
+| NOOK-123 | 3 | unfollow removes Threads entry | none | none |
+| NOOK-124 | 1 | phone badge unchanged | none | none |
+| NOOK-124 | 1 | desktop badge unchanged | none | none |
+| NOOK-124 | 1 | reply remains in Threads | `tests/thread-delivery.mjs:30` | asserted |
 | NOOK-079 | 1 | owner creates and copies once at both widths | none | none |
 | NOOK-079 | 1 | retry has one message | `tests/integration-tokens.mjs:29` | asserted |
 | NOOK-079 | 1 | truthful via label | `tests/integration-tokens.mjs:26` | asserted |
@@ -606,8 +606,8 @@ The clause-level journey assessment is in [DONE-AUDIT.md](DONE-AUDIT.md). This s
 | NOOK-089 | old 4 | No-new-durable-category and migration statements describe mechanism, not a user outcome. | `docs/contract/mechanism.md` | moved |
 | NOOK-044 | old 1 | Live Campfire account receipt moved to R-8; genuine upstream fixture migration still gates. | `CONTRACT.md` | moved |
 | NOOK-046 | old 1 | Live Mattermost account receipt moved to R-8; genuine upstream fixture migration still gates. | `CONTRACT.md` | moved |
-| NOOK-135 | 1 | draft survives navigation and restart | none | none |
-| NOOK-136 | 1 | channel and DM sections organized | none | none |
-| NOOK-136 | 1 | work acceptance unchanged | none | none |
+| NOOK-136 | 1 | draft survives navigation and restart | none | none |
+| NOOK-137 | 1 | channel and DM sections organized | none | none |
+| NOOK-137 | 1 | work acceptance unchanged | none | none |
 | NOOK-007 | 1 | no ambient code or client-side/credentialed fetch from conversation/import/model content | none | none |
 | NOOK-007 | 1 | provider effects use the scoped app/specialist/meeting door | none | none |

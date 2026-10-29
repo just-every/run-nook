@@ -18,7 +18,7 @@ A claim is done when every clause behind it is done, missing when every one is m
 | 10 | Try it beside Slack. Keep Slack running while your team tries Nook. | `NOOK-041` partial | partial |
 | 11 | Install it. A few commands, or the guided installer. | `NOOK-050` partial | partial |
 | 12 | Bring your Slack history. Public channels come in, read only. | `NOOK-041` partial | partial |
-| 13 | Invite your team. Choose the channels each person sees. | `NOOK-018` partial; `NOOK-093` partial | partial |
+| 13 | Invite your team. Choose the channels each person sees. | `NOOK-018` partial; `NOOK-094` partial | partial |
 | 14 | Free, and yours to keep. Nook is 100% free and open source. It’s MIT licensed, so your team can use it, change it and run it however you like. | `NOOK-050` partial | partial |
 
 Claims: 14; 0 done, 14 partial, 0 missing.

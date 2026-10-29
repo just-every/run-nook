@@ -1,3 +1,4 @@
+import {publicAppPath,publicAppRequest} from './public'
 import type {StorageBindings} from '../platform/storage/context'
 import {authBindings} from '../platform/operator-auth.server'
 import {sameHash,sealToken} from '../integrations/secret'
@@ -20,6 +21,7 @@ async function payload(request:Request){
  }catch{return null}
 }
 export async function webhookRequest(bindings:StorageBindings,request:Request):Promise<Response>{
+ const publicPath=publicAppPath(new URL(request.url).pathname);if(publicPath)return publicAppRequest(bindings,request,publicPath)
  if(new URL(request.url).pathname.startsWith(WEB_API))return webApiRequest(bindings,request)
  const env={...bindings,...authBindings(bindings)},token=decodeURIComponent(new URL(request.url).pathname.slice('/hooks/slack/'.length))
  const bearer=/^(nookapp_([0-9a-f-]{36})\.[A-Za-z0-9_-]{43})$/.exec(token)

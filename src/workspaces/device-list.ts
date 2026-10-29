@@ -1,4 +1,4 @@
-// "Your workspaces" (NOOK-137) is kept on this device, never on a server. A browser
+// "Your workspaces" (NOOK-138) is kept on this device, never on a server. A browser
 // keeps storage per origin, so each installation holds its own copy of the list.
 // Opening another installation from the menu carries this copy in the URL fragment,
 // which browsers never send to a server, and the receiver merges it.

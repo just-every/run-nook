@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 
 // Use a fresh Worker/database: other suites deliberately alter due-time fixtures.
 export async function offboardedConversion({post,get,owner,member,registered,check,restart,validateArchive}){
- await check('NOOK-121 conversion preserves offboarded creator history without restoring access',async()=>{
+ await check('NOOK-122 conversion preserves offboarded creator history without restoring access',async()=>{
   const former=await registered('FormerPlanner'+Date.now())
   const dm=(await post('/api/conversations',{name:'Original planning group',kind:'dm',participants:[owner.user.id,member.user.id]},former.cookie)).data
   const original=(await post(`/api/conversations/${dm.id}/messages`,{body:'The original audience and full history must survive offboarding.',intent:crypto.randomUUID()},former.cookie)).data

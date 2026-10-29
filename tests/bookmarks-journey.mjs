@@ -6,8 +6,8 @@ import {productPolicy} from '../src/platform/portability-policy.mjs'
 import {migrationHistory} from './migration-history.mjs'
 import {bookmarksBrowser} from './bookmarks-browser.mjs'
 
-// NOOK-118 channel bookmarks through the real Worker, local D1 and the archive service. No outbound edge exists: any send fails the test.
-test('NOOK-118 a channel bookmarks bar is added to, reordered and trimmed by members who may post, refuses a guest and an announcement-only member, checks file access at read, audits each change, and exports, restores and erases with its channel',{timeout:240000},async()=>{
+// NOOK-119 channel bookmarks through the real Worker, local D1 and the archive service. No outbound edge exists: any send fails the test.
+test('NOOK-119 a channel bookmarks bar is added to, reordered and trimmed by members who may post, refuses a guest and an announcement-only member, checks file access at read, audits each change, and exports, restores and erases with its channel',{timeout:240000},async()=>{
  const app=await installation(async()=>new Response(null,{status:201}),{workerOptions:{assets:{directory:process.cwd()+'/dist/client',binding:'ASSETS',run_worker_first:true}}}),{call,db,ownerCookie,origin}=app;let restore
  try{
   const room=await call('/api/conversations','POST',{name:'Launch bookmarks',kind:'private'},ownerCookie),other=await call('/api/conversations','POST',{name:'Other bookmarks',kind:'private'},ownerCookie)

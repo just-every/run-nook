@@ -2,7 +2,7 @@ import {withRestoredArchive} from './archive-roundtrip.mjs'
 import assert from 'node:assert/strict'
 export async function personalJourney({owner,registered,post,get,request,check,restart,sql,validateArchive}){
  const member=await registered('PersonalSender'),outsider=await registered('PersonalOutside')
- await check('NOOK-101 [NOOK-032] first-sign-in defaults, member choices and dated vacation preserve notification ownership',async()=>{
+ await check('NOOK-102 [NOOK-032] first-sign-in defaults, member choices and dated vacation preserve notification ownership',async()=>{
   const defaults=(await get('/api/team/notification-defaults')).data,defaultChannels=(await get('/api/team/default-channels')).data;
   await get('/api/team/notification-defaults',member.cookie,403);
   const publicRoom=(await post('/api/conversations',{name:'synthetic-nook default alerts',kind:'channel',participants:[]})).data;
@@ -72,7 +72,7 @@ export async function personalJourney({owner,registered,post,get,request,check,r
   for(let n=0;receipt.state!=='complete'&&n<30;n++)receipt=(await request('/api/erasures/'+receipt.id+'/resume',{method:'POST',cookie:owner.cookie,body:{}})).data;
   assert.equal(receipt.state,'complete');const after=await archive();for(const table of ['nook_keywords','nook_vacations','nook_notify_preferences'])assert.ok(!after.some(r=>r.table===table&&r.row.user===keywordPerson.user.id),'fresh archive excludes erased '+table);
  });
- await check('NOOK-092 sent history pages own recent messages under current access',async()=>{
+ await check('NOOK-093 sent history pages own recent messages under current access',async()=>{
   const room=(await post('/api/conversations',{name:'Regional customer launch',kind:'private',participants:[member.user.id]})).data
   const expected=new Set()
   for(let n=0;n<52;n++)expected.add((await post(`/api/conversations/${room.id}/messages`,{body:`Customer briefing update ${n}`,intent:crypto.randomUUID()},member.cookie)).data.id)

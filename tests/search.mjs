@@ -150,7 +150,7 @@ export async function aiSearchJourney(app,edge,t){
 }
 
 export async function recapJourney(app,edge){
- const {call,db,ownerCookie}=app,key='synthetic-nook-101';
+ const {call,db,ownerCookie}=app,key='synthetic-nook-102';
  const room=await call('/api/conversations','POST',{name:'Autumn release planning',kind:'private'},ownerCookie),member=await app.invite('Lena',room.id),other=await call('/api/conversations','POST',{name:'Compensation planning',kind:'private'},ownerCookie),outsider=await app.invite('Sam',other.id);
  const send=(body,extra={})=>call('/api/conversations/'+room.id+'/messages','POST',{body,intent:crypto.randomUUID(),...extra},ownerCookie);
  const recap=(input={},cookie=member.cookie,status=200)=>call('/api/recaps','POST',{conversation:room.id,...input},cookie,status);

@@ -1,7 +1,7 @@
 import {expect} from '@playwright/test'
 import {browserWidths,checkScreen,evidenceDirectory} from './browser-support.mjs'
 
-// NOOK-118 bookmarks at 1440 and 390: a member who may post adds a link, a folder and a file, reorders and removes; a restricted member sees the bar and the reason, not the controls.
+// NOOK-119 bookmarks at 1440 and 390: a member who may post adds a link, a folder and a file, reorders and removes; a restricted member sees the bar and the reason, not the controls.
 export async function bookmarksBrowser({origin,manager,restricted,room,file,destination=evidenceDirectory('bookmarks')}){
  await browserWidths(async(width,open)=>{
   const errors=[],admin=await open({cookie:manager.cookie,origin},{errors}),reader=await open({cookie:restricted.cookie,origin}),url=origin+'/app?conversation='+room.id

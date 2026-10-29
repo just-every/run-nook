@@ -20,25 +20,25 @@ Ruled default APPROVED with riders by ct, 22 October 2026 22:15Z: off until the 
 
 ### RL-4 — Cross-app message refusals
 
-Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-112, NOOK-114.
+Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-113, NOOK-115.
 
 CT policy ruling, 26 October 2026: When an app targets another app identity’s message within its granted conversation, chat.delete returns ok:false with cant_delete_message; chat.update returns ok:false with cant_update_message. The refusal changes no message. This corrects the deletion error name only; current grants, app identity, membership, revocation and posting controls remain unchanged.
 
 ### RL-5 — Unsupported-format warning
 
-Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-112, NOOK-114.
+Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-113, NOOK-115.
 
 CT policy ruling, 26 October 2026: On an accepted Web API message whose formatting Nook cannot render, response_metadata.warnings contains unsupported_formatting as a Nook-specific extension, not a Slack-defined warning code. The payload’s text fallback and the existing visible-notice requirement remain mandatory. Compatibility documentation classifies this behavior as degraded and identifies the extension explicitly. It establishes no Slack validation equivalence. Gap: the complete contracted Block Kit subset, exhaustive method, event, field and block matrix, and real SDK behavior remain unproved where existing evidence is absent.
 
 ### RL-6 — Native identity metadata
 
-Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-112, NOOK-114.
+Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-113, NOOK-115.
 
-CT policy ruling, 26 October 2026: Pending Slack ID mapping, auth.test retains team as the Nook branding display name and team_id as the request URL’s host, including a nondefault port. These are explicitly degraded native metadata: team is not proof of a customer-specific workspace name, and team_id is an origin-local locator, not a Slack workspace ID or a durable installation identifier across host changes. The returned user_id and bot_id identify the existing approved app-name and channel pair, not mapped Slack identities or a person. Compatibility documentation discloses these limits; clients requiring Slack identifier semantics remain unsupported. Gap: stable Slack-style identity mapping and imported Slack ID resolution remain required in NOOK-112 with NOOK-041 and are not satisfied by a hostname or native approval ID.
+CT policy ruling, 26 October 2026: Pending Slack ID mapping, auth.test retains team as the Nook branding display name and team_id as the request URL’s host, including a nondefault port. These are explicitly degraded native metadata: team is not proof of a customer-specific workspace name, and team_id is an origin-local locator, not a Slack workspace ID or a durable installation identifier across host changes. The returned user_id and bot_id identify the existing approved app-name and channel pair, not mapped Slack identities or a person. Compatibility documentation discloses these limits; clients requiring Slack identifier semantics remain unsupported. Gap: stable Slack-style identity mapping and imported Slack ID resolution remain required in NOOK-113 with NOOK-041 and are not satisfied by a hostname or native approval ID.
 
 ### RL-7 — Web API failure envelope
 
-Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-112, NOOK-114.
+Date: 26 October 2026. Ruled by: ct. Clauses: NOOK-113, NOOK-115.
 
 CT policy ruling, 26 October 2026: Web API application-level failures return HTTP 200 with ok:false and the applicable error, including unknown_method for unavailable methods. A rate refusal returns HTTP 429 with ok:false, error ratelimited and Retry-After in seconds. HTTP 200 does not imply application success, and unknown_method does not satisfy any required method. This convention does not alter incoming-webhook status behavior, grant authority, authorize effects on refusal or waive any required Web API, event or app journey.
 
