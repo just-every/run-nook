@@ -7093,7 +7093,7 @@
       "executable": false
     },
     "tests/agent-door/adoption-journey.mjs": {
-      "sha256": "2b5de3625825f13413b65a92c6f38fa83034e1a3025f754ea283068a51565f95",
+      "sha256": "8285cc3c5cc854ac1bd7726cd24a8b1f6d074663d19bc8bae1ec8341d9e90db6",
       "executable": false
     },
     "tests/agent-door/browser-proof.mjs": {

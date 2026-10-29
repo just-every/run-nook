@@ -63,9 +63,30 @@ try{
  await personCall('/auth/operator/role',{operatorId:ari.id,role:'admin'});
  const member=await b.tool('nook.identity.read',{});assert.equal(member.status,200);
  const bound=await f.database.prepare('SELECT operator_id,business_role FROM bs_team WHERE business_id=?').bind(f.roster[0].id).first();assert.equal(bound.operator_id,ari.id);assert.equal(bound.business_role,'member');
+ // Exercise Business editor eligibility through the native approval door. A
+ // local admin cannot approve for that role until the signed roster says so.
+ await c.adopt(autonomousPolicy());
+ const reviewRoom=await call('conversations.create',{name:'Business approval boundary',kind:'private'});
+ const rowan=team.find(p=>p.email===f.roster[1].email);
+ await c.adopt({...autonomousPolicy(),rules:[{id:'named-editor',class:'*',do:'approval',approver:['role:editor'],wait:'PT1H'}]});
+ const held=await c.tool('nook.conversations.member',{id:reviewRoom.id,user:rowan.id,remove:false,idempotency_key:randomUUID()});
+ const approval=held.result?._meta?.['com.runeditrun/approval'];assert.ok(approval?.id);
+ const approvalPath='/agents/api/approvals/'+approval.id;
+ const localAdmin=await f.request(approvalPath,{headers:{Cookie:f.roster[0].cookie}});assert.equal(localAdmin.status,403);await localAdmin.body?.cancel();
+ const membership=()=>f.database.prepare('SELECT count(*) AS n FROM nook_members WHERE conversation=? AND user=?').bind(reviewRoom.id,rowan.id).first();
+ assert.equal((await membership()).n,0);
+ const editors=f.roster.map((p,i)=>i===0?{...p,role:'admin'}:p);await f.pairBusiness(editors);
+ const eligible=await personCall(approvalPath,undefined,f.roster[0].cookie);
+ const approved=await personCall(approvalPath+'/approve',{revision:eligible.approval.revision,summary_sha256:eligible.approval.summary_sha256},f.roster[0].cookie);
+ assert.equal(approved.approval.state,'executed');assert.equal((await membership()).n,1);
+ assert.ok(approved.approval.approvals.some(mark=>mark.person===ari.id&&mark.ref==='role:editor'));
+ console.log('NOOK_BUSINESS_EDITOR '+JSON.stringify({local_admin_approval:localAdmin.status,before:0,business_admin_approval:approved.approval.state,after:1,named_native_approver:true}));
  const renamed=f.roster.map((p,i)=>i===0?{...p,email:'synthetic-nook-ari-renamed@example.com'}:p);await f.pairBusiness(renamed);
  const same=await f.database.prepare('SELECT operator_id FROM bs_team WHERE business_id=?').bind(f.roster[0].id).first();assert.equal(same.operator_id,ari.id);
+ await c.adopt(autonomousPolicy());
+ const renamedCall=await b.tool('nook.identity.read',{});assert.equal(renamedCall.result?.structuredContent?.id,ari.id);
+ const removedEditor=await f.request(approvalPath,{headers:{Cookie:f.roster[0].cookie}});assert.equal(removedEditor.status,403);await removedEditor.body?.cancel();
  await personCall('/auth/operator/status',{operatorId:ari.id,status:'inactive'});
  const inactive=await b.tool('nook.identity.read',{});assert.equal(inactive.status,401);
- console.log('NOOK_TEAM_RECONCILIATION '+JSON.stringify({native_role_promotion_does_not_change_business_role:bound.business_role,email_change_preserves_native_id:same.operator_id===ari.id,inactive_person:inactive.status}));
+ console.log('NOOK_TEAM_RECONCILIATION '+JSON.stringify({native_role_promotion_does_not_change_business_role:bound.business_role,email_change_preserves_native_id:same.operator_id===ari.id,email_change_scoped_call:renamedCall.status,removed_business_editor:removedEditor.status,inactive_person:inactive.status}));
 }finally{await f.close()}
