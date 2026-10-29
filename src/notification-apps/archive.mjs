@@ -1,4 +1,4 @@
-export const notificationExcludedTables=['nook_notification_secrets','nook_notification_rates','nook_notification_email_facts'];
+export const notificationExcludedTables=['nook_notification_capabilities','nook_notification_requests','nook_notification_secrets','nook_notification_rates','nook_notification_email_facts'];
 export async function validateNotificationApps(read,manifest,actors,conversations){
  if(manifest?.tables&&!manifest.tables.some(t=>t.name==='nook_notification_apps'))return;
  const rows=await read('nook_notification_apps'),ids=new Set();

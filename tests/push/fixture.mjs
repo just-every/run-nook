@@ -7,10 +7,12 @@ import {mailBindings,mailEdge,registerMailEdge} from '../mail-edge.mjs';
 const require=createRequire(import.meta.url),{Miniflare,Log,LogLevel,convertV4MiniflareOptions}=createRequire(require.resolve('wrangler'))('miniflare');
 // Run the emitted application and actual Durable Object alarms. The sole fake is
 // the outbound HTTPS edge: no provider account or vendor request is used.
-export async function installation(edge,{bootstrap=true,migrate=true,origin:configuredOrigin,workerOptions={}}={}){
+export async function installation(edge,{bootstrap=true,migrate=true,origin:configuredOrigin,workerOptions={},now}={}){
  const port=await new Promise((resolve,reject)=>{const server=createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port))})});
  const origin=configuredOrigin??'http://127.0.0.1:'+port,secret=crypto.randomUUID()+crypto.randomUUID(),token=crypto.randomUUID()+crypto.randomUUID();
  const modules=[{type:'ESModule',path:resolve('dist/server/index.js')},...(await readdir('dist/server/assets')).filter(name=>name.endsWith('.js')).map(name=>({type:'ESModule',path:resolve('dist/server/assets',name)}))];
+ // A test-only entry module pins Date.now inside the real Worker; production has no clock input.
+ if(now!==undefined){assert.ok(Number.isSafeInteger(now));modules.unshift({type:'ESModule',path:resolve('dist/server/pinned-clock.js'),contents:`import worker from './index.js'; export {ChatHub} from './index.js'; Date.now=()=>${now}; export default worker;`})}
  const mail=mailEdge(edge);let unregister;
  const options={port,host:'127.0.0.1',name:'nook-push-test',routes:['*/*'],modules,modulesRoot:resolve('dist/server'),compatibilityDate:'2026-09-08',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CHAT_HUB:{className:'ChatHub',useSQLite:true}},bindings:{AUTH_ORIGIN:origin,AUTH_LOCAL:'true',OWNER_EMAIL:'owner@example.test',SESSION_SECRET:secret,SETUP_TOKEN:token,...mailBindings},outboundService:request=>mail.fetch(request),log:new Log(LogLevel.ERROR)};
  Object.assign(options,workerOptions);

@@ -717,7 +717,7 @@
       "executable": false
     },
     "docs/integration-tokens.md": {
-      "sha256": "eb30df69a48dc8f282f2df2526fa7b99ac760d9de40aa04fd25b1b4f772726a7",
+      "sha256": "b843061e815090fe48db6dd02245ce006fe3b6b5ef5b753ef4040520fc6f0c40",
       "executable": false
     },
     "docs/mattermost-import.md": {
@@ -1546,6 +1546,10 @@
     },
     "migrations/0098_profile_zone_choice.sql": {
       "sha256": "3638c4ec2bd047048a2df875d378877b9b474721da772f3ca06d0b82e2f22819",
+      "executable": false
+    },
+    "migrations/0099_public_apps.sql": {
+      "sha256": "bb53206448f1bf19b5c912a68c596c14fa6f8d803e2d1c7d4558338f517dabac",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -5573,7 +5577,7 @@
       "executable": false
     },
     "src/notification-apps/archive.mjs": {
-      "sha256": "ff21d26bed7ce91eb25265582c5a4fa4de01bf91a9fdf1ddd1c23c2c187a4b39",
+      "sha256": "fb148982ac33f38ab753d5be5712a6b80b0cc3466631e19bca770c05f8f5b916",
       "executable": false
     },
     "src/notification-apps/body.ts": {
@@ -5588,16 +5592,32 @@
       "sha256": "e7842f5c07c4a50395d681a5aff9c681e498ee178b2395a71f1396af66afb1a9",
       "executable": false
     },
+    "src/notification-apps/installed-context.ts": {
+      "sha256": "df0e3a0a54e8fc5a7d37ee03928948afe8edb6e7684df3f605c3497d13e38739",
+      "executable": false
+    },
     "src/notification-apps/manage.ts": {
-      "sha256": "4634dca0151a42e35652b42bed3194df2e1fa471ecbd1f2771a7aeffd941b503",
+      "sha256": "d9fc329cdaee8e9b235817ab9dc84d6b3f55cfc04acd7bc987732e88a2c5861d",
+      "executable": false
+    },
+    "src/notification-apps/message-reads.ts": {
+      "sha256": "c523a97e0f1c67b5844ec1eb847b104dab3ecbef4243c1e2f07077f84cdac863",
       "executable": false
     },
     "src/notification-apps/NotificationApps.tsx": {
       "sha256": "39ad208ab4bbe1f311b518de565cecdc2146e83bd4057799be9e463be957d82f",
       "executable": false
     },
+    "src/notification-apps/public.ts": {
+      "sha256": "65a16096740318b0cacebdcf203aca1673c95536bd394edca8b49b7191ee7370",
+      "executable": false
+    },
     "src/notification-apps/receipts.ts": {
       "sha256": "4597c018b39f75c3f91d81d614c85e99d7edd51924e5634815d00181eb671b22",
+      "executable": false
+    },
+    "src/notification-apps/signing.ts": {
+      "sha256": "d5a87e06bc130141820f46193dc2bb53cc12c814ffc73bd54b30eafbb4313194",
       "executable": false
     },
     "src/notification-apps/slack-format.ts": {
@@ -5605,11 +5625,11 @@
       "executable": false
     },
     "src/notification-apps/web-api.ts": {
-      "sha256": "a3d38c07897a0b2105e93581e028d306c1fe9972a7bddac7ee0b16678281f4ec",
+      "sha256": "69bde1b980ed06cf841bad0233515cc46a523fb993fa5dd2996c5091e726618b",
       "executable": false
     },
     "src/notification-apps/webhook.ts": {
-      "sha256": "dddb1dacfed74351c55c6c519ec309d31e9656c81397c2166c8a9906ab2457f9",
+      "sha256": "8b9bc294e8e748cc4af9481a15bd6c8dd95ec92334b2c2906308af34f5f9d46d",
       "executable": false
     },
     "src/notify/compose.ts": {
@@ -6345,7 +6365,7 @@
       "executable": false
     },
     "src/team/erasure/graph.ts": {
-      "sha256": "d683513a9c0f3001990ab21b672a1a8447403ac65525f42748f8d826fe343558",
+      "sha256": "34732627379da7b4cbc869ccd8f797ee2f0cb630c1ee63587a66955def460e0e",
       "executable": false
     },
     "src/team/erasure/identity.ts": {
@@ -6929,15 +6949,19 @@
       "executable": false
     },
     "tests/notification-apps.mjs": {
-      "sha256": "acd79b619a3b846bea8dbee4ff2f324c2312f5b44cb27f7319b113cc8247ab27",
+      "sha256": "20e9e6e50e7eb41b310cb2732af7bbc075f87c08c556e938527f1c47373f20f1",
       "executable": false
     },
     "tests/notification-extension.mjs": {
       "sha256": "04e773446a2730e22a2e6532e80ce1457363f6b2bea53d52805c78743d143927",
       "executable": false
     },
+    "tests/notification-public.mjs": {
+      "sha256": "a09942f68e71c85f5b751067d52ae9ed221420bae54df2a7df23df98e4cc40a7",
+      "executable": false
+    },
     "tests/notification-webhooks.mjs": {
-      "sha256": "7ab41935dd2726fcf9072235a2b043447d48e65a873cffdab6fe7886e1bd4ab4",
+      "sha256": "2ee291582f04457491e2e5accb26453eb3170079ba77c447269015d1402c3ee5",
       "executable": false
     },
     "tests/notify-journey.mjs": {
@@ -7133,7 +7157,7 @@
       "executable": false
     },
     "tests/push/fixture.mjs": {
-      "sha256": "577f9f065be32656968d99c228a6552133aa364648f52443f9f0735a1301cfd4",
+      "sha256": "27291e189e140358aa1dcdd02f1bcf7e206046d0a20076d38013a5d28ecf5894",
       "executable": false
     },
     "tests/push/journey.mjs": {
