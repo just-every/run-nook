@@ -4428,6 +4428,10 @@
       "sha256": "1de06490a5eda233e74eee516671b5b2ef0b4f7069b9219a046623f85df479f0",
       "executable": false
     },
+    "src/base/modules/portability/derived.mjs": {
+      "sha256": "71c14a3aa115be21ba6a6ea19b69d227adb1d56cdb9137affc1a07a2c4c0211e",
+      "executable": false
+    },
     "src/base/modules/portability/dev-data.mjs": {
       "sha256": "2627e3e19d677b3aee90917e40ec24f3ba3b5ae63b7052e0ff2103e1d8101b79",
       "executable": false
@@ -4554,6 +4558,10 @@
     },
     "src/base/modules/portability/replay-views.mjs": {
       "sha256": "86fe27bce062825e399cea780efaf0c0d29870f4ec14733a960a15b404d1ce9b",
+      "executable": false
+    },
+    "src/base/modules/portability/restore-empty.mjs": {
+      "sha256": "7838bb4495953ee3e9c56d0bb562014613c4ad02ae2ed34ed047d3f6709cf33c",
       "executable": false
     },
     "src/base/modules/portability/restore-safety.mjs": {
