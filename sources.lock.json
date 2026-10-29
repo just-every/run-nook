@@ -4129,7 +4129,7 @@
       "executable": false
     },
     "src/brand/SiteHeader.tsx": {
-      "sha256": "0c855e465ec67a44063b9c2f90c399b997255d365122b4cd8707ecb38779f8d4",
+      "sha256": "2ed44275060a2b53264151e22effa75c9c5bdcf9d273ca8052a1181f6f919921",
       "executable": false
     },
     "src/brand/tokens.css": {
@@ -6205,7 +6205,7 @@
       "executable": false
     },
     "src/site/pages.tsx": {
-      "sha256": "0f7a0e107b9b74cf62d9bee513f70f0032573d357ebafe0b746f3b1ae7f6cc85",
+      "sha256": "2e8061147a81c12a3e0383f12d37fdea7f5f25933d220b2b51b8bc69355c1013",
       "executable": false
     },
     "src/site/run.ts": {
