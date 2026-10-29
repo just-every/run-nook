@@ -6,6 +6,7 @@ import {PUSH_FOLD_MS,PUSH_GATHER_MS} from './queue'
 import {pushCancellation,pushHeldUntil} from './policy'
 import {authBindings} from '../platform/operator-auth.server'
 import {pushSnapshot} from './snapshot'
+import {queuedAgentLabel} from '../agent-door/queued-consent'
 export {pushSnapshot} from './snapshot'
 type Row={id:string;actor:string;message:string|null;reason:string}
 export async function drainPush(bindings:any,now=Date.now(),network:typeof fetch=fetch):Promise<number|null>{
@@ -49,7 +50,7 @@ export async function drainPush(bindings:any,now=Date.now(),network:typeof fetch
    await rows("UPDATE nook_notify_queue SET state=CASE WHEN (SELECT cancel FROM candidates WHERE candidates.id=nook_notify_queue.id) IS NOT NULL THEN 'cancelled' WHEN attempts>1 THEN 'retrying' ELSE 'pending' END,error=COALESCE((SELECT cancel FROM candidates WHERE candidates.id=nook_notify_queue.id),error),attempts=attempts-1,due=max(created+?, ?,COALESCE((SELECT held FROM candidates WHERE candidates.id=nook_notify_queue.id),0)),email=NULL,updated=? WHERE channel='push' AND email=? AND state='sending'",PUSH_GATHER_MS,current,current,claim).run()
   }
   if(!device){await release();continue}
-  const info=await sql('SELECT c.name,c.kind,(SELECT display_name FROM oa_operators WHERE id=?) AS actor FROM nook_conversations c WHERE id=?',lead.actor,group.conversation).first<any>()
+  const info=await sql(`SELECT c.name,c.kind,COALESCE((SELECT ${queuedAgentLabel} FROM nook_notify_queue q WHERE q.id=?),(SELECT display_name FROM oa_operators WHERE id=?)) AS actor FROM nook_conversations c WHERE id=?`,lead.id,lead.actor,group.conversation).first<any>()
   const place=info?.kind==='dm'?'a direct conversation':'#'+(info?.name??''),actor=info?.actor??'Someone'
   const wording:Record<string,string>={'broadcast':`${actor} sent a channel-wide mention in ${place}`,'mention':`${actor} mentioned you in ${place}`,'keyword':`${actor} wrote a message with one of your keywords in ${place}`,'urgent-request':`Urgent request from ${actor} in ${place}`,'direct-message':`${actor} sent a message in ${place}`,'thread-follow':`${actor} replied in ${place}`,'all-messages':`${actor} sent a message in ${place}`,'commitment-proposal':`${actor} proposed a commitment in ${place}`,'commitment-revision':`${actor} changed a commitment in ${place}`,'commitment-complete':`${actor} reported a commitment complete in ${place}`}
   const open=new URL('/app',env.AUTH_ORIGIN);open.searchParams.set('conversation',group.conversation);if(lead.message)open.searchParams.set('focus',lead.message);else open.searchParams.set('panel','outcomes')

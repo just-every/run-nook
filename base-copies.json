@@ -585,6 +585,48 @@
       }
     },
     {
+      "path": "src/base/foundation/runtime/contract-docs.mjs",
+      "originPath": "foundation/runtime/contract-docs.mjs",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
+      "files": {
+        "src/base/foundation/runtime/contract-docs.mjs": "59ff5f3635018233bc8caafb2718f95f5420931f370596b998e3c6d3bd94e593"
+      },
+      "modes": {
+        "src/base/foundation/runtime/contract-docs.mjs": "100644"
+      },
+      "originFiles": [
+        "foundation/runtime/contract-docs.mjs"
+      ]
+    },
+    {
+      "path": "src/base/foundation/runtime/contract-prose-patterns.mjs",
+      "originPath": "foundation/runtime/contract-prose-patterns.mjs",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
+      "files": {
+        "src/base/foundation/runtime/contract-prose-patterns.mjs": "5519a7439e28f7c2635a0170749c43ccdc96eaccc0c313f55a2294d0665c8ba4"
+      },
+      "modes": {
+        "src/base/foundation/runtime/contract-prose-patterns.mjs": "100644"
+      },
+      "originFiles": [
+        "foundation/runtime/contract-prose-patterns.mjs"
+      ]
+    },
+    {
+      "path": "src/base/foundation/runtime/contract-prose.mjs",
+      "originPath": "foundation/runtime/contract-prose.mjs",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
+      "files": {
+        "src/base/foundation/runtime/contract-prose.mjs": "7f606da0b4ac6f259fdaaa2a263250c1b6a20d5c906104c5a961271d23e818e0"
+      },
+      "modes": {
+        "src/base/foundation/runtime/contract-prose.mjs": "100644"
+      },
+      "originFiles": [
+        "foundation/runtime/contract-prose.mjs"
+      ]
+    },
+    {
       "path": "src/base/foundation/runtime/icon-head.ts",
       "originPath": "foundation/runtime/icon-head.ts",
       "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
@@ -596,6 +638,20 @@
       },
       "originFiles": [
         "foundation/runtime/icon-head.ts"
+      ]
+    },
+    {
+      "path": "src/base/foundation/runtime/seed-contract.mjs",
+      "originPath": "foundation/runtime/seed-contract.mjs",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
+      "files": {
+        "src/base/foundation/runtime/seed-contract.mjs": "7beada5d271beaaf63d76e1f8cf2712ba906ec7d430f8312f4abedfad57428b4"
+      },
+      "modes": {
+        "src/base/foundation/runtime/seed-contract.mjs": "100644"
+      },
+      "originFiles": [
+        "foundation/runtime/seed-contract.mjs"
       ]
     },
     {

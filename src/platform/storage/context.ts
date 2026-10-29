@@ -10,13 +10,14 @@ export const authority=`(SELECT authority FROM nook_storage WHERE id=1)='normali
 export const authFence=`EXISTS(SELECT 1 FROM oa_sessions s JOIN oa_operators o ON o.id=s.operator_id WHERE s.id=? AND s.operator_id=? AND s.operator_version=? AND o.version=s.operator_version AND o.status='active' AND ${productAccess('o.id')} AND s.revoked_at IS NULL AND s.expires_at>CAST(unixepoch('subsec')*1000 AS INTEGER))`
 // Unpublished imported history stays hidden, except a source import from the owner applying it.
 export const memberFence=`EXISTS(SELECT 1 FROM nook_members mf WHERE mf.conversation=? AND mf.user=? AND ${allowedGrant('mf.user','mf.conversation')} AND NOT EXISTS(SELECT 1 FROM nook_import_channels ch JOIN nook_imports j ON j.id=ch.job WHERE ch.conversation=mf.conversation AND NOT (j.owner=mf.user AND substr(j.id,1,6)<>'slack-' AND substr(j.id,1,9)<>'campfire-' AND substr(j.id,1,11)<>'mattermost-' AND substr(j.id,1,6)<>'gchat-') AND (j.state<>'complete' OR NOT (${publishedImport}))))`
-export type AgentIdentity={kind:'agent';operator:Operator;agentId:string;consent?:string;policy:string|null;localRevision:number;operationId:string;label:string;approvers:readonly {id:string;name:string}[]}
+export type AgentIdentity={kind:'agent';operator:Operator;agentId:string;consent?:string;policy:string|null;localRevision:number;operationId:string;scopes?:readonly string[];clientId?:string;idempotencyKey?:string|null;label:string;approvers:readonly {id:string;name:string}[]}
 export class Context {
  private personEvents:{type:string;uri:string}[]=[]
  constructor(readonly env:StorageBindings,private readonly identity:Session|AgentIdentity,private readonly onPersonChange?:(events:{type:string;uri:string}[])=>Promise<void>){}
  get session():Session{if(this.identity.kind==='agent')fail(403,'A native person session is required');return this.identity as Session}
  get operator(){return this.identity.operator}
  get memberBroadcasts(){return true}
+ get queueOrigin(){const a=this.identity;return a.kind==='agent'?JSON.stringify({person:this.uid,version:a.operator.version,agent:a.agentId,consent:a.consent??null,operationId:a.operationId,scopes:a.scopes??[],clientId:a.clientId??null,idempotencyKey:a.idempotencyKey??null,label:a.label,policy:a.policy,localRevision:a.localRevision}):null}
  get db(){return this.env.DB}
  get uid(){return this.identity.kind==='agent'?this.identity.operator.id:(this.identity as Session).operatorId}
  get credentials():any[]{return this.identity.kind==='agent'?[this.uid,this.operator.version,this.identity.agentId,this.identity.policy,this.identity.localRevision,this.identity.consent??null,this.identity.consent??null]:[this.session.id,this.uid,this.operator.version]}
@@ -57,5 +58,5 @@ export class Context {
  async hint(){await this.env.CHAT_HUB.get(this.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/hint',{method:'POST'}).catch(()=>undefined)}
 }
 export async function context(bindings:StorageBindings,headers:Headers,identity?:Promise<Session|null>){const env={...bindings,...authBindings(bindings)};const session=await(identity??operatorAuth(env).getSession(new Request(env.AUTH_ORIGIN+'/app',{headers})))??fail(401,'Sign in required');const c=new Context(env,session,async events=>{const {emitPersonChanges}=await import('../../agent-door/person-events');await emitPersonChanges(env,session.operator,events)});await c.check();await initializeDefaultChannels(c);return c}
-export type MessageWriter=Pick<Context,'uid'|'sql'|'event'>
+export type MessageWriter=Pick<Context,'uid'|'sql'|'event'> & Partial<Pick<Context,'queueOrigin'>>
 export function indexMessage(c:Pick<Context,'sql'>,id:string,conversation:string,body:string,source='native'){return c.sql('INSERT INTO nook_search(message,conversation,source,scope,body_lower) VALUES(?,?,?,?,?)',id,conversation,source,'|'+conversation+'|',body.toLowerCase())}

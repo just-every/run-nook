@@ -16,14 +16,14 @@ export function nookPeople(env:StorageBindings):PeopleAdapter{
   async sponsor(claims){
    const binding=await settings()
    if(binding?.owner_id===claims.sub){const claimed=await owner();return claimed?admitted(await native.person(claimed.claim_id)):null}
-   const row=await env.DB.prepare("SELECT operator_id FROM bs_team WHERE business_id=? AND state<>'conflict'").bind(claims.sub).first<{operator_id:string|null}>()
+   const row=await env.DB.prepare("SELECT operator_id FROM bs_team WHERE business_id=? AND state='active'").bind(claims.sub).first<{operator_id:string|null}>()
    return row?.operator_id?admitted(await native.person(row.operator_id)):null
   },
   session:async request=>admitted(await native.session(request)),
   async businessMember(person){
    const binding=await settings()
    if(binding?.owner_id&&(await owner())?.claim_id===person.id)return {id:binding.owner_id,role:'owner'}
-   const row=await env.DB.prepare("SELECT business_id,business_role FROM bs_team WHERE operator_id=? AND state<>'conflict' AND business_id IS NOT NULL").bind(person.id).first<{business_id:string;business_role:string}>()
+   const row=await env.DB.prepare("SELECT business_id,business_role FROM bs_team WHERE operator_id=? AND state='active' AND business_id IS NOT NULL").bind(person.id).first<{business_id:string;business_role:string}>()
    return row?{id:row.business_id,role:row.business_role==='admin'?'editor':null}:null
   },
   businessRole:person=>person.role==='owner'?'owner':null,
