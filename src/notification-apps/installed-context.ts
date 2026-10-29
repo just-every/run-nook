@@ -29,6 +29,7 @@ export class InteractiveContext extends InstalledContext{
  }
 }
 export class EventContext extends AppContext{
+ protected override get auditApp(){return this.approval.id}
  constructor(env:StorageBindings,app:Approval,actor:string,readonly receipts:D1PreparedStatement[]){super(env,app,actor)}
  override get credentials(){return [...super.credentials,this.approval.id,this.approval.conversation,this.approval.creator??'',this.approval.id]}
  override get fence(){return `${super.fence} AND ${installer} AND ${memberFence} AND EXISTS(SELECT 1 FROM nook_notification_capabilities WHERE app=? AND signing IS NOT NULL)`}

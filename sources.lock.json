@@ -625,7 +625,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "5e30266c47de27558fe3d28cdec777cd5803b383210d1fcdd3d6b15567d9ca6c",
+      "sha256": "26d3f85577ab3d7e8f7cd56acea2432952bda65fac602bfe5e4ea23ad21379b2",
       "executable": false
     },
     "AGENTS.md": {
@@ -649,7 +649,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "cfa74f0943beac5735db4a5c5d2e28b98563f8ee7603bfa70fd21377b28a1933",
+      "sha256": "dabfe23f2b574e7541f29a01e861436eaf2a8e9ea0d6243d467ebeca03c41eeb",
       "executable": false
     },
     "DEMO.md": {
@@ -681,7 +681,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "467793966b53a4d814107a01c349eee97ebc98215c6d8e79ee3795a1d636d947",
+      "sha256": "f5c3ce00742560342dff3b718e32c389e4ac0c12260b3e8d204ccf5f8ed96df8",
       "executable": false
     },
     "docs/conversations.md": {
@@ -5585,7 +5585,7 @@
       "executable": false
     },
     "src/notification-apps/context.ts": {
-      "sha256": "2eac730cad2f0eb67132693044c864afea25716d59e76b1fbe76918598a328a0",
+      "sha256": "3cc64baf1738da91014e38684bbacf35d2b3d5c91bac0ebafbba5e6c85cf6317",
       "executable": false
     },
     "src/notification-apps/door.ts": {
@@ -5593,7 +5593,7 @@
       "executable": false
     },
     "src/notification-apps/installed-context.ts": {
-      "sha256": "df0e3a0a54e8fc5a7d37ee03928948afe8edb6e7684df3f605c3497d13e38739",
+      "sha256": "8172623597fba89cefb31a898c076d53e5d6f387cfc06f088eef828aae8b240e",
       "executable": false
     },
     "src/notification-apps/manage.ts": {
@@ -6957,7 +6957,7 @@
       "executable": false
     },
     "tests/notification-public.mjs": {
-      "sha256": "a09942f68e71c85f5b751067d52ae9ed221420bae54df2a7df23df98e4cc40a7",
+      "sha256": "05480d13d3c8ee79d15f1d6a6c61781f61e1bc885e8c3af3196a0a11d17cbd28",
       "executable": false
     },
     "tests/notification-webhooks.mjs": {
@@ -7157,7 +7157,7 @@
       "executable": false
     },
     "tests/push/fixture.mjs": {
-      "sha256": "27291e189e140358aa1dcdd02f1bcf7e206046d0a20076d38013a5d28ecf5894",
+      "sha256": "c4cc9cbe77d1a8b48c403117cea4dbb2d9af5e5be830ec2a0a4ded388dab22ad",
       "executable": false
     },
     "tests/push/journey.mjs": {

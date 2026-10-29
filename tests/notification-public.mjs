@@ -30,7 +30,8 @@ export async function publicAppJourney(){
   await call('/auth/invite','POST',{email,displayName:'App installer',role:'admin'},ownerCookie,202);
   const installer=await app.signIn(email);
   const approve=async(name,cookie=installer.cookie,extras={})=>(await call('/api/notification-apps','POST',{name,channels:[room.id],messageReads:true,interactivity:true,signingSecret:secret,...extras},cookie)).approvals[0];
-  const grant=await approve('Review helper');
+  const replaced=await approve('Review helper'),grant=await approve('Review helper');
+  assert.deepEqual(await read(replaced,room.id),{ok:false,error:'invalid_auth'});
   const plain=(await call('/api/notification-apps','POST',{name:'Notifications only',channels:[room.id]},ownerCookie)).approvals[0];
   assert.deepEqual(await read(plain,room.id),{ok:false,error:'missing_scope',needed:'channels:history',provided:''});
   const native=await call('/api/conversations/'+room.id+'/messages','POST',{body:'Agenda ready for review.',intent:'synthetic-nook-90'},ownerCookie);
@@ -48,7 +49,9 @@ export async function publicAppJourney(){
    await refused(signed(grant,door,payload,{key:'synthetic-nook-91'}),401);
   }
   const delivered=await accepted(signed(grant,'events',event));
-  const visible=await call('/api/messages/'+delivered.id,'GET',undefined,ownerCookie);assert.equal(visible.body,event.event.text);assert.equal(visible.app,1);assert.equal(visible.authorName,'Review helper');
+  const visible=await call('/api/messages/'+delivered.id,'GET',undefined,ownerCookie);assert.equal(visible.body,event.event.text);assert.equal(visible.app,1);assert.equal(visible.authorName,'Review helper');assert.equal(visible.author,replaced.id,'replacement preserves the approved app posting identity');
+  const deliveryAudit=(await call('/api/team/audit?kind=notification-app.write','GET',undefined,ownerCookie)).items.filter(row=>row.reason.includes(delivered.id));
+  assert.equal(deliveryAudit.length,1);assert.equal(deliveryAudit[0].service,'notification-app:'+grant.id,'replacement approval is the audited live grant');
   await refused(signed(grant,'events',event),409);
   await refused(signed(grant,'events',{...event,event:{...event.event,text:'A retry must not duplicate delivery.'}},{stamp:String(now/1000+1)}),409);
   const beforeAction=await snapshot(),action=await accepted(signed(grant,'interactivity',button)),afterAction=await snapshot();
