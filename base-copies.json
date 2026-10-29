@@ -345,7 +345,7 @@
     {
       "path": "scripts/delivery/base/schema/business-field-inputs.mjs",
       "originPath": "schema/business-field-inputs.mjs",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "scripts/delivery/base/schema/business-field-inputs.mjs": "b028b576bc85758c4ed400d059d4aae4fdda7a29eeb290fd1032ea15aaf957d1"
       },
@@ -359,7 +359,7 @@
     {
       "path": "scripts/delivery/base/schema/dependencies.mjs",
       "originPath": "schema/dependencies.mjs",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "scripts/delivery/base/schema/dependencies.mjs": "4bfc30fa75029db2727a9d1fb095d4969dc756c5317ac55ce768202bb869e2b7"
       },
@@ -373,7 +373,7 @@
     {
       "path": "scripts/delivery/base/schema/json-schema.mjs",
       "originPath": "schema/json-schema.mjs",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "scripts/delivery/base/schema/json-schema.mjs": "f964a1f8bab23bfad0c8b6552d8e717091619fa438e0d6e65a9801e1d97782bc"
       },
@@ -387,7 +387,7 @@
     {
       "path": "scripts/delivery/base/schema/setup-validation.mjs",
       "originPath": "schema/setup-validation.mjs",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "scripts/delivery/base/schema/setup-validation.mjs": "89327f524f2e7cfcaf9c750e9a5aa7249c91199a9afd0c14afe9efcf444ad14a"
       },
@@ -401,7 +401,7 @@
     {
       "path": "scripts/delivery/base/schema/SETUP.schema.json",
       "originPath": "schema/SETUP.schema.json",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "scripts/delivery/base/schema/SETUP.schema.json": "ac52bac39e7e7e4dace1c22dce370f76df52e7f5bb167730ecfd96b0b7961c86"
       },
@@ -587,7 +587,7 @@
     {
       "path": "src/base/foundation/runtime/icon-head.ts",
       "originPath": "foundation/runtime/icon-head.ts",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "src/base/foundation/runtime/icon-head.ts": "ce4fa9ca48534d926469829abd372d1c81c6de31fb18cb4df567bc84a598e86f"
       },
@@ -601,7 +601,7 @@
     {
       "path": "src/base/foundation/runtime/theme-frame.ts",
       "originPath": "foundation/runtime/theme-frame.ts",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "src/base/foundation/runtime/theme-frame.ts": "70d2024eae2a29772e577924dc2542e33685ef25b4f99d32aa12b6f8540dce0b"
       },
@@ -665,10 +665,10 @@
     {
       "path": "src/base/modules/agent-door",
       "originPath": "modules/agent-door",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "src/base/modules/agent-door/admission.ts": "c67ee28a1ae61b963619ffc64807baaa37b618aec41d6a2d90f1852f5beebf9e",
-        "src/base/modules/agent-door/ADOPTING.md": "32226371c21871a96294e5fb7b4b0669e0ee48c576b56db0d91ca649db1d0d12",
+        "src/base/modules/agent-door/ADOPTING.md": "4c2308559c5d989c2547805aeb4a42b1cb06939942e79a44b6a36c0b9a71c0be",
         "src/base/modules/agent-door/approval-execution.ts": "184b7fd7f016fb58121746873f4bf8fab621c4d09a1a00e61cf53eedad2fc3b3",
         "src/base/modules/agent-door/approvals.ts": "45757936fac519de054ca754fd45ea3e6def75f18f1e71cb6a651e6451bf767c",
         "src/base/modules/agent-door/audit.ts": "dba2eec2f97a5580af7b2b0a997617ef0aed8bcd4a36467914aeeb7b439b94ed",
@@ -880,7 +880,7 @@
     {
       "path": "src/base/modules/business-settings",
       "originPath": "modules/business-settings",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "src/base/modules/business-settings/ADOPTING.md": "5d7383182eb0ca92ce53b51d93f0199412366873ba7281cc0610857f76e77884",
         "src/base/modules/business-settings/apply.ts": "037784c7d783c36577d351c9a6bddab5780393e192883ec08616a4d480e9df48",
@@ -2307,7 +2307,7 @@
     {
       "path": "src/base/modules/portability",
       "originPath": "modules/portability",
-      "revision": "e1b4265eb0d839a67dae3c36a04f83fa48c9d480",
+      "revision": "f96363bf919ea3e7ed1837daba6894810a50e4a6",
       "files": {
         "src/base/modules/portability/backfills.mjs": "270f6504803690dbfffbd54439e30087a308fea2b00cc33e3d02397e9e1484e6",
         "src/base/modules/portability/bookkeeping.mjs": "463159369ea8d6a03ebe4308bf7282f0a003d6d32764873456a74001bec7a27d",
