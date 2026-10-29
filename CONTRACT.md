@@ -1527,16 +1527,18 @@ Inherits BASE-AGENT-001 to BASE-AGENT-013. The company's policy decides every ca
 
 **How Nook computes each class.**
 - standard: reversible internal messages, notes, follows and drafts, measured in items.
-- external: new outside exposure through recipients, external participants, links or connectors; recipient count and known, new or public counterparty come from current records.
+- external: new outside exposure through recipients, external participants, links or connectors, including ordinary conversation sends and edits, outgoing webhooks and scanning-subprocessor delivery; recipient count and known, new or public counterparty come from current records and the destination.
 - commitment: accepted work, a business decision or sign-off; value and counterparty come from the bound record.
 - access: membership, device, role or app-grant changes; people and widening/narrowing direction come from the change.
 - security: factor, credential, scanning and protection settings, naming the changed setting.
-- destructive: irreversible erasure or purge, with affected item count.
+- destructive: irreversible message deletion, clip/transcript or recording erasure, or purge, with affected item count; removal that the product can undo remains standard.
 - sensitive: regulated personal fields and files labeled as holding them, with record count and data kind.
 - money: a change to what the business pays, with amount, currency and counterparty.
 - accounts: an outside account or paid resource, naming its provider.
 - gated: the provider's hosted consent, verification or checkout step that it keeps for a person, naming provider and step.
 - live: published workflows and changed running delivery behavior, naming the affected service.
+
+Each tool row lists its possible classes. A call carries every class that its current recipients, destination and operation meet, so outside exposure and irreversible removal can apply together; the company’s policy decides the disposition.
 
 | Tool | Does | Core clauses | Risk class | Today |
 | --- | --- | --- | --- | --- |
