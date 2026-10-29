@@ -1,5 +1,14 @@
 /** Conformance-only native read witnesses; every mutation remains in the real service. */
 export async function afterStep({phase,step,result,request,origin,cookie,database}){
+ if(['decision','revise-decision'].includes(step.id)){
+  const record=result.record,db=await database('DB')
+  const activity=await db.prepare('SELECT agent_name,sponsor_name,approvers FROM nook_agent_activity WHERE resource=? AND version=? ORDER BY at DESC LIMIT 1').bind(record.id,record.version).first()
+  const response=await request(new URL(`/api/outcomes/${record.id}/versions`,origin).href,{headers:{Cookie:cookie}})
+  const history=await response.json()
+  if(!activity||!history.items.some(version=>version.version===record.version&&version.actorName===`${activity.agent_name} for ${activity.sponsor_name}`))throw Error('Decision history attribution differs')
+  if(phase==='held'&&!JSON.parse(activity.approvers).some(person=>person.name===activity.sponsor_name))throw Error('Decision named approval differs')
+  return
+ }
  if(!['note','revise','revert'].includes(step.id))return
  const record=result.record
  const response=await request(new URL(`/api/conversations/${record.conversation}/notes/${record.id}`,origin).href,{headers:{Cookie:cookie}})
