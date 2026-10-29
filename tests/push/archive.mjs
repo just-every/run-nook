@@ -99,7 +99,9 @@ async function upgradeHistory(c){
   const records=(await c.db.prepare("SELECT * FROM nook_push_delivery_records WHERE held_at IS NOT NULL OR state='cancelled' ORDER BY id").all()).results;assert.ok(records.length>=105);
   for(const record of [...records,c.erasedSourceRecord])insert.run(...columns.map(k=>k==='conversation'&&c.conversion.records.some(r=>r.id===record.id)?c.conversion.source:record[k]));
   for(const record of c.conversion.records)assert.equal(db.prepare('SELECT conversation FROM nook_push_delivery_records WHERE id=?').get(record.id).conversation,c.conversion.source,'pre-0074 conversion left a positive record on the old DM');
-  const queued=await c.db.prepare("SELECT * FROM nook_notify_queue WHERE channel='push' AND held_at IS NOT NULL LIMIT 1").first();assert.ok(queued);const queueKeys=Object.keys(queued);db.prepare(`INSERT INTO nook_notify_queue(${queueKeys.join(',')}) VALUES(${queueKeys.map(()=>'?').join(',')})`).run(...Object.values(queued));
+  // This historical database predates agent admission metadata. Preserve every
+  // queue field in its own schema rather than importing later columns into it.
+  const queued=await c.db.prepare("SELECT * FROM nook_notify_queue WHERE channel='push' AND held_at IS NOT NULL LIMIT 1").first();assert.ok(queued);const queueKeys=db.prepare('PRAGMA table_info(nook_notify_queue)').all().map(column=>column.name);db.prepare(`INSERT INTO nook_notify_queue(${queueKeys.join(',')}) VALUES(${queueKeys.map(()=>'?').join(',')})`).run(...queueKeys.map(key=>queued[key]));
   assert.ok(db.prepare('SELECT 1 FROM nook_push_delivery_records WHERE id=?').get(c.erasedSourceRecord.id),'upgrade begins with an erased-source historical record');
   const ambiguous={...records[0],id:'unresolvable-prior-source'};insert.run(...columns.map(k=>ambiguous[k]));
   const migration=await readFile('migrations/'+latest,'utf8');db.exec('BEGIN');assert.throws(()=>db.exec(migration),/ambiguous_delivery_source/);db.exec('ROLLBACK');

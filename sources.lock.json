@@ -7629,7 +7629,7 @@
       "executable": false
     },
     "tests/push/archive.mjs": {
-      "sha256": "15901af20346a01e2f50e511e543ffe241536332dd6f19ef282ac12a87131749",
+      "sha256": "8f5e48004949964f3205b167294f0d5b2a25ba5bb83f38cc4a28aa73cfb0b6c9",
       "executable": false
     },
     "tests/push/broadcast.mjs": {
