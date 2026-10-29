@@ -989,27 +989,27 @@
       "executable": false
     },
     "evidence/notes/channel-1440.png": {
-      "sha256": "2569fb0be7d33fc9e846c66e37e5ffc2a351d1b5a65c36f583d1897c5d3f3a36",
+      "sha256": "f061f15aa8ca1ec3969de27efedfa54fa1f20b52b37ab945e2674489caaa0fd8",
       "executable": false
     },
     "evidence/notes/channel-390.png": {
-      "sha256": "89ff07878f6f04a248e5d8a6e5c62a940bf512d843c6a4536c28ae5d46953930",
+      "sha256": "7682803f2566110eb8f423be1b5a5ea0408ab963b13e02c938039a22b1fd5c10",
       "executable": false
     },
     "evidence/notes/edit-1440.png": {
-      "sha256": "e9c7cac06ad6f6bc8168fec1bd120939c89c740b93095a916675a82c3a610833",
+      "sha256": "cf575ce4d214f038b8dd0140cd3b17b2d735e52379b47432cac18f41534339d6",
       "executable": false
     },
     "evidence/notes/edit-390.png": {
-      "sha256": "aa0785b0794119ec00d925e21fbab6337019c5b309a05a0e6032ddac5e2677be",
+      "sha256": "2dd57b5ffacccf309267c1091ca3bf658b46f01f2b5e4514eeaa2e12d84815b6",
       "executable": false
     },
     "evidence/notes/thread-1440.png": {
-      "sha256": "6d8f25378b8e81dc8aa89820aed6946b35cbf06fd855fc7a78999f3d3b3ca65d",
+      "sha256": "ce4b1aacfa3bcb0626b0bd6034527fd114f0f48b12126ded609aa5a56bdc7be7",
       "executable": false
     },
     "evidence/notes/thread-390.png": {
-      "sha256": "f1d8460dce7dddd520d6993462f8ee5d44addb22f23ff4d3efcfa86d78d5eea1",
+      "sha256": "b4c92adc898ed0f12baaee6dd964878ce326faf9e3dd9a1830e0bbd42c0ca00e",
       "executable": false
     },
     "evidence/quiet/not-delivered-member-1440.png": {
@@ -1589,15 +1589,15 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "fbc77dc15e20de95c76d6b9b7efcdd902328cf5b47c8878529bdb962f0ffb286",
+      "sha256": "f83ed5cf27c7a368d1244c8b233cba99e500ea0ba6b8c980adb67705cecdb9b6",
       "executable": false
     },
     "owner-deployment.json": {
-      "sha256": "afcefd4c7fa7f33fda48db2a956f817a9d81a9420163f967b9cd77d7a4d20f90",
+      "sha256": "97a83f2f45c4ed614e1800e33c001c0d832a2e87da99dd8f0c666e7c8f2215be",
       "executable": false
     },
     "package.json": {
-      "sha256": "3c2eea1e808c6d20c8e4853e32492e8af6855c98cf1aa9acb79c5417d88df22b",
+      "sha256": "a023c4283e66cacf1ff87f886da8233f7d60f3cdfc7e2a20cb004e22f33bd22c",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -1853,7 +1853,11 @@
       "executable": false
     },
     "scripts/deployment/command.mjs": {
-      "sha256": "824d55fe64990ff344ea7b44719e90de41f83bf87f507ac21f93a5c50e66aa40",
+      "sha256": "2832960040a85082182f4dc6597b6bfe48dbe9c779ae740d65ba25e495459758",
+      "executable": false
+    },
+    "scripts/deployment/stage-product.mjs": {
+      "sha256": "e7370e116bcd28c06c9f8ff94d133ea634611ce26ae02113185758c135b64ca2",
       "executable": false
     },
     "scripts/edition-authoring/base-copies.mjs": {
@@ -7713,7 +7717,7 @@
       "executable": false
     },
     "tests/readme-journey.mjs": {
-      "sha256": "12558aad8fb18436386b2abcff899ad80b5a51dd28ffe0163459544f7bbfc229",
+      "sha256": "2bf76abf89fb97e05438e68891365b549c4c9b3e855070d4a5eea2a3635c21dd",
       "executable": false
     },
     "tests/readme-team-flow.mjs": {
