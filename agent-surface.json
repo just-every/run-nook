@@ -863,7 +863,8 @@
     {
       "clauses": [
         "NOOK-079",
-        "NOOK-089"
+        "NOOK-089",
+        "NOOK-090"
       ],
       "reason": "connector"
     },

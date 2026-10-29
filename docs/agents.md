@@ -32,6 +32,9 @@ person deactivates their native identity; returning to a roster cannot restore
 channel access without Nook's fresh scoped regrant. A locally promoted admin is
 not a Business policy editor. Unmapped, inactive and product-inadmissible people
 are refused. Service, import and installation credentials keep their own purpose.
+Signed chat-app callbacks and app-token message reads (NOOK-090) remain native
+connector doors, bound to the installation and its current installing person.
+They do not create an additional company-agent dispatcher.
 
 A signed Business team admin can approve requests addressed to `role:editor`.
 A native admin whose Business role is member cannot inspect or decide those

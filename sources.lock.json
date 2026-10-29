@@ -629,7 +629,7 @@
       "executable": false
     },
     "agent-surface.json": {
-      "sha256": "051d0b36603234b82c118daff4cf84fdd2ce1e5f76f7be67299531466b36fd74",
+      "sha256": "b62ed1710765901b76484346c92dce105ce81ec80a8a60cb21b8fc2f6c6f7e8c",
       "executable": false
     },
     "AGENTS.md": {
@@ -669,7 +669,7 @@
       "executable": false
     },
     "docs/agents.md": {
-      "sha256": "9c037d9e2b78995d4b7fb7b9fe9a14ddda973a8f3fc7e97d0320479973e6a64c",
+      "sha256": "1eee64bdc45c7260c53a96f3936fc97616b37b69f265656481c8f5721f0967a7",
       "executable": false
     },
     "docs/attention.md": {
