@@ -5,8 +5,8 @@ export function Free({variant = 'instance'}: {variant?: 'instance' | 'site'}) {
   return (
     <section className="home-section split" id="free" aria-labelledby="free-title">
       <div className="section-copy">
-        <h2 id="free-title">Free, and yours to keep.</h2>
-        <p className="section-body">Nook is 100% free and open source. It’s MIT licensed, so your team can use it, change it and run it however you like.</p>
+        <h2 id="free-title">Yours to keep.</h2>
+        <p className="section-body">Nook is open source, and its licence is one short, plain file. Your team can use it, change it and run it however you like.</p>
         <div className="section-actions"><a className="home-pill" href={variant === 'site' ? '/run' : sourceUrl}>{variant === 'site' ? 'Run Nook' : 'Get the code'}</a></div>
       </div>
       <LicenceFileDrawing />

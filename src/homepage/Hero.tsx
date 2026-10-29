@@ -13,7 +13,7 @@ export function Hero({variant = 'instance'}: {variant?: 'instance' | 'site'}) {
           {variant === 'site' && <a className="hero-secondary" href={demoUrl}>Try the demo</a>}
           <a className="hero-secondary" href="/docs">Read the docs</a>
         </div>
-        <p className="hero-free"><span className="hero-free-part">100% free, open source alternative</span> <span className="hero-free-part">to <strong>Slack</strong> and <strong>Microsoft Teams</strong></span></p>
+        <p className="hero-free"><span className="hero-free-part">An open source alternative</span> <span className="hero-free-part">to <strong>Slack</strong> and <strong>Microsoft Teams</strong></span></p>
       </div>
       <HeroAlcove />
     </section>
