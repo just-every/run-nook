@@ -79,3 +79,11 @@ harness retries through an account that no longer has conversation access. Nook
 refuses that retry without retained content. The same refusal is required by the
 current-authority replay contract; the harness must account for terminal
 self-revocation rather than weakening the native membership check.
+
+The native conformance legs cover replay after membership loss, Business
+teammate identity and inactivity, a validated Web Push receipt, and queued
+notification revocation for message posts, commitment proposals and revisions,
+checklist proposals and polls. Superseded notifications remain cancelled;
+revocation cancels every still-pending notification with `consent_revoked` and
+makes no provider request. The browser leg shows activity, named approval and
+blocked final state at 1440 and 390.

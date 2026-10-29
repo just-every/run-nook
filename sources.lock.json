@@ -669,7 +669,7 @@
       "executable": false
     },
     "docs/agents.md": {
-      "sha256": "4f8dbd764abbdaee98975033bd45ed3c6ab99f91cf43a916b2c4783aa7c89575",
+      "sha256": "8b39164dc8a21f663bd996148f518e6a0e23df224253814f8251178fcced9d87",
       "executable": false
     },
     "docs/attention.md": {
@@ -2121,7 +2121,7 @@
       "executable": false
     },
     "src/agent-door/tools-conversations.ts": {
-      "sha256": "b68f63ab1ff9241aaa51f81f46efcfe5ffe67ac8cf6c85667406a37ef45792dd",
+      "sha256": "cfb09ac4ecdddcadf18060bfe66023327d249d2c73eb62d13ffd848d8b26a215",
       "executable": false
     },
     "src/agent-door/tools-messages.ts": {
@@ -7094,6 +7094,10 @@
     },
     "tests/agent-door/adoption-journey.mjs": {
       "sha256": "2b5de3625825f13413b65a92c6f38fa83034e1a3025f754ea283068a51565f95",
+      "executable": false
+    },
+    "tests/agent-door/browser-proof.mjs": {
+      "sha256": "00ff1e4406a36a9330092b02671e0a416893d2c4f0e3afe0093502a731bef4c4",
       "executable": false
     },
     "tests/agent-door/installation.mjs": {
