@@ -18,7 +18,7 @@ export async function defaultChannels(c:Context){
   c.rows(`SELECT a.id,a.version,a.conversation,c.name,a.enabled,a.mandatory,a.actor,o.display_name AS actorName,a.created FROM nook_default_actions a JOIN nook_conversations c ON c.id=a.conversation LEFT JOIN oa_operators o ON o.id=a.actor WHERE ${management('?')} ORDER BY a.version DESC,a.conversation LIMIT 50`,[c.uid]),
  ])
  if((await c.one(`SELECT ${policyVersion} AS version`)).version!==settings.version)fail(409,'Default-channel policy changed; reload before saving')
- return {version:settings.version,canChangeMandatory:c.session.operator.role==='owner',channels,history}
+ return {version:settings.version,canChangeMandatory:c.operator.role==='owner',channels,history}
 }
 export async function updateDefaultChannels(c:Context,input:Record<string,any>){
  if(Object.keys(input).some(key=>!['version','channels'].includes(key))||!Number.isSafeInteger(input.version)||input.version<0||!Array.isArray(input.channels)||input.channels.length>50)fail(400,'Choose up to 50 default public channels and the current policy version')

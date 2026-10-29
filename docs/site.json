@@ -112,6 +112,11 @@
           "slug": "directories",
           "source": "docs/directories.md",
           "label": "Finding people and channels"
+        },
+        {
+          "slug": "agents",
+          "source": "docs/agents.md",
+          "label": "Agent access"
         }
       ]
     }
@@ -180,6 +185,10 @@
     {
       "source": "IMPORT-DOOR.md",
       "reason": "Maintainer adoption and exact Base divergence record; source-specific moving-in guides cover the product flow."
+    },
+    {
+      "source": "docs/verify.md",
+      "reason": "Generated maintainer verification inventory for the contract; user instructions live in the published guides."
     }
   ]
 }

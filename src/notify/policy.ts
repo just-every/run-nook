@@ -1,7 +1,9 @@
 import {allowedGrant,productAccess} from '../team/access'
+import {queuedAgentCancellation} from '../agent-door/queued-consent'
 // Shared external-delivery fences; each channel adds its own opt-in and reason
 // whitelist. All expressions run against the current D1 snapshot at delivery.
-export const recipientCancellation=`WHEN NOT EXISTS(SELECT 1 FROM oa_operators o WHERE o.id=q.user AND o.status='active') OR NOT ${productAccess('q.user')} THEN 'recipient-inactive'
+export const recipientCancellation=`WHEN (${queuedAgentCancellation}) IS NOT NULL THEN (${queuedAgentCancellation})
+ WHEN NOT EXISTS(SELECT 1 FROM oa_operators o WHERE o.id=q.user AND o.status='active') OR NOT ${productAccess('q.user')} THEN 'recipient-inactive'
  WHEN NOT EXISTS(SELECT 1 FROM nook_members m WHERE m.conversation=q.conversation AND m.user=q.user AND ${allowedGrant('m.user','m.conversation')}) THEN 'no-access'
  WHEN q.actor=q.user THEN 'self'
  WHEN q.message IS NOT NULL AND NOT EXISTS(SELECT 1 FROM nook_messages s WHERE s.id=q.message AND s.deleted=0) OR q.outcome IS NOT NULL AND (NOT EXISTS(SELECT 1 FROM nook_outcomes s WHERE s.id=q.outcome) OR EXISTS(SELECT 1 FROM nook_erased_outcomes e WHERE e.id=q.outcome)) THEN 'source-deleted'`

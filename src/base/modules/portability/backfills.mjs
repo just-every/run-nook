@@ -15,8 +15,8 @@ import { transientTables } from './transient-tables.mjs';
 // - An eligible seed or backfill of a catalogue table replays at finalize.
 //   A carried table keeps its archived rows and admits only one later writer,
 //   naming its target columns. An absent table is reset first; each later write is a
-//   replayable INSERT: they run in migration order, exactly as written, after
-//   the archived rows are inserted and with the destination's triggers still
+//   replayable INSERT or a bounded UPDATE of a newly reconstructed table. They
+//   run in migration order, exactly as written, after archived rows are inserted and with the destination's triggers still
 //   dropped, so the table holds what the live upgrade gave it. A replay may read
 //   only archived tables (complete by then), views over those tables and the
 //   table itself, by named
@@ -56,11 +56,12 @@ export function laterData({applied,unapplied,replay,catalogue,archived,empty,tab
     // Seed INSERTs into a new table replay too: the rows already present in a
     // fresh destination must be reset and derived from the restored installation.
     const transient=transients.get(table);
-    // A transient fill can also read new catalogue tables whose INSERTs the
-    // same plan reconstructs (or whose reset leaves them empty at this point).
+    // A new target can read other new catalogue tables that the same plan
+    // reconstructs. Carried targets still read only archived tables.
     // Dependencies are checked below before any of the plan is selected.
-    const available=[...transients.keys(),...(transient?[...writes.keys()].filter(name=>!carried.includes(name)):[])];
-    const options={table,statements,restorable,writable,carried:[...carried,...available],tables:known,secrets,views,manifest};
+    const available=[...transients.keys(),...(!carried.includes(table)?[...writes.keys()].filter(name=>!carried.includes(name)):[])];
+    const allowUpdate=!transient && !carried.includes(table) && list.some(s=>['insert','replace'].includes(s.data.verb));
+    const options={table,allowUpdate,statements,restorable,writable,carried:[...carried,...available],tables:known,secrets,views,manifest};
     // Carried target rules must use the actual archive, not reconstructed reads.
     const bad=carried.includes(table) && list.length>1?list:list.filter(s=>!replayable(s,{...options,targetCarried:carried.includes(table)}));
     // Writes confined to tables created after the archive retain their
@@ -95,8 +96,8 @@ export function laterData({applied,unapplied,replay,catalogue,archived,empty,tab
     return {migration:s.migration,statement:s.index,table:named[table]??table,sql:s.sql,...(carried.includes(table)?{carried:true}:{}),...(transients.has(table)?{transient:true}:{}),...(schema.has(s)?{schema:true}:{})};
   })};
 }
-function replayable({data},{table,statements,restorable,writable,carried,targetCarried,tables,secrets,views,manifest}) {
-  if(!['insert','replace'].includes(data.verb) || data.star)return false;
+function replayable({data},{table,allowUpdate,statements,restorable,writable,carried,targetCarried,tables,secrets,views,manifest}) {
+  if(!['insert','replace',...(allowUpdate?['update']:[])].includes(data.verb) || data.star)return false;
   if(targetCarried) {
     // sqlite_sequence's high-water mark is not archived, so replay cannot
     // reproduce a carried AUTOINCREMENT table's live key allocation.

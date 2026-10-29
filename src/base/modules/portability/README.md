@@ -67,8 +67,11 @@ belong to the current runtime or environment and never travel:
 | `rer_erasure_blobs`, `rer_erasure_guard`, `rer_erasure_scope`, `rer_erasure_rates` | Erasure work queues, transaction guards, working scope and local rate limits. |
 | `rer_demo` | Local demo setup markers. |
 
-`excludedTables` combines this list with the default identity exclusions `oa_%`
-and `oc_%`. Policy may override those identity exclusions through `includeTables`,
+`excludedTables` combines this list with `oa_%` and the exact Base owner-claim
+identities `oc_owner_claims` and `oc_idp_grants`. Other `oc_` names must be
+explicitly declared in `includeTables` or `excludeTables`; transfers refuse
+`identity_table_undeclared:<name>` rather than silently dropping product rows.
+Policy may override identity exclusions through `includeTables`,
 but naming a mandatory platform table there refuses construction with
 `platform_table:<name>` and a message identifying the table.
 `excludedTable(name, policy)` always returns true for mandatory platform tables,
@@ -102,7 +105,19 @@ The runner validates the module/export before applying data migrations. The
 native transfer worker imports that same seed-owned entry point, preserving
 functions and module-local closures. Modules should have no top-level effects:
 preflight and transfer each load them in a separate process. Archive metadata
-never selects executable policy. Invalid paths, missing/invalid default exports,
+never selects executable policy. A module may also export
+`createPolicy({db, buckets})` to bind payload producers and consumers to the
+current transfer's database and buckets. Its default policy is validated during
+preflight; the factory's policy is validated when the bindings are available.
+Managed intake supplies its disposable source bindings to the same factory, so
+its payloads come from the ZIP's own staged data. Intake compares source schema
+objects with a fresh replay of the destination migrations. Portable tables must
+exist there; retired or replaced objects require a matching historical definition
+and the migration that removes it. The receipt groups those objects by type and
+migration, with counts and hashes of sorted names. Unknown objects refuse before
+native restore; the destination retains its own schema. Native runners can use
+`requireEmptyTables` before creating a restore job; finalization still enforces
+the atomic empty-table guards. Invalid paths, missing/invalid default exports,
 and declaring both `policy` and `policyModule` fail closed. Serializable object
 `policy` declarations remain supported; inline functions (including nested
 schema-upgrade and payload callbacks) are refused instead of being dropped by
@@ -132,6 +147,39 @@ policy still controls that. Archive SQL and names never supply these declaration
 Custom replay runners can supply each plan entry's `aliases` and pass
 `{dataOnly}` as `migrationReplay`'s third argument. Verified archive ledger
 hashes take precedence over name-only placement where available.
+
+### Leaving RER Managed: the Platform ledger rule
+
+A Managed installation's D1 keeps its history in `rer_migrations`, which the
+Platform runner writes; a native installation uses `d1_migrations`. The ledger
+is deployment history, never product schema or data. Base maps it by migration
+identity, name and SHA-256 of the file:
+
+- Export from a Platform-ledger source records `manifest.migrationLedger` (see
+  "Migration history" below) and never archives `rer_migrations` as a table.
+- Import into a native installation matches every entry to exactly one
+  checkout file by hash; a name may confirm that file but cannot point at
+  another. A file the checkout does not have or whose content differs refuses
+  as `migration_ledger:unknown:<name>`, a name on one file with the hash of
+  another as `migration_ledger:conflict:<name>`, and the CLI prints the fix.
+  A checkout file the Platform history lacks refuses at the preflight as
+  `migration_ledger:unapplied`, naming the file; apply it with Platform first.
+- Adapters with their own archive format (not Base's) call `mapMigrationLedger`
+  instead of comparing ledger controllers: it returns the entries named by the
+  checkout's files, or refuses with the same constant codes.
+
+```js
+import { mapMigrationLedger } from '@runeditrun/rer/portability-migrations';
+
+// Export: the source's ledger rows (rer_migrations or not), as native identities.
+const ledger = await mapMigrationLedger({ root, binding: 'DB', platformMigrations, entries: rows });
+// Import: the archive's entries must map without refusal; write no ledger rows.
+await mapMigrationLedger({ root, binding: 'DB', platformMigrations, entries: archive.ledger });
+```
+
+Call `nativeMigrationPreflight` before each native apply as below: a sole,
+fully applied `rer_migrations` returns `{nativeApply:false}` for export and
+import alike, so a seed's own guard must not require `d1_migrations`.
 
 ### Before an adapter's native migrations
 
@@ -192,11 +240,12 @@ provider operation.
 | Compatible `d1_migrations`, every recorded name exactly equal to its checkout filename | `{nativeApply:true}`; Wrangler may apply its pending files. Plain Wrangler names remain supported; tracked history must also match hashes and applied states. |
 | Native alias-only or hash-only relocation, or an unmapped native data-only row | `migration_ledger:incompatible`; restore the matching checkout or reconcile through the owning runner before native apply. |
 | Sole, fully applied matching `rer_migrations` | `{nativeApply:false}`; preserve Platform's ledger and skip Wrangler. |
-| Any pending checkout file with Platform history | `migration_ledger:unapplied`; apply it through the owning runner first. |
-| Multiple ledgers, even empty | `migration_ledger:multiple`; reconcile history through its owning runner. |
+| Fully applied matching `_rer_deploy_migrations` plus plain Wrangler `d1_migrations` bookkeeping | `{nativeApply:false}`; preserve the deploy history and skip Wrangler. Bookkeeping names must belong to that history. A tracked D1 ledger must match the deploy history's names, hashes and order. |
+| Any pending checkout file with Platform history or the legacy pair | `migration_ledger:unapplied`, naming the file (`error.migration`); apply it through the owning runner first. |
+| Other multiple ledgers, or disagreeing tracked native histories | `migration_ledger:multiple`; reconcile history through its owning runner. |
 | Legacy `_rer_deploy_migrations` alone | `migration_ledger:runner`; use its owning runner, which can adopt the history. |
 | Invalid ledger shape, row or binding | `migration_ledger:incompatible` or `migration_ledger:binding`. |
-| Partial Platform batch or non-applied tracked row | `migration_ledger:uncertain`; resolve the incomplete operation first. |
+| Partial Platform batch or non-applied tracked or legacy row | `migration_ledger:uncertain`; resolve the incomplete operation first. |
 | Unknown hash/name, ambiguous hash/alias or conflicting name/hash | `migration_ledger:unknown`, `:ambiguous` or `:conflict`; use the matching checkout and declaration. |
 
 Refusals throw `PortabilityError` with status 409 and a constant `code`;
@@ -230,8 +279,10 @@ owner claim. Such a destination keeps that claim and recovers access through
 ordinary native sign-in; setup does not grant another owner. Other tables are
 discovered automatically. Exclusion rules follow SQLite's ASCII identifier case matching.
 Unlisted virtual tables, hidden virtual-table columns and foreign keys into
-excluded tables fail by name. The product must explicitly regenerate derived
-data. A schema upgrade may change columns but cannot silently omit tables.
+excluded tables fail by name. Restore rebuilds policy-declared external-content
+FTS5 indexes from their content tables in the same transaction as the restored
+rows. The product must explicitly regenerate other derived data. A schema
+upgrade may change columns but cannot silently omit tables.
 
 Provider link keys and transient provider sessions never travel. Export marks
 retained dependency links as needing re-link and turns provider sign-in and
@@ -334,9 +385,13 @@ source identity, job ids and boundaries do not affect equivalence.
 
 Schema identity covers table definitions (including constraints and generated
 expressions), explicit indexes (including uniqueness and partial predicates),
-views and triggers. Indexes and triggers on excluded tables are excluded with
-their tables, including platform bookkeeping tables. The complete additional
-definitions travel in `schemaObjects`. A single SQLite lexer reads the original
+views and triggers. Row exclusions do not omit indexes and triggers attached
+to excluded tables, including platform bookkeeping tables. Names with the literal
+internal prefixes `sqlite_` and `_cf_` remain exempt. The complete additional
+definitions travel in `schemaObjects`. Explicitly acknowledged v1 recovery uses
+the historical exclusion projection only when placing its old backup within
+native migration history; the live destination and ordinary v2 inventories
+still use the complete catalogue. A single SQLite lexer reads the original
 SQL before removing trivia. Identity records each token's class and canonical
 value, plus a deterministic spelling: a single space separates neighbours
 exactly when concatenating them would change their tokenization. The complete
@@ -384,6 +439,7 @@ Re-export from the original installation to carry the complete definitions.
 A new archive explicitly records even an empty object inventory, so later
 additive migrations can still be placed normally. The separate acknowledged
 v1 recovery path remains an explicitly unverified recovery, as documented below.
+Version 2 backups without that inventory use recorded migration replay when it proves the complete destination schema, or the acknowledged recovery below.
 
 New exports use archive version 2. The closing `archiveHash` is SHA-256 of
 canonical JSON `{manifest,parts}`, where `manifest` is the complete manifest
@@ -418,6 +474,60 @@ authenticate it. If the original installation is unavailable, use the explicit
 [backup-only v1 recovery](#backup-only-v1-recovery) below. Normal import still
 requires version 2 integrity.
 
+## Older version 2 backups and acknowledged recovery
+
+A fresh export from a current rer is preferred whenever the original installation
+is available. Current archives carry the complete schema inventory and restore
+without any acknowledgment. Version 2 backups written by rer 0.2.79 or earlier
+can lack `schemaObjects`. Ordinary import verifies such a backup without an
+acknowledgment when its nonempty recorded migration history, resolved against the
+destination's own applied files in order, replays to the complete live destination
+schema identity, including indexes, views and triggers. The same replay's tables
+must match the archive's table definitions. The archive's ledger, when present,
+must agree with its recorded names, and available hashes must match. Missing
+history, failed replay, table drift or a different complete destination identity
+still refuses `schema_mismatch:legacy_schema` before staging. Source SQL is never
+installed. This verified path records no `schemaUnverified` receipt.
+
+When that proof is unavailable, the owner can explicitly accept that its schema
+objects are unverified:
+
+```sh
+rer import --input exports/retained.rer --yes --acknowledge-unverified-schema-objects
+```
+
+This accepts only the missing inventory and preserves the existing recovery path,
+even when ordinary import could verify the backup. The acknowledgment never accepts
+version 1 metadata; that separate recovery still needs both v1 flags below.
+The destination must be empty under the existing product emptiness rule:
+non-migration rows in product tables refuse `target_not_empty:<table>` before
+staging, including before a local runner applies pending product migrations.
+Finalization repeats the normal emptiness check and atomic guards.
+The normal restore maintenance lock remains held throughout staging and restore.
+
+The destination runner must replay its own applied migration files. Every
+archived table, column, dependency and table definition must match a compatible
+point in that history, with only the supported later additive changes. Recorded
+migration names must form an ordered compatible subset of the destination's
+history; unknown names, incompatible columns or definitions, uncertain migrations
+and unsafe later data changes refuse before staging, naming the mismatch.
+Older name-only migration ledger rows are accepted for this acknowledged path;
+ledger hashes, when present, must still match. Platform ledger rows are verified
+against the archive parts and skipped, never installed over destination history.
+
+Indexes, views and triggers come only from the destination's migrations, never
+from archive SQL. Recovery writes rows and assets through the normal integrity,
+authentication, explicit confirmation, safety and final erasure-fencing checks.
+Seed-owned authority checks, including private-key matching, remain the seed's
+responsibility and are unchanged.
+
+The completed restore job and returned receipt carry `schemaUnverified`, with
+its reason (acknowledged recovery of a version 2 archive without schemaObjects),
+source identity, export time, acknowledgment time and archive hash. The local
+command prints this secret-free receipt. A current archive records no such
+receipt, even when the flag was supplied. Preserve the original backup and the
+receipt; export a new current archive after recovery.
+
 ## Archives across later additive migrations
 
 An archive restores into an installation whose schema differs only by migrations
@@ -440,6 +550,18 @@ them into a scratch database to find the archive's place in that history:
 - Archives record the applied migration names in `manifest.migrations` (since
   additive restore). Every recorded migration must be applied here, and
   replaying exactly those must give the archive's schema identity.
+- Archives exported from an installation RER Platform migrated (a Managed
+  installation leaving for native) also carry `manifest.migrationLedger`:
+  `{origin:'rer_migrations',entries:[{name,sha256}]}` in application order,
+  each entry named by the exporting checkout's file with that SHA-256, so
+  `manifest.migrations` lists native file names whatever prefix Platform
+  recorded. Where the exporter has no checkout files (a hosted export), the
+  ledger's own names are kept beside their hashes. Import resolves each entry
+  by hash exactly as it does an archived ledger table (next item), so a
+  Platform prefix needs no declaration and a changed file refuses. Platform's
+  ledger is never imported as product tables. Native sources record no
+  `migrationLedger`; their archives are unchanged, and v1 and earlier v2
+  archives remain importable.
 - Older archives that still carry their source's migration ledger as a table
   (`rer_migrations` and the other ledgers above, from before they became
   bookkeeping) are placed by it. Every name it records must be applied here,
@@ -643,6 +765,42 @@ its v2 output succeeds; do not reset the recovered installation to retry.
 `exports.create(actor?)` copies all tables in one D1 batch. Product writes may
 continue after that snapshot. R2 listing records size and etag; changes or missing
 objects fail subsequent reads. D1 and R2 do not share a cross-binding transaction.
+
+The direct service factory `createPortability` accepts an optional synchronous
+`onExport({id, actor, scope})` callback returning `[sql, args][]`. Its SQL is
+appended to that same snapshot/job-creating D1 batch. A thrown callback or failed
+statement refuses creation; failed SQL rolls back the job, snapshots and audit
+rows together. With no hook, export behavior is unchanged. This records job
+creation, not successful download: a later build, file-write or download failure
+does not erase a committed creation audit.
+
+This hook applies to exports created through that service, including the file
+adapter used by CLI exports. `createPortabilityHandler` does not accept or
+forward `onExport`; the HTTP export handler has no audit hook.
+
+`id` is the export job id, `scope` is the constant `'installation'`, and `actor`
+is the opaque caller id, with the direct/CLI sentinel `'direct'` normalized to
+`null`. Job ownership still stores `'direct'` for existing direct callers.
+The callback receives no names, emails, IdP identifiers, tokens, record data,
+object keys or file paths. Pass only opaque operator ids as authenticated actors.
+The seed owns audit storage, migrations, retention, erasure and archive policy;
+Base adds no audit table. For a CLI installation export, wire the seed's existing
+`operation_audit` schema to action `installation.export`, actor_id `NULL` and
+feature `rer export`, for example:
+
+```js
+const service = await createPortability({db, buckets, policy,
+  onExport: ({id, actor}) => [[
+    'INSERT INTO operation_audit(id,action,actor_id,feature) VALUES(?,?,?,?)',
+    [id, 'installation.export', actor, 'rer export'],
+  ]],
+});
+```
+
+Adapt the statement to the seed's schema and use the service in its existing
+export adapter. Hooks return SQL only; external side effects cannot share the
+D1 transaction. Do not write these events to the erasure tombstone journal.
+
 Transfer bookkeeping lives in sidecar tables, so product tables up to D1's
 100-column limit retain the full column and binding capacity. A keyless table
 with 100 columns or generated columns restores its rowids with two updates in
@@ -852,6 +1010,7 @@ modules/portability/sqlite-tokens.mjs
 modules/portability/bookkeeping.mjs
 modules/portability/storage.mjs
 modules/portability/copies.mjs
+modules/portability/derived.mjs
 modules/portability/dev-data.mjs
 modules/portability/provider-data.mjs
 modules/portability/policy-data.mjs
@@ -928,3 +1087,57 @@ Base's default-seed and composed foundation CLI adapters adopt direct local D1
 bindings with explicit identity/configuration exclusions. Their CLI journeys
 exercise archive/reset/restore/archive equivalence. Remote transfer and deployed
 product acceptance remain outside this local adoption.
+
+
+### Optional Managed data intake
+
+Platform's data download is a stored ZIP with kind `runeditrun-app-data` and
+schema 1. It is distinct from an installation archive. The reference adapter
+opts in with `localPortability({database, policy, buckets, managedData: true})`.
+Existing adapters retain their native archive and legacy JSON readers.
+
+Adapters with their own native archive format can keep their existing `import`
+method and add `managedDataImport` from an opted-in `localPortability`
+declaration. The CLI selects that method only for ZIP input; all other inputs
+continue through the adapter's original reader. This requires the seed's real
+native Workers database name, binding and portability policy.
+
+Adapters that already consume Base's native format can import `withManagedDataImport`
+from the package's portability entry point and call
+`withManagedDataImport(context, declaration, restoreNative)` before their native
+reader. The declaration supplies the real `binding`, `buckets`, `policy` or
+`policyModule`, and optional `platformMigrations`. The callback receives the
+context with a private native archive path for a Managed ZIP, or the original
+context for other inputs. Authentication, explicit confirmation, custody and
+empty-target checks remain the caller's responsibility. The callback must await
+its native restore before returning; staging is deleted on success or failure.
+This helper emits Base's native portability format; an adapter with a different
+format must provide a callback that adopts that native restore contract.
+
+The intake checks the complete ZIP and manifest, required members, checksums,
+bindings and Platform ledger before native restore. Source SQL runs in a private
+workerd D1 sandbox. The existing exporter preserves its erasure journal, excludes
+identity and secret data, maps migration identities using the same hash matching
+as native Platform-ledger archives, and emits a verified native archive. Native
+restore still checks emptiness, migration compatibility, erasure and row safety.
+No source SQL runs against the destination. The intake accounts every non-internal
+source table, index, trigger and view against native schema or a named retirement
+in destination migrations, including objects attached to excluded tables. Internal
+prefixes are compared literally. A scratch native import preflight checks the
+projected archive before native restore can open the destination.
+
+Policy-declared derived virtual tables omitted from a Managed dump are created
+in the sandbox from the destination's migrated definitions. Their triggers must
+still be present and compatible; omitting those triggers remains a schema
+refusal. The dump statement allowlist still refuses all `CREATE VIRTUAL TABLE`
+statements, including declared names. A native copy-normalization SQLite failure
+is reported as `copy_normalization_failed`, without SQL diagnostics or row values.
+
+The current intake supports one database and declared buckets, local Workers
+transport, stored ZIP members, at most 10,000 entries and statements, a 128 MiB
+archive, 64 MiB members, 4 MiB metadata members and 16 MiB of SQL, with each SQL
+statement at most 100,000 bytes after binding string literals, with at most 100
+parameters of at most 2 MiB each. It refuses compressed or encrypted entries,
+unsafe paths, duplicate or unexpected members, missing ledgers, other versions,
+container transport, later-journal and legacy-recovery options. Refusals use
+constant `managed_data_*` reasons and do not print source values.

@@ -3,10 +3,10 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {generateProjectDescriptor} from './base/generators/project.mjs';
 import {loadSetupManifest} from './base/setup-manifest.mjs';
-import {packagingPolicy} from './config.mjs';
+import {packagingSource} from './config.mjs';
 
 export async function projectDescriptor(root=process.cwd()) {
- const config=await packagingPolicy();
+ const config=await packagingSource();
  const setup=await loadSetupManifest(root,config.setup);
  return {...generateProjectDescriptor(config.project),setup:{path:setup.path,sha256:setup.sha256}};
 }

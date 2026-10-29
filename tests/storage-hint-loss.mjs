@@ -1,12 +1,14 @@
 // A test-only network-edge failure. The actual emitted app, D1, R2 and DO run
 // unchanged; post-commit namespace fetches fail only at this test binding edge.
-import {readFile,writeFile,unlink} from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
 import {relative,resolve} from 'node:path';
 export async function hintLossConfig(root,transferFaults=null){
  const directory=resolve(root,'dist/server'),original=JSON.parse(await readFile(resolve(directory,'wrangler.json'),'utf8'));
  // Wrangler's no-bundle modules are named relative to this module directory.
- const entry=resolve(directory,'storage-hint-loss-'+process.pid+'-worker.mjs'),config=resolve(directory,'storage-hint-loss-'+process.pid+'-wrangler.json'),main='./'+relative(directory,resolve(directory,original.main)).split('\\').join('/');
- await writeFile(entry,`import app from ${JSON.stringify(main)};
+ const entry=resolve(directory,'storage-hint-loss-'+process.pid+'-worker.mjs'),main='./'+relative(directory,resolve(directory,original.main)).split('\\').join('/');
+ // Keep the network-edge wrapper in memory for this journey. Production builds
+ // replace dist/, so a restart must not depend on a temporary file inside it.
+ const contents=`import app from ${JSON.stringify(main)};
 export {ChatHub} from ${JSON.stringify(main)};
 export default {
  fetch(request,env,ctx){
@@ -25,7 +27,6 @@ export default {
   return app.fetch(request,{...env,CHAT_HUB:edge,DB,FILES},ctx);
  }
 };
-`);
- await writeFile(config,JSON.stringify({...original,main:entry}));
- return {path:config,close:async()=>{for(const path of [entry,config])try{await unlink(path)}catch(error){if(error.code!=='ENOENT')throw error}}};
+`;
+ return {config:{...original,main:entry},entry:{type:'ESModule',path:entry,contents}};
 }
