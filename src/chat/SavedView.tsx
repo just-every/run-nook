@@ -39,16 +39,23 @@ export function SavedView({user,conversations,revision,privateSignal,onOpen,onEr
   {showForm&&<SaveLinkForm conversations={conversations} user={user} current={current} onError={onError} onSaved={()=>{setShowForm(false);setReload(value=>value+1)}}/>}
   {error&&<p className="warning" role="alert">{error} <button className="text-button" onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
   <div role="status" className="sr-only">{loading?'Loading saved items':page?`${page.items.length} saved items loaded`:''}</div>
-  {page&&<ol className="collection-list" aria-label="Saved items">{page.items.map(item=><li className="collection-item" key={item.id} data-saved={item.id}>
+  {page&&<ol className="collection-list" aria-label="Saved items">{page.items.map(item=>{
+   const where=item.unavailable?undefined:conversations.find(c=>c.id===item.conversation),place=item.unavailable?'':(item.conversationKind==='dm'?'':'# ')+(where?conversationName(where,user):item.conversationName)
+   return <li className="collection-item reveal-host" key={item.id} data-saved={item.id}>
    {item.unavailable?<p className="muted">Saved item unavailable</p>:<>
-    <p className="collection-meta">{item.conversationKind==='dm'?'':'# '}{conversations.find(c=>c.id===item.conversation)?conversationName(conversations.find(c=>c.id===item.conversation)!,user):item.conversationName} · {item.kind==='message'?'Message':item.kind==='attachment'?'File':'Link'}</p>
-    {item.kind==='message'&&<><p className="collection-author">{item.message.authorName||'Former member'}</p><p className="message-body collection-excerpt">{item.message.body}</p><button className="text-button" onClick={()=>{if(current())onOpen(item.conversation,item.message.id,item.message.parent)}}>Open in conversation</button></>}
-    {item.kind==='attachment'&&<><a className="collection-download" href={`/api/attachments/${encodeURIComponent(item.attachment.id)}/download`} download={item.attachment.name}>{item.attachment.name}</a><p className="collection-meta">{Math.max(1,Math.round(item.attachment.size/1024))} KB · {item.attachment.mime}</p><button className="text-button" onClick={()=>{if(current())onOpen(item.conversation,item.attachment.message,null)}}>Open in conversation</button></>}
+    {item.kind==='message'&&<><p className="collection-author">{item.message.authorName||'Former member'}</p><p className="message-body collection-excerpt">{item.message.body}</p></>}
+    {item.kind==='attachment'&&<a className="collection-download" href={`/api/attachments/${encodeURIComponent(item.attachment.id)}/download`} download={item.attachment.name}>{item.attachment.name}</a>}
     {item.kind==='link'&&<a className="collection-url" href={item.url} target="_blank" rel="noopener noreferrer">{item.url}<span className="sr-only"> (opens in new tab)</span></a>}
    </>}
-   {!item.unavailable&&<SavedReminder id={item.id} reminder={item.reminder??null} disabled={busy!==null} current={current} onChanged={()=>setReload(value=>value+1)} onError={onError}/>}
-   <div className="collection-footer"><span className="collection-meta">Saved <time dateTime={item.created}>{formatTime(item.created)}</time></span><button className="text-button" disabled={busy!==null} onClick={()=>void remove(item.id)}>{busy===item.id?'Removing…':'Remove from Saved'}</button></div>
-  </li>)}</ol>}
+   <div className="collection-footer"><span className="collection-meta">{item.unavailable?'':place+' · '+(item.kind==='message'?'Message':item.kind==='attachment'?'File · '+Math.max(1,Math.round(item.attachment.size/1024))+' KB':'Link')+' · '}Saved <time dateTime={item.created}>{formatTime(item.created)}</time></span>
+    <div className="saved-actions">
+     {!item.unavailable&&item.kind==='message'&&<button className="text-button reveal" onClick={()=>{if(current())onOpen(item.conversation,item.message.id,item.message.parent)}}>Open in conversation</button>}
+     {!item.unavailable&&item.kind==='attachment'&&<button className="text-button reveal" onClick={()=>{if(current())onOpen(item.conversation,item.attachment.message,null)}}>Open in conversation</button>}
+     {!item.unavailable&&<SavedReminder id={item.id} reminder={item.reminder??null} disabled={busy!==null} current={current} onChanged={()=>setReload(value=>value+1)} onError={onError}/>}
+     <button className="text-button reveal" disabled={busy!==null} onClick={()=>void remove(item.id)}>{busy===item.id?'Removing…':'Remove from Saved'}</button>
+    </div>
+   </div>
+  </li>})}</ol>}
   {loading&&!page&&<p className="muted">Loading saved items…</p>}
   {page&&!page.items.length&&!conversations.length&&<div className="empty-state"><h2>Save something for later</h2><a className="soft-button" href="/app?view=channels">Browse channels</a></div>}
   {page?.cursor&&<button className="soft-button" disabled={loading||busy!==null} onClick={()=>void more()}>{loading?'Loading…':'Load more saved items'}</button>}

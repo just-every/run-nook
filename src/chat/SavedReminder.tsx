@@ -42,8 +42,8 @@ export function SavedReminder({id,reminder,disabled=false,current,onChanged,onEr
   if(due<=Date.now()){setError('Choose a future date and time.');return}
   void change(due)
  }
- return <div className="saved-reminder" style={{minWidth:0,maxWidth:'100%'}}>
-  {reminder&&<p className="collection-meta" role="status">
+ return <div className="saved-reminder" data-editing={editing||undefined}>
+  {reminder&&<p className="collection-meta saved-reminder-status" role="status">
    {reminder.state==='pending'&&<>Reminder: <time dateTime={new Date(reminder.due).toISOString()}>{new Date(reminder.due).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short',timeZone:reminder.timeZone})}</time> · {reminder.timeZone}</>}
    {reminder.state==='ready'&&'Reminder due'}
    {reminder.state==='done'&&'Reminder done'}
@@ -59,10 +59,10 @@ export function SavedReminder({id,reminder,disabled=false,current,onChanged,onEr
     <button type="submit" className="soft-button" disabled={locked}>{busy?'Saving…':'Save reminder'}</button>
     <button type="button" className="text-button" disabled={busy} onClick={()=>{setEditing(false);setError('')}}>Cancel edit</button>
    </div>
-  </form>:<div className="collection-actions" style={{marginLeft:0}}>
-   <button type="button" className="soft-button" disabled={locked} onClick={startEditing}>{activeReminder?'Edit reminder':'Remind me'}</button>
-   {activeReminder&&<button type="button" className="text-button" disabled={locked} onClick={()=>void change(null)}>{busy?'Cancelling…':'Cancel reminder'}</button>}
-  </div>}
+  </form>:<>
+   <button type="button" className="soft-button reveal" disabled={locked} onClick={startEditing}>{activeReminder?'Edit reminder':'Remind me'}</button>
+   {activeReminder&&<button type="button" className="text-button reveal" disabled={locked} onClick={()=>void change(null)}>{busy?'Cancelling…':'Cancel reminder'}</button>}
+  </>}
   {error&&<p className="warning" id={fieldId+'-error'} role="alert">{error}</p>}
  </div>
 }
