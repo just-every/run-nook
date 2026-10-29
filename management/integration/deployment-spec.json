@@ -472,6 +472,12 @@
       "name": "0098_profile_zone_choice.sql",
       "sha256": "3638c4ec2bd047048a2df875d378877b9b474721da772f3ca06d0b82e2f22819",
       "sql": "-- Existing stored zones remain explicit choices. New partial writes set this fact.\nALTER TABLE nook_profiles ADD COLUMN zone_chosen INTEGER NOT NULL DEFAULT 1 CHECK(zone_chosen IN (0,1));\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0099_public_apps.sql",
+      "sha256": "bb53206448f1bf19b5c912a68c596c14fa6f8d803e2d1c7d4558338f517dabac",
+      "sql": "-- Optional public capabilities belong to the existing explicit channel approval.\n-- Credentials and replay receipts are operational state, never portable data.\nCREATE TABLE nook_notification_capabilities(\n app TEXT PRIMARY KEY,read_messages INTEGER NOT NULL CHECK(read_messages IN (0,1)),\n act_as_installer INTEGER NOT NULL CHECK(act_as_installer IN (0,1)),signing TEXT\n);\nCREATE TABLE nook_notification_requests(app TEXT NOT NULL,key TEXT NOT NULL,PRIMARY KEY(app,key));\nCREATE TRIGGER nook_notification_capability_exit AFTER UPDATE OF state,creator ON nook_notification_apps\n WHEN NEW.state<>'active' OR NEW.creator IS NULL BEGIN\n DELETE FROM nook_notification_secrets WHERE app=NEW.id AND EXISTS(SELECT 1 FROM nook_notification_capabilities WHERE app=NEW.id);\n DELETE FROM nook_notification_capabilities WHERE app=NEW.id;\n DELETE FROM nook_notification_requests WHERE app=NEW.id;\nEND;\nCREATE TRIGGER nook_notification_capability_delete AFTER DELETE ON nook_notification_apps BEGIN\n DELETE FROM nook_notification_capabilities WHERE app=OLD.id;\n DELETE FROM nook_notification_requests WHERE app=OLD.id;\nEND;\n"
     }
   ],
   "compatibilityDate": "2026-09-08",
