@@ -85,6 +85,9 @@ jobs:
           - stage: unit public doors
             browser: true
             command: node scripts/ci-unit.mjs remaining
+          - stage: agent door
+            browser: false
+            command: node node_modules/@runeditrun/rer/cli/agent-door.mjs . owner-deployment.json
           - stage: product API
             browser: false
             command: node scripts/ci-stage.mjs 'pnpm test:runtime --suite=core-api-product'

@@ -514,6 +514,12 @@
       "name": "0105_agent_activity.sql",
       "sha256": "954f4986315706e0f37949c3a6e5f7647b82790c38cd69567dfea3a71b4444c5",
       "sql": "-- Native attribution survives address changes. No credential or private note text.\nCREATE TABLE nook_agent_activity (\n operation TEXT NOT NULL, agent TEXT NOT NULL, agent_name TEXT NOT NULL,\n sponsor TEXT NOT NULL, sponsor_name TEXT NOT NULL, approvers TEXT NOT NULL,\n resource TEXT NOT NULL, version INTEGER NOT NULL, at TEXT NOT NULL,\n PRIMARY KEY(operation,resource)\n);\nCREATE INDEX nook_agent_activity_resource ON nook_agent_activity(resource,version);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "0106_agent_attribution_erasure.sql",
+      "sha256": "4ac68fa19e95dfed77ffb0a6eaa9ed03eab70ecbf95531cdc3671c6e036dc65c",
+      "sql": "-- Native shared-note authorship becomes anonymous when its person is erased.\nCREATE TRIGGER nook_agent_sponsor_erased AFTER DELETE ON nook_actors BEGIN\n UPDATE nook_agent_activity SET sponsor_name='Former member' WHERE sponsor=OLD.id;\nEND;\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

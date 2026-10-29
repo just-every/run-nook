@@ -152,6 +152,32 @@
         "NOOK-004",
         "NOOK-010"
       ]
+    },
+    {
+      "name": "nook.decisions.create",
+      "scope": "decisions:write",
+      "readOnly": false,
+      "classes": [
+        "commitment"
+      ],
+      "clauses": [
+        "NOOK-004",
+        "NOOK-056",
+        "SURFACE-003"
+      ]
+    },
+    {
+      "name": "nook.decisions.revise",
+      "scope": "decisions:write",
+      "readOnly": false,
+      "classes": [
+        "commitment"
+      ],
+      "clauses": [
+        "NOOK-004",
+        "NOOK-056",
+        "SURFACE-003"
+      ]
     }
   ],
   "notTools": [
@@ -301,7 +327,7 @@
           }
         ],
         "links": [],
-        "pinned": false
+        "pinned": true
       },
       "expect": [
         {
@@ -508,11 +534,87 @@
           }
         }
       ]
+    },
+    {
+      "id": "decision",
+      "tool": "nook.decisions.create",
+      "args": {
+        "conversation": {
+          "$from": "create",
+          "pointer": "/record/id"
+        },
+        "body": "Keep the reviewed launch checklist as the current internal decision."
+      },
+      "expect": [
+        {
+          "class": "commitment",
+          "facts": {
+            "measure": 0,
+            "currency": "USD",
+            "counterparty": "internal"
+          }
+        }
+      ],
+      "inject": {
+        "classes": [
+          "standard"
+        ],
+        "value": 0,
+        "approved": true
+      }
+    },
+    {
+      "id": "read-decision",
+      "tool": "nook.outcomes.read",
+      "args": {
+        "id": {
+          "$from": "decision",
+          "pointer": "/record/id"
+        }
+      },
+      "expect": [
+        {
+          "class": "standard",
+          "facts": {
+            "measure": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "revise-decision",
+      "tool": "nook.decisions.revise",
+      "args": {
+        "id": {
+          "$from": "decision",
+          "pointer": "/record/id"
+        },
+        "version": {
+          "$from": "read-decision",
+          "pointer": "/record/version"
+        },
+        "expected_revision": {
+          "$from": "read-decision",
+          "pointer": "/record/version"
+        },
+        "body": "Keep the checklist current and review the escalation contact before launch."
+      },
+      "expect": [
+        {
+          "class": "commitment",
+          "facts": {
+            "measure": 0,
+            "currency": "USD",
+            "counterparty": "internal"
+          }
+        }
+      ]
     }
   ],
   "verification": {
     "fixtures": {
       "module": "tests/agent-phase-fixtures.mjs"
-    }
+    },
+    "journey": "tests/agent-native-journey.mjs"
   }
 }

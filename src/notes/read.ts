@@ -15,7 +15,7 @@ export async function scope(c:Context,conversation:string,thread:string|null){
 }
 export async function getNote(c:Context,conversation:string,id:string){
  noteId(conversation);noteId(id)
- const row=await c.one(`SELECT ${noteColumns},(SELECT agent_name||' for '||sponsor_name FROM nook_agent_activity e WHERE e.resource=nook_notes.id AND e.version=nook_notes.version ORDER BY at DESC LIMIT 1) AS preparedBy FROM nook_notes WHERE id=? AND conversation=?`,[id,conversation],conversation)
+ const row=await c.one(`SELECT ${noteColumns},(SELECT agent_name||' for '||sponsor_name FROM nook_agent_activity e WHERE e.resource=nook_notes.id AND e.version=nook_notes.version ORDER BY at DESC LIMIT 1) AS preparedBy,(SELECT e.agent_name||' for '||e.sponsor_name FROM nook_agent_activity e WHERE e.resource=nook_notes.id AND e.version=(SELECT MIN(v.version) FROM nook_note_versions v WHERE v.note=nook_notes.id AND v.pinned_at=nook_notes.pinned_at) ORDER BY e.at DESC LIMIT 1) AS pinnedByLabel FROM nook_notes WHERE id=? AND conversation=?`,[id,conversation],conversation)
  if(!row)fail(404,'Note unavailable')
  return projectNote(row)
 }

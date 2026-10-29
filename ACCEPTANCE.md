@@ -9,9 +9,9 @@ The primary journey: Install Nook, invite the team, review and import their hist
 | Tier | Done | Partial | Missing | Total |
 | --- | ---: | ---: | ---: | ---: |
 | Core | 1 | 87 | 52 | 140 |
-| Agent surface | 0 | 17 | 2 | 19 |
+| Agent surface | 0 | 19 | 0 | 19 |
 | Later | 0 | 0 | 0 | 0 |
-| Full target | 1 | 104 | 54 | 159 |
+| Full target | 1 | 106 | 52 | 159 |
 
 Judged from the code and tests at commit `8c1d000d00209b6a2d951a12bcd575c9822290ae` (29 October 2026). Field proof register: 11 rows; 0 passed, 0 failed, 11 not run.
 
@@ -1883,8 +1883,8 @@ Core · push-further · **partial** · Cites BASE-AGENT-001, BASE-AGENT-002, BAS
 2. Deny access to a second private channel, an unlisted tool and a malicious source instruction; revoke membership/grants mid-run and verify no cached context or further tool write escapes.
 3. Run the official MCP Inspector against Nook's MCP server and pass its tool-listing and tool-call checks; connect two independent standard MCP clients, one authorized as a member and one as an agent, and see each return only its own permitted messages; a call to an MCP server outside the sponsor's permitted scope is refused.
 
-**Evidence.** `src/agent-door/index.server.ts`; `agent-surface.json`; production-door conformance 826/826
-**Gap.** Declared CORE subset only: twelve internal tools; broader native jobs and stranger-client receipts remain incomplete.
+**Evidence.** `src/agent-door/index.server.ts`; `agent-surface.json`; production-door conformance 1147/1147
+**Gap.** Declared CORE subset only: fourteen internal tools; broader native jobs and stranger-client receipts remain incomplete.
 
 #### NOOK-055 — Accountable commitment assistant
 
@@ -1949,7 +1949,7 @@ Core · push-further · **partial** · Cites BASE-AGENT-009, BASE-AGENT-011, BAS
 1. Under the held company policy, start a scheduled handoff run, inspect and decline its external-class write, interrupt the provider after a step, restart and revoke the grant.
 2. The owner sees a durable failed/uncertain state and exact remaining action; no duplicate write, resumed revoked access or commitment outside the held company's policy appears.
 
-**Evidence.** `src/agent-door/context.server.ts`; `agent-surface.json`; production-door conformance 826/826
+**Evidence.** `src/agent-door/context.server.ts`; `agent-surface.json`; production-door conformance 1147/1147
 **Gap.** Immediate CORE policy, Pause, review and replay run. Queued continuation, wider native attribution and control journeys remain incomplete.
 
 ## Agent surface
@@ -1970,7 +1970,7 @@ Agent surface · target · **partial**
 5. A foreign Origin returns 403, and a header and body method mismatch returns `HeaderMismatch`.
 6. An oversized body returns 413 with no effect.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Both MCP eras and native signed bootstrap are exercised for the declared CORE subset; the wider jobs remain incomplete.
 
 #### BASE-AGENT-002 — The seed's jobs are tools, through the UI's own actions
@@ -1987,8 +1987,8 @@ Agent surface · target · **partial**
 5. The UI action and its tool, on the same fixture, give the same record state and the same audit event type.
 6. The seed's embedded agents appear in the audit as calls to the same tools.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
-**Gap.** Twelve native tools are declared; message sends, commitments, access/security, erasure, forwarding, reminders, provider and other native jobs are not agent tools yet.
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
+**Gap.** Fourteen native tools are declared; message sends, assignee commitments, access/security, erasure, forwarding, reminders, provider and other native jobs are not agent tools yet.
 
 #### BASE-AGENT-003 — Records are resources
 
@@ -2004,7 +2004,7 @@ Agent surface · target · **partial**
 5. Bytes over budget return `budget_exhausted` and no partial content.
 6. Customer-sourced text carries the untrusted marker.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Undeclared family: resources. Native readers exist internally; CORE withholds resource links and resources/read, so the required mutation receipt is not proved.
 
 #### BASE-AGENT-004 — Business identity and short-lived, audience-bound tokens
@@ -2022,7 +2022,7 @@ Agent surface · target · **partial**
 6. Revoking consent in the seed or in Business refuses the next call within 60 seconds.
 7. After unpairing, Business tokens are refused and the seed's own sign-in still works.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Unknown subject and changed email refuse. Inactive and allow-list-excluded sponsor probes are undeclared; no local MCP bearer adapter is supplied.
 
 #### BASE-AGENT-005 — An agent acts as a person in a role, never more
@@ -2038,7 +2038,7 @@ Agent surface · target · **partial**
 4. Calls that widen the agent's own grant or its sponsor's role, or change the policy or Pause, return `self_escalation` and change nothing, even under a policy with every class autonomous; dropping a scope from its own grant runs.
 5. An injection fixture yields no out-of-grant call and no change of class: record text asking for a wider action, or claiming that a recipient is internal.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Current native membership and product admission govern this subset. Access/security tool escalation and independent multi-sponsor journeys remain unproved.
 
 #### BASE-AGENT-006 — Every action declares its risk class
@@ -2055,8 +2055,8 @@ Agent surface · target · **partial**
 5. No tool in `tools / list` declares a class outside the fleet list, and `rer check` fails on one.
 6. A refused call's audit row still records its computed classes.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
-**Gap.** Standard internal work is exercised. External audiences refuse; other classes await their native tool adapters and fixtures.
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
+**Gap.** Standard internal work and non-monetary commitment decisions are exercised. External audiences refuse; other classes await their native tool adapters and fixtures.
 
 #### BASE-AGENT-007 — The company's policy decides, at one chokepoint
 
@@ -2074,7 +2074,7 @@ Agent surface · target · **partial**
 7. A policy change applies to the next call within 60 seconds, and the audit cites the new revision.
 8. A policy document with a bad signature or another Business's id is rejected, and the door keeps the last valid revision.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** CORE policy and approval pipeline is exercised. The complete seeded conversation-clerk week and independent named approver journey remain incomplete.
 
 #### BASE-AGENT-008 — Truthful attribution
@@ -2092,7 +2092,7 @@ Agent surface · target · **partial**
 6. Activity and exports at 1440 and 390 show `"<agent> for <person>"` for every agent act.
 7. Mail an agent sends to an outside address names `"<agent> for <person>"` as its sender.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Native note revisions retain agent/preparer and sponsor in the effect transaction. Attribution in message sends, provider content and the wider native audit remains incomplete.
 
 #### BASE-AGENT-009 — Every agent action is audited with its class and decision
@@ -2110,7 +2110,7 @@ Agent surface · target · **partial**
 6. Removing the agent keeps its rows and its name.
 7. The Agents page works at 1440 and 390 with no serious or critical axe findings.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** The declared journey reconciles door audits with zero differs_from_policy. Wider native activity and undeclared families remain unproved.
 
 #### BASE-AGENT-010 — Agents can follow changes
@@ -2127,7 +2127,7 @@ Agent surface · target · **partial**
 5. A failed webhook is visible and replays without duplicate effects.
 6. `approval.pending`, `approval.decided`, `review.flagged` and `policy.adopted` carry the class and decision and nothing the subscriber may not read.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Undeclared family: events and subscriptions. No event listing, resource refresh or live subscription completion is claimed.
 
 #### BASE-AGENT-011 — Limits are policy, and Pause stops everything
@@ -2145,7 +2145,7 @@ Agent surface · target · **partial**
 6. Pause and Pause all agents each stop the next call within 60 seconds, and resume restores access.
 7. An agent token cannot resume.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Business/local Pause and consent checks run for the immediate CORE subset. Undeclared families: queued lifecycle, timed lifecycle and provider/mail edges; spend reservations are unavailable.
 
 #### BASE-AGENT-012 — Writes are idempotent and conflict-safe
@@ -2161,7 +2161,7 @@ Agent surface · target · **partial**
 4. A stale revision returns a conflict naming the current revision.
 5. A job handle used by another person's token reads as not found.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
 **Gap.** Immediate note and conversation mutations are exercised for once-only replay, argument conflict and revision checks. Queued/provider uncertainty remains unproved.
 
 #### BASE-AGENT-013 — Manifest, docs and the conformance journey
@@ -2177,8 +2177,8 @@ Agent surface · target · **partial**
 4. Every acceptance point runs under both policies, every decision matches the policy in force, and under all autonomous no call waits for a person or is refused by policy.
 5. A stranger agent given only the seed URL completes the specialist journey through MCP.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826 (29 October 2026)
-**Gap.** The declared 12-tool/13-step CORE journey passes. Undeclared families: resources, events, prompts, subscriptions, multi-sponsor, resource refresh, timed lifecycle, dual host, queued lifecycle and owner-native administration; the complete seeded week remains incomplete.
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147 (29 October 2026)
+**Gap.** The declared 14-tool/16-step CORE journey passes. Undeclared families: resources, events, prompts, subscriptions, multi-sponsor, resource refresh, timed lifecycle, dual host, queued lifecycle and owner-native administration; the complete seeded week remains incomplete.
 
 ### Agent surface
 
@@ -2193,8 +2193,8 @@ Agent surface · target · **partial** · From new · Cites BASE-AGENT-002, BASE
 2. A message post, note revision, forward and reminder use the same Nook action as their corresponding screen.
 3. A notification-app token never becomes sponsor-bound agent authority.
 
-**Evidence.** `src/agent-door/registry.server.ts`; `agent-surface.json`; production-door conformance 826/826
-**Gap.** Twelve native internal tools are mapped. The target table remains unchanged; sends, forwards, reminders and the other supported native verbs still need adapters.
+**Evidence.** `src/agent-door/registry.server.ts`; `agent-surface.json`; production-door conformance 1147/1147
+**Gap.** Fourteen native internal tools are mapped. The target table remains unchanged; sends, forwards, reminders and the other supported native verbs still need adapters.
 
 #### SURFACE-002 — Exposure and sensitive-data classification
 
@@ -2207,12 +2207,12 @@ Agent surface · target · **partial** · From new · Cites BASE-AGENT-006
 2. A share, forward, connector send or retrieval that newly exposes content outside the company adds external, with recipient count and internal, known, new or public counterparty.
 3. A regulated personal record or an attachment labeled as containing regulated personal data adds sensitive with record count and data kind; a passage claiming another label changes neither fact.
 
-**Evidence.** `src/agent-door/context.server.ts`; production-door conformance 826/826
-**Gap.** Standard internal work is exercised; external-audience note work refuses. External and sensitive effect classification remain incomplete.
+**Evidence.** `src/agent-door/context.server.ts`; production-door conformance 1147/1147
+**Gap.** Standard internal work and commitment decisions are exercised; external-audience note work refuses. External and sensitive effect classification remain incomplete.
 
 #### SURFACE-003 — Authority and irreversible decisions
 
-Agent surface · target · **missing** · From new · Cites BASE-AGENT-005, BASE-AGENT-006, BASE-AGENT-008
+Agent surface · target · **partial** · From new · Cites BASE-AGENT-005, BASE-AGENT-006, BASE-AGENT-008
 
 **Requirement.** Nook classifies bindings, grants, protective settings and irreversible removal from the action and current records.
 
@@ -2222,12 +2222,12 @@ Agent surface · target · **missing** · From new · Cites BASE-AGENT-005, BASE
 3. Changing second-factor, credential, scanning or data-protection settings adds security with the named setting.
 4. Purging retained content or applying irreversible erasure adds destructive with the affected item count.
 
-**Evidence.** None.
-**Gap.** No complete Nook MCP registry, risk classifier and two-policy conformance journey proves these outcomes.
+**Evidence.** `src/agent-door/registry.server.ts`; `src/platform/storage/outcomes.ts`; production-door conformance 1147/1147
+**Gap.** Non-monetary business decisions carry commitment and run through real named approval. Access, security and irreversible-erasure adapters and their native witnesses remain incomplete.
 
 #### SURFACE-004 — Provider, spend and live-service classification
 
-Agent surface · target · **missing** · From new · Cites BASE-AGENT-006, BASE-AGENT-008, BASE-AGENT-011
+Agent surface · target · **partial** · From new · Cites BASE-AGENT-006, BASE-AGENT-008, BASE-AGENT-011
 
 **Requirement.** Nook computes provider and service classes from the action, account state and provider answer.
 
@@ -2237,8 +2237,8 @@ Agent surface · target · **missing** · From new · Cites BASE-AGENT-006, BASE
 3. A provider-hosted consent, verification or checkout step that the provider keeps for a person adds gated with provider and step; no agent supplies the person’s password, second factor or CAPTCHA.
 4. Publishing a workflow or changing running delivery behavior adds live with its service.
 
-**Evidence.** None.
-**Gap.** No complete Nook MCP registry, risk classifier and two-policy conformance journey proves these outcomes.
+**Evidence.** `agent-surface.json`; `docs/agents.md`
+**Gap.** Undeclared family: provider and mail edges. No money, accounts, gated or live tool is claimed; provider spend reservations are not available.
 
 #### SURFACE-005 — Nook records, events and prompts
 
@@ -2266,8 +2266,8 @@ Agent surface · target · **partial** · From new · Cites BASE-AGENT-007, BASE
 3. Under a company policy blocking the external class, the outside handoff is refused and internal work retains its distinct result.
 4. Revoke a source midway and observe no leaked context or unauthorized continuation; reconcile the week’s records, approvals, refusals, reminders and event handoffs.
 
-**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 826/826
-**Gap.** The internal note subset runs under autonomous, held and blocked-standard policies. The complete seeded week, external handoff, independent approver and stranger-agent journeys remain incomplete.
+**Evidence.** `agent-surface.json`; `tests/agent-phase-fixtures.mjs`; production-door conformance 1147/1147
+**Gap.** The internal note subset runs under autonomous, held and blocked-commitment policies. The complete seeded week, external handoff, independent approver and stranger-agent journeys remain incomplete.
 
 ## Later
 
