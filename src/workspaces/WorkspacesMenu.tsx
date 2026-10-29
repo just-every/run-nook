@@ -6,9 +6,9 @@ import './workspaces.css'
 import './workspace-note.css'
 export type DeviceWorkspaces={list:DeviceList;pending:Handoff|null;open:(origin:string)=>void;add:(address:string)=>boolean;remove:(origin:string)=>void;accept:()=>void;dismiss:()=>void}
 // Links saved on the account by earlier Nook versions join this device's list once.
-export function useDeviceWorkspaces(account:string,saved:string[]):DeviceWorkspaces{
+export function useDeviceWorkspaces(account:string,saved:string[],businessName?:string|null):DeviceWorkspaces{
  const [list,setList]=useState<DeviceList>({entries:[],removed:{}}),[pending,setPending]=useState<Handoff|null>(null)
- useEffect(()=>{recordCurrent(account,[branding.name,document.querySelector<HTMLStyleElement>('style[data-rer-label]')?.dataset.rerLabel].filter(Boolean).join(' '));const received=receiveHandoff();setList(received.list);setPending(received.pending)},[account])
+ useEffect(()=>{recordCurrent(account,[businessName||branding.name,document.querySelector<HTMLStyleElement>('style[data-rer-label]')?.dataset.rerLabel].filter(Boolean).join(' '));const received=receiveHandoff();setList(received.list);setPending(received.pending)},[account,businessName])
  useEffect(()=>{if(saved.length){for(const origin of saved)addOrigin(origin,{unlessRemoved:true});setList(readList())}},[saved.join('\n')])
  return {list,pending,
   open:origin=>location.assign(handoffUrl(origin)),

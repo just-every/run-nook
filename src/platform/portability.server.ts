@@ -17,5 +17,5 @@ export async function portabilityRoute(env:StorageBindings,request:Request){
  return (await handler(request))!
 }
 async function owner(env:StorageBindings,request:Request){
- try{const c=await context(env,request.headers);return c.session.operator.role==='owner'?c.uid:null}catch(error){if(error instanceof Fault&&error.status<500)return null;throw error}
+ try{const c=await context(env,request.headers);return c.operator.role==='owner'?c.uid:null}catch(error){if(error instanceof Fault&&error.status<500)return null;throw error}
 }
