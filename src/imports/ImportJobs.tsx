@@ -11,9 +11,10 @@ type Props = {
 };
 const reversed = ['undone', 'rolled_back'];
 export function ImportJobs({ jobs, busy, onAction, onRefresh, onCleanup, onSaveCutover }: Props) {
+    // Nothing to follow, refresh or clean up until a job exists.
+    if (jobs.length === 0) return null;
     return <section><h2>Import jobs</h2>
-        <p>Progress survives closing this page and restarting the application. Undo removes only unchanged records owned by that import; later live work or references stop removal.</p>
-        {jobs.length === 0 ? <p>No reviewed imports yet.</p> : jobs.map(item => {
+        {jobs.map(item => {
             const state = item.job?.state ?? item.state, checkpoint = item.job?.checkpoint ?? item.checkpoint, total = item.job?.total ?? item.total;
             const channels = item.summary?.channels?.map((channel: any) => channel.name).join(', ');
             return <article className="import-job" key={item.planId ?? item.review ?? item.jobId}>
