@@ -15,10 +15,21 @@ import {BookmarksManager} from '../team/BookmarksManager'
 import {ConversationNotifications} from './ConversationNotifications'
 import {MESSAGE_LIMIT} from '../family/team-chat/domain'
 import '../app-style/dialogs.css'
+const textFields='input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]):not([type=submit]),textarea'
 type Props={dialog:DialogState;close:()=>void;user:Person;users:Person[];conversation?:Conversation;data:Projection|null;mutate:<T>(path:string,input:unknown,method?:string)=>Promise<T>;onCreated:(c:Conversation)=>void;refresh:()=>Promise<void>;onLeft:()=>void;privateSignal:AbortSignal;revision:number;onOpen:(conversation:string,focus:string,thread:string|null)=>void;onError:(error:unknown)=>void}
 export function Dialogs(props:Props) {
  const ref=useRef<HTMLDialogElement>(null),opener=useRef(typeof document==='undefined'?null:document.activeElement as HTMLElement|null)
- useEffect(()=>{const origin=opener.current;ref.current?.showModal();if(['new-message','new-channel','edit','revise','outcome','poll','reminder'].includes(props.dialog.kind))ref.current?.querySelector<HTMLElement>('input:not([type=hidden]):not([type=checkbox]),textarea,select')?.focus({preventScroll:true});return ()=>{if(origin?.isConnected)origin.focus({preventScroll:true})}},[])
+ useEffect(()=>{
+  const origin=opener.current,dialog=ref.current!
+  dialog.showModal()
+  // The first field takes the caret so the first keystrokes land; Close keeps focus only where the dialog has no field.
+  // A field that arrives with the dialog's data is focused when it appears, unless the person has already moved on.
+  const close=dialog.querySelector('.dialog-heading .icon-button'),idle=()=>[close,dialog,document.body].includes(document.activeElement as HTMLElement)
+  const focusField=()=>{if(!idle())return true;const field=dialog.querySelector<HTMLElement>(textFields)??dialog.querySelector<HTMLElement>('select');field?.focus({preventScroll:true});return Boolean(field)}
+  const observer=focusField()?null:new MutationObserver(()=>{if(focusField())observer?.disconnect()}),stop=()=>observer?.disconnect(),timer=setTimeout(stop,5000)
+  observer?.observe(dialog,{childList:true,subtree:true});dialog.addEventListener('keydown',stop);dialog.addEventListener('pointerdown',stop)
+  return ()=>{stop();clearTimeout(timer);dialog.removeEventListener('keydown',stop);dialog.removeEventListener('pointerdown',stop);if(origin?.isConnected)origin.focus({preventScroll:true})}
+ },[])
  const title={ 'new-message':'New message','new-channel':'Create a channel',reminder:'Create reminder',schedule:'Schedule message',details:'Conversation details',pins:'Pinned messages',bookmarks:'Channel bookmarks',poll:'Create poll',notifications:'Conversation notifications',edit:'Edit message',delete:'Delete message',outcome:props.dialog.kind==='outcome'&&props.dialog.outcomeKind==='commitment'?'Ask someone':'Record a decision',revise:props.dialog.kind==='revise'&&props.dialog.outcome.kind==='decision'?'Revise decision':'Revise request' }[props.dialog.kind]
  return <dialog ref={ref} id="dialog" data-kind={props.dialog.kind} aria-labelledby="dialog-title" onKeyDown={containDialogFocus} onCancel={e=>{e.preventDefault();props.close()}} onClose={props.close}><div className="dialog-heading"><h2 id="dialog-title">{title}</h2><button className="icon-button" data-tooltip="Close dialog" aria-label="Close dialog" onClick={props.close}><IconClose/><span className="sr-only">Close</span></button></div><DialogBody {...props}/></dialog>
 }
