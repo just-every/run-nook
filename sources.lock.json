@@ -6777,7 +6777,7 @@
       "executable": false
     },
     "tests/erasure-browser.mjs": {
-      "sha256": "82f382847aac7059687d3c67f7a5f4df6d11f7aa0a6c58290a4393813ae22282",
+      "sha256": "7c0d6c5e39af512d3e7faf8f401448b1c659b628bb3dccbb20a8e12d6c9c48c4",
       "executable": false
     },
     "tests/erasure.test.mjs": {
@@ -6881,7 +6881,7 @@
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
-      "sha256": "26b77627e25f772fb4e7bc7f472f8b5ed08fd32ff0ed184a796d1daeacbaf32e",
+      "sha256": "10cb41b859456f1db307a12b65a7640cad7976692a2ff5fc11448bfd86c35ee6",
       "executable": false
     },
     "tests/integration-tokens.mjs": {
