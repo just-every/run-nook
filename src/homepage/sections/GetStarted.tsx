@@ -14,7 +14,7 @@ export function GetStarted({variant = 'instance'}: {variant?: 'instance' | 'site
         {variant === 'site' && <a className="home-link" href={demoUrl}>Try the demo</a>}
         <a className="home-link" href="/docs">Read the docs</a>
       </div>
-      <p className="home-free">Free and open source, MIT licensed.</p>
+      <p className="home-free">Open source, MIT licensed.</p>
     </section>
   )
 }

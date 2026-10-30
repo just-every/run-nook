@@ -1869,7 +1869,7 @@ Each tool row lists its possible classes. A call carries every class that its cu
 | --- | --- | --- |
 | 1 | Talk it through. Get it done. | NOOK-004, NOOK-010 |
 | 2 | Turn a message into a decision or a request. Everyone can see who’s on it. | NOOK-004, NOOK-010 |
-| 3 | 100% free, open source alternative to Slack and Microsoft Teams. | NOOK-050 |
+| 3 | An open source alternative to Slack and Microsoft Teams. | NOOK-050 |
 | 4 | Channels: Public, private and direct. | NOOK-016, NOOK-003 |
 | 5 | Threads: Replies stay with their message. | NOOK-016, NOOK-071 |
 | 6 | Files: Attach images, PDFs and text files. | NOOK-012 |
@@ -1880,7 +1880,7 @@ Each tool row lists its possible classes. A call carries every class that its cu
 | 11 | Install it. A few commands, or the guided installer. | NOOK-050 |
 | 12 | Bring your Slack history. Public channels come in, read only. | NOOK-041 |
 | 13 | Invite your team. Choose the channels each person sees. | NOOK-018, NOOK-094 |
-| 14 | Free, and yours to keep. Nook is 100% free and open source. It’s MIT licensed, so your team can use it, change it and run it however you like. | NOOK-050 |
+| 14 | Yours to keep. Nook is open source, and its licence is one short, plain file. Your team can use it, change it and run it however you like. | NOOK-050 |
 
 ## Status
 
