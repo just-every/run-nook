@@ -18,6 +18,7 @@ owner-session mount without owner-claim, and public HTTP conformance.
 
 Import `createImportDoorHandler`, `importDoorSchema`,
 `importDoorApplyFailureMigration`, `importDoorScopesMigration`,
+`importDoorArchiveMigration`, `importDoorIntakeMigration`,
 `writeImportDoorSettings`, `enableDoorAtFirstClaim`, `readImportDoorHistory`
 and `verifyRerGrant` from `./index.ts`.
 The handler returns `(request: Request) => Promise<Response | null>`; pass
@@ -33,10 +34,11 @@ Construct the handler with these seed-owned options:
 | `installationId` | Optional permanent door key for settings, lineage and history; defaults to `claim.installationId`. Use the owner-session mount's key when RER's claim id differs. |
 | `ownerPrincipalId` | Actual owner principal used by the seed's ordinary import history and undo context. |
 | `destination`, `mapping` | Product destination and reviewed `ImportMapping`. |
-| `format`, `parse` | `'json'` or `'ndjson'`, and the product's parser of source records. |
-| `source` | Instead of `parse`/`mapping`, for several sources: `source(namespace)` returns that namespace's `{parse, mapping, ownerPrincipalId?}` from the seed's server-owned allow-list, or `null`. It runs after grant verification and before any write; `null` is refused with 403 `unknown_import_source`. |
+| `format`, `parse` | `'json'` or `'ndjson'`, and the product's parser of source records. With declared intake, sanitized custody is always read as NDJSON. |
+| `intake` | Optional server-owned `{formats, allow}` declaration for dropping non-allowlisted fields before custody. See below; no callback is accepted. |
+| `source` | Instead of `parse`/`mapping`, for several sources: `source(namespace)` returns that namespace's `{parse, mapping, ownerPrincipalId?, intake?}` from the seed's server-owned allow-list, or `null`. It runs after grant verification and before any write; `null` is refused with 403 `unknown_import_source`. |
 | `limits` | Optional reader limits; grant quotas still apply. |
-| `reversalPolicy` | Optional undo policy for new door jobs: `'strict'` (the default) or `'preserve-conflicts'`, which keeps the owner's native edits on undo, as a seed's own preserving imports do, and needs the adapter's `preparePreservedUndo`. Existing jobs keep their policy. See ADOPTING.md. |
+| `reversalPolicy` | Optional override for new jobs. Without it, declaring `targets.preparePreservedUndo` selects `'preserve-conflicts'`; adapters without that method stay `'strict'`. Preserve keeps native edits on undo and requires that method. Existing jobs keep their creation policy. See ADOPTING.md. |
 
 A fresh installation applies the statements in `importDoorSchema: string[]`
 in a new product-owned numbered migration after the D1 import-kit schemas.
@@ -54,11 +56,20 @@ earlier door's plan table, so re-applying it fails the deploy):
    removes the old one-plan-per-bundle uniqueness constraint and adds the
    `ik_door_apply_failures` table (see "Catch-up and recovery").
 2. `importDoorScopesMigration`, the additive `ik_door_scopes` table.
+3. `importDoorArchiveMigration`, the additive `ik_door_archives` and
+   `ik_door_archive_chunks` tables (see "Archives").
 
-Until both have run, an enabled door answers every route with 503
+An installed adapter that declares intake also applies the optional
+`importDoorIntakeMigration` once in its own new numbered migration. It adds
+nullable `intake_json` to `ik_door_uploads`; fresh `importDoorSchema` already
+includes it. An existing installation without an intake declaration needs no
+intake migration and keeps its existing upload behavior.
+
+Until the first two have run, an enabled door answers every route with 503
 `import_door_schema_outdated`; a disabled grant door still answers 404. The
 owner-session mount (`createImportOperatorHandler` in `operator.ts`, which
 exports the same schema and migrations) has no opt-in and answers 503 too.
+Until the third has run, only `archive` and `restore-check` answer that 503.
 
 `ik_door_scopes` binds each logical namespace to the product destination on
 the first uploaded chunk, before a plan/job exists. Old applied namespaces remain scoped through their kit job id
@@ -70,12 +81,12 @@ has to bind them.
 
 Import-kit custody retirement withdraws the record content in scope whole, in
 the same D1 batch as native erasure, the restore checkpoint and the journal:
-uploaded chunks, upload headers and saved snapshot bodies, including unapplied
-uploads. The journal counts the withdrawn rows. Withdrawing door content fences
+uploaded chunks, upload headers, saved snapshot bodies and archive bytes,
+including unapplied uploads. The journal counts the withdrawn rows. Withdrawing door content fences
 the erasure, so a values-only erasure that touches it requires the restore
 checkpoint (`IMPORT_RETIREMENT_CHECKPOINT_REQUIRED` without one). Plans,
-approvals, namespace heads, namespace bindings and apply-failure facts (a plan
-id and an allowlisted reason code) hold no record content and stay, so the seed's history still lists a surviving import "via Business",
+approvals, namespace heads, namespace bindings, apply-failure facts (a plan
+id and an allowlisted reason code) and archive headers hold no record content and stay, so the seed's history still lists a surviving import "via Business",
 and `status` and `undo` keep working through its kit job. Where a withdrawn
 snapshot is needed (`reconcile`, catch-up `plan`, an `apply` that has not
 completed) the door answers 410 `snapshot_withdrawn` with `details.planId`.
@@ -126,7 +137,10 @@ An install RER provisions for a Business plan the owner approved with the door
 opted in carries `RER_IMPORT_DOOR=on` alongside its `RER_OWNER_CLAIM_ISSUER`,
 `RER_OWNER_CLAIM_INSTALLATION_ID`, `RER_OWNER_CLAIM_APP_ORIGIN` and
 `RER_OWNER_CLAIM_PUBLIC_KEYS` trust, whatever its claim mode (bootstrap or
-signed). When the seed sees exactly `on`, it calls
+signed). The recommended consent path is owner opt-in: grants stay closed
+under `RER_IMPORT_DOOR=on` until the owner turns Business imports on at Move
+in, through the settings action above. A seed may instead open the door at the
+first owner claim: when it sees exactly `on`, it calls
 `enableDoorAtFirstClaim(database, installationId, ownerPredicate)` from the
 path that completes its first owner claim and again from every later owner path
 while the variable is `on`: the claim's already-initialized answer, and owner
@@ -203,17 +217,120 @@ nothing more, and check `kid` against the seed's revoked keys
 
 ## Requests
 
-All bodies are JSON. Quotas are admission limits, not a hosted capacity promise.
+Bodies are JSON except declared-intake upload streams described below. Quotas
+are admission limits, not a hosted capacity promise.
 
 | POST route suffix | Body and result |
 | --- | --- |
-| `uploads` | `{ uploadId?, name, bundleSha256, totalBytes, totalChunks, index, chunkSha256, base64 }`; decoded chunks are exactly 64 KiB except the final chunk. `totalChunks` must equal `ceil(totalBytes / 65536)`. Omit `uploadId` on the first chunk to receive a server-generated UUID. Reuse it and the same bundle metadata for subsequent chunks. Both chunk and complete bundle SHA-256 are checked before reporting completion. |
-| `uploads` | `{ uploadId }` returns received-chunk inventory for resuming. An identical duplicate chunk is idempotent with a fresh grant. |
-| `plan` | `{ uploadId, catchup?: boolean }` returns `planId`, `fingerprint`, server-derived counts, summary, rejected rows with reasons, `diagnostics` and differences including gone source ids. Planning makes no native target writes. |
-| `apply` | `{ planId, reviewedFingerprint }` creates or resumes the real kit job in bounded batches. Repeat with a fresh valid grant to continue. |
+| `uploads` (no intake declaration) | `{ uploadId?, name, bundleSha256, totalBytes, totalChunks, index, chunkSha256, base64 }`; decoded chunks are exactly 64 KiB except the final chunk. `totalChunks` must equal `ceil(totalBytes / 65536)`. Omit `uploadId` on the first chunk to receive a server-generated UUID. Reuse it and the same bundle metadata for subsequent chunks. Both chunk and complete bundle SHA-256 are checked before reporting completion. |
+| `uploads` (declared intake) | Full raw stream with `Content-Type: application/octet-stream`, `X-Import-Format: csv\|ndjson\|json` and `X-Import-Name: <safe file name>`. Returns custody hashes and intake metadata; see below. |
+| `uploads` | `{ uploadId }` returns received-chunk inventory/progress. Without intake, an identical duplicate chunk is idempotent with a fresh grant. |
+| `plan` | `{ uploadId, catchup?: boolean }` returns `planId`, `fingerprint`, `created` (true only when this request created the plan), server-derived counts, summary, rejected rows with reasons, `diagnostics` and differences including gone source ids. Planning makes no native target writes. |
+| `apply` | `{ planId, reviewedFingerprint }` creates or resumes the real kit job in bounded batches. Repeat with a fresh valid grant to continue. A large source (a stored plan over 4 MiB, such as a multi-megabyte Notion export) is created in bounded staged steps within one request, and the answer may be the still `queued` job; an interrupted creation is never a job and the next `apply` resumes it from what was staged. |
 | `status` | `{ planId }` reads current job progress. |
 | `reconcile` | `{ planId }` derives source-id disposition/presence and native/provenance revision, value, attachment and count checks on the server. |
 | `undo` | `{ planId }` reverses the newest snapshot's attributed effects in bounded kit work, preserving native edits. |
+| `cancel` | `{ planId }` removes only an unapproved private plan with no `job_id`, failure or kit job under its operation key. Otherwise answers 409 `plan_cancel_refused`. Grant only; the owner-session mount uses `undo`. |
+| `archive` | `{ uploadId, tool, takenAt }` keeps a fully uploaded bundle as the tool's archive; returns `archiveId`, `key`, `tool`, `takenAt`, `bundleSha256`, `bytes` and `counts`. Grant only. See "Archives". |
+| `restore-check` | `{ archiveId }` parses the archive with the namespace's reader and mapping and writes nothing native; returns the archive's fields with `bundleSha256`, `bytes` and `counts` recomputed from its bytes, and `rejected`. Grant only. |
+
+### Optional intake before custody
+
+Declare intake when the seed's source contract forbids storing fields beyond a
+fixed list. It runs before any persistent write of source content, including
+upload chunks, originals and snapshots. This is a static, server-owned,
+drop-only declaration: no callback, client sanitizer or client-supplied hash can
+replace it. For example:
+
+```ts
+intake: {
+  formats: ['csv', 'ndjson', 'json'],
+  allow: {
+    csv: ['user_id', 'email', 'name', 'blocked'],
+    ndjson: ['/user_id', '/email', '/name', '/blocked'],
+    json: ['/id', '/status', '/profile/email', '/profile/login',
+      '/profile/displayName', '/profile/firstName', '/profile/lastName',
+      '/profile/department'],
+  },
+}
+```
+
+CSV entries match exact, case-sensitive decoded column headers. JSON and NDJSON
+entries are exact RFC 6901 pointers to scalar leaves, relative to each source
+record. Nested parents survive only for declared descendants; an object or array
+at an allowed leaf is refused. Undeclared fields are dropped. CSV decoded cell
+strings are unchanged; JSON primitive values and numeric lexemes are unchanged.
+Every accepted row is re-encoded as NDJSON, so syntax representation changes
+without normalizing field names or values. The product parser receives this
+sanitized NDJSON during planning, and the existing `credentials: 'remove'`
+policy still applies then.
+
+POST the complete raw file stream to the same
+`/api/operator/import/uploads` or `/api/rer/import/uploads` route. Set
+`Content-Type: application/octet-stream`, `X-Import-Format` to a declared
+`csv`, `ndjson` or `json`, and `X-Import-Name` to a safe file name. Use the same
+owner authentication, Origin/CSRF checks or action-bound grant and quotas as
+other door requests. Unknown or undeclared formats fail closed. A declared
+source refuses JSON chunk envelopes; JSON `{uploadId}` remains the progress
+read. A source without `intake` keeps the original chunk protocol byte-for-byte.
+
+The response retains `uploadId`, `bundleSha256`, `received` and `complete`, and
+adds:
+
+```ts
+intake: {
+  sanitized: true,
+  allowlistSha256,
+  inputFormat, // 'csv', 'ndjson' or 'json'
+  custodyFormat: 'ndjson',
+}
+```
+
+`bundleSha256` and chunk hashes describe the sanitized custody bytes, not the
+raw request. `allowlistSha256` is server-derived from the canonical sorted
+formats and each format's sorted allowlist. Intake metadata is stored on the
+upload and in the job's `plan.source.intake`, covered by the plan fingerprint
+and snapshot hash, and compared on plan, apply, reconcile, undo and replay.
+Share the same declaration between the operator mount and the grant source
+resolver; changing it cannot silently reinterpret retained custody.
+
+Streaming enforces byte and record quotas plus `limits.maxRecordBytes`
+(default 1 MiB), buffering one row and a fixed output chunk batch. UTF-8,
+quoted CSV fields, lines, CRLF and BOM may cross arbitrary stream boundaries.
+An invalid row refuses with its row number and a fixed reason, without logging
+source values. Forbidden fields never reach persistent storage. On an invalid
+row or interrupted request, earlier sanitized rows may already be stored;
+include these partial uploads in erasure so their custody can be withdrawn.
+
+CSV reports logical rows (the header is row 1), preserves quoted commas,
+newlines and escaped quotes, and refuses duplicate decoded headers, mismatched
+widths and invalid quoting. NDJSON reports physical lines and skips blank
+lines. JSON incrementally reads a plain array of object rows, including Okta's
+Users API list, and refuses duplicate object keys or malformed array grammar.
+Arrays in undeclared fields are dropped; traversing an array in an allowed
+pointer is refused because reconstructing a sparse array would add values.
+A leading UTF-8 BOM is accepted once; UTF-8 decoding is strict. Empty CSV,
+header-only CSV, empty NDJSON and an empty JSON array yield no records. An
+empty JSON file is malformed. Refusals carry `details.row` and a fixed
+`details.reason` such as `invalid_json`, `invalid_utf8`, `duplicate_header` or
+`width_mismatch`; dropped values and parser exception text are never logged.
+
+The exact-original-byte rule applies to sources without an intake declaration.
+For declared intake, sanitized NDJSON is the original custody used by plans,
+reconciliation and archives; the raw input is never an original artifact.
+
+### Large sources
+
+A large reviewed plan does not push a door request past D1's 32 MiB RPC
+ceiling or its 1,000-statement budget: snapshot,
+upload and original reads are paged; job creation stages the plan (and the
+original it holds) a few MiB at a time and publishes the job in one small
+transaction that copies the staged rows inside D1; and later batches fence the
+plan's custody revision instead of resending it. No request carries a whole
+plan or a whole original. See the kit README, "Large plans: staged creation and
+revision fences". The seed's target adapter `planCodec`, when it has one, now
+retains a door job whose plan holds no original bytes (for example, an upload
+whose credential values were removed).
 
 ### Credentials and source refusals
 
@@ -262,7 +379,8 @@ locate it; no source value is reflected:
 | `source_<reader or bundle code>` / 422 | For example `source_malformed_json`, `source_malformed_utf8`, `source_parser_failed`, `source_duplicate_source_conflict`, `source_duplicate_target`, `source_active_effect_forbidden`. |
 | `source_byte_limit`, `source_record_limit`, `source_record_byte_limit`, `source_effect_limit`, `source_import_plan_too_large` / 413 | A source or plan bound. |
 
-Bodies are limited to 100,000 bytes. The 1,024-chunk bound limits one bundle to
+JSON bodies are limited to 100,000 bytes; intake streams use their source and
+grant byte/record quotas instead. The 1,024-chunk bound limits one bundle to
 64 MiB even if a grant's byte quota is larger. A smaller grant quota wins.
 
 Adapters for large records must implement a compact `matchesMany`, because plan,
@@ -285,6 +403,57 @@ only. Parsing and mapping are product-owned and cannot send, enqueue or activate
 access. An adopting seed supplies its native field sampling and integrated
 acceptance evidence; this module has no external side effects.
 
+## Archives
+
+When Business switches off a tool, it uploads the tool's final export and calls
+`archive` with the `uploadId`, the tool's id (`tool`: lowercase letters, digits,
+`.`, `_` and `-`, at most 64, starting with a letter or digit) and when the
+export was taken (`takenAt`, a canonical ISO timestamp). The door copies the
+exact uploaded bytes into the seed's own D1 as the tool's archive, named
+`business-archive/<tool>/<takenAt>` (`key`), and answers its `archiveId`, the
+bundle's `bundleSha256` and `bytes`, and `counts`: the reader and mapping's
+counts of the bundle (`input`, `unique`, `mapped`, `rejected`, `byKind` and the
+rest), as a first plan of it would report them. `counts.input` counts every
+record read, a repeated identical record included, and `counts.unique` each
+source identity once: to check an archive against the catch-up of the same
+export, compare `counts.unique` with the catch-up's `summary.sourceRecords`, or
+`counts.input` with the catch-up's `counts.input`. Archiving writes nothing native. The archive
+holds its own copy, so `plan`, a catch-up, a cancelled preparation or an `undo`
+never deletes it, and the upload stays usable for planning. The same request
+again answers the same archive; another `tool` or `takenAt` for an archived
+upload answers 409 `archive_exists` with `details.archiveId`.
+
+An archive keeps exact bytes, so it refuses what the door never keeps: a bundle
+from which the reader had to remove a live credential value answers 422
+`archive_holds_credentials`. The markers rer's vendor exports leave in place of
+the values they strip (`[removed]` in a field, `removed@` in a URL, `=removed`
+for a query or fragment parameter) hold no credential, so such a bundle
+archives, although a plan of it still withholds the original; a bundle holding an erased record answers 409 `source_erased`
+and the upload goes, as `plan` does; a reader refusal answers its named 4xx. An
+upload whose bytes already went (planned with credentials removed, or refused)
+answers 410 `upload_bytes_withheld`: upload it again and archive before
+planning.
+
+`restore-check` with `{archiveId}` reads the archive's bytes back, checks each
+chunk and the bundle hash (409 `archive_custody_mismatch` otherwise), and parses
+them with the namespace's reader and current mapping without writing anything
+native. It answers the archive's fields with `bundleSha256`, `bytes` and
+`counts` recomputed from the bytes, and `rejected` (`kind`, `sourceId`,
+`reason`). An unknown archive answers 404 `archive_not_found`; one over the
+grant's quotas 403 `archive_exceeds_grant_quota`.
+
+A person's erasure withdraws every archive's bytes in its scope with the rest
+of the door's held content, and its journal counts them under
+`ik_door_archive_chunks`. The archive header (id, tool, time, file name, hash,
+size and kind counts) stays, so `restore-check` then answers 410
+`archive_withdrawn` with `details.archiveId` and `details.reason`. The upload
+went with it; the tool's export, uploaded again, is refused while it still
+holds the erased person (`source_erased`).
+
+Both are grant actions with the grant rules above: no fingerprint, approval or
+`catchup`, a fresh single-use grant per call, bound to its action, namespace and
+quotas. The owner-session mount answers them 404.
+
 ## Catch-up and recovery
 
 A logical namespace tracks a lineage of snapshots; each snapshot's kit namespace
@@ -298,11 +467,38 @@ Only one plan may remain pending per logical namespace until applied or undone.
 Committed kit state recovers lineage after an interrupted call. Repeating a
 bundle reuses its exact retained plan unless that plan's apply failed or its
 import was undone or rolled back: then the same bundle plans afresh, so a file
-can be imported again after undo. Use a fresh explicit namespace and review
+can be imported again after undo. A catch-up (`catchup: true`) never reuses an
+applied plan, the head or one before it: a bundle identical to one already
+applied plans afresh against the head, so an unchanged source yields a catch-up
+with no changes that a standing approval can apply. Repeating it before it is
+applied reuses that catch-up plan. Use a fresh explicit namespace and review
 for a different mapping. Undo snapshots newest first, including undo from the
 seed's ordinary owner history. Undoing a snapshot while a newer one still holds
 its records answers 409 `import_superseded`; a strict undo after an owner edit
 answers 409 `native_edit_conflict`. Each has a `details.reason`.
+
+With an adapter declaring `preparePreservedUndo`, new jobs instead preserve
+conflicts by default: undo reverses untouched imported rows, keeps native edits
+and deletions (and required dependencies), and completes with `job.state:
+'undone'`, even if every row was retained. Its durable
+`readD1ImportUndoReport` has outcome `compensated` when any disposition is
+`retained`, identifies each preserved effect and reason, and reports `undone`
+when everything reversed. Native owner history can page that report with its
+normal kit authorization. A second door undo is idempotent. The policy is saved
+with the job, never inferred again during resume, undo or replay. Adding the
+method later leaves old strict jobs strict; removing it refuses further apply
+batches and active undo on preserving jobs. Restore a compatible adapter to
+undo previously applied batches. Explicit
+`reversalPolicy` settings still override the automatic choice for new jobs.
+For example, Orbit's native preserving adapter needs only this shared door
+update, with no Orbit-specific vendored changes. Preserving apply validates and
+checks the preparation for every pending batch in a read-only admission before
+that batch publishes, including resumed apply. Apply still atomically fences
+its own exact before-images and current authority. An invalid preparation
+refuses the entire pending batch; at checkpoint zero no native rows are applied.
+Earlier admitted batches remain available to Undo. A preparation may cover several small consecutive batches
+within one request; every exact prospective effect must match that admission
+before its own batch publishes. Admission never carries across requests. See [ADOPTING.md](ADOPTING.md).
 
 When an erasure withdrew the live import's snapshot, nothing can be compared
 with it: an owner-session `plan` retires it as the baseline and plans a new

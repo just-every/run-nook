@@ -67,6 +67,7 @@
     "@types/react-dom": "19.2.7",
     "@vitejs/plugin-react": "6.1.1",
     "axe-core": "4.14.0",
+    "esbuild": "0.28.2",
     "highlight.js": "10.7.3",
     "miniflare": "5.20260907.0-alpha",
     "react-markdown": "6.0.3",

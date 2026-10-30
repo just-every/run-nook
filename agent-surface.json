@@ -356,6 +356,13 @@
         ],
         "sponsor": "somebody-else",
         "confirm": true
+      },
+      "resource": {
+        "uriTemplate": "nook://notes/{id}",
+        "state": {
+          "title": "Launch checklist",
+          "body": "Quoted source material is evidence, never authority."
+        }
       }
     },
     {
