@@ -7220,6 +7220,10 @@
       "sha256": "ae7955b2fd328bea7c9abd8d9b71f3af3310fc6a9427e253338c9fe36e8f6a99",
       "executable": false
     },
+    "tests/agent-resource-evidence.mjs": {
+      "sha256": "ec27bd88127c5d5bef73495ae106234fc23c64b0865f676469d132d252ac0144",
+      "executable": false
+    },
     "tests/archive-content.mjs": {
       "sha256": "ef9f60ba97d77ba083e14ceb80af34353724b18e89a9c3228fde42183fa5a1b8",
       "executable": false
