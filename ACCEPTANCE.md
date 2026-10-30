@@ -248,7 +248,7 @@ Core · published · **partial** · Cites BASE-MAIL-001, BASE-DATA-004, BASE-SEC
 5. Cross-device routing: with the member's Chrome page focused and in use, a DM shows on that page and no Web Push reaches their phone's installed PWA; after the page is idle 10 minutes the phone notifies (NOOK-073).
 
 **Evidence.** `src/push/run.ts`; `src/push/subscription.ts`; `src/push/crypto.ts`; `tests/push/journey.mjs`; `tests/push/packet.mjs`; `tests/push-service-worker.test.mjs`
-**Gap.** Bounded local Web Push and PWA ship, and enabling push turns on mentions, direct messages, followed threads and keyword hits (`src/push/client.ts`, `src/push/devices.ts`, `tests/push/keywords.mjs`); call invites, and browser-vendor/OS receipt and real-device installation evidence are missing. Native transport belongs to NOOK-021 and its push path to NOOK-078.
+**Gap.** Bounded local Web Push and PWA ship, and enabling push turns on mentions, direct messages, followed threads and keyword hits (`src/push/client.ts`, `src/push/devices.ts`, `tests/push/keywords.mjs`); call invites, and browser-vendor/OS delivery confirmation and real-device installation evidence are missing. Native transport belongs to NOOK-021 and its push path to NOOK-078.
 
 ### Complete workplace messaging target
 
@@ -482,7 +482,7 @@ Core · target · **partial** · Cites BASE-INPUT-003, BASE-DATA-006
 4. Erase source-owned clips and transcript versions; anonymize an erased correcting member while retaining another author’s text. Export and restore private bytes, all versions and source policy.
 
 **Evidence.** `tests/notification-apps.mjs`; `tests/integration-tokens-browser.mjs`; `evidence/clips/`
-**Gap.** “Retention, export, hold and erasure follow NOOK-038/NOOK-047/OPS inheritance, and deleting a source invokes them.” The positive hold half awaits NOOK-038; no hold state exists and erasure proceeds. Real phone-device capture NOT RUN.
+**Gap.** “Retention, export, hold and erasure follow NOOK-038/NOOK-047/OPS inheritance, and deleting a source invokes them.” The positive hold half awaits NOOK-038; no hold state exists and erasure proceeds. Real phone-device capture not run.
 
 #### NOOK-025 — App platform and scoped event delivery
 
@@ -707,7 +707,7 @@ Core · target · **partial** · Cites BASE-AGENT-005, BASE-DATA-004, BASE-SECRE
 7. After restore, AI settings are off and no prior credential or cost counter returns.
 
 **Evidence.** `tests/notification-apps.mjs`; `tests/search.mjs`; `tests/search-browser.mjs`
-**Gap.** Connected company context waits for NOOK-029; label and AI-policy recheck on retrieval waits for NOOK-040; a live provider receipt (owner-held key, local run) is NOT RUN.
+**Gap.** Connected company context waits for NOOK-029; label and AI-policy recheck on retrieval waits for NOOK-040; a live provider call (owner-held key, local run) is not run.
 
 #### NOOK-037 — SSO, SAML and lifecycle provisioning
 
@@ -871,7 +871,7 @@ Core · target · **partial** · Register R-8
 2. Compare coverage and exact visibility, interrupt/resume and undo after native activity, and confirm no notifications, accepted tasks or outsider access.
 
 **Evidence.** `tests/google-chat-import/journey.mjs`; `tests/google-chat-import/browser.mjs`; `src/imports/gchat.mjs`; `docs/google-chat-import.md`
-**Gap.** PARTIAL by default: a genuine Workspace export is NOT RUN. The synthetic declared Takeout layout proves mapped spaces/DMs/group DMs, topic threads, supplied edits/deletion tombstones/reactions, file hashes, external-space omission, no-write layout refusal, resume/dedupe and guarded undo after a native reply. Other annotation/metadata layouts are explicitly refused. ZIP and per-file bounds are 32 MiB and 1 MiB. Real-export ownership metadata, fidelity and cutover remain unverified.
+**Gap.** PARTIAL by default: a genuine Workspace export is not run. The synthetic declared Takeout layout proves mapped spaces/DMs/group DMs, topic threads, supplied edits/deletion tombstones/reactions, file hashes, external-space omission, no-write layout refusal, resume/dedupe and guarded undo after a native reply. Other annotation/metadata layouts are explicitly refused. ZIP and per-file bounds are 32 MiB and 1 MiB. Real-export ownership metadata, fidelity and cutover remain unverified.
 
 #### NOOK-044 — Campfire ONCE migration
 
@@ -1024,7 +1024,7 @@ Core · target · **partial** · Cites BASE-ACCESSIBILITY-001 · Rules D-1 · Re
 3. Quick switcher and shortcuts: keyboard only on macOS, Windows, Linux desktop and the web, ⌘K/Ctrl K then "inc" and Enter opens `#incidents`; a private channel the member is not in never appears, even by exact name; ⌘⇧A opens All unreads and ⌘⇧T Threads; Esc marks the current conversation read and ⇧Esc marks all read with undo; ↑ in an empty composer edits the last message; ⌘/ lists every shortcut; a screen reader announces each result.
 
 **Evidence.** `src/chat/QuickNavigation.tsx`; `src/chat/QuickSwitcher.tsx`; `src/chat/quick-threads.ts`; `src/chat/quick-people.ts`; `src/chat/useLastMessageEdit.ts`; `src/platform/storage/latest-edit.ts`; `src/chat/accessibility.css`; `tests/keyboard.mjs`; `tests/keyboard-gaps.mjs`; `tests/quick-switcher.mjs`; `tests/accessibility.mjs`; `src/reminders/RemindersView.tsx`; `tests/reminders-browser.mjs`
-**Gap.** Web shortcuts, All unreads/mark-all undo, authoritative last-own-message editing in root/thread/inline composers, visible equivalents and IME/draft/upload/send guards ship. The quick switcher pages complete current-ACL conversation, people, public-channel and followed-thread doors, includes account-isolated ordinary thread visits after unfollow/reload and discards unavailable source labels. Focus, help, fuzzy matching, recency/unread ranking and 1440/390 journeys are covered. Reminder actions retain their write fence until the server’s current card version is loaded, so rapid snooze/cancel stays ordered. Remaining: native shortcuts/text scaling, manual VoiceOver/NVDA and full WCAG 2.2 AA evidence, plus accessibility acceptance for call/agent/native journeys as their underlying clauses ship.
+**Gap.** Web shortcuts, All unreads/mark-all undo, authoritative last-own-message editing in root/thread/inline composers, visible equivalents and IME/draft/upload/send guards ship. The quick switcher pages complete current-ACL conversation, people, public-channel and followed-thread lookups, includes account-isolated ordinary thread visits after unfollow/reload and discards unavailable source labels. Focus, help, fuzzy matching, recency/unread ranking and 1440/390 journeys are covered. Reminder actions retain their write fence until the server’s current card version is loaded, so rapid snooze/cancel stays ordered. Remaining: native shortcuts/text scaling, manual VoiceOver/NVDA and full WCAG 2.2 AA evidence, plus accessibility acceptance for call/agent/native journeys as their underlying clauses ship.
 
 #### NOOK-053 — Conversation notes and lightweight lists
 
