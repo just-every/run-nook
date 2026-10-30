@@ -649,7 +649,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "0c78ff8542ecfd13680d94a8e83521077cbf78857a7f8f4590e2543fc78e8450",
+      "sha256": "85d76908c820360a68468541e4fa62891fb78e93f35393c084b8ece624c4a145",
       "executable": false
     },
     "DEMO.md": {
@@ -681,7 +681,7 @@
       "executable": false
     },
     "docs/CLAIMS.md": {
-      "sha256": "f32e81ba982617c37a91ddea5ecbe6b9847e908c22bcb70bc730673cff6a1ffa",
+      "sha256": "402734c3b3d7d14889759a823a593e5d8a32f2d6914e9ae1e602b3d45b3beb5a",
       "executable": false
     },
     "docs/contract/COVERAGE.json": {
@@ -4969,7 +4969,7 @@
       "executable": false
     },
     "src/homepage/Hero.tsx": {
-      "sha256": "3a4063774be62f53ba79f5fe38b5491cb5de1c59c2f4b3b63985fb4cbdc28da2",
+      "sha256": "fb07f21c65f327977ffcf879b223ea829642b11aadd55f43a4b8f3b9a1ca14fd",
       "executable": false
     },
     "src/homepage/HeroAlcove.tsx": {
@@ -4997,11 +4997,11 @@
       "executable": false
     },
     "src/homepage/sections/Free.tsx": {
-      "sha256": "39f334d47486603d257fddd0480ac41bc1d15abd15d88ca9c623a2a473421b23",
+      "sha256": "f1e57461173eb2c5bb9fb7740786f4938b72be64a44a733821d8457eeca585e2",
       "executable": false
     },
     "src/homepage/sections/GetStarted.tsx": {
-      "sha256": "342b5fe8a0be58a5d991273d7a0e1cc0425364893fb3beb6d7c3a9be682b5a11",
+      "sha256": "f1a97759bc69e0ec46a5c7363320237a5b3fba367ca1a55b7cc8e0d8f27df197",
       "executable": false
     },
     "src/homepage/sections/MoveIn.tsx": {
@@ -6249,11 +6249,15 @@
       "executable": false
     },
     "src/site/pages.tsx": {
-      "sha256": "eb186c4b08de31d6e6e848e7585480f1f7fe9b8990be85ca14c4d5ff32ebc6d2",
+      "sha256": "5a43cce8aab0046537af122018136fc7c79b41adc596158299259789372c4a2a",
       "executable": false
     },
     "src/site/raw.d.ts": {
       "sha256": "501a0af6b1f0bbf9f47bbc479c7d42355d293be7e444d1a2836e8646a205078e",
+      "executable": false
+    },
+    "src/site/run-copy.ts": {
+      "sha256": "f9edab9ed882cd8190e30b69542ea70593d8a8773cfdc12685d63ffe6f65dc50",
       "executable": false
     },
     "src/site/run.ts": {
