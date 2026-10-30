@@ -42,6 +42,7 @@ export class Context {
   await this.writable(conversation)
   try{await this.batch(statements,conversation,`${channelWritable('?')} AND (${condition})`,[conversation,...values])}catch(error){await this.writable(conversation);throw error}
  }
+ attribution(resource:string):D1PreparedStatement[]{return []}
  event(conversation:string,kind:string,object:string){return [this.sql('UPDATE nook_conversations SET seq=seq+1 WHERE id=?',conversation),this.sql('INSERT INTO nook_events SELECT id,seq,?,?,? FROM nook_conversations WHERE id=?',kind,object,this.uid,conversation)]}
  async hint(){await this.env.CHAT_HUB.get(this.env.CHAT_HUB.idFromName('workspace')).fetch('https://hub/hint',{method:'POST'}).catch(()=>undefined)}
 }

@@ -93,7 +93,11 @@ async function upgradeHistory(c){
   const latest='0074_push_record_sources.sql',migrations=(await readdir('migrations')).filter(n=>n.endsWith('.sql')&&n<latest).sort();
   for(const name of migrations)db.exec(await readFile('migrations/'+name,'utf8'));
   for(const table of ['nook_actors','oa_operators','nook_access','nook_conversations','nook_group_conversions','nook_messages','nook_erased_messages','nook_erased_actors','nook_outcomes','nook_outcome_versions','nook_erased_outcomes','nook_erased_outcome_actions']){
-   const rows=(await c.db.prepare('SELECT * FROM '+table).all()).results;for(const row of rows){const keys=Object.keys(row);db.prepare(`INSERT INTO ${table}(${keys.join(',')}) VALUES(${keys.map(()=>'?').join(',')})`).run(...Object.values(row))}
+   // Copy the historical table shape: current rows can have columns added
+   // after this upgrade boundary (for example operator last-sign-in time).
+   const keys=db.prepare(`PRAGMA table_info(${table})`).all().map(column=>column.name);
+   const rows=(await c.db.prepare('SELECT * FROM '+table).all()).results;
+   for(const row of rows){for(const key of keys)assert.ok(Object.hasOwn(row,key),`${table}.${key} exists in the source row`);db.prepare(`INSERT INTO ${table}(${keys.join(',')}) VALUES(${keys.map(()=>'?').join(',')})`).run(...keys.map(key=>row[key]))}
   }
   const columns=db.prepare('PRAGMA table_info(nook_push_delivery_records)').all().map(c=>c.name),insert=db.prepare(`INSERT INTO nook_push_delivery_records VALUES(${columns.map(()=>'?').join(',')})`);
   const records=(await c.db.prepare("SELECT * FROM nook_push_delivery_records WHERE held_at IS NOT NULL OR state='cancelled' ORDER BY id").all()).results;assert.ok(records.length>=105);

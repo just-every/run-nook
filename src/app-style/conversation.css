@@ -63,6 +63,13 @@
 .nook-app .new-divider { display: flex; align-items: center; gap: var(--s3); margin: var(--s2) 0; color: var(--ink); font-size: var(--fs-meta); font-weight: 600; }
 .nook-app .new-divider::after { content: ''; flex: 1; height: 1px; background: var(--brand-rose); }
 
+/* The day a run of messages was sent: a quiet label and a hairline */
+.nook-app .day-line { display: flex; align-items: center; gap: var(--s3); margin: var(--s4) 0 var(--s1); color: var(--ink-soft); font-size: var(--fs-meta); }
+.nook-app .day-line::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.nook-app .history-controls + .message-group > .day-line, .nook-app .history-controls + .day-line, .nook-app .thread-log > .day-line:first-child { margin-top: 0; }
+.nook-app .day-line + .message { margin-top: 0; }
+.nook-app .day-line + .new-divider { margin-top: var(--s1); }
+
 /* Files */
 .nook-app .file-row { display: flex; flex-wrap: wrap; max-width: 480px; align-items: center; gap: var(--s3); margin: 6px 0 0; padding: var(--s2) var(--s3); border-radius: var(--r-control); background: var(--wash); }
 .nook-app .file-row a { flex: 1 1 140px; min-width: 0; color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
@@ -164,6 +171,9 @@
 }
 
 .nook-app .composer .schedule-draft { grid-area: schedule; justify-self: start; }
+/* "Also send to #channel" in a thread: the box and its words on one line, across the composer. */
+.nook-app .composer .composer-broadcast { grid-column: 1 / -1; margin: var(--s1) 0; }
+@media (max-width: 850px) { .nook-app .composer .composer-broadcast { min-height: 44px; } }
 
 /* Long drafts and pending-upload controls remain reachable above mobile tabs. */
 .nook-app .chat > .composer { flex-shrink:1; min-height:0; overflow-y:auto; }

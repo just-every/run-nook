@@ -11,7 +11,7 @@ export async function createNote(c:Context,conversation:string,value:unknown){
  const {thread:rawThread,...fields}=input,note=content(fields),thread=rawThread==null?null:noteId(rawThread)
  await scope(c,conversation,thread)
  const id=crypto.randomUUID(),now=new Date().toISOString()
- await c.writeBatch([...c.event(conversation,'note',id),c.sql(`INSERT INTO nook_notes(id,conversation,thread,author,created,updated,version,title,body,items_json,links_json,pinned,pinned_by,pinned_at) VALUES(?,?,?,?,?,?,1,?,?,?,?,?,?,?)`,id,conversation,thread,c.uid,now,now,note.title,note.body,JSON.stringify(note.items),JSON.stringify(note.links),Number(note.pinned),note.pinned?c.uid:null,note.pinned?now:null),snapshot(c,id,c.uid,now)],conversation,rootFence,rootValues(thread,conversation))
+ await c.writeBatch([...c.event(conversation,'note',id),c.sql(`INSERT INTO nook_notes(id,conversation,thread,author,created,updated,version,title,body,items_json,links_json,pinned,pinned_by,pinned_at) VALUES(?,?,?,?,?,?,1,?,?,?,?,?,?,?)`,id,conversation,thread,c.uid,now,now,note.title,note.body,JSON.stringify(note.items),JSON.stringify(note.links),Number(note.pinned),note.pinned?c.uid:null,note.pinned?now:null),snapshot(c,id,c.uid,now),...c.attribution(id)],conversation,rootFence,rootValues(thread,conversation))
  await c.hint();return getNote(c,conversation,id)
 }
 async function save(c:Context,conversation:string,id:string,expected:number,note:NoteContent,reverted:number|null){
@@ -20,7 +20,7 @@ async function save(c:Context,conversation:string,id:string,expected:number,note
  if(prior.version!==expected)fail(409,'Note changed; reload')
  const now=new Date().toISOString(),changed=prior.pinned!==note.pinned
  const by=note.pinned?(changed?c.uid:prior.pinnedBy):null,at=note.pinned?(changed?now:prior.pinnedAt):null
- await c.writeBatch([...c.event(conversation,'note',id),c.sql(`UPDATE nook_notes SET version=version+1,updated=?,title=?,body=?,items_json=?,links_json=?,pinned=?,pinned_by=?,pinned_at=? WHERE id=? AND conversation=?`,now,note.title,note.body,JSON.stringify(note.items),JSON.stringify(note.links),Number(note.pinned),by,at,id,conversation),snapshot(c,id,c.uid,now,reverted)],conversation,`EXISTS(SELECT 1 FROM nook_notes WHERE id=? AND conversation=? AND version=? AND deleted=0)`,[id,conversation,expected])
+ await c.writeBatch([...c.event(conversation,'note',id),c.sql(`UPDATE nook_notes SET version=version+1,updated=?,title=?,body=?,items_json=?,links_json=?,pinned=?,pinned_by=?,pinned_at=? WHERE id=? AND conversation=?`,now,note.title,note.body,JSON.stringify(note.items),JSON.stringify(note.links),Number(note.pinned),by,at,id,conversation),snapshot(c,id,c.uid,now,reverted),...c.attribution(id)],conversation,`EXISTS(SELECT 1 FROM nook_notes WHERE id=? AND conversation=? AND version=? AND deleted=0)`,[id,conversation,expected])
  await c.hint();return getNote(c,conversation,id)
 }
 /** Full replacement; checklist IDs remain stable across revisions. */

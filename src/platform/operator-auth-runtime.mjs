@@ -31,7 +31,7 @@ export function authConfig(bindings,branding){
  const env=authBindings(bindings),local=env.AUTH_LOCAL==='true';
  return {origin:env.AUTH_ORIGIN,local,OWNER_EMAIL:env.OWNER_EMAIL,SESSION_SECRET:env.SESSION_SECRET,SETUP_TOKEN:env.SETUP_TOKEN,MAIL_FROM:env.MAIL_FROM,branding:{productName:branding.name,accentColor:migrateAccent(branding.primaryColor),signInPath:'/signin',theme:pageThemeHref},...(local?{ipLimit:1000,emailLimit:100}:{})};
 }
-export function createConfiguredAuth(bindings,branding){
+export function createConfiguredAuth(bindings,branding,businessSettings){
  const env=authBindings(bindings),local=env.AUTH_LOCAL==='true';
  let valid=false;try{valid=acceptsRequest(env,new Request(env.AUTH_ORIGIN))}catch{}
  if(!valid)throw new AuthError('invalid_configuration',503);
@@ -39,5 +39,5 @@ export function createConfiguredAuth(bindings,branding){
  return createOperatorAuth({db:env.DB,config:authConfig(bindings,branding),mailSender:sender,
   // Cloudflare overwrites this header at the deployed Worker boundary. Never
   // trust Forwarded/X-Forwarded-For or use the local shared bucket in production.
-  clientIp:request=>local?'local':request.headers.get('CF-Connecting-IP')??''});
+  businessSettings,clientIp:request=>local?'local':request.headers.get('CF-Connecting-IP')??''});
 }

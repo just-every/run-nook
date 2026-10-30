@@ -3,7 +3,7 @@ import { canonicalJson, base64, unbase64, utf8 } from './hash.mjs';
 import { schemaIdentityOf } from './schema-identity.mjs';
 import { platformTables, platformTable, identifier, matches } from './bookkeeping.mjs';
 /** Platform bookkeeping is mandatory; operator identity remains a seed choice. */
-export const excludedTables=Object.freeze([...platformTables,'oa_%','oc_%']);
+export const excludedTables=Object.freeze([...platformTables,'oa_%','oc_owner_claims','oc_idp_grants']);
 const fields=['product','excludeTables','includeTables','derivedTables','secretColumns','exportRow','importSafety','importRow','replaceableTables','requiredConfiguration','validateStaged','acceptedSchemas','buckets','extraPayloads','partBytes'];
 const name=value=>typeof value==='string' && value.length>0 && value.length<=512 && !/[\x00-\x1f]/.test(value);
 const names=value=>Array.isArray(value) && value.every(name) && new Set(value).size===value.length;
@@ -51,21 +51,48 @@ export function policy(input) {
   return {...result,excludeTables:[...excludedTables,...result.excludeTables]};
 }
 /** Platform tables are always excluded; explicit includes override only optional exclusions. */
-export const excludedTable=(table,input={})=>platformTable(table) || (!(input.includeTables??[]).includes(table) && [...excludedTables,...(input.excludeTables??[])].some(pattern=>matches(table,pattern)));
+export function excludedTable(table,input={}) {
+  if(platformTable(table))return true;
+  if((input.includeTables??[]).includes(table))return false;
+  if([...excludedTables,...(input.excludeTables??[])].some(pattern=>matches(table,pattern)))return true;
+  if(matches(table,'oc_%')) {
+    const error=new PortabilityError('identity_table_undeclared:'+table,409);
+    error.message='Table "'+table+'" shares the owner-claim prefix. Declare it in includeTables to transfer its rows or excludeTables to omit them.';
+    throw error;
+  }
+  return false;
+}
 async function archived(db,config) {
-  const objects=await all(db,"SELECT name,sql,type,tbl_name FROM sqlite_master WHERE sql IS NOT NULL ORDER BY name");
+  const objects=await all(db,"SELECT name,sql,type,tbl_name FROM sqlite_master WHERE sql IS NOT NULL AND substr(lower(name),1,7) <> 'sqlite_' AND substr(lower(name),1,4) <> '_cf_' ORDER BY name");
   const kinds=await all(db,'PRAGMA table_list');
+ return archivedInventory({objects,kinds},config);
+}
+function archivedInventory({objects:input,kinds},config) {
+ const objects=[...input];
   const derived=config.derivedTables;
   const excluded=objects.filter(x=>x.type==='table' && (excludedTable(x.name,config) || (!config.includeTables.includes(x.name) &&
     derived.some(p=>x.name===p || (kinds.find(k=>k.name===x.name)?.type==='shadow' && x.name.startsWith(p+'_'))))));
   objects.sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:a.type<b.type?-1:a.type>b.type?1:0);
-  const schemaObjects=objects.filter(x=>['index','view','trigger'].includes(x.type)
-    && !excluded.some(t=>t.name===x.tbl_name)).map(({name,type,tbl_name,sql})=>({name,type,table:tbl_name,sql}));
+  // Row exclusions never erase behavioral schema evidence, even for objects
+  // attached to excluded tables. Only literal engine-internal names are exempt.
+  const schemaObjects=objects.filter(x=>['index','view','trigger'].includes(x.type)).map(({name,type,tbl_name,sql})=>({name,type,table:tbl_name,sql}));
   return {objects,kinds,excluded,schemaObjects,entries:objects.filter(x=>x.type==='table' && !excluded.some(y=>y.name===x.name))};
 }
 // The archive schema identity alone, for databases that need not satisfy the policy.
-export async function schemaIdentity(db,config) {
-  const {entries,schemaObjects}=await archived(db,config);return schemaIdentityOf(entries,schemaObjects);
+export async function schemaIdentity(db,config,{legacyExcludedObjects=false,tablesOnly=false}={}) {
+  return inventoryIdentity(await archived(db,config),{legacyExcludedObjects,tablesOnly});
+}
+// Build evidence and live SQLite use exactly the same policy projection.
+export function inventorySchemaIdentity(inventory,config,options) {
+  return inventoryIdentity(archivedInventory(inventory,config),options);
+}
+function inventoryIdentity({entries,excluded,schemaObjects},{legacyExcludedObjects=false,tablesOnly=false}={}) {
+  // Acknowledged v1 recovery places an old backup using its historical
+  // projection; acknowledged recovery of a version 2 archive without an object
+  // inventory compares tables only. Current archives always retain the
+  // complete object inventory.
+  const objects=tablesOnly?[]:legacyExcludedObjects?schemaObjects.filter(object=>!excluded.some(table=>table.name===object.table)):schemaObjects;
+  return schemaIdentityOf(entries,objects);
 }
 export async function catalogue(db,config) {
   const {objects,kinds,excluded,entries,schemaObjects}=await archived(db,config);

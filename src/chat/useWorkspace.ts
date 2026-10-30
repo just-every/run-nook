@@ -10,6 +10,7 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
  const [user,setUser]=useState(initial.user),[attentionLoaded,setAttentionLoaded]=useState(false),[conversations,setConversations]=useState(initial.conversations),[users,setUsers]=useState<Person[]>([]),[data,setData]=useState<Projection|null>(null),[attention,setAttention]=useState<Attention>(emptyAttention),[error,setError]=useState(''),[loading,setLoading]=useState(false),[revision,setRevision]=useState(0),[connected,setConnected]=useState(false),[accessEpoch,setAccessEpoch]=useState(0)
  const [snapshot,setSnapshot]=useState<WorkspaceSnapshot|null>(null)
  const latest=useRef(initial.snapshot??null),bootstrap=useRef<WorkspaceSnapshot|null>(null),preparedRoute=useRef<string|null>(null),bootstrapped=useRef(false),writes=useRef(0),hints=useRef(new Map<string,number>())
+ const navigation=useRef(navigate),notice=useRef('');navigation.current=navigate
  const current=useRef(route),cache=useRef<Projection|null>(null),generation=useRef(0),running=useRef<{signal:AbortSignal;promise:Promise<void>}|null>(null),again=useRef(false)
  const privateAccess=useRef({user:initial.user.id,controller:new AbortController()})
  // The live socket's 4001 close and a 401 response can both report a lost session;
@@ -28,6 +29,15 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
   clearConversationDrafts(initial.user.id,ids.filter((id):id is string=>Boolean(id)))
   for(const key of Object.keys(sessionStorage))if(key.startsWith('nook:')&&ids.some(id=>id&&key.includes(':'+id+':')))sessionStorage.removeItem(key)
   setSnapshot(null);setConversations([]);setUsers([]);setData(null);setAttention(emptyAttention);setAttentionLoaded(false);setRevision(r=>r+1);setAccessEpoch(r=>r+1)
+ },[])
+ // A thread or message link that no longer answers keeps the channel: open it plainly and say so in one line.
+ const lostTarget=useCallback((status:number)=>{
+  const here=current.current
+  if(status!==404||here.view!=='chat'||!here.conversation||!(here.thread||here.focus))return false
+  notice.current=here.thread?'That thread is no longer here':'That message is no longer here'
+  cache.current=null;setData(null)
+  navigation.current({thread:null,focus:null,panel:null,before:null,threadBefore:null,landing:true},true)
+  return true
  },[])
  const onError=useCallback((e:unknown)=>{
   if(privateSignal.aborted)return
@@ -61,14 +71,14 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
     const id=current.current.conversation
     if(!id)continue
     if(!allowed.has(id)){cache.current=null;setData(null);setError('This conversation is unavailable. Choose a conversation you can access.');continue}
-    if(nextSnapshot.dataError){cache.current=null;setData(null);setAttentionLoaded(false);onError(new ApiError(nextSnapshot.dataError.status,nextSnapshot.dataError.message));continue}
+    if(nextSnapshot.dataError){if(lostTarget(nextSnapshot.dataError.status)){again.current=true;continue}cache.current=null;setData(null);setAttentionLoaded(false);onError(new ApiError(nextSnapshot.dataError.status,nextSnapshot.dataError.message));continue}
     if(!next||windowKey(current.current)!==next.key){again.current=true;continue}
     cache.current=next;setData(next)
-   } catch(e){if(privateSignal.aborted)return;setAttentionLoaded(false);if(e instanceof ApiError&&e.status===404){cache.current=null;setData(null)}onError(e)}
+   } catch(e){if(privateSignal.aborted)return;setAttentionLoaded(false);if(e instanceof ApiError&&e.status===404){if(lostTarget(404)){again.current=true;continue}cache.current=null;setData(null)}onError(e)}
   }while(again.current&&!privateSignal.aborted)}
   const pending={signal:privateSignal,promise:task()};running.current=pending
   try{await pending.promise}finally{if(running.current===pending)running.current=null;if(!privateSignal.aborted)setLoading(false)}
- },[onError,clearPrivate,privateSignal])
+ },[onError,clearPrivate,lostTarget,privateSignal])
  const beginWrite=useCallback(()=>{
   writes.current++
   return ()=>{writes.current=Math.max(0,writes.current-1);if(!privateSignal.aborted&&!writes.current&&(again.current||hints.current.size)&&!running.current)void refresh()}
@@ -98,8 +108,8 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
   if(!initial.snapshot||bootstrap.current===initial.snapshot)return
   bootstrap.current=initial.snapshot
   const epoch=generation.current
-  void completeSnapshot(initial.snapshot).then(next=>{if(privateSignal.aborted||epoch!==generation.current)return;latest.current=next;cache.current=next.data;setSnapshot(next);setUser(next.user);setConversations(next.conversations);setUsers(next.users);setAttention(next.attention);setAttentionLoaded(true);setData(next.data);setLoading(false);if(initial.route?.conversation&&!next.conversations.some(c=>c.id===initial.route?.conversation))setError('This conversation is unavailable. Choose a conversation you can access.');else if(next.dataError)setError(next.dataError.message)}).catch(onError)
- },[initial.snapshot,privateSignal,onError])
+  void completeSnapshot(initial.snapshot).then(next=>{if(privateSignal.aborted||epoch!==generation.current)return;latest.current=next;cache.current=next.data;setSnapshot(next);setUser(next.user);setConversations(next.conversations);setUsers(next.users);setAttention(next.attention);setAttentionLoaded(true);setData(next.data);setLoading(false);if(initial.route?.conversation&&!next.conversations.some(c=>c.id===initial.route?.conversation))setError('This conversation is unavailable. Choose a conversation you can access.');else if(next.dataError&&!lostTarget(next.dataError.status))setError(next.dataError.message)}).catch(onError)
+ },[initial.snapshot,privateSignal,onError,lostTarget])
  useEffect(()=>{
   if(privateSignal.aborted)return
   if(preparedRoute.current===JSON.stringify(route)){preparedRoute.current=null;return}
@@ -108,7 +118,7 @@ export function useWorkspace(initial:InitialWorkspace,route:LocationState,naviga
    bootstrapped.current=true
    if(!(route.view==='chat'&&route.landing&&window.matchMedia('(max-width: 850px)').matches&&initial.conversations.some(c=>c.id===route.conversation&&c.unread>0)))return
   }
-  generation.current++;setError('');setLoading(true);void refresh()
+  generation.current++;setError(notice.current);notice.current='';setLoading(true);void refresh()
  },[initial.user.id,route.view,route.conversation,route.thread,route.focus,route.before,route.threadBefore,route.landing,refresh,privateSignal])
  useEffect(()=>{
   let stopped=false,socket:WebSocket|undefined,reconnect:ReturnType<typeof setTimeout>|undefined,attempt=0

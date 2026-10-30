@@ -1,3 +1,5 @@
+import {nookAgentDoor} from './agent-door/index.server'
+import {businessSettings} from './agent-door/business.server'
 import {resumableRoute} from './files/resumable.server';
 import {clipRoute} from './clips/server'
 import {transcriptRoute} from './transcripts/route.server'
@@ -146,12 +148,16 @@ export default withDemo({
   const asset = await staticAssetResponse(request,env)
   if(asset) return asset
   const publicEnv = authBindings(env)
+  if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
+  const businessResponse=await businessSettings({...env,...publicEnv}).handle(request)
+  if(businessResponse)return businessResponse
+  const agentResponse=await nookAgentDoor(env).handle(request)
+  if(agentResponse)return agentResponse
   const state = await setupStateResponse(request,publicEnv)
   if(state) return state
   const lobby = await lobbyResponse(request,publicEnv,identity,baseOwnerClaim)
   if(lobby) return lobby
   const url = new URL(request.url),repository=new Repository(env)
-  if(!acceptsRequest(env,request)) return new Response('Not found',{status:404})
   const aliases:Record<string,string>={'/settings':'/app?view=you','/app/settings':'/app?view=you','/app/channels':'/app?view=channels','/app/people':'/app?view=people','/login':'/signin','/sign-in':'/signin'}
   if((request.method==='GET'||request.method==='HEAD')&&aliases[url.pathname])return new Response(null,{status:307,headers:{Location:aliases[url.pathname],'Cache-Control':'no-store'}})
   if(url.pathname==='/signin')return await signInRoute(env,request)??new Response('Not found',{status:404})

@@ -15,7 +15,7 @@ export async function installation(edge,{bootstrap=true,migrate=true,origin:conf
  if(now!==undefined){assert.ok(Number.isSafeInteger(now));modules.unshift({type:'ESModule',path:resolve('dist/server/pinned-clock.js'),contents:`import worker from './index.js'; export {ChatHub} from './index.js'; let clock=${now}; Date.now=()=>clock; export default {...worker,fetch(...args){clock++;return worker.fetch(...args)}};`})}
  const mail=mailEdge(edge);let unregister;
  const options={port,host:'127.0.0.1',name:'nook-push-test',routes:['*/*'],modules,modulesRoot:resolve('dist/server'),compatibilityDate:'2026-09-08',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CHAT_HUB:{className:'ChatHub',useSQLite:true}},bindings:{AUTH_ORIGIN:origin,AUTH_LOCAL:'true',OWNER_EMAIL:'owner@example.test',SESSION_SECRET:secret,SETUP_TOKEN:token,...mailBindings},outboundService:request=>mail.fetch(request),log:new Log(LogLevel.ERROR)};
- Object.assign(options,workerOptions);
+ Object.assign(options,{...workerOptions,bindings:{...options.bindings,...workerOptions.bindings}});
  const mf=new Miniflare(convertV4MiniflareOptions(options));
  unregister=registerMailEdge(origin,mail);
  try{

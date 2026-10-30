@@ -24,7 +24,21 @@ export function TooltipSurface(){
   document.addEventListener('pointerover',enter,true);document.addEventListener('pointerout',leave,true);document.addEventListener('focusin',focus,true);document.addEventListener('focusout',hide,true);document.addEventListener('pointerdown',down,true);document.addEventListener('pointerup',up,true);document.addEventListener('pointercancel',up,true);document.addEventListener('contextmenu',context,true);document.addEventListener('keydown',key,true);window.addEventListener('scroll',scroll,true);window.addEventListener('resize',hide)
   return()=>{hide();document.removeEventListener('pointerover',enter,true);document.removeEventListener('pointerout',leave,true);document.removeEventListener('focusin',focus,true);document.removeEventListener('focusout',hide,true);document.removeEventListener('pointerdown',down,true);document.removeEventListener('pointerup',up,true);document.removeEventListener('pointercancel',up,true);document.removeEventListener('contextmenu',context,true);document.removeEventListener('keydown',key,true);window.removeEventListener('scroll',scroll,true);window.removeEventListener('resize',hide)}
  },[id])
- useLayoutEffect(()=>{if(!active||!tip.current)return;const rect=active.getBoundingClientRect(),box=tip.current.getBoundingClientRect(),margin=8;const above=rect.top-box.height-margin>=margin;setPosition({left:Math.max(margin,Math.min(innerWidth-box.width-margin,rect.left+(rect.width-box.width)/2)),top:above?rect.top-box.height-margin:rect.bottom+margin})},[active])
+ // The tip follows its control while it is shown: a dialog that grows as its content loads, or settles from its entrance, moves the control.
+ useLayoutEffect(()=>{
+  if(!active)return
+  let frame=0
+  const place=()=>{
+   const box=tip.current?.getBoundingClientRect()
+   if(box&&active.isConnected){
+    const rect=active.getBoundingClientRect(),margin=8,above=rect.top-box.height-margin>=margin
+    const left=Math.max(margin,Math.min(innerWidth-box.width-margin,rect.left+(rect.width-box.width)/2)),top=above?rect.top-box.height-margin:rect.bottom+margin
+    setPosition(old=>old.left===left&&old.top===top?old:{left,top})
+   }
+   frame=requestAnimationFrame(place)
+  }
+  place();return()=>cancelAnimationFrame(frame)
+ },[active])
  if(!active)return null
  // A dialog is in the top layer: its tooltip must live there too.
  return createPortal(<span ref={tip} id={id} role="tooltip" className="action-tooltip" style={position}>{active.dataset.tooltip}</span>,active.closest('dialog')??active.closest('.nook-app')??document.body)
