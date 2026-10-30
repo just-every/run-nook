@@ -1,15 +1,9 @@
-// Base's Run page opens its sub line and meta description with "100% free and
-// open source." Free is a footnote for Nook (owner, 28 Oct): the licence stays in
-// the page's facts footer, and the lead says only what the page does. Base copies
-// are byte-exact, so the lead is trimmed here; a Base refresh that changes these
-// strings fails the build instead of silently shipping "free" again.
-const LEADS = [
-  '100% free and open source. Two lines, and',
-  ' 100% free and open source.',
-]
+// Free is a footnote for Nook (owner, 28 Oct). Base's chooser now puts that
+// lead in the self-host badge; the source/licence facts remain in its footer.
+// Keep the Base copy exact and fail if the badge changes on a later refresh.
+const FREE_BADGE = '<span class="badge">100% free</span>'
 
 export function withoutLeadingFree(html: string): string {
-  const [sub, meta] = LEADS
-  if (!html.includes(sub) || !html.includes(meta)) throw new Error('Base Run page copy changed: update src/site/run-copy.ts')
-  return html.replace(sub, 'Two lines in your terminal, and').replace(meta, '')
+  if (!html.includes(FREE_BADGE)) throw new Error('Base Run page copy changed: update src/site/run-copy.ts')
+  return html.replace(FREE_BADGE, '')
 }
