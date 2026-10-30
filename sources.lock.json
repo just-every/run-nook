@@ -6929,7 +6929,7 @@
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
-      "sha256": "10cb41b859456f1db307a12b65a7640cad7976692a2ff5fc11448bfd86c35ee6",
+      "sha256": "f500acf3b971aa5e9640292b7d0802d2fb870dd3daeb421680ca7186edf4f827",
       "executable": false
     },
     "tests/integration-tokens.mjs": {
