@@ -13,7 +13,7 @@ class ResourcePrincipal extends Context {
 }
 export function nookResources(env:StorageBindings):ResourceDefinition[]{
  return ['conversations','notes','messages','outcomes'].map(kind=>({
-  uriTemplate:`nook://${kind}/{id}`,name:`Nook ${kind}`,scope:kind==='notes'?'notes:read':'conversations:read',classes:['standard'],
+  uriTemplate:`nook://${kind}/{id}`,name:`Nook ${kind}`,scope:'evidence:read',classes:['standard'],
   classify:()=>[{class:'standard',facts:{measure:1}}],
   async read(uri,ctx){
    try{

@@ -36,14 +36,18 @@ In particular, erasure must account for retained door evidence before enabling a
 agent erasure tool, and queued delivery needs originating consent and a fresh
 execution admission.
 
-The declared capabilities are `tools`, `policy`, `pause`, `audit` and
-`idempotency`. Events, public MCP resources, prompts and subscriptions are
-undeclared and return `capability_not_declared`. Native conversation, message,
-outcome and note resource readers are retained internally, with native membership
-checks, for a later resource-family adoption. Base 0.2.91 withholds mutation
-resource links when that family is undeclared; the required same-door resource
-receipt is therefore still a Base coordination gap. No provider cost or spend
-reservation is offered; non-monetary decisions have zero monetary value and the conformance policy uses `spend: {none: true}`.
+The declared capabilities are `tools`, `policy`, `pause`, `audit`,
+`idempotency` and `resources`. Record-writing tools return resource links for
+native conversations, notes and outcomes. Templates are `nook://conversations/{id}`,
+`nook://notes/{id}`, `nook://messages/{id}` and `nook://outcomes/{id}`.
+`resources/read` requires `evidence:read` and rechecks the sponsoring person's
+current product access and conversation membership through Nook's native readers.
+Resource content is untrusted evidence, never authorization. A resource URI adds
+no authority; removed membership makes a previously returned link unavailable.
+Events, prompts and subscriptions remain undeclared and return
+`capability_not_declared`. No provider cost or spend reservation is offered;
+non-monetary decisions have zero monetary value and the conformance policy uses
+`spend: {none: true}`.
 
 The installation uses the signed `/auth/owner-claim` lifecycle declared in
 `rer-setup.json`. Signed Business settings bind the Business owner ID to the
@@ -57,5 +61,5 @@ subset. It uses fresh records created through Nook's production HTTP doors, the
 actual migrations and native note writes. No network-edge module is declared:
 the exposed tools make no outbound provider call. Native owner/team mail uses
 Base's built-in isolated mail edge during verification. The wider contract's
-conversation-clerk week, external handoffs, resource receipts and optional
+conversation-clerk week, external handoffs and optional
 families remain partial.

@@ -625,11 +625,11 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "76af1126aac65931b97f592a70fbff90d4e9455f24e7a671c19b74241eacf8e6",
+      "sha256": "1e74b6fdf6e4b5970eff5b5808ad7c3b0a477c1887c6c3738804578ba83fff0c",
       "executable": false
     },
     "agent-surface.json": {
-      "sha256": "c9b27e42b55dca9b1e73761c22bfb274917c474cd86036b0d17e571aa85f7db5",
+      "sha256": "b96dbdfe005a85c612bfe6da3d606fb5657f4a52f19980e570c458cd61d9a4be",
       "executable": false
     },
     "AGENTS.md": {
@@ -653,7 +653,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "6ef32b3aa3528619e1ee6fc521da86f6b9d84b3d10a9050e9e458a9a33b5abf2",
+      "sha256": "5fc93b1fc70c14c7a9e02ebb68caa3daa795a21a118e924005700c5ce36f99d3",
       "executable": false
     },
     "DEMO.md": {
@@ -669,7 +669,7 @@
       "executable": false
     },
     "docs/agents.md": {
-      "sha256": "9509b0841aaf79e81aeba972bfc6eac6755556ae38b8c569b9d2a309f953e495",
+      "sha256": "d0aa713e74829e31013a953d65cc630072283fdd67219385d98c2f87905510a8",
       "executable": false
     },
     "docs/attention.md": {
@@ -2109,7 +2109,7 @@
       "executable": false
     },
     "src/agent-door/index.server.ts": {
-      "sha256": "5fa180a3d37556f2c512156b657426528dd4d89a9d1421f0127ad8489ad76349",
+      "sha256": "6eecf114259125178ea4af6b7cd4d9d515850be3cb172f58242ce5b127b1a35e",
       "executable": false
     },
     "src/agent-door/people.server.ts": {
@@ -2117,11 +2117,11 @@
       "executable": false
     },
     "src/agent-door/registry.server.ts": {
-      "sha256": "8a2d03a9640d3940762cc04eec36a4872aea683300f5d5c2603a4dca71e40b42",
+      "sha256": "46fc50c3a0530ad78aa257d50db547206311b818c50e491acafe37f14abb1603",
       "executable": false
     },
     "src/agent-door/resources.server.ts": {
-      "sha256": "f99da241c11f8813b0a87570c14fd164141dcb0a9a657bdbcf5a20c1edd186d9",
+      "sha256": "9d85789a079c4d74695e46c603b04a50ffb493153164effa1f828fe56c4a5601",
       "executable": false
     },
     "src/ai-search/AiSettings.tsx": {
@@ -7213,7 +7213,7 @@
       "executable": false
     },
     "tests/agent-native-journey.mjs": {
-      "sha256": "9cc707a9c0c3d97ad03eae8fab9e4000f3363a07afa0a65710aa672c3568f0d8",
+      "sha256": "f2792bc71e104322b79183930dc00ee2343d0e931300ef79c3acda55190e3783",
       "executable": false
     },
     "tests/agent-phase-fixtures.mjs": {
@@ -7733,7 +7733,7 @@
       "executable": false
     },
     "tests/push/fixture.mjs": {
-      "sha256": "c4cc9cbe77d1a8b48c403117cea4dbb2d9af5e5be830ec2a0a4ded388dab22ad",
+      "sha256": "404cf1ff7031f562083f5c87b253111bd1755030db3cffa95751aa9ffaa60938",
       "executable": false
     },
     "tests/push/journey.mjs": {

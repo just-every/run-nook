@@ -7,7 +7,8 @@
     "policy",
     "pause",
     "audit",
-    "idempotency"
+    "idempotency",
+    "resources"
   ],
   "tools": [
     {
@@ -242,7 +243,12 @@
       "reason": "installation"
     }
   ],
-  "resources": [],
+  "resources": [
+    "nook://conversations/{id}",
+    "nook://notes/{id}",
+    "nook://messages/{id}",
+    "nook://outcomes/{id}"
+  ],
   "witness": {
     "tool": "nook.workspace.snapshot",
     "args": {}

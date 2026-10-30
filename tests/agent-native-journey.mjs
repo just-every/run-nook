@@ -23,6 +23,7 @@ export async function afterStep({phase,step,result,request,origin,cookie,databas
  if(phase==='held'&&JSON.parse(activity.approvers).length)throw Error('Review must not invent a prior human approval')
 }
 export default async function({database}){
+ await (await import('./agent-resource-evidence.mjs')).resourceEvidence()
  const db=await database('DB')
  const binding=await db.prepare('SELECT b.claim_id,s.owner_id FROM oa_bootstrap b JOIN bs_settings s ON s.singleton=b.singleton WHERE b.singleton=1').first()
  if(!binding?.owner_id)throw Error('Signed owner binding missing')

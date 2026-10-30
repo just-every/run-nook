@@ -4,7 +4,7 @@ import type {StorageBindings} from '../platform/storage/context'
 import {nativePeople} from './people.server'
 import {nookTools} from './registry.server'
 import {nookResources} from './resources.server'
-export const capabilities=['tools','policy','pause','audit','idempotency'] as const
+export const capabilities=['tools','policy','pause','audit','idempotency','resources'] as const
 export const notTools=[
  {clauses:['NOOK-006', 'NOOK-041', 'NOOK-042', 'NOOK-043', 'NOOK-044', 'NOOK-045', 'NOOK-046', 'NOOK-077', 'NOOK-103', 'NOOK-076', 'NOOK-131'],reason:'import-door' as const},
  {clauses:['NOOK-021', 'NOOK-074', 'NOOK-078', 'NOOK-097', 'NOOK-136', 'NOOK-138', 'NOOK-133'],reason:'device' as const},
