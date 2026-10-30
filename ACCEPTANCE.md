@@ -121,7 +121,7 @@ Core · published · **partial** · Register R-6
 2. Keep failed or unmeasured end states visible without presenting provider acceptance as device display or human reading.
 
 **Evidence.** `ACCEPTANCE.md`; `tests/push-journey.mjs`; `tests/pilot-journey.mjs`
-**Gap.** Local core journeys at 1440 and 390 and a hosted sign-in, invitation/mention-mail, populated-installation upgrade and export/restore workflow have recorded proof. Hosted multi-device, real-device push, capacity and full-category acceptance remain unproven.
+**Gap.** Not yet proven: a hosted installation used on several devices at once, push on real phones, behaviour at full capacity, and acceptance in every category. Proven so far: the core journeys locally at 1440 and 390, and on a hosted installation sign-in, invitation and mention email, upgrading an installation that already holds data, and export and restore.
 
 #### NOOK-009 — Backup and export (C9)
 
