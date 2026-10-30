@@ -1625,11 +1625,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "b4b022327abe36e1e1ddcbcb9e39ee45d875f6374163ec27a77c5da0100a598d",
+      "sha256": "18040fda7cb3e75fc20899dfb77fb2ecfbb668d4ff9e0d93c75088ec1d120a04",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "d604eb145a54ae0eda50ac986044958cb95474a327c44b5ee5fa82211ce91070",
+      "sha256": "d6e33c404a78bad32b164e9dae1fe0eceba34596bf801179b8474e4a79aca30c",
       "executable": false
     },
     "public/brand/band.svg": {
