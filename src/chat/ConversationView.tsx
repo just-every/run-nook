@@ -6,13 +6,14 @@ import {BookmarksBar} from '../team/BookmarksBar'
 import type {TeamRequest} from '../team/types'
 import {canEraseChannelMessage} from '../team/erasure/policy'
 import {NookMark} from '../brand/NookMark'
-import {useEffect,useLayoutEffect,useRef,useState} from 'react'
+import {Fragment,useEffect,useLayoutEffect,useRef,useState} from 'react'
 import type {Conversation,DialogState,LocationState,Message,Outcome,Person,Projection,ReadAcknowledgement} from './types'
 import {Composer} from './Composer'
 import {MessageRow} from './MessageRow'
 import {OutcomeCard} from './OutcomeCard'
 import {useReadVisibility} from './useReadVisibility'
 import {conversationName} from './Navigation'
+import {dayKey,dayLabel} from './day'
 import {IconBack,IconBell,IconClose,IconPlus} from './icons'
 type Props={users:Person[];conversations:Conversation[];filesRevision:number;recapOpened:boolean;closeRecap:()=>void;request:TeamRequest;user:Person;conversation:Conversation;data:Projection;route:LocationState;privateSignal:AbortSignal;conversationCurrent:()=>boolean;threadCurrent:()=>boolean;navigate:(next:Partial<LocationState>,replace?:boolean)=>void;openDialog:(d:DialogState)=>void;refresh:()=>Promise<void>;beginWrite:()=>()=>void;sendMessage:(input:unknown)=>Promise<void>;onRead:(ack:ReadAcknowledgement)=>Promise<void>;mutate:(path:string,input:unknown,method?:string)=>Promise<unknown>;onError:(e:unknown)=>void;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void}
 export function ConversationView({users,conversations,filesRevision,recapOpened,closeRecap,request,user,conversation:c,data,route,privateSignal,conversationCurrent,threadCurrent,navigate,openDialog,refresh,beginWrite,sendMessage,onRead,mutate,onError,onAction,onDiscuss}:Props) {
@@ -23,7 +24,7 @@ export function ConversationView({users,conversations,filesRevision,recapOpened,
  // A conversation opened at its landing keeps that landing while the panel opens and closes: changing it would reset the window and blank the chat.
  const keepLanding=route.landing?{landing:true}:{}
  const setShowOutcomes=(value:boolean)=>navigate({panel:value?'outcomes':null,...(!value?{focus:null}:{}),...keepLanding})
- const name=conversationName(c,user),roots=data.rootWindow.items.filter(m=>!m.parent||m.channelBroadcast),root=data.threadWindow?.root,replies=data.threadWindow?.items||[]
+ const name=conversationName(c,user),roots=data.rootWindow.items.filter(m=>(!m.parent||m.channelBroadcast)&&!(m.deleted&&!m.parent&&!m.replyCount)),root=data.threadWindow?.root,replies=data.threadWindow?.items||[]
  const activeLog=route.thread?threadLog:log
  const activeWindow=data.threadWindow||data.rootWindow
  const latestWindow=useRef(activeWindow);latestWindow.current=activeWindow
@@ -97,6 +98,8 @@ export function ConversationView({users,conversations,filesRevision,recapOpened,
  }
  const thread=(m:Message)=>{navigate({thread:m.id,focus:m.id,panel:null,threadBefore:null})}
  const back=()=>{const id=route.thread;navigate({thread:null,focus:id,panel:null,threadBefore:null,before:null})}
+ const dayChanged=(m:Message,before?:Message)=>!before||dayKey(m.created)!==dayKey(before.created)
+ const dayLine=(m:Message,before?:Message)=>dayChanged(m,before)&&<div className="day-line">{dayLabel(m.created)}</div>
  const stitched=(m:Message)=>data.outcomes.filter(o=>o.source===m.id)
  // A row continues the previous author's run when the same person wrote it within five minutes and nothing sits between them.
  const continues=(m:Message,before:Message|undefined,dividerBetween=false,inThread=false)=>Boolean(before&&!dividerBetween&&!m.deleted&&!before.deleted&&m.author===before.author&&m.authorName===before.authorName&&!!m.immutable===!!before.immutable&&Math.abs(new Date(m.created).getTime()-new Date(before.created).getTime())<=300000&&(inThread||!stitched(before).length))
@@ -136,7 +139,7 @@ export function ConversationView({users,conversations,filesRevision,recapOpened,
    <div className="log-frame">
     <div className="message-log" ref={log} aria-label="Conversation messages" role="region" tabIndex={0}>
      <div className="history-controls">{data.rootWindow.hasMore&&data.rootWindow.cursor&&<button className="text-button" onClick={()=>navigate({before:data.rootWindow.cursor,focus:null})}>Load earlier messages</button>}</div>
-     {roots.map((m,index)=>{const divider=m.sequence>c.readSeq&&(index===0||roots[index-1].sequence<=c.readSeq)&&c.unread>0;return <div className="message-group" key={m.id}>{divider&&<div className="new-divider">New messages</div>}{row(m,false,roots[index-1],divider)}</div>})}
+     {roots.map((m,index)=>{const divider=m.sequence>c.readSeq&&(index===0||roots[index-1].sequence<=c.readSeq)&&c.unread>0;return <div className="message-group" key={m.id}>{dayLine(m,roots[index-1])}{divider&&<div className="new-divider">New messages</div>}{row(m,false,roots[index-1],divider||dayChanged(m,roots[index-1]))}</div>})}
      {c.convertedFrom&&<p className="dialog-note">This private channel continues a group DM with its full history and original participants.</p>}{!roots.length&&!c.convertedTo&&<div className="empty-state"><NookMark/><h2>Start the conversation</h2><p>{c.kind==='dm'?`Say hello to ${name}.`:`Say something to #${name}.`}</p></div>}
     </div>
     {showLatest&&<button className="jump-latest soft-button" onClick={()=>latest()}>Latest messages</button>}
@@ -150,7 +153,7 @@ export function ConversationView({users,conversations,filesRevision,recapOpened,
     <div className="log-frame">
      <div className="message-log thread-log" ref={threadLog} role="region" aria-label="Thread messages" tabIndex={0}>
       <div className="history-controls">{data.threadWindow?.hasMore&&data.threadWindow.cursor&&<button className="text-button" onClick={()=>navigate({threadBefore:data.threadWindow!.cursor,focus:null})}>Load earlier replies</button>}</div>
-      {row(root,true)}<hr className="thread-sep"/>{replies.map((m,index)=>row(m,true,replies[index-1]))}
+      {dayLine(root)}{row(root,true)}<hr className="thread-sep"/>{replies.map((m,index)=><Fragment key={m.id}>{dayLine(m,replies[index-1]??root)}{row(m,true,replies[index-1],dayChanged(m,replies[index-1]??root))}</Fragment>)}
       {data.outcomes.filter(o=>o.source===root.id).map(o=>card(o,true))}
      </div>
      {showLatestReplies&&<button className="jump-latest soft-button" onClick={()=>latest(true)}>Latest replies</button>}

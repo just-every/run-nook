@@ -2,10 +2,10 @@ import {useRef,useState} from 'react'
 import type {ReactNode} from 'react'
 import type {Outcome,Person} from './types'
 import {OutcomeHistory} from './OutcomeHistory'
+import {dueDate} from './day'
 import {IconMore} from './icons'
 import {useDismiss} from './useDismiss'
 export const outcomeStatus=(o:Outcome)=>({'proposed':'Awaiting agreement','accepted':'Accepted','reported-complete':'Reported done','recorded':'Decision recorded','cancelled':'Cancelled'}[o.status]||o.status)
-const dueDate=(deadline:string)=>{const date=new Date(deadline+'T00:00');return Number.isNaN(date.getTime())?deadline:date.toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})}
 // A decision or request as a sentence, a status line, one meta line and only the actions that are yours.
 // Secondary verbs remain visible; `children` are extra actions placed in the same row.
 export function OutcomeCard({outcome:o,user,onAction,onDiscuss,onRevise,compact=false,children}:{outcome:Outcome;user:Person;onAction:(o:Outcome,action:string)=>Promise<unknown>;onDiscuss:(o:Outcome)=>void;onRevise:(o:Outcome)=>void;compact?:boolean;children?:ReactNode}) {

@@ -14,6 +14,7 @@ import { DocsPage } from '../docs/DocsPage'
 import { pages, repository, sections, version } from 'virtual:nook-docs'
 import { run } from './run'
 import { withSiteHeader } from './header'
+import { withoutLeadingFree } from './run-copy'
 
 // Contract text under 13px (H11): the clause kind tags (12.5px from 761px up) and the phone eyebrow (12px).
 const contractText = '@media(min-width:761px){.kind{font-size:13px}}@media(max-width:760px){.eyebrow{font-size:13px}}'
@@ -32,8 +33,8 @@ export async function sitePages({ styles, contract }: SiteContext): Promise<Site
   }))
   return {
     pages: [
-      { path: '/', html: document('Nook — Talk it through. Get it done.', '100% free, open source alternative to Slack and Microsoft Teams. Turn a message into a decision or a request. Everyone can see who’s on it.', <Homepage variant="site" />) },
-      { path: '/run', html: withSiteHeader(runPageHtml(identity, run, contract)) },
+      { path: '/', html: document('Nook — Talk it through. Get it done.', 'An open source alternative to Slack and Microsoft Teams. Turn a message into a decision or a request. Everyone can see who’s on it.', <Homepage variant="site" />) },
+      { path: '/run', html: withSiteHeader(withoutLeadingFree(runPageHtml(identity, run, contract))) },
       ...(contract ? [{ path: '/contract', html: withSiteHeader(withContractContext(contractPageHtml(identity, run, contract), contractSource, contract), 'contract', contractText) }] : []),
       ...docs,
       { path: '/404', html: withSiteHeader(siteNotFoundHtml(identity, run, contract)) },
