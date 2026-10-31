@@ -9,10 +9,10 @@ export async function personalBrowser({origin,owner,member,destination='evidence
  const cookie=person=>{const at=person.cookie.indexOf('=');return {name:person.cookie.slice(0,at),value:person.cookie.slice(at+1),url:origin}}
  const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
  try{await mkdir(destination,{recursive:true});for(const width of [1440,390]){
-  let context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000}})
+  let context=await browser.newContext({timezoneId:'UTC',serviceWorkers:'block',viewport:{width,height:width===390?844:1000}})
   try{
    await context.addCookies([cookie(owner)]);let page=await context.newPage()
-   const offerContext=await browser.newContext({serviceWorkers:'block',viewport:{width,height:900}});
+   const offerContext=await browser.newContext({timezoneId:'UTC',serviceWorkers:'block',viewport:{width,height:900}});
    try{const invitee=await invite(origin,owner.cookie,'synthetic-nook-offer-'+width+'-'+Date.now());await offerContext.addCookies([cookie(invitee)]);const offer=await offerContext.newPage();await offer.goto(origin+'/app?view=you');
     const region=offer.getByRole('region',{name:'Email notification offer',exact:true});await expect(region).toContainText('Email is off.');await expect(region.locator('details')).not.toHaveAttribute('open','');await region.getByText('Email options',{exact:true}).click();await region.getByLabel('Bundle interval').selectOption('60');
     await offer.addScriptTag({content:await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await offer.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);await offer.screenshot({path:resolve(destination,`email-offer-before-${width}.png`),fullPage:true});
@@ -27,7 +27,8 @@ export async function personalBrowser({origin,owner,member,destination='evidence
    await page.goto(origin+'/app?conversation='+room.id)
    await page.goto(origin+'/app?view=you');
    const vacationStart=new Date(Date.now()-60000),vacationEnd=new Date(Date.now()+3600000);
-   const local=stamp=>new Date(stamp-stamp.getTimezoneOffset()*60000).toISOString().slice(0,16);
+   // datetime-local values use the browser context’s UTC wall clock.
+   const local=stamp=>stamp.toISOString().slice(0,16);
    await page.getByLabel('Vacation starts',{exact:true}).fill(local(vacationStart));await page.getByLabel('Vacation ends',{exact:true}).fill(local(vacationEnd));
    await page.getByRole('button',{name:'Save vacation',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Vacation saved.'})).toBeVisible();
    await page.addScriptTag({content:await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'),'utf8')});assert.deepEqual(await page.evaluate(async()=>(await axe.run()).violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>v.id)),[]);
@@ -39,7 +40,7 @@ export async function personalBrowser({origin,owner,member,destination='evidence
    await page.getByRole('textbox',{name:'Message Product launch handoff '+width,exact:true}).fill(draft)
    await page.goto(origin+'/app?view=drafts');await expect(page.getByRole('heading',{name:'Drafts & sent',exact:true})).toBeVisible();await expect(page.getByText(draft,{exact:true})).toBeVisible()
    await page.screenshot({animations:'disabled',path:resolve(destination,`drafts-${width}.png`)})
-   const state=await context.storageState();await context.close();context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:width===390?844:1000},storageState:state});page=await context.newPage()
+   const state=await context.storageState();await context.close();context=await browser.newContext({timezoneId:'UTC',serviceWorkers:'block',viewport:{width,height:width===390?844:1000},storageState:state});page=await context.newPage()
    await page.goto(origin+'/app?view=drafts');await expect(page.getByText(draft,{exact:true})).toBeVisible();await page.getByRole('button',{name:'Continue draft',exact:true}).click();await expect(page.getByRole('textbox',{name:'Message Product launch handoff '+width,exact:true})).toHaveValue(draft)
    await page.getByRole('button',{name:'Send',exact:true}).click();await expect(page.getByRole('textbox',{name:'Message Product launch handoff '+width,exact:true})).toHaveValue('')
    await page.goto(origin+'/app?view=drafts');await expect(page.getByRole('heading',{name:'No drafts in this browser'})).toBeVisible();await page.getByRole('button',{name:'Sent',exact:true}).click();await expect(page.getByRole('article').filter({has:page.getByRole('heading',{name:room.name,exact:true})}).filter({hasText:draft})).toBeVisible();await page.screenshot({animations:'disabled',path:resolve(destination,`sent-${width}.png`)})

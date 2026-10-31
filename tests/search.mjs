@@ -34,8 +34,8 @@ export async function searchJourney(h){
   assert.equal((await find('Q3 type:dm')).items.length,0)
   const stamp='2026-10-01T03:30:00.000Z'
   await sql(`UPDATE nook_messages SET created='${stamp}' WHERE id='${draft.id}'`)
-  assert.ok(ids(await find('draft during:september',member,'&timeZone=America/New_York')).includes(draft.id))
-  assert.ok(!ids(await find('draft during:september',member,'&timeZone=UTC')).includes(draft.id))
+  assert.ok(ids(await find('draft during:2026-09',member,'&timeZone=America/New_York')).includes(draft.id))
+  assert.ok(!ids(await find('draft during:2026-09',member,'&timeZone=UTC')).includes(draft.id))
   document=await upload('Q3-retention-policy.pdf','application/pdf',searchPdf('Customer success handoff: reference PO 5k for Q3 HR approval.'))
   const text=await upload('sales-team-notes.txt','text/plain','The AI launch briefing covers payroll and café staffing.')
   const png=await upload('staffing-chart.png','image/png',await readFile(new URL('../public/icons/nook-192.png',import.meta.url)))

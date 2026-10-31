@@ -8405,7 +8405,7 @@
       "executable": false
     },
     "tests/personal-browser.mjs": {
-      "sha256": "68f203d57c95d2f3d9cd6692511614531292c488197abe67801565d08e1515de",
+      "sha256": "f7e3a4e402026b7ba3e244b3b0a2ace09320e8725f46bfbabf8814a711e9439d",
       "executable": false
     },
     "tests/personal.mjs": {
@@ -8605,7 +8605,7 @@
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
-      "sha256": "ddbda41b10d3e0e0435c6a6040ec85fd777e8c36470567b08f3227412dd450a4",
+      "sha256": "4206f3f1844c3cb6ea57159f359e25810ca7e2ee2ff217c5008dd4d85a758fb8",
       "executable": false
     },
     "tests/saved-reminders.mjs": {
@@ -8633,7 +8633,7 @@
       "executable": false
     },
     "tests/search.mjs": {
-      "sha256": "7e0c4d34a7121aa3cf4ef08d198e828071325fd2001300478e9408db64575ab6",
+      "sha256": "5e8965a9e42f979d7b81d0ff957f94a54d400711a29b124126dba5698a8b2ad0",
       "executable": false
     },
     "tests/slack-delta-browser.mjs": {

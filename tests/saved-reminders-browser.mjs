@@ -7,13 +7,14 @@ import {resolve} from 'node:path'
 export async function savedRemindersBrowser({origin,owner,member,destination='evidence/saved-reminders'}){
  const call=async(path,body,cookie=owner.cookie,method='POST')=>{const r=await fetch(origin+path,{method,headers:{cookie,origin,'content-type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});assert.equal(r.status,200);return r.json()}
  const browser=await chromium.launch({channel:'chromium',headless:true,args:['--use-mock-keychain','--password-store=basic']})
- const localTime=(minutes)=>{const d=new Date(Date.now()+minutes*60000),pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`}
+ // Match the UTC browser context even when the Node runner is in a DST zone.
+ const localTime=(minutes)=>{const d=new Date(Date.now()+minutes*60000),pad=n=>String(n).padStart(2,'0');return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`}
  try{
   await mkdir(destination,{recursive:true})
   for(const width of [1440,390]){
    const room=await call('/api/conversations',{name:'Support handoff '+width,kind:'dm',participants:[member.user.id]})
    const root=await call(`/api/conversations/${room.id}/messages`,{body:`Please review the ${width===390?'mobile':'desktop'} support handoff before Thursday’s launch briefing.`,intent:crypto.randomUUID()})
-   const context=await browser.newContext({viewport:{width,height:width===390?844:1000}})
+   const context=await browser.newContext({timezoneId:'UTC',viewport:{width,height:width===390?844:1000}})
    try{
     const [name,...value]=member.cookie.split('=');await context.addCookies([{name,value:value.join('='),url:origin}]);const page=await context.newPage()
     await page.goto(origin+'/app?conversation='+room.id+'&focus='+root.id)
