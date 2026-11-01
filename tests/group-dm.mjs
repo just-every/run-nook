@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict'
-const nav=(page,name)=>page.getByRole('navigation',{name:'Workspace',exact:true}).getByRole('button',{name:new RegExp('^'+name+'( \\d+)?$')})
+// Channels is the rail's group heading at 1440 and a tab at 390; the other daily items are buttons in the Workspace navigation.
+const nav=(page,name)=>name==='Channels'?page.getByRole('button',{name:'Channels',exact:true}):page.getByRole('navigation',{name:'Workspace',exact:true}).getByRole('button',{name:new RegExp('^'+name+'( \\d+)?$')})
 async function json(page,origin,path){const response=await page.request.get(origin+'/api/'+path);assert.equal(response.status(),200,path);return response.json()}
 export async function groupDmFlow({alice,bob,origin,aliceUser,bobUser,bobName}){
  await alice.locator('.nook-app[data-live-connected=true]').waitFor()
  const third=(await json(alice,origin,'users')).find(p=>p.id!==aliceUser.id&&p.id!==bobUser.id&&p.active!==0&&p.mode!=='guest')
  assert.ok(third,'a third current full teammate is available')
- await nav(alice,'Channels').click();await alice.getByRole('button',{name:'New message',exact:true}).last().click()
+ await nav(alice,'Channels').click();await alice.getByRole('button',{name:'New message',exact:true}).click()
  const groupDialog=alice.getByRole('dialog',{name:'New message',exact:true})
  await groupDialog.getByRole('button',{name:'Start a group message',exact:true}).click()
  await groupDialog.getByLabel(bobName,{exact:true}).check();await groupDialog.getByLabel(third.name,{exact:true}).check()

@@ -23,6 +23,11 @@
   .nook-app .mobile-tabs button[aria-current=page] { color: var(--ink); font-weight: 600; }
   .nook-app .mobile-tabs .count { margin-left: 0; }
   .nook-app .page-content { padding: var(--s4); }
+  /* The list is the Channels tab: the All unreads head row and each group's "+" are 44px targets. */
+  .nook-app .unreads-row { min-height: 52px; padding: 0 4px; border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); font-size: var(--fs-body); }
+  .nook-app .unreads-row svg { display: block; }
+  .nook-app .group-heading { min-height: 44px; }
+  .nook-app .group-heading .icon-button { width: 44px; height: 44px; border-radius: 50%; background: var(--wash); color: var(--ink); }
   .nook-app .field :is(input, textarea, select) { font-size: 16px; }
   .nook-app .search-form .field input { font-size: 17px; }
   .nook-app dialog { width: 100%; max-width: none; max-height: 88dvh; margin: auto 0 0; padding: 20px var(--s4) calc(20px + env(safe-area-inset-bottom, 0px)); border-radius: 18px 18px 0 0; }

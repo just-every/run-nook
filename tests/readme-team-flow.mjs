@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 export async function readmeTeamFlow(page,origin,width,{capture=async()=>{}}={}){
  const name=`Local plans ${width}`,ownerText=`Owner started plans at ${width}`,reply=`Dev member replied at ${width}`;
  await page.goto(`${origin}/auth/dev/enter?as=owner&returnTo=/app`);await page.waitForURL(origin+'/app');
- await page.goto(origin+'/app?view=channels');await page.locator('.nook-app[data-live-connected="true"]').waitFor();await page.getByRole('button',{name:'Create channel',exact:true}).last().click();
+ await page.goto(origin+'/app?view=channels');await page.locator('.nook-app[data-live-connected="true"]').waitFor();await page.getByRole('button',{name:'Create channel',exact:true}).click();
  const dialog=page.getByRole('dialog');await dialog.getByLabel('Channel name',{exact:true}).fill(name);
  await dialog.getByLabel('Visibility',{exact:true}).selectOption('private');await dialog.getByRole('button',{name:'Create channel',exact:true}).click();
  await page.getByLabel('Message '+name,{exact:true}).fill(ownerText);await page.getByRole('button',{name:'Send',exact:true}).click();await page.locator('.message-body').filter({hasText:ownerText}).waitFor();
