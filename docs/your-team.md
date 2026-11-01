@@ -13,7 +13,7 @@ An admin does not get extra access to another person's direct messages. New memb
 
 ## Invitations
 
-On a hosted workspace, owners and admins open **You → Team**. In **Invite someone**, leave **Action** on **Invite a teammate**, enter their name and email, choose their access type and role, then select the initial channels. Nook sends the one-time invitation through the mail provider configured by the owner; the invitee confirms its link.
+On a hosted workspace, owners and admins open **You** (the profile button on desktop, the You tab on a phone) and choose **Team**, the first row. In **Invite someone**, leave **Action** on **Invite a teammate**, enter their name and email, choose their access type and role, then select the initial channels. Nook sends the one-time invitation through the mail provider configured by the owner; the invitee confirms its link.
 
 To invite many people at once, owners and admins use **Invite many people** on the same page: paste one person per line as `email, name, role, channels` (role is `member` or `guest`; separate channels with a semicolon) or upload a CSV, up to 1,000 rows. **Preview invitations** flags invalid addresses, repeated addresses, people who already have an account, invitations already pending, and rows Nook cannot send (an admin or owner role, an unknown channel, a guest with no channel, a missing name) and sends nothing. **Send** then issues one single-use invitation per remaining address, through the same mail and confirmation as a single invitation; it works through them five at a time and can be repeated safely. Invitations still expire after seven days. Each person who accepts joins the channels you named plus your default channels, and a guest only the channels you named. Pending invitations show **Resend invitation** and **Cancel invitation** in the people list. Admin and owner invitations stay one at a time. Invitation links, approved domains and invitation requests are not available yet.
 
@@ -39,7 +39,7 @@ Hover over a person under **People** (the actions are always shown on a phone) t
 
 ## Switching workspaces
 
-Each Nook installation is its own workspace with its own address. **Your workspaces** (in the sidebar, or under **You** on a phone) lists the installations this browser has signed in to. The list is kept on this device, not on any server.
+Each Nook installation is its own workspace with its own address. **Your workspaces** (a line under the wordmark in the sidebar, or under **You** on a phone) lists the installations this browser has signed in to. The list is kept on this device, not on any server.
 
 - Choose a workspace to open it at its own address. Sign-in, drafts, caches and notifications stay separate for each one, so signing out of one leaves the others signed in.
 - **Add a workspace** opens another installation by its address, such as `chat.example.com`.

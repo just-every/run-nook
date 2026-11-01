@@ -1,6 +1,6 @@
 # Finding people and channels
 
-The people directory and public-channel browser search the complete authorized collection. In Browse public channels, enter a name and choose Search channels, or choose More channels to continue the current result. Joining still gives access to that channel’s full history.
+The people directory (**Search → People**) and public-channel browser search the complete authorized collection. In Browse public channels, enter a name and choose Search channels, or choose More channels to continue the current result. Joining still gives access to that channel’s full history.
 
 Workspace people, channel members and the administrator’s Team list load their remaining pages automatically. A guest sees only identities visible through their current scope; each page rechecks current access. Channel details warn when membership approaches the existing 1,000-member channel limit. This is a membership limit, not a directory truncation.
 

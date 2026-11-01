@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Navigation
+
+The main menu now holds daily work only, the same at both widths. The sidebar lists Attention, Threads and Search, the conditional All unreads row, and the Channels and Direct messages groups; the phone bar shows Attention, Threads, Channels, Search and You. Reminders and Drafts & sent (with its Scheduled tab) are segments under Attention; Files, People and Saved are segments under Search. Old links such as `/app?view=reminders` and `/app?view=scheduled` still work and open the matching segment. New message and Create channel each have one entrance, the group "+", with a tooltip on hover and focus and a 44 px target on a phone. Team and invitations live only under You, as its first row for owners and admins. Exactly one item is current on every page (`aria-current="page"`), including a conversation, which now lights the Channels tab on a phone. The All unreads preference also hides the phone row.
+
 ## 0.5.0 — 2026-10-24
 
 Nook 0.5.0 packages the work on main since 0.4.0 with rer 0.2.80.
