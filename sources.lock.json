@@ -8469,7 +8469,7 @@
       "executable": false
     },
     "tests/profile-fields-ordering.mjs": {
-      "sha256": "35c5da81f293970bca3299da12b48f2e6fc18e9d879350aa4008916b0787b20a",
+      "sha256": "f749de27914ebd616d062d41421ad3c7889cdff19125a9b759e35c51332ae45e",
       "executable": false
     },
     "tests/profile-zone-browser.mjs": {

@@ -32,7 +32,9 @@ export async function profileFieldReadOrdering(page){
    // Let the browser consume the delivered response and commit its render.
    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))
   },
-  async close(){releaseReads.resolve();releaseWorkspace.resolve();releaseTeam.resolve();await page.unroute(team,teamHandler);await page.unroute(fields,fieldsHandler);await page.unroute(workspace,workspaceHandler)},
+  // This helper owns the dedicated page's routes. Drain them before disabling
+  // interception, including handlers still fetching when the gates are released.
+  async close(){releaseReads.resolve();releaseWorkspace.resolve();releaseTeam.resolve();await page.unrouteAll({behavior:'wait'})},
  }
 }
 
@@ -67,5 +69,5 @@ export async function profileFieldScopeOrdering(page,fields,width,expireProof){
   await expect(fields).toHaveAttribute('data-save','idle');await expect(fields).toHaveAttribute('aria-busy','false')
   await expect(fields.getByRole('status')).toHaveText('Profile fields changed while saving. The list was reloaded.')
   await expect(fields.getByRole('button',{name:'Edit Regional coverage '+width,exact:true})).toBeVisible()
- }finally{release.resolve();if(started)await finished.promise;releaseWorkspace.resolve();await Promise.all(workspaceDone);await page.unroute(workspace,workspaceHandler);await page.unroute(path,handler)}
+ }finally{release.resolve();if(started)await finished.promise;releaseWorkspace.resolve();await Promise.all(workspaceDone);await page.unrouteAll({behavior:'wait'})}
 }
