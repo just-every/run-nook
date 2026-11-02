@@ -1,0 +1,12 @@
+/* The host strip: one segmented track under the header, rose-wash selection, no counts. Hosted views keep their own controls. */
+.nook-app .host-page { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.nook-app .host-strip-row { flex: none; padding: var(--s3) var(--s5) 0; }
+.nook-app .host-strip { display: flex; width: fit-content; max-width: 100%; gap: 2px; padding: 3px; border-radius: var(--r-pill); background: var(--wash); }
+.nook-app .host-strip button { min-height: 34px; padding: 0 var(--s4); border-radius: var(--r-pill); color: var(--ink-soft); font-size: var(--fs-ui); font-weight: 500; white-space: nowrap; }
+.nook-app .host-strip button:hover { background: var(--wash); color: var(--ink); }
+.nook-app .host-strip button[aria-pressed=true] { background: var(--wash-select); color: var(--ink); font-weight: 600; }
+@media (max-width: 850px) {
+  .nook-app .host-strip-row { padding: var(--s3) var(--s4) 0; }
+  .nook-app .host-strip { width: 100%; padding: 0; }
+  .nook-app .host-strip button { flex: 1 1 0; min-height: 44px; padding: 0 var(--s2); }
+}

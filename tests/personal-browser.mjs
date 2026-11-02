@@ -38,7 +38,7 @@ export async function personalBrowser({origin,owner,member,destination='evidence
    await page.goto(origin+'/app?conversation='+room.id);
    const draft='Before the Thursday rollout, ask Ana to confirm the West Coast support rotation.'
    await page.getByRole('textbox',{name:'Message Product launch handoff '+width,exact:true}).fill(draft)
-   await page.goto(origin+'/app?view=drafts');await expect(page.getByRole('heading',{name:'Drafts & sent',exact:true})).toBeVisible();await expect(page.getByText(draft,{exact:true})).toBeVisible()
+   await page.goto(origin+'/app?view=drafts');await expect(page.getByRole('heading',{name:'Attention',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Attention sections',exact:true}).getByRole('button',{name:'Drafts & sent',exact:true})).toHaveAttribute('aria-pressed','true');await expect(page.getByText(draft,{exact:true})).toBeVisible()
    await page.screenshot({animations:'disabled',path:resolve(destination,`drafts-${width}.png`)})
    const state=await context.storageState();await context.close();context=await browser.newContext({timezoneId:'UTC',serviceWorkers:'block',viewport:{width,height:width===390?844:1000},storageState:state});page=await context.newPage()
    await page.goto(origin+'/app?view=drafts');await expect(page.getByText(draft,{exact:true})).toBeVisible();await page.getByRole('button',{name:'Continue draft',exact:true}).click();await expect(page.getByRole('textbox',{name:'Message Product launch handoff '+width,exact:true})).toHaveValue(draft)

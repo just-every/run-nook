@@ -35,7 +35,7 @@ export async function mattermostBrowser({origin,owner,journey,destination='evide
     await page.getByLabel('Conversation options',{exact:true}).click();await page.getByRole('button',{name:'Pinned messages',exact:true}).click();await expect(page.getByRole('dialog')).toContainText(root.body);await shot('pins')
     // The imported private save is visible through the existing product collection.
     await page.goto(origin+'/app?view=saved')
-    await expect(page.getByRole('heading',{name:'Saved',exact:true}).first()).toBeVisible();await shot('saved')
+    await expect(page.getByRole('heading',{name:'Search',exact:true}).first()).toBeVisible();await expect(page.getByRole('navigation',{name:'Search sections',exact:true}).getByRole('button',{name:'Saved',exact:true})).toHaveAttribute('aria-pressed','true');await shot('saved')
    }finally{await context.close()}
   }
  }finally{await browser.close()}

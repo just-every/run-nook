@@ -10,8 +10,9 @@ import '../app-style/threads.css'
 import './personal.css'
 type Sent={id:string;conversation:string;parent:string|null;body:string;created:string;name:string;kind:string}
 type Props={user:Person;conversations:Conversation[];revision:number;privateSignal:AbortSignal;onError:(e:unknown)=>void;onOpen:(conversation:string,message:string|null,thread:string|null)=>void;refresh:()=>Promise<void>}
-export function DraftsSentView(props:Props){
- const [section,setSection]=useState<'drafts'|'scheduled'|'sent'>('drafts')
+// view=scheduled opens this view with its Scheduled tab selected.
+export function DraftsSentView({initialSection='drafts',...props}:Props&{initialSection?:'drafts'|'scheduled'}){
+ const [section,setSection]=useState<'drafts'|'scheduled'|'sent'>(initialSection)
  return <><nav className="personal-tabs" aria-label="Drafts and sent sections">{(['drafts','scheduled','sent'] as const).map(value=><button className="soft-button" key={value} aria-pressed={section===value} onClick={()=>setSection(value)}>{value==='drafts'?'Drafts':value==='scheduled'?'Scheduled':'Sent'}</button>)}</nav>{section==='scheduled'?<ScheduledView {...props} onOpen={(conversation,message,thread)=>props.onOpen(conversation,message,thread)}/>:section==='drafts'?<DraftList {...props}/>:<SentList {...props}/>}</>
 }
 function DraftList({user,conversations,onOpen,onError}:Props){

@@ -22,7 +22,7 @@ function WorkspaceList({device}:{device:DeviceWorkspaces}){
  return <div className="workspaces-list">
   <p className="workspaces-note">Saved on this device.</p>
   <ul aria-label="Your workspaces">{device.list.entries.map(e=>{const current=e.origin===location.origin;return <li key={e.origin} className={current?'current':''}>
-   {current?<span className="workspace-entry" aria-current="page"><strong>{e.name||'Another workspace'}</strong><small>This workspace{e.account?' · '+e.account:''}</small></span>
+   {current?<span className="workspace-entry" aria-current="true"><strong>{e.name||'Another workspace'}</strong><small>This workspace{e.account?' · '+e.account:''}</small></span>
    :<a className="workspace-entry" href={e.origin+'/app'} onClick={event=>{event.preventDefault();device.open(e.origin)}}><strong>{e.name||'Another workspace'}</strong><small>{e.account?'Signed in as '+e.account:'Added on this device'}</small></a>}
    {!current&&<button type="button" className="text-button" onClick={()=>device.remove(e.origin)}>Remove<span className="sr-only"> {e.name||'Another workspace'}</span></button>}
   </li>})}</ul>
