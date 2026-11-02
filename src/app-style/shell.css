@@ -34,13 +34,22 @@ body:has(.nook-app) { margin: 0; overflow: hidden; background: var(--brand-paper
 .nook-app .nook-wordmark svg { width: 22px; height: 24px; flex: none; }
 .nook-app .workspace-nav { padding: 0 12px; }
 .nook-app .workspace-nav button { display: flex; width: 100%; min-height: 36px; align-items: center; gap: 10px; margin: 1px 0; padding: 0 10px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
-.nook-app :is(.workspace-nav button, .conversation-link, .profile):hover { background: var(--wash); }
-.nook-app :is(.workspace-nav button, .conversation-link, .profile).selected { background: var(--wash-select); font-weight: 500; }
+.nook-app :is(.workspace-nav button, .unreads-row, .group-link, .conversation-link, .profile):hover { background: var(--wash); }
+.nook-app :is(.workspace-nav button, .unreads-row, .conversation-link, .profile).selected { background: var(--wash-select); font-weight: 500; }
 .nook-app .workspace-nav .count { margin-left: auto; }
 .nook-app .sidebar-conversations { flex: 1; min-height: 0; overflow: auto; padding: 14px 12px; scrollbar-width: thin; }
 .nook-app .conversation-group + .conversation-group { margin-top: 16px; }
-.nook-app .group-heading { display: flex; min-height: 28px; align-items: center; justify-content: space-between; padding: 0 0 0 10px; }
+/* All unreads is a quiet text row at the head of the list; rose wash marks only the one current item. */
+.nook-app .unreads-row { display: flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; margin: 0 0 12px; padding: 0 10px; border-radius: var(--r-control); color: var(--ink-soft); font-size: var(--fs-ui); text-align: left; }
+.nook-app .unreads-row.selected { color: var(--ink); }
+.nook-app .unreads-row svg { display: none; width: 18px; height: 18px; flex: none; color: var(--ink-faint); }
+.nook-app .group-heading { display: flex; min-height: 32px; align-items: center; justify-content: space-between; padding: 0 0 0 10px; }
+.nook-app .group-heading.selected { border-radius: var(--r-control); background: var(--wash-select); }
+.nook-app .group-heading.selected h2 { color: var(--ink); }
+.nook-app .group-heading h2 { flex: 1; min-width: 0; }
 .nook-app .group-heading .icon-button { width: 28px; height: 28px; }
+.nook-app .group-link { display: block; width: 100%; min-height: 32px; padding: 0; border-radius: var(--r-control); color: inherit; font: inherit; text-align: left; }
+.nook-app .group-link:hover { background: transparent; }
 .nook-app .conversation-group h2 { margin: 0; color: var(--ink-soft); font: 500 var(--fs-meta)/1.4 var(--brand-font-text); }
 .nook-app .conversation-link { display: flex; width: 100%; min-height: 36px; align-items: center; gap: 10px; margin: 1px 0; padding: 0 10px; border-radius: var(--r-control); font-size: var(--fs-body); text-align: left; }
 .nook-app .conversation-link > span:not(.avatar):not(.channel-prefix):not(.count) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -93,5 +102,3 @@ body:has(> #rer-dev-badge):has(> .nook-app) { display: flex; flex-direction: col
 body:has(> .nook-app) > #rer-dev-badge { flex: none; margin-bottom: 0; }
 body:has(> #rer-dev-badge) > .nook-app { flex: 1; min-height: 0; }
 body:has(> #rer-dev-badge) > .nook-app .app { height: 100%; }
-.nook-app .channel-invite { margin-bottom: 20px; }
-.nook-app .channel-invite p { margin: 4px 0 0; color: var(--ink-soft); font-size: var(--fs-meta); }

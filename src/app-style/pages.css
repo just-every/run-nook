@@ -2,10 +2,13 @@
 
 /* Channels: the rail already lists your conversations, so wide screens show only the directory; phones and guests keep the flat list. */
 .nook-app .channels-page .conversation-group h2 { margin: 0; }
-.nook-app .channels-page .group-heading { padding: var(--s3) 4px 4px; }
+.nook-app .channels-page .group-heading { padding: var(--s2) 0 0 4px; }
+.nook-app .channels-page .conversation-group:has(+ :not(.conversation-group)) { margin-bottom: var(--s5); }
 .nook-app .channels-page .conversation-link { min-height: 52px; margin: 0; padding: 0 4px; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
 .nook-app .channels-page .conversation-link:hover { background: var(--wash); }
-@media (min-width: 851px) { .nook-app .channels-page.has-directory .conversation-group { display: none; } }
+/* You: the Team row opens the page for owners and admins, set off from the settings that follow. */
+.nook-app .profile-page .page-column > .profile-row:first-child { border-top: 0; border-bottom: 1px solid var(--line); margin-bottom: var(--s3); }
+@media (min-width: 851px) { .nook-app .channels-page.has-directory .conversation-group, .nook-app .channels-page .unreads-row { display: none; } }
 
 /* Search: a quiet underlined field, then results as plain rows */
 .nook-app .search-form { display: flex; align-items: center; gap: var(--s3); margin: 0 0 var(--s4); }

@@ -31,7 +31,7 @@ export async function pilotBrowser({browser,installation,width,destination}){
   await enterLocal(owner,origin,'owner',installation.open);
   await enterLocal(member,origin,'member');
   const person=await read(memberContext,origin,'/api/me');
-  await owner.goto(origin+'/app?view=channels');await expect(owner.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await owner.getByRole('button',{name:'Create channel',exact:true}).last().click();
+  await owner.goto(origin+'/app?view=channels');await expect(owner.locator('.nook-app[data-live-connected="true"]')).toBeVisible();await owner.getByRole('button',{name:'Create channel',exact:true}).click();
   const dialog=owner.getByRole('dialog');await dialog.getByLabel('Channel name',{exact:true}).fill(channelName);await dialog.getByLabel('Visibility',{exact:true}).selectOption('private');await dialog.getByRole('button',{name:'Create channel',exact:true}).click();
   await owner.getByLabel('Message '+channelName,{exact:true}).waitFor();
   const channels=await read(ownerContext,origin,'/api/conversations'),conversation=channels.find(c=>c.name===channelName);assert.ok(conversation);

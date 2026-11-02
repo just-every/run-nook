@@ -9,7 +9,8 @@ import {browserSignIn} from './auth-support.mjs'
 import {hostileMessage,assertSafeMessage} from './browser-markup.mjs'
 import {auditComposerRouting} from './accessibility.mjs'
 // A destination may carry its unread count in its accessible name, as in "Attention 2".
-const nav=(page,name)=>page.getByRole('navigation',{name:'Workspace',exact:true}).getByRole('button',{name:new RegExp('^'+name+'( \\d+)?$')})
+// Channels is the rail's group heading at 1440 and a tab at 390; the other daily items are buttons in the Workspace navigation.
+const nav=(page,name)=>name==='Channels'?page.getByRole('button',{name:'Channels',exact:true}):page.getByRole('navigation',{name:'Workspace',exact:true}).getByRole('button',{name:new RegExp('^'+name+'( \\d+)?$')})
 async function json(page,origin,path,data,method=data?'POST':'GET'){
  const response=await page.request.fetch(origin+'/api/'+path,{method,data});assert.equal(response.status(),200,`${method} ${path}`);return response.json()
 }
@@ -33,7 +34,7 @@ export async function runBrowser(origin,destination){
    try{
     await browserSignIn(alice,origin,aliceName);await browserSignIn(bob,origin,bobName)
     const aliceUser=await json(alice,origin,'me'),bobUser=await json(bob,origin,'me')
-    await alice.getByRole('button',{name:'Create channel',exact:true}).last().click()
+    await alice.getByRole('button',{name:'Create channel',exact:true}).click()
     await alice.getByLabel('Channel name',{exact:true}).fill(channelName)
     await alice.getByLabel(bobName,{exact:true}).check()
     await alice.getByRole('dialog').getByRole('button',{name:'Create channel',exact:true}).click()
@@ -248,7 +249,7 @@ export async function runBrowser(origin,destination){
     for(const page of [alice,bob])assert.deepEqual(await page.evaluate(()=>{const ids=[...document.querySelectorAll('[id]')].map(node=>node.id);return ids.filter((id,i)=>ids.indexOf(id)!==i)}),[],'no duplicate DOM IDs')
     checks.push(`${label}: maximum-size binary upload reservation retry after lost acknowledgement and reload, authorized download/remove, literal human markup, exact-intent retry after lost acknowledgement and reload`)
     // Two interactions create a DM, named for the other participant in each session.
-    await nav(alice,'Channels').click();await alice.getByRole('button',{name:'New message',exact:true}).last().click();await alice.getByRole('dialog').getByRole('button',{name:bobName,exact:true}).click()
+    await nav(alice,'Channels').click();await alice.getByRole('button',{name:'New message',exact:true}).click();await alice.getByRole('dialog').getByRole('button',{name:bobName,exact:true}).click()
     await expect(alice.getByRole('heading',{name:bobName,exact:true})).toBeVisible()
     const dm=(await json(alice,origin,'conversations')).find(c=>c.kind==='dm'&&c.name===bobName)
     await bob.goto(origin+`/app?view=chat&conversation=${dm.id}`);await expect(bob.getByRole('heading',{name:aliceName,exact:true})).toBeVisible()
