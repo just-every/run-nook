@@ -32,7 +32,7 @@ Archiving keeps history available and stops new posts, replies, edits, reactions
 
 ## Saved context and pins
 
-Choose **More → Save for later** on a message or **Save file** on an attachment. **Saved** is a private, ordered list, available in the desktop rail and under **You** on a phone. You can also save an HTTP or HTTPS link associated with a conversation; Nook does not fetch it. Saves survive sign-in on another device and duplicate saves retain their original order. Choose **Remind me** on a saved item to pick a future date and time in the time zone shown. Edit or cancel it from Saved. When due, it appears privately in **Attention**, where you can dismiss it or snooze it for an hour; quiet time holds it. Reminders survive restart and never change unread messages or accepted work. If the source is erased or you lose access before it is due, the reminder is canceled.
+Choose **More → Save for later** on a message or **Save file** on an attachment. **Saved** is a private, ordered list under **Search → Saved** on desktop and on a phone. You can also save an HTTP or HTTPS link associated with a conversation; Nook does not fetch it. Saves survive sign-in on another device and duplicate saves retain their original order. Choose **Remind me** on a saved item to pick a future date and time in the time zone shown. Edit or cancel it from Saved. When due, it appears privately in **Attention**, where you can dismiss it or snooze it for an hour; quiet time holds it. Reminders survive restart and never change unread messages or accepted work. If the source is erased or you lose access before it is due, the reminder is canceled.
 
 Channel members can choose **More → Pin to channel** and retrieve shared context from **Conversation options → Pinned messages**, with who pinned it and when. Direct conversations do not have shared pins. Archived channels keep pins readable but cannot change them.
 
@@ -48,7 +48,7 @@ A channel with bookmarks shows them in a bar above its messages: links, files fr
 
 ## All unreads and group conversations
 
-Open **All unreads** in the sidebar, or from **You** on a phone, to catch up in sidebar order. Reading the list leaves messages unread until you open their conversation or choose **Mark conversation read** or **Mark all read**. Undo is available for ten seconds. A later read from another session wins over undo; Attention and accepted work are unchanged. Ctrl Shift A (Command Shift A on a Mac) opens the view; Shift Escape marks all read. You can hide its sidebar entry under You.
+Open **All unreads**, the row at the head of the conversation list (in the sidebar on desktop, on the Channels tab on a phone), to catch up in list order. Reading the list leaves messages unread until you open their conversation or choose **Mark conversation read** or **Mark all read**. Undo is available for ten seconds. A later read from another session wins over undo; Attention and accepted work are unchanged. Ctrl Shift A (Command Shift A on a Mac) opens the view; Shift Escape marks all read. You can hide its row under **You**.
 
 In a group DM’s **Details**, choose a private channel name and **Convert to private channel**. Its full history and original participants move together, with the same message, thread and file IDs. The fixed DM becomes read-only with a link to the channel. Only an original participant may convert it, and every original participant must still have access; restore missing access explicitly before converting. Later invitations follow normal private-channel permissions and disclose full history.
 
@@ -56,7 +56,7 @@ In a group DM’s **Details**, choose a private channel name and **Convert to pr
 
 Write in a conversation or thread, attach files and choose **Schedule for later**. For a new text message, use **Conversation options → Schedule message**. Review the owner, current audience, files and first send times. Choose a named time zone and either a one-off time or a daily, weekday, weekly or monthly recurrence with an end date. Times may be scheduled up to a year ahead; a series may run for up to a year after its first occurrence.
 
-Open **Scheduled** in the sidebar or **You → Scheduled messages** on a phone. Inspect pending messages and occurrence history, change future text or times, remove future attachments, pause, review and resume, or cancel. A message already sent stays in its conversation. File templates stay private until sent and each occurrence receives an independent copy. Deleting a sent copy does not change future sends. Erasing an original template stops the schedule and names the missing file as the reason to review it. Cancel a draft dialog to change its attachments in the conversation composer.
+Open **Attention → Drafts & sent → Scheduled**. Inspect pending messages and occurrence history, change future text or times, remove future attachments, pause, review and resume, or cancel. A message already sent stays in its conversation. File templates stay private until sent and each occurrence receives an independent copy. Deleting a sent copy does not change future sends. Erasing an original template stops the schedule and names the missing file as the reason to review it. Cancel a draft dialog to change its attachments in the conversation composer.
 
 The scheduler runs without an open browser and checks the sender’s current identity, membership, thread, mentions and posting permission again when due. A failed or unconfirmed send is visible with its reason; it is never automatically reposted. **Check scheduler** retries arming the durable scheduler without creating a second occurrence. More than 15 minutes late after an outage is held for review: choose a new future time before resuming. Restored archives pause active schedules for the same review.
 
@@ -64,13 +64,13 @@ Recurrence keeps the chosen local wall-clock time across daylight saving. A miss
 
 ## Drafts & sent
 
-Open **Drafts & sent** in the sidebar, or under **You** on a phone. **Drafts** lists unsent messages saved in this browser for your account, including thread replies and unconfirmed sends. Continue a draft to reopen its conversation or thread; retrying an unconfirmed send retains its original intent. Browser drafts do not sync to another device.
+Open **Attention → Drafts & sent**. **Drafts** lists unsent messages saved in this browser for your account, including thread replies and unconfirmed sends. Continue a draft to reopen its conversation or thread; retrying an unconfirmed send retains its original intent. Browser drafts do not sync to another device.
 
 **Scheduled** contains the same edit, pause, cancel and history controls as Scheduled messages. **Sent** lists messages you sent in the last 30 days, newest first, with pages of older messages and a link back to each message. It shows current revisions and excludes deleted messages and conversations you can no longer read. Imported history is not a sent message.
 
 ## Files
 
-Choose **Files** in a conversation’s Messages/Files tabs to browse its shared files, newest first, or open **Files** from the sidebar or **You** to browse all conversations you can read. Filter by person or file type, download the original bytes, preview supported PNG/JPEG images, or open a file’s original message/thread. Native files and published imported files appear together, with their original author and shared time. Staged uploads and deleted files do not appear; losing conversation access removes its files. File contents are not searched.
+Choose **Files** in a conversation’s Messages/Files tabs to browse its shared files, newest first, or open **Search → Files** to browse all conversations you can read. Filter by person or file type, download the original bytes, preview supported PNG/JPEG images, or open a file’s original message/thread. Native files and published imported files appear together, with their original author and shared time. Staged uploads and deleted files do not appear; losing conversation access removes its files. File contents are not searched.
 
 ## Notes and lightweight lists
 

@@ -49,7 +49,7 @@ Reply inline or open the full discussion. **Mark thread read** clears that threa
 
 ## Personal and channel reminders
 
-Open **Reminders** in the sidebar or **You → Reminders** on a phone. You can also type `/remind` in a conversation, choose **Remind me** from a message’s menu, or **Remind me about file** beside a file.
+Open **Attention → Reminders**, the second segment under the page title on desktop and on a phone. You can also type `/remind` in a conversation, choose **Remind me** from a message’s menu, or **Remind me about file** beside a file.
 
 Enter a target, text and time, then choose **Preview reminder**. For example:
 

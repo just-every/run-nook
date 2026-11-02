@@ -1,6 +1,6 @@
 # Integration tokens
 
-An integration token lets another service, such as a report, a monitor or a CI job, post into chosen channels without anyone's sign-in. Only owners manage them, under **You → Team → Integration tokens**.
+An integration token lets another service, such as a report, a monitor or a CI job, post into chosen channels without anyone's sign-in. Only owners manage them, under **You → Team → Integration tokens** (the Team row is the first row of You).
 
 ## Create a token
 

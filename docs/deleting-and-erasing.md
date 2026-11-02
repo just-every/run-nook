@@ -4,7 +4,7 @@ Authors can delete their own native messages and remove their own native files. 
 
 ## Erase a teammate
 
-In **You → Team**, choose **Erase member**. Owners can erase other eligible accounts; admins can erase accounts with the member role, including guest access. You cannot erase yourself or the last active owner.
+In **You**, choose **Team**, then **Erase member**. Owners can erase other eligible accounts; admins can erase accounts with the member role, including guest access. You cannot erase yourself or the last active owner.
 
 The preview shows counts without repeating the person's details. Type **ERASE** to confirm. The receipt reports progress and elapsed time. You can close the dialog while accepted work continues. **Pending erasures** lets an eligible operator resume work with their current authority.
 
