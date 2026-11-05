@@ -1621,7 +1621,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "fbc77dc15e20de95c76d6b9b7efcdd902328cf5b47c8878529bdb962f0ffb286",
+      "sha256": "40154f04bec967d7e098d1d5b804d63184a7d80d1d4fbb534ecd11986b1142e6",
       "executable": false
     },
     "owner-deployment.json": {
@@ -1693,7 +1693,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "6737dfd6557c7db19d4e4db13f476a41def9c36b0cfdb8b096fbb9558bb26194",
+      "sha256": "c98f06153d6a38a57fc00d8342b352f9318be7b2537dc9b0eebfee48fe3109a4",
       "executable": false
     },
     "release-history/0.4.0.json": {
