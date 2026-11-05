@@ -44,12 +44,21 @@ documents, a Hono HTTP boundary, D1 storage and Base operator-auth sign-in.
 One line installs the `rer` command, clones the latest source from `main` into
 `run-nook` and starts it. Git is required; rer brings Node and pnpm.
 
+The [Nook install page](https://run-nook.com/run) has the public setup instructions.
+
 Use `curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-nook`.
 
 Already have Node 22 or later? This does the same:
 
 ```sh
 npx -y @runeditrun/rer dev just-every/run-nook
+```
+
+The shell installer puts `rer` in `$HOME/.local/bin` without editing shell
+profiles. In each new terminal, run this before the bare `rer` commands below:
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
 To start it again later, run the same line from the same folder,
@@ -145,8 +154,10 @@ SendGrid or Resend mail options, with your own provider credentials.
 
 ### Deploy to your own Cloudflare account
 
+Stop this checkout's dev or preview app first. Deployment commands, including
+the dry run, require exclusive local state and refuse an active app with exit 4.
 Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment before
-the dry run. rer 0.2.80 validates production sign-in configuration before building.
+the dry run; it validates production sign-in configuration before building.
 After `rer reset` and `rer import`, the local installer answers are gone. Append
 `--owner-name "Your name"` to the dry run and real deploy commands below so the
 hosted owner has your name; `OWNER_EMAIL` supplies the mailbox only.
@@ -158,10 +169,13 @@ OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… M
 ```
 
 Without `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, the dry run is expected
-to refuse with exit 3 (`missing_input`), naming both missing inputs. It cannot
-inspect the target secret bindings without them. Supply those credentials in
-your environment or an owned 0600 `--env-file` for a complete dry run; it reads
-the target configuration without deploying. A real deploy creates or reuses the D1 database and Worker
+to complete with exit 0 once the app is stopped and the local checks pass. It
+builds and validates offline, then prints a deployment plan. It needs no
+Cloudflare credentials, makes no provider request and deploys nothing; target
+secret bindings and remote readiness are not checked.
+
+A real deploy needs the Cloudflare credentials in your environment or an owned
+0600 `--env-file`. It creates or reuses the D1 database and Worker
 named after this project, applies pending migrations, uploads the build, checks
 health and then claims the hosted owner from `OWNER_EMAIL`. Set it to your real
 email address at deploy; the local development identity is for this computer.
