@@ -13,6 +13,8 @@ export async function auditJourney({post,get,request,owner,member,registered,che
   const own=(await post('/api/conversations',{name:'Departing team handoff',kind:'channel'},target.cookie)).data
   const before=(await get('/api/team/audit?actor='+target.user.id,admin.cookie)).data.items;assert.ok(before.some(row=>row.kind==='channel.created'))
   await post('/api/team/remove',{user:member.user.id,conversation:room.id})
+  // A membership fact names the person who acted and the member it affected.
+  for(const [kind,who] of [['membership.join','granted'],['membership.leave','removed']]){const rows=(await get('/api/team/audit?kind='+kind+'&scope='+encodeURIComponent(room.id),admin.cookie)).data.items;assert.ok(rows.some(row=>row.actor===owner.user.id&&row.subject===member.user.id&&row.subjectName&&row.reason.includes(who)),'membership '+kind+' names owner and member')}
   const details=(await get('/api/channels/'+room.id+'/details')).data
   await request('/api/channels/'+room.id+'/posting',{method:'PATCH',cookie:owner.cookie,body:{version:details.version,level:'managers',replies:'same',people:[]}})
   await post('/api/conversations/'+room.id+'/messages',{body:'Customer launch approved; keep the audit free of this message body.',intent:crypto.randomUUID(),adminOverride:true},admin.cookie)

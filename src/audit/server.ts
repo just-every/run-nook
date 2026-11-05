@@ -2,7 +2,8 @@ import type {Context} from '../platform/storage/context'
 import {authority} from '../platform/storage/context'
 import {fail} from '../family/team-chat/domain'
 const manager=`EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access access ON access.user=o.id WHERE o.id=? AND o.status='active' AND o.role IN ('owner','admin') AND access.active=1 AND access.mode='member')`
-const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'System' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,c.kind AS scopeKind,l.version,l.reason,l.outcome,l.count FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope`
+// A membership fact's affected member is the journal row its id names ('membership:<seq>'); the writer stays the actor.
+const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'System' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,c.kind AS scopeKind,l.version,l.reason,l.outcome,l.count,em.user AS subject,CASE WHEN em.user IS NULL THEN NULL ELSE COALESCE(sa.name,'Former member') END AS subjectName FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope LEFT JOIN nook_exit_membership em ON em.seq=CASE WHEN l.service='nook_exit_membership' THEN CAST(substr(l.id,12) AS INTEGER) END LEFT JOIN nook_actors sa ON sa.id=em.user`
 const allowed=['actor','kind','scope','outcome','from','until','cursor','format']
 function filters(params:URLSearchParams){
  if([...params.keys()].some(key=>!allowed.includes(key)))fail(400,'Unknown audit filter')
@@ -36,7 +37,7 @@ export async function auditRoute(c:Context,request:Request):Promise<Response|nul
  if(!['page','json','csv'].includes(format))fail(400,'Choose JSON or CSV')
  const first=await page(c,url.searchParams),headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
  if(format==='page')return Response.json(first,{headers})
- const encoder=new TextEncoder(),fields=['id','actor','actorName','service','at','kind','scope','scopeKind','version','reason','outcome','count']
+ const encoder=new TextEncoder(),fields=['id','actor','actorName','service','at','kind','scope','scopeKind','version','reason','outcome','count','subject','subjectName']
  // Formula-looking labels remain literal when opened in spreadsheet software.
  const csv=(value:any)=>'"'+String(value??'').replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"'
  let current=first,started=false,wrote=false

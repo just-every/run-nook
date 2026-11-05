@@ -11,3 +11,16 @@ export function eventWords(kind:string,scopeKind?:string|null){const words=kind.
 export const eventKinds=Object.keys(events)
 // The stored reason of a direct conversation's membership row says "Channel"; the row names its own kind.
 export function reasonWords(reason:string,scopeKind?:string|null){return scopeKind==='dm'?reason.replace(/^Channel membership/,'Conversation membership'):reason}
+// A membership fact has two people: the one who acted and the member it affected. A person joining or leaving on their
+// own is one line as before; someone adding or removing another names both, and a fact with no acting person names the member.
+type Membership={kind:string;actor:string|null;actorName:string;subject?:string|null;subjectName?:string|null;scope:string}
+const changed:Record<string,string>={'membership.join':'added','membership.leave':'removed'}
+export function auditHeadline(row:Membership&{scopeKind?:string|null}){
+ if(row.subject&&row.actor&&row.subject!==row.actor&&changed[row.kind])return (row.scopeKind==='dm'?{'membership.join':'Added to a direct conversation','membership.leave':'Removed from a direct conversation'}:{'membership.join':'Added to a channel','membership.leave':'Removed from a channel'})[row.kind]!
+ return eventWords(row.kind,row.scopeKind)
+}
+export function auditWho(row:Membership){
+ if(!row.subject||!row.subjectName||row.subject===row.actor)return row.actorName
+ if(!row.actor)return row.subjectName
+ return changed[row.kind]?`${row.actorName} ${changed[row.kind]} ${row.subjectName}`:row.actorName
+}

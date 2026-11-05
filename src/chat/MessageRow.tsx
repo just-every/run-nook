@@ -27,7 +27,8 @@ const tool=(label:string,icon:ReactNode,onClick:()=>void)=><button type="button"
 // The menu stays within the viewport, including a narrow thread pane or phone.
 function MoreMenu({message,canEdit,canErase,eraseTrigger,onEdit,onDelete,onErase,onForward}:{message:Message;canEdit:boolean;canErase:boolean;eraseTrigger:React.RefObject<HTMLButtonElement|null>;onEdit:()=>void;onDelete:()=>void;onErase:()=>void;onForward:()=>void}) {
  const menu=useRef<HTMLDetailsElement>(null),[open,setOpen]=useState(false),[position,setPosition]=useState({top:64,right:16})
- useDismiss(menu)
+ // A saved edit moves the message's version on: the menu that opened Edit closes with the dialog.
+ useDismiss(menu,message.version)
  return <details className="message-more menu" ref={menu} onToggle={e=>{setOpen(e.currentTarget.open);if(e.currentTarget.open){const box=e.currentTarget.getBoundingClientRect();setPosition({top:Math.max(64,Math.min(box.bottom+6,window.innerHeight-320)),right:Math.max(16,Math.min(window.innerWidth-box.right,window.innerWidth-236))})}}}><summary className="icon-button" data-tooltip="More actions" aria-label="More actions"><IconMore/></summary><div className="popover inline" style={{'--more-top':position.top+'px','--more-right':position.right+'px'} as React.CSSProperties}>{open&&<CollectionActions message={message}/>} <button type="button" onClick={onForward}>Forward</button>{canEdit&&<><button type="button" onClick={onEdit}>Edit</button><button type="button" onClick={onDelete}>Delete</button></>}{canErase&&<button type="button" className="erase-item" ref={eraseTrigger} onClick={onErase}>Erase message</button>}</div></details>
 }
 // A tap on the message itself (not a control, not a text selection) focuses it, which opens the tray on touch screens.
@@ -54,7 +55,7 @@ export function MessageRow({message:m,user,onThread,onAsk,onDecision,onEdit,onDe
     {!!m.poll&&<PollCard message={m.id} question={m.body}/>}
     {m.broadcast&&<BroadcastRecipients message={m.id} broadcast={m.broadcast}/>}
     {(!!m.urgent||!!m.notified?.length)&&<div className="message-routing">{!!m.urgent&&<strong>Urgent</strong>}{!!m.notified?.length&&<span>Notified: {m.notified.map(person=>person.name).join(', ')}</span>}{!!m.urgent&&!!m.urgentReason&&<span className="message-urgent-reason">{m.urgentReason}</span>}</div>}
-    {!thread&&onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}
+    {onOutcome&&<OutcomeLines outcomes={outcomes} onOpen={onOutcome}/>}
     {(m.attachments||[]).map(f=><div className="file-row reveal-host" key={f.id}>{f.state==='deleted'?<span className="muted">Attachment removed</span>:<>{previews&&<><ImagePreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/><TextPreview attachment={f} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/></>}<a href={`/api/attachments/${f.id}/download`} download={f.name}><strong>{f.name}</strong><small>{Math.max(1,Math.round(f.size/1024))} KB · Download</small></a><SaveFileAction conversation={m.conversation} attachment={f.id}/>{!m.immutable&&<ClipPlayer file={f} request={team.request} accessEpoch={team.accessEpoch} revision={team.revision} onDenied={team.onDenied}/>}{!m.immutable&&f.author===user.id&&<button type="button" className="text-button reveal" onClick={()=>onRemove(f.id)}>Remove file</button>}</>}</div>)}
     {!!m.immutable&&<SlackHistory history={m.slack} messageId={m.id} accessEpoch={team.accessEpoch} onDenied={team.onDenied}/>}
     {!m.immutable&&<ReactionChips reactions={reactions}/>}

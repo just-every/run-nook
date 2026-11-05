@@ -23,14 +23,13 @@ const repeats={none:'Once',daily:'Every day',weekdays:'Every weekday',weekly:'Ev
 
 export function RemindersView({revision,privateSignal,userId,onError,onOpen,refresh,conversations}:Props){
  const [page,setPage]=useState<ReminderPage|null>(null),[editor,setEditor]=useState<{existing?:Reminder}|null>(null),[busy,setBusy]=useState(false)
- const readEpoch=useRef(0),writing=useRef(false),emptyOpened=useRef(false)
+ const readEpoch=useRef(0),writing=useRef(false)
  const current=usePrivateScope(privateSignal,'reminders'),dialog=useRef<HTMLDialogElement>(null),titleId=useId()
  useEffect(()=>{
   let cancelled=false;const epoch=++readEpoch.current
   void api<ReminderPage>('reminders').then(next=>{if(!cancelled&&current()&&!writing.current&&epoch===readEpoch.current)setPage(next)}).catch(error=>{if(!cancelled&&current())onError(error)})
   return()=>{cancelled=true}
  },[revision,current,onError])
- useEffect(()=>{if(!page)return;if(page.items.length){emptyOpened.current=false;return}if(!emptyOpened.current){emptyOpened.current=true;setEditor({})}},[page])
  useEffect(()=>{
   if(!editor)return
   const trigger=document.activeElement as HTMLElement|null
@@ -64,6 +63,7 @@ export function RemindersView({revision,privateSignal,userId,onError,onOpen,refr
  return <section className="page-content threads-page"><div className="page-column">
   <button className="soft-button" disabled={busy} onClick={()=>setEditor({})}>Create reminder</button>
   {!page&&<p role="status" className="muted">Loading reminders…</p>}
+  {page&&!page.items.length&&<p className="empty-state">No reminders yet.</p>}
   {page?.items.map(item=>{
    const owner=item.user===userId,recipient=item.recipient===userId,finished=item.delivery==='done'||item.delivery==='cancelled'||item.state==='cancelled'
    const conversation=item.conversation?conversations.find(value=>value.id===item.conversation):null
