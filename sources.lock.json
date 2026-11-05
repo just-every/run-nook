@@ -2557,7 +2557,7 @@
       "executable": false
     },
     "scripts/local/transfer.mjs": {
-      "sha256": "f6d8d5e04b2a58d513d5a02b22a7f7cb07bec09d7ff4a6a2018d225e5828dd7e",
+      "sha256": "ad6c4270ed9aa535ccb756b8c663d9622150292875cd6e6064b4c0e11bb80b66",
       "executable": false
     },
     "scripts/notify-test-mail.mjs": {
@@ -5865,7 +5865,7 @@
       "executable": false
     },
     "src/dev/admit.server.ts": {
-      "sha256": "259d794b0db8dc7b8fa68851b77d8d7dadd7817d287d1161bd6147b14194aada",
+      "sha256": "2ce59f55d0527a3682d37f4d643b9f3ee78bf770667d1ae527959829497a0c99",
       "executable": false
     },
     "src/dev/personas.ts": {
@@ -7521,7 +7521,7 @@
       "executable": false
     },
     "src/server.dev.ts": {
-      "sha256": "6edb54a4853862270c1108ae3dd9cde289d8e5c64ab51923f6dc6f5babbc8f21",
+      "sha256": "6f8b450bdacd36ba97e6704f96f4c3ac8c6deaae8382f6576d1d37df4601eae4",
       "executable": false
     },
     "src/server.ts": {
@@ -8137,7 +8137,7 @@
       "executable": false
     },
     "tests/exit-export.test.mjs": {
-      "sha256": "2dc43f58980e1ccaddf493db0c9cd7a8927e3abf750be92367cfc0a7df48f9ca",
+      "sha256": "288a29e863ef0e147fc0947733f9c9f6b8685cdf93a9e41edf9237d920bba09f",
       "executable": false
     },
     "tests/fake-account.mjs": {

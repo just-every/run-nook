@@ -32,8 +32,8 @@ export async function transfer(direction,path,{root=process.cwd(),legacyOutput,l
   // archives written before that change.
   service=await createPortability({db:proxy.env.DB,buckets:{FILES:proxy.env.FILES},policy:{...await productPolicy(proxy.env.DB),...(direction==='import'?{partBytes:MAX_PART_BYTES}:{})},...(direction==='import'?{migrations:()=>migrations(root,proxy.env.DB)}:{})});
   if(direction==='export'){
-   // Dev personas are local-only people and never travel: suspend them through the product's own deactivation (it revokes their sessions and grants) so the archive holds them inactive. The next dev sign-in as a persona reactivates it.
-   await proxy.env.DB.prepare("UPDATE oa_operators SET status='inactive' WHERE lower(email) LIKE '%@dev.localhost' AND status='active'").run();
+   // Base excludes authentication tables. Keep durable product actors and their
+   // audiences intact: credential exclusion is not a member deactivation.
    await mkdir(dirname(path),{recursive:true,mode:0o700});const file=await privateFile(temporary,false);created=true;
    try{id=await service.exports.create();while((await service.exports.advance(id,{maxParts:16})).phase==='building'){}
     const reader=(await service.exports.download(id)).getReader();try{for(;;){const {done,value}=await reader.read();if(done)break;await file.writeFile(value)}}finally{await reader.cancel();reader.releaseLock()}await file.sync();
