@@ -8,7 +8,7 @@ import {devGate} from './base/modules/operator-auth/index.mjs'
 import {authBindings,authConfig} from './platform/operator-auth-runtime.mjs'
 import branding from './branding.json'
 import {devPersonas} from './dev/personas'
-import {admitPersona,reactivatePersona} from './dev/admit.server'
+import {admitPersona} from './dev/admit.server'
 import type {Bindings} from './platform/repository.server'
 export {ChatHub} from './platform/storage/live'
 
@@ -19,8 +19,9 @@ export default {
  async fetch(request,env,execution){
   const url=new URL(request.url),as=url.searchParams.get('as')
   const persona=url.pathname==='/auth/dev/enter'&&as&&devPersonas().some(person=>person.as===as)
-  // Only a request the key gate admits touches a persona: an export suspends them, and entering as one again reactivates it.
-  if(persona&&await keyed(env,request))await reactivatePersona(env.DB,as)
+  // As with the ordinary bootstrap door, imported actors require explicit
+  // offline mapping before the local layer may create any authentication row.
+  if(url.pathname==='/auth/dev/enter'&&await keyed(env,request)&&await env.DB.prepare('SELECT 1 WHERE NOT EXISTS(SELECT 1 FROM oa_bootstrap WHERE singleton=1) AND EXISTS(SELECT 1 FROM nook_actors)').first())return Response.json({error:'identity_recovery_required'},{status:409,headers:{'Cache-Control':'no-store'}})
   const response=await layered.fetch(request,env,execution)
   // The persona's operator exists once the layer has answered; admit it to the product before the redirect lands.
   if(persona&&response.status===303)await admitPersona(env.DB,as)

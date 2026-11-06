@@ -3,7 +3,8 @@ import {authority} from '../platform/storage/context'
 import {fail} from '../family/team-chat/domain'
 const manager=`EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access access ON access.user=o.id WHERE o.id=? AND o.status='active' AND o.role IN ('owner','admin') AND access.active=1 AND access.mode='member')`
 // A membership fact's affected member is the journal row its id names ('membership:<seq>'); the writer stays the actor.
-const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'System' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,c.kind AS scopeKind,l.version,l.reason,l.outcome,l.count,em.user AS subject,CASE WHEN em.user IS NULL THEN NULL ELSE COALESCE(sa.name,'Former member') END AS subjectName FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope LEFT JOIN nook_exit_membership em ON em.seq=CASE WHEN l.service='nook_exit_membership' THEN CAST(substr(l.id,12) AS INTEGER) END LEFT JOIN nook_actors sa ON sa.id=em.user`
+// DM subjects are private to current participants, including in streamed exports; managers outside the roster see the actor only.
+const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'System' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,c.kind AS scopeKind,l.version,l.reason,l.outcome,l.count,em.user AS subject,CASE WHEN em.user IS NULL THEN NULL ELSE COALESCE(sa.name,'Former member') END AS subjectName FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope LEFT JOIN nook_exit_membership em ON em.seq=CASE WHEN l.service='nook_exit_membership' THEN CAST(substr(l.id,12) AS INTEGER) END AND (c.kind<>'dm' OR EXISTS(SELECT 1 FROM nook_members dm WHERE dm.conversation=c.id AND dm.user=?)) LEFT JOIN nook_actors sa ON sa.id=em.user`
 const allowed=['actor','kind','scope','outcome','from','until','cursor','format']
 function filters(params:URLSearchParams){
  if([...params.keys()].some(key=>!allowed.includes(key)))fail(400,'Unknown audit filter')
@@ -23,7 +24,7 @@ function filters(params:URLSearchParams){
 async function page(c:Context,params:URLSearchParams){
  const {where,values}=filters(params),guard=`${authority} AND ${c.fence} AND ${manager}`,credentials=[...c.credentials,c.uid]
  const [rows,access]=await c.db.batch([
-  c.sql(`${projection} WHERE ${where} AND ${guard} ORDER BY l.at DESC,l.id DESC LIMIT 101`,...values,...credentials),
+  c.sql(`${projection} WHERE ${where} AND ${guard} ORDER BY l.at DESC,l.id DESC LIMIT 101`,c.uid,...values,...credentials),
   c.sql(`SELECT 1 WHERE ${guard}`,...credentials),
  ])
  if(!access.results.length){await c.check();fail(403,'Only owners and admins can read the audit log')}

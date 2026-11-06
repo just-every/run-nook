@@ -195,10 +195,13 @@ here; importing content deliberately does not authorize a new owner.
    ```
 
    Miniflare may also put `metadata.sqlite` here; it is bookkeeping, not the
-   workspace. Inspect the candidates read-only:
+   workspace. The no-Node shell installer keeps its Node executable at the
+   explicit path below, without adding `node` to PATH. Set it once for all
+   three Node commands in this procedure, then inspect the candidates read-only:
 
    ```sh
-   node --input-type=module <<'JS'
+   NOOK_NODE="${XDG_DATA_HOME:-$HOME/.local/share}/rer/node/bin/node"
+   "$NOOK_NODE" --input-type=module <<'JS'
    import {readdirSync} from 'node:fs';
    import {DatabaseSync} from 'node:sqlite';
    const directory = '.wrangler/state/v3/d1/miniflare-D1DatabaseObject';
@@ -211,6 +214,10 @@ here; importing content deliberately does not authorize a new owner.
    }
    JS
    ```
+
+   If you used the labelled Node alternative in the README instead of the
+   shell installer, set `NOOK_NODE="$(command -v node)"` to your installed
+   Node 22 or later before running these commands.
 
    Select the file with authority `normalized` and the restored actors. If
    several workspaces match, identify the intended one; do not select by age
@@ -225,7 +232,7 @@ here; importing content deliberately does not authorize a new owner.
    export NOOK_RESTORE_DB='.wrangler/state/v3/d1/miniflare-D1DatabaseObject/REPLACE-WITH-BINDING-FILENAME.sqlite'
    mkdir -p exports
    mkdir -m 700 exports/identity-recovery
-   node --input-type=module <<'JS'
+   "$NOOK_NODE" --input-type=module <<'JS'
    import {DatabaseSync, backup} from 'node:sqlite';
    const db = new DatabaseSync(process.env.NOOK_RESTORE_DB, {readOnly: true});
    try {
@@ -244,7 +251,7 @@ here; importing content deliberately does not authorize a new owner.
    each person will use. Choose an active owner. Then recover the snapshot:
 
    ```sh
-   node scripts/storage/recover-identities.mjs exports/identity-recovery/source.sqlite exports/identity-recovery/recovered.sqlite exports/identity-recovery/mapping.json
+   "$NOOK_NODE" scripts/storage/recover-identities.mjs exports/identity-recovery/source.sqlite exports/identity-recovery/recovered.sqlite exports/identity-recovery/mapping.json
    ```
 
 3. While the app is still stopped, preserve the imported file and its sidecars,

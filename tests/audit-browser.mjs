@@ -2,7 +2,7 @@ import {chromium,expect} from '@playwright/test'
 import assert from 'node:assert/strict'
 import {mkdir,writeFile} from 'node:fs/promises'
 import {resolve} from 'node:path'
-export async function auditBrowser({origin,admin,member,destination='evidence/audit'}){
+export async function auditBrowser({origin,admin,member,direct,destination='evidence/audit'}){
  await mkdir(destination,{recursive:true})
  const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
  try{
@@ -18,6 +18,12 @@ export async function auditBrowser({origin,admin,member,destination='evidence/au
     await log.getByLabel('Kind',{exact:true}).selectOption('');await log.getByLabel('Outcome',{exact:true}).selectOption('uncertain');await expect(log.locator('ol').getByText('Cancelled an export',{exact:true})).toBeVisible()
     await log.getByRole('heading',{name:'Audit log',exact:true}).scrollIntoViewIfNeeded();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:resolve(destination,`audit-${width}.png`)})
     await log.locator('li').filter({hasText:'Cancelled an export'}).scrollIntoViewIfNeeded();await page.screenshot({path:resolve(destination,`audit-items-${width}.png`)})
+    if(width===1440&&direct){
+     await log.getByLabel('Outcome',{exact:true}).selectOption('');await log.getByLabel('Kind',{exact:true}).selectOption('membership.join')
+     await log.getByLabel('Scope',{exact:true}).fill(direct.id);await log.getByRole('button',{name:'Apply text filters',exact:true}).click()
+     await expect(log.locator('li')).toHaveCount(2)
+     for(const row of await log.locator('li').all()){await expect(row).toContainText(direct.actorName+' · a direct conversation');await expect(row).not.toContainText(direct.participantName)}
+    }
     await context.clearCookies();await context.addCookies([cookie(member)]);await page.goto(origin+'/app?view=team');await expect(page.getByRole('region',{name:'Audit log',exact:true})).toHaveCount(0)
    }finally{await context.close()}
   }
