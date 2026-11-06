@@ -1,0 +1,100 @@
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+{
+  "stage": "after",
+  "doors": [
+    {
+      "reader": "owner",
+      "format": "page",
+      "status": 200,
+      "file": "owner-page.json",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "owner",
+      "format": "csv",
+      "status": 200,
+      "file": "owner-csv.csv",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "owner",
+      "format": "json",
+      "status": 200,
+      "file": "owner-json.json",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "unrelated-admin",
+      "format": "page",
+      "status": 200,
+      "file": "unrelated-admin-page.json",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "unrelated-admin",
+      "format": "csv",
+      "status": 200,
+      "file": "unrelated-admin-csv.csv",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "unrelated-admin",
+      "format": "json",
+      "status": 200,
+      "file": "unrelated-admin-json.json",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "participant-admin",
+      "format": "page",
+      "status": 200,
+      "file": "participant-admin-page.json",
+      "rows": 2,
+      "recipientDisclosed": true
+    },
+    {
+      "reader": "participant-admin",
+      "format": "csv",
+      "status": 200,
+      "file": "participant-admin-csv.csv",
+      "rows": 2,
+      "recipientDisclosed": true
+    },
+    {
+      "reader": "participant-admin",
+      "format": "json",
+      "status": 200,
+      "file": "participant-admin-json.json",
+      "rows": 2,
+      "recipientDisclosed": true
+    }
+  ],
+  "screens": [
+    {
+      "reader": "owner",
+      "width": 1440,
+      "height": 900,
+      "file": "owner-team-audit-1440.png",
+      "auditRows": 2,
+      "recipientDisclosed": false,
+      "text": "Joined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM\nJoined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM"
+    },
+    {
+      "reader": "owner",
+      "width": 390,
+      "height": 900,
+      "file": "owner-team-audit-390.png",
+      "auditRows": 2,
+      "recipientDisclosed": false,
+      "text": "Joined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM\nJoined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM"
+    }
+  ]
+}

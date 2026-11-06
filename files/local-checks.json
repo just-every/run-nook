@@ -1,0 +1,118 @@
+[
+  {
+    "name": "restore-audit-artifacts",
+    "command": [
+      "git",
+      "restore",
+      "--source=origin/main",
+      "--",
+      "evidence/audit"
+    ],
+    "exit": 0,
+    "log": "checks/restore-audit-artifacts.log"
+  },
+  {
+    "name": "restore-generated-views",
+    "command": [
+      "git",
+      "checkout",
+      "origin/main",
+      "--",
+      "ACCEPTANCE.md",
+      "docs/CLAIMS.md"
+    ],
+    "exit": 0,
+    "log": "checks/restore-generated-views.log"
+  },
+  {
+    "name": "contract-docs",
+    "command": [
+      "node",
+      "src/base/contract-docs.mjs",
+      "check"
+    ],
+    "exit": 0,
+    "log": "checks/contract-docs.log"
+  },
+  {
+    "name": "source-lock-generate",
+    "command": [
+      "node",
+      "scripts/edition-authoring/cli.mjs",
+      "lock"
+    ],
+    "exit": 0,
+    "log": "checks/source-lock-generate.log"
+  },
+  {
+    "name": "source-lock-check",
+    "command": [
+      "node",
+      "scripts/edition-authoring/cli.mjs",
+      "check"
+    ],
+    "exit": 0,
+    "log": "checks/source-lock-check.log"
+  },
+  {
+    "name": "diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "log": "checks/diff-check.log"
+  },
+  {
+    "name": "stage",
+    "command": [
+      "git",
+      "add",
+      "src/audit/server.ts",
+      "tests/audit-journey.mjs",
+      "tests/audit-browser.mjs",
+      "sources.lock.json"
+    ],
+    "exit": 0,
+    "log": "checks/stage.log"
+  },
+  {
+    "name": "staged-files",
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--stat"
+    ],
+    "exit": 0,
+    "log": "checks/staged-files.log"
+  },
+  {
+    "name": "staged-diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check"
+    ],
+    "exit": 0,
+    "log": "checks/staged-diff-check.log"
+  },
+  {
+    "name": "contract-source-unchanged",
+    "command": [
+      "git",
+      "diff",
+      "--exit-code",
+      "origin/main",
+      "--",
+      "CONTRACT.md",
+      "ACCEPTANCE.md",
+      "docs/CLAIMS.md",
+      ".github/workflows/verify.yml"
+    ],
+    "exit": 0,
+    "log": "checks/contract-source-unchanged.log"
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "stage": "before",
+    "width": 1440,
+    "jsonRows": 2,
+    "csvRows": 2,
+    "recipientDisclosed": true,
+    "passed": true
+  },
+  {
+    "stage": "before",
+    "width": 390,
+    "jsonRows": 2,
+    "csvRows": 2,
+    "recipientDisclosed": true,
+    "passed": true
+  },
+  {
+    "stage": "after",
+    "width": 1440,
+    "jsonRows": 2,
+    "csvRows": 2,
+    "recipientDisclosed": false,
+    "passed": true
+  },
+  {
+    "stage": "after",
+    "width": 390,
+    "jsonRows": 2,
+    "csvRows": 2,
+    "recipientDisclosed": false,
+    "passed": true
+  }
+]

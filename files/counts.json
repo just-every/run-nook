@@ -1,0 +1,29 @@
+{
+  "before": {
+    "contractStatuses": {
+      "partial": 104,
+      "missing": 54,
+      "done": 1
+    },
+    "clauses": 159,
+    "auditRuntimeRegistrations": 1
+  },
+  "main": {
+    "contractStatuses": {
+      "partial": 104,
+      "missing": 54,
+      "done": 1
+    },
+    "clauses": 159,
+    "auditRuntimeRegistrations": 1
+  },
+  "after": {
+    "contractStatuses": {
+      "partial": 104,
+      "missing": 54,
+      "done": 1
+    },
+    "clauses": 159,
+    "auditRuntimeRegistrations": 1
+  }
+}

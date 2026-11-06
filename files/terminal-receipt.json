@@ -1,0 +1,26 @@
+{
+  "repository": "just-every/run-nook",
+  "branch": "cloud/sd-nook-str-actions-1-fix1",
+  "head": "22dcc2d55bb017830e26f492964355ba3216c435",
+  "productPush": "successful",
+  "productRemoteRefVerified": true,
+  "verify": {
+    "id": 42223581001,
+    "status": "in_progress",
+    "conclusion": null,
+    "head_sha": "22dcc2d55bb017830e26f492964355ba3216c435",
+    "html_url": "https://github.com/just-every/run-nook/actions/runs/42223581001"
+  },
+  "localTouchedChecks": "passed",
+  "beforeAfter": "before-after.json",
+  "nativeDownloads": "native-downloads-check.json",
+  "screenshots": [
+    "after/owner-team-audit-1440.png",
+    "after/owner-team-audit-390.png"
+  ],
+  "clauseStatusChanges": [],
+  "blockers": [],
+  "publicationScan": "fleet Mac gate; not run by cloud",
+  "evidencePublication": "initial report-only save; CI in progress",
+  "cleanup": "delete clone and node_modules immediately after successful evidence publication"
+}

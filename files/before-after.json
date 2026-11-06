@@ -1,0 +1,28 @@
+{
+  "before": {
+    "sourceHead": "c9280b55339d5ec0b808c5a175feb34e48fa1e67",
+    "nonparticipant_api_export_disclosures": 6,
+    "nonparticipant_api_export_checks": 6,
+    "page_disclosures": 2,
+    "native_widths": [
+      1440,
+      390
+    ],
+    "membership_events_per_door": 2,
+    "participant_formats_retained": 3,
+    "dm_read_denials": 2
+  },
+  "after": {
+    "sourceHead": "22dcc2d55bb017830e26f492964355ba3216c435",
+    "nonparticipant_api_export_disclosures": 0,
+    "nonparticipant_api_export_checks": 6,
+    "page_disclosures": 0,
+    "native_widths": [
+      1440,
+      390
+    ],
+    "membership_events_per_door": 2,
+    "participant_formats_retained": 3,
+    "dm_read_denials": 2
+  }
+}

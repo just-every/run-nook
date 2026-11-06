@@ -1,0 +1,4 @@
+id,actor,actorName,service,at,kind,scope,scopeKind,version,reason,outcome,count,subject,subjectName
+"membership:6","98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6","Dev member","nook_exit_membership","1793970737977","membership.join","a direct conversation","dm","1","Channel membership granted","confirmed","1","af501224-c4e8-429b-b478-2e53d76284cb","Dev admin"
+"membership:5","98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6","Dev member","nook_exit_membership","1793970737977","membership.join","a direct conversation","dm","1","Channel membership granted","confirmed","1","98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6","Dev member"
+

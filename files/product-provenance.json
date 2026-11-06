@@ -1,0 +1,30 @@
+{
+  "head": "22dcc2d55bb017830e26f492964355ba3216c435",
+  "tree": "2d7efa250f9516277ee062566b499fd60e24a9d6",
+  "branch": "cloud/sd-nook-str-actions-1-fix1",
+  "originMain": "4767f48a6fe0d5b00cc4a19a9b79d1d0a892e087",
+  "originalCandidate": "c9280b55339d5ec0b808c5a175feb34e48fa1e67",
+  "firstParent": "c9280b55339d5ec0b808c5a175feb34e48fa1e67",
+  "secondParent": "4767f48a6fe0d5b00cc4a19a9b79d1d0a892e087",
+  "changedVsOriginal": [
+    "OPERATIONS.md",
+    "README.md",
+    "scripts/local/transfer.mjs",
+    "sources.lock.json",
+    "src/audit/server.ts",
+    "src/dev/admit.server.ts",
+    "src/server.dev.ts",
+    "tests/audit-browser.mjs",
+    "tests/audit-journey.mjs",
+    "tests/exit-export.test.mjs"
+  ],
+  "repairFiles": [
+    "src/audit/server.ts",
+    "tests/audit-journey.mjs",
+    "tests/audit-browser.mjs",
+    "sources.lock.json"
+  ],
+  "clean": true,
+  "preservesOriginalCandidate": true,
+  "containsFetchedMain": true
+}

@@ -1,0 +1,232 @@
+[
+  {
+    "command": "git config --global user.name / user.email (fleet identity)",
+    "exit": 0
+  },
+  {
+    "command": "bash /workspace/rer-cloud-launcher/refresh.sh; python3 /tmp/fleet-git-setup.py",
+    "exit": 0
+  },
+  {
+    "command": "git clone --depth 1 --filter=blob:none https://github.com/just-every/run-nook.git <owned clone>; local fleet identity; fleet-cloud-hooks",
+    "exit": 0
+  },
+  {
+    "command": "git fetch --depth=30 origin cloud/sd-nook-str-actions-1:refs/remotes/origin/cloud/sd-nook-str-actions-1; verify c9280b55339d5ec0b808c5a175feb34e48fa1e67; branch cloud/sd-nook-str-actions-1-fix1",
+    "exit": 0
+  },
+  {
+    "command": "source /tmp/rer-cloud-toolchain.sh; cloud_run npx -y @runeditrun/rer setup --owner-email fleet@runeditrun.com --non-interactive; reinstall preserved hooks",
+    "exit": 0
+  },
+  {
+    "command": "cloud_run npx -y @runeditrun/rer build (original candidate)",
+    "exit": 0
+  },
+  {
+    "command": "cloud_run node /tmp/nook-b1-probe.mjs before",
+    "exit": 0,
+    "receipt": "before/receipt.json"
+  },
+  {
+    "command": "cloud_run npx -y @runeditrun/rer build (repair, before merge)",
+    "exit": 0
+  },
+  {
+    "command": "cloud_run node /tmp/nook-b1-probe.mjs after (repair, before merge)",
+    "exit": 0
+  },
+  {
+    "command": "cloud_run node --import /tmp/nook-cloud-browser.mjs --test tests/audit-runtime.mjs (initial API/export extension)",
+    "exit": 0,
+    "tests": 1,
+    "pass": 1,
+    "fail": 0
+  },
+  {
+    "command": "pnpm typecheck (initial repair)",
+    "exit": 0
+  },
+  {
+    "command": "git fetch origin main; git merge-base HEAD origin/main",
+    "exit": 1,
+    "reason": "shallow histories had no common visible ancestor; no product failure"
+  },
+  {
+    "command": "git fetch --deepen=100 origin main cloud/sd-nook-str-actions-1; git merge-base HEAD origin/main",
+    "exit": 0
+  },
+  {
+    "command": "env GIT_AUTHOR_NAME='Run Edit Run fleet' GIT_AUTHOR_EMAIL=fleet@runeditrun.com GIT_COMMITTER_NAME='Run Edit Run fleet' GIT_COMMITTER_EMAIL=fleet@runeditrun.com git merge --no-commit origin/main",
+    "exit": 0,
+    "main": "4767f48a6fe0d5b00cc4a19a9b79d1d0a892e087",
+    "conflicts": false
+  },
+  {
+    "command": "cloud_run npx -y @runeditrun/rer build (merged final tree)",
+    "exit": 0,
+    "log": "checks/build.log"
+  },
+  {
+    "command": "cloud_run node --import /tmp/nook-cloud-browser.mjs --test tests/audit-runtime.mjs (final assertions, merged tree)",
+    "exit": 0,
+    "tests": 1,
+    "pass": 1,
+    "fail": 0,
+    "log": "checks/audit-runtime.log"
+  },
+  {
+    "command": "pnpm typecheck (final merged tree)",
+    "exit": 0,
+    "log": "checks/typecheck.log"
+  },
+  {
+    "command": "git fetch origin main; env GIT_AUTHOR_NAME='Run Edit Run fleet' GIT_AUTHOR_EMAIL=fleet@runeditrun.com GIT_COMMITTER_NAME='Run Edit Run fleet' GIT_COMMITTER_EMAIL=fleet@runeditrun.com git merge --no-commit origin/main (freshness recheck)",
+    "exit": 128,
+    "reason": "existing pending merge; followed by successful equality check MERGE_HEAD == freshly fetched origin/main"
+  },
+  {
+    "command": "test \"$(git rev-parse MERGE_HEAD)\" = \"$(git rev-parse origin/main)\"",
+    "exit": 0
+  },
+  {
+    "name": "restore-audit-artifacts",
+    "command": [
+      "git",
+      "restore",
+      "--source=origin/main",
+      "--",
+      "evidence/audit"
+    ],
+    "exit": 0,
+    "log": "checks/restore-audit-artifacts.log"
+  },
+  {
+    "name": "restore-generated-views",
+    "command": [
+      "git",
+      "checkout",
+      "origin/main",
+      "--",
+      "ACCEPTANCE.md",
+      "docs/CLAIMS.md"
+    ],
+    "exit": 0,
+    "log": "checks/restore-generated-views.log"
+  },
+  {
+    "name": "contract-docs",
+    "command": [
+      "node",
+      "src/base/contract-docs.mjs",
+      "check"
+    ],
+    "exit": 0,
+    "log": "checks/contract-docs.log"
+  },
+  {
+    "name": "source-lock-generate",
+    "command": [
+      "node",
+      "scripts/edition-authoring/cli.mjs",
+      "lock"
+    ],
+    "exit": 0,
+    "log": "checks/source-lock-generate.log"
+  },
+  {
+    "name": "source-lock-check",
+    "command": [
+      "node",
+      "scripts/edition-authoring/cli.mjs",
+      "check"
+    ],
+    "exit": 0,
+    "log": "checks/source-lock-check.log"
+  },
+  {
+    "name": "diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "log": "checks/diff-check.log"
+  },
+  {
+    "name": "stage",
+    "command": [
+      "git",
+      "add",
+      "src/audit/server.ts",
+      "tests/audit-journey.mjs",
+      "tests/audit-browser.mjs",
+      "sources.lock.json"
+    ],
+    "exit": 0,
+    "log": "checks/stage.log"
+  },
+  {
+    "name": "staged-files",
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--stat"
+    ],
+    "exit": 0,
+    "log": "checks/staged-files.log"
+  },
+  {
+    "name": "staged-diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check"
+    ],
+    "exit": 0,
+    "log": "checks/staged-diff-check.log"
+  },
+  {
+    "name": "contract-source-unchanged",
+    "command": [
+      "git",
+      "diff",
+      "--exit-code",
+      "origin/main",
+      "--",
+      "CONTRACT.md",
+      "ACCEPTANCE.md",
+      "docs/CLAIMS.md",
+      ".github/workflows/verify.yml"
+    ],
+    "exit": 0,
+    "log": "checks/contract-source-unchanged.log"
+  },
+  {
+    "command": "env GIT_AUTHOR_NAME='Run Edit Run fleet' GIT_AUTHOR_EMAIL=fleet@runeditrun.com GIT_COMMITTER_NAME='Run Edit Run fleet' GIT_COMMITTER_EMAIL=fleet@runeditrun.com git commit -m \"Protect DM membership subjects from unrelated audit readers\"",
+    "exit": 0,
+    "head": "22dcc2d55bb017830e26f492964355ba3216c435"
+  },
+  {
+    "command": "git log origin/main..HEAD --format=\"%an <%ae>%n%cn <%ce>%n%(trailers:only,unfold)\"; inspect every body and validate every candidate including side parents",
+    "exit": 0,
+    "commits": 5,
+    "receipt": "identity-check.json"
+  },
+  {
+    "command": "python3 $HOME/rer-consolidation/.tools/cloud-push.py origin cloud/sd-nook-str-actions-1-fix1",
+    "exit": 0,
+    "attempts": 1,
+    "log": "product-push.log"
+  },
+  {
+    "command": "cloud_run node /tmp/nook-b1-probe.mjs after (published exact SHA)",
+    "exit": 0,
+    "head": "22dcc2d55bb017830e26f492964355ba3216c435",
+    "receipt": "after/receipt.json",
+    "log": "checks/exact-head-probe.log"
+  }
+]

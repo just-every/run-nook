@@ -1,0 +1,70 @@
+{
+  "head": "22dcc2d55bb017830e26f492964355ba3216c435",
+  "files": [
+    {
+      "path": "src/app-style/outcomes.css",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "a6cc1d2ea0c894dc104793c3383a792521bae43615362a3fe8913605817e7081"
+    },
+    {
+      "path": "src/chat/ConversationView.tsx",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "7bf2b8e453bbff4de9d65fdfae3edf6315353e9026ccc5cc8837fef21d84ff01"
+    },
+    {
+      "path": "src/chat/MessageRow.tsx",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "fcae24108acb9a44d8b415f983a7c52b1dbee512ed3946fb44809711af569897"
+    },
+    {
+      "path": "src/chat/OutcomeCard.tsx",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "453de7c274f0f3adbeeff9972041f581110af25463b58cb841cec942ef9265f9"
+    },
+    {
+      "path": "src/reminders/RemindersView.tsx",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "994a3b94bc376487a8ee99ce8ced1a142569ab4503e7e6e3e9990939e21fe32a"
+    },
+    {
+      "path": "tests/keyboard.mjs",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "6e8506d672e93bb6af6e078c8d1f9d9b7d84206740818d88a05dfd0eb466f3f0"
+    },
+    {
+      "path": "tests/reminders-browser.mjs",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "e9e3b32617b4d9e5d0fa332e039b960b566d6c333c708e2fb8c723b20c9a3aa3"
+    },
+    {
+      "path": "src/audit/AuditLog.tsx",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "f3bc4d135837aafc3b08b839c135f3bfc5569a0a85fc36ce6ed16ab024805f09"
+    },
+    {
+      "path": "src/audit/event-words.ts",
+      "unchangedFromOriginalCandidate": true,
+      "sha256": "9ccbf23d6b9cef46f4c9ca900982130296cb311b51801e4748dbf2325076cc9a"
+    },
+    {
+      "path": "CONTRACT.md",
+      "unchangedFromFreshMain": true,
+      "sha256": "1d9c414a7044c5594767fef74b56a429f9d09f5cd70f9ea99bed70c985ef27b8"
+    },
+    {
+      "path": "ACCEPTANCE.md",
+      "unchangedFromFreshMain": true,
+      "sha256": "b708e4877d7c80c63ca8cabc16b0ec6d41fbdca74c6f41fbbf281fc9af44eefe"
+    },
+    {
+      "path": "docs/CLAIMS.md",
+      "unchangedFromFreshMain": true,
+      "sha256": "c84e0ea4a528eaeb8ad350b2d0f7946dd278b9e84696245b1a89ff624eda87b8"
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "unchangedFromFreshMain": true,
+      "sha256": "7d9a2aa446a2717f0e54cebdc925ad29f479434ff7429c21f3f4195e14a1825d"
+    }
+  ]
+}

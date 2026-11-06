@@ -1,0 +1,404 @@
+{
+  "stage": "after",
+  "sourceHead": "22dcc2d55bb017830e26f492964355ba3216c435",
+  "sequence": [
+    {
+      "method": "POST",
+      "path": "/api/conversations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/team/invitations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/invite",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/team/invitations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/invite",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/team/invitations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/invite",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/conversations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/conversations/92470519-77c0-4978-9029-b5c624fef73b/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations/92470519-77c0-4978-9029-b5c624fef73b/messages",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations/92470519-77c0-4978-9029-b5c624fef73b/messages",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b&format=csv",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b&format=json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b&format=csv",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b&format=json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b&format=csv",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/team/audit?kind=membership.join&scope=92470519-77c0-4978-9029-b5c624fef73b&format=json",
+      "status": 200
+    }
+  ],
+  "doors": [
+    {
+      "reader": "owner",
+      "format": "page",
+      "status": 200,
+      "file": "owner-page.json",
+      "rows": 2,
+      "recipientDisclosed": false,
+      "items": [
+        {
+          "id": "membership:6",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        },
+        {
+          "id": "membership:5",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        }
+      ]
+    },
+    {
+      "reader": "owner",
+      "format": "csv",
+      "status": 200,
+      "file": "owner-csv.csv",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "owner",
+      "format": "json",
+      "status": 200,
+      "file": "owner-json.json",
+      "rows": 2,
+      "recipientDisclosed": false,
+      "items": [
+        {
+          "id": "membership:6",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        },
+        {
+          "id": "membership:5",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        }
+      ]
+    },
+    {
+      "reader": "unrelated-admin",
+      "format": "page",
+      "status": 200,
+      "file": "unrelated-admin-page.json",
+      "rows": 2,
+      "recipientDisclosed": false,
+      "items": [
+        {
+          "id": "membership:6",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        },
+        {
+          "id": "membership:5",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        }
+      ]
+    },
+    {
+      "reader": "unrelated-admin",
+      "format": "csv",
+      "status": 200,
+      "file": "unrelated-admin-csv.csv",
+      "rows": 2,
+      "recipientDisclosed": false
+    },
+    {
+      "reader": "unrelated-admin",
+      "format": "json",
+      "status": 200,
+      "file": "unrelated-admin-json.json",
+      "rows": 2,
+      "recipientDisclosed": false,
+      "items": [
+        {
+          "id": "membership:6",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        },
+        {
+          "id": "membership:5",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": null,
+          "subjectName": null
+        }
+      ]
+    },
+    {
+      "reader": "participant-admin",
+      "format": "page",
+      "status": 200,
+      "file": "participant-admin-page.json",
+      "rows": 2,
+      "recipientDisclosed": true,
+      "items": [
+        {
+          "id": "membership:6",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": "af501224-c4e8-429b-b478-2e53d76284cb",
+          "subjectName": "Dev admin"
+        },
+        {
+          "id": "membership:5",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "subjectName": "Dev member"
+        }
+      ]
+    },
+    {
+      "reader": "participant-admin",
+      "format": "csv",
+      "status": 200,
+      "file": "participant-admin-csv.csv",
+      "rows": 2,
+      "recipientDisclosed": true
+    },
+    {
+      "reader": "participant-admin",
+      "format": "json",
+      "status": 200,
+      "file": "participant-admin-json.json",
+      "rows": 2,
+      "recipientDisclosed": true,
+      "items": [
+        {
+          "id": "membership:6",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": "af501224-c4e8-429b-b478-2e53d76284cb",
+          "subjectName": "Dev admin"
+        },
+        {
+          "id": "membership:5",
+          "actor": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "actorName": "Dev member",
+          "service": "nook_exit_membership",
+          "at": 1793970737977,
+          "kind": "membership.join",
+          "scope": "a direct conversation",
+          "scopeKind": "dm",
+          "version": 1,
+          "reason": "Channel membership granted",
+          "outcome": "confirmed",
+          "count": 1,
+          "subject": "98b93ef1-9538-4a4f-9c07-2d4b9b6af6d6",
+          "subjectName": "Dev member"
+        }
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "reader": "owner",
+      "width": 1440,
+      "height": 900,
+      "file": "owner-team-audit-1440.png",
+      "auditRows": 2,
+      "recipientDisclosed": false,
+      "text": "Joined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM\nJoined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM"
+    },
+    {
+      "reader": "owner",
+      "width": 390,
+      "height": 900,
+      "file": "owner-team-audit-390.png",
+      "auditRows": 2,
+      "recipientDisclosed": false,
+      "text": "Joined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM\nJoined a direct conversation\nconfirmed\n\nDev member · a direct conversation\n\nConversation membership granted\n\nNov 6, 2026, 1:12 PM"
+    }
+  ]
+}

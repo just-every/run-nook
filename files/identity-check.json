@@ -1,0 +1,35 @@
+{
+  "allCandidateCommits": [
+    {
+      "sha": "22dcc2d55bb017830e26f492964355ba3216c435",
+      "author": "Run Edit Run fleet <fleet@runeditrun.com>",
+      "committer": "Run Edit Run fleet <fleet@runeditrun.com>",
+      "trailers": ""
+    },
+    {
+      "sha": "c9280b55339d5ec0b808c5a175feb34e48fa1e67",
+      "author": "James Peter <github@zemaj.com>",
+      "committer": "James Peter <github@zemaj.com>",
+      "trailers": "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
+    },
+    {
+      "sha": "9aa07e13ec21e3daa68a7c7232a165f44b9adfe5",
+      "author": "James Peter <github@zemaj.com>",
+      "committer": "James Peter <github@zemaj.com>",
+      "trailers": "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
+    },
+    {
+      "sha": "3aa703dc0ccf44e163b23b96b73d466945b256a0",
+      "author": "James Peter <github@zemaj.com>",
+      "committer": "James Peter <github@zemaj.com>",
+      "trailers": "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
+    },
+    {
+      "sha": "9d7d072dd3fc17175a9a3e6139614726064c9d56",
+      "author": "James Peter <github@zemaj.com>",
+      "committer": "James Peter <github@zemaj.com>",
+      "trailers": "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
+    }
+  ],
+  "passed": true
+}

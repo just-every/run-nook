@@ -1,0 +1,175 @@
+diff --git a/sources.lock.json b/sources.lock.json
+index bf6381f..1cbf889 100644
+--- a/sources.lock.json
++++ b/sources.lock.json
+@@ -1621,7 +1621,7 @@
+       "executable": false
+     },
+     "OPERATIONS.md": {
+-      "sha256": "fbc77dc15e20de95c76d6b9b7efcdd902328cf5b47c8878529bdb962f0ffb286",
++      "sha256": "40154f04bec967d7e098d1d5b804d63184a7d80d1d4fbb534ecd11986b1142e6",
+       "executable": false
+     },
+     "owner-deployment.json": {
+@@ -1693,7 +1693,7 @@
+       "executable": false
+     },
+     "README.md": {
+-      "sha256": "6737dfd6557c7db19d4e4db13f476a41def9c36b0cfdb8b096fbb9558bb26194",
++      "sha256": "c98f06153d6a38a57fc00d8342b352f9318be7b2537dc9b0eebfee48fe3109a4",
+       "executable": false
+     },
+     "release-history/0.4.0.json": {
+@@ -2557,7 +2557,7 @@
+       "executable": false
+     },
+     "scripts/local/transfer.mjs": {
+-      "sha256": "f6d8d5e04b2a58d513d5a02b22a7f7cb07bec09d7ff4a6a2018d225e5828dd7e",
++      "sha256": "ad6c4270ed9aa535ccb756b8c663d9622150292875cd6e6064b4c0e11bb80b66",
+       "executable": false
+     },
+     "scripts/notify-test-mail.mjs": {
+@@ -2801,7 +2801,7 @@
+       "executable": false
+     },
+     "src/audit/server.ts": {
+-      "sha256": "2ad4476840db7f305a8fa9ad848b41e441da646c4a13e64b9ffb8a85d268ad63",
++      "sha256": "4f59eafbe75d3d99a2465f0f44bb6f3737d6371795823e71fa31a3b3503858c0",
+       "executable": false
+     },
+     "src/base/contract-anchor.mjs": {
+@@ -5865,7 +5865,7 @@
+       "executable": false
+     },
+     "src/dev/admit.server.ts": {
+-      "sha256": "259d794b0db8dc7b8fa68851b77d8d7dadd7817d287d1161bd6147b14194aada",
++      "sha256": "2ce59f55d0527a3682d37f4d643b9f3ee78bf770667d1ae527959829497a0c99",
+       "executable": false
+     },
+     "src/dev/personas.ts": {
+@@ -7521,7 +7521,7 @@
+       "executable": false
+     },
+     "src/server.dev.ts": {
+-      "sha256": "6edb54a4853862270c1108ae3dd9cde289d8e5c64ab51923f6dc6f5babbc8f21",
++      "sha256": "6f8b450bdacd36ba97e6704f96f4c3ac8c6deaae8382f6576d1d37df4601eae4",
+       "executable": false
+     },
+     "src/server.ts": {
+@@ -8013,11 +8013,11 @@
+       "executable": false
+     },
+     "tests/audit-browser.mjs": {
+-      "sha256": "000c5eaba390af0c9f14b35d5739b7b75e52a92c4715ae3fc74ee7e1dc5d7886",
++      "sha256": "e59c6db68874054141b5475ebb3811a457d91985bf0427c8a2905757688431e2",
+       "executable": false
+     },
+     "tests/audit-journey.mjs": {
+-      "sha256": "6f53efd472df78a4056d0c91c258c01c19a4c40b1acd6bc8e680a94d8e2c1b18",
++      "sha256": "b462df217e1e6647d1ec0d574da41a5d0a8aafa3de3dfb5bd353ff4371d7530c",
+       "executable": false
+     },
+     "tests/audit-runtime.mjs": {
+@@ -8137,7 +8137,7 @@
+       "executable": false
+     },
+     "tests/exit-export.test.mjs": {
+-      "sha256": "2dc43f58980e1ccaddf493db0c9cd7a8927e3abf750be92367cfc0a7df48f9ca",
++      "sha256": "288a29e863ef0e147fc0947733f9c9f6b8685cdf93a9e41edf9237d920bba09f",
+       "executable": false
+     },
+     "tests/fake-account.mjs": {
+diff --git a/src/audit/server.ts b/src/audit/server.ts
+index 69d6679..4de7583 100644
+--- a/src/audit/server.ts
++++ b/src/audit/server.ts
+@@ -3,7 +3,8 @@ import {authority} from '../platform/storage/context'
+ import {fail} from '../family/team-chat/domain'
+ const manager=`EXISTS(SELECT 1 FROM oa_operators o JOIN nook_access access ON access.user=o.id WHERE o.id=? AND o.status='active' AND o.role IN ('owner','admin') AND access.active=1 AND access.mode='member')`
+ // A membership fact's affected member is the journal row its id names ('membership:<seq>'); the writer stays the actor.
+-const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'System' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,c.kind AS scopeKind,l.version,l.reason,l.outcome,l.count,em.user AS subject,CASE WHEN em.user IS NULL THEN NULL ELSE COALESCE(sa.name,'Former member') END AS subjectName FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope LEFT JOIN nook_exit_membership em ON em.seq=CASE WHEN l.service='nook_exit_membership' THEN CAST(substr(l.id,12) AS INTEGER) END LEFT JOIN nook_actors sa ON sa.id=em.user`
++// DM subjects are private to current participants, including in streamed exports; managers outside the roster see the actor only.
++const projection=`SELECT l.id,l.actor,COALESCE(a.name,CASE WHEN l.actor IS NULL THEN 'System' ELSE 'Former member' END) AS actorName,l.service,l.at,l.kind,CASE WHEN c.kind='dm' THEN 'a direct conversation' WHEN c.id IS NOT NULL THEN c.name WHEN l.scope='workspace' THEN 'workspace' ELSE 'Unavailable scope' END AS scope,c.kind AS scopeKind,l.version,l.reason,l.outcome,l.count,em.user AS subject,CASE WHEN em.user IS NULL THEN NULL ELSE COALESCE(sa.name,'Former member') END AS subjectName FROM nook_audit_log l LEFT JOIN nook_actors a ON a.id=l.actor LEFT JOIN nook_conversations c ON c.id=l.scope LEFT JOIN nook_exit_membership em ON em.seq=CASE WHEN l.service='nook_exit_membership' THEN CAST(substr(l.id,12) AS INTEGER) END AND (c.kind<>'dm' OR EXISTS(SELECT 1 FROM nook_members dm WHERE dm.conversation=c.id AND dm.user=?)) LEFT JOIN nook_actors sa ON sa.id=em.user`
+ const allowed=['actor','kind','scope','outcome','from','until','cursor','format']
+ function filters(params:URLSearchParams){
+  if([...params.keys()].some(key=>!allowed.includes(key)))fail(400,'Unknown audit filter')
+@@ -23,7 +24,7 @@ function filters(params:URLSearchParams){
+ async function page(c:Context,params:URLSearchParams){
+  const {where,values}=filters(params),guard=`${authority} AND ${c.fence} AND ${manager}`,credentials=[...c.credentials,c.uid]
+  const [rows,access]=await c.db.batch([
+-  c.sql(`${projection} WHERE ${where} AND ${guard} ORDER BY l.at DESC,l.id DESC LIMIT 101`,...values,...credentials),
++  c.sql(`${projection} WHERE ${where} AND ${guard} ORDER BY l.at DESC,l.id DESC LIMIT 101`,c.uid,...values,...credentials),
+   c.sql(`SELECT 1 WHERE ${guard}`,...credentials),
+  ])
+  if(!access.results.length){await c.check();fail(403,'Only owners and admins can read the audit log')}
+diff --git a/tests/audit-browser.mjs b/tests/audit-browser.mjs
+index 661c3e0..e75b196 100644
+--- a/tests/audit-browser.mjs
++++ b/tests/audit-browser.mjs
+@@ -2,7 +2,7 @@ import {chromium,expect} from '@playwright/test'
+ import assert from 'node:assert/strict'
+ import {mkdir,writeFile} from 'node:fs/promises'
+ import {resolve} from 'node:path'
+-export async function auditBrowser({origin,admin,member,destination='evidence/audit'}){
++export async function auditBrowser({origin,admin,member,direct,destination='evidence/audit'}){
+  await mkdir(destination,{recursive:true})
+  const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
+  try{
+@@ -18,6 +18,12 @@ export async function auditBrowser({origin,admin,member,destination='evidence/au
+     await log.getByLabel('Kind',{exact:true}).selectOption('');await log.getByLabel('Outcome',{exact:true}).selectOption('uncertain');await expect(log.locator('ol').getByText('Cancelled an export',{exact:true})).toBeVisible()
+     await log.getByRole('heading',{name:'Audit log',exact:true}).scrollIntoViewIfNeeded();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:resolve(destination,`audit-${width}.png`)})
+     await log.locator('li').filter({hasText:'Cancelled an export'}).scrollIntoViewIfNeeded();await page.screenshot({path:resolve(destination,`audit-items-${width}.png`)})
++    if(width===1440&&direct){
++     await log.getByLabel('Outcome',{exact:true}).selectOption('');await log.getByLabel('Kind',{exact:true}).selectOption('membership.join')
++     await log.getByLabel('Scope',{exact:true}).fill(direct.id);await log.getByRole('button',{name:'Apply text filters',exact:true}).click()
++     await expect(log.locator('li')).toHaveCount(2)
++     for(const row of await log.locator('li').all()){await expect(row).toContainText(direct.actorName+' · a direct conversation');await expect(row).not.toContainText(direct.participantName)}
++    }
+     await context.clearCookies();await context.addCookies([cookie(member)]);await page.goto(origin+'/app?view=team');await expect(page.getByRole('region',{name:'Audit log',exact:true})).toHaveCount(0)
+    }finally{await context.close()}
+   }
+diff --git a/tests/audit-journey.mjs b/tests/audit-journey.mjs
+index e423050..11f1ba5 100644
+--- a/tests/audit-journey.mjs
++++ b/tests/audit-journey.mjs
+@@ -14,7 +14,11 @@ export async function auditJourney({post,get,request,owner,member,registered,che
+   const before=(await get('/api/team/audit?actor='+target.user.id,admin.cookie)).data.items;assert.ok(before.some(row=>row.kind==='channel.created'))
+   await post('/api/team/remove',{user:member.user.id,conversation:room.id})
+   // A membership fact names the person who acted and the member it affected.
+-  for(const [kind,who] of [['membership.join','granted'],['membership.leave','removed']]){const rows=(await get('/api/team/audit?kind='+kind+'&scope='+encodeURIComponent(room.id),admin.cookie)).data.items;assert.ok(rows.some(row=>row.actor===owner.user.id&&row.subject===member.user.id&&row.subjectName&&row.reason.includes(who)),'membership '+kind+' names owner and member')}
++  for(const [kind,who] of [['membership.join','granted'],['membership.leave','removed']])for(const format of ['page','json','csv']){
++   const value=await get('/api/team/audit?kind='+kind+'&scope='+encodeURIComponent(room.id)+'&format='+format,admin.cookie)
++   if(format==='csv')assert.ok(value.raw.split('\n').some(row=>row.includes(owner.user.id)&&row.includes(member.user.id)&&row.includes(member.user.name)&&row.includes(who)),'private-channel '+kind+' CSV names actor and affected member')
++   else assert.ok(value.data.items.some(row=>row.actor===owner.user.id&&row.subject===member.user.id&&row.subjectName===member.user.name&&row.reason.includes(who)),'private-channel '+kind+' '+format+' names actor and affected member')
++  }
+   const details=(await get('/api/channels/'+room.id+'/details')).data
+   await request('/api/channels/'+room.id+'/posting',{method:'PATCH',cookie:owner.cookie,body:{version:details.version,level:'managers',replies:'same',people:[]}})
+   await post('/api/conversations/'+room.id+'/messages',{body:'Customer launch approved; keep the audit free of this message body.',intent:crypto.randomUUID(),adminOverride:true},admin.cookie)
+@@ -42,12 +46,26 @@ export async function auditJourney({post,get,request,owner,member,registered,che
+   assert.equal((await sql('SELECT count(*) AS n FROM nook_audit'))[0].n,deniedBefore)
+   const dm=(await post('/api/conversations',{name:'Confidential compensation discussion',kind:'dm',participants:[owner.user.id]},member.cookie)).data
+   await post('/api/conversations/'+dm.id+'/messages',{body:'Private compensation marker should never enter audit',intent:crypto.randomUUID()},member.cookie)
++  const adminDm=(await post('/api/conversations',{name:'Confidential admin discussion',kind:'dm',participants:[admin.user.id]},member.cookie)).data
++  // An unrelated owner or admin may audit the action, but cannot discover its other DM participant through any format.
++  for(const [conversation,reader,participant] of [[dm,admin,owner],[adminDm,owner,admin]]){
++   await get('/api/conversations/'+conversation.id+'/messages',reader.cookie,403)
++   const query='kind=membership.join&scope='+encodeURIComponent(conversation.id)
++   for(const format of ['page','json','csv']){
++    const value=await get('/api/team/audit?'+query+'&format='+format,reader.cookie)
++    assert.ok(!value.raw.includes(participant.user.id)&&!value.raw.includes(participant.user.name),'nonparticipant '+format+' hides the affected DM member')
++    if(format==='csv'){assert.equal(value.raw.trim().split('\n').length,3);assert.match(value.raw,/a direct conversation/)}
++    else {assert.equal(value.data.items.length,2);for(const row of value.data.items){assert.equal(row.actor,member.user.id);assert.equal(row.actorName,member.user.name);assert.equal(row.scope,'a direct conversation');assert.equal(row.count,1);assert.equal(row.subject,null);assert.equal(row.subjectName,null)}}
++   }
++   const ownEvents=(await get('/api/team/audit?'+query,participant.cookie)).data.items
++   assert.ok(ownEvents.some(row=>row.subject===participant.user.id&&row.subjectName===participant.user.name),'current participant retains their DM audit detail')
++  }
+   const download=await get('/api/team/audit?format=json',admin.cookie);assert.ok(download.data.items.some(row=>row.kind==='channel.created'&&row.scope==='a direct conversation'));assert.ok(download.data.items.some(row=>row.kind==='integration.rotate'&&row.reason==='Token label: Release handoff'));assert.ok(!download.raw.includes(token.secret)&&!download.raw.includes(rotated.secret));assert.doesNotMatch(download.raw,/Confidential compensation|Private compensation marker|Customer launch approved|token_hash|SESSION_SECRET/)
+   const empty=await get('/api/team/audit?format=csv&kind=not-a-real-action',admin.cookie);assert.equal(empty.raw.trim().split('\n').length,1)
+   const csv=await get('/api/team/audit?format=csv&kind=policy.posting',admin.cookie);assert.match(csv.raw,/policy.posting/)
+   await request('/api/team/audit',{method:'PATCH',body:{},cookie:admin.cookie,status:405})
+   await validateArchive()
+-  if(!withoutBrowser)await(await import('./audit-browser.mjs')).auditBrowser({origin:origin(),admin,member})
++  if(!withoutBrowser)await(await import('./audit-browser.mjs')).auditBrowser({origin:origin(),admin,member,direct:{id:dm.id,actorName:member.user.name,participantName:owner.user.name}})
+   await roundTrip({owner,admin,rows:download.data.items})
+  })
+ }
