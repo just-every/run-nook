@@ -6,7 +6,7 @@ Product head: 22dcc2d55bb017830e26f492964355ba3216c435
 Original candidate retained as first parent: c9280b55339d5ec0b808c5a175feb34e48fa1e67
 Fresh main retained as second parent: 4767f48a6fe0d5b00cc4a19a9b79d1d0a892e087
 PR: none created; the repository guide specifies no PR landing requirement.
-CI Verify: run 42223581001, exact head, pending at report preparation.
+CI Verify: run 42223581001, completed/success on exact head 22dcc2d55bb017830e26f492964355ba3216c435. https://github.com/just-every/run-nook/actions/runs/42223581001
 Product push: successful on first guard attempt. Evidence publication is separate and signals no product acceptance or landing.
 
 ## Scope and result
@@ -85,4 +85,6 @@ All five commits in origin/main..HEAD, including side parents, passed the explic
 
 The Mac fleet owns the complete publication scan and landing. This cloud task does not claim to have run that Mac scan, and never pushes main or a default branch. The exact-SHA Verify is observed through REST using one watcher and at least 300 seconds between observations. No workflow is edited, dispatched or rerun to obtain a different result.
 
-Actual product provenance is product-provenance.json; the push receipt is product-push.log; the per-door receipts are before/receipt.json and after/receipt.json. Evidence is transported only on refs/heads/evidence/sd-nook-str-actions-1-fix1 through the supplied report-only entrypoint. No packet file is part of the product branch. Cleanup and final CI disposition are recorded in terminal-receipt.json.
+CI completed successfully; four REST observations were used, spaced at least 300 seconds apart. No failed-job log call or workflow rerun was needed. No blockers remain. The initial evidence save was independently read back at 95ddd3bdfac66e86f9b320b31768ece5f5f41599 with all 78 manifest files verified; the final evidence update includes this completed CI receipt and the actual initial transport/readback receipts.
+
+Actual product provenance is product-provenance.json; the push receipt is product-push.log; the per-door receipts are before/receipt.json and after/receipt.json. Evidence is transported only on refs/heads/evidence/sd-nook-str-actions-1-fix1 through the supplied report-only entrypoint. No packet file is part of the product branch. Final CI disposition and the cleanup sequence are recorded in terminal-receipt.json. The clone is removed only after the final evidence push succeeds, immediately before the final response.

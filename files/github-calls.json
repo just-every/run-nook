@@ -29,5 +29,16 @@
       "--jq",
       "{status,conclusion,head_sha,html_url}"
     ]
+  },
+  {
+    "at": 1793971631.9037616,
+    "utc": "2026-11-06T13:27:11Z",
+    "command": [
+      "gh",
+      "api",
+      "repos/just-every/run-nook/actions/runs/42223581001",
+      "--jq",
+      "{status,conclusion,head_sha,html_url}"
+    ]
   }
 ]

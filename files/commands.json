@@ -228,5 +228,57 @@
     "head": "22dcc2d55bb017830e26f492964355ba3216c435",
     "receipt": "after/receipt.json",
     "log": "checks/exact-head-probe.log"
+  },
+  {
+    "command": [
+      "gh",
+      "api",
+      "repos/just-every/run-nook/actions/runs?head_sha=22dcc2d55bb017830e26f492964355ba3216c435&per_page=100"
+    ],
+    "exit": 0,
+    "observedUTC": "2026-11-06T13:12:11Z"
+  },
+  {
+    "command": [
+      "gh",
+      "api",
+      "repos/just-every/run-nook/actions/runs/42223581001",
+      "--jq",
+      "{status,conclusion,head_sha,html_url}"
+    ],
+    "exit": 0,
+    "observedUTC": "2026-11-06T13:17:11Z"
+  },
+  {
+    "command": [
+      "gh",
+      "api",
+      "repos/just-every/run-nook/actions/runs/42223581001",
+      "--jq",
+      "{status,conclusion,head_sha,html_url}"
+    ],
+    "exit": 0,
+    "observedUTC": "2026-11-06T13:22:11Z"
+  },
+  {
+    "command": [
+      "gh",
+      "api",
+      "repos/just-every/run-nook/actions/runs/42223581001",
+      "--jq",
+      "{status,conclusion,head_sha,html_url}"
+    ],
+    "exit": 0,
+    "observedUTC": "2026-11-06T13:27:11Z"
+  },
+  {
+    "command": "cloud_evidence.py publish --repo <owned clone> --repository just-every/run-nook --tag sd-nook-str-actions-1-fix1 --packet <actual packet> --file <78 explicitly selected files>",
+    "exit": 0,
+    "receipt": "evidence-initial-publication.log"
+  },
+  {
+    "command": "cloud_evidence.py fetch --repository just-every/run-nook --tag sd-nook-str-actions-1-fix1 --root <isolated readback> --head 95ddd3bdfac66e86f9b320b31768ece5f5f41599",
+    "exit": 0,
+    "receipt": "evidence-initial-readback.json"
   }
 ]

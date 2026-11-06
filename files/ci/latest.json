@@ -1,7 +1,7 @@
 {
   "id": 42223581001,
-  "status": "in_progress",
-  "conclusion": null,
+  "status": "completed",
+  "conclusion": "success",
   "head_sha": "22dcc2d55bb017830e26f492964355ba3216c435",
   "html_url": "https://github.com/just-every/run-nook/actions/runs/42223581001"
 }
