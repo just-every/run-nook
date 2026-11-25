@@ -10,9 +10,34 @@ import {released} from './worker-ports.mjs'
 import {approveInstaller,launchInstaller} from './installer-approval.mjs'
 import {devKey} from './dev-key.mjs'
 import {copyWorkingTree} from './working-tree-copy.mjs'
-// A setup rerun may refresh local identity credentials; product
-// rows, people, sessions and the owner claim must not change.
-function workspaceSnapshot(path){const db=new DatabaseSync(path,{readOnly:true});try{const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE 'nook_%' OR name IN ('oa_operators','oa_sessions','oa_bootstrap')) AND name NOT LIKE 'nook_search%' ORDER BY name").all().map(row=>row.name);return JSON.stringify(names.map(name=>[name,db.prepare('SELECT * FROM '+name).all().map(row=>JSON.stringify(row)).sort()]))}finally{db.close()}}
+function workspaceSnapshot(path){
+ const db=new DatabaseSync(path,{readOnly:true});
+ try{
+  const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE 'nook_%' OR name IN ('oa_operators','oa_sessions','oa_bootstrap')) AND name NOT LIKE 'nook_search%' ORDER BY name").all().map(row=>row.name);
+  return Object.fromEntries(names.map(name=>[name,db.prepare('SELECT * FROM '+name).all().sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))]));
+ }finally{db.close()}
+}
+function assertReinstallPreserved(before,after){
+ const previousSessions=new Set(before.oa_sessions.map(session=>session.id))
+ const ownerId=before.oa_bootstrap[0].claim_id
+ // Rer verifies the owner entry in a disposable browser. Its local session
+ // also writes an audit event and advances the same owner's last sign-in.
+ const probeSessions=after.oa_sessions.filter(session=>!previousSessions.has(session.id))
+ assert.ok(probeSessions.every(session=>session.kind==='dev'&&session.operator_id===ownerId),'the reinstall may only add local readiness sessions for the owner')
+ const probeAuditIds=new Set(probeSessions.map(session=>`session:${session.id}:start`))
+ for(const session of probeSessions){
+  const audit=after.nook_audit.find(row=>row.id===`session:${session.id}:start`)
+  assert.ok(audit?.kind==='session.started'&&audit.actor===ownerId&&audit.at===session.created_at,'the readiness session has its owner audit event')
+ }
+ const previousOwner=before.oa_operators.find(operator=>operator.id===ownerId)
+ const owner=after.oa_operators.find(operator=>operator.id===ownerId)
+ const lastSignIn=probeSessions.reduce((value,session)=>Math.max(value??0,session.created_at),previousOwner.last_signin_at)
+ assert.equal(owner.last_signin_at,lastSignIn,'only these sessions advance the owner’s last sign-in')
+ owner.last_signin_at=previousOwner.last_signin_at
+ after.nook_audit=after.nook_audit.filter(row=>!probeAuditIds.has(row.id))
+ after.oa_sessions=after.oa_sessions.filter(session=>previousSessions.has(session.id))
+ assert.ok(JSON.stringify(after)===JSON.stringify(before),'guided reinstall preserves workspace rows, people, owner and every existing session')
+}
 export async function runInstallerWorkflow(h){
  const {root,states,port,check,evidence,databasePath,stop}=h
  // The guided installer runs in a fresh clone, never over this checkout's own state;
@@ -56,7 +81,7 @@ export async function runInstallerWorkflow(h){
    await installer.close();installer=undefined;await released(guidedPort);await start(port)
    const reinstalled=await verifyWorkflow(origin,proof,{preservedSessions:true});await stop()
    assert.equal(await databasePath(state),persisted,'the second installation uses the populated D1 store')
-   assert.ok(workspaceSnapshot(persisted)===beforeRerun,'guided reinstall preserves every workspace row, user, owner, session and private byte without writes')
+   assertReinstallPreserved(beforeRerun,workspaceSnapshot(persisted))
    await start(port);const restarted=await verifyWorkflow(origin,proof);await stop()
    const portable=await (await import('./runtime-portability.mjs')).runPortabilityWorkflow({root:app,state,states,proof,ownerEmail:input.OWNER_EMAIL,databasePath,command:h.command,start,stop,verify:()=>verifyWorkflow(origin,proof,{sessionsExcluded:true})})
    evidence.guidedWorkflow={...workflowReport(proof),guide,initial,portable,reinstalled:{...reinstalled,secondApproval:true,sameD1:true,completeWorkspacePreserved:true,originalSessionsValid:true},restarted,restored:portable,normalizedStorage:true}

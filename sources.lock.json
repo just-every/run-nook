@@ -8225,7 +8225,7 @@
       "executable": false
     },
     "tests/installer-workflow.mjs": {
-      "sha256": "3ca90f8055ae3d8f580b607736162778bfac42bc7b2d62b594f06328acf1326d",
+      "sha256": "07cbdfa4a868d8b623fe475b7bc37c812aaf61b699484b4d8ab3ae60ff27bf54",
       "executable": false
     },
     "tests/integration-tokens-browser.mjs": {
