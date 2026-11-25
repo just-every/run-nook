@@ -11,10 +11,11 @@ export function nativePeople(env:StorageBindings):PeopleAdapter{
   return {...person,active:person.active&&access?.active===1}
  }
  const person=async(id:string)=>admitted(await accounts.person(id))
- const settings=()=>env.DB.prepare('SELECT owner_id FROM bs_settings WHERE singleton=1 AND stopped=0').first<{owner_id:string|null}>()
+ const settings=()=>env.DB.prepare('SELECT owner_id,stopped FROM bs_settings WHERE singleton=1').first<{owner_id:string|null;stopped:number}>()
  const setupOwner=()=>env.DB.prepare('SELECT claim_id FROM oa_bootstrap WHERE singleton=1').first<{claim_id:string}>()
  return {
   person,
+  async businessStopped(){return (await settings())?.stopped!==0},
   async sponsor({sub}){
    const business=await settings()
    if(!business?.owner_id)return null
@@ -27,7 +28,7 @@ export function nativePeople(env:StorageBindings):PeopleAdapter{
   },
   async businessMember(native){
    const business=await settings()
-   if(!business?.owner_id)return null
+   if(!business?.owner_id||business.stopped!==0)return null
    if((await setupOwner())?.claim_id===native.id)return {id:business.owner_id,role:'owner'}
    const binding=await env.DB.prepare("SELECT business_id,business_role FROM bs_team WHERE operator_id=? AND state<>'conflict' AND business_id IS NOT NULL").bind(native.id).first<{business_id:string;business_role:string}>()
    return binding?{id:binding.business_id,role:binding.business_role==='admin'?'editor':null}:null

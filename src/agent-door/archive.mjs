@@ -3,5 +3,6 @@
 export const agentExcludedTables=[
  'agent_door_state','agent_door_agents','agent_door_calls','agent_door_approvals',
  'agent_door_reviews','agent_door_events','agent_door_usage',
- 'bs_settings','bs_team','bs_overrides','bs_logo','bs_assert',
+ 'agent_door_replay_aliases','agent_door_relay','agent_door_retired_refs',
+ 'bs_settings','bs_team','bs_overrides','bs_logo','bs_assert','bs_retired',
 ];
