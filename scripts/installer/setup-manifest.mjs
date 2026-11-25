@@ -8,8 +8,10 @@ export function localSetupManifest(manifest) {
   default:'development', options:[{value:'development',label:'Local development (no email sent)'}],
  });
  Object.assign(local.fields.find(field => field.name === 'MAIL_FROM'), {
-  label:'Local sender', default:'auth@localhost.test', help:'Placeholder sender only. Local sign-in uses the private RER_OPEN development session; no email is sent or stored.',
+  label:'Local sender', required:true, presentations:undefined, default:'auth@localhost.test', help:'Placeholder sender only. Local sign-in uses the private RER_OPEN development session; no email is sent or stored.',
  });
- local.groups.find(group => group.id === 'mail').label = 'Local sign-in';
+ Object.assign(local.groups.find(group => group.id === 'mail'), {
+  label:'Local sign-in', help:'Local development sends and stores no email.',
+ });
  return local;
 }

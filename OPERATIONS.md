@@ -40,13 +40,13 @@ DMs have fixed participants. Owner and admin roles never open other people's DMs
 
 ## Owner-account deploy
 
-Set the mail inputs before either deployment command: rer 0.2.25 checks production
-sign-in configuration even for a dry run. `deploy --dry-run` builds and validates
-the Worker, assets, every migration and
-`owner-deployment.json` with no provider request. `deploy` needs
-`CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN` in the shell, plus
-`MAIL_FROM` and `SENDGRID_API_KEY` on the first deploy; `OWNER_EMAIL` defaults to
-the setup owner. It stages the build and migrations under `.rer/deploy/product`
+`MAIL_PROVIDER=none rer deploy --dry-run` builds and validates the Worker,
+assets, migrations and `owner-deployment.json` locally. For a real deploy, supply
+`CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN`. Set
+`OWNER_EMAIL` to the hosted owner's address. Mail-off deployments need no sender
+or mail key. To deploy with SendGrid, supply a verified `MAIL_FROM` and
+`SENDGRID_API_KEY` instead of setting `MAIL_PROVIDER=none`. The deploy stages
+the build and migrations under `.rer/deploy/product`
 and runs rer's deploy-kit owner controller: find-or-create the D1 database and
 Worker named after the project, apply pending migrations, upload, set secrets and
 check `/health`. rer supplies the production `SESSION_SECRET` and a one-time
@@ -61,11 +61,12 @@ passes, `rer deploy` claims the production owner by posting the setup token to
 `/auth/bootstrap` (303 creates the owner; an owner that already exists is kept),
 removes the token from the Worker, records that and checks health again; a later
 deploy no longer declares it, and the runtime runs without it once an owner exists.
-The owner signs in by email. `rer deploy --remove --yes` deletes what the deploy
-created for the environment; update is `git pull --ff-only` then `rer deploy`.
-Production auth requires the
-exact HTTPS origin, `AUTH_LOCAL=false`, SendGrid mail and Cloudflare's
-`CF-Connecting-IP`; local persona entry is unavailable there.
+With mail off, the owner runs `rer signin` from the deployment checkout using
+the same Cloudflare credentials and environment. With mail on, the owner can
+sign in by email. `rer deploy --remove --yes` deletes what the deploy created
+for the environment. Update with `git pull --ff-only` then `rer deploy`, keeping
+the same mail mode. Production auth requires the exact HTTPS origin,
+`AUTH_LOCAL=false` and Cloudflare's `CF-Connecting-IP`.
 
 
 ## Email notifications

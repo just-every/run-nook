@@ -2,7 +2,8 @@
 // used only by the owner-account deploy test (Base's deploy-kit provider fixture).
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
-import { hash } from '@runeditrun/rer/internal/modules/deploy-kit/validation.mjs';
+import { canonicalJson } from '@runeditrun/rer/modules/portability';
+const hash = value => createHash('sha256').update(Buffer.isBuffer(value) ? value : canonicalJson(value)).digest('hex');
 export function providerFixture({handlers = ['fetch','scheduled']} = {}) {
   const accountId = 'a'.repeat(32); const token = 'test-only-provider-token';
   const state = {calls:[],writes:[],databases:[],buckets:[],queues:[],namespaces:[],settings:null,version:null,deployments:[],secrets:[],subdomain:false,schedules:[],objects:new Map(),failSql:null,healthOverride:null};

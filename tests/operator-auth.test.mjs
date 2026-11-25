@@ -3,15 +3,19 @@ import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
 import {readFileSync,readdirSync} from 'node:fs';
 import {sqliteBinding} from './sqlite-binding.mjs';
-import {createConfiguredAuth,developmentMail,acceptsRequest} from '../src/platform/operator-auth-runtime.mjs';
+import {createConfiguredAuth,developmentMail,acceptsRequest,mailSender} from '../src/platform/operator-auth-runtime.mjs';
 import {createAuthHandler} from '../src/base/modules/operator-auth/index.mjs';
 import {ownerSigninDigest} from '../src/base/modules/operator-auth/owner-signin-grant.mjs';
+
+function migrate(db){
+ for(const file of readdirSync(new URL('../migrations/',import.meta.url)).filter(name=>name.endsWith('.sql')).sort())db.sqlite.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+}
 
 test('configured production auth delivers through the selected mail transport, fences trusted IPs and consumes native links once',async()=>{
  const db=sqliteBinding(),fetchBefore=globalThis.fetch,messages=[];
  try{
   // The real schema: operator auth reads oa_dev_credentials when it previews a link, so a store without the dev-sessions migration fails closed.
-  for(const file of readdirSync(new URL('../migrations/',import.meta.url)).filter(name=>name.endsWith('.sql')).sort())db.sqlite.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+  migrate(db);
   const env={DB:db,AUTH_LOCAL:'false',AUTH_ORIGIN:'https://workspace.example.test',OWNER_EMAIL:'owner@example.test',SESSION_SECRET:crypto.randomUUID()+crypto.randomUUID(),SETUP_TOKEN:crypto.randomUUID()+crypto.randomUUID(),MAIL_PROVIDER:'sendgrid',MAIL_FROM:'signin@example.test',SENDGRID_API_KEY:'synthetic-provider-credential'},brand={name:'Nook',primaryColor:'#5678dc'};
   globalThis.fetch=async(url,init)=>{assert.equal(url,'https://api.sendgrid.com/v3/mail/send');messages.push(JSON.parse(init.body));return new Response(null,{status:202,headers:{'x-message-id':crypto.randomUUID()}})};
   const auth=createConfiguredAuth(env,brand),handler=createAuthHandler(auth);
@@ -50,4 +54,42 @@ test('configured production auth delivers through the selected mail transport, f
   assert.equal(messages.length,beforeSuppressed,'development sending makes no provider request');
   assert.equal(db.sqlite.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='rer_mail_development_outbox'").get().n,0,'development sending creates no captured mail storage');
  }finally{globalThis.fetch=fetchBefore;db.close()}
+});
+
+test('a hosted owner can use a one-time rer sign-in grant when email is off',async t=>{
+ const db=sqliteBinding();
+ t.after(()=>db.sqlite.close());
+ migrate(db);
+ const env={
+  DB:db,AUTH_LOCAL:'false',AUTH_ORIGIN:'https://workspace.example.test',
+  OWNER_EMAIL:'owner@example.test',SESSION_SECRET:crypto.randomUUID()+crypto.randomUUID(),
+  SETUP_TOKEN:crypto.randomUUID()+crypto.randomUUID(),MAIL_PROVIDER:'none',
+ };
+ const auth=createConfiguredAuth(env,{name:'Nook',primaryColor:'#5678dc'});
+ const handler=createAuthHandler(auth);
+ const call=(path,body,cookie)=>handler(new Request(env.AUTH_ORIGIN+path,{
+  headers:{
+   Origin:env.AUTH_ORIGIN,'CF-Connecting-IP':'192.0.2.10',
+   ...(cookie?{Cookie:cookie}:{}),...(body?{'Content-Type':'application/json'}:{}),
+  },
+  ...(body?{method:'POST',body:JSON.stringify(body)}:{}),
+ }));
+
+ assert.equal((await mailSender(env).send({})).code,'mail_off');
+ assert.equal((await call('/auth/bootstrap',{token:env.SETUP_TOKEN,displayName:'Morgan Lee'})).status,303);
+ const refused=await call('/auth/magic-link',{email:env.OWNER_EMAIL});
+ assert.equal(refused.status,503);
+ assert.equal((await refused.json()).error,'mail_unavailable');
+
+ // Simulate only the D1 write made by the Cloudflare API during rer signin.
+ const token=randomBytes(32).toString('base64url'),now=Date.now();
+ db.sqlite.prepare(`INSERT INTO oa_owner_signins(id,token_hash,operator_id,operator_version,created_at,expires_at)
+  SELECT ?,?,id,version,?,? FROM oa_operators WHERE role='owner'`)
+  .run(crypto.randomUUID(),await ownerSigninDigest(token),now,now+600_000);
+ assert.equal((await call('/auth/owner-signin?token='+token)).status,200);
+ const signIn=await call('/auth/owner-signin',{token});
+ assert.equal(signIn.status,303);
+ const session=await call('/auth/session',undefined,signIn.headers.get('set-cookie').split(';')[0]);
+ assert.equal((await session.json()).operator.email,env.OWNER_EMAIL);
+ assert.equal((await call('/auth/owner-signin',{token})).status,400);
 });

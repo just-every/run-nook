@@ -39,15 +39,25 @@
     },
     {
       "binding": "MAIL_FROM",
-      "environment": "MAIL_FROM"
+      "environment": "MAIL_FROM",
+      "optional": true,
+      "verifyStandIn": "auth@example.test"
     },
     {
       "binding": "SENDGRID_API_KEY",
-      "environment": "SENDGRID_API_KEY"
+      "environment": "SENDGRID_API_KEY",
+      "optional": true,
+      "verifyStandIn": "test-only-sendgrid-key"
     },
     {
       "binding": "MAIL_API_KEY",
-      "environment": "SENDGRID_API_KEY"
+      "environment": "SENDGRID_API_KEY",
+      "optional": true
+    },
+    {
+      "binding": "MAIL_PROVIDER",
+      "environment": "MAIL_PROVIDER",
+      "optional": true
     }
   ],
   "originVar": "AUTH_ORIGIN",
@@ -58,5 +68,8 @@
   "platforms": [
     "workers",
     "container"
+  ],
+  "publicSettings": [
+    "MAIL_PROVIDER"
   ]
 }

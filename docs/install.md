@@ -32,8 +32,9 @@ rer dev
 Setup keeps the same owner ID and your local data. You can also run setup before
 the first `rer dev` to choose the local owner from the start. For hosting,
 set `OWNER_EMAIL` to your real email address when you run `rer deploy`; rer claims
-the hosted owner automatically, with no manual setup-token step. Sign in by email
-at the address deploy prints. See [Updating and deploying](updating.md).
+the hosted owner automatically. With `MAIL_PROVIDER=none`, run `rer signin` from
+the deployment checkout. With a mail provider, sign in by email at the address
+deploy prints. See [Updating and deploying](updating.md).
 
 ## Invite a teammate locally
 

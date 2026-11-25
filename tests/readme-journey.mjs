@@ -23,7 +23,7 @@ assert.ok(section,'README keeps its local section')
 const lines=[...section.matchAll(/^```sh\n([\s\S]*?)^```/gm)].flatMap(match=>match[1].replace(/\\\n\s*/g,' ').split('\n')).map(line=>line.replace(/\s+#.*$/,'').trim()).filter(Boolean)
 const oneLine=/^npx -y @runeditrun\/rer dev just-every\/[\w-]+$/
 assert.ok(lines.some(line=>oneLine.test(line)),'README gives the one-line install')
-for(const verb of ['verify','export','reset','import','deploy'])assert.ok(lines.some(line=>line.startsWith('rer '+verb)),'README documents '+verb)
+for(const verb of ['verify','export','reset','import','deploy'])assert.ok(lines.some(line=>new RegExp('(?:^| )rer '+verb+'(?: |$)').test(line)),'README documents '+verb)
 
 const freePort=()=>new Promise((ok,bad)=>{const server=createServer();server.once('error',bad);server.listen(0,'127.0.0.1',()=>{const {port}=server.address();server.close(()=>ok(port))})})
 const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),bin=await mkdtemp(join(tmpdir(),'nook-readme-bin-'))
@@ -33,17 +33,8 @@ const port=await freePort(),clone=await mkdtemp(join(tmpdir(),'nook-readme-')),b
 await writeFile(join(bin,'rer'),`#!/bin/sh\nexec node ${join(root,'node_modules/@runeditrun/rer/global/rer.mjs')} "$@"\n`,{mode:0o755})
 // The clone is a different checkout: it takes its own local operation, not verify's.
 const {RER_LOCAL_OPERATION:_,...env}={...process.env,PATH:bin+':'+process.env.PATH,CI:'true',WRANGLER_SEND_METRICS:'false',RER_SERVER_JOURNEY:'1'}
-const run=(line,expectCredentialRefusal=false)=>{let result,error
+const run=(line)=>{let result,error
  try{result=execFileSync('bash',['-e','-c',line],{cwd:clone,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:20*60_000})}catch(failure){error=failure}
- if(expectCredentialRefusal){
-  assert.equal(error?.status,3,'credential-free README dry run refuses with exit 3')
-  const output=String(error.stdout??'')+String(error.stderr??'')
-  // rer 0.2.80 prints this missing_input diagnostic without its code in human mode.
-  const code=/^Dry run cannot read the target secret bindings without /m.test(output)?'missing_input':undefined
-  assert.equal(code,'missing_input','credential-free README dry run reports missing_input')
-  for(const name of ['CLOUDFLARE_ACCOUNT_ID','CLOUDFLARE_API_TOKEN'])assert.ok(output.includes(name),'credential-free README dry run names '+name)
-  return output
- }
  if(error){
  const verb=/\brer ([a-z-]+)/.exec(line)?.[1]??'unknown';
  const output=String(error.stdout??'')+String(error.stderr??'');
@@ -83,7 +74,14 @@ try{
   if(line==='rer dev --stop'){await stopDev();continue}
   const command=line.replace('--owner-email EMAIL','--owner-email '+ownerEmail)
   if(line==='rer export --output exports/nook.rer')assert.equal(dev.exitCode!=null||dev.signalCode!=null,true,'the app is stopped before export')
-  const output=run(line==='rer deploy --dry-run'?'OWNER_EMAIL=nativeowner@example.test MAIL_FROM=auth@mail.runeditrun.com SENDGRID_API_KEY=test-only-sendgrid-key '+command+' --owner-name "Synthetic Nook"':command,line==='rer deploy --dry-run')
+  if(line==='MAIL_PROVIDER=none rer deploy --dry-run'){
+   const output=run('OWNER_EMAIL=nativeowner@example.test '+command+' --owner-name "Synthetic Nook" --json')
+   const result=output.trim().split('\n').map(line=>JSON.parse(line)).find(event=>event.event==='result')
+   assert.equal(result?.dryRun,true)
+   assert.equal(result.deployed,false)
+   assert.equal(result.providerChecked,false)
+   assert.ok(result.plan.d1.some(({migrations})=>migrations.length>0),'dry run validates migrations')
+  }else run(command)
  }
  assert.equal((await stat(join(clone,'exports/nook.rer'))).mode&0o077,0,'the archive is owner-only')
  // Export again after reset and import: the restored installation holds the same records.

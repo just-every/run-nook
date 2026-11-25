@@ -13,7 +13,7 @@
     {
       "id": "mail",
       "label": "Local sign-in",
-      "help": "Hosting requires a mail provider and a verified sender. Local development sends and stores no email."
+      "help": "Local development sends and stores no email."
     }
   ],
   "fields": [

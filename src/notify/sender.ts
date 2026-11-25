@@ -7,7 +7,7 @@ export type Mail={deliveryId:string;to:string;subject:string;text:string}
 export type SendResult={ok:true}|{ok:false;error:ErrorClass;retryable:boolean}
 export type Send=(mail:Mail)=>Promise<SendResult>
 /** Where notification mail goes: silent development suppression, a configured provider, or nowhere. */
-export function sendingSetup(env:any):'suppressed'|'provider'|'not-set-up'{try{mailSender(env);return env.RER_DEMO==='1'?'provider':developmentMail(env)?'suppressed':'provider'}catch{return 'not-set-up'}}
+export function sendingSetup(env:any):'suppressed'|'provider'|'not-set-up'{if(env.MAIL_PROVIDER==='none')return 'not-set-up';try{mailSender(env);return env.RER_DEMO==='1'?'provider':developmentMail(env)?'suppressed':'provider'}catch{return 'not-set-up'}}
 // Accepted by the provider is not proof
 // of inbox receipt. A definite refusal or an unconfirmed send is not retried:
 // retrying an uncertain send could deliver it twice.

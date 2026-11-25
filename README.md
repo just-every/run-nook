@@ -156,15 +156,20 @@ SendGrid or Resend mail options, with your own provider credentials.
 
 Stop this checkout's dev or preview app first. Deployment commands, including
 the dry run, require exclusive local state and refuse an active app with exit 4.
-Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment before
-the dry run; it validates production sign-in configuration before building.
+Set `MAIL_PROVIDER=none` to run without a sender or mail key. Email sign-in,
+invitations and notifications are unavailable in this mode. The owner uses
+`rer signin` from the deployment checkout with its Cloudflare credentials.
+For a deployment with SendGrid, supply `MAIL_FROM` and `SENDGRID_API_KEY` instead.
 After `rer reset` and `rer import`, the local installer answers are gone. Append
 `--owner-name "Your name"` to the dry run and real deploy commands below so the
 hosted owner has your name; `OWNER_EMAIL` supplies the mailbox only.
 
 ```sh
-rer deploy --dry-run
-OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
+MAIL_PROVIDER=none rer deploy --dry-run
+OWNER_EMAIL=you@example.com \
+  MAIL_PROVIDER=none \
+  CLOUDFLARE_ACCOUNT_ID=… \
+  CLOUDFLARE_API_TOKEN=… \
   rer deploy
 ```
 
@@ -179,9 +184,9 @@ A real deploy needs the Cloudflare credentials in your environment or an owned
 named after this project, applies pending migrations, uploads the build, checks
 health and then claims the hosted owner from `OWNER_EMAIL`. Set it to your real
 email address at deploy; the local development identity is for this computer.
-No manual setup-token step is needed. Open `/signin` at the address `rer deploy`
-prints and sign in by email. The hosted front page shows **Sign in** as soon as
-the owner is claimed.
+The hosted front page shows **Sign in** as soon as the owner is claimed.
+With a configured mail provider, open `/signin` at the address `rer deploy`
+prints and sign in by email.
 
 To sign in as the hosted owner without email, run this from the checkout that
 deployed Nook, using the same Cloudflare credentials:

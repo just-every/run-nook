@@ -37,6 +37,7 @@ export const commandAdapter=createCommandAdapter(lifecycle,{
  deploy:Object.assign(deployment(lifecycle),{declaration:'owner-deployment.json'}),portability,
  // rer verify's hosted-output check reads the declaration Nook's own deploy uses.
  deployDeclaration:'owner-deployment.json',
+ mailOffSignIn:'rer signin',
  site:{entry:'src/site/pages.tsx',output:'dist/site',declaration:'deploy-site.json',config:'vite.site.config.ts'},
  publicPages:['/','/signin','/docs','/docs/install'],
  // Local dev identity: the local-only Worker entry, the build output rer build scans for the dev layer,

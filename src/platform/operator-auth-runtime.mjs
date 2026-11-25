@@ -13,8 +13,13 @@ export function acceptsRequest(bindings,request){
   return env.AUTH_LOCAL==='true'?isLoopbackHost(url.hostname)&&['http:','https:'].includes(url.protocol):url.protocol==='https:'&&!isLoopbackHost(url.hostname);
  }catch{return false}
 }
+const disabledSender=Object.freeze({
+ async send(){return {provider:'none',status:'rejected',providerMessageId:null,code:'mail_off'}},
+});
+
 // Sign-in mail and C14 notification mail share this one configured sender.
 export function mailSender(env){
+ if(env.MAIL_PROVIDER==='none')return disabledSender;
  if(typeof env.MAIL_FROM!=='string'||!env.MAIL_FROM.trim())throw new AuthError('mail_configuration_required',503);
  if(env.RER_DEMO==='1')return {async send(){return {provider:'development',status:'accepted',providerMessageId:null}}};
  if(env.AUTH_LOCAL==='true'&&env.MAIL_PROVIDER==='development'){
@@ -35,7 +40,7 @@ export function createConfiguredAuth(bindings,branding,businessSettings){
  const env=authBindings(bindings),local=env.AUTH_LOCAL==='true';
  let valid=false;try{valid=acceptsRequest(env,new Request(env.AUTH_ORIGIN))}catch{}
  if(!valid)throw new AuthError('invalid_configuration',503);
- const sender=mailSender(env);
+ const sender=env.MAIL_PROVIDER==='none'?undefined:mailSender(env);
  return createOperatorAuth({db:env.DB,config:authConfig(bindings,branding),mailSender:sender,
   // Cloudflare overwrites this header at the deployed Worker boundary. Never
   // trust Forwarded/X-Forwarded-For or use the local shared bucket in production.

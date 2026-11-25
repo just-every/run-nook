@@ -1,13 +1,10 @@
 import {cp,mkdir,mkdtemp,readFile,rename,rm} from 'node:fs/promises';
 import {join} from 'node:path';
-import {ownerPlan,ownerWorkerName} from '@runeditrun/rer/modules/deploy-kit/owner';
-import {packageBuild} from '@runeditrun/rer/modules/deploy-kit/prepare';
 import {main} from '@runeditrun/rer/modules/deploy-kit/owner-cli';
 import {privateDirectory,writePrivateFile} from '@runeditrun/rer/private-files';
 import {invalid,missing} from '@runeditrun/rer/errors';
 
 export const ownerProduct='.rer/deploy/product';
-const suppliedNames=['OWNER_EMAIL','MAIL_FROM','SENDGRID_API_KEY'];
 const text=value=>typeof value==='string'&&value.trim()&&!/[\r\n\0]/.test(value);
 
 // Base deploy-kit packages migrations from migrations/core; stage the build
@@ -35,14 +32,8 @@ export function deployment(lifecycle){return async({root,options,store,signal,op
  const environment=options.environment??'production';
  await lifecycle.run(root,{},store,()=>{},signal,{verb:'build',operationToken});
  await stageProduct(root);
- if(options.dryRun){
-  // Validate the real build and migrations against a synthetic target; no account lookup.
-  const worker=ownerWorkerName(declaration.project,environment);
-  const artifact=await packageBuild({root,source:{sha:'0'.repeat(40),tree:'0'.repeat(40)},runIdentity:{id:'0',attempt:'1'},productDirectory:ownerProduct});
-  ownerPlan({project:declaration.project,environment,worker,origin:`https://${worker}.example.invalid`},declaration,artifact);
-  store.report('deploy: dry run complete; no deployment occurred and no provider request was made.');
-  return {dryRun:true,deployed:false,migrations:artifact.migrations.length};
- }
+ const args=['--declaration','owner-deployment.json','--environment',environment,'--product',ownerProduct];
+ if(options.dryRun)return main(['local-plan',...args],process.env,{cwd:root});
  const account=['CLOUDFLARE_ACCOUNT_ID','CLOUDFLARE_API_TOKEN'];
  store.addSecrets?.(account.map(name=>process.env[name]).filter(text));
  const absent=account.filter(name=>!text(process.env[name]));
@@ -50,12 +41,11 @@ export function deployment(lifecycle){return async({root,options,store,signal,op
  // Only the account credentials and declared secrets cross into the controller.
  const names=['PATH','HOME','TMPDIR',...account,...declaration.secrets.map(item=>item.environment)];
  const env=Object.fromEntries(names.filter(name=>text(process.env[name])).map(name=>[name,process.env[name]]));
- const args=['--declaration','owner-deployment.json','--environment',environment,'--product',ownerProduct];
  let result;
  try{result=await main(['deploy',...args],env,{cwd:root});}
  catch(error){
   const input=/^missing-secret-([A-Z][A-Z0-9_]*)$/.exec(error?.message)?.[1];
-  if(input)throw missing(`Required deployment configuration is missing: ${input}. A first deploy needs ${suppliedNames.join(', ')} in the environment or an --env-file (OWNER_EMAIL defaults to the setup owner). See OPERATIONS.md.`);
+  if(input)throw missing(`Required deployment configuration is missing: ${input}. Supply it in the environment or an --env-file (OWNER_EMAIL defaults to the setup owner). See OPERATIONS.md.`);
   throw error;
  }
  await main(['health',...args],env,{cwd:root});

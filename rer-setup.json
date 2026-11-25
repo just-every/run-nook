@@ -13,7 +13,7 @@
     {
       "id": "mail",
       "label": "Sign-in email",
-      "help": "Hosting requires a mail provider and a verified sender. Local development sends and stores no email."
+      "help": "Enable email with a verified sender, or leave mail off and sign in with rer signin."
     }
   ],
   "fields": [
@@ -80,6 +80,10 @@
         {
           "value": "resend",
           "label": "Resend"
+        },
+        {
+          "value": "none",
+          "label": "Off (owner signs in with rer signin)"
         }
       ],
       "group": "mail"
@@ -88,9 +92,32 @@
       "name": "MAIL_FROM",
       "label": "Verified sender email",
       "kind": "email",
-      "required": true,
+      "required": false,
       "group": "mail",
-      "help": "Use a sender address verified with your chosen mail provider."
+      "help": "Use a sender address verified with your chosen mail provider.",
+      "presentations": [
+        {
+          "when": {
+            "field": "MAIL_PROVIDER",
+            "equals": "rer"
+          },
+          "required": true
+        },
+        {
+          "when": {
+            "field": "MAIL_PROVIDER",
+            "equals": "sendgrid"
+          },
+          "required": true
+        },
+        {
+          "when": {
+            "field": "MAIL_PROVIDER",
+            "equals": "resend"
+          },
+          "required": true
+        }
+      ]
     },
     {
       "name": "MAIL_RELAY_URL",

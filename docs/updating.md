@@ -42,36 +42,35 @@ RER Managed sets up sign-in and notification email automatically. You need no ma
 
 ## Check a deploy locally
 
-Set `OWNER_EMAIL`, `MAIL_FROM` and `SENDGRID_API_KEY` in your environment, then run the dry run before a real deployment. rer 0.2.25 validates production sign-in configuration before building:
+Stop any local instance in this checkout, then run the dry run before a real deployment.
 
 ```sh
-rer deploy --dry-run
+MAIL_PROVIDER=none rer deploy --dry-run
 ```
 
 The dry run builds and validates the Worker, assets, migrations and deployment settings without contacting Cloudflare.
-
-After local development setup (`rer dev` or `rer setup` in the same checkout), `rer deploy --dry-run` currently fails with `ENOENT ... migrations/core` on this layout, while the real `rer deploy` works. This was measured with `@runeditrun/rer` 0.2.63 and 0.2.68; the fix belongs to the `rer` command, not to Nook. Run the dry run in a checkout that has not run local setup, or go straight to the real deploy.
 
 ## Deploy to your Cloudflare account
 
 **Or let Run Edit Run host it.** [Run Edit Run](https://app.runeditrun.com/?product=team-workspace&plan=assisted) can set Nook up on your own Cloudflare account and keep it updated; sign-ups are by request for now.
 
-To do it yourself, you supply a Cloudflare account ID and a scoped API token. On the first deployment you also supply the mail-from address and a SendGrid API key. Set `OWNER_EMAIL` to the real email address that will own the hosted workspace. Local `rer setup` is optional and is not required for deployment:
+Supply your Cloudflare account ID and a scoped API token. Set `OWNER_EMAIL` to the email address that will own the hosted workspace. The local installer is optional.
 
 ```sh
-OWNER_EMAIL=you@example.com CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… MAIL_FROM=… SENDGRID_API_KEY=… \
+OWNER_EMAIL=you@example.com \
+  MAIL_PROVIDER=none \
+  CLOUDFLARE_ACCOUNT_ID=… \
+  CLOUDFLARE_API_TOKEN=… \
   rer deploy
 ```
 
-The deploy command stages the Worker and migrations, creates or reuses the project's D1 database and Worker, applies pending migrations, uploads the build and checks health. It generates the production session secret itself and keeps no secret in your checkout. Production sign-in requires the configured HTTPS origin and mail provider.
+The deploy command stages the Worker and migrations, creates or reuses the project's D1 database and Worker, applies pending migrations, uploads the build and checks health. It generates the production session secret. With `MAIL_PROVIDER=none`, email sign-in, invitations and notifications are unavailable. The owner can still sign in with `rer signin`. To enable SendGrid on a new deployment, leave out `MAIL_PROVIDER=none` and supply a verified `MAIL_FROM` and `SENDGRID_API_KEY`.
 
 A dry run checks the build and settings only. It does not deploy anything, so run the real deploy before you tell your team the workspace is live.
 
 ## The owner is claimed for you
 
-After the deploy is healthy, `rer deploy` claims the hosted owner from `OWNER_EMAIL` automatically. There is no manual setup-token step. Open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you.
-
-Nook 0.4.0 pins `@runeditrun/rer` 0.2.63. The hosted front page shows **Sign in** as soon as the owner is claimed; the separate first-run confirmation follows sign-in.
+After the deploy is healthy, `rer deploy` claims the hosted owner from `OWNER_EMAIL` automatically. There is no manual setup-token step. With email enabled, open the address `rer deploy` printed, enter the owner email at `/signin` and follow the link Nook mails you. With email off, use the command below. The hosted front page shows **Sign in** as soon as the owner is claimed; the separate first-run confirmation follows sign-in.
 
 If the owner already exists, the deploy keeps it. If the claim or the token's removal fails, the deploy says so and what to run; running the same `rer deploy` again finishes it.
 
@@ -94,7 +93,7 @@ git pull --ff-only
 CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… rer deploy
 ```
 
-`--ff-only` refuses rather than merging when your checkout has its own commits; private settings, `.rer/` and `exports/` are not tracked and stay as they are. If the new source pins a different `rer`, `rer deploy` installs it first. Use the same Cloudflare account, and the same `--environment NAME` if the first deploy used one. On the pins measured so far (`@runeditrun/rer` 0.2.63 and 0.2.68) a hosted update needs the mail inputs in your environment on every hosted `rer deploy`, not only the first: set `MAIL_FROM` and `SENDGRID_API_KEY` (or `MAIL_API_KEY`) each time, until a later `rer` release keeps them for you. When first updating from Nook 0.3.0 or earlier, supply `MAIL_FROM` and `SENDGRID_API_KEY` with `rer deploy`: the existing SendGrid input also populates the shared `MAIL_API_KEY` Worker binding required by rer 0.2.25.
+`--ff-only` refuses rather than merging when your checkout has its own commits; private settings, `.rer/` and `exports/` are not tracked and stay as they are. If the new source pins a different `rer`, `rer deploy` installs it first. Use the same Cloudflare account, and the same `--environment NAME` if the first deploy used one. Keep `MAIL_PROVIDER=none` in the environment when updating a mail-off deployment. For SendGrid, keep the existing mail configuration available when deploying. To update a workspace from Nook 0.3.0 or earlier with SendGrid enabled, supply `MAIL_FROM` and `SENDGRID_API_KEY` so rer can also bind the shared `MAIL_API_KEY`.
 
 Migrations only add to the database, so the existing workspace keeps its data, sessions and settings. If the deploy fails, nothing is removed: fix the cause and run the same deploy again.
 
