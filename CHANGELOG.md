@@ -4,7 +4,7 @@
 
 ## 0.6.0 — 2026-11-27
 
-Nook 0.6.0 packages the work on main since 0.5.0 with rer 0.2.134.
+Nook 0.6.0 packages the work on main since 0.5.0 with rer 0.2.143.
 
 ### In this release
 
