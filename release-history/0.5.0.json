@@ -1,0 +1,343 @@
+{
+  "version": "0.5.0",
+  "previousVersion": "0.4.0",
+  "date": "2026-10-24",
+  "publicReleaseNotes": "## 0.5.0 \u2014 2026-10-24\n\nNook 0.5.0 packages the work on main since 0.4.0 with rer 0.2.80.\n\n### In this release\n\nThe README journey covers a fresh checkout, local owner setup, independent teammates in a private channel at 1440 and 390, and export/reset/import with identical re-exported content. The deployment dry run uses a valid sender address. Local development sends and stores no email.\n\nOpening a channel on a phone when its only unread message is a thread reply now shows the channel, with the reply still unread behind its reply count. Messages no longer show a stray \"0\" beside the author's name and time, under the message or before the reply count. An approved notification app can use its channel token with Slack's Web API at /api/slack/ for auth.test, chat.postMessage, chat.update, chat.delete and chat.getPermalink; the address is shown with the new token when the app is approved.\n\n### Updating\n\nExport first. Preserve the existing owner, private settings, resource identities and every applied migration. Update the source, then run rer setup locally or rer deploy for the same hosted environment. This release adds 30 migrations after v0.4.0; never reset populated data to upgrade.\n\n### Not in this release\n\nThe contract assessment remains 35 done, 26 partial and 30 missing clauses out of 91. No clause is promoted by this release. See CONTRACT.md and ACCEPTANCE.md for the remaining work.\n\n### Known issues\n\nA retained v0.4.0 Platform-ledger archive may be refused by the native importer with schema_mismatch. Restore into the release you exported from, then upgrade the original installation and export again. This release adds no per-seed ledger shim.\n\n### Contract changes since 0.4.0\n\n- **NOOK-015 changed (A1).** Clarify retained history and preserve published erasure duties.\n\n  Was: `Failure classes show to the recipient, the sender and the owner for seven days; terminal delivery metadata lasts thirty days.`\n\n  Now: `Failure classes show to the recipient, the sender and the owner for seven days; terminal delivery queue rows last thirty days, while NOOK-073's held, released and canceled routing records are retained as that clause states.`\n\n- **NOOK-015 changed (A2).** Clarify retained history and preserve published erasure duties.\n\n  Was: `Today fresh visible presence holds all of the member's Web Push; NOOK-073's cross-device active-elsewhere rule replaces that hold for Web Push exactly as for native push:`\n\n  Now: `Visible presence alone holds no Web Push; NOOK-073's cross-device active-elsewhere rule governs Web Push exactly as native push:`\n\n- **NOOK-015 changed (A3).** Clarify retained history and preserve published erasure duties.\n\n  Was: `Archives exclude keys, devices, presence and all delivery state; restored installations send nothing old. Member/message/outcome erasure removes associated push records.`\n\n  Now: `Archives exclude keys, devices, presence and the live delivery queue; NOOK-073's body-free routing records travel in operational archives as history and are never sent, so restored installations send nothing old. Member/message/outcome erasure removes associated push records: the erased member's devices, presence, preferences, queue rows and routing records, and every recipient's queue rows and routing records of alerts the erased member, message or outcome caused.`\n\n- **ERASURE-001 changed (A4).** Clarify retained history and preserve published erasure duties.\n\n  Was: `Other authors retain work and state without erased assignee/action attribution.`\n\n  Now: `Other authors retain work and state without erased assignee/action attribution. Shared conversation notes are such work: member erasure removes only the member's author, reviser and pin attribution, and a note another member authored or revised keeps its title, text, checklist items, links, pin state and every snapshot for the other participants; notes the member wrote alone, and notes on the member's erased thread roots, are cleared (NOOK-053). Web Push routing records are removed with the member they belong to and with the message, outcome or member that caused them (NOOK-015, NOOK-073); none is a structural tombstone.`\n\n- **NOOK-080 added.**\n\n  **NOOK-080 \u2014 Notification destination door.** An owner or admin approves a notifying app (a sibling such as Slate, or any `NOOK-025` app) for named channels only, issuing a channel-scoped token shown once, stored hashed, revocable by owner, admin or channel manager. Posts are authenticated, idempotent on a client key, limited to 1 per second per channel (burst 20) with `429` and `Retry-After`, and editable only by the posting app. For approved channels only, the token reads: privacy, sharing (`NOOK-031`), and members with verified email, guest flag and bot flag. After revocation, archive, sharing or removal, posts write nothing. Messages show the app identity and badge, and are audited (`NOOK-051`) and exported (`NOOK-047`).\n\n  **Acceptance evidence:** Approve an app for one private channel. Post, edit and delete; replay a key; exceed the rate; read every audience fact. Then add a guest, share, archive and revoke: facts change and later posts write nothing. Channel A's token cannot reach channel B.\n\n### Prose changes since 0.4.0\n\n- **docs/privacy.md (A5).** Reverse the unrecorded narrowing of the published erasure promise.\n\n  Was at 0.4.0: `Member, message and outcome erasure removes associated delivery records.`\n\n  Was before this correction: `Member, message and outcome erasure removes associated delivery queue rows; member erasure also removes that person's routing records.`\n\n  Now: `Member, message and outcome erasure removes associated delivery records: the queue rows and routing records of every alert the erased person, message or commitment caused, and all of an erased person's own devices, delivery rows and routing records.`\n\n- Attention and readable-export guides distinguish retained Web Push history from email queue rules and disclose legacy hold limits. Conversation and erasure guides name complete shared-note content and thread-root clearing. The next release copies these contract and prose amendments verbatim; the issued 0.4.0 RELEASE.json remains unchanged.\n\nProduct screenshot: .github/assets/release/nook-launch-channel-1600.png",
+  "contractChanges": {
+    "NOOK-002": {
+      "change": "changed",
+      "summary": "Updated Atomic messages, retries and replay (C2); current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-004": {
+      "change": "changed",
+      "summary": "Updated Decisions and commitments (C4); current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-012": {
+      "change": "changed",
+      "summary": "Updated Private attachments (C12); current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-014": {
+      "change": "changed",
+      "summary": "Updated Email notifications (C14); current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "ERASURE-001": {
+      "change": "changed",
+      "summary": "Updated Member, message and imported-author erasure; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-015": {
+      "change": "changed",
+      "summary": "Updated Web Push (C15); current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-017": {
+      "change": "changed",
+      "summary": "Updated Composition and personal workspace; current acceptance and evidence limits are in NOOK-017, NOOK-091, NOOK-092, NOOK-093, NOOK-135, NOOK-136, NOOK-137, NOOK-138 in CONTRACT.md."
+    },
+    "NOOK-021": {
+      "change": "changed",
+      "summary": "Updated Native clients and dependable device catch-up; current acceptance and evidence limits are in NOOK-021, NOOK-097, NOOK-098 in CONTRACT.md."
+    },
+    "NOOK-022": {
+      "change": "changed",
+      "summary": "Updated In-context voice, video and screen sharing; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-023": {
+      "change": "changed",
+      "summary": "Updated Zoom, Google Meet and Teams meetings; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-024": {
+      "change": "changed",
+      "summary": "Updated Asynchronous clips, transcripts and call artifacts; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-025": {
+      "change": "changed",
+      "summary": "Updated App and bot platform; current acceptance and evidence limits are in NOOK-025, NOOK-099, NOOK-100 in CONTRACT.md."
+    },
+    "NOOK-026": {
+      "change": "changed",
+      "summary": "Updated Workflow builder and durable scheduled work; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-028": {
+      "change": "changed",
+      "summary": "Updated Support, sales and operational signals; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-029": {
+      "change": "changed",
+      "summary": "Updated Connected documents and knowledge; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-031": {
+      "change": "changed",
+      "summary": "Updated Shared channels between organizations; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-032": {
+      "change": "changed",
+      "summary": "Updated Recurring quiet schedules and notification policy; current acceptance and evidence limits are in NOOK-032, NOOK-101, NOOK-102 in CONTRACT.md."
+    },
+    "NOOK-035": {
+      "change": "changed",
+      "summary": "Updated Channel recaps and catch-up digests; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-036": {
+      "change": "changed",
+      "summary": "Updated AI search with cited answers; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-038": {
+      "change": "changed",
+      "summary": "Updated Retention, legal hold and preservation; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-051": {
+      "change": "changed",
+      "summary": "Updated Auditable authority and actions; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-053": {
+      "change": "changed",
+      "summary": "Updated Conversation notes and lightweight lists; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-060": {
+      "change": "changed",
+      "summary": "Updated Organization policy and channel lifecycle; current acceptance and evidence limits are in NOOK-060, NOOK-110 in CONTRACT.md."
+    },
+    "NOOK-061": {
+      "change": "changed",
+      "summary": "Updated Any office file, large uploads, previews and malware scanning; current acceptance and evidence limits are in NOOK-061, NOOK-111 in CONTRACT.md."
+    },
+    "NOOK-062": {
+      "change": "changed",
+      "summary": "Updated Notification previews and actionable replies; current acceptance and evidence limits are in NOOK-062, NOOK-112 in CONTRACT.md."
+    },
+    "NOOK-063": {
+      "change": "changed",
+      "summary": "Updated Slack-compatible webhooks and Web API; current acceptance and evidence limits are in NOOK-063, NOOK-113, NOOK-114, NOOK-115 in CONTRACT.md."
+    },
+    "NOOK-065": {
+      "change": "changed",
+      "summary": "Updated Channel-wide mentions: @channel, @here and @everyone; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-066": {
+      "change": "changed",
+      "summary": "Updated Channel posting permissions and announcement channels; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-067": {
+      "change": "changed",
+      "summary": "Updated Forwarding messages and email into conversations; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-069": {
+      "change": "changed",
+      "summary": "Updated Two-factor authentication without SSO; current acceptance and evidence limits are in NOOK-069, NOOK-116 in CONTRACT.md."
+    },
+    "NOOK-070": {
+      "change": "changed",
+      "summary": "Updated Polls, GIFs, thread broadcast, bookmarks and translation; current acceptance and evidence limits are in NOOK-070, NOOK-117, NOOK-118, NOOK-119, NOOK-120 in CONTRACT.md."
+    },
+    "NOOK-072": {
+      "change": "changed",
+      "summary": "Updated Automatic thread following and channel-wide thread replies; current acceptance and evidence limits are in NOOK-072, NOOK-123, NOOK-124 in CONTRACT.md."
+    },
+    "NOOK-073": {
+      "change": "changed",
+      "summary": "Updated Active-elsewhere device routing; current acceptance and evidence limits are in NOOK-073, NOOK-125 in CONTRACT.md."
+    },
+    "NOOK-074": {
+      "change": "changed",
+      "summary": "Updated Native sign-in and finding the installation; current acceptance and evidence limits are in NOOK-074, NOOK-126, NOOK-127, NOOK-128, NOOK-129 in CONTRACT.md."
+    },
+    "NOOK-075": {
+      "change": "changed",
+      "summary": "Updated External participants without a Nook installation; current acceptance and evidence limits are in NOOK-075, NOOK-130 in CONTRACT.md."
+    },
+    "NOOK-077": {
+      "change": "changed",
+      "summary": "Updated Final catch-up import at cutover; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-078": {
+      "change": "changed",
+      "summary": "Updated Push from owned installations to the store apps; current acceptance and evidence limits are in NOOK-078, NOOK-132, NOOK-133, NOOK-134 in CONTRACT.md."
+    },
+    "NOOK-079": {
+      "change": "added",
+      "summary": "Added Scoped integration tokens; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-080": {
+      "change": "added",
+      "summary": "Added Notification destination door; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-054": {
+      "change": "changed",
+      "summary": "Updated Scoped company-context agents and MCP; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-059": {
+      "change": "changed",
+      "summary": "Updated Visible and controllable agent execution; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-081": {
+      "change": "added",
+      "summary": "Added Inbound email into conversations; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-082": {
+      "change": "added",
+      "summary": "Added Scheduled forwarding; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-083": {
+      "change": "added",
+      "summary": "Added External shared-channel forwarding; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-084": {
+      "change": "added",
+      "summary": "Added Scheduled catch-up digests; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-085": {
+      "change": "added",
+      "summary": "Added Call recordings and consent artifacts; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-086": {
+      "change": "added",
+      "summary": "Added Suggested AI clip summaries; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-087": {
+      "change": "added",
+      "summary": "Added Provider-generated transcripts; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-088": {
+      "change": "added",
+      "summary": "Added Slack grant and app delta reads; current acceptance and evidence limits remain in CONTRACT.md."
+    },
+    "NOOK-089": {
+      "change": "added",
+      "summary": "Added Notification destination door extension; current acceptance and evidence limits remain in CONTRACT.md."
+    }
+  },
+  "proseChanges": {
+    "README.md": {
+      "change": "changed",
+      "summary": "Document the current native release and fence the command used by the fresh-checkout journey."
+    },
+    "CHANGELOG.md": {
+      "change": "changed",
+      "summary": "Owner-facing changes, update steps and observed portability outcomes."
+    }
+  },
+  "extensionPointChanges": [],
+  "migrations": [
+    {
+      "id": "0065_import_kit_door_support.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0066_import_door.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0067_nook_import_door.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0068_integration_tokens.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0069_active_elsewhere.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0070_conversation_notes.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0071_admin_audit.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0072_quiet_schedule.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0073_device_delivery_records.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0074_push_record_sources.sql",
+      "buyerSteps": "Apply through rer setup or rer deploy on the existing installation. Preserves routing source history; ambiguous sources refuse atomically. Retained pre-0074 archives require restoring into their original release, upgrading, then exporting again."
+    },
+    {
+      "id": "0075_notification_apps.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0076_ai_search.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0077_recaps.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0078_forwards.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0079_clips.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0080_scheduled_forwards.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0081_scheduled_digests.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0082_device_mobile_always.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0083_personal_keywords.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0087_workspace_channel_policy.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0088_channel_descriptions.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0089_polls.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0090_bookmarks.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0091_provider_transcripts.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0092_file_policy.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0093_thread_broadcasts.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0094_resumable_uploads.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0095_vacations.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0096_notification_defaults.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    },
+    {
+      "id": "0097_restore_audit.sql",
+      "buyerSteps": "Apply through rer setup locally or rer deploy against the same hosted environment. Preserve populated data and all applied migration bytes; do not reset."
+    }
+  ],
+  "breaking": false,
+  "agentUpdateInstructions": "Updating from 0.4.0 to 0.5.0: export first; preserve the existing owner, data, private settings, resource identities, migration history and erasure journal. Fast-forward the source and install its exact rer 0.2.80 pin. Run rer setup locally or rer deploy using the same hosted account and environment. Never reset populated state to update. Restore into the release you exported from when the native importer reports schema_mismatch, then upgrade and export again. Follow OPERATIONS.md#restoring-a-local-archive for an empty-target restore and identity recovery."
+}

@@ -645,7 +645,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "3a5dae6e52f4170bb5e20f0ed581fe65be6ca3410df646214421a7d38db26a13",
+      "sha256": "6f294a2bd01a847dde0c7d48327f4ad7846869886a9274733bd1dda478f77592",
       "executable": false
     },
     "CLAUDE.md": {
@@ -1629,7 +1629,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "77e20855422b738a7e1c27e33228606984f73cd0ddb6fde69d442e850f2b1762",
+      "sha256": "44f115d99fd92785345295f2bea50c08efae69f5e2d787ad22d5b0600c35632b",
       "executable": false
     },
     "owner-deployment.json": {
@@ -1637,7 +1637,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "d3686fa60ef6b1d0724ff125af904e5ae3ea0152db026c2fee1163bd7a3fad3f",
+      "sha256": "c7b47596c41f630a2f1079edf9d48309a9ca8b3155d04617120c7e4dd58d9d97",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -1701,15 +1701,19 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "b9ee5138d2361fa0d1f3f5767fc0cbba8d429801b0a0b735b5be9fdfc0aa3aa8",
+      "sha256": "92094f77f131d6f3a495dd4fffd94cab0fe3a683025fbfb080e0f907333cb593",
       "executable": false
     },
     "release-history/0.4.0.json": {
       "sha256": "1bf6717a653c67a45c01fe416e8624f02666907931f513752447d4422d10bee1",
       "executable": false
     },
-    "RELEASE.json": {
+    "release-history/0.5.0.json": {
       "sha256": "f8b79e5b507bb61b777012590f5546d9d33b5f974fb8f3616a117321546fac67",
+      "executable": false
+    },
+    "RELEASE.json": {
+      "sha256": "42022f80e49f954e48d6883bb681e972741e1ca4be04a0119baa308ba6e08918",
       "executable": false
     },
     "rer-project.json": {
@@ -2661,7 +2665,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "65ab8063c3ecb847b8ccde408832ac0bc1187419374c30dc6fbaa9763af9b286",
+      "sha256": "eff8a32312175856e1dfb87e8f31b6d2100a45f53bb72ac958646be3401d99a2",
       "executable": false
     },
     "SLACK-IMPORT.md": {

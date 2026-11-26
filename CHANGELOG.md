@@ -2,9 +2,33 @@
 
 ## Unreleased
 
+## 0.6.0 — 2026-11-27
+
+Nook 0.6.0 packages the work on main since 0.5.0 with rer 0.2.134.
+
+### In this release
+
+Nook can be deployed with no mail sender. Set `MAIL_PROVIDER=none` and the deploy needs no sender address or mail key; email sign-in, invitations and notifications are unavailable in that mode, and the owner signs in with `rer signin` from the deployment checkout. Deployments with SendGrid, Resend or RER Managed mail are unchanged.
+
+A company's agent can work in Nook through its `/mcp` door, as a current native person and never past that person's membership: reading conversations, messages and outcomes, keeping channel notes and checklists, and recording non-monetary decisions, under the company's policy, with the person's controls, approvals and the door's audit at `/agents`. See docs/agents.md. The contract adds signed public event and interactivity endpoints and app-token message reads for a chat app (NOOK-090); CONTRACT.md says how far that is proven.
+
+Everyday use: the day a message was sent shows between messages and in version history; a dialog opens with the caret in its first field; time zones are chosen from a picker and an unchosen profile zone follows the browser; a missing thread or message keeps the channel open and says so in one line; a deleted message with no replies leaves no empty row; phone controls keep a 44 px target; and dialogs no longer fade in, so text is never read at reduced contrast.
+
 ### Navigation
 
 The main menu now holds daily work only, the same at both widths. The sidebar lists Attention, Threads and Search, the conditional All unreads row, and the Channels and Direct messages groups; the phone bar shows Attention, Threads, Channels, Search and You. Reminders and Drafts & sent (with its Scheduled tab) are segments under Attention; Files, People and Saved are segments under Search. Old links such as `/app?view=reminders` and `/app?view=scheduled` still work and open the matching segment. New message and Create channel each have one entrance, the group "+", with a tooltip on hover and focus and a 44 px target on a phone. Team and invitations live only under You, as its first row for owners and admins. Exactly one item is current on every page (`aria-current="page"`), including a conversation, which now lights the Channels tab on a phone. The All unreads preference also hides the phone row.
+
+### Updating
+
+Export first. Preserve the existing owner, private settings, resource identities and every applied migration. Update the source, then run rer setup locally or rer deploy for the same hosted environment. This release adds 11 migrations after v0.5.0 (0098 to 0108); never reset populated data to upgrade. A Nook that used the agent door before this release is upgraded in place by 0107.
+
+### Not in this release
+
+The contract was rewritten into scoped clauses with a risk policy, and every clause was judged again under a stricter rule: done means every acceptance outcome has recorded proof. It now counts 1 done, 104 partial and 54 missing clauses out of 159 (0.5.0 counted 35, 26 and 30 out of 91). No behaviour was removed. See CONTRACT.md and ACCEPTANCE.md for the remaining work.
+
+### Known issues
+
+A retained v0.4.0 Platform-ledger archive may be refused by the native importer with schema_mismatch. Restore into the release you exported from, then upgrade the original installation and export again.
 
 ## 0.5.0 — 2026-10-24
 
