@@ -45,7 +45,6 @@ export async function storageGuards(h){
   const status=await new Promise((ok,bad)=>{const q=httpRequest(origin()+'/api/me',{headers:{host:'unsupported.invalid',cookie:owner.cookie}},r=>{r.resume();r.once('end',()=>ok(r.statusCode))});q.on('error',bad);q.end()});assert.equal(status,404);assert.equal((await request('/health')).data.status,'ok');await request('/');
   for(const file of (await readdir(resolve(root,'dist/client/assets'))).filter(name=>name.endsWith('.js')))assert.doesNotMatch(await readFile(resolve(root,'dist/client/assets',file),'utf8'),/cloudflare:workers|passwordHash|UPDATE nook_messages/);
  });
- await directoryJourney(h);
 }
 
 export async function directoryJourney({check,sql,post,get,owner,member,outsider}){

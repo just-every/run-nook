@@ -94,7 +94,7 @@ try {
  await request('/api/logout',{method:'POST',cookie:revoked.cookie,body:{}})
  const assets=await readdir(resolve(root,'dist/server/assets')); let fnId
  for(const file of assets.filter(x=>x.startsWith('loaders-')&&x.endsWith('.js'))) { const source=await readFile(resolve(root,'dist/server/assets',file),'utf8'); fnId=source.match(/id: "([a-f0-9]{64})",\s*name: "loadWorkspace"/)?.[1] ?? fnId }
- let broadcastFixture,reportFixture
+ let broadcastFixture,reportFixture,runDirectory
  if(['core-api-product','core-browser'].includes(suite)){const harness={post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,registered,sql,check,origin:()=>origin};const fixture=reportFixture=await(await import('./reports.mjs')).reportsJourney(harness);if(suite==='core-browser'&&!withoutBrowser)await check('Report filters, current source drill-through and CSV at 1440 and 390',()=>import('./reports-browser.mjs').then(m=>m.reportsBrowser({origin,owner,fixture})))}
  assert.ok(fnId,'private generated transport must exist in emitted artifact')
  if(['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite)){
@@ -140,7 +140,11 @@ try {
  const reconcile=async()=>{await stop();await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/storage/reconcile.mjs','--paused','--persist='+resolve(state,'v3'),'--discard-expired'],{cwd:root,env,stdio:['ignore','pipe','pipe']});let text='';child.stdout.on('data',value=>text+=value);child.stderr.on('data',value=>text+=value);child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error(text)))});await restart({transferFaults:null})}
  if(suite!=='core-api-product')await (await import('./storage-flows.mjs')).storageFlows({check,post,patch,get,request,sql,owner,member,outsider,c,origin:()=>origin,restart,reconcile,facts})
  const normalizedHarness={validateArchive,check,post,patch,get,request,sql,owner,member,outsider,expired,revoked,registered,origin:()=>origin,restart:async()=>{await stop();await start(port)},facts,fnId,evidence,root};
- if(suite!=='core-api-product')await(await import('./storage-guards.mjs')).storageGuards(normalizedHarness)
+ if(suite!=='core-api-product'){
+  const {storageGuards,directoryJourney}=await import('./storage-guards.mjs')
+  await storageGuards(normalizedHarness)
+  runDirectory=()=>directoryJourney(normalizedHarness)
+ }
  if(suite!=='core-api-storage'){
  await(await import('./attention.mjs')).runAttention(normalizedHarness)
  await(await import('./threads.mjs')).threadJourney(normalizedHarness)
@@ -166,7 +170,6 @@ try {
  if(withoutBrowser){evidence.skipped=[{name:'Browser journey',reason:'Explicit --without-browser; no UI verdict'}]}else{
   broadcastFixture??=await(await import('./broadcast.mjs')).broadcastJourney({check,post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),patch:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'PATCH',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,sql,origin:()=>origin,restart:async()=>{await stop();await start(port)}})
   await(await import('./broadcast-browser.mjs')).broadcastBrowser({origin,owner,member,people:broadcastFixture.people})
-  if(['all','core'].includes(suite))await check('NOOK-047 readable scoped exports at both widths',()=>import('./readable-export-browser.mjs').then(m=>m.readableExportBrowser({origin,owner,member,outsider})))
   await check('NOOK-019 Files at both widths',async()=>{await(await import('./files-browser.mjs')).filesBrowser({origin,owner,member,sql,destination:'evidence/files'})})
   await check('NOOK-093 Drafts and sent at both widths',async()=>{await(await import('./personal-browser.mjs')).personalBrowser({origin,owner,member})})
   await check('NOOK-033 reminder journeys at both widths',async()=>{await(await import('./reminders-browser.mjs')).remindersBrowser({origin,owner,member})})
@@ -186,8 +189,17 @@ try {
  }
  if(['all','core','core-api','core-api-product','installer'].includes(suite))await(await import('./profiles.mjs')).profilesJourney({post:(path,body,cookie=owner.cookie,status=200)=>request(path,{method:'POST',body,cookie,status}),get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),request,owner,member,outsider,check,restart:async()=>{await stop();await start(port)},sql,origin:()=>origin})
  if(reportFixture)await(await import('./reports.mjs')).reportsFailureProbe({get:(path,cookie=owner.cookie,status=200)=>request(path,{cookie,status}),sql},reportFixture)
+ // Run the large directory fixture after workspace-wide archive and browser checks.
+ await runDirectory?.()
  await stop()
- if(suite==='all'||suite==='core')await new Promise((ok,bad)=>{const child=spawn(process.execPath,['tests/runtime.mjs','--suite=conversion'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Isolated group-conversion journey failed')))})
+ // These journeys use fresh state, as they do in CI.
+ const isolatedSuites=withoutBrowser?['conversion']:['conversion','readable-export']
+ if(suite==='all'||suite==='core')for(const isolated of isolatedSuites){
+  await new Promise((ok,bad)=>{
+   const child=spawn(process.execPath,['tests/runtime.mjs',`--suite=${isolated}`],{cwd:root,env,stdio:'inherit'});
+   child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error(`Isolated ${isolated} journey failed`)))
+  })
+ }
  if(suite!=='core-api-product'&&suite!=='core-browser'&&!['unreads','scheduled','reminders','broadcast','personal','files','search','composition','slack-imports','conversion','keyboard','threads','readable-export','campfire-imports','mattermost-imports','integrations'].includes(suite))await check('original migrations, resumable R2 conversion and actual Base portability',async()=>{await import('./storage-migration.mjs')})
  if(['all','core','threads'].includes(suite))await new Promise((ok,bad)=>{const child=spawn(process.execPath,['--test','--test-concurrency=1','tests/thread-delivery.mjs'],{cwd:root,env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>code===0?ok():bad(Error('Thread delivery journey failed')))})
  await lossConfig.close();lossConfig=null

@@ -49,10 +49,10 @@
 .nook-app fieldset { max-height: 250px; overflow: auto; border: 1px solid var(--line); border-radius: var(--r-surface); }
 .nook-app legend { padding: 0 6px; font-weight: 600; }
 
-/* Dialogs: a raised sheet that fades in; a bottom sheet on phones (phone.css) */
+/* Dialogs: a raised sheet that settles in (scale only: text never renders translucent mid-entry); a bottom sheet on phones (phone.css) */
 .nook-app dialog { width: calc(100% - 32px); max-width: 480px; max-height: 90dvh; padding: var(--s5); border: 0; border-radius: var(--r-dialog); background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-pop); }
-.nook-app dialog[open] { opacity: 1; transform: none; transition: opacity 160ms var(--ease), transform 160ms var(--ease); }
-@starting-style { .nook-app dialog[open] { opacity: 0; transform: scale(.98); } }
+.nook-app dialog[open] { transform: none; transition: transform 160ms var(--ease); }
+@starting-style { .nook-app dialog[open] { transform: scale(.98); } }
 @media (prefers-reduced-motion: reduce) { .nook-app dialog[open] { transition: none; } }
 .nook-app dialog::backdrop { background: rgb(42 29 33 / .30); }
 .nook-app .dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s4); }

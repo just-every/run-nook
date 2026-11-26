@@ -2733,7 +2733,7 @@
       "executable": false
     },
     "src/app-style/controls.css": {
-      "sha256": "af03684d3567ebbc564aae75b40d573f52ad99a3d1328c51b11eecb01675080a",
+      "sha256": "04a9333edeab8e85d957033083536d5980ee03945953f419663e9152fce64eef",
       "executable": false
     },
     "src/app-style/conversation-notifications.css": {
@@ -8197,7 +8197,7 @@
       "executable": false
     },
     "tests/exit-export.test.mjs": {
-      "sha256": "288a29e863ef0e147fc0947733f9c9f6b8685cdf93a9e41edf9237d920bba09f",
+      "sha256": "06894c7d4ab8c0639e926c9a1cfd094b5e6c474164db5c5c1fce64967f5b66e6",
       "executable": false
     },
     "tests/fake-account.mjs": {
@@ -8533,7 +8533,7 @@
       "executable": false
     },
     "tests/profiles.mjs": {
-      "sha256": "abff99fb515188fddb7a4beefb561ade96cd05be5a97537ef05d1e7683e9a805",
+      "sha256": "31e706395b3e9eaac7736033790766c91a8eb876c6929d1846851761c99e970b",
       "executable": false
     },
     "tests/push-clock.mjs": {
@@ -8669,7 +8669,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "aeac891a0e7264b9d186d83e966d7d8f453767dd11793823c63ac940d419ce8e",
+      "sha256": "1f8848c5670a7e3b4468fd3c5c0192b06c776eef9cda696a724dfff7db567e7a",
       "executable": false
     },
     "tests/saved-reminders-browser.mjs": {
@@ -8785,7 +8785,7 @@
       "executable": false
     },
     "tests/storage-guards.mjs": {
-      "sha256": "1dfbaf2c9f9011e448e1dc993790d8b1a4e925f4011541f8f31015b079293977",
+      "sha256": "25477d2209f9f67708b6eba1d3b50be0eec7fcbcb490cfd6d6f27d59481e8680",
       "executable": false
     },
     "tests/storage-hint-loss.mjs": {

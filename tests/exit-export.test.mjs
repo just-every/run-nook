@@ -107,7 +107,8 @@ async function localPersonaRestore({root,local,execute,t}){
  // Reuse the stopped, migrated empty fixture, as in the hosted leg above.
  // Each import still gets an independent empty database, never source data.
  const empty=join(local,'empty-state');await cp(join(local,'.wrangler/state'),empty,{recursive:true});
- const environment={...process.env,CI:'true',WRANGLER_SEND_METRICS:'false',RER_DEV_KEY:devKey,RER_DEV_ORIGIN:origin};
+ // This copied installation needs its own local operation lock even under rer verify.
+ const {RER_LOCAL_OPERATION:_,...environment}={...process.env,CI:'true',WRANGLER_SEND_METRICS:'false',RER_DEV_KEY:devKey,RER_DEV_ORIGIN:origin};
  let worker,closed;
  async function start(){
   worker=spawn(process.execPath,[join(root,'node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port',new URL(origin).port,'--strictPort'],{cwd:local,env:environment,stdio:'ignore'});

@@ -47,6 +47,7 @@ export async function profilesJourney({post,get,request,sql,owner,member,outside
   assert.equal((await get('/api/people?q=Directory',guest.cookie)).data.items.length,0)
  })
  await check('NOOK-091 typing expires, respects membership and disabling clears ephemeral presence',async()=>{
+  await post('/api/profile',{presenceEnabled:true,typingEnabled:true},member.cookie)
   const c=(await post('/api/conversations',{name:'Typing privacy',kind:'private',participants:[member.user.id]})).data
   const path='/api/conversations/'+c.id+'/typing'
   const before=(await get('/api/conversations',member.cookie)).data.find(i=>i.id===c.id)
